@@ -1,0 +1,164 @@
+body{
+    font-family: Arial;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* -------------- Board START -------------- */
+#chessboard {
+    width: 800px;
+    height: 800px;
+    border:1px solid black;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin: -400px 0 0 -400px;
+    display:flex;
+    flex-wrap: wrap;
+    cursor: pointer;
+}
+
+#chessboard .square{
+    width:100px;
+    height:100px;
+    box-shadow: inset 0 0 1px #000;
+    text-align: center;
+}
+
+#chessboard .square-black{
+    background-image:url("../assets/brown_dark.png");
+}
+
+#chessboard .square-white{
+    background-image:url("../assets/brown_light.png");
+}
+/* -------------- Board END -------------- */
+
+/* -------------- Pieces START -------------- */
+.piece{
+    background-position: center;
+    background-size:cover;
+    background-repeat: no-repeat;
+    margin:0 auto;
+    margin-top:17.5px;
+}
+
+[data-piece="rook"]{
+    width:58px;
+    height:65px;
+}
+
+[data-piece="knight"]{
+    width:58px;
+    height:65px;
+}
+
+[data-piece="bishop"]{
+    width:64px;
+    height:65px;
+}
+
+[data-piece="queen"]{
+    width:71px;
+    height:65px;
+}
+
+[data-piece="king"]{
+    width:64px;
+    height:65px;
+}
+
+[data-piece="pawn"]{
+    width:53px;
+    height:65px;
+}
+
+[data-piece="rook"][data-color="white"]{
+    background-image:url("../assets/rook_white.png");
+}
+
+[data-piece="knight"][data-color="white"]{
+    background-image:url("../assets/knight_white.png");
+}
+
+[data-piece="bishop"][data-color="white"]{
+    background-image:url("../assets/bishop_white.png");
+}
+
+[data-piece="queen"][data-color="white"]{
+    background-image:url("../assets/queen_white.png");
+}
+
+[data-piece="king"][data-color="white"]{
+    background-image:url("../assets/king_white.png");
+}
+
+[data-piece="pawn"][data-color="white"]{
+    background-image:url("../assets/pawn_white.png");
+}
+
+[data-piece="rook"][data-color="black"]{
+    background-image:url("../assets/rook_black.png");
+}
+
+[data-piece="knight"][data-color="black"]{
+    background-image:url("../assets/knight_black.png");
+}
+
+[data-piece="bishop"][data-color="black"]{
+    background-image:url("../assets/bishop_black.png");
+}
+
+[data-piece="queen"][data-color="black"]{
+    background-image:url("../assets/queen_black.png");
+}
+
+[data-piece="king"][data-color="black"]{
+    background-image:url("../assets/king_black.png");
+}
+
+[data-piece="pawn"][data-color="black"]{
+    background-image:url("../assets/pawn_black.png");
+}
+
+/* -------------- Pieces END -------------- */
+
+/* -------------- Squares Start -------------- */
+.clicked-effect{
+    box-shadow:inset 0px 0px 15px #000!important;
+}
+
+.playable-effect{
+    box-shadow:inset 0px 0px 15px #000!important;
+}
+
+.playable-effect::after{
+    content:"*";
+    font-size:100px;
+}
+
+.killable-effect{
+    box-shadow:inset 0px 0px 15px red!important;
+}
+
+span.number{
+    position:absolute;
+    right:0;
+    margin-right:5px;
+    font-size:17px;
+    color:#C19285;
+    margin-top:5px;
+}
+
+span.chars{
+    position:absolute;
+    bottom:0;
+    margin-left:-45px;
+    font-size:17px;
+    color:#C19285;
+    margin-bottom:5px;
+}

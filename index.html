@@ -1,0 +1,57 @@
+<!-- <!DOCTYPE html> -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Game</title>
+    <link rel="stylesheet" href="src/css/chess.css">
+</head>
+<body>  
+    <div id = "chessboard"></div>
+    
+    <script src = "src/js/Client.js"></script>
+    <script src = "src/js/Board.js"></script>
+    <script src = "src/js/Engine.js"></script>
+    <script src = "src/js/Piece.js"></script>
+    <script src = "src/js/Chess.js"></script>
+    <script>
+        var chess = new Chess();    
+        
+        // NOTE: Diagonal testi için tekrar denenecek tahtanın kenarlarında sıkıntı çıkıyor olabilir ama sonra önce diğer testler denenecek.
+        // Check Test - 1 
+        // chess.startCustomGame([
+        //     {"color":"white", "piece":"bishop", "square":42},
+        //     {"color":"black", "piece":"rook", "square":37},
+        //     {"color":"black", "piece":"pawn", "square":32},
+        //     {"color":"black", "piece":"king", "square":12},
+        // ]);
+
+        //Check Test - 2
+        // chess.startCustomGame([
+        //     {"color":"black", "piece":"king", "square":12},
+        //     {"color":"white", "piece":"bishop", "square":28},
+        //     {"color":"white", "piece":"rook", "square":52},
+        //     {"color":"black", "piece":"pawn", "square":32},
+        // ]);
+
+        // Check Test - 3
+        // chess.startCustomGame([
+        //     {"color":"black", "piece":"king", "square":12},
+        //     {"color":"black", "piece":"queen", "square":28},
+        //     {"color":"white", "piece":"rook", "square":52},
+        // ]);
+
+        // Check Test - 4
+        // chess.startCustomGame([
+        //     {"color":"white", "piece":"king", "square":12},
+        //     {"color":"black", "piece":"queen", "square":35},
+        //     {"color":"black", "piece":"rook", "square":53},
+        // ]);
+
+        function clickSquare(e){
+            chess.clickSquare(e);
+        }
+    </script>
+</body>
+</html>
