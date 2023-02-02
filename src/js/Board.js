@@ -60,8 +60,8 @@ class Board {
             else if (square_id == 4 || square_id == 60) // Queen 
                 this.createPiece(square_id < 60 ? "white" : "black", "queen", square_id);
             else if (square_id == 5 || square_id == 61) // King
-                this.createPiece(square_id < 61 ? "white" : "black", "king", square_id);
-            /*else if (square_id >= 9 && square_id < 17 || square_id > 48 && square_id < 57) // Pawn 
+                this.createPiece(square_id < 61 ? "white" : "black", "king", square_id);            
+            /*FIXME else if (square_id >= 9 && square_id < 17 || square_id > 48 && square_id < 57) // Pawn 
                     this.createPiece(square_id < 48 ? "white" : "black", "pawn", square_id);*/
         }
     }
@@ -74,12 +74,20 @@ class Board {
     * @returns {void}
     */
     createPiece(color, piece_type, target_square_id) {
+
         const target_square = document.getElementById(target_square_id); // Find target square element
         const piece = document.createElement("div");
         piece.classList.add("piece");
         piece.setAttribute("data-piece", piece_type); // For image of piece
         piece.setAttribute("data-color", color); // For image of piece   
-        const piece_obj = new Piece(createPieceID(), piece_type, color);
+        let piece_obj = new Piece(createPieceID(), piece_type, color);
+
+        // Set white and black king
+        if(piece_type == "king" && color == "white")
+            gl_white_king = piece_obj;
+        else if(piece_type == "king" && color == "black")
+            gl_black_king = piece_obj;
+            
         setGlobalSquare(target_square_id, piece_obj); // Add square list for position information
         setGlobalPiece(piece_obj.id, piece_obj); // Add pieces list
         target_square.appendChild(piece); // Add piece to target square
@@ -89,13 +97,18 @@ class Board {
     * Clear/Refresh Board 
     * @returns {void}
     */
-    clearBoard() {
-        let squares_effects = document.querySelectorAll(".clicked-effect,.playable-effect,.killable-effect");
-        let l = squares_effects.length;
+    refreshBoard() {
+        let squares = document.querySelectorAll(".square");
+        let l = squares.length;
         for (let i = 0; i < l; i++) {
-            squares_effects[i].classList.remove("clicked-effect");
-            squares_effects[i].classList.remove("playable-effect");
-            squares_effects[i].classList.remove("killable-effect");
+            // Control Squares and piece ID for changing on DOM(Security measures). If any id change after the start then set its id to its position
+            if (squares[i].id != i + 1)
+                squares[i].id = i + 1;
+
+            // Clear effects on the squares
+            squares[i].classList.remove("clicked-effect");
+            squares[i].classList.remove("playable-effect");
+            squares[i].classList.remove("killable-effect");
         }
     }
 
@@ -107,14 +120,11 @@ class Board {
     showPlayableSquares(playable_squares) {
         let l = playable_squares.length;
         for (let i = 0; i < l; i++) {
-            // Find Playable Square
-            let playable_square = document.getElementById(playable_squares[i]);
-
             // If the square contains enemy piece then the square is "killable-piece"
             if (isSquareHas(playable_squares[i]) == "enemy")
-                playable_square.classList.add("killable-effect");
+                this.setEffectOfSquareID(playable_squares[i], "killable")
             else // If the square not contains piece then the square is "playable-square"
-                playable_square.classList.add("playable-effect");
+                this.setEffectOfSquareID(playable_squares[i], "playable")
         }
     }
 
@@ -126,7 +136,7 @@ class Board {
     * @param {int} target_square Piece target square
     * @returns {void}
     */
-    async movePiece(piece, target_square) {
+    async movePieceOnBoard(piece, target_square) {
         let piece_id = getSquareIDByPiece(piece);
         movePieceToSquare(piece_id, target_square);
 
@@ -148,19 +158,14 @@ class Board {
         piece_id.classList.add("piece");
         target_piece.appendChild(piece_id);
     }
-
-
+ 
     /**
-     * Control Squares and piece ID for changing on DOM(Security measures). If any id change after the start then set its id to its position
+     * Set effect of the square
+     * @param {int} square_id Square to be effected
+     * @param {string} effect_type "playable", "killable", "checked"
      * @returns {void}
      */
-    controlBoard() {
-        let squares_control = document.getElementsByClassName("square");
-        let l = squares_control.length;
-        for (let i = 0; i < l; i++) {
-            if (squares_control[i].id != i + 1)
-                squares_control[i].id = i + 1;
-        }
+    setEffectOfSquareID(square_id, effect_type){
+        document.getElementById(square_id).classList.add(effect_type + "-effect");
     }
-
 }

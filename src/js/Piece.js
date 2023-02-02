@@ -8,18 +8,16 @@ class Piece extends Engine {
 
     /**
     * Get Playable Squares
-    * @param {boolean} check_sensivity Get Playables but piece_sensivity = "king"
     * @returns {Array<int>}
     */
-    getPlayableSquares(check_sensivity = false) {
-        check_sensivity = !check_sensivity ? true : "king";
+    getPlayableSquares() {
         var playable_squares_id = [];
         switch (this.type) {
             case "rook":
-                playable_squares_id = this.#getRookPlayableSquares(check_sensivity);
+                playable_squares_id = this.#getRookPlayableSquares();
                 break;
             case "bishop":
-                playable_squares_id = this.#getBishopPlayableSquares(check_sensivity);
+                playable_squares_id = this.#getBishopPlayableSquares();
                 break;
             case "pawn":
                 playable_squares_id = this.#getPawnPlayableSquares();
@@ -28,7 +26,7 @@ class Piece extends Engine {
                 playable_squares_id = this.#getKingPlayableSquares();
                 break;
             case "queen":
-                playable_squares_id = this.#getQueenPlayableSquares(check_sensivity);
+                playable_squares_id = this.#getQueenPlayableSquares();
                 break;
             case "knight":
                 playable_squares_id = this.#getKnightPlayableSquares();
@@ -42,33 +40,30 @@ class Piece extends Engine {
     /**
      * @private
      * Get Playable Squares Of Rook
-     * @param {boolean} check_sensivity
      * @returns {Array<int>}
      */
-    #getRookPlayableSquares(check_sensivity) {
+    #getRookPlayableSquares() {
         let square_id = getSquareIDByPiece(this);
         
         // get all squares of row and column
-        return this.getColumnSquaresOfSquare({square_id:square_id, piece_sensivity:check_sensivity}).concat(this.getRowSquaresOfSquare({square_id:square_id, piece_sensivity:check_sensivity}));
+        return this.getColumnSquaresOfSquare({square_id:square_id}).concat(this.getRowSquaresOfSquare({square_id:square_id}));
     }
 
     /**
      * @private
      * Get Playable Squares Of Bishop
-     * @param {boolean} check_sensivity
      * @returns {Array<int>}
      */
-    #getBishopPlayableSquares(check_sensivity) {
+    #getBishopPlayableSquares() {
         let square_id = getSquareIDByPiece(this);
 
         // get all squares of diagonal
-        return this.getDiagonalSquaresOfSquare({square_id:square_id, piece_sensivity:check_sensivity});
+        return this.getDiagonalSquaresOfSquare({square_id:square_id});
     }
 
     /**
      * @private
      * Get Playable Squares Of Pawn
-     * @param {boolean} check_sensivity
      * @returns {Array<int>}
      */
     #getPawnPlayableSquares() {
@@ -100,38 +95,33 @@ class Piece extends Engine {
     /**
      * @private
      * Get Playable Squares Of King
-     * @param {boolean} check_sensivity
      * @returns {Array<int>}
      */
     #getKingPlayableSquares() {
         let playable_squares;
         let square_id = getSquareIDByPiece(this);
 
-        // get first squares of column, row and diagonal
+        // TODO: Şahın her tarafını kontrol et zaten bir sütün, satır ya da diagonal den patlarsa oralara gidemezdir.
+        // get first squares of column, row and diagonal 
         playable_squares = this.getColumnSquaresOfSquare({square_id:square_id, distance_limit:1}).concat(this.getRowSquaresOfSquare({square_id:square_id, distance_limit:1})).concat(this.getDiagonalSquaresOfSquare({square_id:square_id, distance_limit:1}));
-        
-        // Check Control block king to move checked position
-        playable_squares = playable_squares.filter(item => inCheckedSquares(item) != item);
         return playable_squares;
     }
 
     /**
      * @private
      * Get Playable Squares Of Queen
-     * @param {boolean} check_sensivity
      * @returns {Array<int>}
      */
-    #getQueenPlayableSquares(check_sensivity) {
+    #getQueenPlayableSquares() {
         let square_id = getSquareIDByPiece(this);
 
         // get all squares of column, row and diagonal(UNLIMITED POWEEEER!!!)
-        return this.getColumnSquaresOfSquare({square_id:square_id, piece_sensivity:check_sensivity}).concat(this.getRowSquaresOfSquare({square_id:square_id, piece_sensivity:check_sensivity})).concat(this.getDiagonalSquaresOfSquare({square_id:square_id, piece_sensivity:check_sensivity}));
+        return this.getColumnSquaresOfSquare({square_id:square_id}).concat(this.getRowSquaresOfSquare({square_id:square_id})).concat(this.getDiagonalSquaresOfSquare({square_id:square_id}));
     }
 
     /**
      * @private
      * Get Playable Squares Of Knight
-     * @param {boolean} check_sensivity
      * @returns {Array<int>}
      */
     #getKnightPlayableSquares() {

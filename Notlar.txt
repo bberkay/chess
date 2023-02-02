@@ -1,9 +1,4 @@
 // TODO: Optimizasyon-İsimlendirme, animasyon, grab, sağ tık oku gibi işlemler en son yapılacak.
-// TODO: tek sorumluluk prensibi gibi SOLID prensiblerine dikkat edilecek ve clean code olacak(özellikle chess.js, board.js).
-// TODO: movePieceToSquare örneği tek sorumluluk prensibini bozuyor check kontrolü yaparak vs.
-// TODO: movePiece -> movePieceOnBoard şeklinde olacak controlboard cleanBoard a taşınacak. vs.
-// TODO: yorum satırı olmayan yerlere yorum satırı yazılacak. Çok uzun olan yerlerde bir üst satıra taşınacak vs.
-	
 
 // TODO: Şah durumu(şahın kendini tehlikeye atamaması ve şah durumunda başka bir hamle yapamamak gibi kısıtlamalar), 
 // TODO: Kısa-Uzun Rok(rok atılırken şah durumuna düşüyor mu kontrolü, kaleler ve şah daha önceden oynanmış mı kontrolü), 

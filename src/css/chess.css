@@ -145,6 +145,10 @@ body{
     box-shadow:inset 0px 0px 15px red!important;
 }
 
+.checked-effect{
+    box-shadow:inset 0px 0px 15px blue!important;
+}
+
 span.number{
     position:absolute;
     right:0;

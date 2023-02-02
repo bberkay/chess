@@ -41,16 +41,17 @@ class Chess {
         let piece;
         if(isSquareHas(square.id)){
             // Control Pieces and Squares for security
-            this.board.controlBoard();
-
+            this.board.refreshBoard();
             piece = getPieceBySquareID(parseInt(square.id)); // get clicked piece
+
+            // if player is checked then can't select any piece except king
             if(gl_checked_player == gl_current_move && piece.type != "king")
                 piece = null;
         }
-
+        
         // Select Piece Control
         if (piece && this.current_piece != piece && piece.color == gl_current_move) { 
-            this.board.clearBoard();
+            this.board.refreshBoard();
             this.current_piece = piece;
 
             // Get playable squares of clicked piece
@@ -62,12 +63,32 @@ class Chess {
             // Piece Move Control
             if (this.current_piece && this.current_piece != piece && this.current_playable_squares.includes(parseInt(square.id)) && this.current_piece != null) {
                 // move piece
-                this.board.movePiece(this.current_piece, square.id);
+                this.board.movePieceOnBoard(this.current_piece, square.id);
+                // is enemy player check?
+                this.isCheck();
                 this.endTurn();
             } else {
                 this.current_piece = null;
-                this.board.clearBoard();
+                this.board.refreshBoard();
             }
+        }
+    }
+
+    /**
+     * Is enemy player checked after move?
+     * @returns {void}
+     */
+    isCheck(){
+        // Get enemy king
+        const enemy_color = gl_current_move == "white" ? "black" : "white";
+        const enemy_king = enemy_color == "white" ? gl_white_king : gl_black_king
+
+        let test = enemy_king.getPlayableSquares();
+        
+        // Set checked player and give effect the checked king
+        if(test){
+            gl_checked_player = enemy_color;
+            this.board.setEffectOfSquareID(enemy_king, "checked");
         }
     }
 
@@ -77,7 +98,7 @@ class Chess {
      */
     endTurn() {
         // Clear Table and Selected Piece
-        this.board.clearBoard();
+        this.board.refreshBoard();
         this.current_piece = null;
 
         // Set New Turn 
