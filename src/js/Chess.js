@@ -64,8 +64,6 @@ class Chess {
             if (this.current_piece && this.current_piece != piece && this.current_playable_squares.includes(parseInt(square.id)) && this.current_piece != null) {
                 // move piece
                 this.board.movePieceOnBoard(this.current_piece, square.id);
-                // is enemy player check?
-                this.isCheck();
                 this.endTurn();
             } else {
                 this.current_piece = null;
@@ -84,12 +82,12 @@ class Chess {
         const enemy_king = enemy_color == "white" ? gl_white_king : gl_black_king
 
         let test = enemy_king.getPlayableSquares();
-        
+        /*
         // Set checked player and give effect the checked king
         if(test){
             gl_checked_player = enemy_color;
             this.board.setEffectOfSquareID(enemy_king, "checked");
-        }
+        }*/
     }
 
     /**
@@ -106,6 +104,9 @@ class Chess {
             gl_current_move = "black";
         else if(gl_current_move == "black")
             gl_current_move = "white";
+
+        // is player check?
+        //this.isCheck();
 
         // Increase Move Count
         gl_move_count++;

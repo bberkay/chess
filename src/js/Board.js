@@ -128,7 +128,6 @@ class Board {
         }
     }
 
-    
     /**
     * Move Piece To Selected Square
     * @async

@@ -44,9 +44,9 @@ class Piece extends Engine {
      */
     #getRookPlayableSquares() {
         let square_id = getSquareIDByPiece(this);
-        
+
         // get all squares of row and column
-        return this.getColumnSquaresOfSquare({square_id:square_id}).concat(this.getRowSquaresOfSquare({square_id:square_id}));
+        return this.getColumnSquaresOfSquare({ square_id: square_id }).concat(this.getRowSquaresOfSquare({ square_id: square_id }));
     }
 
     /**
@@ -58,7 +58,7 @@ class Piece extends Engine {
         let square_id = getSquareIDByPiece(this);
 
         // get all squares of diagonal
-        return this.getDiagonalSquaresOfSquare({square_id:square_id});
+        return this.getDiagonalSquaresOfSquare({ square_id: square_id });
     }
 
     /**
@@ -85,7 +85,7 @@ class Piece extends Engine {
 
         // is first diagonal squares has enemy piece then add playable squares
         diagonal_control.filter(item => {
-            if(isSquareHas(item) == "enemy")
+            if (isSquareHas(item) == "enemy")
                 playable_squares_id.push(item);
         })
 
@@ -99,11 +99,52 @@ class Piece extends Engine {
      */
     #getKingPlayableSquares() {
         let playable_squares;
+        let unplayable_squares;
         let square_id = getSquareIDByPiece(this);
 
-        // TODO: Şahın her tarafını kontrol et zaten bir sütün, satır ya da diagonal den patlarsa oralara gidemezdir.
-        // get first squares of column, row and diagonal 
-        playable_squares = this.getColumnSquaresOfSquare({square_id:square_id, distance_limit:1}).concat(this.getRowSquaresOfSquare({square_id:square_id, distance_limit:1})).concat(this.getDiagonalSquaresOfSquare({square_id:square_id, distance_limit:1}));
+        playable_squares = this.getColumnSquaresOfSquare({ square_id: square_id, distance_limit: 1 }).concat(this.getRowSquaresOfSquare({ square_id: square_id, distance_limit: 1 })).concat(this.getDiagonalSquaresOfSquare({ square_id: square_id, distance_limit: 1 }));
+
+        // Queen(Diagonal), Bishop, Pawn Control
+        this.getDiagonalSquaresOfSquare({ square_id: square_id }).forEach(square => { // Get king's diagonal squares 
+            const piece = getPieceBySquareID(square);
+            if (piece.type == "pawn") {
+                // TODO: Pawn kontrolü de burada yapılacak.
+            }
+            else if (piece.type == "bishop" || piece.type == "queen") {
+                // check enemy diagonal direction
+                if (this.getColumnOfSquare(square) < this.getColumnOfSquare(square_id)) {
+                    // if left diagonal has queen or bishop then king can't play to any square at left diagonal 
+                    unplayable_squares.push(this.getDiagonalSquaresOfSquare({ square_id: square_id, piece_sensivity: false, route_path: "left" }));
+                }
+                else {
+                    // if right diagonal has queen or bishop then king can't play to any square at right diagonal 
+                    unplayable_squares.push(this.getDiagonalSquaresOfSquare({ square_id: square_id, piece_sensivity: false, route_path: "right" }));
+                }
+            }
+        });
+
+        // Queen(Row, Column), Rook Control
+        this.getColumnSquaresOfSquare({ square_id: square_id }).forEach(square => { // Get king's column squares 
+            const piece = getPieceBySquareID(square);
+            if (piece.type == "rook" || piece.type == "queen") {
+                // if column has rook or queen then king can't play to any square at column
+                unplayable_squares.push(this.getColumnSquaresOfSquare({ square_id: square, piece_sensivity: false }));
+            }
+        });
+
+        this.getRowSquaresOfSquare({ square_id: square_id }).filter(square => { // Get king's row squares 
+            const piece = getPieceBySquareID(square);
+            if (piece.type == "rook" || piece.type == "queen") {
+                // if row has rook or queen then king can't play to any square at row
+                unplayable_squares.push(this.getRowSquaresOfSquare({ square_id: square, piece_sensivity: false }));
+            }
+        });
+
+        // Knight Control
+        console.log(unplayable_squares);
+
+        // Substract unplayable squares from playable squares
+        playable_squares = playable_squares.filter(square => !unplayable_squares.includes(square));
         return playable_squares;
     }
 
@@ -116,7 +157,7 @@ class Piece extends Engine {
         let square_id = getSquareIDByPiece(this);
 
         // get all squares of column, row and diagonal(UNLIMITED POWEEEER!!!)
-        return this.getColumnSquaresOfSquare({square_id:square_id}).concat(this.getRowSquaresOfSquare({square_id:square_id})).concat(this.getDiagonalSquaresOfSquare({square_id:square_id}));
+        return this.getColumnSquaresOfSquare({ square_id: square_id }).concat(this.getRowSquaresOfSquare({ square_id: square_id })).concat(this.getDiagonalSquaresOfSquare({ square_id: square_id }));
     }
 
     /**
@@ -127,7 +168,7 @@ class Piece extends Engine {
     #getKnightPlayableSquares() {
         let square_id = getSquareIDByPiece(this);
         let playable_squares_id = [];
-        
+
         // get 2 squares of column
         let column = this.getColumnSquaresOfSquare(square_id, 2, null, true).sort();
         // get 2 squares of row

@@ -75,7 +75,7 @@ class Engine {
     /**
      * Get Row Squares List of Square
      * @param {int} square_id Square ID of the active piece
-     * @param {(string|null)} route_path Specific route path only "left" or "right"(or null for both)
+     * @param {(string|null)} route_path Specific route path only "left" or "right"
      * @param {(int|null)} distance_limit Move away at most [distance_limit] squares from square.
      * @param {boolean} piece_sensivity To avoid tripping over other pieces.
      * @returns {Array<int>}
@@ -122,67 +122,85 @@ class Engine {
     /**
      * Get Diagonal Squares List of Piece
      * @param {int} square_id Square ID of the active piece
-     * @param {(string|null)} route_path Specific route path only "top" or "bottom"(or null for both)
+     * @param {(string|null)} route_path Specific route path only "bottom", "top" or "left"(left top and right bottom), "right"(right top and left bottom)
      * @param {(int|null)} distance_limit Move away at most [distance_limit] squares from square.
      * @param {boolean} piece_sensivity To avoid tripping over other pieces.
      * @returns {Array<int>}
      */
     getDiagonalSquaresOfSquare({ square_id, distance_limit = null, route_path = null, piece_sensivity = true }) {
         let squares = [];
+        let counter = 1;
 
-        if (route_path == null || route_path == "top") {
-            let counter = 1;
-            // Top Left Diagonal of Piece
-            for (let i = square_id - 9; i > 0; i -= 9) {
-                if (distance_limit && counter > distance_limit)
-                    break;
-                squares = squares.concat(this.#checkPath(i, piece_sensivity, "left"));
-                if (squares.includes("break")) { // delete "break" from squares
-                    squares.pop();
-                    break;
-                }
-                counter += 1;
-            }
 
+        // Top Left Diagonal of Piece
+        if (route_path == null || route_path == "top" || route_path == "right") {
             counter = 1;
-            // Top Right Diagonal of Piece
-            for (let i = square_id - 7; i > 0; i -= 7) {
-                if (distance_limit && counter > distance_limit)
-                    break;
-                squares = squares.concat(this.#checkPath(i, piece_sensivity, "right"));
-                if (squares.includes("break")) {
-                    squares.pop();
-                    break;
+            if (this.getColumnOfSquare(square_id) != 1) { // if piece not on the far left
+                for (let i = square_id - 9; i > 0; i -= 9) {
+                    if (distance_limit && counter > distance_limit)
+                        break;
+
+                    squares = squares.concat(this.#checkPath(i, piece_sensivity, true));
+                    if (squares.includes("break")) { // delete "break" from squares
+                        squares.pop();
+                        break;
+                    }
+                    counter += 1;
                 }
-                counter += 1;
             }
         }
 
-        if (route_path == null || route_path == "bottom") {
-            let counter = 1;
-            // Bottom Right Diagonal of Piece
-            for (let i = square_id + 9; i < 65; i += 9) {
-                if (distance_limit && counter > distance_limit)
-                    break;
-                squares = squares.concat(this.#checkPath(i, piece_sensivity, "right"));
-                if (squares.includes("break")) {
-                    squares.pop();
-                    break;
-                }
-                counter += 1;
-            }
-
+        // Left Bottom Diagonal of Piece
+        if (route_path == null || route_path == "bottom" || route_path == "left") {
             counter = 1;
-            // Left Bottom Diagonal of Piece
-            for (let i = square_id + 7; i < 65; i += 7) {
-                if (distance_limit && counter > distance_limit)
-                    break;
-                squares = squares.concat(this.#checkPath(i, piece_sensivity, "left"));
-                if (squares.includes("break")) {
-                    squares.pop();
-                    break;
+            if (this.getColumnOfSquare(square_id) != 1) {
+                for (let i = square_id + 7; i < 65; i += 7) {
+                    if (distance_limit && counter > distance_limit)
+                        break;
+
+                    squares = squares.concat(this.#checkPath(i, piece_sensivity, true));
+                    if (squares.includes("break")) {
+                        squares.pop();
+                        break;
+                    }
+                    counter += 1;
                 }
-                counter += 1;
+            }
+        }
+
+        // Top Right Diagonal of Piece
+        if (route_path == null || route_path == "top" || route_path == "left") {
+            counter = 1;
+            if (this.getColumnOfSquare(square_id) != 8) { // if piece not on the far right
+                for (let i = square_id - 7; i > 0; i -= 7) {
+                    if (distance_limit && counter > distance_limit)
+                        break;
+
+                    squares = squares.concat(this.#checkPath(i, piece_sensivity, true));
+                    if (squares.includes("break")) {
+                        squares.pop();
+                        break;
+                    }
+                    counter += 1;
+                }
+            }
+        }
+
+        // Bottom Right Diagonal of Piece
+        if (route_path == null || route_path == "bottom" || route_path == "right") {
+            counter = 1;
+            if (this.getColumnOfSquare(square_id) != 8) {
+                for (let i = square_id + 9; i < 65; i += 9) {
+                    if (distance_limit && counter > distance_limit)
+                        break;
+
+                    squares = squares.concat(this.#checkPath(i, piece_sensivity, true));
+                    if (squares.includes("break")) {
+                        squares.pop();
+                        break;
+                    }
+                    counter += 1;
+                }
             }
         }
         return squares;
@@ -192,10 +210,10 @@ class Engine {
      * Check All Squares on the Path
      * @param {int} square Target Square(loop element, example 'i')
      * @param {boolean} piece_sensivity To avoid tripping over other pieces.
-     * @param {(string|boolean)} diagonal Is path diagonal then give the direction "left" or "right"
+     * @param {boolean} diagonal Is path diagonal
      * @returns {Array<int>}
      */
-    #checkPath(square, piece_sensivity, diagonal = false) {
+    #checkPath(square, piece_sensivity, diagonal) {
         let squares = [];
         // If target square and current square is same then not push square to squares 
         if (piece_sensivity) {
@@ -217,13 +235,10 @@ class Engine {
         else // if piece sensivity is false add all squares to squares list
             squares.push(square);
 
-        // FIXME Diagonal de iken piece sensivity kontrolü yapılabilir ancak bug var mı yok mu emin değiliz o yüzden bunu daha sonradan test ederiz(veya test zamanı).
-        // Stop if diagonal arrives at the [diagonal] of the board
+        // if square reach the edges of the board
         if (diagonal) {
-            if (this.getColumnOfSquare(square) == 8 || this.getColumnOfSquare(square) == 1) {
+            if (this.getColumnOfSquare(square) == 8 || this.getColumnOfSquare(square) == 1)
                 squares.push("break");
-                return squares;
-            }
         }
 
         return squares;
