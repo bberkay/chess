@@ -10,26 +10,26 @@ class Piece extends Engine {
     * Get Playable Squares
     * @returns {Array<int>}
     */
-    getPlayableSquares() {
+    getPlayableSquaresOfPiece() {
         var playable_squares_id = [];
         switch (this.type) {
             case "rook":
-                playable_squares_id = this.#getRookPlayableSquares();
+                playable_squares_id = this.#getPlayableSquaresOfRook();
                 break;
             case "bishop":
-                playable_squares_id = this.#getBishopPlayableSquares();
+                playable_squares_id = this.#getPlayableSquaresOfBishop();
                 break;
             case "pawn":
-                playable_squares_id = this.#getPawnPlayableSquares();
+                playable_squares_id = this.#getPlayableSquaresOfPawn();
                 break;
             case "king":
-                playable_squares_id = this.#getKingPlayableSquares();
+                playable_squares_id = this.#getPlayableSquaresOfKing();
                 break;
             case "queen":
-                playable_squares_id = this.#getQueenPlayableSquares();
+                playable_squares_id = this.#getPlayableSquaresOfQueen();
                 break;
             case "knight":
-                playable_squares_id = this.#getKnightPlayableSquares();
+                playable_squares_id = this.#getPlayableSquaresOfKnight();
                 break;
             default:
                 break;
@@ -42,7 +42,7 @@ class Piece extends Engine {
      * Get Playable Squares Of Rook
      * @returns {Array<int>}
      */
-    #getRookPlayableSquares() {
+    #getPlayableSquaresOfRook() {
         let square_id = getSquareIDByPiece(this);
 
         // get all squares of row and column
@@ -54,7 +54,7 @@ class Piece extends Engine {
      * Get Playable Squares Of Bishop
      * @returns {Array<int>}
      */
-    #getBishopPlayableSquares() {
+    #getPlayableSquaresOfBishop() {
         let square_id = getSquareIDByPiece(this);
 
         // get all squares of diagonal
@@ -66,7 +66,7 @@ class Piece extends Engine {
      * Get Playable Squares Of Pawn
      * @returns {Array<int>}
      */
-    #getPawnPlayableSquares() {
+    #getPlayableSquaresOfPawn() {
         let square_id = getSquareIDByPiece(this);
         let playable_squares_id = [];
         let limit = 0;
@@ -97,54 +97,20 @@ class Piece extends Engine {
      * Get Playable Squares Of King
      * @returns {Array<int>}
      */
-    #getKingPlayableSquares() {
+    #getPlayableSquaresOfKing() {
         let playable_squares;
         let unplayable_squares;
         let square_id = getSquareIDByPiece(this);
 
         playable_squares = this.getColumnSquaresOfSquare({ square_id: square_id, distance_limit: 1 }).concat(this.getRowSquaresOfSquare({ square_id: square_id, distance_limit: 1 })).concat(this.getDiagonalSquaresOfSquare({ square_id: square_id, distance_limit: 1 }));
-
-        // Queen(Diagonal), Bishop, Pawn Control
-        this.getDiagonalSquaresOfSquare({ square_id: square_id }).forEach(square => { // Get king's diagonal squares 
-            const piece = getPieceBySquareID(square);
-            if (piece.type == "pawn") {
-                // TODO: Pawn kontrolü de burada yapılacak.
-            }
-            else if (piece.type == "bishop" || piece.type == "queen") {
-                // check enemy diagonal direction
-                if (this.getColumnOfSquare(square) < this.getColumnOfSquare(square_id)) {
-                    // if left diagonal has queen or bishop then king can't play to any square at left diagonal 
-                    unplayable_squares.push(this.getDiagonalSquaresOfSquare({ square_id: square_id, piece_sensivity: false, route_path: "left" }));
-                }
-                else {
-                    // if right diagonal has queen or bishop then king can't play to any square at right diagonal 
-                    unplayable_squares.push(this.getDiagonalSquaresOfSquare({ square_id: square_id, piece_sensivity: false, route_path: "right" }));
-                }
-            }
-        });
-
-        // Queen(Row, Column), Rook Control
-        this.getColumnSquaresOfSquare({ square_id: square_id }).forEach(square => { // Get king's column squares 
-            const piece = getPieceBySquareID(square);
-            if (piece.type == "rook" || piece.type == "queen") {
-                // if column has rook or queen then king can't play to any square at column
-                unplayable_squares.push(this.getColumnSquaresOfSquare({ square_id: square, piece_sensivity: false }));
-            }
-        });
-
-        this.getRowSquaresOfSquare({ square_id: square_id }).filter(square => { // Get king's row squares 
-            const piece = getPieceBySquareID(square);
-            if (piece.type == "rook" || piece.type == "queen") {
-                // if row has rook or queen then king can't play to any square at row
-                unplayable_squares.push(this.getRowSquaresOfSquare({ square_id: square, piece_sensivity: false }));
-            }
-        });
-
-        // Knight Control
-        console.log(unplayable_squares);
+        unplayable_squares = this.getUnplayableSquares(square_id);
 
         // Substract unplayable squares from playable squares
         playable_squares = playable_squares.filter(square => !unplayable_squares.includes(square));
+
+        // Control 
+        playable_squares = playable_squares.filter(square => !this.getSquareIfUnplayable(square));
+
         return playable_squares;
     }
 
@@ -153,7 +119,7 @@ class Piece extends Engine {
      * Get Playable Squares Of Queen
      * @returns {Array<int>}
      */
-    #getQueenPlayableSquares() {
+    #getPlayableSquaresOfQueen() {
         let square_id = getSquareIDByPiece(this);
 
         // get all squares of column, row and diagonal(UNLIMITED POWEEEER!!!)
@@ -165,7 +131,7 @@ class Piece extends Engine {
      * Get Playable Squares Of Knight
      * @returns {Array<int>}
      */
-    #getKnightPlayableSquares() {
+    #getPlayableSquaresOfKnight() {
         let square_id = getSquareIDByPiece(this);
         let playable_squares_id = [];
 

@@ -55,7 +55,7 @@ class Chess {
             this.current_piece = piece;
 
             // Get playable squares of clicked piece
-            this.current_playable_squares = this.engine.getPlayableSquares(this.current_piece);
+            this.current_playable_squares = this.current_piece.getPlayableSquaresOfPiece();
 
             // Show playable squares of clicked piece
             this.board.showPlayableSquares(this.current_playable_squares);
@@ -81,7 +81,6 @@ class Chess {
         const enemy_color = gl_current_move == "white" ? "black" : "white";
         const enemy_king = enemy_color == "white" ? gl_white_king : gl_black_king
 
-        let test = enemy_king.getPlayableSquares();
         /*
         // Set checked player and give effect the checked king
         if(test){

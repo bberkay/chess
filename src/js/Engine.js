@@ -1,14 +1,5 @@
 class Engine {
     /**
-     * Get Playable Squares of the Piece
-     * @param {Piece} piece Piece Object
-     * @returns {Array<int>}
-     */
-    getPlayableSquares(piece) {
-        return piece.getPlayableSquares();
-    }
-
-    /**
      * Get Column of Square
      * @param {int} square_id Square ID of the active piece
      * @returns {int}
@@ -44,7 +35,7 @@ class Engine {
             for (let i = square_id - 8; i > 0; i -= 8) {
                 if (distance_limit && counter > distance_limit)
                     break;
-                squares = squares.concat(this.#checkPath(i, piece_sensivity));
+                squares = squares.concat(this.#getPlayableSquares(i, piece_sensivity));
                 if (squares.includes("break")) {
                     squares.pop(); // delete "break" from squares
                     break;
@@ -60,7 +51,7 @@ class Engine {
             for (let i = square_id + 8; i < 65; i += 8) {
                 if (distance_limit && counter > distance_limit)
                     break;
-                squares = squares.concat(this.#checkPath(i, piece_sensivity));
+                squares = squares.concat(this.#getPlayableSquares(i, piece_sensivity));
                 if (squares.includes("break")) {
                     squares.pop();
                     break;
@@ -91,7 +82,7 @@ class Engine {
             for (let i = square_id + 1; i <= row * 8; i++) {
                 if (distance_limit && counter > distance_limit)
                     break;
-                squares = squares.concat(this.#checkPath(i, piece_sensivity));
+                squares = squares.concat(this.#getPlayableSquares(i, piece_sensivity));
                 if (squares.includes("break")) { // delete "break" from squares
                     squares.pop();
                     break;
@@ -107,7 +98,7 @@ class Engine {
             for (let i = square_id - 1; i >= (row * 8) - 7; i--) {
                 if (distance_limit && counter > distance_limit)
                     break;
-                squares = squares.concat(this.#checkPath(i, piece_sensivity));
+                squares = squares.concat(this.#getPlayableSquares(i, piece_sensivity));
                 if (squares.includes("break")) {
                     squares.pop();
                     break;
@@ -140,7 +131,7 @@ class Engine {
                     if (distance_limit && counter > distance_limit)
                         break;
 
-                    squares = squares.concat(this.#checkPath(i, piece_sensivity, true));
+                    squares = squares.concat(this.#getPlayableSquares(i, piece_sensivity, true));
                     if (squares.includes("break")) { // delete "break" from squares
                         squares.pop();
                         break;
@@ -158,7 +149,7 @@ class Engine {
                     if (distance_limit && counter > distance_limit)
                         break;
 
-                    squares = squares.concat(this.#checkPath(i, piece_sensivity, true));
+                    squares = squares.concat(this.#getPlayableSquares(i, piece_sensivity, true));
                     if (squares.includes("break")) {
                         squares.pop();
                         break;
@@ -176,7 +167,7 @@ class Engine {
                     if (distance_limit && counter > distance_limit)
                         break;
 
-                    squares = squares.concat(this.#checkPath(i, piece_sensivity, true));
+                    squares = squares.concat(this.#getPlayableSquares(i, piece_sensivity, true));
                     if (squares.includes("break")) {
                         squares.pop();
                         break;
@@ -194,7 +185,7 @@ class Engine {
                     if (distance_limit && counter > distance_limit)
                         break;
 
-                    squares = squares.concat(this.#checkPath(i, piece_sensivity, true));
+                    squares = squares.concat(this.#getPlayableSquares(i, piece_sensivity, true));
                     if (squares.includes("break")) {
                         squares.pop();
                         break;
@@ -207,13 +198,13 @@ class Engine {
     }
 
     /**
-     * Check All Squares on the Path
+     * Get Playable Square on the path
      * @param {int} square Target Square(loop element, example 'i')
      * @param {boolean} piece_sensivity To avoid tripping over other pieces.
      * @param {boolean} diagonal Is path diagonal
      * @returns {Array<int>}
      */
-    #checkPath(square, piece_sensivity, diagonal) {
+    #getPlayableSquares(square, piece_sensivity, diagonal) {
         let squares = [];
         // If target square and current square is same then not push square to squares 
         if (piece_sensivity) {
@@ -242,5 +233,74 @@ class Engine {
         }
 
         return squares;
+    }
+
+    /**
+     * Get Unplayable Square on the path
+     * @param {int} square_id Square ID of the target square
+     * @returns {Array<int>}
+     */
+    getUnplayableSquares(square_id){
+        let unplayable_squares = [];
+
+        // Queen(Diagonal), Bishop, Pawn Control
+        this.getDiagonalSquaresOfSquare({ square_id: square_id }).forEach(square => { // Get king's diagonal squares 
+            const piece = getPieceBySquareID(square);
+            if (piece.type == "pawn") {
+                // TODO: Pawn kontrolü de burada yapılacak.
+            }
+            else if (piece.type == "bishop" || piece.type == "queen") {
+                // check enemy diagonal direction
+                if (this.getColumnOfSquare(square) < this.getColumnOfSquare(square_id)) {
+                    // if left diagonal has queen or bishop then left diagonal in danger
+                    this.getDiagonalSquaresOfSquare({ square_id: square_id, piece_sensivity: false, route_path: "left" }).forEach(item => {
+                        unplayable_squares.push(item);
+                    });
+                }
+                else {
+                    // if right diagonal has queen or bishop then right diagonal in danger
+                    this.getDiagonalSquaresOfSquare({ square_id: square_id, piece_sensivity: false, route_path: "right" }).forEach(item => {
+                        unplayable_squares.push(item);
+                    });
+                }
+            }
+        });
+
+        // Queen(Row, Column), Rook Control
+        this.getColumnSquaresOfSquare({ square_id: square_id }).forEach(square => { // Get king's column squares 
+            const piece = getPieceBySquareID(square);
+            if (piece.type == "rook" || piece.type == "queen") {
+                // if column has rook or queen then king can't play to any square at column
+                this.getColumnSquaresOfSquare({ square_id: square, piece_sensivity: false }).forEach(item => {
+                    unplayable_squares.push(item);
+                });
+            }
+        });
+
+        this.getRowSquaresOfSquare({ square_id: square_id }).filter(square => { // Get king's row squares 
+            const piece = getPieceBySquareID(square);
+            if (piece.type == "rook" || piece.type == "queen") {
+                // if row has rook or queen then king can't play to any square at row
+                this.getRowSquaresOfSquare({ square_id: square, piece_sensivity: false }).forEach(item => {
+                    unplayable_squares.push(item);
+                });
+            }
+        });
+
+        // Knight Control
+
+        return unplayable_squares;
+    }
+
+    /**
+     * Check is square unplayable
+     * @param {int} square_id Square ID of the target square
+     * @returns {boolean}
+     */
+    isSquareUnplayable(square_id){
+        if(this.getSquareIfUnplayable(square_id).length > 0)
+            return true;
+        else
+            return false;
     }
 }
