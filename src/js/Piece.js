@@ -69,9 +69,11 @@ class Piece extends Engine {
     #getPlayableSquaresOfPawn() {
         let square_id = getSquareIDByPiece(this);
         let playable_squares_id = [];
+
         let limit = 0;
         let route = "";
         let row_of_pawn = this.getRowOfSquare(square_id);
+        
         if (gl_current_move == "black") {
             limit = row_of_pawn == 7 ? 2 : 1;  // if black pawn is start position then 2 square limit else 1
             route = "top"; // black goes top
@@ -80,8 +82,9 @@ class Piece extends Engine {
             limit = row_of_pawn == 2 ? 2 : 1;
             route = "bottom"; // white goes bottom
         }
-        playable_squares_id = this.getColumnSquaresOfSquare(square_id, limit, route); // get first [limit] square of [route] column
-        let diagonal_control = this.getDiagonalSquaresOfSquare(square_id, 1, route) // get first diagonal squares
+
+        playable_squares_id = this.getColumnSquaresOfSquare({square_id:square_id, distance_limit:limit, route_path:route}); // get first [limit] square of [route] column
+        let diagonal_control = this.getDiagonalSquaresOfSquare({square_id:square_id, distance_limit:1, route_path:route}) // get first diagonal squares
 
         // is first diagonal squares has enemy piece then add playable squares
         diagonal_control.filter(item => {
@@ -105,11 +108,11 @@ class Piece extends Engine {
         playable_squares = this.getColumnSquaresOfSquare({ square_id: square_id, distance_limit: 1 }).concat(this.getRowSquaresOfSquare({ square_id: square_id, distance_limit: 1 })).concat(this.getDiagonalSquaresOfSquare({ square_id: square_id, distance_limit: 1 }));
         unplayable_squares = this.getUnplayableSquares(square_id);
 
-        // Substract unplayable squares from playable squares
+        // Substract unplayable squares from playable squares(for itself)
         playable_squares = playable_squares.filter(square => !unplayable_squares.includes(square));
 
-        // Control 
-        playable_squares = playable_squares.filter(square => !this.getSquareIfUnplayable(square));
+        // Substract unplayable squares from playable squares(for squares around)
+        playable_squares = playable_squares.filter(square => !this.isSquareUnplayable(square));
 
         return playable_squares;
     }
@@ -136,13 +139,13 @@ class Piece extends Engine {
         let playable_squares_id = [];
 
         // get 2 squares of column
-        let column = this.getColumnSquaresOfSquare(square_id, 2, null, true).sort();
+        let column = this.getColumnSquaresOfSquare({square_id:square_id, distance_limit:2, piece_sensivity:true}).sort();
         // get 2 squares of row
-        let row = this.getRowSquaresOfSquare(square_id, 2, null, true).sort();
+        let row = this.getRowSquaresOfSquare({square_id:square_id, distance_limit:2, piece_sensivity:true}).sort();
         // get first square of left side and right side at end of the column 
-        let column_sides = this.getRowSquaresOfSquare(column[0], 1, null, true).concat(this.getRowSquaresOfSquare(column[column.length - 1], 1, null, true));
+        let column_sides = this.getRowSquaresOfSquare({square_id:column[0], distance_limit:1, piece_sensivity:true}).concat(this.getRowSquaresOfSquare({square_id:column[column.length - 1], distance_limit:1, piece_sensivity:true}));
         // get first square of top side and bottom side at end of the row
-        let row_sides = this.getColumnSquaresOfSquare(row[0], 1, null, true).concat(this.getColumnSquaresOfSquare(row[row.length - 1], 1, null, true));
+        let row_sides = this.getColumnSquaresOfSquare({square_id:row[0], distance_limit:1, piece_sensivity:true}).concat(this.getColumnSquaresOfSquare({square_id:row[row.length - 1], distance_limit:1, piece_sensivity:true}));
         // concat all playable squares
         playable_squares_id = column_sides.concat(row_sides);
 

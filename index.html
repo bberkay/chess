@@ -8,9 +8,6 @@
     <link rel="stylesheet" href="src/css/chess.css">
 </head>
 <body>  
-    <div style = "text-align:center;">
-        <h3>Checked Player: <span id = "checked-player">Test</span></h3>
-    </div>
     <div id = "chessboard"></div>
     
     <script src = "src/js/Client.js"></script>
@@ -20,40 +17,17 @@
     <script src = "src/js/Chess.js"></script>
     <script>
         var chess = new Chess();    
-        
-        // NOTE: Diagonal testi için tekrar denenecek tahtanın kenarlarında sıkıntı çıkıyor olabilir ama sonra önce diğer testler denenecek.
-        // Check Test - 1 
-        // chess.startCustomGame([
-        //     {"color":"white", "piece":"bishop", "square":42},
-        //     {"color":"black", "piece":"rook", "square":37},
-        //     {"color":"black", "piece":"pawn", "square":32},
-        //     {"color":"black", "piece":"king", "square":12},
-        // ]);
 
-        //Check Test - 2
-         chess.startCustomGame([
-             {"color":"black", "piece":"king", "square":12},
-             {"color":"white", "piece":"bishop", "square":37},
-             {"color":"white", "piece":"rook", "square":51},
-             {"color":"black", "piece":"pawn", "square":32},
-         ]);
-
-        // Check Test - 3
-        // chess.startCustomGame([
-        //     {"color":"black", "piece":"king", "square":12},
-        //     {"color":"black", "piece":"queen", "square":28},
-        //     {"color":"white", "piece":"rook", "square":52},
-        // ]);
-
-        // Check Test - 4
-        // chess.startCustomGame([
-        //     {"color":"white", "piece":"king", "square":12},
-        //     {"color":"black", "piece":"queen", "square":35},
-        //     {"color":"black", "piece":"rook", "square":53},
-        // ]);
+        // TODO: vezirin çekilememesi lazım bu yüzden eğer vezir çekiliyor ise şah oluyor mu kontrol edilecek
+        // TODO: Bu da yapıldığında şah tamamen bitmiş olacak.
+        chess.startCustomGame([
+            {"color":"white", "piece":"king", "square":12},
+            {"color":"white", "piece":"queen", "square":28},
+            {"color":"black", "piece":"rook", "square":52},
+        ]);
 
         function clickSquare(e){
-            chess.clickSquare(e);
+            chess.selectSquare(e);
         }
     </script>
 </body>

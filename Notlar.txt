@@ -1,9 +1,7 @@
 // TODO: Optimizasyon-İsimlendirme, animasyon, grab, sağ tık oku gibi işlemler en son yapılacak.
 
-// TODO: Şah durumu(şahın kendini tehlikeye atamaması ve şah durumunda başka bir hamle yapamamak gibi kısıtlamalar), 
 // TODO: Kısa-Uzun Rok(rok atılırken şah durumuna düşüyor mu kontrolü, kaleler ve şah daha önceden oynanmış mı kontrolü), 
 // TODO: Geçerken Alma, Mat-Pat Kontrolü, Piyon dönüşümü
-
 
 // TODO: Notasyon bölümü, tur geçme tuşu ve sıra değişme efekti, tahta teması değiştirme, yenilen taşlar ve taş puan sistemi
 // TODO: Hamle geri alma, Maçtan çekilme, Maç oluşturma, Önce ki hamleyi izleme(önizleme-şart değil-)? bu bölümün bir kısmı yapılmayabilir.

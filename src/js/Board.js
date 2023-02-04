@@ -61,8 +61,8 @@ class Board {
                 this.createPiece(square_id < 60 ? "white" : "black", "queen", square_id);
             else if (square_id == 5 || square_id == 61) // King
                 this.createPiece(square_id < 61 ? "white" : "black", "king", square_id);            
-            /*FIXME else if (square_id >= 9 && square_id < 17 || square_id > 48 && square_id < 57) // Pawn 
-                    this.createPiece(square_id < 48 ? "white" : "black", "pawn", square_id);*/
+            else if (square_id >= 9 && square_id < 17 || square_id > 48 && square_id < 57) // Pawn 
+                this.createPiece(square_id < 48 ? "white" : "black", "pawn", square_id);
         }
     }
 
@@ -138,10 +138,11 @@ class Board {
     async movePieceOnBoard(piece, target_square) {
         let piece_id = getSquareIDByPiece(piece);
         movePieceToSquare(piece_id, target_square);
-
-        // Remove piece from his square
+        
+        // Remove piece from his square(and checked effect if exist)
         piece_id = document.getElementsByClassName("square")[piece_id - 1];
         piece_id.removeChild(piece_id.lastElementChild);
+        piece_id.classList.remove("checked-effect");
 
         // Remove enemy from target square
         let target_piece = document.getElementById(target_square);

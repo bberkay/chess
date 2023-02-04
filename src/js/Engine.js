@@ -236,71 +236,67 @@ class Engine {
     }
 
     /**
-     * Get Unplayable Square on the path
+     * Get Unplayable Square on the path(for check operations)
      * @param {int} square_id Square ID of the target square
      * @returns {Array<int>}
      */
-    getUnplayableSquares(square_id){
+    getUnplayableSquares(square_id) {
+        let enemy_color;
         let unplayable_squares = [];
 
-        // Queen(Diagonal), Bishop, Pawn Control
-        this.getDiagonalSquaresOfSquare({ square_id: square_id }).forEach(square => { // Get king's diagonal squares 
-            const piece = getPieceBySquareID(square);
-            if (piece.type == "pawn") {
-                // TODO: Pawn kontrolü de burada yapılacak.
-            }
-            else if (piece.type == "bishop" || piece.type == "queen") {
-                // check enemy diagonal direction
-                if (this.getColumnOfSquare(square) < this.getColumnOfSquare(square_id)) {
-                    // if left diagonal has queen or bishop then left diagonal in danger
-                    this.getDiagonalSquaresOfSquare({ square_id: square_id, piece_sensivity: false, route_path: "left" }).forEach(item => {
-                        unplayable_squares.push(item);
-                    });
-                }
-                else {
-                    // if right diagonal has queen or bishop then right diagonal in danger
-                    this.getDiagonalSquaresOfSquare({ square_id: square_id, piece_sensivity: false, route_path: "right" }).forEach(item => {
-                        unplayable_squares.push(item);
-                    });
-                }
-            }
-        });
+        // Find Enemy Color
+        if(isSquareHas(square_id) && getPieceBySquareID(square_id).type == "king")
+            enemy_color = getPieceBySquareID(square_id).color == "white" ? "black" : "white";
+        else
+            enemy_color = gl_current_move == "white" ? "black" : "white";
 
-        // Queen(Row, Column), Rook Control
-        this.getColumnSquaresOfSquare({ square_id: square_id }).forEach(square => { // Get king's column squares 
-            const piece = getPieceBySquareID(square);
-            if (piece.type == "rook" || piece.type == "queen") {
-                // if column has rook or queen then king can't play to any square at column
-                this.getColumnSquaresOfSquare({ square_id: square, piece_sensivity: false }).forEach(item => {
-                    unplayable_squares.push(item);
+
+        let piece_types = ["queen", "bishop", "rook", "knight", "king"];
+
+        // Is enemy [piece_type] threatening target square then get [piece_type]'s playable squares and add to unplayable squares
+        piece_types.forEach(type => {
+            let enemy_pieces = getActivePiecesWithFilter(type, enemy_color);
+            if (enemy_pieces) {
+                enemy_pieces.forEach(enemy_piece => {
+                    enemy_piece = enemy_piece.getPlayableSquaresOfPiece(); // get pieces playable squares
+                    enemy_piece.forEach(square => {
+                        if (square_id == square) // if any playable square equal target square then
+                            unplayable_squares.push(square); // add to unplayable squares
+                    });
                 });
             }
         });
 
-        this.getRowSquaresOfSquare({ square_id: square_id }).filter(square => { // Get king's row squares 
-            const piece = getPieceBySquareID(square);
-            if (piece.type == "rook" || piece.type == "queen") {
-                // if row has rook or queen then king can't play to any square at row
-                this.getRowSquaresOfSquare({ square_id: square, piece_sensivity: false }).forEach(item => {
-                    unplayable_squares.push(item);
-                });
-            }
-        });
-
-        // Knight Control
+        // Pawn control(because pawn can only kill its diagonal squares not all playable squares like other pieces)
+        let enemy_pawns = getActivePiecesWithFilter("pawn", enemy_color);
+        if (enemy_pawns) {
+            enemy_pawns.forEach(enemy_pawn => {
+                let enemy_pawn_pos = getSquareIDByPiece(enemy_pawn); // get pawn square id
+                if (enemy_color == "white") {
+                    // get white pawn killable squares(white pawn first diagonal squares + 7 and + 9)
+                    if (square_id == enemy_pawn_pos + 7 || square_id == enemy_pawn_pos + 9)
+                        unplayable_squares.push(square_id); 
+                } else {
+                    // get black pawn killable squares(black pawn first diagonal squares - 7 and - 9)
+                    if (square_id == enemy_pawn_pos - 7 || square_id == enemy_pawn_pos - 9)
+                        unplayable_squares.push(square_id);
+                }
+            });
+        }
 
         return unplayable_squares;
     }
 
     /**
-     * Check is square unplayable
+     * Check is square unplayable(for check operations)
      * @param {int} square_id Square ID of the target square
      * @returns {boolean}
      */
-    isSquareUnplayable(square_id){
-        if(this.getSquareIfUnplayable(square_id).length > 0)
-            return true;
-        else
-            return false;
+    isSquareUnplayable(square_id) {
+        if(square_id){
+            if (this.getUnplayableSquares(square_id).length > 0)
+                return true;
+        }
+        return false;
     }
 }

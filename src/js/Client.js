@@ -66,6 +66,24 @@ function createPieceID() {
 
 
 /**
+ * Get Active Pieces On The Board With Filter
+ * @param {string} type Type of pieces to get
+ * @param {string} color Color of pieces to get
+ * @returns {(Array<Piece>|null)}
+ */
+function getActivePiecesWithFilter(type, color){
+    let pieces = [];
+    for(let square in gl_squares){
+        let piece = getPieceBySquareID(parseInt(square));
+        if(piece.color == color && piece.type == type)
+            pieces.push(piece);
+    }
+
+    return pieces.length > 0 ? pieces : null;
+}
+
+
+/**
  * Get Piece By Square ID
  * @param {int} square_id 
  * @returns {(Piece|boolean)} 
