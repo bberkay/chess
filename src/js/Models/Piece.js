@@ -128,11 +128,11 @@ class Piece extends PieceEngine {
         let playable_squares = this.getColumnSquaresOfSquare({ square_id: square_id }).concat(this.getRowSquaresOfSquare({ square_id: square_id })).concat(this.getDiagonalSquaresOfSquare({ square_id: square_id }));
 
         playable_squares.forEach(square => {
-            GameEngine.movePieceToSquare(square_id, square);
-            if(isCheck()){
+            GameEngine.changePiecePosition(square_id, square);
+            if(isCheck()){ // TODO: check kontrolü burada bir ke daha yapılacak.
                 unplayable_squares.push(square);        
             }
-            GameEngine.movePieceToSquare(square, square_id);
+            GameEngine.changePiecePosition(square, square_id);
         });
 
         // Substract unplayable squares from playable squares(for itself)

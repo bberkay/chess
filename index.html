@@ -9,10 +9,11 @@
 </head>
 <body>  
     <div id = "chessboard"></div>
-    
-    <script src = "src/js/Controllers/GameEngine.js"></script>
-    <script src = "src/js/Controllers/BoardEngine.js"></script>
-    <script src = "src/js/Controllers/PieceEngine.js"></script>
+
+    <script src = "src/js/Handler/DOMHandler.js"></script>
+    <script src = "src/js/Engines/GameEngine.js"></script>
+    <script src = "src/js/Engines/BoardEngine.js"></script>
+    <script src = "src/js/Engines/PieceEngine.js"></script>
     <script src = "src/js/Models/Piece.js"></script>
     <script src = "src/js/Chess.js"></script>
     <script>
@@ -26,9 +27,10 @@
             {"color":"black", "piece":"rook", "square":52},
         ]);
 
+        /*
         function clickSquare(e){
             chess.selectSquare(e);
-        }
+        }*/
     </script>
 </body>
 </html>

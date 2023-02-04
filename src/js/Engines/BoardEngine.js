@@ -21,7 +21,7 @@ class BoardEngine{
             let square = document.createElement('div');
             square.classList.add('square');
             square.setAttribute("id", i); // Square position
-            square.setAttribute("onclick", "clickSquare(this)");
+            square.setAttribute("onclick", "DOMHandler.clickSquare(this)");
             square.innerHTML = i; // STUB -> Show Square ID
 
             if (i % 8 == 0) { // Create Board Numbers
@@ -134,9 +134,9 @@ class BoardEngine{
     * @param {int} target_square Piece target square
     * @returns {void}
     */
-    async movePieceOnBoard(piece, target_square) {
+    async movePiece(piece, target_square) {
         let piece_id = GameEngine.getSquareIDByPiece(piece);
-        GameEngine.movePieceToSquare(piece_id, target_square);
+        GameEngine.changePiecePosition(piece_id, target_square);
         
         // Remove piece from his square(and checked effect if exist)
         piece_id = document.getElementsByClassName("square")[piece_id - 1];

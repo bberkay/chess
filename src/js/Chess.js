@@ -37,7 +37,7 @@ class Chess {
      * @param {Element} square Element of the clicked square('this' object comes from DOM)
      * @returns {void}
      */
-    selectSquare(square) {
+    playPiece(square) {
         let piece;
         if(GameEngine.isSquareHas(square.id)){
             // Control Pieces and Squares for security
@@ -63,7 +63,7 @@ class Chess {
             // Piece Move Control
             if (this.current_piece && this.current_piece != piece && this.current_playable_squares.includes(parseInt(square.id)) && this.current_piece != null) {
                 // move piece
-                this.board.movePieceOnBoard(this.current_piece, square.id);
+                this.board.movePiece(this.current_piece, square.id);
                 this.isCheck();
                 this.endTurn();
             } else {
@@ -74,8 +74,8 @@ class Chess {
     }
 
     /**
-     * Is enemy player checked after move?
-     * @returns {void}
+     * Is enemy player checked after move? If checked then set gl_checked_player to enemy player
+     * @returns {boolean}
      */
     isCheck(){
         // Get enemy king
@@ -86,7 +86,10 @@ class Chess {
         if(this.engine.isSquareUnplayable(enemy_king_square_id)){
             gl_checked_player = enemy_king.color;
             this.board.setEffectOfSquareID(enemy_king_square_id, "checked");
+            return true;
         }
+
+        return false;
     }
 
     /**

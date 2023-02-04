@@ -125,12 +125,12 @@ class GameEngine {
 
 
     /**
-     * Change Squares
+     * Move Piece To Square
      * @param {int} from Square ID of the piece to move
      * @param {int} to Square ID of the target square
      * @returns {void}
      */
-    static movePieceToSquare(from, to) {
+    static changePiecePosition(from, to) {
         let moved_piece = GameEngine.getPieceBySquareID(from);
         GameEngine.setGlobalSquare(from, 0);
         GameEngine.setGlobalSquare(to, moved_piece);
