@@ -209,7 +209,7 @@ class Engine {
         // If target square and current square is same then not push square to squares 
         if (piece_sensivity) {
             // if piece sensivity is true then calculate every piece on the path
-            let square_type = isSquareHas(square);
+            let square_type = Client.isSquareHas(square);
             // Stop if any piece on the path and piece doesn't have to ability to jump(of course this control because of knight).    
             if (square_type == "friend") {
                 squares.push("break");
@@ -245,8 +245,8 @@ class Engine {
         let unplayable_squares = [];
 
         // Find Enemy Color
-        if(isSquareHas(square_id) && getPieceBySquareID(square_id).type == "king")
-            enemy_color = getPieceBySquareID(square_id).color == "white" ? "black" : "white";
+        if(Client.isSquareHas(square_id) && Client.getPieceBySquareID(square_id).type == "king")
+            enemy_color = Client.getPieceBySquareID(square_id).color == "white" ? "black" : "white";
         else
             enemy_color = gl_current_move == "white" ? "black" : "white";
 
@@ -255,7 +255,7 @@ class Engine {
 
         // Is enemy [piece_type] threatening target square then get [piece_type]'s playable squares and add to unplayable squares
         piece_types.forEach(type => {
-            let enemy_pieces = getActivePiecesWithFilter(type, enemy_color);
+            let enemy_pieces = Client.getActivePiecesWithFilter(type, enemy_color);
             if (enemy_pieces) {
                 enemy_pieces.forEach(enemy_piece => {
                     enemy_piece = enemy_piece.getPlayableSquaresOfPiece(); // get pieces playable squares
@@ -268,10 +268,10 @@ class Engine {
         });
 
         // Pawn control(because pawn can only kill its diagonal squares not all playable squares like other pieces)
-        let enemy_pawns = getActivePiecesWithFilter("pawn", enemy_color);
+        let enemy_pawns = Client.getActivePiecesWithFilter("pawn", enemy_color);
         if (enemy_pawns) {
             enemy_pawns.forEach(enemy_pawn => {
-                let enemy_pawn_pos = getSquareIDByPiece(enemy_pawn); // get pawn square id
+                let enemy_pawn_pos = Client.getSquareIDByPiece(enemy_pawn); // get pawn square id
                 if (enemy_color == "white") {
                     // get white pawn killable squares(white pawn first diagonal squares + 7 and + 9)
                     if (square_id == enemy_pawn_pos + 7 || square_id == enemy_pawn_pos + 9)

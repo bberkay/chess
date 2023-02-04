@@ -17,7 +17,7 @@ class Board {
         let board_chars_count = 0; // For loop, not too important
 
         for (let i = 1; i <= 64; i++) {
-            setGlobalSquare(i, 0);
+            Client.setGlobalSquare(i, 0);
             let square = document.createElement('div');
             square.classList.add('square');
             square.setAttribute("id", i); // Square position
@@ -80,7 +80,7 @@ class Board {
         piece.classList.add("piece");
         piece.setAttribute("data-piece", piece_type); // For image of piece
         piece.setAttribute("data-color", color); // For image of piece   
-        let piece_obj = new Piece(createPieceID(), piece_type, color);
+        let piece_obj = new Piece(Client.createPieceID(), piece_type, color);
 
         // Set white and black king
         if(piece_type == "king" && color == "white")
@@ -88,8 +88,8 @@ class Board {
         else if(piece_type == "king" && color == "black")
             gl_black_king = piece_obj;
             
-        setGlobalSquare(target_square_id, piece_obj); // Add square list for position information
-        setGlobalPiece(piece_obj.id, piece_obj); // Add pieces list
+        Client.setGlobalSquare(target_square_id, piece_obj); // Add square list for position information
+        Client.setGlobalPiece(piece_obj.id, piece_obj); // Add pieces list
         target_square.appendChild(piece); // Add piece to target square
     }
 
@@ -121,7 +121,7 @@ class Board {
         let l = playable_squares.length;
         for (let i = 0; i < l; i++) {
             // If the square contains enemy piece then the square is "killable-piece"
-            if (isSquareHas(playable_squares[i]) == "enemy")
+            if (Client.isSquareHas(playable_squares[i]) == "enemy")
                 this.setEffectOfSquareID(playable_squares[i], "killable")
             else // If the square not contains piece then the square is "playable-square"
                 this.setEffectOfSquareID(playable_squares[i], "playable")
@@ -136,8 +136,8 @@ class Board {
     * @returns {void}
     */
     async movePieceOnBoard(piece, target_square) {
-        let piece_id = getSquareIDByPiece(piece);
-        movePieceToSquare(piece_id, target_square);
+        let piece_id = Client.getSquareIDByPiece(piece);
+        Client.movePieceToSquare(piece_id, target_square);
         
         // Remove piece from his square(and checked effect if exist)
         piece_id = document.getElementsByClassName("square")[piece_id - 1];

@@ -3,8 +3,8 @@ class Chess {
      * @constructor
      */
     constructor() {
-        this.board = new BoardEngine();
-        this.engine = new PieceEngine();
+        this.board = new Board();
+        this.engine = new Engine();
         this.current_piece = null;
         this.current_playable_squares = null;
         this.check_limitation = null;
@@ -16,7 +16,7 @@ class Chess {
     */
     startGame() {
         this.board.createBoard();
-        this.board.createPiecesAtStartPosition();
+        this.board.createPieces();
     }
 
     /**
