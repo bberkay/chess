@@ -32,7 +32,7 @@ var gl_white_king = null;
 var gl_black_king = null;
 
 
-class Client {
+class GameEngine {
     /**
      * Set Global Square
      * @param {int} key
@@ -62,7 +62,7 @@ class Client {
         if (!gl_pieces[id])
             return id;
         else
-            Client.createPieceID();
+            GameEngine.createPieceID();
     }
 
 
@@ -75,7 +75,7 @@ class Client {
     static getActivePiecesWithFilter(type, color) {
         let pieces = [];
         for (let square in gl_squares) {
-            let piece = Client.getPieceBySquareID(parseInt(square));
+            let piece = GameEngine.getPieceBySquareID(parseInt(square));
             if (piece.color == color && piece.type == type)
                 pieces.push(piece);
         }
@@ -115,7 +115,7 @@ class Client {
      */
     static isSquareHas(square_id) {
         if (gl_squares[square_id] != 0) {
-            if (Client.getPieceBySquareID(square_id).color != gl_current_move)
+            if (GameEngine.getPieceBySquareID(square_id).color != gl_current_move)
                 return "enemy";
             else
                 return "friend";
@@ -131,8 +131,8 @@ class Client {
      * @returns {void}
      */
     static movePieceToSquare(from, to) {
-        let moved_piece = Client.getPieceBySquareID(from);
-        Client.setGlobalSquare(from, 0);
-        Client.setGlobalSquare(to, moved_piece);
+        let moved_piece = GameEngine.getPieceBySquareID(from);
+        GameEngine.setGlobalSquare(from, 0);
+        GameEngine.setGlobalSquare(to, moved_piece);
     }
 }
