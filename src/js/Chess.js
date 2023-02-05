@@ -39,7 +39,7 @@ class Chess{
      */
     playPiece(square) {
         let piece;
-        if(GameController.isSquareHas(square.id)){
+        if(GameController.isSquareHasPiece(square.id)){
             // Control Pieces and Squares for security
             this.board.refreshBoard();
             piece = GameController.getPieceBySquareID(parseInt(square.id)); // get clicked piece
@@ -78,7 +78,8 @@ class Chess{
      * @returns {boolean}
      */
     isCheck(){
-       
+        const enemy_king = GameController.getKing({enemy:true});
+        const enemy_king_square_id = GameController.getKingSquareID({enemy:true});
 
         // Set checked player and give effect the checked king
         if(this.engine.isSquareUnplayable(enemy_king_square_id)){

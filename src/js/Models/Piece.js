@@ -88,7 +88,7 @@ class Piece extends PieceEngine {
 
         // is first diagonal squares has enemy piece then add playable squares
         diagonal_control.filter(item => {
-            if (GameController.isSquareHas(item) == "enemy")
+            if (GameController.isSquareHasEnemy(item))
                 playable_squares_id.push(item);
         })
 
@@ -123,21 +123,9 @@ class Piece extends PieceEngine {
      * @returns {Array<int>}
      */
     #getPlayableSquaresOfQueen() {
-        let unplayable_squares = [];
         let square_id = GameController.getSquareIDByPiece(this);
         let playable_squares = this.getColumnSquaresOfSquare({ square_id: square_id }).concat(this.getRowSquaresOfSquare({ square_id: square_id })).concat(this.getDiagonalSquaresOfSquare({ square_id: square_id }));
-
-        playable_squares.forEach(square => {
-            GameController.changePiecePosition(square_id, square);
-            if(this.isSquareUnplayable(GameController.getEnemyKingSquareID())){
-                unplayable_squares.push(square);        
-            }
-            GameController.changePiecePosition(square, square_id);
-        });
-
-        // Substract unplayable squares from playable squares(for itself)
-        playable_squares = playable_squares.filter(square => !unplayable_squares.includes(square));
-
+        
         // get all squares of column, row and diagonal(UNLIMITED POWEEEER!!!)
         return playable_squares;
     }

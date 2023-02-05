@@ -107,27 +107,36 @@ class GameController {
         return false;
     }
 
-
     /**
-     * Is Square Has Piece ? if not then false else "friend" or "enemy"
+     * Is Square Has Piece ?
      * @param {int} square_id Square ID of the target square
-     * @returns {(boolean|string)}
+     * @returns {boolean}
      */
-    static isSquareHas(square_id) {
-        if (gl_squares[square_id] != 0) {
-            if (GameController.getPieceBySquareID(square_id).color != gl_current_move)
-                return "enemy";
-            else
-                return "friend";
-        } else
-            return false;
+    static isSquareHasPiece(square_id){
+        return gl_squares[square_id] != 0 ? true : false;
     }
 
+    /**
+     * Is square has enemy ?
+     * @param {int} square_id Square ID of the target square
+     * @param {string} opt_compare_color Color to compare(optional)
+     * @returns {boolean}
+     */
+    static isSquareHasEnemy(square_id, opt_compare_color = false){
+        if(!opt_compare_color)
+            opt_compare_color = gl_current_move;
+
+        if (this.isSquareHasPiece(square_id) && this.getPieceBySquareID(square_id).color != opt_compare_color)
+            return true;
+        else
+            return false;
+    }
 
     /**
      * Move Piece To Square
      * @param {int} from Square ID of the piece to move
      * @param {int} to Square ID of the target square
+     * @param {boolean} cache_position Is move for temporarily check
      * @returns {void}
      */
     static changePiecePosition(from, to) {
@@ -137,19 +146,25 @@ class GameController {
     }
 
     /**
-     * Get Enemy King
+     * Get Player or Enemy King
      * @returns {Piece}
      */
-    static getEnemyKing(){
-        const enemy_king = gl_current_move == "white" ? gl_black_king : gl_white_king;
-        return enemy_king;
+    static getKing({player = false, enemy = false}){
+        if(player == false && enemy == false) // If player and enemy are false then return player's king
+            return gl_current_move == "white" ? gl_white_king : gl_black_king;
+        else if(player == true && enemy == false) 
+            return gl_current_move == "white" ? gl_white_king : gl_black_king;
+        else if(player == false && enemy == true)
+            return gl_current_move == "white" ? gl_black_king : gl_white_king;
+        else // If player and enemy are true then return player's king
+            return gl_current_move == "white" ? gl_white_king : gl_black_king;
     }
 
     /**
-     * Get Square ID of Enemy King 
+     * Get Square ID of Player or Enemy King 
      * @returns {int}
      */
-    static getEnemyKingSquareID(){
-        return this.getSquareIDByPiece(this.getEnemyKing());
+    static getKingSquareID({player = false, enemy = false}){
+        return this.getSquareIDByPiece(this.getKing({player:player, enemy:enemy}));
     }
 }

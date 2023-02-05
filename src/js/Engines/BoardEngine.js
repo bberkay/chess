@@ -120,7 +120,7 @@ class BoardEngine{
         let l = playable_squares.length;
         for (let i = 0; i < l; i++) {
             // If the square contains enemy piece then the square is "killable-piece"
-            if (GameController.isSquareHas(playable_squares[i]) == "enemy")
+            if (GameController.isSquareHasEnemy(playable_squares[i]))
                 this.setEffectOfSquareID(playable_squares[i], "killable")
             else // If the square not contains piece then the square is "playable-square"
                 this.setEffectOfSquareID(playable_squares[i], "playable")

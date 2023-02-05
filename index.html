@@ -19,18 +19,12 @@
     <script>
         var chess = new Chess();    
 
-        // TODO: vezirin çekilememesi lazım bu yüzden eğer vezir çekiliyor ise şah oluyor mu kontrol edilecek
-        // TODO: Bu da yapıldığında şah tamamen bitmiş olacak.
         chess.startCustomGame([
             {"color":"white", "piece":"king", "square":12},
             {"color":"white", "piece":"queen", "square":28},
             {"color":"black", "piece":"rook", "square":52},
         ]);
 
-        /*
-        function clickSquare(e){
-            chess.selectSquare(e);
-        }*/
     </script>
 </body>
 </html>

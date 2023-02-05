@@ -1,4 +1,5 @@
 // TODO: Optimizasyon-İsimlendirme, animasyon, grab, sağ tık oku gibi işlemler en son yapılacak.
+// TODO: isSquareUnplayable ismi değiştirilecek.
 
 // TODO: Kısa-Uzun Rok(rok atılırken şah durumuna düşüyor mu kontrolü, kaleler ve şah daha önceden oynanmış mı kontrolü), 
 // TODO: Geçerken Alma, Mat-Pat Kontrolü, Piyon dönüşümü

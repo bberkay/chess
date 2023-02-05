@@ -27,7 +27,7 @@ class PieceEngine{
      */
     getColumnSquaresOfSquare({ square_id, distance_limit = null, route_path = null, piece_sensivity = true }) {
         let squares = [];
-
+        const current_square_id = square_id;
         if (route_path == null || route_path == "top") {
             let counter = 1;
 
@@ -35,7 +35,7 @@ class PieceEngine{
             for (let i = square_id - 8; i > 0; i -= 8) {
                 if (distance_limit && counter > distance_limit)
                     break;
-                squares = squares.concat(this.#getPlayableSquares(i, piece_sensivity));
+                squares = squares.concat(this.#getPlayableSquares(current_square_id, i, piece_sensivity));
                 if (squares.includes("break")) {
                     squares.pop(); // delete "break" from squares
                     break;
@@ -51,7 +51,7 @@ class PieceEngine{
             for (let i = square_id + 8; i < 65; i += 8) {
                 if (distance_limit && counter > distance_limit)
                     break;
-                squares = squares.concat(this.#getPlayableSquares(i, piece_sensivity));
+                squares = squares.concat(this.#getPlayableSquares(current_square_id, i, piece_sensivity));
                 if (squares.includes("break")) {
                     squares.pop();
                     break;
@@ -74,6 +74,7 @@ class PieceEngine{
     getRowSquaresOfSquare({ square_id, distance_limit = null, route_path = null, piece_sensivity = true }) {
         let squares = [];
         let row = this.getRowOfSquare(square_id);
+        const current_square_id = square_id;
 
         if (route_path == null || route_path == "right") {
             let counter = 1;
@@ -82,7 +83,7 @@ class PieceEngine{
             for (let i = square_id + 1; i <= row * 8; i++) {
                 if (distance_limit && counter > distance_limit)
                     break;
-                squares = squares.concat(this.#getPlayableSquares(i, piece_sensivity));
+                squares = squares.concat(this.#getPlayableSquares(current_square_id, i, piece_sensivity));
                 if (squares.includes("break")) { // delete "break" from squares
                     squares.pop();
                     break;
@@ -98,7 +99,7 @@ class PieceEngine{
             for (let i = square_id - 1; i >= (row * 8) - 7; i--) {
                 if (distance_limit && counter > distance_limit)
                     break;
-                squares = squares.concat(this.#getPlayableSquares(i, piece_sensivity));
+                squares = squares.concat(this.#getPlayableSquares(current_square_id, i, piece_sensivity));
                 if (squares.includes("break")) {
                     squares.pop();
                     break;
@@ -121,8 +122,8 @@ class PieceEngine{
     getDiagonalSquaresOfSquare({ square_id, distance_limit = null, route_path = null, piece_sensivity = true }) {
         let squares = [];
         let counter = 1;
-
-
+        const current_square_id = square_id;
+        
         // Top Left Diagonal of Piece
         if (route_path == null || route_path == "top" || route_path == "right") {
             counter = 1;
@@ -131,7 +132,7 @@ class PieceEngine{
                     if (distance_limit && counter > distance_limit)
                         break;
 
-                    squares = squares.concat(this.#getPlayableSquares(i, piece_sensivity, true));
+                    squares = squares.concat(this.#getPlayableSquares(current_square_id, i, piece_sensivity, true));
                     if (squares.includes("break")) { // delete "break" from squares
                         squares.pop();
                         break;
@@ -149,7 +150,7 @@ class PieceEngine{
                     if (distance_limit && counter > distance_limit)
                         break;
 
-                    squares = squares.concat(this.#getPlayableSquares(i, piece_sensivity, true));
+                    squares = squares.concat(this.#getPlayableSquares(current_square_id, i, piece_sensivity, true));
                     if (squares.includes("break")) {
                         squares.pop();
                         break;
@@ -167,7 +168,7 @@ class PieceEngine{
                     if (distance_limit && counter > distance_limit)
                         break;
 
-                    squares = squares.concat(this.#getPlayableSquares(i, piece_sensivity, true));
+                    squares = squares.concat(this.#getPlayableSquares(current_square_id, i, piece_sensivity, true));
                     if (squares.includes("break")) {
                         squares.pop();
                         break;
@@ -185,7 +186,7 @@ class PieceEngine{
                     if (distance_limit && counter > distance_limit)
                         break;
 
-                    squares = squares.concat(this.#getPlayableSquares(i, piece_sensivity, true));
+                    squares = squares.concat(this.#getPlayableSquares(current_square_id, i, piece_sensivity, true));
                     if (squares.includes("break")) {
                         squares.pop();
                         break;
@@ -199,36 +200,41 @@ class PieceEngine{
 
     /**
      * Get Playable Square on the path
-     * @param {int} square Target Square(loop element, example 'i')
+     * @param {int} current_square_id Current Square 
+     * @param {int} target_square_id Target Square(loop element, example 'i')
      * @param {boolean} piece_sensivity To avoid tripping over other pieces.
      * @param {boolean} diagonal Is path diagonal
      * @returns {Array<int>}
      */
-    #getPlayableSquares(square, piece_sensivity, diagonal) {
+    #getPlayableSquares(current_square_id, target_square_id, piece_sensivity, diagonal = false) {
         let squares = [];
+
         // If target square and current square is same then not push square to squares 
-        if (piece_sensivity) {
-            // if piece sensivity is true then calculate every piece on the path
-            let square_type = GameController.isSquareHas(square);
+        if (piece_sensivity) { // if piece sensivity is true then calculate every piece on the path
+            // Control square 
+            let square_type = GameController.isSquareHasPiece(target_square_id);
+            if(square_type)
+                square_type = GameController.isSquareHasEnemy(target_square_id, GameController.getPieceBySquareID(current_square_id).color) ? "enemy" : "friend";
+
             // Stop if any piece on the path and piece doesn't have to ability to jump(of course this control because of knight).    
             if (square_type == "friend") {
                 squares.push("break");
                 return squares;
             }
             else if (square_type == "enemy") {
-                squares.push(square);
+                squares.push(target_square_id);
                 squares.push("break");
                 return squares;
             }
             else
-                squares.push(square);
+                squares.push(target_square_id);
         }
         else // if piece sensivity is false add all squares to squares list
-            squares.push(square);
+            squares.push(target_square_id);
 
         // if square reach the edges of the board
         if (diagonal) {
-            if (this.getColumnOfSquare(square) == 8 || this.getColumnOfSquare(square) == 1)
+            if (this.getColumnOfSquare(target_square_id) == 8 || this.getColumnOfSquare(target_square_id) == 1)
                 squares.push("break");
         }
 
@@ -245,12 +251,13 @@ class PieceEngine{
         let unplayable_squares = [];
 
         // Find Enemy Color
-        if(GameController.isSquareHas(square_id) && GameController.getPieceBySquareID(square_id).type == "king")
-            enemy_color = GameController.getPieceBySquareID(square_id).color == "white" ? "black" : "white";
+        let piece = GameController.getPieceBySquareID(square_id);
+        if(GameController.isSquareHasPiece(square_id) && piece.type == "king")
+            enemy_color = piece.color == "white" ? "black" : "white";
         else
             enemy_color = gl_current_move == "white" ? "black" : "white";
 
-
+        // All Piece Type for get all enemy
         let piece_types = ["queen", "bishop", "rook", "knight", "king"];
 
         // Is enemy [piece_type] threatening target square then get [piece_type]'s playable squares and add to unplayable squares
@@ -258,7 +265,8 @@ class PieceEngine{
             let enemy_pieces = GameController.getActivePiecesWithFilter(type, enemy_color);
             if (enemy_pieces) {
                 enemy_pieces.forEach(enemy_piece => {
-                    enemy_piece = enemy_piece.getPlayableSquaresOfPiece(); // get pieces playable squares
+                    // get pieces playable squares
+                    enemy_piece = enemy_piece.getPlayableSquaresOfPiece();
                     enemy_piece.forEach(square => {
                         if (square_id == square) // if any playable square equal target square then
                             unplayable_squares.push(square); // add to unplayable squares
@@ -293,10 +301,8 @@ class PieceEngine{
      * @returns {boolean}
      */
     isSquareUnplayable(square_id) {
-        if(square_id){
-            if (this.getUnplayableSquares(square_id).length > 0)
-                return true;
-        }
+        if (this.getUnplayableSquares(square_id).length > 0)
+            return true;
         return false;
     }
 }
