@@ -1,4 +1,4 @@
-class Chess {
+class Chess{
     /**
      * @constructor
      */
@@ -39,10 +39,10 @@ class Chess {
      */
     playPiece(square) {
         let piece;
-        if(GameEngine.isSquareHas(square.id)){
+        if(GameController.isSquareHas(square.id)){
             // Control Pieces and Squares for security
             this.board.refreshBoard();
-            piece = GameEngine.getPieceBySquareID(parseInt(square.id)); // get clicked piece
+            piece = GameController.getPieceBySquareID(parseInt(square.id)); // get clicked piece
 
             // if player is checked then can't select any piece except king
             if(gl_checked_player == gl_current_move && piece.type != "king")
@@ -78,9 +78,7 @@ class Chess {
      * @returns {boolean}
      */
     isCheck(){
-        // Get enemy king
-        const enemy_king = gl_current_move == "white" ? gl_black_king : gl_white_king;
-        const enemy_king_square_id = GameEngine.getSquareIDByPiece(enemy_king);
+       
 
         // Set checked player and give effect the checked king
         if(this.engine.isSquareUnplayable(enemy_king_square_id)){

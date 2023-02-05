@@ -32,7 +32,7 @@ var gl_white_king = null;
 var gl_black_king = null;
 
 
-class GameEngine {
+class GameController {
     /**
      * Set Global Square
      * @param {int} key
@@ -62,7 +62,7 @@ class GameEngine {
         if (!gl_pieces[id])
             return id;
         else
-            GameEngine.createPieceID();
+            GameController.createPieceID();
     }
 
 
@@ -75,7 +75,7 @@ class GameEngine {
     static getActivePiecesWithFilter(type, color) {
         let pieces = [];
         for (let square in gl_squares) {
-            let piece = GameEngine.getPieceBySquareID(parseInt(square));
+            let piece = GameController.getPieceBySquareID(parseInt(square));
             if (piece.color == color && piece.type == type)
                 pieces.push(piece);
         }
@@ -115,7 +115,7 @@ class GameEngine {
      */
     static isSquareHas(square_id) {
         if (gl_squares[square_id] != 0) {
-            if (GameEngine.getPieceBySquareID(square_id).color != gl_current_move)
+            if (GameController.getPieceBySquareID(square_id).color != gl_current_move)
                 return "enemy";
             else
                 return "friend";
@@ -131,8 +131,25 @@ class GameEngine {
      * @returns {void}
      */
     static changePiecePosition(from, to) {
-        let moved_piece = GameEngine.getPieceBySquareID(from);
-        GameEngine.setGlobalSquare(from, 0);
-        GameEngine.setGlobalSquare(to, moved_piece);
+        let moved_piece = GameController.getPieceBySquareID(from);
+        GameController.setGlobalSquare(from, 0);
+        GameController.setGlobalSquare(to, moved_piece);
+    }
+
+    /**
+     * Get Enemy King
+     * @returns {Piece}
+     */
+    static getEnemyKing(){
+        const enemy_king = gl_current_move == "white" ? gl_black_king : gl_white_king;
+        return enemy_king;
+    }
+
+    /**
+     * Get Square ID of Enemy King 
+     * @returns {int}
+     */
+    static getEnemyKingSquareID(){
+        return this.getSquareIDByPiece(this.getEnemyKing());
     }
 }

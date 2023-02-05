@@ -17,7 +17,7 @@ class BoardEngine{
         let board_chars_count = 0; // For loop, not too important
 
         for (let i = 1; i <= 64; i++) {
-            GameEngine.setGlobalSquare(i, 0);
+            GameController.setGlobalSquare(i, 0);
             let square = document.createElement('div');
             square.classList.add('square');
             square.setAttribute("id", i); // Square position
@@ -79,7 +79,7 @@ class BoardEngine{
         piece.classList.add("piece");
         piece.setAttribute("data-piece", piece_type); // For image of piece
         piece.setAttribute("data-color", color); // For image of piece   
-        let piece_obj = new Piece(GameEngine.createPieceID(), piece_type, color);
+        let piece_obj = new Piece(GameController.createPieceID(), piece_type, color);
 
         // Set white and black king
         if(piece_type == "king" && color == "white")
@@ -87,8 +87,8 @@ class BoardEngine{
         else if(piece_type == "king" && color == "black")
             gl_black_king = piece_obj;
             
-        GameEngine.setGlobalSquare(target_square_id, piece_obj); // Add square list for position information
-        GameEngine.setGlobalPiece(piece_obj.id, piece_obj); // Add pieces list
+        GameController.setGlobalSquare(target_square_id, piece_obj); // Add square list for position information
+        GameController.setGlobalPiece(piece_obj.id, piece_obj); // Add pieces list
         target_square.appendChild(piece); // Add piece to target square
     }
     
@@ -120,7 +120,7 @@ class BoardEngine{
         let l = playable_squares.length;
         for (let i = 0; i < l; i++) {
             // If the square contains enemy piece then the square is "killable-piece"
-            if (GameEngine.isSquareHas(playable_squares[i]) == "enemy")
+            if (GameController.isSquareHas(playable_squares[i]) == "enemy")
                 this.setEffectOfSquareID(playable_squares[i], "killable")
             else // If the square not contains piece then the square is "playable-square"
                 this.setEffectOfSquareID(playable_squares[i], "playable")
@@ -135,8 +135,8 @@ class BoardEngine{
     * @returns {void}
     */
     async movePiece(piece, target_square) {
-        let piece_id = GameEngine.getSquareIDByPiece(piece);
-        GameEngine.changePiecePosition(piece_id, target_square);
+        let piece_id = GameController.getSquareIDByPiece(piece);
+        GameController.changePiecePosition(piece_id, target_square);
         
         // Remove piece from his square(and checked effect if exist)
         piece_id = document.getElementsByClassName("square")[piece_id - 1];

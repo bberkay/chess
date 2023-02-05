@@ -43,7 +43,7 @@ class Piece extends PieceEngine {
      * @returns {Array<int>}
      */
     #getPlayableSquaresOfRook() {
-        let square_id = GameEngine.getSquareIDByPiece(this);
+        let square_id = GameController.getSquareIDByPiece(this);
 
         // get all squares of row and column
         return this.getColumnSquaresOfSquare({ square_id: square_id }).concat(this.getRowSquaresOfSquare({ square_id: square_id }));
@@ -55,7 +55,7 @@ class Piece extends PieceEngine {
      * @returns {Array<int>}
      */
     #getPlayableSquaresOfBishop() {
-        let square_id = GameEngine.getSquareIDByPiece(this);
+        let square_id = GameController.getSquareIDByPiece(this);
 
         // get all squares of diagonal
         return this.getDiagonalSquaresOfSquare({ square_id: square_id });
@@ -67,7 +67,7 @@ class Piece extends PieceEngine {
      * @returns {Array<int>}
      */
     #getPlayableSquaresOfPawn() {
-        let square_id = GameEngine.getSquareIDByPiece(this);
+        let square_id = GameController.getSquareIDByPiece(this);
         let playable_squares_id = [];
 
         let limit = 0;
@@ -88,7 +88,7 @@ class Piece extends PieceEngine {
 
         // is first diagonal squares has enemy piece then add playable squares
         diagonal_control.filter(item => {
-            if (GameEngine.isSquareHas(item) == "enemy")
+            if (GameController.isSquareHas(item) == "enemy")
                 playable_squares_id.push(item);
         })
 
@@ -103,7 +103,7 @@ class Piece extends PieceEngine {
     #getPlayableSquaresOfKing() {
         let playable_squares;
         let unplayable_squares;
-        let square_id = GameEngine.getSquareIDByPiece(this);
+        let square_id = GameController.getSquareIDByPiece(this);
 
         playable_squares = this.getColumnSquaresOfSquare({ square_id: square_id, distance_limit: 1 }).concat(this.getRowSquaresOfSquare({ square_id: square_id, distance_limit: 1 })).concat(this.getDiagonalSquaresOfSquare({ square_id: square_id, distance_limit: 1 }));
         unplayable_squares = this.getUnplayableSquares(square_id);
@@ -124,15 +124,15 @@ class Piece extends PieceEngine {
      */
     #getPlayableSquaresOfQueen() {
         let unplayable_squares = [];
-        let square_id = GameEngine.getSquareIDByPiece(this);
+        let square_id = GameController.getSquareIDByPiece(this);
         let playable_squares = this.getColumnSquaresOfSquare({ square_id: square_id }).concat(this.getRowSquaresOfSquare({ square_id: square_id })).concat(this.getDiagonalSquaresOfSquare({ square_id: square_id }));
 
         playable_squares.forEach(square => {
-            GameEngine.changePiecePosition(square_id, square);
-            if(isCheck()){ // TODO: check kontrolü burada bir ke daha yapılacak.
+            GameController.changePiecePosition(square_id, square);
+            if(this.isSquareUnplayable(GameController.getEnemyKingSquareID())){
                 unplayable_squares.push(square);        
             }
-            GameEngine.changePiecePosition(square, square_id);
+            GameController.changePiecePosition(square, square_id);
         });
 
         // Substract unplayable squares from playable squares(for itself)
@@ -148,7 +148,7 @@ class Piece extends PieceEngine {
      * @returns {Array<int>}
      */
     #getPlayableSquaresOfKnight() {
-        let square_id = GameEngine.getSquareIDByPiece(this);
+        let square_id = GameController.getSquareIDByPiece(this);
         let playable_squares_id = [];
 
         // get 2 squares of column
