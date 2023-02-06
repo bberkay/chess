@@ -102,12 +102,17 @@ class Piece extends PieceEngine {
      */
     #getPlayableSquaresOfKing() {
         let playable_squares;
+        let unplayable_squares;
         let square_id = GameController.getSquareIDByPiece(this);
 
         playable_squares = this.getColumnSquaresOfSquare({ square_id: square_id, distance_limit: 1 }).concat(this.getRowSquaresOfSquare({ square_id: square_id, distance_limit: 1 })).concat(this.getDiagonalSquaresOfSquare({ square_id: square_id, distance_limit: 1 }));
+        unplayable_squares = this.getUnplayableSquares(square_id);
 
         // Substract unplayable squares from playable squares(for itself)
-        playable_squares = playable_squares.filter(square => !this.isSquareInDanger(square));
+        playable_squares = playable_squares.filter(square => !unplayable_squares.includes(square));
+
+        // Substract unplayable squares from playable squares(for squares around)
+        playable_squares = playable_squares.filter(square => !this.isSquareUnplayable(square));
 
         return playable_squares;
     }

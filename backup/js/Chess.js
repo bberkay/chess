@@ -64,7 +64,7 @@ class Chess{
             if (this.current_piece && this.current_piece != piece && this.current_playable_squares.includes(parseInt(square.id)) && this.current_piece != null) {
                 // move piece
                 this.board.movePiece(this.current_piece, square.id);
-                this.controlCheck();
+                this.isCheck();
                 this.endTurn();
             } else {
                 this.current_piece = null;
@@ -75,17 +75,20 @@ class Chess{
 
     /**
      * Is enemy player checked after move? If checked then set gl_checked_player to enemy player
-     * @returns {void}
+     * @returns {boolean}
      */
-    controlCheck(){
+    isCheck(){
         const enemy_king = GameController.getKing({enemy:true});
         const enemy_king_square_id = GameController.getKingSquareID({enemy:true});
 
         // Set checked player and give effect the checked king
-        if(this.engine.isSquareInDanger(enemy_king_square_id)){
+        if(this.engine.isSquareUnplayable(enemy_king_square_id)){
             gl_checked_player = enemy_king.color;
             this.board.setEffectOfSquareID(enemy_king_square_id, "checked");
+            return true;
         }
+
+        return false;
     }
 
     /**
