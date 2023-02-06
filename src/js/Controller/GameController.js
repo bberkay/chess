@@ -67,7 +67,7 @@ class GameController {
 
 
     /**
-     * Get Active Pieces On The Board With Filter
+     * Get Active Pieces On The Board With Filter Like Enemy Queen, Enemy Bishops ... etc.
      * @param {string} type Type of pieces to get
      * @param {string} color Color of pieces to get
      * @returns {(Array<Piece>|null)}
@@ -82,7 +82,6 @@ class GameController {
 
         return pieces.length > 0 ? pieces : null;
     }
-
 
     /**
      * Get Piece By Square ID

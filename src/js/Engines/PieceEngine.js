@@ -242,59 +242,42 @@ class PieceEngine{
     }
 
     /**
-     * Get Unplayable Squares(squares held by the enemy) of target piece
-     * @param {int} square_id Square ID of the target piece
-     * @returns {Array<int>}
-     */
-    #getDangerousSquares(square_id) {
-        let unplayable_squares = [];
-        const piece = GameController.getPieceBySquareID(square_id);
-        const enemy_color = piece.color == "white" ? "black" : "white";       
-
-        // All Piece Type for get all enemy
-        const piece_types = ["queen", "bishop", "rook", "knight", "king"];
-
-        // Is enemy [piece_type] threatening target piece then get [piece_type]'s playable squares and add to unplayable squares
-        piece_types.forEach(type => {
-            let enemy_pieces = GameController.getActivePiecesWithFilter(type, enemy_color);
-            if (enemy_pieces) {
-                enemy_pieces.forEach(enemy_piece => {
-                    unplayable_squares = unplayable_squares.concat(enemy_piece.getPlayableSquaresOfPiece());
-                });
-            }
-        });
-        
-        // Pawn control(because pawn can only kill its diagonal squares not all playable squares like other pieces)
-        let enemy_pawns = GameController.getActivePiecesWithFilter("pawn", enemy_color);
-        if (enemy_pawns) {
-            enemy_pawns.forEach(enemy_pawn => {
-                let enemy_pawn_pos = GameController.getSquareIDByPiece(enemy_pawn); // get pawn square id
-                if (enemy_color == "white") {
-                    // get white pawn killable squares(white pawn first diagonal squares + 7 and + 9)
-                    if (square_id == enemy_pawn_pos + 7 || square_id == enemy_pawn_pos + 9)
-                        unplayable_squares.push(square_id); 
-                } else {
-                    // get black pawn killable squares(black pawn first diagonal squares - 7 and - 9)
-                    if (square_id == enemy_pawn_pos - 7 || square_id == enemy_pawn_pos - 9)
-                        unplayable_squares.push(square_id);
-                }
-            });
-        }
-
-        return unplayable_squares;
-    }
-
-    /**
      * Check is square in danger by any enemy piece(for check operations)
      * @param {int} square_id Square ID of the target square
      * @returns {boolean}
      */
     isSquareInDanger(square_id, enemy_color) {
-        let piece;
-        if(GameController.isSquareHasPiece(square_id))
-            piece = GameController.getPieceBySquareID(square_id);
-            
+        
+        // get all piece types(except pawn) for get all enemy on the board
+        const piece_types = ["queen", "bishop", "rook", "knight", "king"];
+        piece_types.forEach(type => {
+            let enemy_pieces = GameController.getActivePiecesWithFilter(type, enemy_color);
+            if (enemy_pieces) {
+                enemy_pieces.forEach(enemy_piece => {
+                    if(enemy_piece.getPlayableSquaresOfPiece().includes(square_id))
+                        return true;
+                });
+            }
+        });
 
+        // get all enemy pawns
+        const enemy_pawns = GameController.getActivePiecesWithFilter("pawn", enemy_color);
+        if (enemy_pawns) {
+            enemy_pawns.forEach(enemy_pawn => {
+                let enemy_pawn_pos = GameController.getSquareIDByPiece(enemy_pawn);
+                if (enemy_color == "white") {
+                    // get white pawn killable squares(white pawn first diagonal squares + 7 and + 9)
+                    if (square_id == enemy_pawn_pos + 7 || square_id == enemy_pawn_pos + 9)
+                        return true;
+                } else {
+                    // get black pawn killable squares(black pawn first diagonal squares - 7 and - 9)
+                    if (square_id == enemy_pawn_pos - 7 || square_id == enemy_pawn_pos - 9)
+                        return true;
+                }
+            });
+        }
+
+        return false;
     }
 
 }
