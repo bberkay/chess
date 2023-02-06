@@ -242,35 +242,24 @@ class PieceEngine{
     }
 
     /**
-     * Get Unplayable Square on the path(for check operations)
-     * @param {int} square_id Square ID of the target square
+     * Get Unplayable Squares(squares held by the enemy) of target piece
+     * @param {int} square_id Square ID of the target piece
      * @returns {Array<int>}
      */
-    getUnplayableSquares(square_id) {
-        let enemy_color;
+    #getDangerousSquares(square_id) {
         let unplayable_squares = [];
-
-        // Find Enemy Color
-        let piece = GameController.getPieceBySquareID(square_id);
-        if(GameController.isSquareHasPiece(square_id) && piece.type == "king")
-            enemy_color = piece.color == "white" ? "black" : "white";
-        else
-            enemy_color = gl_current_move == "white" ? "black" : "white";
+        const piece = GameController.getPieceBySquareID(square_id);
+        const enemy_color = piece.color == "white" ? "black" : "white";       
 
         // All Piece Type for get all enemy
-        let piece_types = ["queen", "bishop", "rook", "knight", "king"];
+        const piece_types = ["queen", "bishop", "rook", "knight", "king"];
 
-        // Is enemy [piece_type] threatening target square then get [piece_type]'s playable squares and add to unplayable squares
+        // Is enemy [piece_type] threatening target piece then get [piece_type]'s playable squares and add to unplayable squares
         piece_types.forEach(type => {
             let enemy_pieces = GameController.getActivePiecesWithFilter(type, enemy_color);
             if (enemy_pieces) {
                 enemy_pieces.forEach(enemy_piece => {
-                    // get pieces playable squares
-                    enemy_piece = enemy_piece.getPlayableSquaresOfPiece();
-                    enemy_piece.forEach(square => {
-                        if (square_id == square) // if any playable square equal target square then
-                            unplayable_squares.push(square); // add to unplayable squares
-                    });
+                    unplayable_squares = unplayable_squares.concat(enemy_piece.getPlayableSquaresOfPiece());
                 });
             }
         });
@@ -296,14 +285,27 @@ class PieceEngine{
     }
 
     /**
-     * Check is square unplayable(for check operations)
+     * Check is square in danger by any enemy piece(for check operations)
      * @param {int} square_id Square ID of the target square
      * @returns {boolean}
      */
-    isSquareUnplayable(square_id) {
-        if (this.getUnplayableSquares(square_id).length > 0)
-            return true;
-        return false;
+    isSquareInDanger(square_id, enemy_color) {
+        let piece;
+        if(GameController.isSquareHasPiece(square_id))
+            piece = GameController.getPieceBySquareID(square_id);
+            
+
     }
 
 }
+
+
+
+
+
+
+
+
+
+
+
