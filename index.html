@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,32 +8,26 @@
     <title>Chess Game</title>
     <link rel="stylesheet" href="src/css/chess.css">
 </head>
-<body>  
-    <div id = "chessboard"></div>
 
-    <script src = "src/js/Handler/DOMHandler.js"></script>
-    <script src = "src/js/Controller/GameController.js"></script>
-    <script src = "src/js/Engines/BoardEngine.js"></script>
-    <script src = "src/js/Engines/PieceEngine.js"></script>
-    <script src = "src/js/Models/Piece.js"></script>
-    <script src = "src/js/Chess.js"></script>
+<body>
+    <div id="chessboard"></div>
+
+    <script src="src/js/Handler/DOMHandler.js"></script>
+    <script src="src/js/Controller/GameController.js"></script>
+    <script src="src/js/Engines/BoardEngine.js"></script>
+    <script src="src/js/Engines/PieceEngine.js"></script>
+    <script src="src/js/Models/Piece.js"></script>
+    <script src="src/js/Chess.js"></script>
     <script>
-        var chess = new Chess();    
-
+        var chess = new Chess();
+        
         chess.startCustomGame([
-            {"color":"black", "piece":"king", "square":12},
-            {"color":"white", "piece":"rook", "square":51},
-            {"color":"white", "piece":"bishop", "square":37},
+            { "color": "white", "piece": "king", "square": 12 },
+            { "color": "white", "piece": "queen", "square": 28 },
+            { "color": "black", "piece": "rook", "square": 52 },
         ]);
-
-        /*
-      chess.startCustomGame([
-            {"color":"white", "piece":"king", "square":12},
-            {"color":"white", "piece":"queen", "square":28},
-            {"color":"black", "piece":"rook", "square":52},
-        ]);
-        */
 
     </script>
 </body>
+
 </html>

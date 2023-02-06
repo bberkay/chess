@@ -246,8 +246,9 @@ class PieceEngine{
      * @param {int} square_id Square ID of the target square
      * @returns {boolean}
      */
-    isSquareInDanger(square_id, enemy_color) {
-        
+    isSquareInDanger(square_id, enemy_color) {  
+        let result = false;
+
         // get all piece types(except pawn) for get all enemy on the board
         const piece_types = ["queen", "bishop", "rook", "knight", "king"];
         piece_types.forEach(type => {
@@ -255,10 +256,13 @@ class PieceEngine{
             if (enemy_pieces) {
                 enemy_pieces.forEach(enemy_piece => {
                     if(enemy_piece.getPlayableSquaresOfPiece().includes(square_id))
-                        return true;
+                        result = true;
                 });
             }
         });
+        
+        if(result == true)
+            return result;
 
         // get all enemy pawns
         const enemy_pawns = GameController.getActivePiecesWithFilter("pawn", enemy_color);
@@ -268,16 +272,16 @@ class PieceEngine{
                 if (enemy_color == "white") {
                     // get white pawn killable squares(white pawn first diagonal squares + 7 and + 9)
                     if (square_id == enemy_pawn_pos + 7 || square_id == enemy_pawn_pos + 9)
-                        return true;
+                        result = true;
                 } else {
                     // get black pawn killable squares(black pawn first diagonal squares - 7 and - 9)
                     if (square_id == enemy_pawn_pos - 7 || square_id == enemy_pawn_pos - 9)
-                        return true;
+                        result = true;
                 }
             });
         }
 
-        return false;
+        return result;
     }
 
 }

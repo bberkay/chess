@@ -82,7 +82,7 @@ class Chess{
         const enemy_king_square_id = GameController.getKingSquareID({enemy:true});
 
         // Set checked player and give effect the checked king
-        if(this.engine.isSquareInDanger(enemy_king_square_id)){
+        if(this.engine.isSquareInDanger(enemy_king_square_id, gl_current_move)){
             gl_checked_player = enemy_king.color;
             this.board.setEffectOfSquareID(enemy_king_square_id, "checked");
         }
