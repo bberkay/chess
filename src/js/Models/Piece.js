@@ -46,7 +46,13 @@ class Piece extends PieceEngine {
         let square_id = GameController.getSquareIDByPiece(this);
 
         // get all squares of row and column
-        return this.getColumnSquaresOfSquare({ square_id: square_id }).concat(this.getRowSquaresOfSquare({ square_id: square_id }));
+        let playable_squares = this.getColumnSquaresOfSquare({ square_id: square_id }).concat(this.getRowSquaresOfSquare({ square_id: square_id }));
+        let unplayable_squares = this.#getUnplayableSquaresOfPiece(square_id, playable_squares);
+
+        // Substract unplayable squares from playable squares
+        playable_squares = playable_squares.filter(square => !unplayable_squares.includes(square));
+
+        return playable_squares;
     }
 
     /**
@@ -57,8 +63,14 @@ class Piece extends PieceEngine {
     #getPlayableSquaresOfBishop() {
         let square_id = GameController.getSquareIDByPiece(this);
 
-        // get all squares of diagonal
-        return this.getDiagonalSquaresOfSquare({ square_id: square_id });
+        // get diagonal squares
+        let playable_squares = this.getDiagonalSquaresOfSquare({ square_id: square_id });
+        let unplayable_squares = this.#getUnplayableSquaresOfPiece(square_id, playable_squares);
+
+        // Substract unplayable squares from playable squares
+        playable_squares = playable_squares.filter(square => !unplayable_squares.includes(square));
+
+        return playable_squares;
     }
 
     /**
@@ -68,7 +80,6 @@ class Piece extends PieceEngine {
      */
     #getPlayableSquaresOfPawn() {
         let square_id = GameController.getSquareIDByPiece(this);
-        let playable_squares_id = [];
 
         let limit = 0;
         let route = "";
@@ -83,16 +94,21 @@ class Piece extends PieceEngine {
             route = "bottom"; // white goes bottom
         }
 
-        playable_squares_id = this.getColumnSquaresOfSquare({ square_id: square_id, distance_limit: limit, route_path: route }); // get first [limit] square of [route] column
+        let playable_squares = this.getColumnSquaresOfSquare({ square_id: square_id, distance_limit: limit, route_path: route }); // get first [limit] square of [route] column
         let diagonal_control = this.getDiagonalSquaresOfSquare({ square_id: square_id, distance_limit: 1, route_path: route }) // get first diagonal squares
 
         // is first diagonal squares has enemy piece then add playable squares
         diagonal_control.filter(item => {
             if (GameController.isSquareHasEnemy(item))
-                playable_squares_id.push(item);
+                playable_squares.push(item);
         })
 
-        return playable_squares_id;
+        let unplayable_squares = this.#getUnplayableSquaresOfPiece(square_id, playable_squares);
+        
+        // Substract unplayable squares from playable squares
+        playable_squares = playable_squares.filter(square => !unplayable_squares.includes(square));
+
+        return playable_squares;
     }
 
     /**
@@ -123,7 +139,7 @@ class Piece extends PieceEngine {
 
         // get all squares of column, row and diagonal(UNLIMITED POWEEEER!!!)
         let playable_squares = this.getColumnSquaresOfSquare({ square_id: square_id }).concat(this.getRowSquaresOfSquare({ square_id: square_id })).concat(this.getDiagonalSquaresOfSquare({ square_id: square_id }));
-        let unplayable_squares = this.#getUnplayableSquaresOfPiece(square_id, playable_squares)
+        let unplayable_squares = this.#getUnplayableSquaresOfPiece(square_id, playable_squares);
 
         // Substract unplayable squares from playable squares
         playable_squares = playable_squares.filter(square => !unplayable_squares.includes(square));
@@ -138,7 +154,6 @@ class Piece extends PieceEngine {
      */
     #getPlayableSquaresOfKnight() {
         let square_id = GameController.getSquareIDByPiece(this);
-        let playable_squares_id = [];
 
         // get 2 squares of column
         let column = this.getColumnSquaresOfSquare({ square_id: square_id, distance_limit: 2, piece_sensivity: true }).sort();
@@ -148,10 +163,15 @@ class Piece extends PieceEngine {
         let column_sides = this.getRowSquaresOfSquare({ square_id: column[0], distance_limit: 1, piece_sensivity: true }).concat(this.getRowSquaresOfSquare({ square_id: column[column.length - 1], distance_limit: 1, piece_sensivity: true }));
         // get first square of top side and bottom side at end of the row
         let row_sides = this.getColumnSquaresOfSquare({ square_id: row[0], distance_limit: 1, piece_sensivity: true }).concat(this.getColumnSquaresOfSquare({ square_id: row[row.length - 1], distance_limit: 1, piece_sensivity: true }));
+       
         // concat all playable squares
-        playable_squares_id = column_sides.concat(row_sides);
+        let playable_squares = column_sides.concat(row_sides);
+        let unplayable_squares = this.#getUnplayableSquaresOfPiece(square_id, playable_squares);
 
-        return playable_squares_id;
+        // Substract unplayable squares from playable squares
+        playable_squares = playable_squares.filter(square => !unplayable_squares.includes(square));
+
+        return playable_squares;
     }
 
     /**
@@ -170,9 +190,8 @@ class Piece extends PieceEngine {
             GameController.setGlobalSquare(square_id, 0);
 
             playable_squares.forEach(square => {
-                if (this.isSquareInDanger(square, enemy_color)) {
+                if (this.isSquareInDanger(square, enemy_color)) 
                     unplayable_squares.push(square);
-                }
             });
 
              // Add piece again 
@@ -190,9 +209,8 @@ class Piece extends PieceEngine {
                 GameController.setGlobalSquare(square, square_id);
                 GameController.setGlobalSquare(square_id, 0);
 
-                if(this.isSquareInDanger(players_king, enemy_color)){
+                if(this.isSquareInDanger(players_king, enemy_color))
                     unplayable_squares.push(square);
-                }
 
                 // Add pieces to their original squares again 
                 GameController.setGlobalSquare(square_id, real_position);
