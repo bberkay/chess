@@ -124,9 +124,16 @@ class Piece extends PieceEngine {
      */
     #getPlayableSquaresOfQueen() {
         let square_id = GameController.getSquareIDByPiece(this);
+
+        // get all squares of column, row and diagonal(UNLIMITED POWEEEER!!!)
         let playable_squares = this.getColumnSquaresOfSquare({ square_id: square_id }).concat(this.getRowSquaresOfSquare({ square_id: square_id })).concat(this.getDiagonalSquaresOfSquare({ square_id: square_id }));
         
-        // get all squares of column, row and diagonal(UNLIMITED POWEEEER!!!)
+        // get unplayable squares 
+        let unplayable_squares = this.#getUnplayableSquaresOfPiece(square_id, playable_squares)
+        
+        // Substract unplayable squares from playable squares
+        playable_squares = playable_squares.filter(square => !unplayable_squares.includes(square));
+
         return playable_squares;
     }
 
@@ -151,5 +158,21 @@ class Piece extends PieceEngine {
         playable_squares_id = column_sides.concat(row_sides);
 
         return playable_squares_id;
+    }
+
+    /**
+     * Get Unplayable Squares Of Piece(control is piece guard the king from enemy)
+     * @param {int} square_id Square ID of Piece
+     * @param {Array<int>} playable_squares Playable Squares of piece
+     * @returns {Array<int>}
+     */
+    #getUnplayableSquaresOfPiece(square_id, playable_squares){
+        let unplayable_squares = [];
+        playable_squares.forEach(square => {
+            GameController.changePiecePosition(square_id, square);
+            if(!this.isSquareUnplayable(GameController.getKingSquareID({player:true})))
+                unplayable_squares.push(square);
+        }); 
+        return unplayable_squares;
     }
 }

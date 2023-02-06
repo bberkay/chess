@@ -274,7 +274,7 @@ class PieceEngine{
                 });
             }
         });
-
+        
         // Pawn control(because pawn can only kill its diagonal squares not all playable squares like other pieces)
         let enemy_pawns = GameController.getActivePiecesWithFilter("pawn", enemy_color);
         if (enemy_pawns) {
@@ -305,4 +305,5 @@ class PieceEngine{
             return true;
         return false;
     }
+
 }

@@ -136,13 +136,12 @@ class GameController {
      * Move Piece To Square
      * @param {int} from Square ID of the piece to move
      * @param {int} to Square ID of the target square
-     * @param {boolean} cache_position Is move for temporarily check
-     * @returns {void}
+     * @returns {(int|void)}
      */
     static changePiecePosition(from, to) {
-        let moved_piece = GameController.getPieceBySquareID(from);
-        GameController.setGlobalSquare(from, 0);
-        GameController.setGlobalSquare(to, moved_piece);
+        let piece = this.getPieceBySquareID(from);
+        this.setGlobalSquare(from, 0);
+        this.setGlobalSquare(to, piece);
     }
 
     /**
