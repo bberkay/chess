@@ -75,7 +75,7 @@ class GameController {
     static getActivePiecesWithFilter(type, color) {
         let pieces = [];
         for (let square in gl_squares) {
-            let piece = GameController.getPieceBySquareID(parseInt(square));
+            let piece = this.getPieceBySquareID(parseInt(square));
             if (piece.color == color && piece.type == type)
                 pieces.push(piece);
         }

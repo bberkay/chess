@@ -255,7 +255,7 @@ class PieceEngine{
             let enemy_pieces = GameController.getActivePiecesWithFilter(type, enemy_color);
             if (enemy_pieces) {
                 enemy_pieces.forEach(enemy_piece => {
-                    if(enemy_piece.getPlayableSquaresOfPiece().includes(square_id))
+                    if(enemy_piece.getPlayableSquaresOfPiece(false).includes(square_id))
                         result = true;
                 });
             }

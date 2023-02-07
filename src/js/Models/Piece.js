@@ -10,26 +10,26 @@ class Piece extends PieceEngine {
     * Get Playable Squares
     * @returns {Array<int>}
     */
-    getPlayableSquaresOfPiece() {
+    getPlayableSquaresOfPiece(calculate_unplayable_squares = true) {
         var playable_squares_id = [];
         switch (this.type) {
             case "rook":
-                playable_squares_id = this.#getPlayableSquaresOfRook();
+                playable_squares_id = this.#getPlayableSquaresOfRook(calculate_unplayable_squares);
                 break;
             case "bishop":
-                playable_squares_id = this.#getPlayableSquaresOfBishop();
+                playable_squares_id = this.#getPlayableSquaresOfBishop(calculate_unplayable_squares);
                 break;
             case "pawn":
-                playable_squares_id = this.#getPlayableSquaresOfPawn();
+                playable_squares_id = this.#getPlayableSquaresOfPawn(calculate_unplayable_squares);
                 break;
             case "king":
-                playable_squares_id = this.#getPlayableSquaresOfKing();
+                playable_squares_id = this.#getPlayableSquaresOfKing(calculate_unplayable_squares);
                 break;
             case "queen":
-                playable_squares_id = this.#getPlayableSquaresOfQueen();
+                playable_squares_id = this.#getPlayableSquaresOfQueen(calculate_unplayable_squares);
                 break;
             case "knight":
-                playable_squares_id = this.#getPlayableSquaresOfKnight();
+                playable_squares_id = this.#getPlayableSquaresOfKnight(calculate_unplayable_squares);
                 break;
             default:
                 break;
@@ -42,15 +42,16 @@ class Piece extends PieceEngine {
      * Get Playable Squares Of Rook
      * @returns {Array<int>}
      */
-    #getPlayableSquaresOfRook() {
+    #getPlayableSquaresOfRook(calculate_unplayable_squares) {
         let square_id = GameController.getSquareIDByPiece(this);
 
         // get all squares of row and column
         let playable_squares = this.getColumnSquaresOfSquare({ square_id: square_id }).concat(this.getRowSquaresOfSquare({ square_id: square_id }));
-        let unplayable_squares = this.#getUnplayableSquaresOfPiece(square_id, playable_squares);
-
-        // Substract unplayable squares from playable squares
-        playable_squares = playable_squares.filter(square => !unplayable_squares.includes(square));
+        if(calculate_unplayable_squares){
+            let unplayable_squares = this.#getUnplayableSquaresOfPiece(square_id, playable_squares);
+            // Substract unplayable squares from playable squares
+            playable_squares = playable_squares.filter(square => !unplayable_squares.includes(square));
+        }
 
         return playable_squares;
     }
@@ -60,15 +61,16 @@ class Piece extends PieceEngine {
      * Get Playable Squares Of Bishop
      * @returns {Array<int>}
      */
-    #getPlayableSquaresOfBishop() {
+    #getPlayableSquaresOfBishop(calculate_unplayable_squares) {
         let square_id = GameController.getSquareIDByPiece(this);
 
         // get diagonal squares
         let playable_squares = this.getDiagonalSquaresOfSquare({ square_id: square_id });
-        let unplayable_squares = this.#getUnplayableSquaresOfPiece(square_id, playable_squares);
-
-        // Substract unplayable squares from playable squares
-        playable_squares = playable_squares.filter(square => !unplayable_squares.includes(square));
+        if(calculate_unplayable_squares){
+            let unplayable_squares = this.#getUnplayableSquaresOfPiece(square_id, playable_squares);
+            // Substract unplayable squares from playable squares
+            playable_squares = playable_squares.filter(square => !unplayable_squares.includes(square));
+        }
 
         return playable_squares;
     }
@@ -78,7 +80,7 @@ class Piece extends PieceEngine {
      * Get Playable Squares Of Pawn
      * @returns {Array<int>}
      */
-    #getPlayableSquaresOfPawn() {
+    #getPlayableSquaresOfPawn(calculate_unplayable_squares) {
         let square_id = GameController.getSquareIDByPiece(this);
 
         let limit = 0;
@@ -103,10 +105,11 @@ class Piece extends PieceEngine {
                 playable_squares.push(item);
         })
 
-        let unplayable_squares = this.#getUnplayableSquaresOfPiece(square_id, playable_squares);
-        
-        // Substract unplayable squares from playable squares
-        playable_squares = playable_squares.filter(square => !unplayable_squares.includes(square));
+        if(calculate_unplayable_squares){
+            let unplayable_squares = this.#getUnplayableSquaresOfPiece(square_id, playable_squares);
+            // Substract unplayable squares from playable squares
+            playable_squares = playable_squares.filter(square => !unplayable_squares.includes(square));
+        }
 
         return playable_squares;
     }
@@ -116,15 +119,16 @@ class Piece extends PieceEngine {
      * Get Playable Squares Of King
      * @returns {Array<int>}
      */
-    #getPlayableSquaresOfKing() {
+    #getPlayableSquaresOfKing(calculate_unplayable_squares) {
         let square_id = GameController.getSquareIDByPiece(this);
 
         // get first squares of column, row and diagonal
         let playable_squares = this.getColumnSquaresOfSquare({ square_id: square_id, distance_limit: 1 }).concat(this.getRowSquaresOfSquare({ square_id: square_id, distance_limit: 1 })).concat(this.getDiagonalSquaresOfSquare({ square_id: square_id, distance_limit: 1 }));
-        let unplayable_squares = this.#getUnplayableSquaresOfPiece(square_id, playable_squares);
-        
-        // Substract unplayable squares from playable squares
-        playable_squares = playable_squares.filter(square => !unplayable_squares.includes(square));
+        if(calculate_unplayable_squares){
+            let unplayable_squares = this.#getUnplayableSquaresOfPiece(square_id, playable_squares);
+            // Substract unplayable squares from playable squares
+            playable_squares = playable_squares.filter(square => !unplayable_squares.includes(square));
+        }
 
         return playable_squares;
     }
@@ -134,15 +138,16 @@ class Piece extends PieceEngine {
      * Get Playable Squares Of Queen
      * @returns {Array<int>}
      */
-    #getPlayableSquaresOfQueen() {
+    #getPlayableSquaresOfQueen(calculate_unplayable_squares) {
         let square_id = GameController.getSquareIDByPiece(this);
 
         // get all squares of column, row and diagonal(UNLIMITED POWEEEER!!!)
         let playable_squares = this.getColumnSquaresOfSquare({ square_id: square_id }).concat(this.getRowSquaresOfSquare({ square_id: square_id })).concat(this.getDiagonalSquaresOfSquare({ square_id: square_id }));
-        let unplayable_squares = this.#getUnplayableSquaresOfPiece(square_id, playable_squares);
-
-        // Substract unplayable squares from playable squares
-        playable_squares = playable_squares.filter(square => !unplayable_squares.includes(square));
+        if(calculate_unplayable_squares){
+            let unplayable_squares = this.#getUnplayableSquaresOfPiece(square_id, playable_squares);
+            // Substract unplayable squares from playable squares
+            playable_squares = playable_squares.filter(square => !unplayable_squares.includes(square));
+        }
 
         return playable_squares;
     }
@@ -152,7 +157,7 @@ class Piece extends PieceEngine {
      * Get Playable Squares Of Knight
      * @returns {Array<int>}
      */
-    #getPlayableSquaresOfKnight() {
+    #getPlayableSquaresOfKnight(calculate_unplayable_squares) {
         let square_id = GameController.getSquareIDByPiece(this);
 
         // get 2 squares of column
@@ -166,10 +171,11 @@ class Piece extends PieceEngine {
        
         // concat all playable squares
         let playable_squares = column_sides.concat(row_sides);
-        let unplayable_squares = this.#getUnplayableSquaresOfPiece(square_id, playable_squares);
-
-        // Substract unplayable squares from playable squares
-        playable_squares = playable_squares.filter(square => !unplayable_squares.includes(square));
+        if(calculate_unplayable_squares){
+            let unplayable_squares = this.#getUnplayableSquaresOfPiece(square_id, playable_squares);
+            // Substract unplayable squares from playable squares
+            playable_squares = playable_squares.filter(square => !unplayable_squares.includes(square));
+        }
 
         return playable_squares;
     }
@@ -217,7 +223,6 @@ class Piece extends PieceEngine {
                 GameController.setGlobalSquare(square, target_square);
             });
         }
-       
         return unplayable_squares;
     }
 }
