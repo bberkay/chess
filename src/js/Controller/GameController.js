@@ -31,6 +31,19 @@ var gl_killed_white_pieces = [];
 var gl_white_king = null;
 var gl_black_king = null;
 
+/**
+ * Castling control 
+ * null for starting and can be done
+ * true for done
+ * false for can't be done anymore
+ */
+var gl_castling_control = {
+    "white-long":null,
+    "white-short":null,
+    "black-long":null,
+    "black-short":null
+};
+
 
 class GameController {
     /**

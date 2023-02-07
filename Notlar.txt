@@ -1,6 +1,7 @@
 // TODO: Optimizasyon-İsimlendirme, animasyon, grab, sağ tık oku gibi işlemler en son yapılacak.
 
-// TODO: Kısa-Uzun Rok(rok atılırken şah durumuna düşüyor mu kontrolü, kaleler ve şah daha önceden oynanmış mı kontrolü), 
+// TODO: playPiece daha oop hale(rok atma, taş taşıma, yeme için farklı metodları yazılabilir) getirilecek(DOMHandler dan playPiece e Element gönderilmeyecek).
+// TODO: Kısa-Uzun Rok(rok atılırken şah durumuna düşüyor mu ve aralarında taş var mı kontrolü), 
 // TODO: Geçerken Alma, Mat-Pat Kontrolü, Piyon dönüşümü
 
 // TODO: Notasyon bölümü, tur geçme tuşu ve sıra değişme efekti, tahta teması değiştirme, yenilen taşlar ve taş puan sistemi
