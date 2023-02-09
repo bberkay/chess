@@ -5,6 +5,6 @@ class DOMHandler{
      * @returns {void}
      */
     static clickSquare(e){
-        chess.playPiece(e);
+        chess.playPiece(e.id);
     }    
 }

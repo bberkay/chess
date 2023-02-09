@@ -5,8 +5,8 @@ class Chess{
     constructor() {
         this.board = new BoardEngine();
         this.engine = new PieceEngine();
-        this.current_piece = null;
-        this.current_playable_squares = null;
+        this.current_playable_squares = [];
+        this.selected_piece = null;
         this.check_limitation = null;
     }
 
@@ -34,13 +34,26 @@ class Chess{
 
     /**
      * Get Clicked Square
-     * @param {Element} square Element of the clicked square('this' object comes from DOM)
+     * @param {int} square_id Square ID of the clicked square
      * @returns {void}
      */
-    playPiece(square) {
-        // FIXME: Daha OOP hale getirilecek.
+    playPiece(square_id) {
+        // Is player click any piece
+        let square_piece_control = GameController.isSquareHasPiece(square_id);
 
-        let piece;
+        // If clicked square has no piece and selected_piece is null and clicked square not in playable squares then operation is "clear board"
+        if(!square_piece_control && !this.selected_piece){
+            this.board.refreshBoard();
+        }
+        else if(square_piece_control && !this.selected_piece){ // If clicked square has piece and selected_piece is null then operation is "select piece"
+            this.#selectPiece(square_id);
+        } 
+        else{
+            // Diğer işlemler
+        }
+            
+
+        /*
         if(GameController.isSquareHasPiece(square.id)){
             piece = GameController.getPieceBySquareID(parseInt(square.id)); // get clicked piece
 
@@ -94,13 +107,46 @@ class Chess{
                 this.board.refreshBoard();
             }
         }
+        */
     }
 
     /**
+     * @private
+     * Select Piece
+     * @param {int} square_id
+     * @returns {void}
+     */
+    #selectPiece(square_id){
+        let piece = GameController.getPieceBySquareID(square_id);
+
+        // Select Piece
+        if(gl_current_move == piece.color){
+            // If player is checked then player only select king 
+            if(gl_checked_player == gl_current_move && piece.type != "king")
+                this.selected_piece = null;
+            else
+                this.selected_piece = piece;
+        }
+        
+        // Show Playable Squares
+        if(this.selected_piece){
+            this.board.refreshBoard();
+
+            // Get playable squares of selected piece
+            this.current_playable_squares = this.selected_piece.getPlayableSquaresOfPiece();   
+
+            // Show playable squares of selected piece
+            this.board.showPlayableSquares(this.current_playable_squares);
+        }
+
+    }
+
+    /**
+     * @private
      * Is enemy player checked after move? If checked then set gl_checked_player to enemy player
      * @returns {void}
      */
-    controlCheck(){
+    #controlCheck(){
         const enemy_king = GameController.getKing({enemy:true});
         const enemy_king_square_id = GameController.getKingSquareID({enemy:true});
 
@@ -111,11 +157,13 @@ class Chess{
         }
     }
 
+    
     /**
+     * @private
      * Change Current Move and Increase Move Count
      * @returns {void}
      */
-    endTurn() {
+    #endTurn() {
         // Clear Table and Selected Piece
         this.board.refreshBoard();
         this.current_piece = null;
