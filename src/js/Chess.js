@@ -38,16 +38,25 @@ class Chess{
      * @returns {void}
      */
     playPiece(square_id) {
+        square_id = parseInt(square_id);
+
         // Is player click any piece
         let square_piece_control = GameController.isSquareHasPiece(square_id);
+        let square_playable_control = this.current_playable_squares.includes(square_id);
 
         // If clicked square has no piece and selected_piece is null and clicked square not in playable squares then operation is "clear board"
-        if(!square_piece_control && !this.selected_piece){
+        if(!square_piece_control && !this.selected_piece || this.current_playable_squares.length > 0 && !square_playable_control){
             this.board.refreshBoard();
+            this.#unselectPiece();
         }
         else if(square_piece_control && !this.selected_piece){ // If clicked square has piece and selected_piece is null then operation is "select piece"
             this.#selectPiece(square_id);
-        } 
+        }
+        else if(!square_piece_control && square_playable_control){ // If clicked square has no piece but is playable then move
+            this.#movePiece(square_id);
+            this.#controlCheck();
+            this.#endTurn();
+        }
         else{
             // Diğer işlemler
         }
@@ -74,19 +83,7 @@ class Chess{
         }
         
         // Select Piece Control
-        if (piece && this.current_piece != piece && piece.color == gl_current_move) { 
-            this.board.refreshBoard();
-            this.current_piece = piece;
-
-            // Get playable squares of clicked piece
-            this.current_playable_squares = this.current_piece.getPlayableSquaresOfPiece();
-
-            // Show playable squares of clicked piece
-            this.board.showPlayableSquares(this.current_playable_squares);
-        } else {
-            // Piece Move Control
-            if (this.current_piece && this.current_piece != piece && this.current_playable_squares.includes(parseInt(square.id)) && this.current_piece != null) {
-                // Castling limitation is king or rook moved
+        else {
                 if(this.current_piece.type == "king"){
                     gl_castling_control[this.current_piece.color + "-long"] = false;
                     gl_castling_control[this.current_piece.color + "-short"] = false;
@@ -97,15 +94,6 @@ class Chess{
                     else if(rook_square_id == 57 || rook_square_id == 1)
                         gl_castling_control[this.current_piece.color + "-long"] = false;
                 }
-                // move piece
-                this.board.movePiece(this.current_piece, square.id);
-
-                this.controlCheck();
-                this.endTurn();
-            } else {
-                this.current_piece = null;
-                this.board.refreshBoard();
-            }
         }
         */
     }
@@ -139,6 +127,28 @@ class Chess{
             this.board.showPlayableSquares(this.current_playable_squares);
         }
 
+    }
+
+    /**
+     * @private
+     * Unselect Piece
+     * @returns {void}
+     */
+    #unselectPiece(){
+        this.selected_piece = null;
+        this.current_playable_squares = [];
+    }
+
+    /**
+     * @private
+     * Move piece to playable square
+     * @param {int} square_id
+     * @returns {void}
+     */
+    #movePiece(square_id){
+        this.board.movePieceOnBoard(this.selected_piece, square_id);
+        this.#unselectPiece();
+        this.board.refreshBoard();
     }
 
     /**

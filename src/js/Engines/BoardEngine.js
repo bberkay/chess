@@ -134,7 +134,7 @@ class BoardEngine{
     * @param {int} target_square Piece target square
     * @returns {void}
     */
-    async movePiece(piece, target_square) {
+    async movePieceOnBoard(piece, target_square) {
         let piece_id = GameController.getSquareIDByPiece(piece);
         GameController.changePiecePosition(piece_id, target_square);
         

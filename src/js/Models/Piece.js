@@ -130,6 +130,8 @@ class Piece extends PieceEngine {
             playable_squares = playable_squares.filter(square => !unplayable_squares.includes(square));
         }
 
+        // Rok 
+        
         return playable_squares;
     }
 
