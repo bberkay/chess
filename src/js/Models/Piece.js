@@ -124,14 +124,19 @@ class Piece extends PieceEngine {
 
         // get first squares of column, row and diagonal
         let playable_squares = this.getColumnSquaresOfSquare({ square_id: square_id, distance_limit: 1 }).concat(this.getRowSquaresOfSquare({ square_id: square_id, distance_limit: 1 })).concat(this.getDiagonalSquaresOfSquare({ square_id: square_id, distance_limit: 1 }));
+
         if(calculate_unplayable_squares){
             let unplayable_squares = this.#getUnplayableSquaresOfPiece(square_id, playable_squares);
             // Substract unplayable squares from playable squares
             playable_squares = playable_squares.filter(square => !unplayable_squares.includes(square));
         }
 
+        /*
         // Rok 
-        
+        if(gl_castling_control[this.color + "-short"] == null || gl_castling_control[this.color + "-long"] == null){
+            console.log("rok");
+        }*/
+
         return playable_squares;
     }
 

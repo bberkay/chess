@@ -243,12 +243,20 @@ class PieceEngine{
 
     /**
      * Check is square in danger by any enemy piece(for check operations)
-     * @param {int} square_id Square ID of the target square
+     * @param {(Array<int>|int)} square_id Square ID of the target square
      * @returns {boolean}
      */
     isSquareInDanger(square_id, enemy_color) {  
         let result = false;
 
+
+
+        
+
+
+
+
+        /*
         // get all piece types(except pawn) for get all enemy on the board
         const piece_types = ["queen", "bishop", "rook", "knight", "king"];
         piece_types.forEach(type => {
@@ -281,6 +289,8 @@ class PieceEngine{
             });
         }
 
+        // Control every square in array with recursive
+        */
         return result;
     }
 

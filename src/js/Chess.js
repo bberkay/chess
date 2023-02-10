@@ -48,7 +48,7 @@ class Chess{
         if(!square_piece_control && !this.selected_piece || this.current_playable_squares.length > 0 && !square_playable_control){
             this.board.refreshBoard();
             this.#unselectPiece();
-        }
+        } 
         else if(square_piece_control && !this.selected_piece){ // If clicked square has piece and selected_piece is null then operation is "select piece"
             this.#selectPiece(square_id);
         }
@@ -57,45 +57,6 @@ class Chess{
             this.#controlCheck();
             this.#endTurn();
         }
-        else{
-            // Diğer işlemler
-        }
-            
-
-        /*
-        if(GameController.isSquareHasPiece(square.id)){
-            piece = GameController.getPieceBySquareID(parseInt(square.id)); // get clicked piece
-
-            // Castling Control
-            if(this.current_piece == GameController.getKing({player:true}) && piece.type == "rook" && piece.color == gl_current_move){
-                if(gl_castling_control[gl_current_move + "-short"] == null && square.id == 64 || square.id == 8){
-                    // TODO: Kısa rok işlemleri
-                }else if(gl_castling_control[gl_current_move + "-long"] == null && square.id == 57 || square.id == 1){
-                    // TODO: Uzun rok işlemleri
-                }
-            }
-            // Control Pieces and Squares for security
-            this.board.refreshBoard();
-
-            // if player is checked then can't select any piece except king
-            if(gl_checked_player == gl_current_move && piece.type != "king")
-                piece = null;
-        }
-        
-        // Select Piece Control
-        else {
-                if(this.current_piece.type == "king"){
-                    gl_castling_control[this.current_piece.color + "-long"] = false;
-                    gl_castling_control[this.current_piece.color + "-short"] = false;
-                }else if(this.current_piece.type == "rook"){
-                    let rook_square_id = GameController.getSquareIDByPiece(this.current_piece);
-                    if(rook_square_id == 64 || rook_square_id == 8)
-                        gl_castling_control[this.current_piece.color + "-short"] = false;
-                    else if(rook_square_id == 57 || rook_square_id == 1)
-                        gl_castling_control[this.current_piece.color + "-long"] = false;
-                }
-        }
-        */
     }
 
     /**
