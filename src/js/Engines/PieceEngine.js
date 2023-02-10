@@ -247,11 +247,23 @@ class PieceEngine{
      * @returns {boolean}
      */
     isSquareInDanger(square_id, enemy_color) {  
+        let piece = GameController.getPieceBySquareID(square_id);
         let result = false;
-
-
-
-        
+        // FIXME : Daha optimize bir hale getirilecek ve recursive olmayacek tekte çağırılacak.
+        console.log(square_id);
+        if(piece.type != "pawn" && piece.type != "knight"){
+            let diagonal = [];
+            let row = [];
+            let column = [];
+            let distance_limit = piece.type == "king" ? 1 : null;
+            if(piece.type != "rook")
+                diagonal = this.getDiagonalSquaresOfSquare({square_id:square_id, distance_limit:distance_limit});
+            else if(piece.type != "bishop"){
+                row = this.getRowSquaresOfSquare({square_id:square_id, distance_limit:distance_limit});
+                column = this.getColumnSquaresOfSquare({square_id:square_id, distance_limit:distance_limit});
+            }
+            console.log(this.getRowSquaresOfSquare({square_id:square_id}));
+        }
 
 
 
