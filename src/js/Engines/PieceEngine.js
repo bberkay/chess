@@ -247,27 +247,12 @@ class PieceEngine{
      * @returns {boolean}
      */
     isSquareInDanger(square_id, enemy_color) {  
-        let piece = GameController.getPieceBySquareID(square_id);
         let result = false;
-        // FIXME : Daha optimize bir hale getirilecek ve recursive olmayacek tekte çağırılacak.
-        console.log(square_id);
-        if(piece.type != "pawn" && piece.type != "knight"){
-            let diagonal = [];
-            let row = [];
-            let column = [];
-            let distance_limit = piece.type == "king" ? 1 : null;
-            if(piece.type != "rook")
-                diagonal = this.getDiagonalSquaresOfSquare({square_id:square_id, distance_limit:distance_limit});
-            else if(piece.type != "bishop"){
-                row = this.getRowSquaresOfSquare({square_id:square_id, distance_limit:distance_limit});
-                column = this.getColumnSquaresOfSquare({square_id:square_id, distance_limit:distance_limit});
-            }
-            console.log(this.getRowSquaresOfSquare({square_id:square_id}));
-        }
-
-
-
-
+        let enemy_bishop_queen = this.getDiagonalSquaresOfSquare({square_id:square_id}).filter(square => !GameController.isSquareHasEnemy(square, ["bishop", "queen"]));
+        let enemy_pawn = this.getDiagonalSquaresOfSquare({square_id:square_id, distance_limit:1}).filter(square => !GameController.isSquareHasEnemy(square, ["pawn"]));
+        let enemy_rook_queen = this.getRowSquaresOfSquare({square_id:square_id}).filter(square => !GameController.isSquareHasEnemy(square, ["rook", "queen"]));
+        enemy_rook_queen = enemy_rook_queen.concat(this.getColumnSquaresOfSquare({square_id:square_id}).filter(square => !GameCOntroller.isSquareHasEnemy(square, ["rook", "queen"])));
+        
         /*
         // get all piece types(except pawn) for get all enemy on the board
         const piece_types = ["queen", "bishop", "rook", "knight", "king"];

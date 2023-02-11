@@ -132,14 +132,15 @@ class GameController {
      * Is square has enemy ?
      * @param {int} square_id Square ID of the target square
      * @param {string} opt_compare_color Color to compare(optional)
+     * @param {Array<string>} opt_compare_enemy Specific enemy types(optional)
      * @returns {boolean}
      */
-    static isSquareHasEnemy(square_id, opt_compare_color = false){
-        if(!opt_compare_color)
-            opt_compare_color = gl_current_move;
-
-        if (this.isSquareHasPiece(square_id) && this.getPieceBySquareID(square_id).color != opt_compare_color)
-            return true;
+    static isSquareHasEnemy(square_id, opt_compare_color = gl_current_move, opt_compare_enemy = ["queen", "king", "pawn", "bishop", "rook", "knight"]){
+        if (this.isSquareHasPiece(square_id)){
+            let piece = this.getPieceBySquareID(square_id);
+            if(piece.color != opt_compare_color && opt_compare_enemy.includes(piece.type))
+                return true;
+        }
         else
             return false;
     }
