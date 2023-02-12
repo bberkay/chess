@@ -52,7 +52,6 @@ class Piece extends PieceEngine {
             // Substract unplayable squares from playable squares
             playable_squares = playable_squares.filter(square => !unplayable_squares.includes(square));
         }
-
         return playable_squares;
     }
 
@@ -124,13 +123,14 @@ class Piece extends PieceEngine {
 
         // get first squares of column, row and diagonal
         let playable_squares = this.getColumnSquaresOfSquare({ square_id: square_id, distance_limit: 1 }).concat(this.getRowSquaresOfSquare({ square_id: square_id, distance_limit: 1 })).concat(this.getDiagonalSquaresOfSquare({ square_id: square_id, distance_limit: 1 }));
-
+        this.isSquareInDanger(square_id);
+        /*
         if(calculate_unplayable_squares){
             let unplayable_squares = this.#getUnplayableSquaresOfPiece(square_id, playable_squares);
             // Substract unplayable squares from playable squares
             playable_squares = playable_squares.filter(square => !unplayable_squares.includes(square));
         }
-
+        */
         /*
         // Rok 
         if(gl_castling_control[this.color + "-short"] == null || gl_castling_control[this.color + "-long"] == null){
@@ -194,8 +194,6 @@ class Piece extends PieceEngine {
      * @returns {Array<int>}
      */
     #getUnplayableSquaresOfPiece(square_id, playable_squares) {
-        this.isSquareInDanger(square_id);
-        /*
         // Get dangerous squares
         const enemy_color = gl_current_move == "white" ? "black" : "white";
         let unplayable_squares = [];
@@ -213,9 +211,9 @@ class Piece extends PieceEngine {
             GameController.setGlobalSquare(square_id, real_position);
         }
         else{ 
-            
+            /*
              If type is not king then find king and check is king in danger
-            
+            */
             let players_king = GameController.getKingSquareID({player:true});
             playable_squares.forEach(square => {
                 // Delete piece itself from board for to get the back of the piece
@@ -232,7 +230,6 @@ class Piece extends PieceEngine {
                 GameController.setGlobalSquare(square, target_square);
             });
         }
-        */
         return unplayable_squares;
     }
 }
