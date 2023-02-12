@@ -298,6 +298,7 @@ class PieceEngine{
      * @returns {boolean}
      */
     isSquareInDanger(square_id, enemy_color) {  
+        // FIXME: Route Pathler düzeltilecek.
          // Bishop and Queen - Diagonal
         let diagonal = this.getDiagonalSquaresOfSquare({square_id:square_id, route_path:"left"});
         diagonal = GameController.isSquareHasEnemy(diagonal[diagonal.length - 1], enemy_color, ["queen", "bishop"]);

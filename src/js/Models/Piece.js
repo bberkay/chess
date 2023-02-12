@@ -88,15 +88,15 @@ class Piece extends PieceEngine {
 
         if (gl_current_move == "black") {
             limit = row_of_pawn == 7 ? 2 : 1;  // if black pawn is start position then 2 square limit else 1
-            route = "top"; // black goes top
+            route = ["top"]; // black goes top
         }
         else if (gl_current_move == "white") {
             limit = row_of_pawn == 2 ? 2 : 1;
-            route = "bottom"; // white goes bottom
+            route = ["bottom"]; // white goes bottom
         }
 
-        let playable_squares = this.getColumnSquaresOfSquare({ square_id: square_id, distance_limit: limit, route_path: route }); // get first [limit] square of [route] column
-        let diagonal_control = this.getDiagonalSquaresOfSquare({ square_id: square_id, distance_limit: 1, route_path: route }) // get first diagonal squares
+        let playable_squares = this.getColumnSquaresOfSquare({ square_id: square_id, distance_limit: limit, route_path: route })[route]; // get first [limit] square of [route] column
+        let diagonal_control = this.getDiagonalSquaresOfSquare({ square_id: square_id, distance_limit: 1, route_path: route })[route]; // get first diagonal squares
 
         // is first diagonal squares has enemy piece then add playable squares
         diagonal_control.filter(item => {
