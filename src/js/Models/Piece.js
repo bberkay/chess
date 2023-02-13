@@ -123,14 +123,9 @@ class Piece extends PieceEngine {
 
         // get first squares of column, row and diagonal
         let playable_squares = this.getColumnSquaresOfSquare({ square_id: square_id, distance_limit: 1 }).concat(this.getRowSquaresOfSquare({ square_id: square_id, distance_limit: 1 })).concat(this.getDiagonalSquaresOfSquare({ square_id: square_id, distance_limit: 1 }));
-        this.isSquareInDanger(square_id);
-        /*
-        if(calculate_unplayable_squares){
-            let unplayable_squares = this.#getUnplayableSquaresOfPiece(square_id, playable_squares);
-            // Substract unplayable squares from playable squares
-            playable_squares = playable_squares.filter(square => !unplayable_squares.includes(square));
-        }
-        */
+        let unplayable_squares = this.isSquareInDanger(square_id, gl_current_move, true);
+        playable_squares = playable_squares.filter(square => !unplayable_squares.includes(square));
+        
         /*
         // Rok 
         if(gl_castling_control[this.color + "-short"] == null || gl_castling_control[this.color + "-long"] == null){
@@ -188,6 +183,7 @@ class Piece extends PieceEngine {
     }
 
     /**
+     * // TODO: Burası şah dışında ki şahların şahı tehlikeye atmaması için kullanılabilir.
      * Get Unplayable Squares Of Piece
      * @param {int} square_id Square ID of the Target Piece
      * @param {Array<int>} playable_squares Playable Squares of Target Piece
