@@ -47,7 +47,7 @@ class Piece extends PieceEngine {
 
         // get all squares of row and column
         let playable_squares = this.getColumnSquaresOfSquare({ square_id: square_id }).concat(this.getRowSquaresOfSquare({ square_id: square_id }));
-        if(calculate_unplayable_squares){
+        if (calculate_unplayable_squares) {
             let unplayable_squares = this.#getUnplayableSquaresOfPiece(square_id, playable_squares);
             // Substract unplayable squares from playable squares
             playable_squares = playable_squares.filter(square => !unplayable_squares.includes(square));
@@ -65,7 +65,7 @@ class Piece extends PieceEngine {
 
         // get diagonal squares
         let playable_squares = this.getDiagonalSquaresOfSquare({ square_id: square_id });
-        if(calculate_unplayable_squares){
+        if (calculate_unplayable_squares) {
             let unplayable_squares = this.#getUnplayableSquaresOfPiece(square_id, playable_squares);
             // Substract unplayable squares from playable squares
             playable_squares = playable_squares.filter(square => !unplayable_squares.includes(square));
@@ -104,7 +104,7 @@ class Piece extends PieceEngine {
                 playable_squares.push(item);
         })
 
-        if(calculate_unplayable_squares){
+        if (calculate_unplayable_squares) {
             let unplayable_squares = this.#getUnplayableSquaresOfPiece(square_id, playable_squares);
             // Substract unplayable squares from playable squares
             playable_squares = playable_squares.filter(square => !unplayable_squares.includes(square));
@@ -123,9 +123,10 @@ class Piece extends PieceEngine {
 
         // get first squares of column, row and diagonal
         let playable_squares = this.getColumnSquaresOfSquare({ square_id: square_id, distance_limit: 1 }).concat(this.getRowSquaresOfSquare({ square_id: square_id, distance_limit: 1 })).concat(this.getDiagonalSquaresOfSquare({ square_id: square_id, distance_limit: 1 }));
-        let unplayable_squares = this.isSquareInDanger(square_id, gl_current_move, true);
-        playable_squares = playable_squares.filter(square => !unplayable_squares.includes(square));
-        
+        console.log(this.isSquareInDanger(square_id, gl_current_move));
+        /*let unplayable_squares = this.isSquareInDanger(square_id, gl_current_move, true);
+        playable_squares = playable_squares.filter(square => !unplayable_squares.includes(square));*/
+
         /*
         // Rok 
         if(gl_castling_control[this.color + "-short"] == null || gl_castling_control[this.color + "-long"] == null){
@@ -140,16 +141,14 @@ class Piece extends PieceEngine {
      * Get Playable Squares Of Queen
      * @returns {Array<int>}
      */
-    #getPlayableSquaresOfQueen(calculate_unplayable_squares) {
+    #getPlayableSquaresOfQueen() {
         let square_id = GameController.getSquareIDByPiece(this);
 
         // get all squares of column, row and diagonal(UNLIMITED POWEEEER!!!)
         let playable_squares = this.getColumnSquaresOfSquare({ square_id: square_id }).concat(this.getRowSquaresOfSquare({ square_id: square_id })).concat(this.getDiagonalSquaresOfSquare({ square_id: square_id }));
-        if(calculate_unplayable_squares){
-            let unplayable_squares = this.#getUnplayableSquaresOfPiece(square_id, playable_squares);
-            // Substract unplayable squares from playable squares
-            playable_squares = playable_squares.filter(square => !unplayable_squares.includes(square));
-        }
+        let unplayable_squares = this.#getUnplayableSquaresOfPiece(square_id);
+        // Substract unplayable squares from playable squares
+        playable_squares = playable_squares.filter(square => !unplayable_squares.includes(square));
 
         return playable_squares;
     }
@@ -170,10 +169,10 @@ class Piece extends PieceEngine {
         let column_sides = this.getRowSquaresOfSquare({ square_id: column[0], distance_limit: 1, piece_sensivity: true }).concat(this.getRowSquaresOfSquare({ square_id: column[column.length - 1], distance_limit: 1, piece_sensivity: true }));
         // get first square of top side and bottom side at end of the row
         let row_sides = this.getColumnSquaresOfSquare({ square_id: row[0], distance_limit: 1, piece_sensivity: true }).concat(this.getColumnSquaresOfSquare({ square_id: row[row.length - 1], distance_limit: 1, piece_sensivity: true }));
-       
+
         // concat all playable squares
         let playable_squares = column_sides.concat(row_sides);
-        if(calculate_unplayable_squares){
+        if (calculate_unplayable_squares) {
             let unplayable_squares = this.#getUnplayableSquaresOfPiece(square_id, playable_squares);
             // Substract unplayable squares from playable squares
             playable_squares = playable_squares.filter(square => !unplayable_squares.includes(square));
@@ -183,7 +182,6 @@ class Piece extends PieceEngine {
     }
 
     /**
-     * // TODO: Burası şah dışında ki şahların şahı tehlikeye atmaması için kullanılabilir.
      * Get Unplayable Squares Of Piece
      * @param {int} square_id Square ID of the Target Piece
      * @param {Array<int>} playable_squares Playable Squares of Target Piece
@@ -191,41 +189,8 @@ class Piece extends PieceEngine {
      */
     #getUnplayableSquaresOfPiece(square_id, playable_squares) {
         // Get dangerous squares
-        const enemy_color = gl_current_move == "white" ? "black" : "white";
         let unplayable_squares = [];
-        if(this.type == "king"){
-            // Delete piece itself from board for to get the back of the piece
-            const real_position = gl_squares[square_id];
-            GameController.setGlobalSquare(square_id, 0);
-
-            playable_squares.forEach(square => {
-                if (this.isSquareInDanger(square, enemy_color)) 
-                    unplayable_squares.push(square);
-            });
-
-             // Add piece again 
-            GameController.setGlobalSquare(square_id, real_position);
-        }
-        else{ 
-            /*
-             If type is not king then find king and check is king in danger
-            */
-            let players_king = GameController.getKingSquareID({player:true});
-            playable_squares.forEach(square => {
-                // Delete piece itself from board for to get the back of the piece
-                const real_position = gl_squares[square_id];
-                const target_square = gl_squares[square];
-                GameController.setGlobalSquare(square, square_id);
-                GameController.setGlobalSquare(square_id, 0);
-
-                if(this.isSquareInDanger(players_king, enemy_color))
-                    unplayable_squares.push(square);
-
-                // Add pieces to their original squares again 
-                GameController.setGlobalSquare(square_id, real_position);
-                GameController.setGlobalSquare(square, target_square);
-            });
-        }
+        
         return unplayable_squares;
     }
 }
