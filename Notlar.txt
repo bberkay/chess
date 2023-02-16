@@ -1,5 +1,5 @@
 // TODO: Optimizasyon(hangi veriler kaç kere geliyor/hesaplanıyor vs.)-İsimlendirme, animasyon, grab, sağ tık oku gibi işlemler en son yapılacak.
-// TODO: Enum
+// TODO: Enum ve issquarehasenemy, issquareindanger gibi fonksiyonlarda bulunan active_color/enemy_color gereklilikleri ölçülecek.
 
 // TODO: Kısa-Uzun Rok(rok atılırken şah durumuna düşüyor mu ve aralarında taş var mı yol da tehlike var mı kontrolü), 
 // TODO: Geçerken Alma, Mat-Pat Kontrolü, Piyon dönüşümü

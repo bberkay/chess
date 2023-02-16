@@ -147,6 +147,7 @@ class Piece extends PieceEngine {
         // get all squares of column, row and diagonal(UNLIMITED POWEEEER!!!)
         let playable_squares = this.getColumnSquaresOfSquare({ square_id: square_id }).concat(this.getRowSquaresOfSquare({ square_id: square_id })).concat(this.getDiagonalSquaresOfSquare({ square_id: square_id }));
         let unplayable_squares = this.#getUnplayableSquaresOfPiece(square_id);
+
         // Substract unplayable squares from playable squares
         playable_squares = playable_squares.filter(square => !unplayable_squares.includes(square));
 
@@ -187,10 +188,19 @@ class Piece extends PieceEngine {
      * @param {Array<int>} playable_squares Playable Squares of Target Piece
      * @returns {Array<int>}
      */
-    #getUnplayableSquaresOfPiece(square_id, playable_squares) {
-        // Get dangerous squares
+    #getUnplayableSquaresOfPiece(square_id) {
+        /**
+         * NOTE: Yeni algoritma da taşın tüm yönleri hesaplanacak ve "top" da kale ve "bottom" şah varsa sadece column boyunca hareket edebilecek
+         * şekilde olacak.
+         * FIXME: bu yüzden issquareindanger ve getunplayablesquares fonksiyonları birbirlerine daha uygun hazırlanacka.
+         */
+
         let unplayable_squares = [];
-        
+        unplayable_squares = this.isSquareInDanger(square_id, gl_current_move, get_dangerous_path_squares);
+        for(let i in unplayable_squares){
+            console.log(i);
+        }
+
         return unplayable_squares;
     }
 }
