@@ -251,12 +251,12 @@ class PieceEngine {
     }
 
     /**
-     * Filter unplayable squares in playable squares for guard the king 
+     * Is Check ?
      * @param {int} square_id Square ID of the target square
      * @param {string} enemy_color Enemy color to compare(optional)
      * @returns {(Array<int>|boolean)}
      */
-    getUnplayableSquares(square_id, enemy_color) {
+    isCheck(square_id, enemy_color) {
         /**
          * FIXME: clean code yapılacak aynı kod tekrar edilemeyecek.
          */

@@ -14,22 +14,22 @@ class Piece extends PieceEngine {
         var playable_squares_id = [];
         switch (this.type) {
             case "rook":
-                playable_squares_id = this.#getPlayableSquaresOfRook(calculate_unplayable_squares);
+                playable_squares_id = this.#getPlayableSquaresOfRook();
                 break;
             case "bishop":
-                playable_squares_id = this.#getPlayableSquaresOfBishop(calculate_unplayable_squares);
+                playable_squares_id = this.#getPlayableSquaresOfBishop();
                 break;
             case "pawn":
-                playable_squares_id = this.#getPlayableSquaresOfPawn(calculate_unplayable_squares);
+                playable_squares_id = this.#getPlayableSquaresOfPawn();
                 break;
             case "king":
-                playable_squares_id = this.#getPlayableSquaresOfKing(calculate_unplayable_squares);
+                playable_squares_id = this.#getPlayableSquaresOfKing();
                 break;
             case "queen":
-                playable_squares_id = this.#getPlayableSquaresOfQueen(calculate_unplayable_squares);
+                playable_squares_id = this.#getPlayableSquaresOfQueen();
                 break;
             case "knight":
-                playable_squares_id = this.#getPlayableSquaresOfKnight(calculate_unplayable_squares);
+                playable_squares_id = this.#getPlayableSquaresOfKnight();
                 break;
             default:
                 break;
@@ -42,16 +42,22 @@ class Piece extends PieceEngine {
      * Get Playable Squares Of Rook
      * @returns {Array<int>}
      */
-    #getPlayableSquaresOfRook(calculate_unplayable_squares) {
+    #getPlayableSquaresOfRook() {
         let square_id = GameController.getSquareIDByPiece(this);
 
         // get all squares of row and column
-        let playable_squares = this.getColumnSquaresOfSquare({ square_id: square_id }).concat(this.getRowSquaresOfSquare({ square_id: square_id }));
-        if (calculate_unplayable_squares) {
-            let unplayable_squares = this.#getUnplayableSquaresOfPiece(square_id, playable_squares);
-            // Substract unplayable squares from playable squares
-            playable_squares = playable_squares.filter(square => !unplayable_squares.includes(square));
+        let playable_squares = {
+            ...this.getColumnSquaresOfSquare({ square_id: square_id }),
+            ...this.getRowSquaresOfSquare({ square_id: square_id }),
         }
+        let playable_paths = this.#getPlayablePaths(playable_squares);
+
+        // Substract unplayable paths from playable paths
+        for (let i in playable_squares) {
+            if (!playable_paths.includes(i))
+                delete playable_squares[i];
+        }
+
         return playable_squares;
     }
 
@@ -60,7 +66,7 @@ class Piece extends PieceEngine {
      * Get Playable Squares Of Bishop
      * @returns {Array<int>}
      */
-    #getPlayableSquaresOfBishop(calculate_unplayable_squares) {
+    #getPlayableSquaresOfBishop() {
         let square_id = GameController.getSquareIDByPiece(this);
 
         // get diagonal squares
@@ -143,13 +149,17 @@ class Piece extends PieceEngine {
      */
     #getPlayableSquaresOfQueen() {
         let square_id = GameController.getSquareIDByPiece(this);
+        let playable_squares_list = [];
 
-        // get all squares of column, row and diagonal(UNLIMITED POWEEEER!!!)
-        let playable_squares = this.getColumnSquaresOfSquare({ square_id: square_id }).concat(this.getRowSquaresOfSquare({ square_id: square_id })).concat(this.getDiagonalSquaresOfSquare({ square_id: square_id }));
-        let unplayable_squares = this.#getUnplayableSquaresOfPiece(square_id);
+        let playable_paths = this.#getPlayablePaths({
+            // get all squares of column, row and diagonal(UNLIMITED POWEEEER!!!)
+            ...this.getColumnSquaresOfSquare({ square_id: square_id }),
+            ...this.getRowSquaresOfSquare({ square_id: square_id }),
+            ...this.getDiagonalSquaresOfSquare({ square_id: square_id })
+        });
 
-        // Substract unplayable squares from playable squares
-        playable_squares = playable_squares.filter(square => !unplayable_squares.includes(square));
+        
+        
 
         return playable_squares;
     }
@@ -183,24 +193,61 @@ class Piece extends PieceEngine {
     }
 
     /**
-     * Get Unplayable Squares Of Piece
-     * @param {int} square_id Square ID of the Target Piece
-     * @param {Array<int>} playable_squares Playable Squares of Target Piece
-     * @returns {Array<int>}
+     * Get playable path to not to be check/avoid endangering the king
+     * @param {JSON} playable_squares Playable Squares of Target Piece
+     * @example {"top":[4,6,7], "top-right":[3,2,1]} 
+     * @returns {JSON} {"top":[2,3,4], "bottom":[5,6,7]}
      */
-    #getUnplayableSquaresOfPiece(square_id) {
-        /**
-         * NOTE: Yeni algoritma da taşın tüm yönleri hesaplanacak ve "top" da kale ve "bottom" şah varsa sadece column boyunca hareket edebilecek
-         * şekilde olacak.
-         * FIXME: bu yüzden issquareindanger ve getunplayablesquares fonksiyonları birbirlerine daha uygun hazırlanacka.
-         */
+    #getPlayablePaths(playable_squares) {
+        let playable_paths = [];
+        let king_square_id = GameController.getKingSquareID({ player: true }); 
 
-        let unplayable_squares = [];
-        unplayable_squares = this.isSquareInDanger(square_id, gl_current_move, get_dangerous_path_squares);
-        for(let i in unplayable_squares){
-            console.log(i);
+        for (let i in playable_squares) {
+            let target_square_for_enemy_control = playable_squares[i].slice(-1)[0]; // Get last square of the path
+            
+            // Control, is last square has enemy
+            let enemy_control = GameController.isSquareHasEnemy(target_square_for_enemy_control, this.color, this.type == "queen" ? ["queen", "bishop", "rook"] : [this.type]);
+            if (enemy_control) {
+                let enemy = GameController.getPieceBySquareID(target_square_for_enemy_control);
+                if (enemy.type == "bishop" || enemy.type == "queen") {
+                    // If enemy type is bishop or queen then current piece just move ...
+                    if (i == "top-left" || i == "bottom-right") {
+                        // if enemy on top-left or bottom-right then current piece just move bottom-right and top-left squares
+                        let target_square_for_king_control = playable_squares[i == "top-left" ? "bottom-right" : "top-left"].slice(-1)[0];
+
+                        // Is current piece guard king
+                        if (i == "top-left" && target_square_for_king_control + 9 == king_square_id || i == "bottom-right" && target_square_for_king_control - 9 == king_square_id)
+                            playable_paths = ["bottom-right", "top-left"];
+                    }
+                    else if (i == "top-right" || i == "bottom-left") {
+                        // if enemy on top-right or bottom-left then just move bottom-left and top-right squares
+                        let target_square_for_king_control = playable_squares[i == "top-right" ? "bottom-left" : "top-right"].slice(-1)[0];
+
+                        // Is current piece guard king
+                        if (i == "top-right" && target_square_for_king_control + 7 == king_square_id || i == "bottom-left" && target_square_for_king_control - 7 == king_square_id)
+                            playable_paths = ["top-right", "bottom-left"];
+                    }
+                }
+                if (enemy.type == "rook" || enemy.type == "queen") {
+                    // If enemy type is rook or queen then current piece just move ...
+                    if (i == "top" || i == "bottom") {
+                        // If enemy on top or bottom then current piece just move bottom and top squares
+                        let target_square_for_king_control = playable_squares[i == "top" ? "bottom" : "top"].slice(-1)[0];
+
+                        // Is current piece guard king
+                        if (i == "top" && target_square_for_king_control + 8 == king_square_id || i == "bottom" && target_square_for_king_control - 8 == king_square_id)
+                            playable_paths = ["top", "bottom"];
+                    }
+                }
+            }
         }
 
-        return unplayable_squares;
+        // Delete unplayable paths in playable squares/paths to avoid endangering the king
+        for(let i in playable_squares){
+            if(!playable_paths.includes(i))
+                delete playable_squares[i];
+        }
+
+        return playable_squares;
     }
 }
