@@ -10,7 +10,7 @@ class Piece extends PieceEngine {
     * Get Playable Squares
     * @returns {Array<int>}
     */
-    getPlayableSquaresOfPiece(calculate_unplayable_squares = true) {
+    getPlayableSquaresOfPiece() {
         var playable_squares_id = [];
         switch (this.type) {
             case "rook":
@@ -44,18 +44,18 @@ class Piece extends PieceEngine {
      */
     #getPlayableSquaresOfRook() {
         let square_id = GameController.getSquareIDByPiece(this);
+        let playable_squares = [];
 
-        // get all squares of row and column
-        let playable_squares = {
+        let playable_paths = this.#getPlayablePaths({
+            // get all squares of row and column
             ...this.getColumnSquaresOfSquare({ square_id: square_id }),
             ...this.getRowSquaresOfSquare({ square_id: square_id }),
-        }
-        let playable_paths = this.#getPlayablePaths(playable_squares);
+        });
 
-        // Substract unplayable paths from playable paths
-        for (let i in playable_squares) {
-            if (!playable_paths.includes(i))
-                delete playable_squares[i];
+        // Json To Array<int>
+        // example: {"top":[2,3,4], "left":[5,6,7]} -> [2,3,4,5,6,7]
+        for(let i in playable_paths){
+            playable_paths[i].forEach(square => playable_squares.push(square));
         }
 
         return playable_squares;
@@ -68,13 +68,17 @@ class Piece extends PieceEngine {
      */
     #getPlayableSquaresOfBishop() {
         let square_id = GameController.getSquareIDByPiece(this);
+        let playable_squares = [];
 
-        // get diagonal squares
-        let playable_squares = this.getDiagonalSquaresOfSquare({ square_id: square_id });
-        if (calculate_unplayable_squares) {
-            let unplayable_squares = this.#getUnplayableSquaresOfPiece(square_id, playable_squares);
-            // Substract unplayable squares from playable squares
-            playable_squares = playable_squares.filter(square => !unplayable_squares.includes(square));
+        let playable_paths = this.#getPlayablePaths({
+            // get all squares of diagonal
+            ...this.getDiagonalSquaresOfSquare({ square_id: square_id })
+        });
+
+        // Json To Array<int>
+        // example: {"top":[2,3,4], "left":[5,6,7]} -> [2,3,4,5,6,7]
+        for(let i in playable_paths){
+            playable_paths[i].forEach(square => playable_squares.push(square));
         }
 
         return playable_squares;
@@ -85,7 +89,7 @@ class Piece extends PieceEngine {
      * Get Playable Squares Of Pawn
      * @returns {Array<int>}
      */
-    #getPlayableSquaresOfPawn(calculate_unplayable_squares) {
+    #getPlayableSquaresOfPawn() {
         let square_id = GameController.getSquareIDByPiece(this);
 
         let limit = 0;
@@ -124,15 +128,13 @@ class Piece extends PieceEngine {
      * Get Playable Squares Of King
      * @returns {Array<int>}
      */
-    #getPlayableSquaresOfKing(calculate_unplayable_squares) {
+    #getPlayableSquaresOfKing() {
         let square_id = GameController.getSquareIDByPiece(this);
 
         // get first squares of column, row and diagonal
         let playable_squares = this.getColumnSquaresOfSquare({ square_id: square_id, distance_limit: 1 }).concat(this.getRowSquaresOfSquare({ square_id: square_id, distance_limit: 1 })).concat(this.getDiagonalSquaresOfSquare({ square_id: square_id, distance_limit: 1 }));
-        console.log(this.isSquareInDanger(square_id, gl_current_move));
-        /*let unplayable_squares = this.isSquareInDanger(square_id, gl_current_move, true);
-        playable_squares = playable_squares.filter(square => !unplayable_squares.includes(square));*/
-
+        let 
+        
         /*
         // Rok 
         if(gl_castling_control[this.color + "-short"] == null || gl_castling_control[this.color + "-long"] == null){
@@ -149,7 +151,7 @@ class Piece extends PieceEngine {
      */
     #getPlayableSquaresOfQueen() {
         let square_id = GameController.getSquareIDByPiece(this);
-        let playable_squares_list = [];
+        let playable_squares = [];
 
         let playable_paths = this.#getPlayablePaths({
             // get all squares of column, row and diagonal(UNLIMITED POWEEEER!!!)
@@ -158,8 +160,11 @@ class Piece extends PieceEngine {
             ...this.getDiagonalSquaresOfSquare({ square_id: square_id })
         });
 
-        
-        
+        // Json To Array<int>
+        // example: {"top":[2,3,4], "left":[5,6,7]} -> [2,3,4,5,6,7]
+        for(let i in playable_paths){
+            playable_paths[i].forEach(square => playable_squares.push(square));
+        }
 
         return playable_squares;
     }
@@ -169,7 +174,7 @@ class Piece extends PieceEngine {
      * Get Playable Squares Of Knight
      * @returns {Array<int>}
      */
-    #getPlayableSquaresOfKnight(calculate_unplayable_squares) {
+    #getPlayableSquaresOfKnight() {
         let square_id = GameController.getSquareIDByPiece(this);
 
         // get 2 squares of column

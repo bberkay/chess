@@ -256,10 +256,7 @@ class PieceEngine {
      * @param {string} enemy_color Enemy color to compare(optional)
      * @returns {(Array<int>|boolean)}
      */
-    isCheck(square_id, enemy_color) {
-        /**
-         * FIXME: clean code yapılacak aynı kod tekrar edilemeyecek.
-         */
+    isSquareInDanger(square_id, enemy_color) {
         // Array<int> 
         let dangerous_paths = [];
 
@@ -267,12 +264,8 @@ class PieceEngine {
         const diagonal = this.getDiagonalSquaresOfSquare({ square_id: square_id});
         for (let i in diagonal) {
             if (GameController.isSquareHasEnemy(diagonal[i].slice(-1)[0], enemy_color, ["queen", "bishop"])) {
-                if (get_dangerous_path_squares) {
-                    if (i == "top-left" || i == "bottom-right")
-                        dangerous_paths = dangerous_paths.concat(diagonal["top-left"].concat(diagonal["bottom-right"]));
-                    else if (i == "top-right" || i == "bottom-left")
-                        dangerous_paths = dangerous_paths.concat(diagonal["top-right"].concat(diagonal["bottom-left"]));
-                }
+                if (get_dangerous_path_squares)
+                    dangerous_paths = dangerous_paths.concat(diagonal[i == "top-left" ? "top-left" : "top-right"].concat(diagonal[i == "bottom-right" ? "bottom-right" : "bottom-left"]));
                 else
                     return true;
             }
