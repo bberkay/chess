@@ -8,5 +8,6 @@
 // TODO: Hamle geri alma, Maçtan çekilme, Maç oluşturma, Önce ki hamleyi izleme(önizleme-şart değil-)? bu bölümün bir kısmı yapılmayabilir.
 // TODO: bot? API kullanılabilir.
 // TODO: ve tabi ki online
+// TODO: Autoload sistemi 
 
 // TODO: readme'ye assets kaynağı eklenecek.

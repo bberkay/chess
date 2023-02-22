@@ -11,15 +11,9 @@
 */
 var gl_squares = {};
 
-/*
-    All Pieces(for control id and find piece easily)
-    example:
-    [
-        11(id):Piece(object),
-        84(id):Piece(object)
-    ]
-*/
-var gl_pieces = {};
+// Set Empty at Start
+for (let i = 1; i < 65; i++)
+    gl_squares[i] = 0;
 
 
 // other global variables
@@ -38,44 +32,23 @@ var gl_black_king = null;
  * false for can't be done anymore
  */
 var gl_castling_control = {
-    "white-long":null,
-    "white-short":null,
-    "black-long":null,
-    "black-short":null
+    "white-long": null,
+    "white-short": null,
+    "black-long": null,
+    "black-short": null
 };
 
 
 class GameController {
     /**
-     * Set Global Square
+     * Change Square Content to Piece[object] or 0[int]
      * @param {int} key
-     * @param {Piece|int} value
+     * @param {(Piece|int)} value
      * @returns {void}
      */
-    static setGlobalSquare(key, value) {
-        gl_squares[key] = value;
-    }
-
-    /**
-     * Set Global Piece
-     * @param {int} id
-     * @param {Piece} piece
-     * @returns {void}
-     */
-    static setGlobalPiece(id, piece) {
-        gl_pieces[id] = piece;
-    }
-
-    /**
-     * Create ID for Piece
-     * @returns {int}
-     */
-    static createPieceID() {
-        const id = 100 - Math.floor(Math.random() * 101) + 10;
-        if (!gl_pieces[id])
-            return id;
-        else
-            GameController.createPieceID();
+    static changeSquareTo(key, value) {
+        if (Object.is(key, int) && key < 65 && Object.is(value, Piece) || Object.is(value, int) && value === 0)
+            gl_squares[key] = value;
     }
 
 
@@ -95,6 +68,7 @@ class GameController {
 
         return pieces.length > 0 ? pieces : null;
     }
+
 
     /**
      * Get Piece By Square ID
@@ -124,7 +98,7 @@ class GameController {
      * @param {int} square_id Square ID of the target square
      * @returns {boolean}
      */
-    static isSquareHasPiece(square_id){
+    static isSquareHasPiece(square_id) {
         return gl_squares[square_id] != 0 ? true : false;
     }
 
@@ -135,37 +109,38 @@ class GameController {
      * @param {Array<string>} specific_enemy Specific enemy types(optional)
      * @returns {boolean}
      */
-    static isSquareHasEnemy(square_id, active_color = gl_current_move, specific_enemy = ["queen", "king", "pawn", "bishop", "rook", "knight"]){
-        if (this.isSquareHasPiece(square_id)){
-            let piece = this.getPieceBySquareID(square_id);
-            if(piece.color != active_color && specific_enemy.includes(piece.type))
-                return true;
-        }
+    static isSquareHasEnemy(square_id, active_color = gl_current_move, specific_enemy = ["queen", "king", "pawn", "bishop", "rook", "knight"]) {
+        let piece = this.getPieceBySquareID(square_id);
+        if (piece && piece.color != active_color && specific_enemy.includes(piece.type))
+            return true;
         return false;
     }
 
     /**
-     * Move Piece To Square
-     * @param {int} from Square ID of the piece to move
-     * @param {int} to Square ID of the target square
-     * @returns {(int|void)}
-     */
-    static changePiecePosition(from, to) {
-        let piece = this.getPieceBySquareID(from);
-        this.setGlobalSquare(from, 0);
-        this.setGlobalSquare(to, piece);
+    * Set King
+    * @param {Piece} king
+    * @returns {void}
+    */
+    static setKing(king) {
+        if (king.type == "king") {
+            if (king.color == "white")
+                gl_white_king = king;
+            else if (king.color == "black")
+                gl_black_king = king;
+        }
     }
+
 
     /**
      * Get Player or Enemy King
      * @returns {Piece}
      */
-    static getKing({player = false, enemy = false}){
-        if(player == false && enemy == false) // If player and enemy are false then return player's king
+    static getKing({ player = false, enemy = false }) {
+        if (player == false && enemy == false) // If player and enemy are false then return player's king
             return gl_current_move == "white" ? gl_white_king : gl_black_king;
-        else if(player == true && enemy == false) 
+        else if (player == true && enemy == false)
             return gl_current_move == "white" ? gl_white_king : gl_black_king;
-        else if(player == false && enemy == true)
+        else if (player == false && enemy == true)
             return gl_current_move == "white" ? gl_black_king : gl_white_king;
         else // If player and enemy are true then return player's king
             return gl_current_move == "white" ? gl_white_king : gl_black_king;
@@ -175,7 +150,7 @@ class GameController {
      * Get Square ID of Player or Enemy King 
      * @returns {int}
      */
-    static getKingSquareID({player = false, enemy = false}){
-        return this.getSquareIDByPiece(this.getKing({player:player, enemy:enemy}));
+    static getKingSquareID({ player = false, enemy = false }) {
+        return this.getSquareIDByPiece(this.getKing({ player: player, enemy: enemy }));
     }
 }

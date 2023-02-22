@@ -1,9 +1,22 @@
 class Piece extends PieceEngine {
-    constructor(id, type, color) {
+    /**
+     * Create Piece Object
+     * @param {string} type 
+     * @param {string} color 
+     * @param {int} target_square_id 
+     */
+    constructor(type, color, target_square_id) {
         super();
-        this.id = id;
+        this.id = this.createPieceID(); // FIXME: PieceEngine içinde oluşturulacak
         this.type = type;
         this.color = color;
+
+        // Set white and black king
+        if(this.type == "king") // NOTE: Bunun varlığı düşünülecek check işlemlerinden sonra
+            GameController.setKing(this);
+
+        // Set Target Square Content to this piece
+        GameController.changeSquareTo(target_square_id, this); 
     }
 
     /**
@@ -134,7 +147,7 @@ class Piece extends PieceEngine {
         // get first squares of column, row and diagonal
         let playable_squares = this.getColumnSquaresOfSquare({ square_id: square_id, distance_limit: 1 }).concat(this.getRowSquaresOfSquare({ square_id: square_id, distance_limit: 1 })).concat(this.getDiagonalSquaresOfSquare({ square_id: square_id, distance_limit: 1 }));
         let 
-        
+
         /*
         // Rok 
         if(gl_castling_control[this.color + "-short"] == null || gl_castling_control[this.color + "-long"] == null){
@@ -153,12 +166,7 @@ class Piece extends PieceEngine {
         let square_id = GameController.getSquareIDByPiece(this);
         let playable_squares = [];
 
-        let playable_paths = this.#getPlayablePaths({
-            // get all squares of column, row and diagonal(UNLIMITED POWEEEER!!!)
-            ...this.getColumnSquaresOfSquare({ square_id: square_id }),
-            ...this.getRowSquaresOfSquare({ square_id: square_id }),
-            ...this.getDiagonalSquaresOfSquare({ square_id: square_id })
-        });
+        let playable_paths = this.#getPlayablePaths(this.calcQueenPlayableSquares(square_id));
 
         // Json To Array<int>
         // example: {"top":[2,3,4], "left":[5,6,7]} -> [2,3,4,5,6,7]

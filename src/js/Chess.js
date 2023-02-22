@@ -3,9 +3,9 @@ class Chess{
      * @constructor
      */
     constructor() {
-        this.board = new BoardEngine();
+        this.board = new BoardController();
         this.engine = new PieceEngine();
-        this.current_playable_squares = [];
+        this.playable_squares = [];
         this.selected_piece = null;
         this.check_limitation = null;
     }
@@ -37,12 +37,11 @@ class Chess{
      * @param {int} square_id Square ID of the clicked square
      * @returns {void}
      */
-    playPiece(square_id) {
-        square_id = parseInt(square_id);
-
+    clickSquare(square_id) {
         // Is player click any piece
         let square_piece_control = GameController.isSquareHasPiece(square_id);
         let square_playable_control = this.current_playable_squares.includes(square_id);
+
 
         // If clicked square has no piece and selected_piece is null and clicked square not in playable squares then operation is "clear board"
         if(!square_piece_control && !this.selected_piece || this.current_playable_squares.length > 0 && !square_playable_control){
@@ -60,13 +59,13 @@ class Chess{
     }
 
     /**
-     * @private
+ * @private
      * Select Piece
      * @param {int} square_id
      * @returns {void}
-     */
+    */
     #selectPiece(square_id){
-        let piece = GameController.getPieceBySquareID(square_id);
+        let piece = GameController.getPieceBySquareID(square_id);       
 
         // Select Piece
         if(gl_current_move == piece.color){
@@ -103,11 +102,11 @@ class Chess{
     /**
      * @private
      * Move piece to playable square
-     * @param {int} square_id
+     * @param {int} square_id Square ID of the Target Square to move
      * @returns {void}
      */
     #movePiece(square_id){
-        this.board.movePieceOnBoard(this.selected_piece, square_id);
+        this.board.movePiece(this.selected_piece, square_id);
         this.#unselectPiece();
         this.board.refreshBoard();
     }
