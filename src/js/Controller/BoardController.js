@@ -83,7 +83,7 @@ class BoardController{
     }
     
     /**
-    * Clear/Refresh Board 
+    * Clear/Refresh Board(Remove effects)
     * @returns {void}
     */
     refreshBoard() {
@@ -110,9 +110,9 @@ class BoardController{
         let l = playable_squares.length;
         for (let i = 0; i < l; i++) {
             if (GameController.isSquareHasEnemy(playable_squares[i]))
-                this.setEffectOfSquareID(playable_squares[i], "killable")
+                this.setEffectOfSquare(playable_squares[i], "killable")
             else
-                this.setEffectOfSquareID(playable_squares[i], "playable")
+                this.setEffectOfSquare(playable_squares[i], "playable")
         }
     }
 
@@ -155,7 +155,7 @@ class BoardController{
      * @param {string} effect_type "playable", "killable", "checked"
      * @returns {void}
      */
-    setEffectOfSquareID(square_id, effect_type){
+    setEffectOfSquare(square_id, effect_type){
         document.getElementById(square_id).classList.add(effect_type + "-effect");
     }
 }

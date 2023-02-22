@@ -1,13 +1,17 @@
-// TODO: Optimizasyon(hangi veriler kaç kere geliyor/hesaplanıyor vs.)-İsimlendirme, animasyon, grab, sağ tık oku gibi işlemler en son yapılacak.
-// TODO: Enum ve issquarehasenemy, issquareindanger gibi fonksiyonlarda bulunan active_color/enemy_color gereklilikleri ölçülecek.
+SIRADA
+// TODO: isSquareHasEnemy tamamen kaldırılacak ardından Engines ve Models bölümleri kontrol edilecek en son Chess.js ve html kontrol edilecek. Kontrol edilirken gereksiz parametrelere, isimlendirme ve optimizasyona dikkat edilecek.
 
+LİSTE
 // TODO: Kısa-Uzun Rok(rok atılırken şah durumuna düşüyor mu ve aralarında taş var mı yol da tehlike var mı kontrolü), 
 // TODO: Geçerken Alma, Mat-Pat Kontrolü, Piyon dönüşümü
-
+// TODO: Animasyon, grab, sağ tık oku gibi işlemler en son yapılacak.
 // TODO: Notasyon bölümü, tur geçme tuşu ve sıra değişme efekti, tahta teması değiştirme, yenilen taşlar ve taş puan sistemi
 // TODO: Hamle geri alma, Maçtan çekilme, Maç oluşturma, Önce ki hamleyi izleme(önizleme-şart değil-)? bu bölümün bir kısmı yapılmayabilir.
+
+EKSTRA
 // TODO: bot? API kullanılabilir.
 // TODO: ve tabi ki online
 // TODO: Autoload sistemi 
 
+ÖNEMLİ
 // TODO: readme'ye assets kaynağı eklenecek.

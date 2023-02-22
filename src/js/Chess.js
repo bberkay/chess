@@ -3,8 +3,8 @@ class Chess{
      * @constructor
      */
     constructor() {
-        this.board = new BoardController();
-        this.engine = new PieceEngine();
+        this.board_controller = new BoardController();
+        this.piece_controller = new PieceController(); 
         this.playable_squares = [];
         this.selected_piece = null;
         this.check_limitation = null;
@@ -15,8 +15,8 @@ class Chess{
     * @returns {void}
     */
     startGame() {
-        this.board.createBoard();
-        this.board.createPiecesAtStartPosition();
+        this.board_controller.createBoard();
+        this.board_controller.createPiecesAtStartPosition();
     }
 
     /**
@@ -26,9 +26,9 @@ class Chess{
     * @returns {void}
     */
     startCustomGame(pieces) {
-        this.board.createBoard();
+        this.board_controller.createBoard();
         pieces.forEach(item => {
-            this.board.createPiece(item["color"], item["piece"], item["square"]);
+            this.board_controller.createPiece(item["color"], item["piece"], item["square"]);
         });
     }
 
@@ -45,7 +45,7 @@ class Chess{
 
         // If clicked square has no piece and selected_piece is null and clicked square not in playable squares then operation is "clear board"
         if(!square_piece_control && !this.selected_piece || this.current_playable_squares.length > 0 && !square_playable_control){
-            this.board.refreshBoard();
+            this.board_controller.refreshBoard();
             this.#unselectPiece();
         } 
         else if(square_piece_control && !this.selected_piece){ // If clicked square has piece and selected_piece is null then operation is "select piece"
@@ -78,13 +78,13 @@ class Chess{
         
         // Show Playable Squares
         if(this.selected_piece){
-            this.board.refreshBoard();
+            this.board_controller.refreshBoard();
 
             // Get playable squares of selected piece
             this.current_playable_squares = this.selected_piece.getPlayableSquaresOfPiece();   
 
             // Show playable squares of selected piece
-            this.board.showPlayableSquares(this.current_playable_squares);
+            this.board_controller.showPlayableSquares(this.current_playable_squares);
         }
 
     }
@@ -106,9 +106,9 @@ class Chess{
      * @returns {void}
      */
     #movePiece(square_id){
-        this.board.movePiece(this.selected_piece, square_id);
+        this.board_controller.movePiece(this.selected_piece, square_id);
         this.#unselectPiece();
-        this.board.refreshBoard();
+        this.board_controller.refreshBoard();
     }
 
     /**
@@ -123,7 +123,7 @@ class Chess{
         // Set checked player and give effect the checked king
         if(this.engine.isSquareInDanger(enemy_king_square_id, gl_current_move)){
             gl_checked_player = enemy_king.color;
-            this.board.setEffectOfSquareID(enemy_king_square_id, "checked");
+            this.board_controller.setEffectOfSquare(enemy_king_square_id, "checked");
         }
     }
 
@@ -135,7 +135,7 @@ class Chess{
      */
     #endTurn() {
         // Clear Table and Selected Piece
-        this.board.refreshBoard();
+        this.board_controller.refreshBoard();
         this.current_piece = null;
 
         // Set New Turn 
