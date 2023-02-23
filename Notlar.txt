@@ -1,5 +1,5 @@
 SIRADA
-// TODO: isSquareHasEnemy tamamen kaldırılacak ardından Engines ve Models bölümleri kontrol edilecek en son Chess.js ve html kontrol edilecek. Kontrol edilirken gereksiz parametrelere, isimlendirme ve optimizasyona dikkat edilecek.
+// TODO: filterplayable ve issquareindanger kontrol edilecek ilk başta issquareindanger kontrol edilsin, en son Chess.js ve html kontrol edilecek.
 
 LİSTE
 // TODO: Kısa-Uzun Rok(rok atılırken şah durumuna düşüyor mu ve aralarında taş var mı yol da tehlike var mı kontrolü), 

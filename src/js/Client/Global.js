@@ -24,6 +24,7 @@ var gl_killed_black_pieces = [];
 var gl_killed_white_pieces = [];
 var gl_white_king = null;
 var gl_black_king = null;
+var gl_id_list = []; // Pieces ID 
 
 /**
  * Castling control 

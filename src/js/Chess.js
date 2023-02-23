@@ -3,8 +3,8 @@ class Chess{
      * @constructor
      */
     constructor() {
-        this.board_controller = new BoardController();
-        this.piece_controller = new PieceController(); 
+        this.board = new Board();
+        this.engine = new Engine(); 
         this.playable_squares = [];
         this.selected_piece = null;
         this.check_limitation = null;
@@ -45,7 +45,7 @@ class Chess{
 
         // If clicked square has no piece and selected_piece is null and clicked square not in playable squares then operation is "clear board"
         if(!square_piece_control && !this.selected_piece || this.current_playable_squares.length > 0 && !square_playable_control){
-            this.board_controller.refreshBoard();
+            this.board.refreshBoard();
             this.#unselectPiece();
         } 
         else if(square_piece_control && !this.selected_piece){ // If clicked square has piece and selected_piece is null then operation is "select piece"
@@ -59,7 +59,7 @@ class Chess{
     }
 
     /**
- * @private
+    * @private
      * Select Piece
      * @param {int} square_id
      * @returns {void}
@@ -78,13 +78,13 @@ class Chess{
         
         // Show Playable Squares
         if(this.selected_piece){
-            this.board_controller.refreshBoard();
+            this.board.refreshBoard();
 
             // Get playable squares of selected piece
             this.current_playable_squares = this.selected_piece.getPlayableSquaresOfPiece();   
 
             // Show playable squares of selected piece
-            this.board_controller.showPlayableSquares(this.current_playable_squares);
+            this.board.showPlayableSquares(this.current_playable_squares);
         }
 
     }
@@ -106,9 +106,9 @@ class Chess{
      * @returns {void}
      */
     #movePiece(square_id){
-        this.board_controller.movePiece(this.selected_piece, square_id);
+        this.board.movePiece(this.selected_piece, square_id);
         this.#unselectPiece();
-        this.board_controller.refreshBoard();
+        this.board.refreshBoard();
     }
 
     /**

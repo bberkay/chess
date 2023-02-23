@@ -1,4 +1,4 @@
-class BoardController{
+class Board{
     /** 
      * Constructor
     */
@@ -109,7 +109,7 @@ class BoardController{
     showPlayableSquares(playable_squares) {
         let l = playable_squares.length;
         for (let i = 0; i < l; i++) {
-            if (GameController.isSquareHasEnemy(playable_squares[i]))
+            if (GameController.isSquareHasPiece(playable_squares[i], gl_current_move == "white" ? "black" : "white"))
                 this.setEffectOfSquare(playable_squares[i], "killable")
             else
                 this.setEffectOfSquare(playable_squares[i], "playable")
@@ -126,8 +126,8 @@ class BoardController{
     async movePiece(piece, target_square) {
         // Change Piece Position 
         let square_id = GameController.getSquareIDByPiece(piece);
-        GameController.changeSquareTo(target_square, square_id);
-        GmaeController.changeSquareTo(square_id, 0);
+        GameController.changeSquare(target_square, square_id);
+        GmaeController.changeSquare(square_id, 0);
     
         // Remove piece from his square(and checked effect if exist)
         piece_id = document.getElementsByClassName("square")[piece_id - 1];
