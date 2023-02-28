@@ -7,8 +7,7 @@ class GameController {
      * @returns {void}
      */
     static changeSquare(key, value) {
-        if (Object.is(key, int) && key < 65 && Object.is(value, Piece) || Object.is(value, int) && value === 0)
-            gl_squares[key] = value;
+        gl_squares[key] = value;
     }
 
 
@@ -87,9 +86,9 @@ class GameController {
     static setKing(piece) {
         if (piece.type == "king") {
             if (piece.color == "white")
-                gl_white_king = king;
+                gl_white_king = piece;
             else if (piece.color == "black")
-                gl_black_king = king;
+                gl_black_king = piece;
         }
     }
 

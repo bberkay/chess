@@ -126,13 +126,12 @@ class Board{
     async movePiece(piece, target_square) {
         // Change Piece Position 
         let square_id = GameController.getSquareIDByPiece(piece);
-        GameController.changeSquare(target_square, square_id);
-        GmaeController.changeSquare(square_id, 0);
-    
-        // Remove piece from his square(and checked effect if exist)
-        piece_id = document.getElementsByClassName("square")[piece_id - 1];
+        GameController.changeSquare(target_square, piece);
+        GameController.changeSquare(square_id, 0);
+
+        // Remove piece from his square
+        let piece_id = document.getElementById(square_id);
         piece_id.removeChild(piece_id.lastElementChild);
-        piece_id.classList.remove("checked-effect");
 
         // Remove enemy from target square
         let target_piece = document.getElementById(target_square);
@@ -142,11 +141,11 @@ class Board{
         await new Promise(r => setTimeout(r, 75));
 
         // Move piece to target square
-        piece_id = document.createElement("div");
-        piece_id.setAttribute("data-color", piece.color);
-        piece_id.setAttribute("data-piece", piece.type);
-        piece_id.classList.add("piece");
-        target_piece.appendChild(piece_id);
+        let piece_element = document.createElement("div");
+        piece_element.setAttribute("data-color", piece.color);
+        piece_element.setAttribute("data-piece", piece.type);
+        piece_element.classList.add("piece");
+        target_piece.appendChild(piece_element);
     }
  
     /**

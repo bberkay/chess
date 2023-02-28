@@ -1,5 +1,7 @@
 SIRADA
 // TODO: filterplayable ve issquareindanger kontrol edilecek ilk başta issquareindanger kontrol edilsin, en son Chess.js ve html kontrol edilecek.
+// TODO: PathEngine, PeiceEngine gibi engineler ayrıştırılabilir.
+// TODO: StartCustomGame içinde e8, e7 gibi square parametlerine geçiş yapılacak.
 
 LİSTE
 // TODO: Kısa-Uzun Rok(rok atılırken şah durumuna düşüyor mu ve aralarında taş var mı yol da tehlike var mı kontrolü), 
@@ -12,6 +14,7 @@ EKSTRA
 // TODO: bot? API kullanılabilir.
 // TODO: ve tabi ki online
 // TODO: Autoload sistemi 
+// TODO: Error sistemi
 
 ÖNEMLİ
 // TODO: readme'ye assets kaynağı eklenecek.
