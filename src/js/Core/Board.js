@@ -151,6 +151,7 @@ class Board{
     /**
      * Set effect of the square
      * @param {int} square_id Square to be effected
+     * TODO: effect_type için ENUM desteği gelecek.
      * @param {string} effect_type "playable", "killable", "checked"
      * @returns {void}
      */

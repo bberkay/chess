@@ -22,7 +22,7 @@ class GameController {
         let pieces = [];
         for (let square in gl_squares) {
             let piece = this.getPieceBySquareID(parseInt(square));
-            if (piece.color == color && piece.type == type)
+            if (piece.color === color && piece.type === type)
                 pieces.push(piece);
         }
 
@@ -37,7 +37,7 @@ class GameController {
      * @returns {(Piece|boolean)} 
      */
     static getPieceBySquareID(square_id) {
-        return gl_squares[square_id] != 0 ? gl_squares[square_id] : false;
+        return gl_squares[square_id] !== 0 ? gl_squares[square_id] : false;
     }
 
 
@@ -49,7 +49,7 @@ class GameController {
      */
     static getSquareIDByPiece(piece) {
         for (let k in gl_squares) {
-            if (gl_squares[k] == piece)
+            if (gl_squares[k] === piece)
                 return parseInt(k);
         }
         return false;
@@ -59,21 +59,14 @@ class GameController {
      * @static
      * Is Square Has Piece ?
      * @param {int} square_id Square ID of the target square
-     * @param {string} specific_color Specific Color(optional)
+     * @param {string|null} specific_color Specific Color(optional)
      * @param {Array<string>} specific_pieces Specific piece types(optional)
      * @returns {boolean}
      */
     static isSquareHasPiece(square_id, specific_color = null, specific_pieces = ["queen", "king", "pawn", "bishop", "rook", "knight"]) {
         let piece = this.getPieceBySquareID(square_id);
-        if (piece) {
-            if (specific_color && piece.color != specific_color)
-                return false;
-
-            if (!specific_pieces.includes(piece.type))
-                return false;
-
-            return true;
-        }
+        if (piece)
+            return !(specific_color && piece.color !== specific_color || !specific_pieces.includes(piece.type));
         return false;
     }
 
@@ -84,36 +77,47 @@ class GameController {
      * @returns {void}
      */
     static setKing(piece) {
-        if (piece.type == "king") {
-            if (piece.color == "white")
+        if (piece.type === "king") {
+            if (piece.color === "white")
                 gl_white_king = piece;
-            else if (piece.color == "black")
+            else if (piece.color === "black")
                 gl_black_king = piece;
         }
     }
 
     /**
      * @static
-     * Get Player or Enemy King
-     * @param {boolean} Player 
-     * @param {boolean} Enemy 
+     * Get Player's King
      * @returns {Piece}
      */
-    static getKing({ player = false, enemy = false }) {
-        if (player && !enemy)
-            return gl_current_move == "white" ? gl_white_king : gl_black_king;
-        else if (!player && enemy)
-            return gl_current_move == "white" ? gl_black_king : gl_white_king;
+    static getPlayerKing() {
+        return gl_current_move === "white" ? gl_white_king : gl_black_king;
     }
 
     /**
      * @static
-     * Get Square ID of Player or Enemy King 
-     * @param {boolean} Player 
-     * @param {boolean} Enemy 
+     * Get Square ID of Player's King
      * @returns {int}
      */
-    static getKingSquareID({ player = false, enemy = false }) {
-        return this.getSquareIDByPiece(this.getKing({ player: player, enemy: enemy }));
+    static getPlayerKingSquareID() {
+        return this.getSquareIDByPiece(this.getPlayerKing());
+    }
+
+    /**
+     * @static
+     * Get Enemy's King
+     * @returns {Piece}
+     */
+    static getEnemyKing() {
+        return gl_current_move === "white" ? gl_black_king : gl_white_king;
+    }
+
+    /**
+     * @static
+     * Get Square ID of Enemy's King
+     * @returns {int}
+     */
+    static getEnemyKingSquareID() {
+        return this.getSquareIDByPiece(this.getEnemyKing());
     }
 }

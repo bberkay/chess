@@ -1,6 +1,5 @@
 SIRADA
-// TODO: filterplayable ve issquareindanger kontrol edilecek ilk başta issquareindanger kontrol edilsin, en son Chess.js ve html kontrol edilecek.
-// TODO: PathEngine, PeiceEngine gibi engineler ayrıştırılabilir.
+// TODO: isCheck yapılacak ardından taşların şah konumuna düşmesi engellenecek.
 // TODO: StartCustomGame içinde e8, e7 gibi square parametlerine geçiş yapılacak.
 
 LİSTE

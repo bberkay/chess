@@ -157,12 +157,12 @@ class Engine{
         let route = "";
         let row_of_pawn = this.#calcRowOfSquare(square_id);
 
-        if (gl_current_move == "black") {
-            limit = row_of_pawn == 7 ? 2 : 1;  // if black pawn is start position then 2 square limit else 1
+        if (gl_current_move === "black") {
+            limit = row_of_pawn === 7 ? 2 : 1;  // if black pawn is start position then 2 square limit else 1
             route = ["top"]; // black goes top
         }
-        else if (gl_current_move == "white") {
-            limit = row_of_pawn == 2 ? 2 : 1;
+        else if (gl_current_move === "white") {
+            limit = row_of_pawn === 2 ? 2 : 1;
             route = ["bottom"]; // white goes bottom
         }
 
@@ -174,7 +174,7 @@ class Engine{
 
         // is first diagonal squares has enemy piece then add playable squares
         diagonal_control.filter(item => {
-            if (GameController.isSquareHasPiece(item, gl_current_move == "white" ? "black" : "white"))
+            if (GameController.isSquareHasPiece(item, gl_current_move === "white" ? "black" : "white"))
                 playable_squares.push(item);
         })
 
@@ -264,7 +264,7 @@ class Engine{
                         let target_square_for_king_control = playable_squares[i == "top" ? "bottom" : "top"].slice(-1)[0];
 
                         // Is current piece guard king
-                        if (i == "top" && target_square_for_king_control + 8 == king_square_id || i == "bottom" && target_square_for_king_control - 8 == king_square_id)
+                        if (i == "top" && target_square_for_king_control + 8 === king_square_id || i == "bottom" && target_square_for_king_control - 8 == king_square_id)
                             playable_paths = ["top", "bottom"];
                     }
                 }
@@ -287,7 +287,7 @@ class Engine{
      * @returns {int}
      */
     #calcColumnOfSquare(square_id) {
-        return square_id % 8 == 0 ? 8 : square_id % 8;
+        return square_id % 8 === 0 ? 8 : square_id % 8;
     }
 
     /**
@@ -417,7 +417,7 @@ class Engine{
         path = [];
         counter = 1;
 
-        if (this.#calcColumnOfSquare(square_id) != 1) { // if piece not on the far left
+        if (this.#calcColumnOfSquare(square_id) !== 1) { // if piece not on the far left
             for (let i = square_id - 9; i > 0; i -= 9) {
                 if (distance_limit && counter > distance_limit)
                     break;
@@ -436,7 +436,7 @@ class Engine{
         path = [];
         counter = 1;
 
-        if (this.#calcColumnOfSquare(square_id) != 1) {
+        if (this.#calcColumnOfSquare(square_id) !== 1) {
             for (let i = square_id + 7; i < 65; i += 7) {
                 if (distance_limit && counter > distance_limit)
                     break;
@@ -455,7 +455,7 @@ class Engine{
         path = [];
         counter = 1;
 
-        if (this.#calcColumnOfSquare(square_id) != 8) { // if piece not on the far right
+        if (this.#calcColumnOfSquare(square_id) !== 8) { // if piece not on the far right
             for (let i = square_id - 7; i > 0; i -= 7) {
                 if (distance_limit && counter > distance_limit)
                     break;
@@ -473,7 +473,7 @@ class Engine{
         // Bottom Right Diagonal of Piece
         path = [];
         counter = 1;
-        if (this.#calcColumnOfSquare(square_id) != 8) {
+        if (this.#calcColumnOfSquare(square_id) !== 8) {
             for (let i = square_id + 9; i < 65; i += 9) {
                 if (distance_limit && counter > distance_limit)
                     break;
@@ -494,7 +494,7 @@ class Engine{
     /**
      * @private
      * Calculate Playable Path
-     * @param {int} square_id Square ID of square to check
+     * @param {int} target_square_id Square ID of square to check
      * @param {boolean} piece_sensivity To avoid tripping over other pieces.
      * @returns {Array<int>}
      */
@@ -507,7 +507,7 @@ class Engine{
                 squares.push("break");
                 return squares;
             }
-            else if (GameController.isSquareHasPiece(target_square_id, gl_current_move == "white" ? "black" : "white")) {
+            else if (GameController.isSquareHasPiece(target_square_id, gl_current_move === "white" ? "black" : "white")) {
                 squares.push(target_square_id);
                 squares.push("break");
                 return squares;
@@ -519,7 +519,7 @@ class Engine{
             squares.push(target_square_id);
 
         // if square reach the edges of the board
-        if (this.#calcColumnOfSquare(target_square_id) == 8 || this.#calcColumnOfSquare(target_square_id) == 1)
+        if (this.#calcColumnOfSquare(target_square_id) === 8 || this.#calcColumnOfSquare(target_square_id) === 1)
             squares.push("break");
 
         return squares;
