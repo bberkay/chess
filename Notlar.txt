@@ -1,5 +1,5 @@
 SIRADA
-// TODO: isCheck yapılacak ardından taşların şah konumuna düşmesi engellenecek.
+// TODO: isCheck yapıldı ancak şah istediği yere gidebiliyor bu engellenece fakat dikkat edilmesi gereken bir mesele var bu da ischeck kontrolünü iki kez yaptırmamak o yüzden ilk ischeck de dangerouse pathler alınıp bir yere gönderilebilir, ardından taşların şah konumuna düşmesi engellenecek.
 // TODO: StartCustomGame içinde e8, e7 gibi square parametlerine geçiş yapılacak.
 
 LİSTE

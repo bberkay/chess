@@ -542,10 +542,10 @@ class Engine{
         // Array<int>
         let dangerous_paths = [];
 
-        const square_id = GameController.getPlayerKingSquareID();
+        const square_id = GameController.getEnemyKingSquareID();
         const enemy_color = gl_current_move === "white" ? "black" : "white";
 
-        /*// Control for Enemy Bishop and Queen
+        // Control for Enemy Bishop and Queen
         const diagonal_control = this.#jsonPathToArrayPath(this.#calcBishopPath(square_id));
         let l = diagonal_control.length;
         for(let i = 0; i<l; i++){
@@ -567,12 +567,10 @@ class Engine{
                 else
                     return true;
             }
-        }*/
+        }
 
        // Control for Enemy Knight
         const knight_control = this.#calcKnightPath(square_id);
-        console.log(knight_control);
-        /*
         l = knight_control.length;
         for(let i = 0; i<l; i++){
             if(GameController.isSquareHasPiece(knight_control[i], enemy_color, ["knight"])){
@@ -582,7 +580,8 @@ class Engine{
                     return true;
             }
         }
-        return dangerous_paths.length != 0 ? dangerous_paths : false;*/
+
+        return dangerous_paths.length !== 0 ? dangerous_paths : false;
     }
 
     /**

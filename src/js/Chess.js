@@ -38,9 +38,13 @@ class Chess{
      */
     clickSquare(square_id) {
         // Is player click any piece
-        let square_piece_control = GameController.isSquareHasPiece(square_id);
+        let square_piece_control = null;
         let square_playable_control = this.playable_squares.includes(square_id);
-        
+        if(gl_checked_player === gl_current_move)
+            square_piece_control = GameController.isSquareHasPiece(square_id, gl_current_move === "white" ? "white" : "black", ["king"]);
+        else
+            square_piece_control = GameController.isSquareHasPiece(square_id);
+
         if(square_piece_control && !this.selected_piece){
             // If clicked square has piece and selected_piece is null then operation is select piece
             this.#selectPiece(square_id);
