@@ -1,2 +1,2 @@
 # JS-chess
- Chess with Javascript
+ Chess with Pure Javascript(not finished yet)
