@@ -231,6 +231,7 @@ class Engine{
 
     
     /**
+     * @deprecated
      * Get playable path to not to be check/avoid endangering the king
      * @param {JSON} playable_squares Playable Squares of Target Piece
      * @example {"top":[4,6,7], "top-right":[3,2,1]} 
