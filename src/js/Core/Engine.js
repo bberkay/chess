@@ -191,15 +191,24 @@ class Engine{
     #calcKnightPath(square_id, piece_sensivity = true) {
         // get 2 squares of column
         let column = this.#jsonPathToArrayPath(this.#calcPlayableColumnSquares({ square_id: square_id, distance_limit: 2, piece_sensivity: piece_sensivity })).sort();
+        column = column.filter(item => { return square_id === item - 16 || square_id === item + 16});
         // get 2 squares of row
         let row = this.#jsonPathToArrayPath(this.#calcPlayableRowSquares({ square_id: square_id, distance_limit: 2, piece_sensivity: piece_sensivity })).sort();
+        row = row.filter(item => { return square_id === item - 2 || square_id === item + 2});
         // get first square of left side and right side at end of the column 
-        let column_sides = this.#jsonPathToArrayPath(this.#calcPlayableRowSquares({ square_id: column[0], distance_limit: 1, piece_sensivity: piece_sensivity })).concat(this.#jsonPathToArrayPath(this.#calcPlayableRowSquares({ square_id: column[column.length - 1], distance_limit: 1, piece_sensivity: piece_sensivity })));
+        let column_sides = [];
+        column.forEach(item => { column_sides.push(this.#jsonPathToArrayPath(this.#calcPlayableRowSquares({square_id:item, distance_limit:1, piece_sensivity:piece_sensivity}))) })
         // get first square of top side and bottom side at end of the row
-        let row_sides = this.#jsonPathToArrayPath(this.#calcPlayableColumnSquares({ square_id: row[0], distance_limit: 1, piece_sensivity: piece_sensivity })).concat(this.#jsonPathToArrayPath(this.#calcPlayableColumnSquares({ square_id: row[row.length - 1], distance_limit: 1, piece_sensivity: piece_sensivity })));
+        let row_sides = [];
+        row.forEach(item => { row_sides.push(this.#jsonPathToArrayPath(this.#calcPlayableColumnSquares({square_id:item, distance_limit:1, piece_sensivity:piece_sensivity}))) });
 
         // concat all playable squares
-        let playable_squares = column_sides.concat(row_sides);
+        let playable_squares = [];
+        column_sides.concat(row_sides).forEach(item => {
+            item.forEach(square => {
+                playable_squares.push(square);
+            })
+        })
 
         return playable_squares;
     }
@@ -515,7 +524,7 @@ class Engine{
             else
                 squares.push(target_square_id);
         }
-        else // if piece sensivity is false then no need control 
+        else // if piece sensivity is false then no need control
             squares.push(target_square_id);
 
         // if square reach the edges of the board
@@ -527,51 +536,53 @@ class Engine{
 
     /**
     * Is Check ?
-    * @param {int} square_id Square ID of the target square
     * @returns {(Array<int>|boolean)}
     */
-    isCheck(square_id) {
-        // Array<int> 
+    isCheck(get_dangerous_path_squares = false) {
+        // Array<int>
         let dangerous_paths = [];
 
-        // Bishop and Queen - Diagonal
-        const diagonal = this.#calcPlayableDiagonalSquares({ square_id: square_id });
-        for (let i in diagonal) {
-            if (GameController.isSquareHasEnemy(diagonal[i].slice(-1)[0], enemy_color, ["queen", "bishop"])) {
-                if (get_dangerous_path_squares)
-                    dangerous_paths = dangerous_paths.concat(diagonal[i == "top-left" ? "top-left" : "top-right"].concat(diagonal[i == "bottom-right" ? "bottom-right" : "bottom-left"]));
+        const square_id = GameController.getPlayerKingSquareID();
+        const enemy_color = gl_current_move === "white" ? "black" : "white";
+
+        /*// Control for Enemy Bishop and Queen
+        const diagonal_control = this.#jsonPathToArrayPath(this.#calcBishopPath(square_id));
+        let l = diagonal_control.length;
+        for(let i = 0; i<l; i++){
+            if(GameController.isSquareHasPiece(diagonal_control[i], enemy_color, ["queen", "bishop"])){
+                if(get_dangerous_path_squares)
+                    dangerous_paths = dangerous_paths.concat(diagonal_control);
                 else
                     return true;
             }
         }
 
-
-        // Rook and Queen - Row
-        const row = this.#calcPlayableRowSquares({ square_id: square_id, route_path: ["right", "left"] });
-        for (let i in row) {
-            if (GameController.isSquareHasEnemy(row[i].slice(-1)[0], enemy_color, ["queen", "rook"])) {
-                if (get_dangerous_path_squares)
-                    dangerous_paths = dangerous_paths.concat(row["right"].concat(row["left"]));
+        // Control for Enemy Rook and Queen
+        const row_control = this.#jsonPathToArrayPath(this.#calcRookPath(square_id));
+        l = row_control.length;
+        for(let i = 0; i<l; i++){
+            if(GameController.isSquareHasPiece(row_control[i], enemy_color, ["queen", "rook"])){
+                if(get_dangerous_path_squares)
+                    dangerous_paths = dangerous_paths.concat(diagonal_control);
                 else
                     return true;
             }
-        }
+        }*/
 
-        // Rook and Queen - Column
-        const column = this.#calcPlayableColumnSquares({ square_id: square_id, route_path: ["top", "bottom"] });
-        for (let i in column) {
-            if (GameController.isSquareHasEnemy(column[i].slice(-1)[0], enemy_color, ["queen", "rook"])) {
-                if (get_dangerous_path_squares)
-                    dangerous_paths = dangerous_paths.concat(column["top"].concat(column["bottom"]));
-                else
-                    return true;
-            }
-        }
-
+       // Control for Enemy Knight
+        const knight_control = this.#calcKnightPath(square_id);
+        console.log(knight_control);
         /*
-        // TODO: Knight, Pawn ve king de hesaplanacak.
-        */
-        return dangerous_paths.length != 0 ? dangerous_paths : false;
+        l = knight_control.length;
+        for(let i = 0; i<l; i++){
+            if(GameController.isSquareHasPiece(knight_control[i], enemy_color, ["knight"])){
+                if(get_dangerous_path_squares)
+                    dangerous_paths = dangerous_paths.concat(diagonal_control);
+                else
+                    return true;
+            }
+        }
+        return dangerous_paths.length != 0 ? dangerous_paths : false;*/
     }
 
     /**

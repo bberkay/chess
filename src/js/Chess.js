@@ -48,7 +48,7 @@ class Chess{
         else if(square_playable_control){
             // If clicked square has no piece but is playable then move
             this.#movePiece(square_id);
-            //this.#controlCheck();
+            this.#controlCheck();
             this.#endTurn();
         }
         else{
