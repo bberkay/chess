@@ -52,15 +52,14 @@ class Chess{
         else if(square_playable_control){
             // If clicked square has no piece but is playable then move
             this.#movePiece(square_id);
-            this.#controlCheck();
             this.#endTurn();
+            this.#controlCheck();
         }
         else{
             // If clicked piece is already selected then unselect piece
             this.board.refreshBoard();
             this.#unselectPiece();
         }
-        
     }
 
     /**
@@ -122,13 +121,13 @@ class Chess{
      * @returns {void}
      */
     #controlCheck(){
-        const enemy_king = GameController.getEnemyKing();
-        const enemy_king_square_id = GameController.getEnemyKingSquareID();
+        const player_king = GameController.getPlayerKing();
+        const player_king_square_id = GameController.getPlayerKingSquareID();
 
         // Set checked player and give effect the checked king
         if(this.engine.isCheck()){
-            gl_checked_player = enemy_king.color;
-            this.board.setEffectOfSquare(enemy_king_square_id, "checked");
+            gl_checked_player = player_king.color;
+            this.board.setEffectOfSquare(player_king_square_id, "checked");
         }
     }
 
