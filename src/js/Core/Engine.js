@@ -33,11 +33,10 @@ class Engine {
     /**
      * Calculate Bishop Playable Squares/Path
      * @param {int} square_id Square ID of the bishop
-     * @param {boolean} piece_sensivity To avoid tripping over other pieces.
      * @returns {Array<int>}
      */
-    getPlayableSquaresOfBishop(square_id, piece_sensivity) {
-        let squares = this.#calcBishopPath(square_id, piece_sensivity);
+    getPlayableSquaresOfBishop(square_id) {
+        let squares = this.#calcBishopPath(square_id);
 
         return this.#jsonPathToArrayPath(squares);
     }
@@ -45,11 +44,10 @@ class Engine {
     /**
      * Calculate Rook Playable Squares/Path
      * @param {int} square_id Square ID of the rook
-     * @param {boolean} piece_sensivity To avoid tripping over other pieces.
      * @returns {Array<int>}
      */
-    getPlayableSquaresOfRook(square_id, piece_sensivity) {
-        let squares = this.#calcRookPath(square_id, piece_sensivity);
+    getPlayableSquaresOfRook(square_id) {
+        let squares = this.#calcRookPath(square_id);
 
         return this.#jsonPathToArrayPath(squares);
     }
@@ -57,11 +55,10 @@ class Engine {
     /**
      * Calculate Queen Playable Squares/Path
      * @param {int} square_id Square ID of the queen
-     * @param {boolean} piece_sensivity To avoid tripping over other pieces.
      * @returns {Array<int>}
      */
-    getPlayableSquaresOfQueen(square_id, piece_sensivity) {
-        let squares = this.#calcQueenPath(square_id, piece_sensivity);
+    getPlayableSquaresOfQueen(square_id) {
+        let squares = this.#calcQueenPath(square_id);
 
         return this.#jsonPathToArrayPath(squares);
     }
@@ -69,23 +66,23 @@ class Engine {
     /**
      * Calculate King Playable Squares/Path
      * @param {int} square_id Square ID of the king
-     * @param {boolean} piece_sensivity To avoid tripping over other pieces.
      * @returns {Array<int>}
      */
-    getPlayableSquaresOfKing(square_id, piece_sensivity) {
-        let squares = this.#calcKingPath(square_id, piece_sensivity);
+    getPlayableSquaresOfKing(square_id) {
+        let squares = this.#jsonPathToArrayPath(this.#calcKingPath(square_id));
+        let get_dangerous_squares = gl_current_dangerous_squares;
 
-        return this.#jsonPathToArrayPath(squares);
+        squares = squares.filter(item => !get_dangerous_squares.includes(item));
+        return squares;
     }
 
     /**
      * Calculate Pawn Playable Squares/Path
      * @param {int} square_id Square ID of the pawn
-     * @param {boolean} piece_sensivity To avoid tripping over other pieces.
      * @returns {Array<int>}
      */
-    getPlayableSquaresOfPawn(square_id, piece_sensivity) {
-        let squares = this.#calcPawnPath(square_id, piece_sensivity);
+    getPlayableSquaresOfPawn(square_id) {
+        let squares = this.#calcPawnPath(square_id);
 
         return this.#jsonPathToArrayPath(squares);
     }
@@ -93,11 +90,10 @@ class Engine {
     /**
      * Calculate Knight Playable Squares/Path
      * @param {int} square_id Square ID of the knight
-     * @param {boolean} piece_sensivity To avoid tripping over other pieces.
      * @returns {Array<int>}
      */
-    getPlayableSquaresOfKnight(square_id, piece_sensivity) {
-        let squares = this.#calcKnightPath(square_id, piece_sensivity);
+    getPlayableSquaresOfKnight(square_id) {
+        let squares = this.#calcKnightPath(square_id);
     }
 
     /**
@@ -149,7 +145,6 @@ class Engine {
      * Calculate Pawn Path
      * @private
      * @param {int} square_id Square ID of the pawn
-     * @param {boolean} piece_sensivity To avoid tripping over other pieces.
      * @returns {JSON}
      */
     #calcPawnPath(square_id) {
@@ -248,25 +243,24 @@ class Engine {
      * @private
      * Calculate King Path
      * @param {int} square_id Square ID of the king
-     * @param {boolean} piece_sensivity To avoid tripping over other pieces.
      * @returns {JSON}
      */
-    #calcKingPath(square_id, piece_sensivity) {
+    #calcKingPath(square_id) {
         return {
             // get first square of column, row and diagonal
             ...this.#calcPlayableColumnSquares({
                 square_id: square_id,
-                piece_sensivity: piece_sensivity,
+                piece_sensivity: true,
                 distance_limit: 1
             }),
             ...this.#calcPlayableRowSquares({
                 square_id: square_id,
-                piece_sensivity: piece_sensivity,
+                piece_sensivity: true,
                 distance_limit: 1
             }),
             ...this.#calcPlayableDiagonalSquares({
                 square_id: square_id,
-                piece_sensivity: piece_sensivity,
+                piece_sensivity: true,
                 distance_limit: 1
             })
         }
@@ -578,7 +572,7 @@ class Engine {
      * Is Check ?
      * @returns {(Array<int>|boolean)}
      */
-    isCheck(get_dangerous_squares = false) {
+    isCheck() {
         /**
          * Set Operation that connected to Path
          * @param {string} current_path_direction
@@ -627,12 +621,8 @@ class Engine {
 
                 // If current square has an any dangerous enemy then player's "checked" and return true or dangerous squares
                 let res = GameController.isSquareHasPiece(diagonal_row_column_path[i][j], enemy_color, enemy_types);
-                if (res) {
-                    if (get_dangerous_squares)
-                        dangerous_squares = getPathConnection(i, diagonal_row_column_path);
-                    else
-                        return true;
-                }
+                if (res)
+                    gl_current_dangerous_squares = getPathConnection(i, diagonal_row_column_path);
             }
         }
 
@@ -641,15 +631,11 @@ class Engine {
         const knight_control = this.#calcKnightPath(square_id);
         l = knight_control.length;
         for (let i = 0; i < l; i++) {
-            if (GameController.isSquareHasPiece(knight_control[i], enemy_color, ["knight"])) {
-                if (get_dangerous_squares)
-                    dangerous_squares = dangerous_squares.concat(knight_control);
-                else
-                    return true;
-            }
+            if (GameController.isSquareHasPiece(knight_control[i], enemy_color, ["knight"]))
+                gl_current_dangerous_squares = gl_current_dangerous_squares.concat(knight_control);
         }
 
-        return dangerous_squares.length !== 0 ? dangerous_squares : false;
+        return gl_current_dangerous_squares.length !== 0;
     }
 
     /**

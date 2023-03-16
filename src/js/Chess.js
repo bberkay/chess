@@ -53,6 +53,7 @@ class Chess{
             // If clicked square has no piece but is playable then move
             this.#movePiece(square_id);
             this.#endTurn();
+            // Eğer şah oynanırsa is check diye kontrol etmeye gerek yok.
             this.#controlCheck();
         }
         else{

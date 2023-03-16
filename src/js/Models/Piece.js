@@ -12,7 +12,7 @@ class Piece extends Engine{
         this.color = color;
 
         // Set white and black king
-        if(this.type == "king") // NOTE: Bunun varlığı düşünülecek check işlemlerinden sonra
+        if(this.type === "king") // NOTE: Bunun varlığı düşünülecek check işlemlerinden sonra
             GameController.setKing(this);
 
         // Set Target Square Content to this piece
@@ -24,7 +24,7 @@ class Piece extends Engine{
     * @returns {Array<int>}
     */
     getPlayableSquaresOfPiece() {
-        var playable_squares_id = [];
+        let playable_squares_id = [];
         switch (this.type) {
             case "rook":
                 playable_squares_id = this.getPlayableSquaresOfRook(GameController.getSquareIDByPiece(this));
