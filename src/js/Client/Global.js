@@ -26,9 +26,6 @@ var gl_white_king = null;
 var gl_black_king = null;
 var gl_id_list = []; // Pieces ID
 
-var gl_current_dangerous_squares = null; // Squares that the king(enemy or player) cannot play.
-// This global variable was created to prevent it from being calculated twice.
-
 /**
  * Castling control 
  * null for starting and can be done

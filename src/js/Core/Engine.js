@@ -37,6 +37,7 @@ class Engine {
      */
     getPlayableSquaresOfBishop(square_id) {
         let squares = this.#calcBishopPath(square_id);
+        squares = this.#filterPlayableSquares(square_id, squares);
 
         return this.#jsonPathToArrayPath(squares);
     }
@@ -48,6 +49,7 @@ class Engine {
      */
     getPlayableSquaresOfRook(square_id) {
         let squares = this.#calcRookPath(square_id);
+        squares = this.#filterPlayableSquares(square_id, squares);
 
         return this.#jsonPathToArrayPath(squares);
     }
@@ -59,7 +61,8 @@ class Engine {
      */
     getPlayableSquaresOfQueen(square_id) {
         let squares = this.#calcQueenPath(square_id);
-
+        squares = this.#filterPlayableSquares(square_id, squares);
+        
         return this.#jsonPathToArrayPath(squares);
     }
 
@@ -69,11 +72,22 @@ class Engine {
      * @returns {Array<int>}
      */
     getPlayableSquaresOfKing(square_id) {
+        let playable_squares = [];
         let squares = this.#jsonPathToArrayPath(this.#calcKingPath(square_id));
-        let get_dangerous_squares = gl_current_dangerous_squares;
 
-        squares = squares.filter(item => !get_dangerous_squares.includes(item));
-        return squares;
+        let king = GameController.getPlayerKing();
+
+        const temp = square_id; 
+        squares.forEach(square => {
+            // Check every playable squares is checked then add unchecked squares to playable squares list
+            GameController.changeSquare(square, king);
+            GameController.changeSquare(square_id, 0);
+            if(!this.isCheck())
+                playable_squares.push(square);
+            GameController.changeSquare(square, 0);
+        });
+        GameController.changeSquare(temp, king); // set king to default position
+        return playable_squares;
     }
 
     /**
@@ -83,6 +97,7 @@ class Engine {
      */
     getPlayableSquaresOfPawn(square_id) {
         let squares = this.#calcPawnPath(square_id);
+        squares = this.#filterPlayableSquares(square_id, squares);
 
         return this.#jsonPathToArrayPath(squares);
     }
@@ -94,6 +109,9 @@ class Engine {
      */
     getPlayableSquaresOfKnight(square_id) {
         let squares = this.#calcKnightPath(square_id);
+        squares = this.#filterPlayableSquares(square_id, squares);
+
+        return squares;
     }
 
     /**
@@ -175,10 +193,12 @@ class Engine {
         })[route];
 
         // is first diagonal squares has enemy piece then add playable squares
-        diagonal_control.filter(item => {
-            if (GameController.isSquareHasPiece(item, gl_current_move === "white" ? "black" : "white"))
-                playable_squares.push(item);
-        })
+        if(diagonal_control){
+            diagonal_control.filter(item => {
+                if (GameController.isSquareHasPiece(item, gl_current_move === "white" ? "black" : "white"))
+                    playable_squares.push(item);
+            })
+        }
 
         return playable_squares;
     }
@@ -268,21 +288,23 @@ class Engine {
 
 
     /**
-     * @deprecated
      * Get playable path to not to be check/avoid endangering the king
+     * @param {int} square_id Square ID of current piece
      * @param {JSON} playable_squares Playable Squares of Target Piece
      * @example {"top":[4,6,7], "top-right":[3,2,1]}
      * @returns {JSON} {"top":[2,3,4], "bottom":[5,6,7]}
      */
-    #filterPlayableSquares(playable_squares) {
+    #filterPlayableSquares(square_id, playable_squares) {
         let playable_paths = [];
-        let king_square_id = GameController.getKingSquareID({player: true});
-
+        let king_square_id = GameController.getPlayerKingSquareID();
+        let current_piece = GameController.getPieceBySquareID(square_id);
+        
+        
         for (let i in playable_squares) {
             let target_square_for_enemy_control = playable_squares[i].slice(-1)[0]; // Get last square of the path
 
             // Control, is last square has enemy
-            let enemy_control = GameController.isSquareHasEnemy(target_square_for_enemy_control, this.color, this.type == "queen" ? ["queen", "bishop", "rook"] : [this.type]);
+            let enemy_control = GameController.isSquareHasPiece(target_square_for_enemy_control, gl_current_move == "white" ? "black" : "white", current_piece.type == "queen" ? ["queen", "bishop", "rook"] : [current_piece.type]);
             if (enemy_control) {
                 let enemy = GameController.getPieceBySquareID(target_square_for_enemy_control);
                 if (enemy.type == "bishop" || enemy.type == "queen") {
@@ -294,6 +316,7 @@ class Engine {
                         // Is current piece guard king
                         if (i == "top-left" && target_square_for_king_control + 9 == king_square_id || i == "bottom-right" && target_square_for_king_control - 9 == king_square_id)
                             playable_paths = ["bottom-right", "top-left"];
+
                     } else if (i == "top-right" || i == "bottom-left") {
                         // if enemy on top-right or bottom-left then just move bottom-left and top-right squares
                         let target_square_for_king_control = playable_squares[i == "top-right" ? "bottom-left" : "top-right"].slice(-1)[0];
@@ -379,7 +402,7 @@ class Engine {
         // Bottom of Column
         counter = 1;
         path = [];
-
+        
         for (let i = square_id + 8; i < 65; i += 8) {
             if (distance_limit && counter > distance_limit)
                 break;
@@ -622,7 +645,7 @@ class Engine {
                 // If current square has an any dangerous enemy then player's "checked" and return true or dangerous squares
                 let res = GameController.isSquareHasPiece(diagonal_row_column_path[i][j], enemy_color, enemy_types);
                 if (res)
-                    gl_current_dangerous_squares = getPathConnection(i, diagonal_row_column_path);
+                    dangerous_squares = getPathConnection(i, diagonal_row_column_path);
             }
         }
 
@@ -632,18 +655,9 @@ class Engine {
         l = knight_control.length;
         for (let i = 0; i < l; i++) {
             if (GameController.isSquareHasPiece(knight_control[i], enemy_color, ["knight"]))
-                gl_current_dangerous_squares = gl_current_dangerous_squares.concat(knight_control);
+                dangerous_squares = gl_current_dangerous_squares.concat(knight_control);
         }
 
-        return gl_current_dangerous_squares.length !== 0;
-    }
-
-    /**
-     * Delete unplayable squares of playable squares for keep king safe
-     * @param {Array<int>} playable_squares Playable Squares of current piece
-     * @returns {Array<int>}
-     */
-    filterPlayableSquares(playable_squares) {
-        // TODO: Sıra burada ama mevcut sistem de knight patlıyor gibi duruyor
+        return dangerous_squares.length !== 0;
     }
 }
