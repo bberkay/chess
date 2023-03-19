@@ -59,7 +59,7 @@ class Piece extends Engine {
      */
     #getPlayableSquaresOfBishop(square_id) {
         let squares = this.calcBishopPath(square_id);
-        squares = this.filterPlayableSquares(square_id, squares);
+        squares = this.#filterPlayableSquares(square_id, squares);
 
         return this.jsonPathToArrayPath(squares);
     }
@@ -72,7 +72,7 @@ class Piece extends Engine {
      */
     #getPlayableSquaresOfRook(square_id) {
         let squares = this.calcRookPath(square_id);
-        squares = this.filterPlayableSquares(square_id, squares);
+        squares = this.#filterPlayableSquares(square_id, squares);
 
         return this.jsonPathToArrayPath(squares);
     }
@@ -84,10 +84,7 @@ class Piece extends Engine {
      * @returns {Array<int>}
      */
     #getPlayableSquaresOfQueen(square_id) {
-        let squares = this.calcQueenPath(square_id);
-        squares = this.filterPlayableSquares(square_id, squares);
-
-        return this.jsonPathToArrayPath(squares);
+        return this.#filterPlayableSquaresNew(square_id, this.calcQueenPath(square_id));
     }
 
     /**
@@ -123,7 +120,7 @@ class Piece extends Engine {
      */
     #getPlayableSquaresOfPawn(square_id) {
         let squares = this.calcPawnPath(square_id);
-        squares = this.filterPlayableSquares(square_id, squares);
+        squares = this.#filterPlayableSquares(square_id, squares);
 
         return this.jsonPathToArrayPath(squares);
     }
@@ -136,12 +133,13 @@ class Piece extends Engine {
      */
     #getPlayableSquaresOfKnight(square_id) {
         let squares = this.calcKnightPath(square_id);
-        squares = this.filterPlayableSquares(square_id);
+        squares = this.#filterPlayableSquares(square_id);
 
         return this.jsonPathToArrayPath(squares);
     }
 
     /**
+     * @deprecated
      * @private
      * Get playable path to not to be check/avoid endangering the king
      * @param {int} square_id Square ID of current piece
@@ -201,6 +199,33 @@ class Piece extends Engine {
         for (let i in playable_squares) {
             if (!playable_paths.includes(i))
                 delete playable_squares[i];
+        }
+
+        return playable_squares;
+    }
+
+
+    /**
+     * @private
+     * Get playable path to not to be check/avoid endangering the king
+     * @param {int} square_id Square ID of current piece
+     * @param {JSON} playable_squares Playable Squares of Target Piece
+     * @returns {Array<int>}
+     */
+    #filterPlayableSquaresNew(square_id, playable_squares = null){
+        let king = GameController.getPlayerKingSquareID();
+        
+        // get diagonal, row and column with calcqueenpath method
+        let routes = this.calcQueenPath(square_id);
+
+        for(let i in routes){
+            // check all squares on the route
+            routes[i].forEach(item => {
+                // if king in guardable area
+                if(item - 9 == king || item - 7 == king || item + 1 == king || item - 1 == king || item + 9 == king || item + 7 == king || item - 8 == king || item + 8 == king){
+                    console.log("King in guardable area: ", king);
+                }
+            })
         }
 
         return playable_squares;
