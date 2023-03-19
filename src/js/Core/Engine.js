@@ -1,5 +1,6 @@
 class Engine {
     /**
+     * @public 
      * Create ID for piece(between 1000 and 9999)
      * @returns {int}
      */
@@ -14,13 +15,13 @@ class Engine {
     }
 
     /**
-     * @private
+     * @public 
      * Convert JSON Path to ArrayList Path
      * @example input is {"top":[3,4,5], "bottom":[8,9,10]} and output is [3,4,5,8,9,10]
      * @param {JSON} json_path JSON Path to convert
      * @returns {Array<int>}
      */
-    #jsonPathToArrayPath(json_path) {
+    jsonPathToArrayPath(json_path) {
         let array_path = [];
         for (let i in json_path) {
             for (let j in json_path[i]) {
@@ -31,97 +32,13 @@ class Engine {
     }
 
     /**
-     * Calculate Bishop Playable Squares/Path
-     * @param {int} square_id Square ID of the bishop
-     * @returns {Array<int>}
-     */
-    getPlayableSquaresOfBishop(square_id) {
-        let squares = this.#calcBishopPath(square_id);
-        squares = this.#filterPlayableSquares(square_id, squares);
-
-        return this.#jsonPathToArrayPath(squares);
-    }
-
-    /**
-     * Calculate Rook Playable Squares/Path
-     * @param {int} square_id Square ID of the rook
-     * @returns {Array<int>}
-     */
-    getPlayableSquaresOfRook(square_id) {
-        let squares = this.#calcRookPath(square_id);
-        squares = this.#filterPlayableSquares(square_id, squares);
-
-        return this.#jsonPathToArrayPath(squares);
-    }
-
-    /**
-     * Calculate Queen Playable Squares/Path
-     * @param {int} square_id Square ID of the queen
-     * @returns {Array<int>}
-     */
-    getPlayableSquaresOfQueen(square_id) {
-        let squares = this.#calcQueenPath(square_id);
-        squares = this.#filterPlayableSquares(square_id, squares);
-        
-        return this.#jsonPathToArrayPath(squares);
-    }
-
-    /**
-     * Calculate King Playable Squares/Path
-     * @param {int} square_id Square ID of the king
-     * @returns {Array<int>}
-     */
-    getPlayableSquaresOfKing(square_id) {
-        let playable_squares = [];
-        let squares = this.#jsonPathToArrayPath(this.#calcKingPath(square_id));
-
-        let king = GameController.getPlayerKing();
-
-        const temp = square_id; 
-        squares.forEach(square => {
-            // Check every playable squares is checked then add unchecked squares to playable squares list
-            GameController.changeSquare(square, king);
-            GameController.changeSquare(square_id, 0);
-            if(!this.isCheck())
-                playable_squares.push(square);
-            GameController.changeSquare(square, 0);
-        });
-        GameController.changeSquare(temp, king); // set king to default position
-        return playable_squares;
-    }
-
-    /**
-     * Calculate Pawn Playable Squares/Path
-     * @param {int} square_id Square ID of the pawn
-     * @returns {Array<int>}
-     */
-    getPlayableSquaresOfPawn(square_id) {
-        let squares = this.#calcPawnPath(square_id);
-        squares = this.#filterPlayableSquares(square_id, squares);
-
-        return this.#jsonPathToArrayPath(squares);
-    }
-
-    /**
-     * Calculate Knight Playable Squares/Path
-     * @param {int} square_id Square ID of the knight
-     * @returns {Array<int>}
-     */
-    getPlayableSquaresOfKnight(square_id) {
-        let squares = this.#calcKnightPath(square_id);
-        squares = this.#filterPlayableSquares(square_id, squares);
-
-        return squares;
-    }
-
-    /**
-     * @private
+     * @public 
      * Calculate Bishop Path
      * @param {int} square_id Square ID of the bishop
      * @param {boolean} piece_sensivity To avoid tripping over other pieces.
      * @returns {JSON}
      */
-    #calcBishopPath(square_id, piece_sensivity = true) {
+    calcBishopPath(square_id, piece_sensivity = true) {
         return {
             // get all squares of diagonal
             ...this.#calcPlayableDiagonalSquares({square_id: square_id, piece_sensivity: piece_sensivity})
@@ -129,13 +46,13 @@ class Engine {
     }
 
     /**
-     * @private
+     * @public 
      * Calculate Rook Path
      * @param {int} square_id Square ID of the rook
      * @param {boolean} piece_sensivity To avoid tripping over other pieces.
      * @returns {JSON}
      */
-    #calcRookPath(square_id, piece_sensivity = true) {
+    calcRookPath(square_id, piece_sensivity = true) {
         return {
             // get all squares of column and row
             ...this.#calcPlayableColumnSquares({square_id: square_id, piece_sensivity: piece_sensivity}),
@@ -144,13 +61,13 @@ class Engine {
     }
 
     /**
-     * @private
+     * @public 
      * Calculate Queen Path
      * @param {int} square_id Square ID of the queen
      * @param {boolean} piece_sensivity To avoid tripping over other pieces.
      * @returns {JSON}
      */
-    #calcQueenPath(square_id, piece_sensivity = true) {
+    calcQueenPath(square_id, piece_sensivity = true) {
         return {
             // get all squares of column, row and diagonal(UNLIMITED POWEEEER!!!)
             ...this.#calcPlayableColumnSquares({square_id: square_id, piece_sensivity: piece_sensivity}),
@@ -160,12 +77,12 @@ class Engine {
     }
 
     /**
+     * @public 
      * Calculate Pawn Path
-     * @private
      * @param {int} square_id Square ID of the pawn
      * @returns {JSON}
      */
-    #calcPawnPath(square_id) {
+    calcPawnPath(square_id) {
         let limit = 0;
         let route = "";
         let row_of_pawn = this.#calcRowOfSquare(square_id);
@@ -204,15 +121,15 @@ class Engine {
     }
 
     /**
-     * @private
+     * @public 
      * Calculate Knight Path
      * @param {int} square_id Square ID of the knight
      * @param {boolean} piece_sensivity To avoid tripping over other pieces.
      * @returns {Array<int>}
      */
-    #calcKnightPath(square_id, piece_sensivity = true) {
+    calcKnightPath(square_id, piece_sensivity = true) {
         // get 2 squares of column
-        let column = this.#jsonPathToArrayPath(this.#calcPlayableColumnSquares({
+        let column = this.jsonPathToArrayPath(this.#calcPlayableColumnSquares({
             square_id: square_id,
             distance_limit: 2,
             piece_sensivity: piece_sensivity
@@ -221,7 +138,7 @@ class Engine {
             return square_id === item - 16 || square_id === item + 16
         });
         // get 2 squares of row
-        let row = this.#jsonPathToArrayPath(this.#calcPlayableRowSquares({
+        let row = this.jsonPathToArrayPath(this.#calcPlayableRowSquares({
             square_id: square_id,
             distance_limit: 2,
             piece_sensivity: piece_sensivity
@@ -232,7 +149,7 @@ class Engine {
         // get first square of left side and right side at end of the column 
         let column_sides = [];
         column.forEach(item => {
-            column_sides.push(this.#jsonPathToArrayPath(this.#calcPlayableRowSquares({
+            column_sides.push(this.jsonPathToArrayPath(this.#calcPlayableRowSquares({
                 square_id: item,
                 distance_limit: 1,
                 piece_sensivity: piece_sensivity
@@ -241,7 +158,7 @@ class Engine {
         // get first square of top side and bottom side at end of the row
         let row_sides = [];
         row.forEach(item => {
-            row_sides.push(this.#jsonPathToArrayPath(this.#calcPlayableColumnSquares({
+            row_sides.push(this.jsonPathToArrayPath(this.#calcPlayableColumnSquares({
                 square_id: item,
                 distance_limit: 1,
                 piece_sensivity: piece_sensivity
@@ -260,12 +177,12 @@ class Engine {
     }
 
     /**
-     * @private
+     * @public 
      * Calculate King Path
      * @param {int} square_id Square ID of the king
      * @returns {JSON}
      */
-    #calcKingPath(square_id) {
+    calcKingPath(square_id) {
         return {
             // get first square of column, row and diagonal
             ...this.#calcPlayableColumnSquares({
@@ -569,7 +486,7 @@ class Engine {
         const enemy_color = gl_current_move === "white" ? "black" : "white";
 
         // Control for Enemy Bishop, Queen, Rook
-        const diagonal_row_column_path = this.#calcQueenPath(square_id); // Get all path
+        const diagonal_row_column_path = this.calcQueenPath(square_id); // Get all path
         let l = 0;
         for (let i in diagonal_row_column_path) {
             l = diagonal_row_column_path[i].length;
@@ -589,7 +506,7 @@ class Engine {
 
 
         // Control for Enemy Knight
-        const knight_control = this.#calcKnightPath(square_id);
+        const knight_control = this.calcKnightPath(square_id);
         l = knight_control.length;
         for (let i = 0; i < l; i++) {
             if (GameController.isSquareHasPiece(knight_control[i], enemy_color, ["knight"]))
@@ -598,95 +515,5 @@ class Engine {
 
         return dangerous_squares.length !== 0;
     }
-
-
-    /**
-     * Get playable path to not to be check/avoid endangering the king
-     * @param {int} square_id Square ID of current piece
-     * @param {JSON} playable_squares Playable Squares of Target Piece
-     * @example {"top":[4,6,7], "top-right":[3,2,1]}
-     * @returns {JSON} {"top":[2,3,4], "bottom":[5,6,7]}
-     */
-    #filterPlayableSquares(square_id, playable_squares){
-        let piece = GameController.getPieceBySquareID(square_id);
-
-        // Is piece can guard king and can kill enemy
-        if(["queen", "rook", "bishop"].includes(piece.type))
-            this.#filterPlayableSquaresCanKill(square_id, playable_squares);
-        else // Is piece just can guard king and not kill enemy(pawn and king)
-            this.#filterPlayableSquaresCantKill(square_id, playable_squares);
-    }
     
-    
-    /**
-     * Get playable path to not to be check/avoid endangering the king
-     * @param {int} square_id Square ID of current piece
-     * @param {JSON} playable_squares Playable Squares of Target Piece
-     * @example {"top":[4,6,7], "top-right":[3,2,1]}
-     * @returns {JSON} {"top":[2,3,4], "bottom":[5,6,7]}
-     */
-    #filterPlayableSquaresCanKill(square_id, playable_squares) {
-        let playable_paths = [];
-        let king_square_id = GameController.getPlayerKingSquareID();
-        let current_piece = GameController.getPieceBySquareID(square_id);
-        
-
-        for (let i in playable_squares) {
-            let target_square_for_enemy_control = playable_squares[i].slice(-1)[0]; // Get last square of the path
-
-            // Control, is last square has enemy
-            let enemy_control = GameController.isSquareHasPiece(target_square_for_enemy_control, gl_current_move == "white" ? "black" : "white", current_piece.type == "queen" ? ["queen", "bishop", "rook"] : [current_piece.type]);
-            if (enemy_control) {
-                let enemy = GameController.getPieceBySquareID(target_square_for_enemy_control);
-                if (enemy.type == "bishop" || enemy.type == "queen") {
-                    // If enemy type is bishop or queen then current piece just move ...
-                    if (i == "top-left" || i == "bottom-right") {
-                        // if enemy on top-left or bottom-right then current piece just move bottom-right and top-left squares
-                        let target_square_for_king_control = playable_squares[i == "top-left" ? "bottom-right" : "top-left"].slice(-1)[0];
-
-                        // Is current piece guard king
-                        if (i == "top-left" && target_square_for_king_control + 9 == king_square_id || i == "bottom-right" && target_square_for_king_control - 9 == king_square_id)
-                            playable_paths = ["bottom-right", "top-left"];
-
-                    } else if (i == "top-right" || i == "bottom-left") {
-                        // if enemy on top-right or bottom-left then just move bottom-left and top-right squares
-                        let target_square_for_king_control = playable_squares[i == "top-right" ? "bottom-left" : "top-right"].slice(-1)[0];
-
-                        // Is current piece guard king
-                        if (i == "top-right" && target_square_for_king_control + 7 == king_square_id || i == "bottom-left" && target_square_for_king_control - 7 == king_square_id)
-                            playable_paths = ["top-right", "bottom-left"];
-                    }
-                }
-                if (enemy.type == "rook" || enemy.type == "queen") {
-                    // If enemy type is rook or queen then current piece just move ...
-                    if (i == "top" || i == "bottom") {
-                        // If enemy on top or bottom then current piece just move bottom and top squares
-                        let target_square_for_king_control = playable_squares[i == "top" ? "bottom" : "top"].slice(-1)[0];
-
-                        // Is current piece guard king
-                        if (i == "top" && target_square_for_king_control + 8 === king_square_id || i == "bottom" && target_square_for_king_control - 8 == king_square_id)
-                            playable_paths = ["top", "bottom"];
-                    }
-                }
-            }
-        }
-
-        // Delete unplayable paths in playable squares/paths to avoid endangering the king
-        for (let i in playable_squares) {
-            if (!playable_paths.includes(i))
-                delete playable_squares[i];
-        }
-
-        return playable_squares;
-    }
-
-    
-    /**
-     * Get playable path to not to be check/avoid endangering the king
-     * @param {int} square_id Square ID of current piece
-     * @param {JSON} playable_squares Playable Squares of Target Piece
-     * @example {"top":[4,6,7], "top-right":[3,2,1]}
-     * @returns {JSON} {"top":[2,3,4], "bottom":[5,6,7]}
-     */
-    #filterPlayableSquaresCantKill(square_id, playable_squares){}
 }
