@@ -58,10 +58,7 @@ class Piece extends Engine {
      * @returns {Array<int>}
      */
     #getPlayableSquaresOfBishop(square_id) {
-        let squares = this.calcBishopPath(square_id);
-        squares = this.#filterPlayableSquares(square_id, squares);
-
-        return this.jsonPathToArrayPath(squares);
+        return this.jsonPathToArrayPath(this.#filterPlayableSquaresNew(square_id, this.calcBishopPath(square_id)));
     }
 
     /**
@@ -71,10 +68,7 @@ class Piece extends Engine {
      * @returns {Array<int>}
      */
     #getPlayableSquaresOfRook(square_id) {
-        let squares = this.calcRookPath(square_id);
-        squares = this.#filterPlayableSquares(square_id, squares);
-
-        return this.jsonPathToArrayPath(squares);
+        return this.jsonPathToArrayPath(this.#filterPlayableSquaresNew(square_id, this.calcRookPath(square_id)));
     }
 
     /**
@@ -84,7 +78,7 @@ class Piece extends Engine {
      * @returns {Array<int>}
      */
     #getPlayableSquaresOfQueen(square_id) {
-        return this.#filterPlayableSquaresNew(square_id, this.calcQueenPath(square_id));
+        return this.jsonPathToArrayPath(this.#filterPlayableSquaresNew(square_id, this.calcQueenPath(square_id)));
     }
 
     /**
@@ -217,14 +211,40 @@ class Piece extends Engine {
         
         // get diagonal, row and column with calcqueenpath method
         let routes = this.calcQueenPath(square_id);
-
+        let playable_paths = [];
+        let enemy_types = [];
+        let control = null;
         for(let i in routes){
-            // check all squares on the route
-            routes[i].forEach(item => {
-                // if king in guardable area
-                if(item - 9 == king || item - 7 == king || item + 1 == king || item - 1 == king || item + 9 == king || item + 7 == king || item - 8 == king || item + 8 == king){
-                    console.log("King in guardable area: ", king);
-                }
+            // check last square on the route
+            control = routes[i][routes[i].length - 1];
+            
+            // if player's king in guardable area
+            if(i == "top-right" && control - 7 == king || i == "bottom-left" && control + 7 == king){
+                playable_paths = ["top-right", "bottom-left"];
+                enemy_types = ["queen", "bishop"];
+            }
+            else if(i == "top-left" && control - 9 == king || i == "bottom-right" && control + 9 == king){
+                playable_paths = ["top-left", "bottom-right"];
+                enemy_types = ["queen", "bishop"];
+            }
+            else if(i == "top" && control - 8 == king || i == "bottom" && control + 8 == king){
+                playable_paths = ["top", "bottom"];
+                enemy_types = ["rook", "queen"];
+            }
+            else if(i == "left" && control - 1 == king || i == "right" && control + 1 == king){
+                playable_paths = ["left", "right"];
+                enemy_types = ["rook", "queen"];
+            }
+        }
+
+        if(playable_paths.length > 0){
+            playable_paths.forEach(path => {
+               routes[path].filter(item => { 
+                    if(GameController.isSquareHasPiece(item, gl_current_move == "white" ? "black" : "white", enemy_types)){
+                        // playable square den playable olmayan pathlerı çıkartma işlemi.
+                        console.log(playable_paths);
+                    }
+                });
             })
         }
 
