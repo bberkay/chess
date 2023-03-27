@@ -130,7 +130,7 @@ class Piece extends Engine {
      * @private
      * Get playable path to not to be check/avoid endangering the king
      * @param {int} square_id Square ID of current piece
-     * @param {JSON} playable_squares Playable Squares of Target Piece
+     * @param {(JSON|Array<int>)} playable_squares Playable Squares of Target Piece
      * @returns {Array<int>}
      */
     #filterPlayableSquares(square_id, playable_squares = null){
