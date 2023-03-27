@@ -1,4 +1,4 @@
-# JS-chess
+# Chess Engine
  Chess with Pure Javascript(not finished yet)
 
 ## Assets 
