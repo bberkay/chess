@@ -58,7 +58,7 @@ class Piece extends Engine {
      * @returns {Array<int>}
      */
     #getPlayableSquaresOfBishop(square_id) {
-        return this.jsonPathToArrayPath(this.#filterPlayableSquaresNew(square_id, this.calcBishopPath(square_id)));
+        return this.jsonPathToArrayPath(this.#filterPlayableSquares(square_id, this.calcBishopPath(square_id)));
     }
 
     /**
@@ -68,7 +68,7 @@ class Piece extends Engine {
      * @returns {Array<int>}
      */
     #getPlayableSquaresOfRook(square_id) {
-        return this.jsonPathToArrayPath(this.#filterPlayableSquaresNew(square_id, this.calcRookPath(square_id)));
+        return this.jsonPathToArrayPath(this.#filterPlayableSquares(square_id, this.calcRookPath(square_id)));
     }
 
     /**
@@ -78,7 +78,7 @@ class Piece extends Engine {
      * @returns {Array<int>}
      */
     #getPlayableSquaresOfQueen(square_id) {
-        return this.jsonPathToArrayPath(this.#filterPlayableSquaresNew(square_id, this.calcQueenPath(square_id)));
+        return this.jsonPathToArrayPath(this.#filterPlayableSquares(square_id, this.calcQueenPath(square_id)));
     }
 
     /**
@@ -113,10 +113,7 @@ class Piece extends Engine {
      * @returns {Array<int>}
      */
     #getPlayableSquaresOfPawn(square_id) {
-        let squares = this.calcPawnPath(square_id);
-        squares = this.#filterPlayableSquares(square_id, squares);
-
-        return this.jsonPathToArrayPath(squares);
+        return this.jsonPathToArrayPath(this.#filterPlayableSquares(square_id, this.calcPawnPath(square_id)));
     }
 
     /**
@@ -126,78 +123,8 @@ class Piece extends Engine {
      * @returns {Array<int>}
      */
     #getPlayableSquaresOfKnight(square_id) {
-        let squares = this.calcKnightPath(square_id);
-        squares = this.#filterPlayableSquares(square_id);
-
-        return this.jsonPathToArrayPath(squares);
+        return this.#filterPlayableSquares(square_id, this.calcKnightPath(square_id));
     }
-
-    /**
-     * @deprecated
-     * @private
-     * Get playable path to not to be check/avoid endangering the king
-     * @param {int} square_id Square ID of current piece
-     * @param {JSON} playable_squares Playable Squares of Target Piece
-     * @example {"top":[4,6,7], "top-right":[3,2,1]}
-     * @returns {JSON} {"top":[2,3,4], "bottom":[5,6,7]}
-     */
-    #filterPlayableSquares(square_id, playable_squares = null) {
-        let playable_paths = [];
-        let king_square_id = GameController.getPlayerKingSquareID();
-        
-        // If piece can guard king and can't kill enemy at the same time
-        if(!playable_squares)
-            playable_squares = this.calcQueenPath(square_id);
-        
-        for (let i in playable_squares) {
-            let target_square_for_enemy_control = playable_squares[i].slice(-1)[0]; // Get last square of the path
-
-            // Control, is last square has enemy
-            let enemy_control = GameController.isSquareHasPiece(target_square_for_enemy_control, gl_current_move == "white" ? "black" : "white", this.type == "queen" ? ["queen", "bishop", "rook"] : [this.type]);
-            if (enemy_control) {
-                let enemy = GameController.getPieceBySquareID(target_square_for_enemy_control);
-                if (enemy.type == "bishop" || enemy.type == "queen") {
-                    // If enemy type is bishop or queen then current piece just move ...
-                    if (i == "top-left" || i == "bottom-right") {
-                        // if enemy on top-left or bottom-right then current piece just move bottom-right and top-left squares
-                        let target_square_for_king_control = playable_squares[i == "top-left" ? "bottom-right" : "top-left"].slice(-1)[0];
-
-                        // Is current piece guard king
-                        if (i == "top-left" && target_square_for_king_control + 9 == king_square_id || i == "bottom-right" && target_square_for_king_control - 9 == king_square_id)
-                            playable_paths = ["bottom-right", "top-left"];
-
-                    } else if (i == "top-right" || i == "bottom-left") {
-                        // if enemy on top-right or bottom-left then just move bottom-left and top-right squares
-                        let target_square_for_king_control = playable_squares[i == "top-right" ? "bottom-left" : "top-right"].slice(-1)[0];
-
-                        // Is current piece guard king
-                        if (i == "top-right" && target_square_for_king_control + 7 == king_square_id || i == "bottom-left" && target_square_for_king_control - 7 == king_square_id)
-                            playable_paths = ["top-right", "bottom-left"];
-                    }
-                }
-                if (enemy.type == "rook" || enemy.type == "queen") {
-                    // If enemy type is rook or queen then current piece just move ...
-                    if (i == "top" || i == "bottom") {
-                        // If enemy on top or bottom then current piece just move bottom and top squares
-                        let target_square_for_king_control = playable_squares[i == "top" ? "bottom" : "top"].slice(-1)[0];
-
-                        // Is current piece guard king
-                        if (i == "top" && target_square_for_king_control + 8 === king_square_id || i == "bottom" && target_square_for_king_control - 8 == king_square_id)
-                            playable_paths = ["top", "bottom"];
-                    }
-                }
-            }
-        }
-
-        // Delete unplayable paths in playable squares/paths to avoid endangering the king
-        for (let i in playable_squares) {
-            if (!playable_paths.includes(i))
-                delete playable_squares[i];
-        }
-
-        return playable_squares;
-    }
-
 
     /**
      * @private
@@ -206,12 +133,12 @@ class Piece extends Engine {
      * @param {JSON} playable_squares Playable Squares of Target Piece
      * @returns {Array<int>}
      */
-    #filterPlayableSquaresNew(square_id, playable_squares = null){
+    #filterPlayableSquares(square_id, playable_squares = null){
         let king = GameController.getPlayerKingSquareID();
         
         // get diagonal, row and column with calcqueenpath method
         let routes = this.calcQueenPath(square_id);
-        let playable_paths = [];
+        let king_guard_route = [];
         let enemy_types = [];
         let control = null;
         for(let i in routes){
@@ -220,29 +147,47 @@ class Piece extends Engine {
             
             // if player's king in guardable area
             if(i == "top-right" && control - 7 == king || i == "bottom-left" && control + 7 == king){
-                playable_paths = ["top-right", "bottom-left"];
+                // king in top-right or bottom-left then playable paths are top-right and bottom-left
+                king_guard_route = ["top-right", "bottom-left"];
+                // dangerous enemies are queen and bishop
                 enemy_types = ["queen", "bishop"];
             }
             else if(i == "top-left" && control - 9 == king || i == "bottom-right" && control + 9 == king){
-                playable_paths = ["top-left", "bottom-right"];
+                // king in top-right or bottom-left then playable paths are top-left and bottom-right
+                king_guard_route = ["top-left", "bottom-right"];
+                // dangerous enemies are queen and bishop
                 enemy_types = ["queen", "bishop"];
             }
             else if(i == "top" && control - 8 == king || i == "bottom" && control + 8 == king){
-                playable_paths = ["top", "bottom"];
+                // king in top or bottom then playable paths are top and bottom
+                king_guard_route = ["top", "bottom"];
+                // dangerous enemies rook and queen
                 enemy_types = ["rook", "queen"];
             }
             else if(i == "left" && control - 1 == king || i == "right" && control + 1 == king){
-                playable_paths = ["left", "right"];
+                // king in left or right then playable paths are left and right
+                king_guard_route = ["left", "right"];
+                // dangerous enemies rook and queen
                 enemy_types = ["rook", "queen"];
             }
         }
-
-        if(playable_paths.length > 0){
-            playable_paths.forEach(path => {
-               routes[path].filter(item => { 
-                    if(GameController.isSquareHasPiece(item, gl_current_move == "white" ? "black" : "white", enemy_types)){
-                        // playable square den playable olmayan pathlerı çıkartma işlemi.
-                        console.log(playable_paths);
+     
+        // if correct enemy in king guard route then delete other squares that not in king guard route
+        if(king_guard_route.length > 0){
+            king_guard_route.forEach(path => {
+               routes[path].filter(item => { // traverse king guard route/playable paths squares
+                    if(GameController.isSquareHasPiece(item, gl_current_move == "white" ? "black" : "white", enemy_types)){ // if target square has any "enemy_types" enemy
+                        if(Array.isArray(playable_squares)){
+                            // if playable squares if array(this control for knight) delete squares that not in king guard squares
+                            playable_squares.filter(square => { !king_guard_route.includes(square) })
+                        }else{
+                            // if playable squares is json(this control for all pieces except pawn and knight) delete squares that not in king guard squares
+                            for(let t in playable_squares){
+                                if(!king_guard_route.includes(t)){
+                                    delete playable_squares[t];
+                                }
+                            }
+                        }
                     }
                 });
             })
