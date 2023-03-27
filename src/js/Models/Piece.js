@@ -179,7 +179,7 @@ class Piece extends Engine {
                     if(GameController.isSquareHasPiece(item, gl_current_move == "white" ? "black" : "white", enemy_types)){ // if target square has any "enemy_types" enemy
                         if(Array.isArray(playable_squares)){
                             // if playable squares if array(this control for knight) delete squares that not in king guard squares
-                            playable_squares.filter(square => { !king_guard_route.includes(square) })
+                            playable_squares = playable_squares.filter(square => { !king_guard_route.includes(square) })
                         }else{
                             // if playable squares is json(this control for all pieces except pawn and knight) delete squares that not in king guard squares
                             for(let t in playable_squares){
