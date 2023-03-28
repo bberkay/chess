@@ -128,7 +128,7 @@ class Chess{
         // Set checked player and give effect the checked king
         if(this.engine.isCheck()){
             gl_checked_player = player_king.color;
-            this.board.setEffectOfSquare(player_king_square_id, "checked");
+            this.board.setCheckedEffect();
         }
     }
 

@@ -112,7 +112,7 @@ class Engine {
         // is first diagonal squares has enemy piece then add playable squares
         if(diagonal_control){
             diagonal_control.filter(item => {
-                if (GameController.isSquareHasPiece(item, gl_current_move === "white" ? "black" : "white"))
+                if (GameController.isSquareHasPiece(item, GameController.getEnemyColor()))
                     playable_squares.push(item);
             })
         }
@@ -430,7 +430,7 @@ class Engine {
             if (GameController.isSquareHasPiece(target_square_id, gl_current_move)) {
                 squares.push("break");
                 return squares;
-            } else if (GameController.isSquareHasPiece(target_square_id, gl_current_move === "white" ? "black" : "white")) {
+            } else if (GameController.isSquareHasPiece(target_square_id, GameController.getEnemyColor())) {
                 squares.push(target_square_id);
                 squares.push("break");
                 return squares;
@@ -483,7 +483,7 @@ class Engine {
         let dangerous_squares = [];
 
         const square_id = GameController.getPlayerKingSquareID();
-        const enemy_color = gl_current_move === "white" ? "black" : "white";
+        const enemy_color = GameController.getEnemyColor();
 
         // Control for Enemy Bishop, Queen, Rook
         const diagonal_row_column_path = this.calcQueenPath(square_id); // Get all path

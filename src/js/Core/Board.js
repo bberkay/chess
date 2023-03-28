@@ -1,5 +1,12 @@
 class Board{
-    #Effects = { checked:"checked-effect", killable:"killable-effect", playable:"playable-effect"}
+    /**
+     * @enum {string}
+     */
+    #Effects = { 
+        checked:"checked-effect", 
+        killable:"killable-effect", 
+        playable:"playable-effect"
+    }
 
     /** 
      * Constructor
@@ -158,5 +165,13 @@ class Board{
      */
     setEffectOfSquare(square_id, effect){
         document.getElementById(square_id.toString()).classList.add(effect);
+    }
+
+    /**
+     * Set checked effect of player's king
+     * @returns {void}
+     */
+    setCheckedEffect(){
+        document.getElementById(GameController.getPlayerKingSquareID().toString()).classList.add(this.#Effects.checked);
     }
 }

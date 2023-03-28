@@ -176,7 +176,7 @@ class Piece extends Engine {
         if(king_guard_route.length > 0){
             king_guard_route.forEach(path => {
                routes[path].filter(item => { // traverse king guard route/playable paths squares
-                    if(GameController.isSquareHasPiece(item, gl_current_move == "white" ? "black" : "white", enemy_types)){ // if target square has any "enemy_types" enemy
+                    if(GameController.isSquareHasPiece(item, GameController.getEnemyColor(), enemy_types)){ // if target square has any "enemy_types" enemy
                         if(Array.isArray(playable_squares)){
                             // if playable squares if array(this control for knight) delete squares that not in king guard squares
                             playable_squares = playable_squares.filter(square => { !king_guard_route.includes(square) })

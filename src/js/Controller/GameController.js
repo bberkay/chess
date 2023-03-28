@@ -127,6 +127,6 @@ class GameController {
      * @returns {string}
      */
     static getEnemyColor(){
-        return gl_current_move == "white" ? "black" : "white";
+        return gl_current_move === "white" ? "black" : "white";
     }
 }

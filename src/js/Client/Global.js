@@ -132,3 +132,4 @@ const Type = {
     rook:"rook",
     pawn:"pawn",
 }
+
