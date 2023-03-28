@@ -3,9 +3,9 @@ class Piece extends Engine {
      * Create Piece Object
      * @param {string} type 
      * @param {string} color 
-     * @param {int} target_square_id 
+     * @param {int} square 
      */
-    constructor(type, color, target_square_id) {
+    constructor(type, color, square) {
         super();
         this.id = this.createPieceID();
         this.type = type;
@@ -16,7 +16,7 @@ class Piece extends Engine {
             GameController.setKing(this);
 
         // Set Target Square Content to this piece
-        GameController.changeSquare(target_square_id, this);
+        GameController.changeSquare(square, this);
     }
 
     /**

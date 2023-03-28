@@ -1,4 +1,6 @@
 class Board{
+    #Effects = { checked:"checked-effect", killable:"killable-effect", playable:"playable-effect"}
+
     /** 
      * Constructor
     */
@@ -95,9 +97,9 @@ class Board{
                 squares[i].id = i + 1;
 
             // Clear effects on the squares
-            squares[i].classList.remove("clicked-effect");
-            squares[i].classList.remove("playable-effect");
-            squares[i].classList.remove("killable-effect");
+            squares[i].classList.remove(this.#Effects.checked);
+            squares[i].classList.remove(this.#Effects.playable);
+            squares[i].classList.remove(this.#Effects.killable);
         }
     }
 
@@ -109,10 +111,10 @@ class Board{
     showPlayableSquares(playable_squares) {
         let l = playable_squares.length;
         for (let i = 0; i < l; i++) {
-            if (GameController.isSquareHasPiece(playable_squares[i], gl_current_move == "white" ? "black" : "white"))
-                this.setEffectOfSquare(playable_squares[i], "killable")
+            if (GameController.isSquareHasPiece(playable_squares[i], GameController.getEnemyColor()))
+                this.setEffectOfSquare(playable_squares[i], this.#Effects.killable)
             else
-                this.setEffectOfSquare(playable_squares[i], "playable")
+                this.setEffectOfSquare(playable_squares[i], this.#Effects.playable)
         }
     }
 
@@ -151,10 +153,10 @@ class Board{
     /**
      * Set effect of the square
      * @param {int} square_id Square to be effected
-     * @param {string} effect_type "playable", "killable", "checked"
+     * @param {(playable|killable|checked)} effect
      * @returns {void}
      */
-    setEffectOfSquare(square_id, effect_type){
-        document.getElementById(square_id.toString()).classList.add(effect_type + "-effect");
+    setEffectOfSquare(square_id, effect){
+        document.getElementById(square_id.toString()).classList.add(effect);
     }
 }

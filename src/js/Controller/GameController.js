@@ -120,4 +120,13 @@ class GameController {
     static getEnemyKingSquareID() {
         return this.getSquareIDByPiece(this.getEnemyKing());
     }
+
+    /**
+     * @static
+     * Get Enemy Color
+     * @returns {string}
+     */
+    static getEnemyColor(){
+        return gl_current_move == "white" ? "black" : "white";
+    }
 }

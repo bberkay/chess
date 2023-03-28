@@ -21,7 +21,7 @@ class Chess{
     /**
     * Custom Game Creator For Tests
     * @param {Array<JSON>} pieces Custom Pieces
-    * @example [{"color":"black", "piece":"pawn", "square":29}, {"color":"white", "piece":"queen", "square":12}]
+    * @example [{"color":Color.white, "piece":Type.pawn, "square":Square.e2}, ...]
     * @returns {void}
     */
     startCustomGame(pieces) {
