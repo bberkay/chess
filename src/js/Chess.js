@@ -1,10 +1,11 @@
+import { Board } from "./Autoloader.js";
+
 class Chess{
     /**
      * @constructor
      */
     constructor() {
         this.board = new Board();
-        this.engine = new Engine(); 
         this.playable_squares = [];
         this.selected_piece = null;
     }
@@ -53,8 +54,8 @@ class Chess{
             // If clicked square has no piece but is playable then move
             this.#movePiece(square_id);
             this.#endTurn();
-            // Eğer şah oynanırsa is check diye kontrol etmeye gerek yok.
-            this.#controlCheck();
+            if(!GameController.getPieceBySquareID(square_id).type === "king")
+                this.#controlCheck();
         }
         else{
             // If clicked piece is already selected then unselect piece

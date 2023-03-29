@@ -20,10 +20,10 @@ class Board{
      * @returns {void}
      */
     createBoard() {
-        const board_chars = "abcdefgh"; // Board Bottom Characters
-        let square_color = "white"; // Board Start Squares Color
-        let board_numbers = 8; // Board Right Numbers
-        let board_chars_count = 0; // For loop, not too important
+        const board_chars = "abcdefgh";
+        let square_color = "white"
+        let board_numbers = 8;
+        let board_chars_count = 0;
 
         for (let i = 1; i <= 64; i++) {
             let square = document.createElement('div');
@@ -86,7 +86,7 @@ class Board{
         const piece = document.createElement("div");
         piece.classList.add("piece");
         piece.setAttribute("data-piece", piece_type); // For image of piece
-        piece.setAttribute("data-color", color); // For image of piece   
+        piece.setAttribute("data-color", color); 
         new Piece(piece_type, color, target_square_id); // Create Piece[object]
         target_square.appendChild(piece); // Add piece to target square
     }
