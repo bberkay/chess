@@ -120,13 +120,12 @@ class Chess{
      * @private
      * Is enemy player checked after move? If checked then set gl_checked_player to enemy player
      * @returns {void}
-     */
+     */ 
     #controlCheck(){
         const player_king = GameController.getPlayerKing();
-        const player_king_square_id = GameController.getPlayerKingSquareID();
 
         // Set checked player and give effect the checked king
-        if(this.engine.isCheck()){
+        if(Game.isCheck()){
             gl_checked_player = player_king.color;
             this.board.setCheckedEffect();
         }
