@@ -6,8 +6,8 @@ class Piece {
      * @param {int} square 
      */
     constructor(type, color, square) {
-        this.piece_engine = new PieceEngine();
-        this.id = this.piece_engine.createPieceID();
+        this.#piece_engine = new PieceEngine();
+        this.id = this.#piece_engine.createPieceID();
         this.type = type;
         this.color = color;
 
@@ -25,7 +25,7 @@ class Piece {
      * @returns {Array<int>}
      */
     getPlayableSquaresOfPiece() {
-        return this.piece_engine.getPlayableSquaresOfPiece(GameController.getSquareIDByPiece(this));
+        return this.#piece_engine.getPlayableSquaresOfPiece(this.type, GameController.getSquareIDByPiece(this));
     }
 
 }

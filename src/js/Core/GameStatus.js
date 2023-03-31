@@ -40,7 +40,7 @@ class GameStatus{
         const enemy_color = GameController.getEnemyColor();
 
         // Control for Enemy Bishop, Queen, Rook
-        const diagonal_row_column_path = PiecePathSchema.calcQueenPath(square_id); // Get all path
+        const diagonal_row_column_path = PiecePathSchema.calcQueenPath(square_id); // FIXME: Burası değişecek Get all path
         let l = 0;
         for (let i in diagonal_row_column_path) {
             l = diagonal_row_column_path[i].length;

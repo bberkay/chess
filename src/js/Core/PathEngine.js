@@ -241,5 +241,4 @@ class PathEngine {
 
         return squares;
     }
-    
 }
