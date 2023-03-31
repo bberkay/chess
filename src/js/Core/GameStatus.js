@@ -64,7 +64,7 @@ class GameStatus{
         l = knight_control.length;
         for (let i = 0; i < l; i++) {
             if (GameController.isSquareHasPiece(knight_control[i], enemy_color, ["knight"]))
-                dangerous_squares = gl_current_dangerous_squares.concat(knight_control);
+                dangerous_squares = dangerous_squares.concat(knight_control);
         }
 
         return dangerous_squares.length !== 0;

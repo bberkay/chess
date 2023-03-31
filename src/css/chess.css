@@ -23,6 +23,7 @@ body{
 }
 
 #chessboard .square{
+    position: relative;
     width:100px;
     height:100px;
     box-shadow: inset 0 0 1px #000;
@@ -44,37 +45,9 @@ body{
     background-size:cover;
     background-repeat: no-repeat;
     margin:0 auto;
-    margin-top:17.5px;
-}
-
-[data-piece="rook"]{
-    width:58px;
-    height:65px;
-}
-
-[data-piece="knight"]{
-    width:58px;
-    height:65px;
-}
-
-[data-piece="bishop"]{
-    width:64px;
-    height:65px;
-}
-
-[data-piece="queen"]{
-    width:71px;
-    height:65px;
-}
-
-[data-piece="king"]{
-    width:64px;
-    height:65px;
-}
-
-[data-piece="pawn"]{
-    width:53px;
-    height:65px;
+    margin-top:10px;
+    width:80px;
+    height:80px;
 }
 
 [data-piece="rook"][data-color="white"]{
@@ -133,24 +106,19 @@ body{
 }
 
 .playable-effect{
-    box-shadow:inset 0px 0px 15px #000!important;
-}
-
-.playable-effect::after{
-    content:"*";
-    font-size:100px;
+    box-shadow:inset 0px 0px 15px #57ce92!important;
 }
 
 .killable-effect{
-    box-shadow:inset 0px 0px 15px red!important;
+    box-shadow:inset 0px 0px 15px rgb(223, 48, 48)!important;
 }
 
 .checked-effect{
-    box-shadow:inset 0px 0px 15px blue!important;
+    box-shadow:inset 0px 0px 15px rgb(46, 121, 235)!important;
 }
 
 .selected-effect{
-    box-shadow:inset 0px 0px 15px black!important;
+    box-shadow:inset 0px 0px 100px #47a17338!important;
 }
 
 span.number{
@@ -160,13 +128,23 @@ span.number{
     font-size:17px;
     color:#C19285;
     margin-top:5px;
+    font-weight: bold;
 }
 
 span.chars{
     position:absolute;
-    bottom:0;
-    margin-left:-45px;
+    bottom:0px;
+    margin-left:-43px;
     font-size:17px;
     color:#C19285;
-    margin-bottom:5px;
+    margin-bottom:0px;
+    font-weight: bold;
+}
+
+span.square-id{
+    position: absolute;
+    top:5px;
+    left:5px;
+    color:#00c3ffd7;
+    font-weight: bold;
 }

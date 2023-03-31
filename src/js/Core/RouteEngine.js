@@ -99,37 +99,39 @@ class RouteEngine{
         let column = PathConverter.jsonPathToArrayPath(path_engine.calcPlayableColumnSquares({
             square_id: square_id,
             distance_limit: 2,
-            piece_sensivity: piece_sensivity
+            piece_sensivity: false
         })).sort();
-        console.log(column);
         column = column.filter(item => {
             return square_id === item - 16 || square_id === item + 16
         });
+
         // get 2 squares of row
         let row = PathConverter.jsonPathToArrayPath(path_engine.calcPlayableRowSquares({
             square_id: square_id,
             distance_limit: 2,
-            piece_sensivity: piece_sensivity
+            piece_sensivity: false
         })).sort();
         row = row.filter(item => {
             return square_id === item - 2 || square_id === item + 2
         });
+
         // get first square of left side and right side at end of the column 
         let column_sides = [];
         column.forEach(item => {
             column_sides.push(PathConverter.jsonPathToArrayPath(path_engine.calcPlayableRowSquares({
                 square_id: item,
                 distance_limit: 1,
-                piece_sensivity: piece_sensivity
+                piece_sensivity: false
             })))
         })
+
         // get first square of top side and bottom side at end of the row
         let row_sides = [];
         row.forEach(item => {
             row_sides.push(PathConverter.jsonPathToArrayPath(path_engine.calcPlayableColumnSquares({
                 square_id: item,
                 distance_limit: 1,
-                piece_sensivity: piece_sensivity
+                piece_sensivity: false
             })))
         });
 
@@ -137,7 +139,8 @@ class RouteEngine{
         let playable_squares = [];
         column_sides.concat(row_sides).forEach(item => {
             item.forEach(square => {
-                playable_squares.push(square);
+                if(!GameController.isSquareHasPiece(square, gl_current_move))
+                    playable_squares.push(square);
             })
         })
 

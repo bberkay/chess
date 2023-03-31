@@ -11,6 +11,7 @@
 
 <body>
     <div id="chessboard"></div>
+    <button onclick="DOMHandler.toggleSquareID()">Show Square ID</button>
 
     <script src="src/js/Client/Global.js"></script>
     <script src="src/js/Controller/GameController.js"></script>
@@ -25,7 +26,7 @@
     <script src="src/js/Chess.js"></script>
     <script>
         const chess = new Chess();
-        //chess.startGame();
+        chess.startGame();
         // chess.startCustomGame([
         //     { "color": "white", "piece": "king", "square": 61 },
         //     { "color": "white", "piece": "rook", "square": 64 },
@@ -42,10 +43,6 @@
         //     { "color": "black", "piece": "rook", "square": 54 },
         // ]);
 
-        chess.startCustomGame([
-            { "color": Color.black, "piece": Type.bishop, "square": Square.d5 },
-            { "color": Color.white, "piece": Type.pawn, "square": Square.e6 },
-        ]);
     </script>
 </body>
 

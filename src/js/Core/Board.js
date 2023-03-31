@@ -31,7 +31,6 @@ class Board{
             square.classList.add('square');
             square.setAttribute("id", i); // Square position
             square.setAttribute("onclick", "DOMHandler.clickSquare(this)");
-            square.innerHTML = i; // STUB -> Show Square ID
 
             if (i % 8 == 0) { // Create Board Numbers
                 square.innerHTML += "<span class = 'number'>" + board_numbers + "</span>";
@@ -206,10 +205,11 @@ class Board{
 
     /**
      * Clear checked effect of selected piece
-     * @param {Piece} selected_piece
      * @returns {void}
      */
     clearCheckedEffect(){
-        document.querySelector(".checked-effect").classList.remove(this.#Effects.checked);
+        try{
+            document.querySelector(".checked-effect").classList.remove(this.#Effects.checked);
+        }catch{}
     }
 }
