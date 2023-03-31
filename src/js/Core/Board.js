@@ -105,7 +105,7 @@ class Board{
                 squares[i].id = i + 1;
 
             // Clear effects on the squares
-            squares[i].classList.remove(this.#Effects.checked);
+            //squares[i].classList.remove(this.#Effects.checked);
             squares[i].classList.remove(this.#Effects.playable);
             squares[i].classList.remove(this.#Effects.killable);
         }
@@ -169,12 +169,12 @@ class Board{
     }
 
     /**
-     * Set effect of the square
+     * Clear effect of the square
      * @param {int} square_id Square to be effected
      * @param {(playable|killable|checked)} effect
      * @returns {void}
      */
-    unsetEffectOfSquare(square_id, effect){
+    clearEffectOfSquare(square_id, effect){
         document.getElementById(square_id.toString()).classList.remove(effect);
     }
 
@@ -183,7 +183,7 @@ class Board{
      * @returns {void}
      */
     setCheckedEffect(){
-        this.setEffectOfSquare((GameController.getPlayerKingSquareID(), this.#Effects.checked));
+        this.setEffectOfSquare(GameController.getPlayerKingSquareID(), this.#Effects.checked);
     }
 
     /**
@@ -196,11 +196,20 @@ class Board{
     }
 
     /**
-     * Set selected effect of selected piece
+     * Clear selected effect of selected piece
      * @param {Piece} selected_piece
      * @returns {void}
      */
-    unsetSelectedEffect(selected_piece){
-        this.unsetEffectOfSquare(GameController.getSquareIDByPiece(selected_piece), this.#Effects.selected);
+    clearSelectedEffect(selected_piece){
+        this.clearEffectOfSquare(GameController.getSquareIDByPiece(selected_piece), this.#Effects.selected);
+    }
+
+    /**
+     * Clear checked effect of selected piece
+     * @param {Piece} selected_piece
+     * @returns {void}
+     */
+    clearCheckedEffect(){
+        document.querySelector(".checked-effect").classList.remove(this.#Effects.checked);
     }
 }

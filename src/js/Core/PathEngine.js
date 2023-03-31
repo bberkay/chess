@@ -141,6 +141,10 @@ class PathEngine {
                     path.pop();
                     break;
                 }
+
+                if(i % 8 == 0 || i % 8 == 1) // if square reach the edges of the board
+                    break;
+
                 counter += 1;
             }
         }
@@ -160,6 +164,10 @@ class PathEngine {
                     path.pop();
                     break;
                 }
+
+                if(i % 8 == 0 || i % 8 == 1)
+                    break;
+
                 counter += 1;
             }
         }
@@ -179,6 +187,10 @@ class PathEngine {
                     path.pop();
                     break;
                 }
+
+                if(i % 8 == 0 || i % 8 == 1)
+                    break;
+
                 counter += 1;
             }
         }
@@ -197,6 +209,10 @@ class PathEngine {
                     path.pop();
                     break;
                 }
+
+                if(i % 8 == 0 || i % 8 == 1)
+                    break;
+
                 counter += 1;
             }
         }
@@ -228,11 +244,7 @@ class PathEngine {
         } else // if piece sensivity is false then no need control
             squares.push(target_square_id);
 
-        // if square reach the edges of the board
-        const column_of_square = this.calcColumnOfSquare(target_square_id);
-        if (column_of_square === 8 || column_of_square === 1)
-            squares.push("break");
-
+        
         return squares;
     }
 }

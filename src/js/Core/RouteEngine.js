@@ -104,6 +104,7 @@ class RouteEngine{
             distance_limit: 2,
             piece_sensivity: piece_sensivity
         })).sort();
+        console.log(column);
         column = column.filter(item => {
             return square_id === item - 16 || square_id === item + 16
         });

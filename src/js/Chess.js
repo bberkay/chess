@@ -48,7 +48,7 @@ class Chess{
             // If clicked square has piece and selected_piece is null then operation is select piece
             this.#selectPiece(square_id);
         }
-        else if(square_piece_control && this.selected_piece){
+        else if(square_piece_control && this.selected_piece && GameController.getPieceBySquareID(square_id).color == gl_current_move){
             let clicked_piece = GameController.getPieceBySquareID(square_id);
             if(clicked_piece.color == gl_current_move && clicked_piece != this.selected_piece){
                 // If player select another piece after select piece then unselect first selected piece and select new selected piece.
@@ -63,9 +63,15 @@ class Chess{
         else if(square_playable_control){
             // If clicked square has no piece but is playable then move
             this.#movePiece(square_id);
+            this.board.refreshBoard();
+            // If moved piece is king then clear checked effect(is checked or not)
+            if(this.selected_piece.type == "king")
+                this.board.clearCheckedEffect();
             this.#endTurn();
-            if(!GameController.getPieceBySquareID(square_id).type === "king")
+            // If moved piece is king then don't control check
+            if(this.selected_piece.type !== "king")
                 this.#controlCheck();
+            this.#unselectPiece();
         }
         else{
             // If clicked piece is already selected then unselect piece
@@ -84,7 +90,8 @@ class Chess{
         let piece = GameController.getPieceBySquareID(square_id);       
 
         // Select Piece
-        if(gl_current_move === piece.color){
+        //if(gl_current_move === piece.color){
+        if(gl_current_move){
             // If player is checked then player only select king 
             if(gl_checked_player === gl_current_move && piece.type !== "king")
                 this.selected_piece = null;
@@ -113,7 +120,7 @@ class Chess{
      * @returns {void}
      */
     #unselectPiece(){
-        this.board.unsetSelectedEffect(this.selected_piece);
+        this.board.clearSelectedEffect(this.selected_piece);
         this.selected_piece = null;
         this.playable_squares = [];
     }
@@ -125,10 +132,8 @@ class Chess{
      * @returns {void}
      */
     #movePiece(square_id){
-        this.board.unsetSelectedEffect(this.selected_piece);
+        this.board.clearSelectedEffect(this.selected_piece);
         this.board.movePiece(this.selected_piece, square_id);
-        this.#unselectPiece();
-        this.board.refreshBoard();
     }
 
     /**
@@ -140,7 +145,7 @@ class Chess{
         const player_king = GameController.getPlayerKing();
 
         // Set checked player and give effect the checked king
-        if(Game.GameStatus.isCheck()){
+        if(GameStatus.isCheck()){
             gl_checked_player = player_king.color;
             this.board.setCheckedEffect();
         }
@@ -153,10 +158,6 @@ class Chess{
      * @returns {void}
      */
     #endTurn() {
-        // Clear Table and Selected Piece
-        this.board.refreshBoard();
-        this.selected_piece = null;
-
         // Set New Turn 
         if(gl_current_move === "white")
             gl_current_move = "black";
