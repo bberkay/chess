@@ -69,23 +69,20 @@ class RouteEngine{
         let playable_squares = path_engine.calcPlayableColumnSquares({
             square_id: square_id,
             distance_limit: limit,
-            route_path: route
         })[route];
 
         // get first diagonal squares
         let diagonal_control = path_engine.calcPlayableDiagonalSquares({
             square_id: square_id,
             distance_limit: 1,
-            route_path: route
-        })[route];
+        });
 
         // is first diagonal squares has enemy piece then add playable squares
-        if(diagonal_control){
-            diagonal_control.filter(item => {
-                if (GameController.isSquareHasPiece(item, GameController.getEnemyColor()))
-                    playable_squares.push(item);
-            })
-        }
+        if (GameController.isSquareHasPiece(diagonal_control[route+"-left"][0], GameController.getEnemyColor()))
+            playable_squares.push(diagonal_control[route+"-left"][0]);
+
+        if (GameController.isSquareHasPiece(diagonal_control[route+"-right"][0], GameController.getEnemyColor()))
+            playable_squares.push(diagonal_control[route+"-right"][0]);
 
         return playable_squares;
     }

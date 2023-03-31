@@ -75,7 +75,7 @@ class PieceEngine{
      * @returns {Array<int>}
      */
     #getPlayableSquaresOfPawn(square_id) {
-        return PathConverter.jsonPathToArrayPath(this.#filterPlayableSquares(square_id, RouteEngine.calcPawnPath(square_id)));
+        return this.#filterPlayableSquares(square_id, RouteEngine.calcPawnPath(square_id));
     }
 
     /**
@@ -97,7 +97,9 @@ class PieceEngine{
      */
     #filterPlayableSquares(square_id, playable_squares = null) {
         let king = GameController.getPlayerKingSquareID();
-
+        if(!king)
+            return playable_squares;
+            
         // get diagonal, row and column with calcqueenpath method
         let routes = RouteEngine.calcQueenPath(square_id);
         let king_guard_route = [];

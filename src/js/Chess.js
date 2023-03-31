@@ -90,8 +90,7 @@ class Chess{
         let piece = GameController.getPieceBySquareID(square_id);       
 
         // Select Piece
-        //if(gl_current_move === piece.color){
-        if(gl_current_move){
+        if(gl_current_move === piece.color){
             // If player is checked then player only select king 
             if(gl_checked_player === gl_current_move && piece.type !== "king")
                 this.selected_piece = null;
