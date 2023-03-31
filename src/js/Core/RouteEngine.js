@@ -1,28 +1,32 @@
-class RouteEngine extends PathEngine{
+class RouteEngine{
     /**
+     * @static
      * Calculate Bishop Path
      * @param {int} square_id Square ID of the bishop
      * @param {boolean} piece_sensivity To avoid tripping over other pieces.
      * @returns {JSON}
      */
-    calcBishopPath(square_id, piece_sensivity = true) {
+    static calcBishopPath(square_id, piece_sensivity = true) {
+        const path_engine = new PathEngine();
         return {
             // get all squares of diagonal
-            ...this.calcPlayableDiagonalSquares({square_id: square_id, piece_sensivity: piece_sensivity})
+            ...path_engine.calcPlayableDiagonalSquares({square_id: square_id, piece_sensivity: piece_sensivity})
         }
     }
 
-     /**
+    /**
+     * @static
      * Calculate Rook Path
      * @param {int} square_id Square ID of the rook
      * @param {boolean} piece_sensivity To avoid tripping over other pieces.
      * @returns {JSON}
      */
-    calcRookPath(square_id, piece_sensivity = true) {
+    static calcRookPath(square_id, piece_sensivity = true) {
+        const path_engine = new PathEngine();
         return {
             // get all squares of column and row
-            ...this.calcPlayableColumnSquares({square_id: square_id, piece_sensivity: piece_sensivity}),
-            ...this.calcPlayableRowSquares({square_id: square_id, piece_sensivity: piece_sensivity}),
+            ...path_engine.calcPlayableColumnSquares({square_id: square_id, piece_sensivity: piece_sensivity}),
+            ...path_engine.calcPlayableRowSquares({square_id: square_id, piece_sensivity: piece_sensivity}),
         }
     }
 
@@ -32,12 +36,13 @@ class RouteEngine extends PathEngine{
      * @param {boolean} piece_sensivity To avoid tripping over other pieces.
      * @returns {JSON}
      */
-    calcQueenPath(square_id, piece_sensivity = true) {
+    static calcQueenPath(square_id, piece_sensivity = true) {
+        const path_engine = new PathEngine();
         return {
             // get all squares of column, row and diagonal(UNLIMITED POWEEEER!!!)
-            ...this.calcPlayableColumnSquares({square_id: square_id, piece_sensivity: piece_sensivity}),
-            ...this.calcPlayableRowSquares({square_id: square_id, piece_sensivity: piece_sensivity}),
-            ...this.calcPlayableDiagonalSquares({square_id: square_id, piece_sensivity: piece_sensivity})
+            ...path_engine.calcPlayableColumnSquares({square_id: square_id, piece_sensivity: piece_sensivity}),
+            ...path_engine.calcPlayableRowSquares({square_id: square_id, piece_sensivity: piece_sensivity}),
+            ...path_engine.calcPlayableDiagonalSquares({square_id: square_id, piece_sensivity: piece_sensivity})
         }
     }
 
@@ -46,10 +51,11 @@ class RouteEngine extends PathEngine{
      * @param {int} square_id Square ID of the pawn
      * @returns {JSON}
      */
-    calcPawnPath(square_id) {
+    static calcPawnPath(square_id) {
+        const path_engine = new PathEngine();
         let limit = 0;
         let route = "";
-        let row_of_pawn = this.calcRowOfSquare(square_id);
+        let row_of_pawn = path_engine.calcRowOfSquare(square_id);
 
         if (gl_current_move === "black") {
             limit = row_of_pawn === 7 ? 2 : 1;  // if black pawn is start position then 2 square limit else 1
@@ -60,14 +66,14 @@ class RouteEngine extends PathEngine{
         }
 
         // get first [limit] square of [route] column
-        let playable_squares = this.calcPlayableColumnSquares({
+        let playable_squares = path_engine.calcPlayableColumnSquares({
             square_id: square_id,
             distance_limit: limit,
             route_path: route
         })[route];
 
         // get first diagonal squares
-        let diagonal_control = this.calcPlayableDiagonalSquares({
+        let diagonal_control = path_engine.calcPlayableDiagonalSquares({
             square_id: square_id,
             distance_limit: 1,
             route_path: route
@@ -90,9 +96,10 @@ class RouteEngine extends PathEngine{
      * @param {boolean} piece_sensivity To avoid tripping over other pieces.
      * @returns {Array<int>}
      */
-    calcKnightPath(square_id, piece_sensivity = true) {
+    static calcKnightPath(square_id, piece_sensivity = true) {
+        const path_engine = new PathEngine();
         // get 2 squares of column
-        let column = PathConverter.jsonPathToArrayPath(this.calcPlayableColumnSquares({
+        let column = PathConverter.jsonPathToArrayPath(path_engine.calcPlayableColumnSquares({
             square_id: square_id,
             distance_limit: 2,
             piece_sensivity: piece_sensivity
@@ -101,7 +108,7 @@ class RouteEngine extends PathEngine{
             return square_id === item - 16 || square_id === item + 16
         });
         // get 2 squares of row
-        let row = PathConverter.jsonPathToArrayPath(this.calcPlayableRowSquares({
+        let row = PathConverter.jsonPathToArrayPath(path_engine.calcPlayableRowSquares({
             square_id: square_id,
             distance_limit: 2,
             piece_sensivity: piece_sensivity
@@ -112,7 +119,7 @@ class RouteEngine extends PathEngine{
         // get first square of left side and right side at end of the column 
         let column_sides = [];
         column.forEach(item => {
-            column_sides.push(PathConverter.jsonPathToArrayPath(this.calcPlayableRowSquares({
+            column_sides.push(PathConverter.jsonPathToArrayPath(path_engine.calcPlayableRowSquares({
                 square_id: item,
                 distance_limit: 1,
                 piece_sensivity: piece_sensivity
@@ -121,7 +128,7 @@ class RouteEngine extends PathEngine{
         // get first square of top side and bottom side at end of the row
         let row_sides = [];
         row.forEach(item => {
-            row_sides.push(PathConverter.jsonPathToArrayPath(this.calcPlayableColumnSquares({
+            row_sides.push(PathConverter.jsonPathToArrayPath(path_engine.calcPlayableColumnSquares({
                 square_id: item,
                 distance_limit: 1,
                 piece_sensivity: piece_sensivity
@@ -145,25 +152,25 @@ class RouteEngine extends PathEngine{
      * @param {int} square_id Square ID of the king
      * @returns {JSON}
      */
-    calcKingPath(square_id) {
+    static calcKingPath(square_id) {
+        const path_engine = new PathEngine();
         return {
             // get first square of column, row and diagonal
-            ...this.calcPlayableColumnSquares({
+            ...path_engine.calcPlayableColumnSquares({
                 square_id: square_id,
                 piece_sensivity: true,
                 distance_limit: 1
             }),
-            ...this.calcPlayableRowSquares({
+            ...path_engine.calcPlayableRowSquares({
                 square_id: square_id,
                 piece_sensivity: true,
                 distance_limit: 1
             }),
-            ...this.calcPlayableDiagonalSquares({
+            ...path_engine.calcPlayableDiagonalSquares({
                 square_id: square_id,
                 piece_sensivity: true,
                 distance_limit: 1
             })
         }
     }
-
 }

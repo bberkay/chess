@@ -149,6 +149,10 @@ body{
     box-shadow:inset 0px 0px 15px blue!important;
 }
 
+.selected-effect{
+    box-shadow:inset 0px 0px 15px black!important;
+}
+
 span.number{
     position:absolute;
     right:0;

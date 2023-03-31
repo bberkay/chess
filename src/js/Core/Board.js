@@ -5,7 +5,8 @@ class Board{
     #Effects = { 
         checked:"checked-effect", 
         killable:"killable-effect", 
-        playable:"playable-effect"
+        playable:"playable-effect",
+        selected:"selected-effect"
     }
 
     /** 
@@ -168,10 +169,38 @@ class Board{
     }
 
     /**
+     * Set effect of the square
+     * @param {int} square_id Square to be effected
+     * @param {(playable|killable|checked)} effect
+     * @returns {void}
+     */
+    unsetEffectOfSquare(square_id, effect){
+        document.getElementById(square_id.toString()).classList.remove(effect);
+    }
+
+    /**
      * Set checked effect of player's king
      * @returns {void}
      */
     setCheckedEffect(){
-        document.getElementById(GameController.getPlayerKingSquareID().toString()).classList.add(this.#Effects.checked);
+        this.setEffectOfSquare((GameController.getPlayerKingSquareID(), this.#Effects.checked));
+    }
+
+    /**
+     * Set selected effect of selected piece
+     * @param {Piece} selected_piece
+     * @returns {void}
+     */
+    setSelectedEffect(selected_piece){
+        this.setEffectOfSquare(GameController.getSquareIDByPiece(selected_piece), this.#Effects.selected);
+    }
+
+    /**
+     * Set selected effect of selected piece
+     * @param {Piece} selected_piece
+     * @returns {void}
+     */
+    unsetSelectedEffect(selected_piece){
+        this.unsetEffectOfSquare(GameController.getSquareIDByPiece(selected_piece), this.#Effects.selected);
     }
 }

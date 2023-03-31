@@ -1,6 +1,5 @@
 class PathEngine {
     /**
-     * @public
      * Calculate Column of Square
      * @param {int} square_id Square ID of the active piece
      * @returns {int}
@@ -10,7 +9,6 @@ class PathEngine {
     }
 
     /**
-     * @public
      * Calculate Row of Square
      * @param {int} square_id Square ID of the active piece
      * @returns {int}
@@ -20,7 +18,6 @@ class PathEngine {
     }
 
     /**
-     * @public
      * Calculate Column Squares List of Square
      * @param {int} square_id Square ID of the active piece
      * @param {(int|null)} distance_limit Move away at most [distance_limit] squares from square.
@@ -28,7 +25,7 @@ class PathEngine {
      * @example if square id is 29 then result will be {"top":[5,13,21], "bottom":[37,45,53,61]}
      * @returns {JSON}
      */
-    calcPlayableColumnSquares({square_id, distance_limit = null, piece_sensivity = true}) {
+    calcPlayableColumnSquares({ square_id, distance_limit = null, piece_sensivity = true }) {
         let playable_squares = {};
         let counter, path;
 
@@ -52,7 +49,7 @@ class PathEngine {
         // Bottom of Column
         counter = 1;
         path = [];
-        
+
         for (let i = square_id + 8; i < 65; i += 8) {
             if (distance_limit && counter > distance_limit)
                 break;
@@ -71,7 +68,6 @@ class PathEngine {
     }
 
     /**
-     * @public
      * Calculate Row Squares List of Square
      * @param {int} square_id Square ID of the active piece
      * @param {(int|null)} distance_limit Move away at most [distance_limit] squares from square.
@@ -79,7 +75,7 @@ class PathEngine {
      * @example if square id is 29 then result will be {"left":[25, 26, 27, 28], "right":[30, 31, 32]}
      * @returns {JSON}
      */
-    calcPlayableRowSquares({square_id, distance_limit = null, piece_sensivity = true}) {
+    calcPlayableRowSquares({ square_id, distance_limit = null, piece_sensivity = true }) {
         let playable_squares = {};
         let row = this.calcRowOfSquare(square_id);
         let path, counter;
@@ -120,7 +116,6 @@ class PathEngine {
     }
 
     /**
-     * @public
      * Calculate Diagonal Squares List of Piece
      * @param {int} square_id Square ID of the active piece
      * @param {(int|null)} distance_limit Move away at most [distance_limit] squares from square.
@@ -128,7 +123,7 @@ class PathEngine {
      * @example If square id is 29 then result will be {"top-left": [2, 11, 20], "bottom-right":[38, 47, 56], "top-right": [8, 15, 22], "bottom-left":[36, 43, 50, 57]}
      * @returns {JSON}
      */
-    calcPlayableDiagonalSquares({square_id, distance_limit = null, piece_sensivity = true}) {
+    calcPlayableDiagonalSquares({ square_id, distance_limit = null, piece_sensivity = true }) {
         let playable_squares = {};
         let path, counter;
 
@@ -211,7 +206,6 @@ class PathEngine {
     }
 
     /**
-     * @private
      * Calculate Playable Path
      * @param {int} target_square_id Square ID of square to check
      * @param {boolean} piece_sensivity To avoid tripping over other pieces.

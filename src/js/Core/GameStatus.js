@@ -40,7 +40,7 @@ class GameStatus{
         const enemy_color = GameController.getEnemyColor();
 
         // Control for Enemy Bishop, Queen, Rook
-        const diagonal_row_column_path = PiecePathSchema.calcQueenPath(square_id); // FIXME: Burası değişecek Get all path
+        const diagonal_row_column_path = RouteEngine.calcQueenPath(square_id); // Get all path
         let l = 0;
         for (let i in diagonal_row_column_path) {
             l = diagonal_row_column_path[i].length;
@@ -60,7 +60,7 @@ class GameStatus{
 
 
         // Control for Enemy Knight
-        const knight_control = PiecePathSchema.calcKnightPath(square_id);
+        const knight_control = RouteEngine.calcKnightPath(square_id);
         l = knight_control.length;
         for (let i = 0; i < l; i++) {
             if (GameController.isSquareHasPiece(knight_control[i], enemy_color, ["knight"]))

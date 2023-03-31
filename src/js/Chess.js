@@ -37,16 +37,28 @@ class Chess{
      */
     clickSquare(square_id) {
         // Is player click any piece
-        let square_piece_control = null;
+        let square_piece_control;
         let square_playable_control = this.playable_squares.includes(square_id);
         if(gl_checked_player === gl_current_move)
             square_piece_control = GameController.isSquareHasPiece(square_id, gl_current_move === "white" ? "white" : "black", ["king"]);
         else
             square_piece_control = GameController.isSquareHasPiece(square_id);
 
-        if(square_piece_control && !this.selected_piece){
+        if(!this.selected_piece){
             // If clicked square has piece and selected_piece is null then operation is select piece
             this.#selectPiece(square_id);
+        }
+        else if(square_piece_control && this.selected_piece){
+            let clicked_piece = GameController.getPieceBySquareID(square_id);
+            if(clicked_piece.color == gl_current_move && clicked_piece != this.selected_piece){
+                // If player select another piece after select piece then unselect first selected piece and select new selected piece.
+                this.#unselectPiece();
+                this.#selectPiece(square_id);
+            }else{
+                // If clicked piece is already selected then unselect piece
+                this.board.refreshBoard();
+                this.#unselectPiece();
+            }
         }
         else if(square_playable_control){
             // If clicked square has no piece but is playable then move
@@ -76,8 +88,10 @@ class Chess{
             // If player is checked then player only select king 
             if(gl_checked_player === gl_current_move && piece.type !== "king")
                 this.selected_piece = null;
-            else
+            else{
                 this.selected_piece = piece;
+                this.board.setSelectedEffect(this.selected_piece);
+            }
         }
         
         // Show Playable Squares
@@ -99,6 +113,7 @@ class Chess{
      * @returns {void}
      */
     #unselectPiece(){
+        this.board.unsetSelectedEffect(this.selected_piece);
         this.selected_piece = null;
         this.playable_squares = [];
     }
@@ -110,6 +125,7 @@ class Chess{
      * @returns {void}
      */
     #movePiece(square_id){
+        this.board.unsetSelectedEffect(this.selected_piece);
         this.board.movePiece(this.selected_piece, square_id);
         this.#unselectPiece();
         this.board.refreshBoard();

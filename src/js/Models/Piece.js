@@ -1,4 +1,6 @@
 class Piece {
+    #piece_engine = new PieceEngine();
+
     /**
      * Create Piece Object
      * @param {string} type 
@@ -6,7 +8,6 @@ class Piece {
      * @param {int} square 
      */
     constructor(type, color, square) {
-        this.#piece_engine = new PieceEngine();
         this.id = this.#piece_engine.createPieceID();
         this.type = type;
         this.color = color;

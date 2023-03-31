@@ -1,4 +1,4 @@
-class PieceEngine extends RouteEngine{
+class PieceEngine{
     /**
      * Create ID for piece(between 1000 and 9999)
      * @returns {int}
@@ -20,7 +20,7 @@ class PieceEngine extends RouteEngine{
      * @returns {Array<int>}
      */
     #getPlayableSquaresOfBishop(square_id) {
-        return PathConverter.jsonPathToArrayPath((this.#filterPlayableSquares(square_id, this.calcBishopPath(square_id))));
+        return PathConverter.jsonPathToArrayPath((this.#filterPlayableSquares(square_id, RouteEngine.calcBishopPath(square_id))));
     }
 
     /**
@@ -30,7 +30,7 @@ class PieceEngine extends RouteEngine{
      * @returns {Array<int>}
      */
     #getPlayableSquaresOfRook(square_id) {
-        return PathConverter.jsonPathToArrayPath(this.#filterPlayableSquares(square_id, this.calcRookPath(square_id)));
+        return PathConverter.jsonPathToArrayPath(this.#filterPlayableSquares(square_id, RouteEngine.calcRookPath(square_id)));
     }
 
     /**
@@ -40,7 +40,7 @@ class PieceEngine extends RouteEngine{
      * @returns {Array<int>}
      */
     #getPlayableSquaresOfQueen(square_id) {
-        return PathConverter.jsonPathToArrayPath(this.#filterPlayableSquares(square_id, this.calcQueenPath(square_id)));
+        return PathConverter.jsonPathToArrayPath(this.#filterPlayableSquares(square_id, RouteEngine.calcQueenPath(square_id)));
     }
 
     /**
@@ -51,7 +51,7 @@ class PieceEngine extends RouteEngine{
      */
     #getPlayableSquaresOfKing(square_id) {
         let playable_squares = [];
-        let squares = PathConverter.jsonPathToArrayPath(this.calcKingPath(square_id));
+        let squares = PathConverter.jsonPathToArrayPath(RouteEngine.calcKingPath(square_id));
 
         let king = GameController.getPlayerKing();
 
@@ -60,7 +60,7 @@ class PieceEngine extends RouteEngine{
             // Check every playable squares is checked then add unchecked squares to playable squares list
             GameController.changeSquare(square, king);
             GameController.changeSquare(square_id, 0);
-            if (!this.GameStatus.isCheck())
+            if (!GameStatus.isCheck())
                 playable_squares.push(square);
             GameController.changeSquare(square, 0);
         });
@@ -75,7 +75,7 @@ class PieceEngine extends RouteEngine{
      * @returns {Array<int>}
      */
     #getPlayableSquaresOfPawn(square_id) {
-        return PathConverter.jsonPathToArrayPath(this.#filterPlayableSquares(square_id, this.calcPawnPath(square_id)));
+        return PathConverter.jsonPathToArrayPath(this.#filterPlayableSquares(square_id, RouteEngine.calcPawnPath(square_id)));
     }
 
     /**
@@ -85,7 +85,7 @@ class PieceEngine extends RouteEngine{
      * @returns {Array<int>}
      */
     #getPlayableSquaresOfKnight(square_id) {
-        return this.#filterPlayableSquares(square_id, this.calcKnightPath(square_id));
+        return this.#filterPlayableSquares(square_id, RouteEngine.calcKnightPath(square_id));
     }
 
     /**
@@ -99,7 +99,7 @@ class PieceEngine extends RouteEngine{
         let king = GameController.getPlayerKingSquareID();
 
         // get diagonal, row and column with calcqueenpath method
-        let routes = this.calcQueenPath(square_id);
+        let routes = RouteEngine.calcQueenPath(square_id);
         let king_guard_route = [];
         let enemy_types = [];
         let control = null;
@@ -166,23 +166,17 @@ class PieceEngine extends RouteEngine{
     getPlayableSquaresOfPiece(piece_type, square_id){
         switch (piece_type) {
             case "rook":
-                playable_squares_id = this.#getPlayableSquaresOfRook(square_id);
-                break;
+                return this.#getPlayableSquaresOfRook(square_id);
             case "bishop":
-                playable_squares_id = this.#getPlayableSquaresOfBishop(square_id);
-                break;
+                return this.#getPlayableSquaresOfBishop(square_id);
             case "pawn":
-                playable_squares_id = this.#getPlayableSquaresOfPawn(square_id);
-                break;
+                return this.#getPlayableSquaresOfPawn(square_id);
             case "king":
-                playable_squares_id = this.#getPlayableSquaresOfKing(square_id);
-                break;
+                return this.#getPlayableSquaresOfKing(square_id);
             case "queen":
-                playable_squares_id = this.#getPlayableSquaresOfQueen(square_id);
-                break;
+                return this.#getPlayableSquaresOfQueen(square_id);
             case "knight":
-                playable_squares_id = this.#getPlayableSquaresOfKnight(square_id);
-                break;
+                return this.#getPlayableSquaresOfKnight(square_id);
             default:
                 break;
         }
