@@ -1,5 +1,3 @@
-import { Board } from "./Autoloader.js";
-
 class Chess{
     /**
      * @constructor
@@ -126,7 +124,7 @@ class Chess{
         const player_king = GameController.getPlayerKing();
 
         // Set checked player and give effect the checked king
-        if(Game.isCheck()){
+        if(Game.GameStatus.isCheck()){
             gl_checked_player = player_king.color;
             this.board.setCheckedEffect();
         }

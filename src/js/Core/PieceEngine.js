@@ -1,13 +1,12 @@
-class PieceEngine{
+class PieceEngine extends RouteEngine{
     /**
-     * @public 
      * Create ID for piece(between 1000 and 9999)
      * @returns {int}
      */
     createPieceID() {
         let id = Math.floor(Math.random() * 10000) + 1000;
         if (gl_id_list.includes(id))
-            this.#createPieceID();
+            this.createPieceID();
         else
             gl_id_list.push(id);
 
@@ -15,44 +14,44 @@ class PieceEngine{
     }
 
     /**
-     * @public
+     * @private
      * Calculate Bishop Playable Squares/Path
      * @param {int} square_id Square ID of the bishop
      * @returns {Array<int>}
      */
-    getPlayableSquaresOfBishop(square_id) {
-        return PathConverter.jsonPathToArrayPath((this.#filterPlayableSquares(square_id, PiecePathSchema.calcBishopPath(square_id))));
+    #getPlayableSquaresOfBishop(square_id) {
+        return PathConverter.jsonPathToArrayPath((this.#filterPlayableSquares(square_id, this.calcBishopPath(square_id))));
     }
 
     /**
-     * @public
+     * @private
      * Calculate Rook Playable Squares/Path
      * @param {int} square_id Square ID of the rook
      * @returns {Array<int>}
      */
-    getPlayableSquaresOfRook(square_id) {
-        return PathConverter.jsonPathToArrayPath(this.#filterPlayableSquares(square_id, PiecePathSchema.calcRookPath(square_id)));
+    #getPlayableSquaresOfRook(square_id) {
+        return PathConverter.jsonPathToArrayPath(this.#filterPlayableSquares(square_id, this.calcRookPath(square_id)));
     }
 
     /**
-     * @public
+     * @private
      * Calculate Queen Playable Squares/Path
      * @param {int} square_id Square ID of the queen
      * @returns {Array<int>}
      */
-    getPlayableSquaresOfQueen(square_id) {
-        return PathConverter.jsonPathToArrayPath(this.#filterPlayableSquares(square_id, PiecePathSchema.calcQueenPath(square_id)));
+    #getPlayableSquaresOfQueen(square_id) {
+        return PathConverter.jsonPathToArrayPath(this.#filterPlayableSquares(square_id, this.calcQueenPath(square_id)));
     }
 
     /**
-     * @public
+     * @private
      * Calculate King Playable Squares/Path
      * @param {int} square_id Square ID of the king
      * @returns {Array<int>}
      */
-    getPlayableSquaresOfKing(square_id) {
+    #getPlayableSquaresOfKing(square_id) {
         let playable_squares = [];
-        let squares = PathConverter.jsonPathToArrayPath(PiecePathSchema.calcKingPath(square_id));
+        let squares = PathConverter.jsonPathToArrayPath(this.calcKingPath(square_id));
 
         let king = GameController.getPlayerKing();
 
@@ -61,7 +60,7 @@ class PieceEngine{
             // Check every playable squares is checked then add unchecked squares to playable squares list
             GameController.changeSquare(square, king);
             GameController.changeSquare(square_id, 0);
-            if (!this.isCheck())
+            if (!this.GameStatus.isCheck())
                 playable_squares.push(square);
             GameController.changeSquare(square, 0);
         });
@@ -70,23 +69,23 @@ class PieceEngine{
     }
 
     /**
-     * @public
+     * @private
      * Calculate Pawn Playable Squares/Path
      * @param {int} square_id Square ID of the pawn
      * @returns {Array<int>}
      */
-    getPlayableSquaresOfPawn(square_id) {
-        return PathConverter.jsonPathToArrayPath(this.#filterPlayableSquares(square_id, PiecePathSchema.calcPawnPath(square_id)));
+    #getPlayableSquaresOfPawn(square_id) {
+        return PathConverter.jsonPathToArrayPath(this.#filterPlayableSquares(square_id, this.calcPawnPath(square_id)));
     }
 
     /**
-     * @public
+     * @private
      * Calculate Knight Playable Squares/Path
      * @param {int} square_id Square ID of the knight
      * @returns {Array<int>}
      */
-    getPlayableSquaresOfKnight(square_id) {
-        return this.#filterPlayableSquares(square_id, PiecePathSchema.calcKnightPath(square_id));
+    #getPlayableSquaresOfKnight(square_id) {
+        return this.#filterPlayableSquares(square_id, this.calcKnightPath(square_id));
     }
 
     /**
@@ -100,7 +99,7 @@ class PieceEngine{
         let king = GameController.getPlayerKingSquareID();
 
         // get diagonal, row and column with calcqueenpath method
-        let routes = PiecePathSchema.calcQueenPath(square_id);
+        let routes = this.calcQueenPath(square_id);
         let king_guard_route = [];
         let enemy_types = [];
         let control = null;
@@ -157,5 +156,35 @@ class PieceEngine{
         }
 
         return playable_squares;
+    }
+
+    /**
+     * Get playable squares of piece
+     * @param {string} piece_type Piece Type
+     * @param {int} square_id Square ID of piece
+     */
+    getPlayableSquaresOfPiece(piece_type, square_id){
+        switch (piece_type) {
+            case "rook":
+                playable_squares_id = this.#getPlayableSquaresOfRook(square_id);
+                break;
+            case "bishop":
+                playable_squares_id = this.#getPlayableSquaresOfBishop(square_id);
+                break;
+            case "pawn":
+                playable_squares_id = this.#getPlayableSquaresOfPawn(square_id);
+                break;
+            case "king":
+                playable_squares_id = this.#getPlayableSquaresOfKing(square_id);
+                break;
+            case "queen":
+                playable_squares_id = this.#getPlayableSquaresOfQueen(square_id);
+                break;
+            case "knight":
+                playable_squares_id = this.#getPlayableSquaresOfKnight(square_id);
+                break;
+            default:
+                break;
+        }
     }
 }

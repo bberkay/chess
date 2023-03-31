@@ -92,9 +92,9 @@ class Board{
     }
     
     /**
-    * Clear/Refresh Board(Remove effects)
-    * @returns {void}
-    */
+     * Clear/Refresh Board(Remove effects)
+     * @returns {void}
+     */
     refreshBoard() {
         let squares = document.querySelectorAll(".square");
         let l = squares.length;

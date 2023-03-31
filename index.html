@@ -12,6 +12,16 @@
 <body>
     <div id="chessboard"></div>
 
+    <script src="src/js/Client/Global.js"></script>
+    <script src="src/js/Controller/GameController.js"></script>
+    <script src="src/js/Core/Utils/PathConverter.js"></script>
+    <script src="src/js/Core/Board.js"></script>
+    <script src="src/js/Core/Game.js"></script>
+    <script src="src/js/Core/PathEngine.js"></script>
+    <script src="src/js/Core/RouteEngine.js"></script>
+    <script src="src/js/Core/PieceEngine.js"></script>
+    <script src="src/js/Handler/DOMHandler.js"></script>
+    <script src="src/js/Models/Piece.js"></script>
     <script src="src/js/Chess.js"></script>
     <script>
         const chess = new Chess();
@@ -34,7 +44,7 @@
         chess.startCustomGame([
             { "color": Color.white, "piece": Type.knight, "square": Square.e5 },
             { "color": Color.black, "piece": Type.bishop, "square": Square.g7 },
-            { "color": Color.black, "piece": Type.king, "square": square.b2 }
+            { "color": Color.white, "piece": Type.king, "square": Square.b2 }
         ]);
     </script>
 </body>

@@ -1,12 +1,11 @@
-class PiecePathSchema extends PathEngine{
+class RouteEngine extends PathEngine{
     /**
-     * @static
      * Calculate Bishop Path
      * @param {int} square_id Square ID of the bishop
      * @param {boolean} piece_sensivity To avoid tripping over other pieces.
      * @returns {JSON}
      */
-    static calcBishopPath(square_id, piece_sensivity = true) {
+    calcBishopPath(square_id, piece_sensivity = true) {
         return {
             // get all squares of diagonal
             ...this.calcPlayableDiagonalSquares({square_id: square_id, piece_sensivity: piece_sensivity})
@@ -14,13 +13,12 @@ class PiecePathSchema extends PathEngine{
     }
 
      /**
-     * @static 
      * Calculate Rook Path
      * @param {int} square_id Square ID of the rook
      * @param {boolean} piece_sensivity To avoid tripping over other pieces.
      * @returns {JSON}
      */
-    static calcRookPath(square_id, piece_sensivity = true) {
+    calcRookPath(square_id, piece_sensivity = true) {
         return {
             // get all squares of column and row
             ...this.calcPlayableColumnSquares({square_id: square_id, piece_sensivity: piece_sensivity}),
@@ -29,13 +27,12 @@ class PiecePathSchema extends PathEngine{
     }
 
     /**
-     * @static 
      * Calculate Queen Path
      * @param {int} square_id Square ID of the queen
      * @param {boolean} piece_sensivity To avoid tripping over other pieces.
      * @returns {JSON}
      */
-    static calcQueenPath(square_id, piece_sensivity = true) {
+    calcQueenPath(square_id, piece_sensivity = true) {
         return {
             // get all squares of column, row and diagonal(UNLIMITED POWEEEER!!!)
             ...this.calcPlayableColumnSquares({square_id: square_id, piece_sensivity: piece_sensivity}),
@@ -45,12 +42,11 @@ class PiecePathSchema extends PathEngine{
     }
 
     /**
-     * @static 
      * Calculate Pawn Path
      * @param {int} square_id Square ID of the pawn
      * @returns {JSON}
      */
-    static calcPawnPath(square_id) {
+    calcPawnPath(square_id) {
         let limit = 0;
         let route = "";
         let row_of_pawn = this.calcRowOfSquare(square_id);
@@ -89,15 +85,14 @@ class PiecePathSchema extends PathEngine{
     }
 
     /**
-     * @static 
      * Calculate Knight Path
      * @param {int} square_id Square ID of the knight
      * @param {boolean} piece_sensivity To avoid tripping over other pieces.
      * @returns {Array<int>}
      */
-    static calcKnightPath(square_id, piece_sensivity = true) {
+    calcKnightPath(square_id, piece_sensivity = true) {
         // get 2 squares of column
-        let column = this.jsonPathToArrayPath(this.calcPlayableColumnSquares({
+        let column = PathConverter.jsonPathToArrayPath(this.calcPlayableColumnSquares({
             square_id: square_id,
             distance_limit: 2,
             piece_sensivity: piece_sensivity
@@ -106,7 +101,7 @@ class PiecePathSchema extends PathEngine{
             return square_id === item - 16 || square_id === item + 16
         });
         // get 2 squares of row
-        let row = this.jsonPathToArrayPath(this.calcPlayableRowSquares({
+        let row = PathConverter.jsonPathToArrayPath(this.calcPlayableRowSquares({
             square_id: square_id,
             distance_limit: 2,
             piece_sensivity: piece_sensivity
@@ -117,7 +112,7 @@ class PiecePathSchema extends PathEngine{
         // get first square of left side and right side at end of the column 
         let column_sides = [];
         column.forEach(item => {
-            column_sides.push(this.jsonPathToArrayPath(this.calcPlayableRowSquares({
+            column_sides.push(PathConverter.jsonPathToArrayPath(this.calcPlayableRowSquares({
                 square_id: item,
                 distance_limit: 1,
                 piece_sensivity: piece_sensivity
@@ -126,7 +121,7 @@ class PiecePathSchema extends PathEngine{
         // get first square of top side and bottom side at end of the row
         let row_sides = [];
         row.forEach(item => {
-            row_sides.push(this.jsonPathToArrayPath(this.calcPlayableColumnSquares({
+            row_sides.push(PathConverter.jsonPathToArrayPath(this.calcPlayableColumnSquares({
                 square_id: item,
                 distance_limit: 1,
                 piece_sensivity: piece_sensivity
@@ -150,7 +145,7 @@ class PiecePathSchema extends PathEngine{
      * @param {int} square_id Square ID of the king
      * @returns {JSON}
      */
-    static calcKingPath(square_id) {
+    calcKingPath(square_id) {
         return {
             // get first square of column, row and diagonal
             ...this.calcPlayableColumnSquares({

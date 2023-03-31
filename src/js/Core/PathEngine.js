@@ -1,6 +1,6 @@
 class PathEngine {
     /**
-     * @private
+     * @public
      * Calculate Column of Square
      * @param {int} square_id Square ID of the active piece
      * @returns {int}
@@ -10,7 +10,7 @@ class PathEngine {
     }
 
     /**
-     * @private
+     * @public
      * Calculate Row of Square
      * @param {int} square_id Square ID of the active piece
      * @returns {int}
@@ -241,6 +241,5 @@ class PathEngine {
 
         return squares;
     }
-
     
 }

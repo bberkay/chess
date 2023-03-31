@@ -1,4 +1,4 @@
-class Game{
+class GameStatus{
     /**
      * @static
      * Is Check ?
