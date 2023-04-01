@@ -50,7 +50,14 @@ class Chess{
         }
         else if(square_piece_control && this.selected_piece && GameController.getPieceBySquareID(square_id).color == gl_current_move){
             let clicked_piece = GameController.getPieceBySquareID(square_id);
-            if(clicked_piece.color == gl_current_move && clicked_piece != this.selected_piece){
+            if(this.selected_piece.type == "king" && clicked_piece.type == "rook" && clicked_piece.color == gl_current_move){
+                let square_id_of_rook = GameController.getPieceBySquareID(clicked_piece);
+                if(clicked_piece.color === "white" && square_id_of_rook == 64 || clicked_piece.color === "black" && square_id_of_rook == 8)
+                    this.#castling("short");
+                else if(clicked_piece.color === "white" && square_id_of_rook == 57 || clicked_piece.color === "black" && square_id_of_rook == 1)
+                    this.#castling("long");
+            }
+            else if(clicked_piece.color == gl_current_move && clicked_piece != this.selected_piece){
                 // If player select another piece after select piece then unselect first selected piece and select new selected piece.
                 this.#unselectPiece();
                 this.#selectPiece(square_id);
@@ -133,6 +140,18 @@ class Chess{
     #movePiece(square_id){
         this.board.clearSelectedEffect(this.selected_piece);
         this.board.movePiece(this.selected_piece, square_id);
+    }
+    
+    /**
+     * @private
+     * Castling
+     * @param {string} castling_type
+     * @returns {void}
+     */
+    #castling(castling_type){
+        // FIXME: Castling devam edilecek.
+        if(!gl_castling_control[gl_current_move + "-" + castling_type])
+            return;
     }
 
     /**

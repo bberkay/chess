@@ -26,7 +26,7 @@
     <script src="src/js/Chess.js"></script>
     <script>
         const chess = new Chess();
-        chess.startGame();
+        // chess.startGame();
         // chess.startCustomGame([
         //     { "color": "white", "piece": "king", "square": 61 },
         //     { "color": "white", "piece": "rook", "square": 64 },
@@ -42,6 +42,12 @@
         //     { "color": "black", "piece": "rook", "square": 13 },
         //     { "color": "black", "piece": "rook", "square": 54 },
         // ]);
+
+        chess.startCustomGame([
+             { "color": Color.white, "piece": Type.king, "square": Square.e1 },
+             { "color": Color.white, "piece": Type.rook, "square": Square.h1 },
+             { "color": Color.white, "piece": Type.rook, "square": Square.a1 },
+         ]);
 
     </script>
 </body>
