@@ -36,75 +36,51 @@ class Chess{
      * @returns {void}
      */
     clickSquare(square_id) {
-        // Is player click any piece
-        let square_piece_control;
-        let square_playable_control = this.playable_squares.includes(square_id);
-        if(gl_checked_player === gl_current_move)
-            square_piece_control = GameController.isSquareHasPiece(square_id, gl_current_move === "white" ? "white" : "black", ["king"]);
-        else
-            square_piece_control = GameController.isSquareHasPiece(square_id);
+        let clicked_square = GameController.getPieceBySquareID(square_id);
 
-        if(!this.selected_piece){
-            // If clicked square has piece and selected_piece is null then operation is select piece
-            this.#selectPiece(square_id);
+        // Select - unselect piece and control short-long rook
+        if(clicked_square && clicked_square.color == gl_current_move){
+            clicked_square === this.selected_piece ? this.#unselectPiece() : this.#selectPiece(clicked_square);
+            // TODO: Rook kontrol
         }
-        else if(square_piece_control && this.selected_piece && GameController.getPieceBySquareID(square_id).color == gl_current_move){
-            let clicked_piece = GameController.getPieceBySquareID(square_id);
-            if(this.selected_piece.type == "king" && clicked_piece.type == "rook" && clicked_piece.color == gl_current_move){
-                let square_id_of_rook = GameController.getPieceBySquareID(clicked_piece);
-                if(clicked_piece.color === "white" && square_id_of_rook == 64 || clicked_piece.color === "black" && square_id_of_rook == 8)
-                    this.#castling("short");
-                else if(clicked_piece.color === "white" && square_id_of_rook == 57 || clicked_piece.color === "black" && square_id_of_rook == 1)
-                    this.#castling("long");
-            }
-            else if(clicked_piece.color == gl_current_move && clicked_piece != this.selected_piece){
-                // If player select another piece after select piece then unselect first selected piece and select new selected piece.
-                this.#unselectPiece();
-                this.#selectPiece(square_id);
-            }else{
-                // If clicked piece is already selected then unselect piece
-                this.board.refreshBoard();
-                this.#unselectPiece();
-            }
-        }
-        else if(square_playable_control){
-            // If clicked square has no piece but is playable then move
+        // Move piece and control check then end turn
+        else if(this.selected_piece && this.playable_squares.includes(square_id)){
             this.#movePiece(square_id);
-            this.board.refreshBoard();
+
             // If moved piece is king then clear checked effect(is checked or not)
             if(this.selected_piece.type == "king")
                 this.board.clearCheckedEffect();
+            
+            // End turn and control check then clear current selected piece
             this.#endTurn();
-            // If moved piece is king then don't control check
-            if(this.selected_piece.type !== "king")
-                this.#controlCheck();
+            this.#controlCheck();
             this.#unselectPiece();
         }
-        else{
-            // If clicked piece is already selected then unselect piece
+        // Clear board
+        else if(!clicked_square){
             this.board.refreshBoard();
             this.#unselectPiece();
         }
+
     }
 
     /**
     * @private
      * Select Piece
-     * @param {int} square_id
+     * @param {Piece} piece
      * @returns {void}
     */
-    #selectPiece(square_id){
-        let piece = GameController.getPieceBySquareID(square_id);       
+    #selectPiece(piece){
+        // Unselect the previous selected piece.
+        if(this.selected_piece)
+            this.#unselectPiece();
 
-        // Select Piece
-        if(gl_current_move === piece.color){
-            // If player is checked then player only select king 
-            if(gl_checked_player === gl_current_move && piece.type !== "king")
-                this.selected_piece = null;
-            else{
-                this.selected_piece = piece;
-                this.board.setSelectedEffect(this.selected_piece);
-            }
+        // If player is checked then player only select king 
+        if(gl_checked_player === gl_current_move && piece.type !== "king")
+            this.selected_piece = null;
+        else{
+            this.selected_piece = piece;
+            this.board.setSelectedEffect(this.selected_piece);
         }
         
         // Show Playable Squares
@@ -127,6 +103,7 @@ class Chess{
      */
     #unselectPiece(){
         this.board.clearSelectedEffect(this.selected_piece);
+        this.board.refreshBoard();
         this.selected_piece = null;
         this.playable_squares = [];
     }
@@ -139,9 +116,10 @@ class Chess{
      */
     #movePiece(square_id){
         this.board.clearSelectedEffect(this.selected_piece);
+        this.board.refreshBoard();
         this.board.movePiece(this.selected_piece, square_id);
     }
-    
+
     /**
      * @private
      * Castling
@@ -149,9 +127,10 @@ class Chess{
      * @returns {void}
      */
     #castling(castling_type){
-        // FIXME: Castling devam edilecek.
         if(!gl_castling_control[gl_current_move + "-" + castling_type])
             return;
+        else
+            console.log("Castling");
     }
 
     /**
@@ -160,6 +139,10 @@ class Chess{
      * @returns {void}
      */ 
     #controlCheck(){
+        // If moved piece is king then don't control check
+        if(this.selected_piece.type !== "king")
+            return;
+            
         const player_king = GameController.getPlayerKing();
 
         // Set checked player and give effect the checked king
