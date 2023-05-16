@@ -8,6 +8,9 @@ class DOMHandler{
         chess.clickSquare(parseInt(e.id));
     }    
 
+    /**
+     * Show Square ID of the squares
+     */
     static toggleSquareID(){
         let squares = document.querySelectorAll(".square");
         if(!squares[0].innerHTML.includes("1")){

@@ -69,4 +69,24 @@ class GameStatus{
 
         return dangerous_squares.length !== 0;
     }
+
+    /**
+     * @static
+     * Can Long Castling?
+     * @param {Piece} piece King
+     * @returns {boolean}
+     */
+    static canLongCastling(piece){
+        return true;
+    }
+
+    /**
+     * @static
+     * Can Short Castling?
+     * @param {Piece} piece King
+     * @returns {boolean}
+     */
+    static canShortCastling(piece){
+        return true;
+    }
 }

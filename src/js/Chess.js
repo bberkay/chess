@@ -40,8 +40,15 @@ class Chess{
 
         // Select - unselect piece and control short-long rook
         if(clicked_square && clicked_square.color == gl_current_move){
-            clicked_square === this.selected_piece ? this.#unselectPiece() : this.#selectPiece(clicked_square);
-            // TODO: Rook kontrol
+            if(clicked_square === this.selected_piece)
+                this.#unselectPiece();
+            else{
+                // If selected piece is king or rook and clicked square is king or rook, but not the same as selected piece, start castling operation
+                if(this.selected_piece && ["rook", "king"].includes(this.selected_piece.type) && ["rook", "king"].includes(clicked_square.type) && this.selected_piece.type != clicked_square.type)
+                    this.#castling(GameController.getSquareIDByPiece(clicked_square.type == "rook" ? clicked_square : this.selected_piece));
+                else
+                    this.#selectPiece(clicked_square)
+            }
         }
         // Move piece and control check then end turn
         else if(this.selected_piece && this.playable_squares.includes(square_id)){
@@ -65,7 +72,7 @@ class Chess{
     }
 
     /**
-    * @private
+     * @private
      * Select Piece
      * @param {Piece} piece
      * @returns {void}
@@ -90,6 +97,26 @@ class Chess{
             // Get playable squares of selected piece
             this.playable_squares = this.selected_piece.getPlayableSquaresOfPiece();   
 
+            if(this.selected_piece.type == "king" || this.selected_piece.type == "rook"){
+                let rook_castling = false;
+                if(GameStatus.canLongCastling(this.selected_piece)){
+                    if(this.selected_piece.type == "king")
+                        this.playable_squares.push(gl_current_move === "white" ? 57 : 1);
+                    else
+                        rook_castling = true;
+                }
+                if(GameStatus.canShortCastling(this.selected_piece)){
+                    if(this.selected_piece.type == "king")
+                        this.playable_squares.push(gl_current_move === "white" ? 64 : 8);
+                    else
+                        rook_castling = true;
+                }
+
+                if(rook_castling){
+                    this.playable_squares.push(gl_current_move === "white" ? 61 : 5);
+                }
+            }
+
             // Show playable squares of selected piece
             this.board.showPlayableSquares(this.playable_squares);
         }
@@ -112,25 +139,43 @@ class Chess{
      * @private
      * Move piece to playable square
      * @param {int} square_id Square ID of the Target Square to move
+     * @param {Piece} piece Optional piece information(default selected piece)
      * @returns {void}
      */
-    #movePiece(square_id){
-        this.board.clearSelectedEffect(this.selected_piece);
+    #movePiece(square_id, piece=null){
+        this.board.clearSelectedEffect(piece == null ? this.selected_piece : piece);
         this.board.refreshBoard();
-        this.board.movePiece(this.selected_piece, square_id);
+        this.board.movePiece(piece == null ? this.selected_piece : piece, square_id);
     }
 
     /**
      * @private
      * Castling
-     * @param {string} castling_type
+     * @param {int} square_id Square ID of rook
      * @returns {void}
      */
-    #castling(castling_type){
-        if(!gl_castling_control[gl_current_move + "-" + castling_type])
+    #castling(square_id){
+        let castling_type = square_id % 8 == 0 ? "short" : "long";
+        if(gl_castling_control[gl_current_move + "-" + castling_type])
             return;
-        else
-            console.log("Castling");
+        else{
+            let player_king = GameController.getPlayerKing();
+            if(castling_type == "short"){ 
+                // If castling type short and square id is 64 then for white, else for black(square id is 8)
+                if(square_id == 64){
+                    // TODO: kral 63 e gidecek ve kale yok olacak.
+                }else{ 
+                    // TODO: kral 7 ye gidecek ve kale yok olacak.
+                }
+            }else{
+                // If castling type long and square id is 57 then for white, else for black(square id is 1)
+                if(square_id == 57){
+                    // TODO: kral 59 a gidecek ve kale yok olacak.
+                }else{
+                    // TODO: kral 3 e gidecek ve kale yok olacak.
+                }
+            }
+        }
     }
 
     /**

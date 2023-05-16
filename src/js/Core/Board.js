@@ -129,7 +129,7 @@ class Board{
     * Move Piece To Selected Square
     * @async
     * @param {Piece} piece Piece of the target to move
-    * @param {int} target_square Piece target square
+    * @param {int} target_square Square ID of target square
     * @returns {void}
     */
     async movePiece(piece, target_square) {
@@ -140,12 +140,16 @@ class Board{
 
         // Remove piece from his square
         let piece_id = document.getElementById(square_id);
-        piece_id.removeChild(piece_id.lastElementChild);
+        let piece_obj = piece_id.querySelector(".piece");
+        if(piece_obj)
+            piece_id.removeChild(piece_obj);
 
         // Remove enemy from target square
         let target_piece = document.getElementById(target_square);
-        if (target_piece.lastElementChild)
-            target_piece.removeChild(target_piece.lastElementChild);
+        // TODO: destroy metodu yazılacak. Alt tarafda target_piece var patlamamasına dikkat et.
+        piece_obj = target_piece.querySelector(".piece");
+        if (piece_obj)
+            target_piece.removeChild(piece_obj);
 
         await new Promise(r => setTimeout(r, 75));
 
@@ -156,7 +160,7 @@ class Board{
         piece_element.classList.add("piece");
         target_piece.appendChild(piece_element);
     }
- 
+
     /**
      * Set effect of the square
      * @param {int} square_id Square to be effected
