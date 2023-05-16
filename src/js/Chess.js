@@ -96,22 +96,26 @@ class Chess{
 
             // Get playable squares of selected piece
             this.playable_squares = this.selected_piece.getPlayableSquaresOfPiece();   
-
+            
+            // If selected piece king or rook then control castling operation for show playable squares to player
             if(this.selected_piece.type == "king" || this.selected_piece.type == "rook"){
                 let rook_castling = false;
                 if(GameStatus.canLongCastling(this.selected_piece)){
+                    // if player click king then click rook
                     if(this.selected_piece.type == "king")
                         this.playable_squares.push(gl_current_move === "white" ? 57 : 1);
                     else
                         rook_castling = true;
                 }
                 if(GameStatus.canShortCastling(this.selected_piece)){
+                    // if player click king then click rook
                     if(this.selected_piece.type == "king")
                         this.playable_squares.push(gl_current_move === "white" ? 64 : 8);
                     else
                         rook_castling = true;
                 }
 
+                // if player click rook then click king
                 if(rook_castling){
                     this.playable_squares.push(gl_current_move === "white" ? 61 : 5);
                 }
