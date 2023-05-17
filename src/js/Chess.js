@@ -37,26 +37,30 @@ class Chess{
      */
     clickSquare(square_id) {
         let clicked_square = GameController.getPieceBySquareID(square_id);
+        let is_castling_move = this.#isCastlingMove(clicked_square);
 
-        // Select - unselect piece and control short-long rook
-        if(clicked_square && clicked_square.color == gl_current_move){
+        // Select - unselect piece
+        if(clicked_square && clicked_square.color == gl_current_move && !is_castling_move){
             if(clicked_square === this.selected_piece)
                 this.#unselectPiece();
-            else{
-                // If selected piece is king or rook and clicked square is king or rook, but not the same as selected piece, start castling operation
-                if(this.selected_piece && ["rook", "king"].includes(this.selected_piece.type) && ["rook", "king"].includes(clicked_square.type) && this.selected_piece.type != clicked_square.type)
-                    this.#castling(GameController.getSquareIDByPiece(clicked_square.type == "rook" ? clicked_square : this.selected_piece));
-                else
-                    this.#selectPiece(clicked_square)
-            }
+            else
+                this.#selectPiece(clicked_square)
         }
-        // Move piece and control check then end turn
+        // Move Piece, Control Castling
         else if(this.selected_piece && this.playable_squares.includes(square_id)){
-            this.#movePiece(square_id);
+            if(is_castling_move) // Control is castling move
+                this.#castling(square_id);
+            else{
+                this.#movePiece(square_id); // Move piece and control check then end turn
+
+                // If moved piece king or rook then change castling status
+                this.#controlCastling();
+            }
 
             // If moved piece is king then clear checked effect(is checked or not)
-            if(this.selected_piece.type == "king")
+            if(this.selected_piece.type == "king"){
                 this.board.clearCheckedEffect();
+            }
             
             // End turn and control check then clear current selected piece
             this.#endTurn();
@@ -66,7 +70,8 @@ class Chess{
         // Clear board
         else if(!clicked_square){
             this.board.refreshBoard();
-            this.#unselectPiece();
+            if(this.selected_piece)
+                this.#unselectPiece();
         }
 
     }
@@ -96,30 +101,6 @@ class Chess{
 
             // Get playable squares of selected piece
             this.playable_squares = this.selected_piece.getPlayableSquaresOfPiece();   
-            
-            // If selected piece king or rook then control castling operation for show playable squares to player
-            if(this.selected_piece.type == "king" || this.selected_piece.type == "rook"){
-                let rook_castling = false;
-                if(GameStatus.canLongCastling(this.selected_piece)){
-                    // if player click king then click rook
-                    if(this.selected_piece.type == "king")
-                        this.playable_squares.push(gl_current_move === "white" ? 57 : 1);
-                    else
-                        rook_castling = true;
-                }
-                if(GameStatus.canShortCastling(this.selected_piece)){
-                    // if player click king then click rook
-                    if(this.selected_piece.type == "king")
-                        this.playable_squares.push(gl_current_move === "white" ? 64 : 8);
-                    else
-                        rook_castling = true;
-                }
-
-                // if player click rook then click king
-                if(rook_castling){
-                    this.playable_squares.push(gl_current_move === "white" ? 61 : 5);
-                }
-            }
 
             // Show playable squares of selected piece
             this.board.showPlayableSquares(this.playable_squares);
@@ -154,40 +135,104 @@ class Chess{
 
     /**
      * @private
+     * Destroy piece by square id
+     * @param {int} square_id 
+     * @returns {void}
+     */
+    #destroyPiece(square_id){
+        // NOTE: Bu bölüm ileride piyon terfisinde kullanılabilir
+        this.board.destroyPiece(square_id);
+    }
+
+    /**
+     * @private
      * Castling
      * @param {int} square_id Square ID of rook
      * @returns {void}
      */
     #castling(square_id){
+        // If first click is rook and second click is king 
+        if(square_id == 61 || square_id == 5)
+            square_id = GameController.getSquareIDByPiece(this.selected_piece) 
+
         let castling_type = square_id % 8 == 0 ? "short" : "long";
-        if(gl_castling_control[gl_current_move + "-" + castling_type])
-            return;
-        else{
-            let player_king = GameController.getPlayerKing();
-            if(castling_type == "short"){ 
-                // If castling type short and square id is 64 then for white, else for black(square id is 8)
-                if(square_id == 64){
-                    // TODO: kral 63 e gidecek ve kale yok olacak.
-                }else{ 
-                    // TODO: kral 7 ye gidecek ve kale yok olacak.
-                }
-            }else{
-                // If castling type long and square id is 57 then for white, else for black(square id is 1)
-                if(square_id == 57){
-                    // TODO: kral 59 a gidecek ve kale yok olacak.
-                }else{
-                    // TODO: kral 3 e gidecek ve kale yok olacak.
-                }
+        let player_king = GameController.getPlayerKing();
+        if(castling_type == "short"){ 
+            // If castling type short and square id is 64 then for white, else for black(square id is 8)
+            if(square_id == 64){
+                // White King goes to 59(c1) and white short rook(h1, 64) goes to 62(f1)
+                this.#movePiece(63, player_king);
+                this.#movePiece(62, GameController.getPieceBySquareID(64));
+                gl_castling_control["white-short"] = false;
+            }else if(square_id == 8){ 
+                // White King goes to 59(c1) and black short rook(h8, 8) goes to 6(f8)
+                this.#movePiece(7, player_king);
+                this.#movePiece(6, GameController.getPieceBySquareID(8));
+                gl_castling_control["black-short"] = false;
+            }
+        }else{
+            // If castling type long and square id is 57 then for white, else for black(square id is 1)
+            if(square_id == 57){ 
+                // White King goes to 59(c1) and white long rook(a1, 57) goes to 60(d1)
+                this.#movePiece(59, player_king);
+                this.#movePiece(60, GameController.getPieceBySquareID(57));
+                gl_castling_control["white-long"] = false;
+            }else if(square_id == 1){
+                // Black King goes to 3(c8) and black long rook(a8, 1) goes to 4(d8)
+                this.#movePiece(3, player_king);
+                this.#movePiece(4, GameController.getPieceBySquareID(1));
+                gl_castling_control["black-long"] = false;
             }
         }
     }
 
     /**
      * @private
+     * Is Castling Move?
+     * @param {int} clicked_piece Square ID of clicked square
+     * @returns {boolean} 
+     */
+    #isCastlingMove(clicked_piece){
+        // If selected piece is king or rook and clicked square is king or rook, but not the same as selected piece, start castling operation
+        if(this.selected_piece && ["rook", "king"].includes(this.selected_piece.type) && ["rook", "king"].includes(clicked_piece.type) && this.selected_piece.type != clicked_piece.type){
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * @private
+     * Control castling after move
+     * @returns {void}
+     */
+    #controlCastling(){
+        if(this.selected_piece.type == "king"){
+            gl_castling_control[gl_current_move + "-short"] = false;
+            gl_castling_control[gl_current_move + "-long"] = false;
+        }
+        else if(this.selected_piece.type == "rook"){
+            if(this.selected_piece.color == "white"){
+                if(gl_squares[64] == 0 || gl_squares[64].color != "white" || gl_squares[64].type != "rook") 
+                    gl_castling_control["white-short"] = false;
+                if(gl_squares[57] == 0 || gl_squares[57].color != "white" || gl_squares[57].type != "rook")
+                    gl_castling_control["white-long"] = false;
+            }else{
+                if(gl_squares[8] == 0 || gl_squares[8].color != "white" || gl_squares[8].type != "rook") 
+                    gl_castling_control["black-short"] = false;
+                if(gl_squares[1] == 0 || gl_squares[1].color != "white" || gl_squares[1].type != "rook")
+                    gl_castling_control["black-long"] = false;
+            }
+        }
+    }
+    
+    /**
+     * @private
      * Is enemy player checked after move? If checked then set gl_checked_player to enemy player
      * @returns {void}
      */ 
     #controlCheck(){
+        // FIXME: Şah çekilme durumu tetiklenmiyor gibi
+
         // If moved piece is king then don't control check
         if(this.selected_piece.type !== "king")
             return;

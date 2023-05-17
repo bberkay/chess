@@ -72,21 +72,28 @@ class GameStatus{
 
     /**
      * @static
-     * Can Long Castling?
-     * @param {Piece} piece King
+     * Is current player can long castling?
      * @returns {boolean}
      */
-    static canLongCastling(piece){
+    static canLongCastling(){
+        if(gl_castling_control[gl_current_move + "-long"] == false)
+            return false;            
+
+        // TODO: Control Castling
+        // NOTE: Galiba controlCastling gereksiz bir fonksiyon burada zaten kontrol ediliyor ve yapılabilirse king veya rook a ekleniyor.
         return true;
     }
 
     /**
      * @static
-     * Can Short Castling?
-     * @param {Piece} piece King
+     * Is current player can short castling?
      * @returns {boolean}
      */
-    static canShortCastling(piece){
+    static canShortCastling(){
+        if(gl_castling_control[gl_current_move + "-short"] == false)
+            return false;
+
+        // TODO: Control Castling
         return true;
     }
 }

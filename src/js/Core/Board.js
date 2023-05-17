@@ -146,7 +146,6 @@ class Board{
 
         // Remove enemy from target square
         let target_piece = document.getElementById(target_square);
-        // TODO: destroy metodu yazılacak. Alt tarafda target_piece var patlamamasına dikkat et.
         piece_obj = target_piece.querySelector(".piece");
         if (piece_obj)
             target_piece.removeChild(piece_obj);
@@ -159,6 +158,22 @@ class Board{
         piece_element.setAttribute("data-piece", piece.type);
         piece_element.classList.add("piece");
         target_piece.appendChild(piece_element);
+    }
+
+    /**
+     * Destroy piece by square id
+     * @param {int} square_id 
+     * @returns {void}
+     */
+    destroyPiece(square_id){
+        // Remove enemy from dom
+        let target_piece = document.getElementById(square_id);
+        let piece_obj = target_piece.querySelector(".piece");
+        if(piece_obj)
+            target_piece.removeChild(piece_obj);
+
+        // Remove enemy from game
+        GameController.changeSquare(square_id, 0);
     }
 
     /**

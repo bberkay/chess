@@ -33,10 +33,10 @@ var gl_id_list = []; // Pieces ID
  * false for can't be done anymore
  */
 var gl_castling_control = {
-    "white-long": null,
-    "white-short": null,
-    "black-long": null,
-    "black-short": null
+    "white-long": true,
+    "white-short": true,
+    "black-long": true,
+    "black-short": true
 };
 
 /*

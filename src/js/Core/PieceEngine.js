@@ -30,7 +30,15 @@ class PieceEngine{
      * @returns {Array<int>}
      */
     #getPlayableSquaresOfRook(square_id) {
-        return PathConverter.jsonPathToArrayPath(this.#filterPlayableSquares(square_id, RouteEngine.calcRookPath(square_id)));
+        let playable_squares = PathConverter.jsonPathToArrayPath(this.#filterPlayableSquares(square_id, RouteEngine.calcRookPath(square_id)));
+
+        // Castling
+        if(GameStatus.canShortCastling())
+            playable_squares.push(square_id == 64 || square_id == 57 ? 61 : 5);
+        if(GameStatus.canLongCastling())
+            playable_squares.push(square_id == 64 || square_id == 57 ? 61 : 5);
+
+        return playable_squares;
     }
 
     /**
@@ -65,6 +73,13 @@ class PieceEngine{
             GameController.changeSquare(square, 0);
         });
         GameController.changeSquare(temp, king); // set king to default position
+
+        // Castling
+        if(GameStatus.canShortCastling())
+            playable_squares.push(king.color == "white" ? 64 : 8);
+        if(GameStatus.canLongCastling())
+            playable_squares.push(king.color == "white" ? 57 : 1);
+
         return playable_squares;
     }
 
@@ -182,5 +197,10 @@ class PieceEngine{
             default:
                 break;
         }
+    }
+
+
+    #addCastlingToPiece(){
+
     }
 }
