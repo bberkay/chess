@@ -9,7 +9,7 @@ class DOMHandler{
     }    
 
     /**
-     * Show Square ID of the squares
+     * Show ID of the squares
      */
     static toggleSquareID(){
         let squares = document.querySelectorAll(".square");

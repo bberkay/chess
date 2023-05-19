@@ -1,4 +1,4 @@
-class PathConverter{
+class JSONConverter{
     /**
      * @static 
      * Convert JSON Path to ArrayList Path
@@ -14,5 +14,19 @@ class PathConverter{
             }
         }
         return array_path;
+    }
+
+    /**
+     * @static
+     * Swap value to key
+     * @param {JSON} json_object 
+     * @returns {JSON}
+     */
+    static reverseJSON(json_object){
+        var swapped_array = {};
+        for(var key in json_object){
+            swapped_array[json_object[key]] = key;
+        }
+        return swapped_array;
     }
 }

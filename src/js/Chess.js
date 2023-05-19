@@ -54,7 +54,7 @@ class Chess{
                 this.#movePiece(square_id); // Move piece and control check then end turn
 
                 // If moved piece king or rook then change castling status
-                this.#controlCastling();
+                this.#changeCastlingStatus();
             }
 
             // If moved piece is king then clear checked effect(is checked or not)
@@ -205,21 +205,26 @@ class Chess{
      * Control castling after move
      * @returns {void}
      */
-    #controlCastling(){
+    #changeCastlingStatus(){
+        // If king is moved then disable short and long castling
         if(this.selected_piece.type == "king"){
             gl_castling_control[gl_current_move + "-short"] = false;
             gl_castling_control[gl_current_move + "-long"] = false;
         }
         else if(this.selected_piece.type == "rook"){
             if(this.selected_piece.color == "white"){
+                // If short rook(id=64) moved then disable white sort castling
                 if(gl_squares[64] == 0 || gl_squares[64].color != "white" || gl_squares[64].type != "rook") 
                     gl_castling_control["white-short"] = false;
+                // If long rook(id=57) moved then disable white long castling
                 if(gl_squares[57] == 0 || gl_squares[57].color != "white" || gl_squares[57].type != "rook")
                     gl_castling_control["white-long"] = false;
             }else{
-                if(gl_squares[8] == 0 || gl_squares[8].color != "white" || gl_squares[8].type != "rook") 
+                // If short rook(id=8) moved then disable black short castling
+                if(gl_squares[8] == 0 || gl_squares[8].color != "black" || gl_squares[8].type != "rook") 
                     gl_castling_control["black-short"] = false;
-                if(gl_squares[1] == 0 || gl_squares[1].color != "white" || gl_squares[1].type != "rook")
+                // If long rook(id=1) moved then disable black long castling
+                if(gl_squares[1] == 0 || gl_squares[1].color != "black" || gl_squares[1].type != "rook")
                     gl_castling_control["black-long"] = false;
             }
         }
@@ -231,10 +236,8 @@ class Chess{
      * @returns {void}
      */ 
     #controlCheck(){
-        // FIXME: Şah çekilme durumu tetiklenmiyor gibi
-
         // If moved piece is king then don't control check
-        if(this.selected_piece.type !== "king")
+        if(this.selected_piece.type === "king")
             return;
             
         const player_king = GameController.getPlayerKing();

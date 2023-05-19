@@ -79,8 +79,15 @@ class GameStatus{
         if(gl_castling_control[gl_current_move + "-long"] == false)
             return false;            
 
+        let long_rook = gl_current_move == "white" ? 57 : 1;
+
         // TODO: Control Castling
-        // NOTE: Galiba controlCastling gereksiz bir fonksiyon burada zaten kontrol ediliyor ve yapılabilirse king veya rook a ekleniyor.
+        if(gl_squares[long_rook + 1] != 0 || gl_squares[long_rook + 2] != 0 || gl_squares[long_rook + 3] != 0)
+            return false;
+
+        
+        // TODO: isCheck'e parametre desteği gelecek.
+
         return true;
     }
 
@@ -93,7 +100,13 @@ class GameStatus{
         if(gl_castling_control[gl_current_move + "-short"] == false)
             return false;
 
-        // TODO: Control Castling
+        let short_rook = gl_current_move == "white" ? 64 : 8;
+
+        if(gl_squares[short_rook - 1] != 0 || gl_squares[short_rook - 2] != 0)
+            return false;
+        
+        // TODO: isCheck'e parametre desteği gelecek.
+
         return true;
     }
 }

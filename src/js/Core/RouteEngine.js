@@ -96,7 +96,7 @@ class RouteEngine{
     static calcKnightPath(square_id, piece_sensivity = true) {
         const path_engine = new PathEngine();
         // get 2 squares of column
-        let column = PathConverter.jsonPathToArrayPath(path_engine.calcPlayableColumnSquares({
+        let column = JSONConverter.jsonPathToArrayPath(path_engine.calcPlayableColumnSquares({
             square_id: square_id,
             distance_limit: 2,
             piece_sensivity: false
@@ -106,7 +106,7 @@ class RouteEngine{
         });
 
         // get 2 squares of row
-        let row = PathConverter.jsonPathToArrayPath(path_engine.calcPlayableRowSquares({
+        let row = JSONConverter.jsonPathToArrayPath(path_engine.calcPlayableRowSquares({
             square_id: square_id,
             distance_limit: 2,
             piece_sensivity: false
@@ -118,7 +118,7 @@ class RouteEngine{
         // get first square of left side and right side at end of the column 
         let column_sides = [];
         column.forEach(item => {
-            column_sides.push(PathConverter.jsonPathToArrayPath(path_engine.calcPlayableRowSquares({
+            column_sides.push(JSONConverter.jsonPathToArrayPath(path_engine.calcPlayableRowSquares({
                 square_id: item,
                 distance_limit: 1,
                 piece_sensivity: false
@@ -128,7 +128,7 @@ class RouteEngine{
         // get first square of top side and bottom side at end of the row
         let row_sides = [];
         row.forEach(item => {
-            row_sides.push(PathConverter.jsonPathToArrayPath(path_engine.calcPlayableColumnSquares({
+            row_sides.push(JSONConverter.jsonPathToArrayPath(path_engine.calcPlayableColumnSquares({
                 square_id: item,
                 distance_limit: 1,
                 piece_sensivity: false
