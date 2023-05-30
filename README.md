@@ -1,5 +1,5 @@
 # Chess Engine
- Chess with Pure Javascript(not finished yet)
+ - Chess with Pure Javascript(not finished yet)
  
  URL: https://bberkay.github.io/chess-engine/ 
 
