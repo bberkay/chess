@@ -21,6 +21,10 @@ class Board{
      * @returns {void}
      */
     createBoard() {
+        // First clear board
+        this.destroyBoard();
+
+        // Create board
         const board_chars = "abcdefgh";
         let square_color = "white"
         let board_numbers = 8;
@@ -49,6 +53,14 @@ class Board{
 
             this.chessboard.appendChild(square);
         }
+    }
+
+    /**
+     * Destroy Chessoard
+     * @returns {void}
+     */
+    destroyBoard(){
+        this.chessboard.innerHTML = "";
     }
 
     /** 

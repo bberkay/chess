@@ -7,16 +7,36 @@ body{
     -ms-user-select: none;
     user-select: none;
 }
+/* -------------- Main START -------------- */
+.main{
+    width:100%;
+    display:flex;
+}
 
+.menu{
+    width:300px;
+    height:300px;
+    position: absolute;
+    top: 50%;
+    left: 30%;
+    margin: -400px 0 0 -400px;
+}
+
+.game{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin: -400px 0 0 -400px;
+}
+
+fieldset{
+    margin-top:10px;
+}
 /* -------------- Board START -------------- */
 #chessboard {
     width: 800px;
     height: 800px;
     border:1px solid black;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    margin: -400px 0 0 -400px;
     display:flex;
     flex-wrap: wrap;
     cursor: pointer;

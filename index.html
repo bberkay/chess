@@ -10,8 +10,70 @@
 </head>
 
 <body>
-    <div id="chessboard"></div>
-    <button onclick="DOMHandler.toggleSquareID()">Show Square ID</button>
+    <div class = "main">
+        <div class = "menu">
+            <fieldset>
+                <legend>Games</legend>
+                <input type="button" id="form-start" value="Start New Game" onclick="DOMHandler.startNewGame()">
+                <input type="button" id="form-start" value="Start Empty Game" onclick="DOMHandler.startEmptyGame()">
+            </fieldset>
+            <fieldset>
+                <legend>Info</legend>
+                <input type="button" id="form-start" value="Show Square ID" onclick="DOMHandler.toggleSquareID()">
+            </fieldset>
+            <fieldset>
+                <legend>Create Piece</legend>
+                <fieldset>
+                    <legend>Color</legend>
+                    <label for="form-white">White</label>
+                    <input type="radio" name="form-color" id="form-white" value="White" checked>
+                    <br>
+                    <label for="form-black">Black</label>
+                    <input type="radio" name="form-color" id="form-black" value="Black">
+                </fieldset>
+                <fieldset>
+                    <legend>Piece</legend>
+                    <label for="form-king">King</label>
+                    <input type="radio" id="form-king" value="King" name = "form-piece" checked>
+                    <br>
+                    <label for="form-queen">Queen</label>
+                    <input type="radio" id="form-queen" value="Queen" name = "form-piece">
+                    <br>
+                    <label for="form-bishop">Bishop</label>
+                    <input type="radio" id="form-bishop" value="Bishop" name = "form-piece">
+                    <br>
+                    <label for="form-knight">Knight</label>
+                    <input type="radio" id="form-knight" value="Knight" name = "form-piece">
+                    <br>
+                    <label for="form-rook">Rook</label>
+                    <input type="radio" id="form-rook" value="Rook" name = "form-piece">
+                    <br>
+                    <label for="form-pawn">Pawn</label>
+                    <input type="radio" id="form-pawn" value="Pawn" name = "form-piece">
+                </fieldset>  
+                <fieldset>
+                    <legend>Square</legend>
+                    <input type="textbox" name="form-square-create" placeholder="A1-h8 or 1-64">
+                    <br>
+                    <small id="square-error" style="color:red;"></small>
+                </fieldset>  
+                <br>
+                <input type="button" value = "Create Piece" onclick="DOMHandler.createPiece()">
+            </fieldset>
+            <fieldset>
+                <legend>Delete Piece</legend>
+                <input type="textbox" name="form-square-delete" placeholder="A1-h8 or 1-64">
+                <br>
+                <small id="square-error" style="color:red;"></small>
+                <br>
+                <input type="button" value = "Delete Piece" onclick="DOMHandler.deletePiece()">
+            </fieldset>  
+        </div>
+        <div class = "game">
+            <div id="chessboard"></div> <!-- Create Game -->
+        </div>
+    </div>
+    
 
     <script src="src/js/Client/Global.js"></script>
     <script src="src/js/Controller/GameController.js"></script>
@@ -26,9 +88,10 @@
     <script src="src/js/Chess.js"></script>
     <script>
         const chess = new Chess();
-        // chess.startGame();
+        if(document.getElementById("chessboard").innerHTML == "")
+            chess.startGame();
 
-        chess.startCustomGame([
+        /*chess.startCustomGame([
              { "color": Color.white, "piece": Type.king, "square": Square.e1 },
              { "color": Color.white, "piece": Type.rook, "square": Square.h1 },
              { "color": Color.white, "piece": Type.rook, "square": Square.a1 },
@@ -36,7 +99,7 @@
              { "color": Color.black, "piece": Type.rook, "square": Square.a8 },
              { "color": Color.black, "piece": Type.rook, "square": Square.h8 },
              { "color": Color.black, "piece": Type.pawn, "square": Square.g1 },
-        ]);
+        ]);*/
     </script>
 </body>
 

@@ -23,11 +23,21 @@ class Chess{
     * @example [{"color":Color.white, "piece":Type.pawn, "square":Square.e2}, ...]
     * @returns {void}
     */
-    startCustomGame(pieces) {
+    startCustomGame(pieces = null) {
         this.board.createBoard();
-        pieces.forEach(item => {
-            this.board.createPiece(item["color"], item["piece"], item["square"]);
-        });
+        if(pieces){
+            pieces.forEach(item => {
+                this.board.createPiece(item["color"], item["piece"], item["square"]);
+            });
+        }
+    }
+
+    /**
+     * Create Piece
+     * @returns {void}
+     */
+    createPiece(color, piece_type, target_square_id){
+        this.board.createPiece(color, piece_type, target_square_id);
     }
 
     /**
@@ -139,8 +149,7 @@ class Chess{
      * @param {int} square_id 
      * @returns {void}
      */
-    #destroyPiece(square_id){
-        // NOTE: Bu bölüm ileride piyon terfisinde kullanılabilir
+    destroyPiece(square_id){
         this.board.destroyPiece(square_id);
     }
 
