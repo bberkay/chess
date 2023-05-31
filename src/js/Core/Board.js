@@ -56,11 +56,13 @@ class Board{
     }
 
     /**
-     * Destroy Chessoard
+     * Destroy Chessboard and pieces in global squares
      * @returns {void}
      */
     destroyBoard(){
         this.chessboard.innerHTML = "";
+        for (let i = 1; i < 65; i++)
+            gl_squares[i] = 0;
     }
 
     /** 

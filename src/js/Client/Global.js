@@ -16,7 +16,7 @@ for (let i = 1; i < 65; i++)
     gl_squares[i] = 0;
 
 
-// other global variables
+// info about game
 var gl_current_move = "white";
 var gl_checked_player = null;
 var gl_move_count = 0;
@@ -133,3 +133,5 @@ const Type = {
     pawn:"pawn",
 }
 
+// Menu variables
+var gl_show_backend_status = false;

@@ -10,7 +10,6 @@ class GameController {
         gl_squares[key] = value;
     }
 
-
     /**
      * @static
      * Get Active Pieces On The Board With Filter Like Enemy Queen, Enemy Bishops ... etc.

@@ -1,5 +1,6 @@
 class DOMHandler{
      /**
+      * @static
      * Get Clicked Square From DOM
      * @param {Element} square Element of the clicked square('this' object comes from DOM)
      * @returns {void}
@@ -9,6 +10,7 @@ class DOMHandler{
     }    
 
     /**
+     * @static
      * Show ID of the squares
      * @returns {void}
      */
@@ -26,6 +28,7 @@ class DOMHandler{
     }
 
     /**
+     * @static
      * Start New Game 
      * @returns {void}
      */
@@ -34,6 +37,7 @@ class DOMHandler{
     }
 
     /**
+     * @static
      * Start Game without Pieces
      * @returns {void}
      */
@@ -42,6 +46,7 @@ class DOMHandler{
     }
 
     /**
+     * @static
      * Control square position in input 
      * @returns {boolean}
      */
@@ -63,6 +68,7 @@ class DOMHandler{
     }
 
     /**
+     * @static
      * Convert square to square_id
      * @param {string} square 
      * @example a1 -> 57, a2 -> 49, h8 -> 8
@@ -82,6 +88,7 @@ class DOMHandler{
     }
 
     /**
+     * @static
      * Delete Piece
      * @returns {void}
      */
@@ -94,6 +101,7 @@ class DOMHandler{
     }
       
     /**
+     * @static
      * Create Piece
      * @returns {void}
      */
@@ -106,5 +114,29 @@ class DOMHandler{
             chess.createPiece(color, piece, DOMHandler.convertToSquareID(square));
         }
 
+    }
+
+    /**
+     * @static
+     * Show Global Squares 
+     * @returns {void}
+     */
+    static toggleBackend(){
+        let squares = document.getElementsByClassName("square");
+        for (let item of squares) {
+            let identity = gl_squares[parseInt(item.id)]; // find real piece in global squares
+            if(identity["id"]){ // if square has piece
+                if(!gl_show_backend_status){ // Add square to real piece info
+                    item.innerHTML +=  "<div class = 'piece-info-container'><div class = 'piece-info'>" + identity["id"] + "</div><div class = 'piece-info'>" + identity["type"] + "</div><div class = 'piece-info'>" + identity["color"] + "</div></div>";     
+                }
+                else{ // remove real piece info from square
+                    let info = document.getElementsByClassName("piece-info-container");
+                    for(let info_item of info){
+                        info_item.remove();
+                    }
+                }
+            }
+        }
+        gl_show_backend_status = !gl_show_backend_status;
     }
 }

@@ -115,6 +115,18 @@ fieldset{
     background-image:url("../assets/pawn_black.png");
 }
 
+.piece-info-container{
+    margin-top:-80px;
+}
+
+.piece-info{
+    background-color: #000;
+    opacity: 0.8;
+    color: #fff;
+    border:1px solid #000;
+    border-radius:15px;
+    margin:5px;
+}
 /* -------------- Pieces END -------------- */
 
 /* -------------- Squares Start -------------- */
@@ -165,3 +177,4 @@ span.square-id{
     color:#ffffffef;
     font-size: 12px;
 }
+/* -------------- Squares End -------------- */

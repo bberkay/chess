@@ -20,6 +20,7 @@
             <fieldset>
                 <legend>Info</legend>
                 <input type="button" id="form-start" value="Show Square ID" onclick="DOMHandler.toggleSquareID()">
+                <input type="button" id="form-start" value="Show Backend" onclick="DOMHandler.toggleBackend()">
             </fieldset>
             <fieldset>
                 <legend>Create Piece</legend>
@@ -68,6 +69,10 @@
                 <br>
                 <input type="button" value = "Delete Piece" onclick="DOMHandler.deletePiece()">
             </fieldset>  
+            <fieldset>
+                <legend>Note</legend>
+                <p><b>Not</b> finished, <a href="https://github.com/bberkay/chess-engine" target="_blank">for source code</a></p>
+            </fieldset>
         </div>
         <div class = "game">
             <div id="chessboard"></div> <!-- Create Game -->
@@ -91,7 +96,7 @@
         if(document.getElementById("chessboard").innerHTML == "")
             chess.startGame();
 
-        /*chess.startCustomGame([
+        chess.startCustomGame([
              { "color": Color.white, "piece": Type.king, "square": Square.e1 },
              { "color": Color.white, "piece": Type.rook, "square": Square.h1 },
              { "color": Color.white, "piece": Type.rook, "square": Square.a1 },
@@ -99,7 +104,7 @@
              { "color": Color.black, "piece": Type.rook, "square": Square.a8 },
              { "color": Color.black, "piece": Type.rook, "square": Square.h8 },
              { "color": Color.black, "piece": Type.pawn, "square": Square.g1 },
-        ]);*/
+        ]);
     </script>
 </body>
 
