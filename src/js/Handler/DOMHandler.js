@@ -59,7 +59,7 @@ class DOMHandler{
             error.innerText = "Must be less than 65 and greater than 0";
             return false;
         }
-        else if(square.length != 2 || square.charAt(0) > 'h' || square.charAt(1) > 9 || square.charAt(1) < 1){
+        else if(square.length > 2 || (!parseInt(square) && square.charAt(0) > 'h') || square.charAt(1) > 9 || square.charAt(1) < 1 || square.charAt(0) > 9 || square.charAt(0) < 1){
             error.innerText = "The first character must be less than i, the second character must be greater than 0 and less than 9";
             return false;
         }
