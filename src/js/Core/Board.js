@@ -94,6 +94,7 @@ class Board{
     * @returns {void}
     */
     createPiece(color, piece_type, target_square_id) {
+        this.destroyPiece(target_square_id); // First destory piece on square
         const target_square = document.getElementById(target_square_id); // Find target square element
         const piece = document.createElement("div");
         piece.classList.add("piece");

@@ -63,6 +63,25 @@ class DOMHandler{
     }
 
     /**
+     * Convert square to square_id
+     * @param {string} square 
+     * @example a1 -> 57, a2 -> 49, h8 -> 8
+     * @returns {int} 
+     */
+    static convertToSquareID(square){
+        if(parseInt(square))
+            return square;
+
+        let first_character_catalog = {'a':1, 'b':2, 'c':3, 'd':4, 'e':5, 'f':6, 'g':7, 'h':8};
+        let result = first_character_catalog[square.charAt(0)];
+        for(let i = 8; i > square.charAt(1); i--){
+            result += 8;
+        }
+
+        return result;
+    }
+
+    /**
      * Delete Piece
      * @returns {void}
      */
@@ -70,7 +89,7 @@ class DOMHandler{
         let square = document.querySelector('input[name="form-square-delete"]').value;
 
         if(DOMHandler.controlSquareInput("form-square-delete")){
-            chess.destroyPiece(parseInt(square));
+            chess.destroyPiece(DOMHandler.convertToSquareID(square));
         }
     }
       
@@ -79,12 +98,12 @@ class DOMHandler{
      * @returns {void}
      */
     static createPiece(){
-        let color = document.querySelector('input[name="form-color"]:checked').value;
-        let piece = document.querySelector('input[name="form-piece"]:checked').value;
+        let color = document.querySelector('input[name="form-color"]:checked').value.toLowerCase();
+        let piece = document.querySelector('input[name="form-piece"]:checked').value.toLowerCase();
         let square = document.querySelector('input[name="form-square-create"]').value;
 
         if(DOMHandler.controlSquareInput("form-square-create")){
-            chess.createPiece(color, piece, parseInt(square));
+            chess.createPiece(color, piece, DOMHandler.convertToSquareID(square));
         }
 
     }
