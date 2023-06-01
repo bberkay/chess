@@ -132,8 +132,9 @@ class Board{
      */
     showPlayableSquares(playable_squares) {
         let l = playable_squares.length;
+        let enemy_color = GameController.getEnemyColor();
         for (let i = 0; i < l; i++) {
-            if (GameController.isSquareHasPiece(playable_squares[i], GameController.getEnemyColor()))
+            if (GameController.isSquareHasPiece(playable_squares[i], enemy_color))
                 this.setEffectOfSquare(playable_squares[i], this.#Effects.killable)
             else
                 this.setEffectOfSquare(playable_squares[i], this.#Effects.playable)

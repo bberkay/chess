@@ -60,19 +60,13 @@ class PieceEngine{
     #getPlayableSquaresOfKing(square_id) {
         let playable_squares = [];
         let squares = JSONConverter.jsonPathToArrayPath(RouteEngine.calcKingPath(square_id));
-
+        
         let king = GameController.getPlayerKing();
 
-        const temp = square_id;
         squares.forEach(square => {
-            // Check every playable squares is checked then add unchecked squares to playable squares list
-            GameController.changeSquare(square, king);
-            GameController.changeSquare(square_id, 0);
-            if (!GameStatus.isCheck())
+            if(!GameStatus.isCheck(square))
                 playable_squares.push(square);
-            GameController.changeSquare(square, 0);
         });
-        GameController.changeSquare(temp, king); // set king to default position
 
         // Castling
         if(GameStatus.canShortCastling())
@@ -197,10 +191,5 @@ class PieceEngine{
             default:
                 break;
         }
-    }
-
-
-    #addCastlingToPiece(){
-
     }
 }
