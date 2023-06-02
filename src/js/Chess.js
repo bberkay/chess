@@ -219,9 +219,9 @@ class Chess{
             // if pawn is white and row number is 4 then pawn can do en passant, if pawn is black and row number is 5 then pawn can do en passant
             if(pawn.color == "white" && 40 >= parseInt(square_id) && parseInt(square_id) >= 33 || pawn.color == "black" && 32 >= parseInt(square_id) && parseInt(square_id) >= 25)
                 gl_en_passant_control[pawn.id] = true;
-            else if(gl_en_passant_control[pawn.id] == true) // if pawn can do en passant already then can't do anymore
+            else if(gl_en_passant_control[pawn.id] == true || gl_en_passant_control[pawn.id] == false) // if pawn can do en passant already then can't do anymore or has already false then continue its status
                 gl_en_passant_control[pawn.id] = false;
-            else // if pawn is white and has not yet reached row number 4 then not-ready, if pawn is black and has not reached yet row number 5 then not-ready
+            else// if pawn is white and has not yet reached row number 4 then not-ready, if pawn is black and has not reached yet row number 5 then not-ready
                 gl_en_passant_control[pawn.id] = "not-ready";
         }
     }
