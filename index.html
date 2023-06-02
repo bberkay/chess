@@ -12,15 +12,16 @@
 <body>
     <div class = "main">
         <div class = "menu">
-            <fieldset>
+            <fieldset class = "menu-buttons">
                 <legend>Games</legend>
-                <input type="button" id="form-start" value="Start New Game" onclick="DOMHandler.startNewGame()">
-                <input type="button" id="form-start" value="Start Empty Game" onclick="DOMHandler.startEmptyGame()">
+                <input type="button" value="Start New Game" onclick="DOMHandler.startNewGame()">
+                <input type="button" value="Start Empty Game" onclick="DOMHandler.startEmptyGame()">
             </fieldset>
-            <fieldset>
+            <fieldset class = "menu-buttons">
                 <legend>Info</legend>
-                <input type="button" id="form-start" value="Show Square ID" onclick="DOMHandler.toggleSquareID()">
-                <input type="button" id="form-start" value="Show Backend" onclick="DOMHandler.toggleBackend()">
+                <input type="button" value="Show Square ID" onclick="DOMHandler.toggleSquareID()">
+                <input type="button" value="Show Piece ID" onclick="DOMHandler.togglePieceID()">
+                <input type="button" value="Show En Passant Status" onclick="DOMHandler.toggleEnPassantStatus()">
             </fieldset>
             <fieldset>
                 <legend>Create Piece</legend>
@@ -97,13 +98,8 @@
             chess.startGame();
 
         chess.startCustomGame([
-             { "color": Color.white, "piece": Type.king, "square": Square.e1 },
-             { "color": Color.white, "piece": Type.rook, "square": Square.h1 },
-             { "color": Color.white, "piece": Type.rook, "square": Square.a1 },
-             { "color": Color.black, "piece": Type.king, "square": Square.e8 },
-             { "color": Color.black, "piece": Type.rook, "square": Square.a8 },
-             { "color": Color.black, "piece": Type.rook, "square": Square.h8 },
-             { "color": Color.black, "piece": Type.bishop, "square": Square.d3 },
+             { "color": Color.white, "piece": Type.pawn, "square": Square.e7 },
+             { "color": Color.black, "piece": Type.pawn, "square": Square.c2 }
         ]);
     </script>
 </body>

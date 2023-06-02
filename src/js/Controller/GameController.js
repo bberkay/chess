@@ -24,7 +24,6 @@ class GameController {
             if (piece.color === color && piece.type === type)
                 pieces.push(piece);
         }
-
         return pieces.length > 0 ? pieces : null;
     }
 

@@ -28,9 +28,6 @@ var gl_id_list = []; // Pieces ID
 
 /**
  * Castling control 
- * null for starting and can be done
- * true for done
- * false for can't be done anymore
  */
 var gl_castling_control = {
     "white-long": true,
@@ -39,11 +36,13 @@ var gl_castling_control = {
     "black-short": true
 };
 
-/*
- * Input Enums
+/**
+ * Piece ID's of pawn that can en passant
  */
+var gl_en_passant_control = {}
 
 /**
+ * Square Input Enum
  * @enum {number} 
  */
 const Square = {
@@ -114,6 +113,7 @@ const Square = {
 }
 
 /**
+ * Color Input Enum
  * @enum {string}
  */
 const Color = {
@@ -122,6 +122,7 @@ const Color = {
 }
 
 /**
+ * Type Input Enum
  * @enum {string}
  */
 const Type = {
@@ -134,4 +135,5 @@ const Type = {
 }
 
 // Menu variables
-var gl_show_backend_status = false;
+var gl_show_piece_id_status = false;
+var gl_show_en_passant_status = false;

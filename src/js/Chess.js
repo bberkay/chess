@@ -67,12 +67,8 @@ class Chess{
                 GameStatus.changeCastlingStatus(this.selected_piece.type, this.selected_piece.color);
             }
 
-            // If moved piece is king then clear checked effect(is checked or not)
-            if(this.selected_piece.type == "king"){
-                this.board.clearCheckedEffect();
-            }
-            
             // End turn and control check then clear current selected piece
+            this.#controlEnPassant();
             this.#endTurn();
             this.#controlCheck();
             this.#unselectPiece();
@@ -211,13 +207,37 @@ class Chess{
     
     /**
      * @private
+     * Control En Passant
+     * @returns {void}
+     */
+    #controlEnPassant(){
+        // find all pawns
+        let pawns = GameController.getActivePiecesWithFilter("pawn", gl_current_move);
+        for(let pawn of pawns){
+            // find square id of pawn
+            let square_id = GameController.getSquareIDByPiece(pawn);
+            // if pawn is white and row number is 4 then pawn can do en passant, if pawn is black and row number is 5 then pawn can do en passant
+            if(pawn.color == "white" && 40 >= parseInt(square_id) && parseInt(square_id) >= 33 || pawn.color == "black" && 32 >= parseInt(square_id) && parseInt(square_id) >= 25)
+                gl_en_passant_control[pawn.id] = true;
+            else if(gl_en_passant_control[pawn.id] == true) // if pawn can do en passant already then can't do anymore
+                gl_en_passant_control[pawn.id] = false;
+            else // if pawn is white and has not yet reached row number 4 then not-ready, if pawn is black and has not reached yet row number 5 then not-ready
+                gl_en_passant_control[pawn.id] = "not-ready";
+        }
+    }
+
+    /**
+     * @private
      * Is enemy player checked after move? If checked then set gl_checked_player to enemy player
      * @returns {void}
      */ 
     #controlCheck(){
         // If moved piece is king then don't control check
-        if(this.selected_piece.type === "king")
+        if(this.selected_piece.type === "king"){
+            this.board.clearCheckedEffect();
+            gl_checked_player = null; // set checked status to null
             return;
+        }
             
         const player_king = GameController.getPlayerKing();
 

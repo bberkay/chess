@@ -16,7 +16,9 @@ body{
     left: 40%;
     margin: -500px 0 0 -500px;
 }
+/* -------------- Main End -------------- */
 
+/* -------------- Menu START -------------- */
 .menu{
     width:350px;
     margin-right:50px;
@@ -29,6 +31,13 @@ body{
 fieldset{
     margin-top:10px;
 }
+
+.menu-buttons input[type="button"]{
+    margin-bottom:5px;
+}
+/* -------------- Menu END -------------- */
+
+
 /* -------------- Board START -------------- */
 #chessboard {
     width: 800px;
@@ -126,6 +135,34 @@ fieldset{
     border:1px solid #000;
     border-radius:15px;
     margin:5px;
+}
+
+.en-passant-container{
+    margin-top:-60px;
+}
+
+.en-passant-info{
+    opacity: 1;
+    border-radius:15px;
+    margin:5px;
+}
+
+.en-passant-info[value="true"]{
+    background-color: #379767;
+    border:1px solid #379767;
+    color: #fff;
+}
+
+.en-passant-info[value="false"]{
+    background-color: rgb(223, 48, 48);
+    border:1px solid rgb(223, 48, 48);
+    color: #fff;
+}
+
+.en-passant-info[value="not-ready"]{
+    background-color:rgb(46, 121, 235);
+    border:1px solid rgb(46, 121, 235);
+    color: #fff;
 }
 /* -------------- Pieces END -------------- */
 

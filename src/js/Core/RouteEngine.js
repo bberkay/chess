@@ -70,6 +70,10 @@ class RouteEngine{
             square_id: square_id,
             distance_limit: limit,
         })[route];
+        
+        // Remove if squares has any piece
+        playable_squares = playable_squares.filter(square => { return gl_squares[square] == 0});
+
 
         // get first diagonal squares
         let diagonal_control = path_engine.calcPlayableDiagonalSquares({

@@ -121,12 +121,15 @@ class DOMHandler{
      * Show Global Squares 
      * @returns {void}
      */
-    static toggleBackend(){
+    static togglePieceID(){
+        if(gl_show_en_passant_status)
+            this.toggleEnPassantStatus();
+        
         let squares = document.getElementsByClassName("square");
         for (let item of squares) {
             let identity = gl_squares[parseInt(item.id)]; // find real piece in global squares
             if(identity["id"]){ // if square has piece
-                if(!gl_show_backend_status){ // Add square to real piece info
+                if(!gl_show_piece_id_status){ // Add square to real piece info
                     item.innerHTML +=  "<div class = 'piece-info-container'><div class = 'piece-info'>" + identity["id"] + "</div><div class = 'piece-info'>" + identity["type"] + "</div><div class = 'piece-info'>" + identity["color"] + "</div></div>";     
                 }
                 else{ // remove real piece info from square
@@ -137,6 +140,34 @@ class DOMHandler{
                 }
             }
         }
-        gl_show_backend_status = !gl_show_backend_status;
+        gl_show_piece_id_status = !gl_show_piece_id_status;
+    }
+
+    /**
+     * @static
+     * Show En Passant Status
+     * @returns {void}
+     */
+    static toggleEnPassantStatus(){
+        if(gl_show_piece_id_status)
+            this.togglePieceID();
+
+        let squares = document.getElementsByClassName("square");
+        for(let square of squares){
+            let status = gl_en_passant_control[gl_squares[parseInt(square.id)].id];
+            if(status != undefined){
+                if(!gl_show_en_passant_status){ // Add square to real piece info
+                    square.innerHTML +=  "<div class = 'en-passant-container'><div class = 'en-passant-info' value='" + status + "'>" + status + "</div></div>";     
+                }
+                else{ // remove real piece info from square
+                    let info = document.getElementsByClassName("en-passant-container");
+                    for(let info_item of info){
+                        info_item.remove();
+                    }
+                }
+            }
+        }
+                
+        gl_show_en_passant_status = !gl_show_en_passant_status; 
     }
 }
