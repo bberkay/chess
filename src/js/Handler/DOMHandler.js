@@ -1,4 +1,12 @@
 class DOMHandler{
+        
+    /*
+     * Menu variables
+     */
+    static #gl_show_piece_id_status = false;
+    static #gl_show_en_passant_status = false;
+    
+    
      /**
       * @static
      * Get Clicked Square From DOM
@@ -140,7 +148,7 @@ class DOMHandler{
                 }
             }
         }
-        gl_show_piece_id_status = !gl_show_piece_id_status;
+        this.#gl_show_piece_id_status = !this.#gl_show_piece_id_status;
     }
 
     /**
@@ -168,6 +176,6 @@ class DOMHandler{
             }
         }
                 
-        gl_show_en_passant_status = !gl_show_en_passant_status; 
+        this.#gl_show_en_passant_status = !this.#gl_show_en_passant_status; 
     }
 }

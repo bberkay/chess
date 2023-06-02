@@ -70,21 +70,6 @@ class GameController {
 
     /**
      * @static
-     * Set Player or Enemy King
-     * @param {Piece} piece
-     * @returns {void}
-     */
-    static setKing(piece) {
-        if (piece.type === "king") {
-            if (piece.color === "white")
-                gl_white_king = piece;
-            else if (piece.color === "black")
-                gl_black_king = piece;
-        }
-    }
-
-    /**
-     * @static
      * Get Player's King
      * @returns {Piece}
      */
