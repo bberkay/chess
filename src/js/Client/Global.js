@@ -139,7 +139,6 @@ class Global{
     /**
      * @static
      * Get Castling Status
-     * @param {string} castling_type
      * @returns {JSON}
      */
     static getCastling(){
@@ -159,10 +158,18 @@ class Global{
      * @static
      * Set Square
      * @param {int} square_id Square ID of square
-     * @param {int|Piece} content Content of square
+     * @param {Piece} content Content of square(default 0)
      * @returns {void}
      */
-    static setSquare(square_id, content){
+    static setSquare(square_id, content=0){
+        // Control square_id and content
+        if(square_id < 1 || square_id > 64)
+            throw new Error("Square ID must be between 1 and 64");
+
+        // Control content
+        if(content instanceof Piece == false && content != 0)
+            throw new Error("Content must be instance of Piece object or 0");
+
         this.#gl_squares[square_id] = content;
     }
 
@@ -192,7 +199,7 @@ class Global{
      */
     static addKilledBlackPiece(piece){
         if(piece instanceof Piece == false || piece.color != "black")
-            return;
+            throw new Error("Piece must be instance of Piece object and color must be black");
 
         this.#gl_killed_black_pieces.push(piece);
     }
@@ -205,8 +212,8 @@ class Global{
      */
     static addKilledWhitePiece(piece){
         if(piece instanceof Piece == false || piece.color != "white")
-            return;
-
+            throw new Error("Piece must be instance of Piece object and color must be white");
+            
         this.#gl_killed_white_pieces.push(piece);
     }
 
@@ -218,7 +225,9 @@ class Global{
     static setWhiteKing(){
         let squares = this.getSquares();
         for(let square of squares){
+            // Get piece
             let piece = squares[square];            
+            // Control piece is king and color is white
             if(piece.type == "king" && piece.color == "white"){
                 this.#gl_white_king = piece;
                 break;
@@ -234,7 +243,9 @@ class Global{
     static setBlackKing(){
         let squares = this.getSquares();
         for(let square of squares){
+            // Get piece
             let piece = squares[square];            
+            // Control piece is king and color is black
             if(piece.type == "king" && piece.color == "black"){
                 this.#gl_white_king = piece;
                 break;
@@ -249,6 +260,10 @@ class Global{
      * @returns {void}
      */
     static addIdList(id){
+        // Control id is valid
+        if(typeof id != "number")
+            throw new Error('Id is not a number');
+
         this.#gl_id_list.push(id);
     }
 
@@ -260,8 +275,13 @@ class Global{
      * @returns {void}
      */
     static setCastling(castling_type, value){
-        if(!Object.values(Castling).includes(value))
-            return;
+        // Control castling type is valid
+        if(!Object.values(Castling).includes(castling_type))
+            throw new Error('Castling type is not valid');
+
+        // Control value is valid
+        if(typeof value != "boolean")
+            throw new Error('Value is not a boolean');
 
         this.#gl_castling_control[castling_type] = value;
     }
@@ -270,14 +290,23 @@ class Global{
      * @static
      * Add En passant to list
      * @param {int} piece_id ID of piece
-     * @param {EnPassant} value EN_PASSANT Enum
+     * @param {EnPassant} en_passant_value EN_PASSANT Enum
      * @returns {void}
      */
-    static addEnPassant(piece_id, value){
-        if(!Object.values(EnPassant).includes(value))
-            return;
+    static addEnPassant(piece_id, en_passant_value){
+        // Control piece id is valid
+        if(typeof piece_id != "number")
+            throw new Error('Piece id is not a number');
+        else{
+            if(!this.getIdList().includes(piece_id))
+                throw new Error('Piece id is not in id list');
+        }
 
-        this.#gl_en_passant_control[piece_id] = value;
+        // Control en passant value is valid
+        if(!Object.values(EnPassant).includes(en_passant_value))
+            throw new Error('En passant type is not valid');
+
+        this.#gl_en_passant_control[piece_id] = en_passant_value;
     }
 }
 
@@ -366,10 +395,10 @@ const Color = {
 }
 
 /**
- * Type Input Enum
+ * Piece Input Enum
  * @enum {string}
  */
-const Type = {
+const Piece = {
     Knight:"knight",
     Queen:"queen",
     King:"king",
