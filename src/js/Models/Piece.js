@@ -14,10 +14,10 @@ class Piece {
 
         // Set white and black king
         if (this.type === "king")
-            GameController.setKing(this);
+            BoardManager.setKing(this);
 
         // Set Target Square Content to this piece
-        GameController.changeSquare(square, this);
+        BoardManager.changeSquare(square, this);
     }
 
     /**
@@ -26,7 +26,7 @@ class Piece {
      * @returns {Array<int>}
      */
     getPlayableSquaresOfPiece() {
-        return this.#piece_engine.getPlayableSquaresOfPiece(this.type, GameController.getSquareIDByPiece(this));
+        return this.#piece_engine.getPlayableSquaresOfPiece(this.type, BoardManager.getSquareIDByPiece(this));
     }
 
 }

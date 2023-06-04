@@ -82,10 +82,10 @@ class RouteEngine{
         });
 
         // is first diagonal squares has enemy piece then add playable squares
-        if (GameController.isSquareHasPiece(diagonal_control[route+"-left"][0], GameController.getEnemyColor()))
+        if (BoardManager.isSquareHasPiece(diagonal_control[route+"-left"][0], BoardManager.getEnemyColor()))
             playable_squares.push(diagonal_control[route+"-left"][0]);
 
-        if (GameController.isSquareHasPiece(diagonal_control[route+"-right"][0], GameController.getEnemyColor()))
+        if (BoardManager.isSquareHasPiece(diagonal_control[route+"-right"][0], BoardManager.getEnemyColor()))
             playable_squares.push(diagonal_control[route+"-right"][0]);
 
         return playable_squares;
@@ -143,7 +143,7 @@ class RouteEngine{
         let playable_squares = [];
         column_sides.concat(row_sides).forEach(item => {
             item.forEach(square => {
-                if(!GameController.isSquareHasPiece(square, gl_current_move))
+                if(!BoardManager.isSquareHasPiece(square, gl_current_move))
                     playable_squares.push(square);
             })
         })

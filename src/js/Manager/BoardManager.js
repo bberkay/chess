@@ -1,24 +1,18 @@
-class GameController {
-    /**
-     * @static
-     * Change Square Content to Piece[object] or 0[int]
-     * @param {int} key
-     * @param {(Piece|int)} value
-     * @returns {void}
-     */
-    static changeSquare(key, value) {
-        gl_squares[key] = value;
-    }
-
+class BoardManager {
     /**
      * @static
      * Get Active Pieces On The Board With Filter Like Enemy Queen, Enemy Bishops ... etc.
-     * @param {string} type Type of pieces to get
-     * @param {string} color Color of pieces to get
+     * @param {Piece} type Type of pieces to get
+     * @param {Color} color Color of pieces to get
      * @returns {(Array<Piece>|null)}
      */
     static getActivePiecesWithFilter(type, color) {
+        // Validate type and color
+        Validator.validateTypes(type, Validation.Type, "Type");
+        Validator.validateTypes(color, Validation.Color, "Color");
+
         let pieces = [];
+        let gl_squares = Global.getSquares();
         for (let square in gl_squares) {
             let piece = this.getPieceBySquareID(parseInt(square));
             if (piece.color === color && piece.type === type)
@@ -35,7 +29,8 @@ class GameController {
      * @returns {(Piece|boolean)} 
      */
     static getPieceBySquareID(square_id) {
-        return gl_squares[square_id] !== 0 ? gl_squares[square_id] : false;
+        let piece = Global.getSquare(square_id);
+        return piece !== 0 ? piece : false;
     }
 
 
@@ -46,6 +41,9 @@ class GameController {
      * @returns {(int|boolean)} 
      */
     static getSquareIDByPiece(piece) {
+        Validator.validatePiece({piece:piece});
+
+        let gl_squares = Global.getSquares();
         for (let k in gl_squares) {
             if (gl_squares[k] === piece)
                 return parseInt(k);
@@ -57,11 +55,15 @@ class GameController {
      * @static
      * Is Square Has Piece ?
      * @param {int} square_id Square ID of the target square
-     * @param {string|null} specific_color Specific Color(optional)
-     * @param {Array<string>} specific_pieces Specific piece types(optional)
+     * @param {Color} specific_color Specific Color(optional)
+     * @param {Array<Type>} specific_pieces Specific piece types(optional)
      * @returns {boolean}
      */
-    static isSquareHasPiece(square_id, specific_color = null, specific_pieces = ["queen", "king", "pawn", "bishop", "rook", "knight"]) {
+    static isSquareHasPiece(square_id, specific_color = null, specific_pieces = [Type.Queen, Type.King, Type.Pawn, Type.Bishop, Type.Rook, Type.Knight]) {
+        // Validate
+        Validator.validateTypes(specific_color, Validation.Color, "Specific Color"); // specific_color must be Color
+        Validator.validateTypes(specific_pieces, Validation.Object, "Specific Piece Type List"); // specific_pieces must be Type array/object
+
         let piece = this.getPieceBySquareID(square_id);
         if (piece)
             return !(specific_color && piece.color !== specific_color || !specific_pieces.includes(piece.type));
@@ -74,7 +76,7 @@ class GameController {
      * @returns {Piece}
      */
     static getPlayerKing() {
-        return gl_current_move === "white" ? gl_white_king : gl_black_king;
+        return Global.getCurrentMove() === Color.White ? Global.getWhiteKing() : Global.getBlackKing();
     }
 
     /**
@@ -92,7 +94,7 @@ class GameController {
      * @returns {Piece}
      */
     static getEnemyKing() {
-        return gl_current_move === "white" ? gl_black_king : gl_white_king;
+        return Global.getCurrentMove() === Color.Black ? Global.getBlackKing() : Global.getWhiteKing();
     }
 
     /**
@@ -110,6 +112,6 @@ class GameController {
      * @returns {string}
      */
     static getEnemyColor(){
-        return gl_current_move === "white" ? "black" : "white";
+        return Global.getCurrentMove() === Color.White ? Color.Black : Color.White;
     }
 }

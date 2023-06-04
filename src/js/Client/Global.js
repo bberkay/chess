@@ -59,6 +59,18 @@ class Global{
 
     /**
      * @static
+     * Get Square Content
+     * @param {int} square_id 
+     * @returns {(Piece|int)}
+     */
+    static getSquare(square_id){
+        Validator.validateSquare({square_id:square_id});
+        
+        return this.#gl_squares[square_id];
+    }
+
+    /**
+     * @static
      * Get Current Move
      * @returns {string}
      */
@@ -162,13 +174,7 @@ class Global{
      * @returns {void}
      */
     static setSquare(square_id, content=0){
-        // Control square_id and content
-        if(square_id < 1 || square_id > 64)
-            throw new Error("Square ID must be between 1 and 64");
-
-        // Control content
-        if(content instanceof Piece == false && content != 0)
-            throw new Error("Content must be instance of Piece object or 0");
+        Validator.validateSquare({square_id:square_id, square_content:content});
 
         this.#gl_squares[square_id] = content;
     }
@@ -198,8 +204,7 @@ class Global{
      * @returns {void}
      */
     static addKilledBlackPiece(piece){
-        if(piece instanceof Piece == false || piece.color != "black")
-            throw new Error("Piece must be instance of Piece object and color must be black");
+        Validator.validatePiece({piece:piece, color:Color.Black});
 
         this.#gl_killed_black_pieces.push(piece);
     }
@@ -211,8 +216,7 @@ class Global{
      * @returns {void}
      */
     static addKilledWhitePiece(piece){
-        if(piece instanceof Piece == false || piece.color != "white")
-            throw new Error("Piece must be instance of Piece object and color must be white");
+        Validator.validatePiece({piece:piece, color:Color.White}); // Control piece is white
             
         this.#gl_killed_white_pieces.push(piece);
     }
@@ -228,7 +232,7 @@ class Global{
             // Get piece
             let piece = squares[square];            
             // Control piece is king and color is white
-            if(piece.type == "king" && piece.color == "white"){
+            if(piece.type == Type.King && piece.color == Color.White){
                 this.#gl_white_king = piece;
                 break;
             }
@@ -246,7 +250,7 @@ class Global{
             // Get piece
             let piece = squares[square];            
             // Control piece is king and color is black
-            if(piece.type == "king" && piece.color == "black"){
+            if(piece.type == Type.King && piece.color == Color.Black){
                 this.#gl_white_king = piece;
                 break;
             }
@@ -260,9 +264,10 @@ class Global{
      * @returns {void}
      */
     static addIdList(id){
-        // Control id is valid
-        if(typeof id != "number")
-            throw new Error('Id is not a number');
+        // Validate
+        Validator.validateTypes([
+            new Validation(id, ValidationType.Number, "ID"), // ID must be integer
+        ]);
 
         this.#gl_id_list.push(id);
     }
@@ -275,13 +280,11 @@ class Global{
      * @returns {void}
      */
     static setCastling(castling_type, value){
-        // Control castling type is valid
-        if(!Object.values(Castling).includes(castling_type))
-            throw new Error('Castling type is not valid');
-
-        // Control value is valid
-        if(typeof value != "boolean")
-            throw new Error('Value is not a boolean');
+        // Validate
+        Validator.validateTypes([
+            new Validation(castling_type, ValidationType.Castling, "Castling"), // Castling type must be enum
+            new Validation(value, ValidationType.Boolean, "Castling value"), // Castling value must be boolean
+        ])
 
         this.#gl_castling_control[castling_type] = value;
     }
@@ -294,17 +297,12 @@ class Global{
      * @returns {void}
      */
     static addEnPassant(piece_id, en_passant_value){
-        // Control piece id is valid
-        if(typeof piece_id != "number")
-            throw new Error('Piece id is not a number');
-        else{
-            if(!this.getIdList().includes(piece_id))
-                throw new Error('Piece id is not in id list');
-        }
-
-        // Control en passant value is valid
-        if(!Object.values(EnPassant).includes(en_passant_value))
-            throw new Error('En passant type is not valid');
+        // Validate
+        Validator.validateTypes([
+            new Validation(en_passant_value, ValidationType.EnPassant, "En passant value"), // En passant value must be enum
+            new Validation(piece_id, ValidationType.Number, "Piece ID"), // Piece id must be number
+        ]); 
+        Validator.validatePiece({id:piece_id}); // Piece id must be in id list
 
         this.#gl_en_passant_control[piece_id] = en_passant_value;
     }
@@ -395,10 +393,10 @@ const Color = {
 }
 
 /**
- * Piece Input Enum
+ * Type Input Enum
  * @enum {string}
  */
-const Piece = {
+const Type = {
     Knight:"knight",
     Queen:"queen",
     King:"king",
@@ -426,4 +424,34 @@ const EnPassant = {
     Ready:"ready",
     NotReady:"not-ready",
     Cant:"can't"
+}
+
+/**
+ * Route Enum
+ * @enum {string}
+ */
+const Route = {
+    BottomLeft:"bottom-left",
+    BottomRight:"bottom-right",
+    TopLeft:"top-left",
+    TopRight:"top-right",
+    Bottom:"bottom",
+    Top:"top",
+    Left:"left",
+    Right:"right",
+}
+
+/**
+ * Validation Type Enum
+ * @enum {(string|Enum)}
+ */
+const ValidationType = {
+    Number:"number",
+    String:"string",
+    Boolean:"boolean",
+    Object:"object",
+    Color:Color,
+    Type:Type,
+    Castling:Castling,
+    EnPassant:EnPassant
 }

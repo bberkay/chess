@@ -33,9 +33,9 @@ class PieceEngine{
         let playable_squares = JSONConverter.jsonPathToArrayPath(this.#filterPlayableSquares(square_id, RouteEngine.calcRookPath(square_id)));
 
         // Castling
-        if(GameStatus.canShortCastling())
+        if(GameManager.canShortCastling())
             playable_squares.push(square_id == 64 || square_id == 57 ? 61 : 5);
-        if(GameStatus.canLongCastling())
+        if(GameManager.canLongCastling())
             playable_squares.push(square_id == 64 || square_id == 57 ? 61 : 5);
 
         return playable_squares;
@@ -61,17 +61,17 @@ class PieceEngine{
         let playable_squares = [];
         let squares = JSONConverter.jsonPathToArrayPath(RouteEngine.calcKingPath(square_id));
         
-        let king = GameController.getPlayerKing();
+        let king = BoardManager.getPlayerKing();
 
         squares.forEach(square => {
-            if(!GameStatus.isCheck(square))
+            if(!GameManager.isCheck(square))
                 playable_squares.push(square);
         });
 
         // Castling
-        if(GameStatus.canShortCastling())
+        if(GameManager.canShortCastling())
             playable_squares.push(king.color == "white" ? 64 : 8);
-        if(GameStatus.canLongCastling())
+        if(GameManager.canLongCastling())
             playable_squares.push(king.color == "white" ? 57 : 1);
 
         return playable_squares;
@@ -108,7 +108,7 @@ class PieceEngine{
      * @returns {Array<int>}
      */
     #filterPlayableSquares(square_id, playable_squares = null) {
-        let king = GameController.getPlayerKingSquareID();
+        let king = BoardManager.getPlayerKingSquareID();
         if(!king)
             return playable_squares;
             
@@ -152,7 +152,7 @@ class PieceEngine{
         if (king_guard_route.length > 0) {
             king_guard_route.forEach(path => {
                 routes[path].filter(item => { // traverse king guard route/playable paths squares
-                    if (GameController.isSquareHasPiece(item, GameController.getEnemyColor(), enemy_types)) { // if target square has any "enemy_types" enemy
+                    if (BoardManager.isSquareHasPiece(item, BoardManager.getEnemyColor(), enemy_types)) { // if target square has any "enemy_types" enemy
                         if (Array.isArray(playable_squares)) {
                             // if playable squares if array(this control for knight) delete squares that not in king guard squares
                             playable_squares = playable_squares.filter(square => { !king_guard_route.includes(square) })

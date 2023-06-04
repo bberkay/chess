@@ -34,6 +34,9 @@ class Chess{
 
     /**
      * Create Piece
+     * @param {string} color Color of the piece
+     * @param {string} piece_type Type of the piece
+     * @param {int} target_square_id Target square id of the piece
      * @returns {void}
      */
     createPiece(color, piece_type, target_square_id){
@@ -46,7 +49,7 @@ class Chess{
      * @returns {void}
      */
     clickSquare(square_id) {
-        let clicked_square = GameController.getPieceBySquareID(square_id);
+        let clicked_square = BoardManager.getPieceBySquareID(square_id);
         let is_castling_move = this.#isCastlingMove(clicked_square);
 
         // Select - unselect piece
@@ -64,7 +67,7 @@ class Chess{
                 this.#movePiece(square_id); // Move piece and control check then end turn
 
                 // If moved piece king or rook then change castling status
-                GameStatus.changeCastlingStatus(this.selected_piece.type, this.selected_piece.color);
+                GameManager.changeCastlingStatus(this.selected_piece.type, this.selected_piece.color);
             }
 
             // End turn and control check then clear current selected piece
@@ -158,21 +161,21 @@ class Chess{
     #castling(square_id){
         // If first click is rook and second click is king 
         if(square_id == 61 || square_id == 5)
-            square_id = GameController.getSquareIDByPiece(this.selected_piece) 
+            square_id = BoardManager.getSquareIDByPiece(this.selected_piece) 
 
         let castling_type = square_id % 8 == 0 ? "short" : "long";
-        let player_king = GameController.getPlayerKing();
+        let player_king = BoardManager.getPlayerKing();
         if(castling_type == "short"){ 
             // If castling type short and square id is 64 then for white, else for black(square id is 8)
             if(square_id == 64){
                 // White King goes to 59(c1) and white short rook(h1, 64) goes to 62(f1)
                 this.#movePiece(63, player_king);
-                this.#movePiece(62, GameController.getPieceBySquareID(64));
+                this.#movePiece(62, BoardManager.getPieceBySquareID(64));
                 gl_castling_control["white-short"] = false;
             }else if(square_id == 8){ 
                 // White King goes to 59(c1) and black short rook(h8, 8) goes to 6(f8)
                 this.#movePiece(7, player_king);
-                this.#movePiece(6, GameController.getPieceBySquareID(8));
+                this.#movePiece(6, BoardManager.getPieceBySquareID(8));
                 gl_castling_control["black-short"] = false;
             }
         }else{
@@ -180,12 +183,12 @@ class Chess{
             if(square_id == 57){ 
                 // White King goes to 59(c1) and white long rook(a1, 57) goes to 60(d1)
                 this.#movePiece(59, player_king);
-                this.#movePiece(60, GameController.getPieceBySquareID(57));
+                this.#movePiece(60, BoardManager.getPieceBySquareID(57));
                 gl_castling_control["white-long"] = false;
             }else if(square_id == 1){
                 // Black King goes to 3(c8) and black long rook(a8, 1) goes to 4(d8)
                 this.#movePiece(3, player_king);
-                this.#movePiece(4, GameController.getPieceBySquareID(1));
+                this.#movePiece(4, BoardManager.getPieceBySquareID(1));
                 gl_castling_control["black-long"] = false;
             }
         }
@@ -212,10 +215,10 @@ class Chess{
      */
     #controlEnPassant(){
         // find all pawns
-        let pawns = GameController.getActivePiecesWithFilter("pawn", gl_current_move);
+        let pawns = BoardManager.getActivePiecesWithFilter("pawn", gl_current_move);
         for(let pawn of pawns){
             // find square id of pawn
-            let square_id = GameController.getSquareIDByPiece(pawn);
+            let square_id = BoardManager.getSquareIDByPiece(pawn);
             // if pawn is white and row number is 4 then pawn can do en passant, if pawn is black and row number is 5 then pawn can do en passant
             if(pawn.color == "white" && 40 >= parseInt(square_id) && parseInt(square_id) >= 33 || pawn.color == "black" && 32 >= parseInt(square_id) && parseInt(square_id) >= 25)
                 gl_en_passant_control[pawn.id] = true;
@@ -239,10 +242,10 @@ class Chess{
             return;
         }
             
-        const player_king = GameController.getPlayerKing();
+        const player_king = BoardManager.getPlayerKing();
 
         // Set checked player and give effect the checked king
-        if(GameStatus.isCheck()){
+        if(GameManager.isCheck()){
             gl_checked_player = player_king.color;
             this.board.setCheckedEffect();
         }

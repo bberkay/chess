@@ -26,7 +26,7 @@ class Board{
 
         // Create board
         const board_chars = "abcdefgh";
-        let square_color = "white"
+        let square_color = Color.White;
         let board_numbers = 8;
         let board_chars_count = 0;
 
@@ -48,21 +48,11 @@ class Board{
 
             // Set Squares Color
             if (i % 8 != 1)
-                square_color = square_color == "black" ? square_color = "white" : square_color = "black";
+                square_color = square_color == Color.Black ? square_color = Color.White : square_color = Color.Black;
             square.classList.add("square-" + square_color);
 
             this.chessboard.appendChild(square);
         }
-    }
-
-    /**
-     * Destroy Chessboard and pieces in global squares
-     * @returns {void}
-     */
-    destroyBoard(){
-        this.chessboard.innerHTML = "";
-        for (let i = 1; i < 65; i++)
-            gl_squares[i] = 0;
     }
 
     /** 
@@ -74,28 +64,34 @@ class Board{
             let square_id = i <= 16 ? i : i + 32;
 
             if (square_id == 1 || square_id == 8 || square_id == 57 || square_id == 64) // Rook
-                this.createPiece(square_id < 57 ? "white" : "black", "rook", square_id);
+                this.createPiece(square_id < 57 ? Color.White : Color.Black, Type.Rook, square_id);
             else if (square_id == 2 || square_id == 7 || square_id == 58 || square_id == 63) // Knight
-                this.createPiece(square_id < 58 ? "white" : "black", "knight", square_id);
+                this.createPiece(square_id < 58 ? Color.White : Color.Black, Type.Knight, square_id);
             else if (square_id == 3 || square_id == 6 || square_id == 59 || square_id == 62)// Bishop
-                this.createPiece(square_id < 58 ? "white" : "black", "bishop", square_id);
+                this.createPiece(square_id < 58 ? Color.White : Color.Black, Type.Bishop, square_id);
             else if (square_id == 4 || square_id == 60) // Queen 
-                this.createPiece(square_id < 60 ? "white" : "black", "queen", square_id);
+                this.createPiece(square_id < 60 ? Color.White : Color.Black, Type.Queen, square_id);
             else if (square_id == 5 || square_id == 61) // King
-                this.createPiece(square_id < 61 ? "white" : "black", "king", square_id);            
+                this.createPiece(square_id < 61 ? Color.White : Color.Black, Type.King, square_id);            
             else if (square_id >= 9 && square_id < 17 || square_id > 48 && square_id < 57) // Pawn 
-                this.createPiece(square_id < 48 ? "white" : "black", "pawn", square_id);
+                this.createPiece(square_id < 48 ? Color.White : Color.Black, Type.Pawn, square_id);
         }
     }
 
     /**
     * Create Piece at Any Position on the Board
-    * @param {string} color Piece color
-    * @param {string} piece_type Piece Type
+    * @param {Color} color Piece color
+    * @param {Type} piece_type Piece Type
     * @param {int} target_square_id Target Square ID
     * @returns {void}
     */
     createPiece(color, piece_type, target_square_id) {
+        Validator.validateTypes([
+            new Validation(color, ValidationType.Color, 'Color'),
+            new Validation(piece_type, ValidationType.Type, 'Type'),
+            new Validation(target_square_id, ValidationType.Number, 'Square ID')
+        ])
+
         this.destroyPiece(target_square_id); // First destory piece on square
         const target_square = document.getElementById(target_square_id); // Find target square element
         const piece = document.createElement("div");
@@ -107,41 +103,6 @@ class Board{
     }
     
     /**
-     * Clear/Refresh Board(Remove effects)
-     * @returns {void}
-     */
-    refreshBoard() {
-        let squares = document.querySelectorAll(".square");
-        let l = squares.length;
-        for (let i = 0; i < l; i++) {
-            // Control Squares and piece ID for changing on DOM(Security measures). If any id change after the start then set its id to its position
-            if (squares[i].id != i + 1)
-                squares[i].id = i + 1;
-
-            // Clear effects on the squares
-            //squares[i].classList.remove(this.#Effects.checked);
-            squares[i].classList.remove(this.#Effects.playable);
-            squares[i].classList.remove(this.#Effects.killable);
-        }
-    }
-
-    /**
-     * Show Playable Squares of the Clicked Piece
-     * @param {Array<int>} playable_squares Element of the clicked square
-     * @returns {void}
-     */
-    showPlayableSquares(playable_squares) {
-        let l = playable_squares.length;
-        let enemy_color = GameController.getEnemyColor();
-        for (let i = 0; i < l; i++) {
-            if (GameController.isSquareHasPiece(playable_squares[i], enemy_color))
-                this.setEffectOfSquare(playable_squares[i], this.#Effects.killable)
-            else
-                this.setEffectOfSquare(playable_squares[i], this.#Effects.playable)
-        }
-    }
-
-    /**
     * Move Piece To Selected Square
     * @async
     * @param {Piece} piece Piece of the target to move
@@ -149,10 +110,13 @@ class Board{
     * @returns {void}
     */
     async movePiece(piece, target_square) {
+        // Validate
+        Validator.validateSquare({ square_id: target_square });
+
         // Change Piece Position 
-        let square_id = GameController.getSquareIDByPiece(piece);
-        GameController.changeSquare(target_square, piece);
-        GameController.changeSquare(square_id, 0);
+        let square_id = BoardManager.getSquareIDByPiece(piece); // Piece will validate in BoardManager
+        BoardManager.changeSquare(target_square, piece); // FIXME: Global set square 
+        BoardManager.changeSquare(square_id, 0);
 
         // Remove piece from his square
         let piece_id = document.getElementById(square_id);
@@ -175,13 +139,16 @@ class Board{
         piece_element.classList.add("piece");
         target_piece.appendChild(piece_element);
     }
-
+    
     /**
      * Destroy piece by square id
      * @param {int} square_id 
      * @returns {void}
      */
     destroyPiece(square_id){
+        // Validate
+        Validator.validateSquare({square_id:square_id});
+
         // Remove enemy from dom
         let target_piece = document.getElementById(square_id);
         let piece_obj = target_piece.querySelector(".piece");
@@ -189,7 +156,57 @@ class Board{
             target_piece.removeChild(piece_obj);
 
         // Remove enemy from game
-        GameController.changeSquare(square_id, 0);
+        BoardManager.changeSquare(square_id, 0);
+    }
+
+    /**
+     * Clear/Refresh Board(Remove effects)
+     * @returns {void}
+     */
+    refreshBoard() {
+        let squares = document.querySelectorAll(".square");
+        let l = squares.length;
+        for (let i = 0; i < l; i++) {
+            // Control Squares and piece ID for changing on DOM(Security measures). If any id change after the start then set its id to its position
+            if (squares[i].id != i + 1)
+                squares[i].id = i + 1;
+
+            // Clear effects on the squares
+            //squares[i].classList.remove(this.#Effects.checked);
+            squares[i].classList.remove(this.#Effects.playable);
+            squares[i].classList.remove(this.#Effects.killable);
+        }
+    }   
+
+    /**
+     * Destroy Chessboard and pieces in global squares
+     * @returns {void}
+     */
+    destroyBoard(){
+        this.chessboard.innerHTML = "";
+        for (let i = 1; i < 65; i++)
+            gl_squares[i] = 0;
+    }
+
+    /**
+     * Show Playable Squares of the Clicked Piece
+     * @param {Array<int>} playable_squares Element of the clicked square
+     * @returns {void}
+     */
+    showPlayableSquares(playable_squares) {
+        // Validate
+        Validator.validateTypes([
+            new Validation(playable_squares, ValidationType.Array, 'Playable Squares')
+        ]);
+
+        let l = playable_squares.length;
+        let enemy_color = BoardManager.getEnemyColor();
+        for (let i = 0; i < l; i++) {
+            if (BoardManager.isSquareHasPiece(playable_squares[i], enemy_color))
+                this.setEffectOfSquare(playable_squares[i], this.#Effects.killable)
+            else
+                this.setEffectOfSquare(playable_squares[i], this.#Effects.playable)
+        }
     }
 
     /**
@@ -199,6 +216,11 @@ class Board{
      * @returns {void}
      */
     setEffectOfSquare(square_id, effect){
+        // Validate
+        if(effect != this.#Effects.playable && effect != this.#Effects.killable && effect != this.#Effects.checked)
+            throw new Error("Invalid effect type");
+        Validator.validateSquare({square_id:square_id});
+
         document.getElementById(square_id.toString()).classList.add(effect);
     }
 
@@ -209,6 +231,11 @@ class Board{
      * @returns {void}
      */
     clearEffectOfSquare(square_id, effect){
+        // Validate
+        if(effect != this.#Effects.playable && effect != this.#Effects.killable && effect != this.#Effects.checked)
+            throw new Error("Invalid effect type");
+        Validator.validateSquare({square_id:square_id});
+        
         document.getElementById(square_id.toString()).classList.remove(effect);
     }
 
@@ -217,7 +244,7 @@ class Board{
      * @returns {void}
      */
     setCheckedEffect(){
-        this.setEffectOfSquare(GameController.getPlayerKingSquareID(), this.#Effects.checked);
+        this.setEffectOfSquare(BoardManager.getPlayerKingSquareID(), this.#Effects.checked);
     }
 
     /**
@@ -226,7 +253,7 @@ class Board{
      * @returns {void}
      */
     setSelectedEffect(selected_piece){
-        this.setEffectOfSquare(GameController.getSquareIDByPiece(selected_piece), this.#Effects.selected);
+        this.setEffectOfSquare(BoardManager.getSquareIDByPiece(selected_piece), this.#Effects.selected);
     }
 
     /**
@@ -235,7 +262,7 @@ class Board{
      * @returns {void}
      */
     clearSelectedEffect(selected_piece){
-        this.clearEffectOfSquare(GameController.getSquareIDByPiece(selected_piece), this.#Effects.selected);
+        this.clearEffectOfSquare(BoardManager.getSquareIDByPiece(selected_piece), this.#Effects.selected);
     }
 
     /**
