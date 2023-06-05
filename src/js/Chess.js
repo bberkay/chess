@@ -12,9 +12,24 @@ class Chess{
     * Start Game
     * @returns {void}
     */
-    startGame() {
-        this.board.createBoard();
-        this.board.createPiecesAtStartPosition();
+    startStandartGame() {
+        for (let i = 1; i <= 32; i++) {
+            let square_id = i <= 16 ? i : i + 32; // Position of the piece on the board
+
+            if (square_id == 1 || square_id == 8 || square_id == 57 || square_id == 64) // Rook
+                this.createPiece(Type.Rook, square_id < 57 ? Color.White : Color.Black, square_id);
+            else if (square_id == 2 || square_id == 7 || square_id == 58 || square_id == 63) // Knight
+                this.createPiece(Type.Knight, square_id < 58 ? Color.White : Color.Black, square_id);
+            else if (square_id == 3 || square_id == 6 || square_id == 59 || square_id == 62)// Bishop
+                this.createPiece(Type.Bishop, square_id < 58 ? Color.White : Color.Black, square_id);
+            else if (square_id == 4 || square_id == 60) // Queen 
+                this.createPiece(Type.Queen, square_id < 60 ? Color.White : Color.Black, square_id);
+            else if (square_id == 5 || square_id == 61) // King
+                this.createPiece(Type.King, square_id < 61 ? Color.White : Color.Black, square_id);            
+            else if (square_id >= 9 && square_id < 17 || square_id > 48 && square_id < 57) // Pawn 
+                this.createPiece(Type.Pawn, square_id < 48 ? Color.White : Color.Black, square_id);
+        }
+        this.board.setupBoard();
     }
 
     /**
@@ -24,36 +39,36 @@ class Chess{
     * @returns {void}
     */
     startCustomGame(pieces = null) {
-        this.board.createBoard();
-        if(pieces){
+        if(pieces){ 
             pieces.forEach(item => {
-                this.board.createPiece(item["color"], item["piece"], item["square"]);
+                this.createPiece(item["piece"], item["color"],  item["square"]);
             });
         }
+        this.board.setupBoard();
     }
 
     /**
      * Create Piece
-     * @param {string} color Color of the piece
      * @param {string} piece_type Type of the piece
+     * @param {string} color Color of the piece
      * @param {int} target_square_id Target square id of the piece
      * @returns {void}
      */
-    createPiece(color, piece_type, target_square_id){
-        this.board.createPiece(color, piece_type, target_square_id);
+    createPiece(piece_type, color, target_square_id){
+        new Piece(piece_type, color, target_square_id);
     }
 
     /**
-     * Get Clicked Square
+     * Define Player's Move
      * @param {int} square_id Square ID of the clicked square
      * @returns {void}
      */
-    clickSquare(square_id) {
+    defineMove(square_id) {
         let clicked_square = BoardManager.getPieceBySquareID(square_id);
         let is_castling_move = this.#isCastlingMove(clicked_square);
 
         // Select - unselect piece
-        if(clicked_square && clicked_square.color == gl_current_move && !is_castling_move){
+        if(clicked_square && clicked_square.color == Global.getCurrentMove() && !is_castling_move){
             if(clicked_square === this.selected_piece)
                 this.#unselectPiece();
             else
@@ -149,7 +164,7 @@ class Chess{
      * @returns {void}
      */
     destroyPiece(square_id){
-        this.board.destroyPiece(square_id);
+        BoardManager.setSquare(square_id, 0);
     }
 
     /**
@@ -192,20 +207,6 @@ class Chess{
                 gl_castling_control["black-long"] = false;
             }
         }
-    }
-
-    /**
-     * @private
-     * Is Castling Move?
-     * @param {int} clicked_piece Square ID of clicked square
-     * @returns {boolean} 
-     */
-    #isCastlingMove(clicked_piece){
-        // If selected piece is king or rook and clicked square is king or rook, but not the same as selected piece, start castling operation
-        if(this.selected_piece && ["rook", "king"].includes(this.selected_piece.type) && ["rook", "king"].includes(clicked_piece.type) && this.selected_piece.type != clicked_piece.type){
-            return true;
-        }
-        return false;
     }
     
     /**
@@ -251,6 +252,19 @@ class Chess{
         }
     }
 
+    /**
+     * @private
+     * Is Castling Move?
+     * @param {int} clicked_piece Square ID of clicked square
+     * @returns {boolean} 
+     */
+    #isCastlingMove(clicked_piece){
+        // If selected piece is king or rook and clicked square is king or rook, but not the same as selected piece, start castling operation
+        if(this.selected_piece && ["rook", "king"].includes(this.selected_piece.type) && ["rook", "king"].includes(clicked_piece.type) && this.selected_piece.type != clicked_piece.type)
+            return true;
+        
+        return false;
+    }
     
     /**
      * @private

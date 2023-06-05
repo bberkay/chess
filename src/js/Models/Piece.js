@@ -12,12 +12,8 @@ class Piece {
         this.type = type;
         this.color = color;
 
-        // Set white and black king
-        if (this.type === "king")
-            BoardManager.setKing(this);
-
         // Set Target Square Content to this piece
-        BoardManager.changeSquare(square, this);
+        BoardManager.setSquare(square, this);
     }
 
     /**
@@ -25,8 +21,20 @@ class Piece {
      * Get Playable Squares
      * @returns {Array<int>}
      */
-    getPlayableSquaresOfPiece() {
-        return this.#piece_engine.getPlayableSquaresOfPiece(this.type, BoardManager.getSquareIDByPiece(this));
+    getPlayableSquares() {
+        return this.#piece_engine.getPlayableSquaresOfPiece(this.type, this.getSquareID());
     }
 
+    
+    /**
+     * @public
+     * Get Square ID of Piece
+     * @returns {int} 
+     */
+    getSquareID() {
+        for (let k in Global.getSquares()) {
+            if (Global.getSquare(parseInt(k)) === this)
+                return parseInt(k);
+        }
+    }
 }

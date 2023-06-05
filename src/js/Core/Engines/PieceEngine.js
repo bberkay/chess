@@ -5,10 +5,10 @@ class PieceEngine{
      */
     createPieceID() {
         let id = Math.floor(Math.random() * 10000) + 1000;
-        if (Client.getIdList().includes(id))
+        if (Global.getIdList().includes(id))
             this.createPieceID();
         else
-            Client.addIdList(id);
+            Global.addIdList(id);
 
         return id
     }

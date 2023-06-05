@@ -1,6 +1,16 @@
 class BoardManager {
     /**
      * @static
+     * Set Square
+     * @param {int} square_id 
+     * @param {(Piece|int)} square_content 
+     */
+    static setSquare(square_id, square_content){
+        Global.setSquare(square_id, square_content);
+    }
+
+    /**
+     * @static
      * Get Active Pieces On The Board With Filter Like Enemy Queen, Enemy Bishops ... etc.
      * @param {Piece} type Type of pieces to get
      * @param {Color} color Color of pieces to get
@@ -31,24 +41,6 @@ class BoardManager {
     static getPieceBySquareID(square_id) {
         let piece = Global.getSquare(square_id);
         return piece !== 0 ? piece : false;
-    }
-
-
-    /**
-     * @static
-     * Get Square ID By Piece
-     * @param {Piece} piece 
-     * @returns {(int|boolean)} 
-     */
-    static getSquareIDByPiece(piece) {
-        Validator.validatePiece({piece:piece});
-
-        let gl_squares = Global.getSquares();
-        for (let k in gl_squares) {
-            if (gl_squares[k] === piece)
-                return parseInt(k);
-        }
-        return false;
     }
 
     /**

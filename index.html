@@ -72,7 +72,7 @@
             </fieldset>  
             <fieldset>
                 <legend>Note</legend>
-                <p><b>Not</b> finished, <a href="https://github.com/bberkay/chess-engine" target="_blank">for source code</a></p>
+                <p>You may encounter some errors because it is not finished yet, and some days it may not work completely.<a href="https://github.com/bberkay/chess-engine" target="_blank"> For source code</a></p>
             </fieldset>
         </div>
         <div class = "game">
@@ -82,26 +82,28 @@
     
 
     <script src="src/js/Client/Global.js"></script>
-    <script src="src/js/Controller/BoardManager.js"></script>
+    <script src="src/js/Core/Validation/Validation.js"></script>
+    <script src="src/js/Core/Validation/Validator.js"></script>
+    <script src="src/js/Core/Managers/BoardManager.js"></script>
     <script src="src/js/Core/Utils/JSONConverter.js"></script>
-    <script src="src/js/Core/PathEngine.js"></script>
-    <script src="src/js/Core/RouteEngine.js"></script>
-    <script src="src/js/Core/PieceEngine.js"></script>
-    <script src="src/js/Core/GameManager.js"></script>
+    <script src="src/js/Core/Engines/PathEngine.js"></script>
+    <script src="src/js/Core/Engines/RouteEngine.js"></script>
+    <script src="src/js/Core/Engines/PieceEngine.js"></script>
+    <script src="src/js/Core/Managers/GameManager.js"></script>
     <script src="src/js/Handler/DOMHandler.js"></script>
     <script src="src/js/Models/Piece.js"></script>
-    <script src="src/js/Core/Board.js"></script>
+    <script src="src/js/Board/Board.js"></script>
     <script src="src/js/Chess.js"></script>
     <script>
         const chess = new Chess();
-        console.log(gl_current_move);
-        if(document.getElementById("chessboard").innerHTML == "")
-            chess.startGame();
 
-        chess.startCustomGame([
-             { "color": Color.white, "piece": Piece.pawn, "square": Square.e7 },
-             { "color": Color.black, "piece": Piece.pawn, "square": Square.c2 }
-        ]);
+        if(document.getElementById("chessboard").innerHTML == "")
+            chess.startStandartGame();
+
+        /*chess.startCustomGame([
+             { "piece": Piece.pawn, "color": Color.white, "square": Square.e7 },
+             { "piece": Piece.pawn, "color": Color.black, "square": Square.c2 }
+        ]);*/
     </script>
 </body>
 

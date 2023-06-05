@@ -14,7 +14,10 @@ class DOMHandler{
      * @returns {void}
      */
     static clickSquare(e){
-        chess.clickSquare(parseInt(e.id));
+        // Validate
+        Validator.validateSquare({square_id:parseInt(e.id)});
+        
+        chess.defineMove(parseInt(e.id));
     }    
 
     /**

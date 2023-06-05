@@ -3,7 +3,7 @@ class Validator{
      * @static
      * Validate square
      * @param {int} square_id
-     * @param {(Piece|int)} piece optional
+     * @param {(Piece|int)} square_content optional
      * @param {boolean} can_empty Can be empty? optional, default is true
      * @throw Error
      */
@@ -18,10 +18,10 @@ class Validator{
             throw new Error("Square ID must be between 1 and 64");
 
         if(square_content){
-            if(can_empty && piece instanceof Piece == false && piece != 0)
+            if(can_empty && square_content instanceof Piece == false && square_content != 0)
                 throw new Error("Piece must be instance of Piece object or 0");
 
-            if(can_empty == false && piece instanceof Piece == false)
+            if(can_empty == false && square_content instanceof Piece == false)
                 throw new Error("Piece must be instance of Piece object");
         }
     }

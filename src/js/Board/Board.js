@@ -17,16 +17,29 @@ class Board{
     }
 
     /**
+     * @public
+     * Setup Board
+     * @returns {void}
+     */
+    setupBoard(){
+        this.#createBoard();
+
+        for(let i in Global.getSquares()){
+            this.createPieceOnBoard(Global.getSquare(parseInt(i)));
+        }
+    }
+
+    /**
      * Create Chessboard
      * @returns {void}
      */
-    createBoard() {
+    #createBoard() {
         // First clear board
-        this.destroyBoard();
+        this.clearBoard();
 
         // Create board
         const board_chars = "abcdefgh";
-        let square_color = Color.White;
+        let square_color = "white";
         let board_numbers = 8;
         let board_chars_count = 0;
 
@@ -48,58 +61,37 @@ class Board{
 
             // Set Squares Color
             if (i % 8 != 1)
-                square_color = square_color == Color.Black ? square_color = Color.White : square_color = Color.Black;
+                square_color = square_color == "black" ? "white" : "black";
+                
             square.classList.add("square-" + square_color);
 
             this.chessboard.appendChild(square);
         }
     }
-
-    /** 
-    * Create Chess Pieces at Their Start Positions
-    * @returns {void}
-    */
-    createPiecesAtStartPosition() {
-        for (let i = 1; i <= 32; i++) {
-            let square_id = i <= 16 ? i : i + 32;
-
-            if (square_id == 1 || square_id == 8 || square_id == 57 || square_id == 64) // Rook
-                this.createPiece(square_id < 57 ? Color.White : Color.Black, Type.Rook, square_id);
-            else if (square_id == 2 || square_id == 7 || square_id == 58 || square_id == 63) // Knight
-                this.createPiece(square_id < 58 ? Color.White : Color.Black, Type.Knight, square_id);
-            else if (square_id == 3 || square_id == 6 || square_id == 59 || square_id == 62)// Bishop
-                this.createPiece(square_id < 58 ? Color.White : Color.Black, Type.Bishop, square_id);
-            else if (square_id == 4 || square_id == 60) // Queen 
-                this.createPiece(square_id < 60 ? Color.White : Color.Black, Type.Queen, square_id);
-            else if (square_id == 5 || square_id == 61) // King
-                this.createPiece(square_id < 61 ? Color.White : Color.Black, Type.King, square_id);            
-            else if (square_id >= 9 && square_id < 17 || square_id > 48 && square_id < 57) // Pawn 
-                this.createPiece(square_id < 48 ? Color.White : Color.Black, Type.Pawn, square_id);
-        }
-    }
-
+    
     /**
     * Create Piece at Any Position on the Board
-    * @param {Color} color Piece color
-    * @param {Type} piece_type Piece Type
-    * @param {int} target_square_id Target Square ID
+    * @param {Piece} piece Piece of the target to create
     * @returns {void}
     */
-    createPiece(color, piece_type, target_square_id) {
-        Validator.validateTypes([
-            new Validation(color, ValidationType.Color, 'Color'),
-            new Validation(piece_type, ValidationType.Type, 'Type'),
-            new Validation(target_square_id, ValidationType.Number, 'Square ID')
-        ])
+    createPieceOnBoard(piece) {
+        // Find square id of piece
+        let square_id = piece.getSquareID();
+        
+        // First clear square
+        this.clearSquare(square_id); 
 
-        this.destroyPiece(target_square_id); // First destory piece on square
-        const target_square = document.getElementById(target_square_id); // Find target square element
-        const piece = document.createElement("div");
-        piece.classList.add("piece");
-        piece.setAttribute("data-piece", piece_type); // For image of piece
-        piece.setAttribute("data-color", color); 
-        new Piece(piece_type, color, target_square_id); // Create Piece[object]
-        target_square.appendChild(piece); // Add piece to target square
+        // Find target square element
+        const target_square = document.getElementById(square_id); 
+
+        // Create piece element
+        let piece_ele = document.createElement("div");
+        piece_ele.classList.add("piece");
+        piece_ele.setAttribute("data-piece", piece.type);
+        piece_ele.setAttribute("data-color", piece.color); 
+
+        // Add piece to target square
+        target_square.appendChild(piece_ele); 
     }
     
     /**
@@ -114,8 +106,8 @@ class Board{
         Validator.validateSquare({ square_id: target_square });
 
         // Change Piece Position 
-        let square_id = BoardManager.getSquareIDByPiece(piece); // Piece will validate in BoardManager
-        BoardManager.changeSquare(target_square, piece); // FIXME: Global set square 
+        let square_id = BoardManager.getSquareIDByPiece(piece);
+        BoardManager.changeSquare(target_square, piece);
         BoardManager.changeSquare(square_id, 0);
 
         // Remove piece from his square
@@ -141,22 +133,16 @@ class Board{
     }
     
     /**
-     * Destroy piece by square id
+     * Clear Square
      * @param {int} square_id 
      * @returns {void}
      */
-    destroyPiece(square_id){
-        // Validate
-        Validator.validateSquare({square_id:square_id});
-
-        // Remove enemy from dom
+    clearSquare(square_id){
+        // Remove piece from his square
         let target_piece = document.getElementById(square_id);
         let piece_obj = target_piece.querySelector(".piece");
         if(piece_obj)
             target_piece.removeChild(piece_obj);
-
-        // Remove enemy from game
-        BoardManager.changeSquare(square_id, 0);
     }
 
     /**
@@ -179,13 +165,13 @@ class Board{
     }   
 
     /**
-     * Destroy Chessboard and pieces in global squares
+     * Clear Chessboard
      * @returns {void}
      */
-    destroyBoard(){
+    clearBoard(){
         this.chessboard.innerHTML = "";
-        for (let i = 1; i < 65; i++)
-            gl_squares[i] = 0;
+        /*STUB: for (let i = 1; i < 65; i++)
+            gl_squares[i] = 0;*/
     }
 
     /**
@@ -194,11 +180,6 @@ class Board{
      * @returns {void}
      */
     showPlayableSquares(playable_squares) {
-        // Validate
-        Validator.validateTypes([
-            new Validation(playable_squares, ValidationType.Array, 'Playable Squares')
-        ]);
-
         let l = playable_squares.length;
         let enemy_color = BoardManager.getEnemyColor();
         for (let i = 0; i < l; i++) {
@@ -216,10 +197,9 @@ class Board{
      * @returns {void}
      */
     setEffectOfSquare(square_id, effect){
-        // Validate
+        /* STUB: Validate
         if(effect != this.#Effects.playable && effect != this.#Effects.killable && effect != this.#Effects.checked)
-            throw new Error("Invalid effect type");
-        Validator.validateSquare({square_id:square_id});
+            throw new Error("Invalid effect type");*/
 
         document.getElementById(square_id.toString()).classList.add(effect);
     }
@@ -231,10 +211,9 @@ class Board{
      * @returns {void}
      */
     clearEffectOfSquare(square_id, effect){
-        // Validate
+        /* STUB: // Validate
         if(effect != this.#Effects.playable && effect != this.#Effects.killable && effect != this.#Effects.checked)
-            throw new Error("Invalid effect type");
-        Validator.validateSquare({square_id:square_id});
+            throw new Error("Invalid effect type");*/
         
         document.getElementById(square_id.toString()).classList.remove(effect);
     }
@@ -253,7 +232,7 @@ class Board{
      * @returns {void}
      */
     setSelectedEffect(selected_piece){
-        this.setEffectOfSquare(BoardManager.getSquareIDByPiece(selected_piece), this.#Effects.selected);
+        this.setEffectOfSquare(selected_piece.getSquareID(), this.#Effects.selected);
     }
 
     /**
@@ -262,11 +241,11 @@ class Board{
      * @returns {void}
      */
     clearSelectedEffect(selected_piece){
-        this.clearEffectOfSquare(BoardManager.getSquareIDByPiece(selected_piece), this.#Effects.selected);
+        this.clearEffectOfSquare(selected_piece.getSquareID(), this.#Effects.selected);
     }
 
     /**
-     * Clear checked effect of selected piece
+     * Clear checked effect
      * @returns {void}
      */
     clearCheckedEffect(){
