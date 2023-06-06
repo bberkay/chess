@@ -112,7 +112,7 @@ class Chess{
             this.#unselectPiece();
 
         // If player is checked then player only select king 
-        if(gl_checked_player === gl_current_move && piece.type !== "king")
+        if(Global.getCheckedPlayer() === Global.getCurrentMove() && piece.type !== "king")
             this.selected_piece = null;
         else{
             this.selected_piece = piece;
@@ -124,7 +124,7 @@ class Chess{
             this.board.refreshBoard();
 
             // Get playable squares of selected piece
-            this.playable_squares = this.selected_piece.getPlayableSquaresOfPiece();   
+            this.playable_squares = this.selected_piece.getPlayableSquares();   
 
             // Show playable squares of selected piece
             this.board.showPlayableSquares(this.playable_squares);
@@ -151,10 +151,18 @@ class Chess{
      * @param {Piece} piece Optional piece information(default selected piece)
      * @returns {void}
      */
-    #movePiece(square_id, piece=null){
-        this.board.clearSelectedEffect(piece == null ? this.selected_piece : piece);
+    #movePiece(square_id, _piece=null){
+        let piece = _piece == null ? this.selected_piece : _piece;
+        
+        // Move Piece To Target Position 
+        const old_square_id = piece.getSquareID();
+        BoardManager.setSquare(square_id, piece);
+        BoardManager.setSquare(old_square_id, 0);
+
+        // Move Piece On Board
+        this.board.clearSelectedEffect(piece);
         this.board.refreshBoard();
-        this.board.movePiece(piece == null ? this.selected_piece : piece, square_id);
+        this.board.movePieceOnBoard(square_id, piece);
     }
 
     /**
@@ -186,12 +194,12 @@ class Chess{
                 // White King goes to 59(c1) and white short rook(h1, 64) goes to 62(f1)
                 this.#movePiece(63, player_king);
                 this.#movePiece(62, BoardManager.getPieceBySquareID(64));
-                gl_castling_control["white-short"] = false;
+                Global.setCastling("white-short", false);
             }else if(square_id == 8){ 
                 // White King goes to 59(c1) and black short rook(h8, 8) goes to 6(f8)
                 this.#movePiece(7, player_king);
                 this.#movePiece(6, BoardManager.getPieceBySquareID(8));
-                gl_castling_control["black-short"] = false;
+                Global.setCastling("black-short", false);
             }
         }else{
             // If castling type long and square id is 57 then for white, else for black(square id is 1)
@@ -199,12 +207,12 @@ class Chess{
                 // White King goes to 59(c1) and white long rook(a1, 57) goes to 60(d1)
                 this.#movePiece(59, player_king);
                 this.#movePiece(60, BoardManager.getPieceBySquareID(57));
-                gl_castling_control["white-long"] = false;
+                Global.setCastling("white-long", false);
             }else if(square_id == 1){
                 // Black King goes to 3(c8) and black long rook(a8, 1) goes to 4(d8)
                 this.#movePiece(3, player_king);
                 this.#movePiece(4, BoardManager.getPieceBySquareID(1));
-                gl_castling_control["black-long"] = false;
+                Global.setCastling("black-long", false);
             }
         }
     }
@@ -216,7 +224,7 @@ class Chess{
      */
     #controlEnPassant(){
         // find all pawns
-        let pawns = BoardManager.getActivePiecesWithFilter("pawn", gl_current_move);
+        let pawns = BoardManager.getActivePiecesWithFilter("pawn", Global.getCurrentMove());
         for(let pawn of pawns){
             // find square id of pawn
             let square_id = BoardManager.getSquareIDByPiece(pawn);
@@ -273,13 +281,10 @@ class Chess{
      */
     #endTurn() {
         // Set New Turn 
-        if(gl_current_move === "white")
-            gl_current_move = "black";
-        else if(gl_current_move === "black")
-            gl_current_move = "white";
+        Global.setNextMove();
 
         // Increase Move Count
-        gl_move_count++;
+        Global.increaseMoveCount();
     }
 
 }

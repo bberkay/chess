@@ -97,19 +97,11 @@ class Board{
     /**
     * Move Piece To Selected Square
     * @async
-    * @param {Piece} piece Piece of the target to move
     * @param {int} target_square Square ID of target square
+    * @param {Piece} piece Piece of the target to move
     * @returns {void}
     */
-    async movePiece(piece, target_square) {
-        // Validate
-        Validator.validateSquare({ square_id: target_square });
-
-        // Change Piece Position 
-        let square_id = BoardManager.getSquareIDByPiece(piece);
-        BoardManager.changeSquare(target_square, piece);
-        BoardManager.changeSquare(square_id, 0);
-
+    async movePieceOnBoard(target_square, piece) {
         // Remove piece from his square
         let piece_id = document.getElementById(square_id);
         let piece_obj = piece_id.querySelector(".piece");

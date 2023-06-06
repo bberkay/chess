@@ -6,9 +6,6 @@ class GameManager{
      * @returns {boolean}
      */
     static isCheck(square_id = null) {
-        // Validate
-        Validator.validateSquare({square_id:square_id});
-
         /**
          * Set Operation that connected to Path
          * @param {string} current_path_direction
@@ -156,12 +153,6 @@ class GameManager{
      * @returns {void}
      */
     static changeCastlingStatus(moved_piece_type, moved_piece_color){
-        // Validate
-        Validator.validateTypes([
-            new Validation(moved_piece_type, ValidationType.Type, "Type"),
-            new Validation(moved_piece_color, ValidationType.Color, "Color")
-        ]);
-
         let gl_current_move = BoardManager.getCurrentMove();
         let gl_squares = BoardManager.getSquares();
 

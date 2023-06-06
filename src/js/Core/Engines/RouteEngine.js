@@ -57,10 +57,10 @@ class RouteEngine{
         let route = "";
         let row_of_pawn = path_engine.calcRowOfSquare(square_id);
 
-        if (gl_current_move === "black") {
+        if (Global.getCurrentMove() === "black") {
             limit = row_of_pawn === 7 ? 2 : 1;  // if black pawn is start position then 2 square limit else 1
             route = ["top"]; // black goes top
-        } else if (gl_current_move === "white") {
+        } else if (Global.getCurrentMove() === "white") {
             limit = row_of_pawn === 2 ? 2 : 1;
             route = ["bottom"]; // white goes bottom
         }
@@ -143,7 +143,7 @@ class RouteEngine{
         let playable_squares = [];
         column_sides.concat(row_sides).forEach(item => {
             item.forEach(square => {
-                if(!BoardManager.isSquareHasPiece(square, gl_current_move))
+                if(!BoardManager.isSquareHasPiece(square, Global.getCurrentMove()))
                     playable_squares.push(square);
             })
         })

@@ -63,9 +63,7 @@ class Global{
      * @param {int} square_id 
      * @returns {(Piece|int)}
      */
-    static getSquare(square_id){
-        Validator.validateSquare({square_id:square_id});
-        
+    static getSquare(square_id){        
         return this.#gl_squares[square_id];
     }
 
@@ -174,8 +172,6 @@ class Global{
      * @returns {void}
      */
     static setSquare(square_id, content=0){
-        Validator.validateSquare({square_id:square_id, square_content:content});
-
         this.#gl_squares[square_id] = content;
     }
 
@@ -204,8 +200,6 @@ class Global{
      * @returns {void}
      */
     static addKilledBlackPiece(piece){
-        Validator.validatePiece({piece:piece, color:Color.Black});
-
         this.#gl_killed_black_pieces.push(piece);
     }
 
@@ -215,9 +209,7 @@ class Global{
      * @param {Piece} piece Killed white piece
      * @returns {void}
      */
-    static addKilledWhitePiece(piece){
-        Validator.validatePiece({piece:piece, color:Color.White}); // Control piece is white
-            
+    static addKilledWhitePiece(piece){            
         this.#gl_killed_white_pieces.push(piece);
     }
 
@@ -264,11 +256,6 @@ class Global{
      * @returns {void}
      */
     static addIdList(id){
-        // Validate
-        Validator.validateTypes([
-            new Validation(id, ValidationType.Number, "ID"), // ID must be integer
-        ]);
-
         this.#gl_id_list.push(id);
     }
 
@@ -280,12 +267,6 @@ class Global{
      * @returns {void}
      */
     static setCastling(castling_type, value){
-        // Validate
-        Validator.validateTypes([
-            new Validation(castling_type, ValidationType.Castling, "Castling"), // Castling type must be enum
-            new Validation(value, ValidationType.Boolean, "Castling value"), // Castling value must be boolean
-        ])
-
         this.#gl_castling_control[castling_type] = value;
     }
 
@@ -297,13 +278,6 @@ class Global{
      * @returns {void}
      */
     static addEnPassant(piece_id, en_passant_value){
-        // Validate
-        Validator.validateTypes([
-            new Validation(en_passant_value, ValidationType.EnPassant, "En passant value"), // En passant value must be enum
-            new Validation(piece_id, ValidationType.Number, "Piece ID"), // Piece id must be number
-        ]); 
-        Validator.validatePiece({id:piece_id}); // Piece id must be in id list
-
         this.#gl_en_passant_control[piece_id] = en_passant_value;
     }
 }

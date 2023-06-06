@@ -17,10 +17,6 @@ class BoardManager {
      * @returns {(Array<Piece>|null)}
      */
     static getActivePiecesWithFilter(type, color) {
-        // Validate type and color
-        Validator.validateTypes(type, Validation.Type, "Type");
-        Validator.validateTypes(color, Validation.Color, "Color");
-
         let pieces = [];
         let gl_squares = Global.getSquares();
         for (let square in gl_squares) {
@@ -52,10 +48,6 @@ class BoardManager {
      * @returns {boolean}
      */
     static isSquareHasPiece(square_id, specific_color = null, specific_pieces = [Type.Queen, Type.King, Type.Pawn, Type.Bishop, Type.Rook, Type.Knight]) {
-        // Validate
-        Validator.validateTypes(specific_color, Validation.Color, "Specific Color"); // specific_color must be Color
-        Validator.validateTypes(specific_pieces, Validation.Object, "Specific Piece Type List"); // specific_pieces must be Type array/object
-
         let piece = this.getPieceBySquareID(square_id);
         if (piece)
             return !(specific_color && piece.color !== specific_color || !specific_pieces.includes(piece.type));

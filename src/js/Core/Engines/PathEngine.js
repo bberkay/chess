@@ -232,7 +232,7 @@ class PathEngine {
 
         // if piece sensivity is true then calculate every piece on the path
         if (piece_sensivity) {
-            if (BoardManager.isSquareHasPiece(target_square_id, gl_current_move)) {
+            if (BoardManager.isSquareHasPiece(target_square_id, Global.getCurrentMove())) {
                 squares.push("break");
                 return squares;
             } else if (BoardManager.isSquareHasPiece(target_square_id, BoardManager.getEnemyColor())) {
