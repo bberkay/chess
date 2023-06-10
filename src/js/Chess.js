@@ -6,6 +6,10 @@ class Chess{
         this.board = new Board();
         this.playable_squares = [];
         this.selected_piece = null;
+
+        // Create squares
+        for (let i = 1; i < 65; i++)
+            Global.setSquare(i, 0);
     }
 
     /**
@@ -122,7 +126,7 @@ class Chess{
             this.selected_piece = null;
         else{
             this.selected_piece = piece;
-            this.board.addEffectToSquare(this.selected_piece, Effect.Selected);
+            this.board.addEffectToSquare(this.selected_piece.getSquareID(), Effect.Selected);
         }
         
         // Show Playable Squares
@@ -162,8 +166,8 @@ class Chess{
         
         // Move Piece To Target Position 
         const old_square_id = piece.getSquareID();
-        BoardManager.setSquare(square_id, piece);
-        BoardManager.setSquare(old_square_id, 0);
+        Global.setSquare(square_id, piece);
+        Global.setSquare(old_square_id, 0);
 
         // Move Piece On Board
         this.board.clearEffectOfSquare(piece);
@@ -179,7 +183,7 @@ class Chess{
      */
     destroyPiece(square_id){
         // Remove Piece From Global Squares
-        BoardManager.setSquare(square_id, 0);
+        Global.setSquare(square_id, 0);
 
         // Remove Piece From Board
         this.board.clearSquare(square_id);
@@ -234,7 +238,7 @@ class Chess{
      */
     #controlEnPassant(){
         // find all pawns
-        let pawns = BoardManager.getActivePiecesWithFilter(Type.Pawn, Global.getCurrentMove());
+        let pawns = BoardManager.getPiecesWithFilter(Type.Pawn, Global.getCurrentMove());
         for(let pawn of pawns){
             // find square id of pawn
             let square_id = BoardManager.getSquareIDByPiece(pawn);

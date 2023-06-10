@@ -82,7 +82,7 @@ class Validator{
      * @throw Error
      */
     static validateTypes(validations){
-        for(let validation of validations){
+        for(let validation in validations){
             if(validation.target_type instanceof Object)
                 this.#validateValueByEnum(validation.value, validation.target_type, validation.error_title);
             else

@@ -54,7 +54,7 @@ class GameManager{
         }
 
         square_id = BoardManager.getPlayerKingSquareID();
-        const enemy_color = BoardManager.getEnemyColor();
+        const enemy_color = Global.getEnemyColor();
 
         // Control for Enemy Bishop, Queen, Rook
         const diagonal_row_column_path = RouteEngine.calcQueenPath(square_id); // Get all path

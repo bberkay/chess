@@ -245,7 +245,7 @@ class PathEngine {
             if (BoardManager.isSquareHasPiece(target_square_id, Global.getCurrentMove())) {
                 squares.push("break");
                 return squares;
-            } else if (BoardManager.isSquareHasPiece(target_square_id, BoardManager.getEnemyColor())) {
+            } else if (BoardManager.isSquareHasPiece(target_square_id, Global.getEnemyColor())) {
                 squares.push(target_square_id);
                 squares.push("break");
                 return squares;

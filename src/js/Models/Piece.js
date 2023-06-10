@@ -13,7 +13,7 @@ class Piece {
         this.color = color;
 
         // Set Target Square Content to this piece
-        BoardManager.setSquare(square, this);
+        Global.setSquare(square, this);
     }
 
     /**

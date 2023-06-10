@@ -145,9 +145,8 @@ class Board{
                 squares[i].id = i + 1;
 
             // Clear effects on the squares
-            //squares[i].classList.remove(this.#Effects.checked);
-            squares[i].classList.remove(this.#Effects.playable);
-            squares[i].classList.remove(this.#Effects.killable);
+            //squares[i].classList.remove(Effects.checked);
+            this.clearEffectOfSquare(squares[i].id, [Effect.Playable, Effect.Killable]);
         }
     }   
 
@@ -170,12 +169,12 @@ class Board{
      */
     showPlayableSquares(playable_squares) {
         let l = playable_squares.length;
-        let enemy_color = BoardManager.getEnemyColor();
+        let enemy_color = Global.getEnemyColor();
         for (let i = 0; i < l; i++) {
             if (BoardManager.isSquareHasPiece(playable_squares[i], enemy_color))
-                this.addEffectToSquare(playable_squares[i], this.#Effects.killable)
+                this.addEffectToSquare(playable_squares[i], Effect.killable)
             else
-                this.addEffectToSquare(playable_squares[i], this.#Effects.playable)
+                this.addEffectToSquare(playable_squares[i], Effect.playable)
         }
     }
 
@@ -196,13 +195,21 @@ class Board{
     /**
      * Clear effect of the square
      * @param {int} square_id Square to be effected
-     * @param {(playable|killable|checked|null)} effect If null then remove all effects
+     * @param {(playable|killable|checked|null|Array<Effect>)} effect If null then remove all effects
      * @returns {void}
      */
     clearEffectOfSquare(square_id, effect=null){
         if(effect == null)
-            document.getElementById(square_id.toString()).classList.remove(this.#Effects.playable, this.#Effects.killable, this.#Effects.checked);
-        else
-            document.getElementById(square_id.toString()).classList.remove(effect);
+            document.getElementById(square_id.toString()).classList.remove(Effect.playable, Effect.killable, Effect.checked);
+        else{
+            if(Array.isArray(effect)){
+                let l = effect.length;
+                for(let i = 0; i < l; i++){
+                    document.getElementById(square_id.toString()).classList.remove(effect[i]);
+                }
+            }else{
+                document.getElementById(square_id.toString()).classList.remove(effect);
+            }
+        }
     }
 }

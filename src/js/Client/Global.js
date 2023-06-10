@@ -40,15 +40,6 @@ class Global{
     static #gl_en_passant_control = {}
 
     /**
-     * Constructor
-     */
-    constructor(){
-        // Set Empty at Start
-        for (let i = 1; i < 65; i++)
-            this.#gl_squares[i] = 0;
-    }
-
-    /**
      * @static
      * Get Current Board
      * @returns {JSON}
@@ -166,6 +157,33 @@ class Global{
 
     /**
      * @static
+     * Get Enemy Color
+     * @returns {string}
+     */
+    static getEnemyColor(){
+        return this.getCurrentMove() == Color.White ? Color.Black : Color.White;
+    }
+
+    /**
+     * @static
+     * Get Enemy King
+     * @returns {Piece}
+     */
+    static getEnemyKing(){
+        return this.getCurrentMove() == Color.White ? this.getBlackKing() : this.getWhiteKing();
+    }
+
+    /**
+     * @static
+     * Get Player King
+     * @returns {Piece}
+     */
+    static getPlayerKing(){
+        return this.getCurrentMove() == Color.White ? this.getWhiteKing() : this.getBlackKing();
+    }
+
+    /**
+     * @static
      * Set Square
      * @param {int} square_id Square ID of square
      * @param {Piece} content Content of square(default 0)
@@ -220,7 +238,8 @@ class Global{
      */
     static setWhiteKing(){
         let squares = this.getSquares();
-        for(let square of squares){
+        
+        for(let square in squares){
             // Get piece
             let piece = squares[square];            
             // Control piece is king and color is white
@@ -238,7 +257,7 @@ class Global{
      */
     static setBlackKing(){
         let squares = this.getSquares();
-        for(let square of squares){
+        for(let square in squares){
             // Get piece
             let piece = squares[square];            
             // Control piece is king and color is black
@@ -438,8 +457,8 @@ const ValidationType = {
     Object:"object",
     Color:Color,
     Type:Type,
-    Castling:Castling,
-    EnPassant:EnPassant
+    CastlingType:CastlingType,
+    EnPassantStatus:EnPassantStatus
 }
 
 /**

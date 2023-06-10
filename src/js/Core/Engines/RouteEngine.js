@@ -85,10 +85,10 @@ class RouteEngine{
         });
 
         // is first diagonal squares has enemy piece then add playable squares
-        if (BoardManager.isSquareHasPiece(diagonal_control[route+"-"+Route.Left][0], BoardManager.getEnemyColor()))
+        if (BoardManager.isSquareHasPiece(diagonal_control[route+"-"+Route.Left][0], Global.getEnemyColor()))
             playable_squares.push(diagonal_control[route+"-"+Route.Left][0]);
 
-        if (BoardManager.isSquareHasPiece(diagonal_control[route+"-"+Route.Right][0], BoardManager.getEnemyColor()))
+        if (BoardManager.isSquareHasPiece(diagonal_control[route+"-"+Route.Right][0], Global.getEnemyColor()))
             playable_squares.push(diagonal_control[route+"-"+Route.Right][0]);
 
         return playable_squares;
