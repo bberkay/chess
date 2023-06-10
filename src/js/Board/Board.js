@@ -1,14 +1,4 @@
 class Board{
-    /**
-     * @enum {string}
-     */
-    #Effects = { 
-        checked:"checked-effect", 
-        killable:"killable-effect", 
-        playable:"playable-effect",
-        selected:"selected-effect"
-    }
-
     /** 
      * Constructor
     */
@@ -25,7 +15,7 @@ class Board{
         this.#createBoard();
 
         for(let i in Global.getSquares()){
-            this.createPieceOnBoard(Global.getSquare(parseInt(i)));
+            this.createPieceOnBoard(Global.getSquare(parseInt(i)), parseInt(i));
         }
     }
 
@@ -72,11 +62,13 @@ class Board{
     /**
     * Create Piece at Any Position on the Board
     * @param {Piece} piece Piece of the target to create
+    * @param {int|null} square_id Square ID of piece. If null then piece will be search in global squares then get its square id
     * @returns {void}
     */
-    createPieceOnBoard(piece) {
+    createPieceOnBoard(piece, square_id=null) {
         // Find square id of piece
-        let square_id = piece.getSquareID();
+        if (square_id == null)
+            square_id = piece.getSquareID();
         
         // First clear square
         this.clearSquare(square_id); 
@@ -97,11 +89,11 @@ class Board{
     /**
     * Move Piece To Selected Square
     * @async
-    * @param {int} target_square Square ID of target square
     * @param {Piece} piece Piece of the target to move
+    * @param {int} target_square Square ID of target square
     * @returns {void}
     */
-    async movePieceOnBoard(target_square, piece) {
+    async movePieceOnBoard(piece, target_square) {
         // Remove piece from his square
         let piece_id = document.getElementById(square_id);
         let piece_obj = piece_id.querySelector(".piece");
@@ -135,6 +127,9 @@ class Board{
         let piece_obj = target_piece.querySelector(".piece");
         if(piece_obj)
             target_piece.removeChild(piece_obj);
+
+        // Remove effects from square
+        this.clearEffectOfSquare(square_id);
     }
 
     /**
@@ -157,13 +152,15 @@ class Board{
     }   
 
     /**
-     * Clear Chessboard
+     * Clear Chessboard, Remove All Pieces
      * @returns {void}
      */
     clearBoard(){
-        this.chessboard.innerHTML = "";
-        /*STUB: for (let i = 1; i < 65; i++)
-            gl_squares[i] = 0;*/
+        let pieces = document.getElementsByClassName("piece");
+        let l = pieces.length;
+        for (let i = 0; i < l; i++) {
+            pieces[i].remove();
+        }
     }
 
     /**
@@ -176,19 +173,19 @@ class Board{
         let enemy_color = BoardManager.getEnemyColor();
         for (let i = 0; i < l; i++) {
             if (BoardManager.isSquareHasPiece(playable_squares[i], enemy_color))
-                this.setEffectOfSquare(playable_squares[i], this.#Effects.killable)
+                this.addEffectToSquare(playable_squares[i], this.#Effects.killable)
             else
-                this.setEffectOfSquare(playable_squares[i], this.#Effects.playable)
+                this.addEffectToSquare(playable_squares[i], this.#Effects.playable)
         }
     }
 
     /**
-     * Set effect of the square
+     * Add effect to the square
      * @param {int} square_id Square to be effected
      * @param {(playable|killable|checked)} effect
      * @returns {void}
      */
-    setEffectOfSquare(square_id, effect){
+    addEffectToSquare(square_id, effect){
         /* STUB: Validate
         if(effect != this.#Effects.playable && effect != this.#Effects.killable && effect != this.#Effects.checked)
             throw new Error("Invalid effect type");*/
@@ -199,50 +196,13 @@ class Board{
     /**
      * Clear effect of the square
      * @param {int} square_id Square to be effected
-     * @param {(playable|killable|checked)} effect
+     * @param {(playable|killable|checked|null)} effect If null then remove all effects
      * @returns {void}
      */
-    clearEffectOfSquare(square_id, effect){
-        /* STUB: // Validate
-        if(effect != this.#Effects.playable && effect != this.#Effects.killable && effect != this.#Effects.checked)
-            throw new Error("Invalid effect type");*/
-        
-        document.getElementById(square_id.toString()).classList.remove(effect);
-    }
-
-    /**
-     * Set checked effect of player's king
-     * @returns {void}
-     */
-    setCheckedEffect(){
-        this.setEffectOfSquare(BoardManager.getPlayerKingSquareID(), this.#Effects.checked);
-    }
-
-    /**
-     * Set selected effect of selected piece
-     * @param {Piece} selected_piece
-     * @returns {void}
-     */
-    setSelectedEffect(selected_piece){
-        this.setEffectOfSquare(selected_piece.getSquareID(), this.#Effects.selected);
-    }
-
-    /**
-     * Clear selected effect of selected piece
-     * @param {Piece} selected_piece
-     * @returns {void}
-     */
-    clearSelectedEffect(selected_piece){
-        this.clearEffectOfSquare(selected_piece.getSquareID(), this.#Effects.selected);
-    }
-
-    /**
-     * Clear checked effect
-     * @returns {void}
-     */
-    clearCheckedEffect(){
-        try{
-            document.querySelector(".checked-effect").classList.remove(this.#Effects.checked);
-        }catch{}
+    clearEffectOfSquare(square_id, effect=null){
+        if(effect == null)
+            document.getElementById(square_id.toString()).classList.remove(this.#Effects.playable, this.#Effects.killable, this.#Effects.checked);
+        else
+            document.getElementById(square_id.toString()).classList.remove(effect);
     }
 }

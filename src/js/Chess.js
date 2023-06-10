@@ -13,6 +13,7 @@ class Chess{
     * @returns {void}
     */
     startStandartGame() {
+        // Create Pieces
         for (let i = 1; i <= 32; i++) {
             let square_id = i <= 16 ? i : i + 32; // Position of the piece on the board
 
@@ -29,6 +30,8 @@ class Chess{
             else if (square_id >= 9 && square_id < 17 || square_id > 48 && square_id < 57) // Pawn 
                 this.createPiece(Type.Pawn, square_id < 48 ? Color.White : Color.Black, square_id);
         }
+
+        // Visualize Pieces and the board
         this.board.setupBoard();
     }
 
@@ -39,11 +42,14 @@ class Chess{
     * @returns {void}
     */
     startCustomGame(pieces = null) {
+        // Create Pieces
         if(pieces){ 
             pieces.forEach(item => {
                 this.createPiece(item["piece"], item["color"],  item["square"]);
             });
         }
+
+        // Visualize Pieces(if 'pieces' is null then board will be empty) and the board
         this.board.setupBoard();
     }
 
@@ -116,7 +122,7 @@ class Chess{
             this.selected_piece = null;
         else{
             this.selected_piece = piece;
-            this.board.setSelectedEffect(this.selected_piece);
+            this.board.addEffectToSquare(this.selected_piece, Effect.Selected);
         }
         
         // Show Playable Squares
@@ -138,7 +144,7 @@ class Chess{
      * @returns {void}
      */
     #unselectPiece(){
-        this.board.clearSelectedEffect(this.selected_piece);
+        this.board.clearEffectOfSquare(this.selected_piece);
         this.board.refreshBoard();
         this.selected_piece = null;
         this.playable_squares = [];
@@ -160,7 +166,7 @@ class Chess{
         BoardManager.setSquare(old_square_id, 0);
 
         // Move Piece On Board
-        this.board.clearSelectedEffect(piece);
+        this.board.clearEffectOfSquare(piece);
         this.board.refreshBoard();
         this.board.movePieceOnBoard(square_id, piece);
     }
@@ -172,7 +178,11 @@ class Chess{
      * @returns {void}
      */
     destroyPiece(square_id){
+        // Remove Piece From Global Squares
         BoardManager.setSquare(square_id, 0);
+
+        // Remove Piece From Board
+        this.board.clearSquare(square_id);
     }
 
     /**
@@ -186,20 +196,20 @@ class Chess{
         if(square_id == 61 || square_id == 5)
             square_id = BoardManager.getSquareIDByPiece(this.selected_piece) 
 
-        let castling_type = square_id % 8 == 0 ? "short" : "long";
+        let castling_type = square_id % 8 == 0 ? CastlingType.Short : CastlingType.Long;
         let player_king = BoardManager.getPlayerKing();
-        if(castling_type == "short"){ 
+        if(castling_type == CastlingType.Short){ 
             // If castling type short and square id is 64 then for white, else for black(square id is 8)
             if(square_id == 64){
                 // White King goes to 59(c1) and white short rook(h1, 64) goes to 62(f1)
                 this.#movePiece(63, player_king);
                 this.#movePiece(62, BoardManager.getPieceBySquareID(64));
-                Global.setCastling("white-short", false);
+                Global.setCastling(CastlingType.WhiteShort, false);
             }else if(square_id == 8){ 
                 // White King goes to 59(c1) and black short rook(h8, 8) goes to 6(f8)
                 this.#movePiece(7, player_king);
                 this.#movePiece(6, BoardManager.getPieceBySquareID(8));
-                Global.setCastling("black-short", false);
+                Global.setCastling(CastlingType.BlackShort, false);
             }
         }else{
             // If castling type long and square id is 57 then for white, else for black(square id is 1)
@@ -207,12 +217,12 @@ class Chess{
                 // White King goes to 59(c1) and white long rook(a1, 57) goes to 60(d1)
                 this.#movePiece(59, player_king);
                 this.#movePiece(60, BoardManager.getPieceBySquareID(57));
-                Global.setCastling("white-long", false);
+                Global.setCastling(CastlingType.WhiteLong, false);
             }else if(square_id == 1){
                 // Black King goes to 3(c8) and black long rook(a8, 1) goes to 4(d8)
                 this.#movePiece(3, player_king);
                 this.#movePiece(4, BoardManager.getPieceBySquareID(1));
-                Global.setCastling("black-long", false);
+                Global.setCastling(CastlingType.BlackLong, false);
             }
         }
     }
@@ -224,17 +234,17 @@ class Chess{
      */
     #controlEnPassant(){
         // find all pawns
-        let pawns = BoardManager.getActivePiecesWithFilter("pawn", Global.getCurrentMove());
+        let pawns = BoardManager.getActivePiecesWithFilter(Type.Pawn, Global.getCurrentMove());
         for(let pawn of pawns){
             // find square id of pawn
             let square_id = BoardManager.getSquareIDByPiece(pawn);
             // if pawn is white and row number is 4 then pawn can do en passant, if pawn is black and row number is 5 then pawn can do en passant
-            if(pawn.color == "white" && 40 >= parseInt(square_id) && parseInt(square_id) >= 33 || pawn.color == "black" && 32 >= parseInt(square_id) && parseInt(square_id) >= 25)
-                gl_en_passant_control[pawn.id] = true;
+            if(pawn.color == Color.White && 40 >= parseInt(square_id) && parseInt(square_id) >= 33 || pawn.color == Color.Black && 32 >= parseInt(square_id) && parseInt(square_id) >= 25)
+                Global.addEnPassant(pawn.id, EnPassantStatus.Ready);
             else if(gl_en_passant_control[pawn.id] == true || gl_en_passant_control[pawn.id] == false) // if pawn can do en passant already then can't do anymore or has already false then continue its status
-                gl_en_passant_control[pawn.id] = false;
+                Global.addEnPassant(pawn.id, EnPassantStatus.Cant);
             else// if pawn is white and has not yet reached row number 4 then not-ready, if pawn is black and has not reached yet row number 5 then not-ready
-                gl_en_passant_control[pawn.id] = "not-ready";
+                Global.addEnPassant(pawn.id, EnPassantStatus.NotReady);
         }
     }
 
@@ -245,9 +255,9 @@ class Chess{
      */ 
     #controlCheck(){
         // If moved piece is king then don't control check
-        if(this.selected_piece.type === "king"){
-            this.board.clearCheckedEffect();
-            gl_checked_player = null; // set checked status to null
+        if(this.selected_piece.type === Type.King){
+            this.board.clearEffectOfSquare(this.selected_piece.getSquareID(), Effect.Checked);
+            Global.setCheckedPlayer(null); // set checked status to null
             return;
         }
             
@@ -255,8 +265,8 @@ class Chess{
 
         // Set checked player and give effect the checked king
         if(GameManager.isCheck()){
-            gl_checked_player = player_king.color;
-            this.board.setCheckedEffect();
+            Global.setCheckedPlayer(player_king.color);
+            this.board.addEffectToSquare(player_king.getSquareID(), Effect.Checked);
         }
     }
 
@@ -268,7 +278,7 @@ class Chess{
      */
     #isCastlingMove(clicked_piece){
         // If selected piece is king or rook and clicked square is king or rook, but not the same as selected piece, start castling operation
-        if(this.selected_piece && ["rook", "king"].includes(this.selected_piece.type) && ["rook", "king"].includes(clicked_piece.type) && this.selected_piece.type != clicked_piece.type)
+        if(this.selected_piece && [Type.Rook, Type.King].includes(this.selected_piece.type) && [Type.Rook, Type.King].includes(clicked_piece.type) && this.selected_piece.type != clicked_piece.type)
             return true;
         
         return false;

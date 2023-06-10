@@ -101,7 +101,7 @@ class GameManager{
         let gl_current_move = BoardManager.getCurrentMove();
         let gl_squares = BoardManager.getSquares();
 
-        if(gl_castling_control[gl_current_move + "-long"] == false)
+        if(gl_castling_control[gl_current_move + "-" + CastlingType.Long] == false)
             return false;            
 
         // Find long rook square_id by player's color
@@ -128,7 +128,7 @@ class GameManager{
         let gl_current_move = BoardManager.getCurrentMove();
         let gl_squares = BoardManager.getSquares();
 
-        if(gl_castling_control[gl_current_move + "-short"] == false)
+        if(gl_castling_control[gl_current_move + "-" + CastlingType.Short] == false)
             return false;
 
         // Find short rook square_id by player's color
@@ -158,24 +158,24 @@ class GameManager{
 
         // If king is moved then disable short and long castling
         if(moved_piece_type == Type.King){
-            Global.setCastling(gl_current_move + "-short", false);
-            Global.setCastling(gl_current_move + "-long", false);
+            Global.setCastling(gl_current_move + "-" + CastlingType.Short, false);
+            Global.setCastling(gl_current_move + "-" + CastlingType.Long, false);
         }
         else if(moved_piece_type == Type.Rook){
             if(moved_piece_color == Color.White){
-                // If short rook(id=64) moved then disable white sort castling
+                // If short rook(id=64) moved then disable white short castling
                 if(gl_squares[64] == 0 || gl_squares[64].color != Color.White || gl_squares[64].type != Type.Rook) 
-                    Global.setCastling(Castling.WhiteSort, false);
+                    Global.setCastling(CastlingType.WhiteShort, false);
                 // If long rook(id=57) moved then disable white long castling
                 if(gl_squares[57] == 0 || gl_squares[57].color != Color.White || gl_squares[57].type != Type.Rook)
-                    Global.setCastling(Castling.WhiteLong, false);
+                    Global.setCastling(CastlingType.WhiteLong, false);
             }else{
                 // If short rook(id=8) moved then disable black short castling
                 if(gl_squares[8] == 0 || gl_squares[8].color != Color.Black || gl_squares[8].type != Type.Rook) 
-                    Global.setCastling(Castling.BlackSort, false);
+                    Global.setCastling(CastlingType.BlackShort, false);
                 // If long rook(id=1) moved then disable black long castling
                 if(gl_squares[1] == 0 || gl_squares[1].color != Color.Black || gl_squares[1].type != Type.Rook)
-                    Global.setCastling(Castling.BlackLong, false);
+                    Global.setCastling(CastlingType.BlackLong, false);
             }
         }
     }

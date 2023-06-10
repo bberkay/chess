@@ -7,7 +7,8 @@ class RouteEngine{
      * @returns {JSON}
      */
     static calcBishopPath(square_id, piece_sensivity = true) {
-        const path_engine = new PathEngine();
+        const path_engine = new PathEngine(); // singleton instance, all path engine in this class will be the same
+
         return {
             // get all squares of diagonal
             ...path_engine.calcPlayableDiagonalSquares({square_id: square_id, piece_sensivity: piece_sensivity})
@@ -22,7 +23,8 @@ class RouteEngine{
      * @returns {JSON}
      */
     static calcRookPath(square_id, piece_sensivity = true) {
-        const path_engine = new PathEngine();
+        const path_engine = new PathEngine(); // singleton instance, all path engine in this class will be the same
+
         return {
             // get all squares of column and row
             ...path_engine.calcPlayableColumnSquares({square_id: square_id, piece_sensivity: piece_sensivity}),
@@ -37,7 +39,8 @@ class RouteEngine{
      * @returns {JSON}
      */
     static calcQueenPath(square_id, piece_sensivity = true) {
-        const path_engine = new PathEngine();
+        const path_engine = new PathEngine(); // singleton instance, all path engine in this class will be the same
+
         return {
             // get all squares of column, row and diagonal(UNLIMITED POWEEEER!!!)
             ...path_engine.calcPlayableColumnSquares({square_id: square_id, piece_sensivity: piece_sensivity}),
@@ -52,17 +55,18 @@ class RouteEngine{
      * @returns {JSON}
      */
     static calcPawnPath(square_id) {
-        const path_engine = new PathEngine();
+        const path_engine = new PathEngine(); // singleton instance, all path engine in this class will be the same
+
         let limit = 0;
         let route = "";
         let row_of_pawn = path_engine.calcRowOfSquare(square_id);
 
-        if (Global.getCurrentMove() === "black") {
+        if (Global.getCurrentMove() === Color.Black) {
             limit = row_of_pawn === 7 ? 2 : 1;  // if black pawn is start position then 2 square limit else 1
-            route = ["top"]; // black goes top
-        } else if (Global.getCurrentMove() === "white") {
+            route = [Route.Top]; // black goes top
+        } else if (Global.getCurrentMove() === Color.White) {
             limit = row_of_pawn === 2 ? 2 : 1;
-            route = ["bottom"]; // white goes bottom
+            route = [Route.Bottom]; // white goes bottom
         }
 
         // get first [limit] square of [route] column
@@ -72,8 +76,7 @@ class RouteEngine{
         })[route];
         
         // Remove if squares has any piece
-        playable_squares = playable_squares.filter(square => { return gl_squares[square] == 0});
-
+        playable_squares = playable_squares.filter(square => { return Global.getSquare(square) == 0});
 
         // get first diagonal squares
         let diagonal_control = path_engine.calcPlayableDiagonalSquares({
@@ -82,11 +85,11 @@ class RouteEngine{
         });
 
         // is first diagonal squares has enemy piece then add playable squares
-        if (BoardManager.isSquareHasPiece(diagonal_control[route+"-left"][0], BoardManager.getEnemyColor()))
-            playable_squares.push(diagonal_control[route+"-left"][0]);
+        if (BoardManager.isSquareHasPiece(diagonal_control[route+"-"+Route.Left][0], BoardManager.getEnemyColor()))
+            playable_squares.push(diagonal_control[route+"-"+Route.Left][0]);
 
-        if (BoardManager.isSquareHasPiece(diagonal_control[route+"-right"][0], BoardManager.getEnemyColor()))
-            playable_squares.push(diagonal_control[route+"-right"][0]);
+        if (BoardManager.isSquareHasPiece(diagonal_control[route+"-"+Route.Right][0], BoardManager.getEnemyColor()))
+            playable_squares.push(diagonal_control[route+"-"+Route.Right][0]);
 
         return playable_squares;
     }
@@ -98,7 +101,8 @@ class RouteEngine{
      * @returns {Array<int>}
      */
     static calcKnightPath(square_id, piece_sensivity = true) {
-        const path_engine = new PathEngine();
+        const path_engine = new PathEngine(); // singleton instance, all path engine in this class will be the same
+
         // get 2 squares of column
         let column = JSONConverter.jsonPathToArrayPath(path_engine.calcPlayableColumnSquares({
             square_id: square_id,
@@ -158,7 +162,8 @@ class RouteEngine{
      * @returns {JSON}
      */
     static calcKingPath(square_id) {
-        const path_engine = new PathEngine();
+        const path_engine = new PathEngine(); // singleton instance, all path engine in this class will be the same
+
         return {
             // get first square of column, row and diagonal
             ...path_engine.calcPlayableColumnSquares({

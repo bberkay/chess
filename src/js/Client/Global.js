@@ -280,6 +280,16 @@ class Global{
     static addEnPassant(piece_id, en_passant_value){
         this.#gl_en_passant_control[piece_id] = en_passant_value;
     }
+
+    /**
+     * @static
+     * Set Checked Player
+     * @param {Color|null} color Color of player
+     * @returns {void}
+     */
+    static setCheckedPlayer(color=null){
+        this.#gl_checked_player = color;
+    }
 }
 
 /**
@@ -383,18 +393,20 @@ const Type = {
  * Castling Enum
  * @enum {string}
  */
-const Castling = {
+const CastlingType = {
     WhiteLong:"white-long",
-    WhiteSort:"white-sort",
+    WhiteShort:"white-short",
     BlackLong:"black-long",
-    BlackShort:"black-short"
+    BlackShort:"black-short",
+    Short:"short",
+    Long:"long"
 }
 
 /**
  * En Passant Enum
  * @enum {string}
  */
-const EnPassant = {
+const EnPassantStatus = {
     Ready:"ready",
     NotReady:"not-ready",
     Cant:"can't"
@@ -428,4 +440,15 @@ const ValidationType = {
     Type:Type,
     Castling:Castling,
     EnPassant:EnPassant
+}
+
+/**
+ * Effect Enum
+ * @enum {string}
+ */
+const Effect = {
+    Checked:"checked-effect", 
+    Killable:"killable-effect", 
+    Playable:"playable-effect",
+    Selected:"selected-effect"
 }

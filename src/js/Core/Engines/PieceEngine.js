@@ -85,7 +85,7 @@ class PieceEngine{
      */
     #getPlayableSquaresOfPawn(square_id) {
         // En Passant
-        
+        // FIXME: En passant status testleri bitirildikten sonra aksiyon yapılacak.
 
         return this.#filterPlayableSquares(square_id, RouteEngine.calcPawnPath(square_id));
     }
@@ -122,29 +122,29 @@ class PieceEngine{
             control = routes[i][routes[i].length - 1];
 
             // if player's king in guardable area
-            if (i == "top-right" && control - 7 == king || i == "bottom-left" && control + 7 == king) {
+            if (i == Route.TopRight && control - 7 == king || i == Route.BottomLeft && control + 7 == king) {
                 // king in top-right or bottom-left then playable paths are top-right and bottom-left
-                king_guard_route = ["top-right", "bottom-left"];
+                king_guard_route = [Route.TopRight, Route.BottomLeft];
                 // dangerous enemies are queen and bishop
-                enemy_types = ["queen", "bishop"];
+                enemy_types = [Type.Queen, Type.Bishop];
             }
-            else if (i == "top-left" && control - 9 == king || i == "bottom-right" && control + 9 == king) {
+            else if (i == Route.TopLeft && control - 9 == king || i == Route.BottomRight && control + 9 == king) {
                 // king in top-right or bottom-left then playable paths are top-left and bottom-right
-                king_guard_route = ["top-left", "bottom-right"];
+                king_guard_route = [Route.TopLeft, Route.BottomRight];
                 // dangerous enemies are queen and bishop
-                enemy_types = ["queen", "bishop"];
+                enemy_types = [Type.Queen, Type.Bishop];
             }
-            else if (i == "top" && control - 8 == king || i == "bottom" && control + 8 == king) {
+            else if (i == Route.Top && control - 8 == king || i == Route.Bottom && control + 8 == king) {
                 // king in top or bottom then playable paths are top and bottom
-                king_guard_route = ["top", "bottom"];
+                king_guard_route = [Route.Top, Route.Bottom];
                 // dangerous enemies rook and queen
-                enemy_types = ["rook", "queen"];
+                enemy_types = [Type.Rook, Type.Queen];
             }
-            else if (i == "left" && control - 1 == king || i == "right" && control + 1 == king) {
+            else if (i == Route.Left && control - 1 == king || i == Route.Right && control + 1 == king) {
                 // king in left or right then playable paths are left and right
-                king_guard_route = ["left", "right"];
+                king_guard_route = [Route.Left, Route.Right];
                 // dangerous enemies rook and queen
-                enemy_types = ["rook", "queen"];
+                enemy_types = [Type.Rook, Type.Queen];
             }
         }
 
@@ -179,17 +179,17 @@ class PieceEngine{
      */
     getPlayableSquaresOfPiece(piece_type, square_id){
         switch (piece_type) {
-            case "rook":
+            case Type.Rook:
                 return this.#getPlayableSquaresOfRook(square_id);
-            case "bishop":
+            case Type.Bishop:
                 return this.#getPlayableSquaresOfBishop(square_id);
-            case "pawn":
+            case Type.Pawn:
                 return this.#getPlayableSquaresOfPawn(square_id);
-            case "king":
+            case Type.King:
                 return this.#getPlayableSquaresOfKing(square_id);
-            case "queen":
+            case Type.Queen:
                 return this.#getPlayableSquaresOfQueen(square_id);
-            case "knight":
+            case Type.Knight:
                 return this.#getPlayableSquaresOfKnight(square_id);
             default:
                 break;

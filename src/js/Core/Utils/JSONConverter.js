@@ -20,6 +20,7 @@ class JSONConverter{
      * @static
      * Swap value to key
      * @param {JSON} json_object 
+     * @example input is {"top":[3,4,5], "bottom":[8,9,10]} and output is {3:"top", 4:"top", 5:"top", 8:"bottom", 9:"bottom", 10:"bottom"}
      * @returns {JSON}
      */
     static reverseJSON(json_object){

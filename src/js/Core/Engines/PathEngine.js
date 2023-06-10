@@ -1,5 +1,15 @@
 class PathEngine {
     /**
+     * Singleton Instance
+     */
+    constructor() {
+        if (!PathEngine.instance)
+            PathEngine.instance = this;
+        
+        return PathEngine.instance;
+    }
+    
+    /**
      * Calculate Column of Square
      * @param {int} square_id Square ID of the active piece
      * @returns {int}
