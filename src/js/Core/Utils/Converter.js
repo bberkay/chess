@@ -1,4 +1,4 @@
-class JSONConverter{
+class Converter{
     /**
      * @static 
      * Convert JSON Path to ArrayList Path
@@ -30,4 +30,24 @@ class JSONConverter{
         }
         return swapped_array;
     }
+
+
+    /**
+     * @static
+     * Convert square to square_id
+     * @param {string} square 
+     * @example a1 -> 57, a2 -> 49, h8 -> 8
+     * @returns {int} 
+     */
+    static convertSquareToSquareID(square){
+        let first_character_catalog = {'a':1, 'b':2, 'c':3, 'd':4, 'e':5, 'f':6, 'g':7, 'h':8};
+        let square_id = first_character_catalog[square.charAt(0)];
+        
+        for(let i = 8; i > square.charAt(1); i--){
+            square_id += 8;
+        }
+
+        return square_id;
+    }
+
 }

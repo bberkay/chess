@@ -1,4 +1,4 @@
-class Validator{
+class ParamValidator{
     /**
      * @static
      * Validate square

@@ -1,11 +1,15 @@
 class Chess{
+    #board; // Board
+    #playable_squares; // Playable squares of the clicked piece
+    #selected_piece; // Selected piece
+
     /**
      * @constructor
      */
     constructor() {
-        this.board = new Board();
-        this.playable_squares = [];
-        this.selected_piece = null;
+        this.#board = new Board();
+        this.#playable_squares = [];
+        this.#selected_piece = null;
 
         // Create squares
         for (let i = 1; i < 65; i++)
@@ -73,7 +77,8 @@ class Chess{
      * @param {int} square_id Square ID of the clicked square
      * @returns {void}
      */
-    defineMove(square_id) {
+    defineMove(square_id) { 
+        // Komple BoardHandler'a geçirilecek.
         let clicked_square = BoardManager.getPieceBySquareID(square_id);
         let is_castling_move = this.#isCastlingMove(clicked_square);
 
@@ -87,11 +92,11 @@ class Chess{
         // Move Piece, Control Castling
         else if(this.selected_piece && this.playable_squares.includes(square_id)){
             if(is_castling_move) // Control is castling move
-                this.#castling(square_id);
+                this.#castling(square_id); // FIXME: MovePiece metodunun içine alınacak.
             else{
                 this.#movePiece(square_id); // Move piece and control check then end turn
 
-                // If moved piece king or rook then change castling status
+                // If moved piece king or rook then change castling status, FIXME: MovePiece metodunun içine alınacak.
                 GameManager.changeCastlingStatus(this.selected_piece.type, this.selected_piece.color);
             }
 

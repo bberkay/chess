@@ -148,11 +148,21 @@ class Global{
     
     /**
      * @static
-     * Get En passant Status
+     * Get En passant Status of all pawns
      * @returns {JSON}
      */
-    static getEnPassant(){
+    static getEnPassantOfAllPawns(){
         return this.#gl_en_passant_control;
+    }
+
+    /**
+     * @static
+     * Get En passant Status of pawn
+     * @param {int} pawn_id
+     * @returns {EnPassantStatus}
+     */
+    static getEnPassantOfPawn(pawn_id){
+        return this.#gl_en_passant_control[pawn_id];
     }
 
     /**
@@ -428,7 +438,7 @@ const CastlingType = {
 const EnPassantStatus = {
     Ready:"ready",
     NotReady:"not-ready",
-    Cant:"can't"
+    Cant:"cant"
 }
 
 /**
@@ -470,4 +480,15 @@ const Effect = {
     Killable:"killable-effect", 
     Playable:"playable-effect",
     Selected:"selected-effect"
+}
+
+/**
+ * Menu Operation Enum
+ * @enum {string}
+ */
+const MenuOperation = {
+    StartNewGame:"startNewGame",
+    StartEmptyGame:"startEmptyGame",
+    DeletePiece:"delete",
+    CreatePiece:"create",
 }

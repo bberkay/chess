@@ -1,9 +1,19 @@
 class Board{
+    #chessboard; // Chessboard Element
+    #square_color; // Square Color
+    #board_numbers; // Board Numbers
+    #board_chars_count; // Board Characters Count
+    #board_chars; // Board Characters
+    
     /** 
      * Constructor
     */
     constructor() {
-        this.chessboard = document.getElementById("chessboard");
+        this.#chessboard = document.getElementById("chessboard");
+        this.#square_color = "white";
+        this.#board_numbers = 8;
+        this.#board_chars_count = 0;
+        this.#board_chars = "abcdefgh";
     }
 
     /**
@@ -11,7 +21,7 @@ class Board{
      * Setup Board
      * @returns {void}
      */
-    setupBoard(){
+    setup(){
         this.#createBoard();
 
         for(let i in Global.getSquares()){
@@ -28,11 +38,6 @@ class Board{
         this.clearBoard();
 
         // Create board
-        const board_chars = "abcdefgh";
-        let square_color = "white";
-        let board_numbers = 8;
-        let board_chars_count = 0;
-
         for (let i = 1; i <= 64; i++) {
             let square = document.createElement('div');
             square.classList.add('square');
@@ -40,19 +45,20 @@ class Board{
             square.setAttribute("onclick", "DOMHandler.clickSquare(this)");
 
             if (i % 8 == 0) { // Create Board Numbers
-                square.innerHTML += "<span class = 'number'>" + board_numbers + "</span>";
-                board_numbers--;
+                square.innerHTML += "<span class = 'number'>" + this.#board_numbers + "</span>";
+                this.#board_numbers--;
             }
 
             if (i > 56 && i < 65) { // Create Board Characters
-                square.innerHTML += "<span class = 'chars'>" + board_chars.charAt(board_chars_count) + "</span>";
-                board_chars_count++;
+                square.innerHTML += "<span class = 'chars'>" + board_chars.charAt(this.#board_chars_count) + "</span>";
+                this.#board_chars_count++;
             }
 
             // Set Squares Color
             if (i % 8 != 1)
-                square_color = square_color == "black" ? "white" : "black";
+                this.#square_color = this.#square_color == Type.Black ? Type.White : Type.Black;
                 
+            // Add square color
             square.classList.add("square-" + square_color);
 
             this.chessboard.appendChild(square);
@@ -117,11 +123,11 @@ class Board{
     }
     
     /**
-     * Clear Square
+     * Remove Piece on the Board
      * @param {int} square_id 
      * @returns {void}
      */
-    clearSquare(square_id){
+    destroyPieceOnBoard(square_id){
         // Remove piece from his square
         let target_piece = document.getElementById(square_id);
         let piece_obj = target_piece.querySelector(".piece");
@@ -129,11 +135,26 @@ class Board{
             target_piece.removeChild(piece_obj);
 
         // Remove effects from square
-        this.clearEffectOfSquare(square_id);
+        this.removeEffectOfSquare(square_id);
     }
 
     /**
-     * Clear/Refresh Board(Remove effects)
+     * Remove All Pieces on the Board
+     * @returns {void}
+     */
+    destroyPiecesOnBoard(){
+        let pieces = document.getElementsByClassName("piece");
+        if(pieces.length == 0) // If there is no piece on the board then
+            return;
+
+        let l = pieces.length;
+        for (let i = 0; i < l; i++) {
+            pieces[i].remove();
+        }
+    }
+
+    /**
+     * Refresh Board(Remove effects)
      * @returns {void}
      */
     refreshBoard() {
@@ -146,28 +167,16 @@ class Board{
 
             // Clear effects on the squares
             //squares[i].classList.remove(Effects.checked);
-            this.clearEffectOfSquare(squares[i].id, [Effect.Playable, Effect.Killable]);
+            this.removeEffectOfSquare(squares[i].id, [Effect.Playable, Effect.Killable]);
         }
     }   
 
     /**
-     * Clear Chessboard, Remove All Pieces
-     * @returns {void}
-     */
-    clearBoard(){
-        let pieces = document.getElementsByClassName("piece");
-        let l = pieces.length;
-        for (let i = 0; i < l; i++) {
-            pieces[i].remove();
-        }
-    }
-
-    /**
      * Show Playable Squares of the Clicked Piece
-     * @param {Array<int>} playable_squares Element of the clicked square
+     * @param {Array<int>} playable_squares Playable squares of the clicked piece
      * @returns {void}
      */
-    showPlayableSquares(playable_squares) {
+    showPlayableSquaresOnBoard(playable_squares) {
         let l = playable_squares.length;
         let enemy_color = Global.getEnemyColor();
         for (let i = 0; i < l; i++) {
@@ -193,12 +202,12 @@ class Board{
     }
 
     /**
-     * Clear effect of the square
-     * @param {int} square_id Square to be effected
+     * Remove effect of the square
+     * @param {int} square_id Square of the effect to be removed
      * @param {(playable|killable|checked|null|Array<Effect>)} effect If null then remove all effects
      * @returns {void}
      */
-    clearEffectOfSquare(square_id, effect=null){
+    removeEffectOfSquare(square_id, effect=null){
         if(effect == null)
             document.getElementById(square_id.toString()).classList.remove(Effect.playable, Effect.killable, Effect.checked);
         else{

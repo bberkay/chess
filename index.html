@@ -55,7 +55,7 @@
                 </fieldset>  
                 <fieldset>
                     <legend>Square</legend>
-                    <input type="textbox" name="form-square-create" placeholder="A1-h8 or 1-64">
+                    <input type="textbox" name="form-square-create" placeholder="A1-h8 or 1-64" minlength=1 maxlength=2>
                     <br>
                     <small id="square-error" style="color:red;"></small>
                 </fieldset>  
@@ -64,7 +64,7 @@
             </fieldset>
             <fieldset>
                 <legend>Delete Piece</legend>
-                <input type="textbox" name="form-square-delete" placeholder="A1-h8 or 1-64">
+                <input type="textbox" name="form-square-delete" placeholder="A1-h8 or 1-64" minlength=1 maxlength=2>
                 <br>
                 <small id="square-error" style="color:red;"></small>
                 <br>
@@ -81,6 +81,7 @@
     </div>
     
 
+    <!-- Import Files -->
     <script src="src/js/Client/Global.js"></script>
     <script src="src/js/Core/Validation/Validation.js"></script>
     <script src="src/js/Core/Validation/Validator.js"></script>

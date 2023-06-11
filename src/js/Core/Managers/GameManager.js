@@ -91,6 +91,12 @@ class GameManager{
         return dangerous_squares.length !== 0;
     }
 
+    static isCheckMate(){
+    }
+
+    static isStaleMate(){
+    }
+
     /**
      * @static
      * Is current player can long castling?
@@ -147,7 +153,7 @@ class GameManager{
 
     /**
      * @static
-     * Control castling after move
+     * Control castling
      * @param {Type} moved_piece_type Type of moved piece
      * @param {Color} moved_piece_color Color of moved piece
      * @returns {void}
