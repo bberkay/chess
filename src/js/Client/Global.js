@@ -492,3 +492,14 @@ const MenuOperation = {
     DeletePiece:"delete",
     CreatePiece:"create",
 }
+
+/**
+ * Square Click Move Type Enum
+ * @enum {string}
+ */
+const MoveType = {
+    SelectPiece:"selectPiece",
+    KillEnemy:"killPiece",
+    MovePiece:"movePiece",
+    ClickSquare:"clickSquare",
+}

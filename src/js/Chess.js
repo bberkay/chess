@@ -7,13 +7,20 @@ class Chess{
      * @constructor
      */
     constructor() {
-        this.#board = new Board();
-        this.#playable_squares = [];
-        this.#selected_piece = null;
+        if (!Chess.instance){
+            this.#board = new Board();
+            this.#playable_squares = [];
+            this.#selected_piece = null;
+    
+            // Create squares
+            for (let i = 1; i < 65; i++)
+                Global.setSquare(i, 0);
 
-        // Create squares
-        for (let i = 1; i < 65; i++)
-            Global.setSquare(i, 0);
+            // Singleton instance
+            Chess.instance = this;    
+        }
+
+        return Chess.instance;
     }
 
     /**
@@ -72,12 +79,7 @@ class Chess{
         new Piece(piece_type, color, target_square_id);
     }
 
-    /**
-     * Define Player's Move
-     * @param {int} square_id Square ID of the clicked square
-     * @returns {void}
-     */
-    defineMove(square_id) { 
+    test(){
         // Komple BoardHandler'a geçirilecek.
         let clicked_square = BoardManager.getPieceBySquareID(square_id);
         let is_castling_move = this.#isCastlingMove(clicked_square);
@@ -112,7 +114,6 @@ class Chess{
             if(this.selected_piece)
                 this.#unselectPiece();
         }
-
     }
 
     /**
@@ -121,39 +122,34 @@ class Chess{
      * @param {Piece} piece
      * @returns {void}
     */
-    #selectPiece(piece){
-        // Unselect the previous selected piece.
-        if(this.selected_piece)
-            this.#unselectPiece();
-
-        // If player is checked then player only select king 
-        if(Global.getCheckedPlayer() === Global.getCurrentMove() && piece.type !== "king")
-            this.selected_piece = null;
-        else{
-            this.selected_piece = piece;
-            this.board.addEffectToSquare(this.selected_piece.getSquareID(), Effect.Selected);
+    selectPiece(piece){
+        // Clear selected_piece && player is checked then player only select king 
+        if(this.#selected_piece || Global.getCheckedPlayer() === Global.getCurrentMove() && piece.type !== "king"){
+            this.#clearSelect();
+            return;
         }
-        
-        // Show Playable Squares
-        if(this.selected_piece){
-            this.board.refreshBoard();
+        // Clear board
+        this.board.refreshBoard();
 
-            // Get playable squares of selected piece
-            this.playable_squares = this.selected_piece.getPlayableSquares();   
+        // Set selected piece
+        this.selected_piece = piece;
+        this.board.addEffectToSquare(this.selected_piece.getSquareID(), SquareEffect.Selected);
 
-            // Show playable squares of selected piece
-            this.board.showPlayableSquares(this.playable_squares);
-        }
-
+        // Get playable squares of selected piece
+        this.playable_squares = this.selected_piece.getPlayableSquares();   
+        /*
+            this.playable_squares = this.selected_piece.getPlayableSquares();
+            add playable squares to 
+        // Show playable squares of selected piece
+        this.board.showPlayableSquaresOnBoard(this.playable_squares);
     }
 
     /**
      * @private
-     * Unselect Piece
+     * Clear selected piece
      * @returns {void}
      */
-    #unselectPiece(){
-        this.board.clearEffectOfSquare(this.selected_piece);
+    #clearSelect(){
         this.board.refreshBoard();
         this.selected_piece = null;
         this.playable_squares = [];
@@ -162,22 +158,22 @@ class Chess{
     /**
      * @private
      * Move piece to playable square
-     * @param {int} square_id Square ID of the Target Square to move
+     * @param {int} target_square_id Square ID of the Target Square that piece will be moved
      * @param {Piece} piece Optional piece information(default selected piece)
      * @returns {void}
      */
-    #movePiece(square_id, _piece=null){
+    #movePiece(target_square_id, _piece=null){
         let piece = _piece == null ? this.selected_piece : _piece;
         
         // Move Piece To Target Position 
         const old_square_id = piece.getSquareID();
-        Global.setSquare(square_id, piece);
+        Global.setSquare(target_square_id, piece);
         Global.setSquare(old_square_id, 0);
 
         // Move Piece On Board
         this.board.clearEffectOfSquare(piece);
         this.board.refreshBoard();
-        this.board.movePieceOnBoard(square_id, piece);
+        this.board.movePieceOnBoard(target_square_id, piece);
     }
 
     /**
@@ -265,7 +261,7 @@ class Chess{
     #controlCheck(){
         // If moved piece is king then don't control check
         if(this.selected_piece.type === Type.King){
-            this.board.clearEffectOfSquare(this.selected_piece.getSquareID(), Effect.Checked);
+            this.board.clearEffectOfSquare(this.selected_piece.getSquareID(), SquareEffect.Checked);
             Global.setCheckedPlayer(null); // set checked status to null
             return;
         }
@@ -275,7 +271,7 @@ class Chess{
         // Set checked player and give effect the checked king
         if(GameManager.isCheck()){
             Global.setCheckedPlayer(player_king.color);
-            this.board.addEffectToSquare(player_king.getSquareID(), Effect.Checked);
+            this.board.addEffectToSquare(player_king.getSquareID(), SquareEffect.Checked);
         }
     }
 

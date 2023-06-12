@@ -42,7 +42,7 @@ class Board{
             let square = document.createElement('div');
             square.classList.add('square');
             square.setAttribute("id", i); // Square position
-            square.setAttribute("onclick", "DOMHandler.clickSquare(this)");
+            this.changeSquareClickMode(square, SquareClickMode.ClickSquare); // Change square click mode
 
             if (i % 8 == 0) { // Create Board Numbers
                 square.innerHTML += "<span class = 'number'>" + this.#board_numbers + "</span>";
@@ -81,6 +81,7 @@ class Board{
 
         // Find target square element
         const target_square = document.getElementById(square_id); 
+        this.changeSquareClickMode(target_square, SquareClickMode.RefreshBoard); // Change square click mode
 
         // Create piece element
         let piece_ele = document.createElement("div");
@@ -154,10 +155,11 @@ class Board{
     }
 
     /**
+     * @static
      * Refresh Board(Remove effects)
      * @returns {void}
      */
-    refreshBoard() {
+    static refreshBoard() {
         let squares = document.querySelectorAll(".square");
         let l = squares.length;
         for (let i = 0; i < l; i++) {
@@ -167,7 +169,7 @@ class Board{
 
             // Clear effects on the squares
             //squares[i].classList.remove(Effects.checked);
-            this.removeEffectOfSquare(squares[i].id, [Effect.Playable, Effect.Killable]);
+            this.removeEffectOfSquare(squares[i].id, [SquareEffect.Playable, SquareEffect.Killable]);
         }
     }   
 
@@ -180,17 +182,21 @@ class Board{
         let l = playable_squares.length;
         let enemy_color = Global.getEnemyColor();
         for (let i = 0; i < l; i++) {
-            if (BoardManager.isSquareHasPiece(playable_squares[i], enemy_color))
-                this.addEffectToSquare(playable_squares[i], Effect.killable)
-            else
-                this.addEffectToSquare(playable_squares[i], Effect.playable)
+            if (BoardManager.isSquareHasPiece(playable_squares[i], enemy_color)){
+                this.addEffectToSquare(playable_squares[i], SquareEffect.Killable)
+                this.changeSquareClickMode(playable_squares[i], SquareClickMode.KillEnemy)
+            }
+            else{
+                this.addEffectToSquare(playable_squares[i], SquareEffect.Playable)
+                this.changeSquareClickMode(playable_squares[i], SquareClickMode.MovePiece)
+            }
         }
     }
 
     /**
      * Add effect to the square
      * @param {int} square_id Square to be effected
-     * @param {(playable|killable|checked)} effect
+     * @param {SquareEffect} effect
      * @returns {void}
      */
     addEffectToSquare(square_id, effect){
@@ -204,12 +210,12 @@ class Board{
     /**
      * Remove effect of the square
      * @param {int} square_id Square of the effect to be removed
-     * @param {(playable|killable|checked|null|Array<Effect>)} effect If null then remove all effects
+     * @param {(SquareEffect|null|Array<SquareEffect>)} effect If null then remove all effects
      * @returns {void}
      */
     removeEffectOfSquare(square_id, effect=null){
         if(effect == null)
-            document.getElementById(square_id.toString()).classList.remove(Effect.playable, Effect.killable, Effect.checked);
+            document.getElementById(square_id.toString()).classList.remove(SquareEffect.playable, SquareEffect.killable, SquareEffect.checked);
         else{
             if(Array.isArray(effect)){
                 let l = effect.length;
@@ -220,5 +226,17 @@ class Board{
                 document.getElementById(square_id.toString()).classList.remove(effect);
             }
         }
+    }
+
+    /**
+     * Change Square Mode/Function
+     * @param {(int|Element)} square_id_or_element Square ID or Element of the square to be changed
+     * @param {SquareClickMode} mode Mode 
+     */
+    changeSquareClickMode(square_id_or_element, mode){
+        if(typeof square_id_or_element == "number")
+            document.getElementById(square_id.toString()).setAttribute("onclick", `BoardHandler.clickSquare(this, '${mode}')`);
+        else
+            square_id_or_element.setAttribute("onclick", `BoardHandler.clickSquare(this, '${mode}')`);
     }
 }
