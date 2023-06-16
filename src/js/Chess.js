@@ -128,6 +128,7 @@ class Chess{
             this.#clearSelect();
             return;
         }
+        
         // Clear board
         this.board.refreshBoard();
 
@@ -137,11 +138,14 @@ class Chess{
 
         // Get playable squares of selected piece
         this.playable_squares = this.selected_piece.getPlayableSquares();   
-        /*
-            this.playable_squares = this.selected_piece.getPlayableSquares();
-            add playable squares to 
+        
+        // Add playable squares to cache
+        Cache.add(selected_piece.id, this.playable_squares);
+
         // Show playable squares of selected piece
         this.board.showPlayableSquaresOnBoard(this.playable_squares);
+
+        // NOTE: En son buradayız, cache yapıldı ve test edilecek.
     }
 
     /**
