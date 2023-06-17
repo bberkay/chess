@@ -8,7 +8,7 @@ class Piece {
      * @param {int} square 
      */
     constructor(type, color, square) {
-        this.id = this.#piece_engine.createPieceID();
+        this.id = this.#piece_engine.createPieceId();
         this.type = type;
         this.color = color;
 
@@ -22,7 +22,7 @@ class Piece {
      * @returns {Array<int>}
      */
     getPlayableSquares() {
-        return this.#piece_engine.getPlayableSquaresOfPiece(this.type, this.getSquareID());
+        return this.#piece_engine.getPlayableSquaresOfPiece(this.type, this.getSquareId());
     }
 
     
@@ -31,7 +31,7 @@ class Piece {
      * Get Square ID of Piece
      * @returns {int} 
      */
-    getSquareID() {
+    getSquareId() {
         for (let k in Global.getSquares()) {
             if (Global.getSquare(parseInt(k)) === this)
                 return parseInt(k);

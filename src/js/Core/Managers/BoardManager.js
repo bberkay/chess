@@ -23,7 +23,7 @@ class BoardManager {
      * @param {int} square_id 
      * @returns {(Piece|boolean)} 
      */
-    static getPieceBySquareID(square_id) {
+    static getPieceBySquareId(square_id) {
         let piece = Global.getSquare(square_id);
         return piece !== 0 ? piece : false;
     }
@@ -49,7 +49,7 @@ class BoardManager {
      * @returns {boolean}
      */
     static isSquareHasPiece(square_id, specific_color = null, specific_pieces = [Type.Queen, Type.King, Type.Pawn, Type.Bishop, Type.Rook, Type.Knight]) {
-        let piece = this.getPieceBySquareID(square_id);
+        let piece = BoardManager.getPieceBySquareId(square_id);
         if (piece)
             return !(specific_color && piece.color !== specific_color || !specific_pieces.includes(piece.type));
         return false;

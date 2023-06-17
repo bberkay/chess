@@ -3,10 +3,10 @@ class PieceEngine{
      * Create ID for piece(between 1000 and 9999)
      * @returns {int}
      */
-    createPieceID() {
+    createPieceId() {
         let id = Math.floor(Math.random() * 10000) + 1000;
         if (Global.getIdList().includes(id))
-            this.createPieceID();
+            this.createPieceId();
         else
             Global.addIdList(id);
 
@@ -108,7 +108,7 @@ class PieceEngine{
      * @returns {Array<int>}
      */
     #filterPlayableSquares(square_id, playable_squares = null) {
-        let king = BoardManager.getPlayerKingSquareID();
+        let king = Cache.get(Global.getCurrentMove() + "-king");
         if(!king)
             return playable_squares;
             

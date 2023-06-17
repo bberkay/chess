@@ -18,10 +18,6 @@ class Global{
     static #gl_current_move = "white";
     static #gl_checked_player = null;
     static #gl_move_count = 0;
-    static #gl_killed_black_pieces = [];
-    static #gl_killed_white_pieces = [];
-    static #gl_white_king = null;
-    static #gl_black_king = null;
     static #gl_id_list = []; // Pieces ID
 
     /**
@@ -38,6 +34,24 @@ class Global{
      * Piece ID's of pawn that can en passant
      */
     static #gl_en_passant_control = {}
+
+    /**
+     * @static
+     */
+    static #gl_turn_control = {
+        "is_game_created":false,
+        "is_any_piece_created":false,
+        "is_white_king_created":false,
+        "is_black_king_created":false,
+        "is_player_checked":false,
+        "is_player_king_selected":false,
+        "is_piece_moved":false,
+        "is_enemy_checked":false,
+        "is_checkmate":false,
+        "is_stalemate":false,
+        "is_game_finished":false,
+        "is_turn_changed":false,
+    }
 
     /**
      * @static
@@ -88,48 +102,6 @@ class Global{
 
     /**
      * @static
-     * Get Killed Black Pieces
-     * @returns {Array<Piece>}
-     */
-    static getKilledBlackPieces(){
-        return this.#gl_killed_black_pieces;
-    }
-
-    /**
-     * @static 
-     * Get Killed White Pieces
-     * @returns {Array<Piece>}
-     */
-    static getKilledWhitePieces(){
-        return this.#gl_killed_white_pieces;
-    }
-
-    /**
-     * @static
-     * Get White King
-     * @returns {Piece}
-     */
-    static getWhiteKing(){
-        if(this.#gl_white_king == null)
-            this.setWhiteKing();
-
-        return this.#gl_white_king;
-    }
-
-    /**
-     * @static
-     * Set White King
-     * @returns {Piece}
-     */
-    static getBlackKing(){
-        if(this.#gl_black_king == null)
-            this.setBlackKing();
-
-        return this.#gl_black_king;
-    }
-
-    /**
-     * @static
      * Get ID List of Pieces
      * @returns {Array<int>}
      */
@@ -176,20 +148,11 @@ class Global{
 
     /**
      * @static
-     * Get Enemy King
-     * @returns {Piece}
+     * Get Turn Control
+     * @returns {JSON}
      */
-    static getEnemyKing(){
-        return this.getCurrentMove() == Color.White ? this.getBlackKing() : this.getWhiteKing();
-    }
-
-    /**
-     * @static
-     * Get Player King
-     * @returns {Piece}
-     */
-    static getPlayerKing(){
-        return this.getCurrentMove() == Color.White ? this.getWhiteKing() : this.getBlackKing();
+    static getTurnControl(){
+        return this.#gl_turn_control;
     }
 
     /**
@@ -219,63 +182,6 @@ class Global{
      */
     static increaseMoveCount(){
         this.#gl_move_count += 1;
-    }
-
-    /**
-     * @static
-     * Add Killed Black Piece
-     * @param {Piece} piece Killed black piece
-     * @returns {void}
-     */
-    static addKilledBlackPiece(piece){
-        this.#gl_killed_black_pieces.push(piece);
-    }
-
-    /**
-     * @static
-     * Add Killed White Piece
-     * @param {Piece} piece Killed white piece
-     * @returns {void}
-     */
-    static addKilledWhitePiece(piece){            
-        this.#gl_killed_white_pieces.push(piece);
-    }
-
-    /**
-     * @static
-     * Set White King
-     * @returns {void}
-     */
-    static setWhiteKing(){
-        let squares = this.getSquares();
-        
-        for(let square in squares){
-            // Get piece
-            let piece = squares[square];            
-            // Control piece is king and color is white
-            if(piece.type == Type.King && piece.color == Color.White){
-                this.#gl_white_king = piece;
-                break;
-            }
-        }
-    }
-
-    /**
-     * @static
-     * Set White King
-     * @returns {void}
-     */
-    static setBlackKing(){
-        let squares = this.getSquares();
-        for(let square in squares){
-            // Get piece
-            let piece = squares[square];            
-            // Control piece is king and color is black
-            if(piece.type == Type.King && piece.color == Color.Black){
-                this.#gl_white_king = piece;
-                break;
-            }
-        }
     }
 
     /**
@@ -318,6 +224,17 @@ class Global{
      */
     static setCheckedPlayer(color=null){
         this.#gl_checked_player = color;
+    }
+
+    /**
+     * @static
+     * Set Turn Control
+     * @param {TurnControl} key Key of control
+     * @param {boolean} value Value of control
+     * @returns {void}
+     */
+    static setTurnControl(key, value){
+        this.#gl_turn_control[key] = value;
     }
 }
 
@@ -472,10 +389,10 @@ const ValidationType = {
 }
 
 /**
- * Effect Enum
+ * SquareEffect Enum
  * @enum {string}
  */
-const Effect = {
+const SquareEffect = {
     Checked:"checked-effect", 
     Killable:"killable-effect", 
     Playable:"playable-effect",
@@ -497,9 +414,28 @@ const MenuOperation = {
  * Square Click Move Type Enum
  * @enum {string}
  */
-const MoveType = {
+const SquareClickMode = {
     SelectPiece:"selectPiece",
     KillEnemy:"killPiece",
     MovePiece:"movePiece",
     ClickSquare:"clickSquare",
+}
+
+/**
+ * Turn Control Enum
+ * @enum {string}
+ */
+const TurnControl = {
+    IsGameCreated:"is_game_created",
+    IsAnyPieceCreated:"is_any_piece_created",
+    IsWhiteKingCreated:"is_white_king_created",
+    IsBlackKingCreated:"is_black_king_created",
+    IsPlayerChecked:"is_player_checked",
+    IsPlayerKingSelected:"is_player_king_selected",
+    IsPieceMoved:"is_piece_moved",
+    IsEnemyChecked:"is_enemy_checked",
+    IsCheckmate:"is_checkmate",
+    IsStalemate:"is_stalemate",
+    IsGameFinished:"is_game_finished",
+    IsTurnChanged:"is_turn_changed",
 }

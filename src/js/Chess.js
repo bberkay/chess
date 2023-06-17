@@ -28,6 +28,9 @@ class Chess{
     * @returns {void}
     */
     startStandartGame() {
+        // Create Board
+        this.#board.createBoard();
+
         // Create Pieces
         for (let i = 1; i <= 32; i++) {
             let square_id = i <= 16 ? i : i + 32; // Position of the piece on the board
@@ -45,9 +48,6 @@ class Chess{
             else if (square_id >= 9 && square_id < 17 || square_id > 48 && square_id < 57) // Pawn 
                 this.createPiece(Type.Pawn, square_id < 48 ? Color.White : Color.Black, square_id);
         }
-
-        // Visualize Pieces and the board
-        this.board.setupBoard();
     }
 
     /**
@@ -57,15 +57,15 @@ class Chess{
     * @returns {void}
     */
     startCustomGame(pieces = null) {
+        // Create Board
+        this.board.createBoard();
+
         // Create Pieces
         if(pieces){ 
             pieces.forEach(item => {
                 this.createPiece(item["piece"], item["color"],  item["square"]);
             });
         }
-
-        // Visualize Pieces(if 'pieces' is null then board will be empty) and the board
-        this.board.setupBoard();
     }
 
     /**
@@ -76,10 +76,16 @@ class Chess{
      * @returns {void}
      */
     createPiece(piece_type, color, target_square_id){
-        new Piece(piece_type, color, target_square_id);
+        // NOTE: Bir den fazla şah olamaz. Validate edilecek.
+
+        let piece = new Piece(piece_type, color, target_square_id);
+        if(piece_type == Type.King)
+            Cache.set(color + "-king", piece);
+
+        this.#board.createPieceOnBoard(piece, target_square_id);
     }
 
-    test(){
+    /*test(){
         // Komple BoardHandler'a geçirilecek.
         let clicked_square = BoardManager.getPieceBySquareID(square_id);
         let is_castling_move = this.#isCastlingMove(clicked_square);
@@ -114,7 +120,7 @@ class Chess{
             if(this.selected_piece)
                 this.#unselectPiece();
         }
-    }
+    }*/
 
     /**
      * @private
@@ -124,39 +130,40 @@ class Chess{
     */
     selectPiece(piece){
         // Clear selected_piece && player is checked then player only select king 
-        if(this.#selected_piece || Global.getCheckedPlayer() === Global.getCurrentMove() && piece.type !== "king"){
-            this.#clearSelect();
+        if(Global.getCheckedPlayer() === Global.getCurrentMove() && piece.type !== "king")
             return;
-        }
         
         // Clear board
-        this.board.refreshBoard();
+        this.#board.refreshBoard();
 
         // Set selected piece
-        this.selected_piece = piece;
-        this.board.addEffectToSquare(this.selected_piece.getSquareID(), SquareEffect.Selected);
+        this.#selected_piece = piece;
+        this.#board.addEffectToSquare(this.#selected_piece.getSquareId(), SquareEffect.Selected);
 
-        // Get playable squares of selected piece
-        this.playable_squares = this.selected_piece.getPlayableSquares();   
+        // Get playable squares of selected piece 
+        if(!Cache.get(this.#selected_piece.id)){ // If playable squares not in cache
+            this.#playable_squares = this.#selected_piece.getPlayableSquares();   
+
+            // Add playable squares to cache
+            Cache.add(this.#selected_piece.id, this.#playable_squares);
+        }
+        else{ // If playable squares in cache
+            this.#playable_squares = Cache.get(this.#selected_piece.id)[0];
+        } 
         
-        // Add playable squares to cache
-        Cache.add(selected_piece.id, this.playable_squares);
-
         // Show playable squares of selected piece
-        this.board.showPlayableSquaresOnBoard(this.playable_squares);
-
-        // NOTE: En son buradayız, cache yapıldı ve test edilecek.
+        this.#board.showPlayableSquaresOnBoard(this.#playable_squares);
     }
 
     /**
-     * @private
+     * @public
      * Clear selected piece
      * @returns {void}
      */
-    #clearSelect(){
-        this.board.refreshBoard();
-        this.selected_piece = null;
-        this.playable_squares = [];
+    clearSelect(){
+        this.#board.refreshBoard();
+        this.#selected_piece = null;
+        this.#playable_squares = [];
     }
 
     /**
@@ -166,18 +173,17 @@ class Chess{
      * @param {Piece} piece Optional piece information(default selected piece)
      * @returns {void}
      */
-    #movePiece(target_square_id, _piece=null){
-        let piece = _piece == null ? this.selected_piece : _piece;
+    movePiece(target_square_id, _piece=null){
+        let piece = _piece == null ? this.#selected_piece : _piece;
         
-        // Move Piece To Target Position 
-        const old_square_id = piece.getSquareID();
-        Global.setSquare(target_square_id, piece);
-        Global.setSquare(old_square_id, 0);
-
         // Move Piece On Board
-        this.board.clearEffectOfSquare(piece);
-        this.board.refreshBoard();
-        this.board.movePieceOnBoard(target_square_id, piece);
+        this.#board.refreshBoard();
+        this.#board.movePieceOnBoard(piece, target_square_id);
+
+        // Move Piece To Target Position 
+        const old_square_id = piece.getSquareId();
+        Global.setSquare(target_square_id, piece);
+        Global.setSquare(old_square_id, 0);        
     }
 
     /**
@@ -211,26 +217,26 @@ class Chess{
             // If castling type short and square id is 64 then for white, else for black(square id is 8)
             if(square_id == 64){
                 // White King goes to 59(c1) and white short rook(h1, 64) goes to 62(f1)
-                this.#movePiece(63, player_king);
-                this.#movePiece(62, BoardManager.getPieceBySquareID(64));
+                this.movePiece(63, player_king);
+                this.movePiece(62, BoardManager.getPieceBySquareID(64));
                 Global.setCastling(CastlingType.WhiteShort, false);
             }else if(square_id == 8){ 
                 // White King goes to 59(c1) and black short rook(h8, 8) goes to 6(f8)
-                this.#movePiece(7, player_king);
-                this.#movePiece(6, BoardManager.getPieceBySquareID(8));
+                this.movePiece(7, player_king);
+                this.movePiece(6, BoardManager.getPieceBySquareID(8));
                 Global.setCastling(CastlingType.BlackShort, false);
             }
         }else{
             // If castling type long and square id is 57 then for white, else for black(square id is 1)
             if(square_id == 57){ 
                 // White King goes to 59(c1) and white long rook(a1, 57) goes to 60(d1)
-                this.#movePiece(59, player_king);
-                this.#movePiece(60, BoardManager.getPieceBySquareID(57));
+                this.movePiece(59, player_king);
+                this.movePiece(60, BoardManager.getPieceBySquareID(57));
                 Global.setCastling(CastlingType.WhiteLong, false);
             }else if(square_id == 1){
                 // Black King goes to 3(c8) and black long rook(a8, 1) goes to 4(d8)
-                this.#movePiece(3, player_king);
-                this.#movePiece(4, BoardManager.getPieceBySquareID(1));
+                this.movePiece(3, player_king);
+                this.movePiece(4, BoardManager.getPieceBySquareID(1));
                 Global.setCastling(CastlingType.BlackLong, false);
             }
         }

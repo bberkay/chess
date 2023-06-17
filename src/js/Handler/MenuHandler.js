@@ -36,10 +36,10 @@ class MenuHandler{
         
         let squares = document.getElementsByClassName("square");
         for (let square of squares) {
-            let identity = Global.getSquare(parseInt(item.id)); // find real piece in global squares
+            let identity = Global.getSquare(parseInt(square.id)); // find real piece in global squares
             if(identity["id"]){ // if square has piece
                 if(!this.is_piece_id_list_shown){ // Add square to real piece info
-                    item.innerHTML +=  "<div class = 'piece-info-container'><div class = 'piece-info'>" + identity["id"] + "</div><div class = 'piece-info'>" + identity["type"] + "</div><div class = 'piece-info'>" + identity["color"] + "</div></div>";     
+                    square.innerHTML +=  "<div class = 'piece-info-container'><div class = 'piece-info'>" + identity["id"] + "</div><div class = 'piece-info'>" + identity["type"] + "</div><div class = 'piece-info'>" + identity["color"] + "</div></div>";     
                 }
                 else{ // remove real piece info from square
                     let info = document.getElementsByClassName("piece-info-container");

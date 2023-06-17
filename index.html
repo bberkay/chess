@@ -14,14 +14,14 @@
         <div class = "menu">
             <fieldset class = "menu-buttons">
                 <legend>Games</legend>
-                <input type="button" value="Start New Game" onclick="DOMHandler.startNewGame()">
-                <input type="button" value="Start Empty Game" onclick="DOMHandler.startEmptyGame()">
+                <input type="button" value="Start New Game" onclick="MenuHandler.startNewGame()">
+                <input type="button" value="Start Empty Game" onclick="MenuHandler.startEmptyGame()">
             </fieldset>
             <fieldset class = "menu-buttons">
                 <legend>Info</legend>
-                <input type="button" value="Show Square ID" onclick="DOMHandler.toggleSquareID()">
-                <input type="button" value="Show Piece ID" onclick="DOMHandler.togglePieceID()">
-                <input type="button" value="Show En Passant Status" onclick="DOMHandler.toggleEnPassantStatus()">
+                <input type="button" value="Show Square ID" onclick="MenuHandler.toggleSquareIdList()">
+                <input type="button" value="Show Piece ID" onclick="MenuHandler.togglePieceIdList()">
+                <input type="button" value="Show En Passant Status" onclick="MenuHandler.toggleEnPassantStatus()">
             </fieldset>
             <fieldset>
                 <legend>Create Piece</legend>
@@ -83,17 +83,20 @@
 
     <!-- Import Files -->
     <script src="src/js/Client/Global.js"></script>
-    <script src="src/js/Core/Validation/Validation.js"></script>
-    <script src="src/js/Core/Validation/Validator.js"></script>
+    <script src="src/js/Client/Cache.js"></script>
+    <script src="src/js/Validators/DomValidator.js"></script>
+    <script src="src/js/Validators/ParamValidator.js"></script>
     <script src="src/js/Core/Managers/BoardManager.js"></script>
-    <script src="src/js/Core/Utils/JSONConverter.js"></script>
+    <script src="src/js/Core/Managers/GameManager.js"></script>
+    <script src="src/js/Core/Utils/Converter.js"></script>
     <script src="src/js/Core/Engines/PathEngine.js"></script>
     <script src="src/js/Core/Engines/RouteEngine.js"></script>
     <script src="src/js/Core/Engines/PieceEngine.js"></script>
-    <script src="src/js/Core/Managers/GameManager.js"></script>
-    <script src="src/js/Handler/DOMHandler.js"></script>
+    <script src="src/js/Handler/BoardHandler.js"></script>
+    <script src="src/js/Handler/MenuHandler.js"></script>
+    <script src="src/js/Models/Validation.js"></script>
     <script src="src/js/Models/Piece.js"></script>
-    <script src="src/js/Board/Board.js"></script>
+    <script src="src/js/Board.js"></script>
     <script src="src/js/Chess.js"></script>
     <script>
         const chess = new Chess();

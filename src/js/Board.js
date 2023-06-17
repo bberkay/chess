@@ -1,41 +1,26 @@
 class Board{
-    #chessboard; // Chessboard Element
-    #square_color; // Square Color
-    #board_numbers; // Board Numbers
-    #board_chars_count; // Board Characters Count
-    #board_chars; // Board Characters
-    
-    /** 
-     * Constructor
-    */
-    constructor() {
-        this.#chessboard = document.getElementById("chessboard");
-        this.#square_color = "white";
-        this.#board_numbers = 8;
-        this.#board_chars_count = 0;
-        this.#board_chars = "abcdefgh";
-    }
-
     /**
-     * @public
-     * Setup Board
-     * @returns {void}
+     * Singleton Instance
      */
-    setup(){
-        this.#createBoard();
-
-        for(let i in Global.getSquares()){
-            this.createPieceOnBoard(Global.getSquare(parseInt(i)), parseInt(i));
+    constructor(){
+        if (!Board.instance){
+            // Singleton instance
+            Board.instance = this;    
         }
-    }
 
+        return Board.instance;
+    }
+    
     /**
      * Create Chessboard
      * @returns {void}
      */
-    #createBoard() {
-        // First clear board
-        this.clearBoard();
+    createBoard() {
+        let chessboard = document.getElementById("chessboard"); // Chessboard Element
+        let square_color = Color.White; // Square Color
+        let board_numbers = 8; // Board Numbers
+        let board_chars_count = 0; // Board Characters Count
+        let board_chars = "abcdefgh"; // Board Characters
 
         // Create board
         for (let i = 1; i <= 64; i++) {
@@ -45,23 +30,23 @@ class Board{
             this.changeSquareClickMode(square, SquareClickMode.ClickSquare); // Change square click mode
 
             if (i % 8 == 0) { // Create Board Numbers
-                square.innerHTML += "<span class = 'number'>" + this.#board_numbers + "</span>";
-                this.#board_numbers--;
+                square.innerHTML += "<span class = 'number'>" + board_numbers + "</span>";
+                board_numbers--;
             }
 
             if (i > 56 && i < 65) { // Create Board Characters
-                square.innerHTML += "<span class = 'chars'>" + board_chars.charAt(this.#board_chars_count) + "</span>";
-                this.#board_chars_count++;
+                square.innerHTML += "<span class = 'chars'>" + board_chars.charAt(board_chars_count) + "</span>";
+                board_chars_count++;
             }
 
             // Set Squares Color
             if (i % 8 != 1)
-                this.#square_color = this.#square_color == Type.Black ? Type.White : Type.Black;
+                square_color = square_color == Color.Black ? Color.White : Color.Black;
                 
             // Add square color
             square.classList.add("square-" + square_color);
 
-            this.chessboard.appendChild(square);
+            chessboard.appendChild(square);
         }
     }
     
@@ -77,11 +62,11 @@ class Board{
             square_id = piece.getSquareID();
         
         // First clear square
-        this.clearSquare(square_id); 
+        this.destroyPieceOnBoard(square_id); 
 
-        // Find target square element
+        // Find target square element and change square to select piece mode
         const target_square = document.getElementById(square_id); 
-        this.changeSquareClickMode(target_square, SquareClickMode.RefreshBoard); // Change square click mode
+        this.changeSquareClickMode(target_square, SquareClickMode.SelectPiece); // Change square click mode
 
         // Create piece element
         let piece_ele = document.createElement("div");
@@ -102,20 +87,22 @@ class Board{
     */
     async movePieceOnBoard(piece, target_square) {
         // Remove piece from his square
-        let piece_id = document.getElementById(square_id);
+        let piece_id = document.getElementById(piece.getSquareId());
         let piece_obj = piece_id.querySelector(".piece");
         if(piece_obj)
             piece_id.removeChild(piece_obj);
 
-        // Remove enemy from target square
+        // Remove enemy from target square and change square to click square mode
         let target_piece = document.getElementById(target_square);
+        this.changeSquareClickMode(target_piece, SquareClickMode.ClickSquare); // Change square click mode
         piece_obj = target_piece.querySelector(".piece");
         if (piece_obj)
             target_piece.removeChild(piece_obj);
 
         await new Promise(r => setTimeout(r, 75));
 
-        // Move piece to target square
+        // Move piece to target square and change square to select piece mode
+        this.changeSquareClickMode(target_piece, SquareClickMode.SelectPiece); // Change square click mode
         let piece_element = document.createElement("div");
         piece_element.setAttribute("data-color", piece.color);
         piece_element.setAttribute("data-piece", piece.type);
@@ -155,11 +142,10 @@ class Board{
     }
 
     /**
-     * @static
      * Refresh Board(Remove effects)
      * @returns {void}
      */
-    static refreshBoard() {
+    refreshBoard() {
         let squares = document.querySelectorAll(".square");
         let l = squares.length;
         for (let i = 0; i < l; i++) {
@@ -168,8 +154,9 @@ class Board{
                 squares[i].id = i + 1;
 
             // Clear effects on the squares
-            //squares[i].classList.remove(Effects.checked);
-            this.removeEffectOfSquare(squares[i].id, [SquareEffect.Playable, SquareEffect.Killable]);
+            this.removeEffectOfSquare(squares[i].id, [SquareEffect.Playable, SquareEffect.Killable, SquareEffect.Selected]);
+            if(squares[i].getAttribute("onclick").includes("movePiece")) // If square click mode is move piece then change it to click square
+                this.changeSquareClickMode(squares[i], SquareClickMode.ClickSquare); // Change square click mode
         }
     }   
 
@@ -182,13 +169,15 @@ class Board{
         let l = playable_squares.length;
         let enemy_color = Global.getEnemyColor();
         for (let i = 0; i < l; i++) {
+            // If square has enemy piece then add killable effect to square and change square to kill enemy mode
             if (BoardManager.isSquareHasPiece(playable_squares[i], enemy_color)){
                 this.addEffectToSquare(playable_squares[i], SquareEffect.Killable)
-                this.changeSquareClickMode(playable_squares[i], SquareClickMode.KillEnemy)
+                this.changeSquareClickMode(playable_squares[i], SqureClickMode.KillEnemy) // Change square click mode
             }
+            // Else add playable effect to square and change square to move piece mode
             else{
                 this.addEffectToSquare(playable_squares[i], SquareEffect.Playable)
-                this.changeSquareClickMode(playable_squares[i], SquareClickMode.MovePiece)
+                this.changeSquareClickMode(playable_squares[i], SquareClickMode.MovePiece) // Change square click mode
             }
         }
     }
@@ -200,10 +189,6 @@ class Board{
      * @returns {void}
      */
     addEffectToSquare(square_id, effect){
-        /* STUB: Validate
-        if(effect != this.#Effects.playable && effect != this.#Effects.killable && effect != this.#Effects.checked)
-            throw new Error("Invalid effect type");*/
-
         document.getElementById(square_id.toString()).classList.add(effect);
     }
 
@@ -235,7 +220,7 @@ class Board{
      */
     changeSquareClickMode(square_id_or_element, mode){
         if(typeof square_id_or_element == "number")
-            document.getElementById(square_id.toString()).setAttribute("onclick", `BoardHandler.clickSquare(this, '${mode}')`);
+            document.getElementById(square_id_or_element.toString()).setAttribute("onclick", `BoardHandler.clickSquare(this, '${mode}')`);
         else
             square_id_or_element.setAttribute("onclick", `BoardHandler.clickSquare(this, '${mode}')`);
     }
