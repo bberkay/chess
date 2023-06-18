@@ -62,7 +62,7 @@ class Board{
     createPieceOnBoard(piece, square_id=null) {
         // Find square id of piece
         if (square_id == null)
-            square_id = piece.getSquareID();
+            square_id = piece.getSquareId();
         
         // First clear square
         this.destroyPieceOnBoard(square_id); 

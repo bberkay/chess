@@ -374,68 +374,68 @@ const StartPosition = {
         {
             "color":Color.White,
             "piece":PieceType.Rook,
-            "position":Square.H8,
+            "square":Square.H8,
         },
         {
             "color":Color.White,
             "piece":PieceType.Rook,
-            "position":Square.A8,
+            "square":Square.A8,
         },
         {
             "color":Color.White,
             "piece":PieceType.King,
-            "position":Square.E8,
+            "square":Square.E8,
         },
         {
             "color":Color.Black,
             "piece":PieceType.Bishop,
-            "position":Square.B2,
+            "square":Square.B2,
         }
     ],
     EnPassant:[
         {
             "color":Color.Black,
             "piece":PieceType.Pawn,
-            "position":Square.E2,
+            "square":Square.E2,
         },
         {
             "color":Color.White,
             "piece":PieceType.Pawn,
-            "position":Square.D7,
+            "square":Square.D7,
         }
     ],
     Check1:[
         {
             "color":Color.Black,
             "piece":PieceType.King,
-            "position":Square.E1,
+            "square":Square.E1,
         },
         {
             "color":Color.White,
             "piece":PieceType.Queen,
-            "position":Square.H5,
+            "square":Square.H5,
         },
         {
             "color":Color.Black,
             "piece":PieceType.Rook,
-            "position":Square.G2,
+            "square":Square.G2,
         }
     ],
     Check2:[
         {
             "color":Color.White,
             "piece":PieceType.King,
-            "position":Square.E9,
+            "square":Square.E8,
         },
         {
             "color":Color.Black,
             "piece":PieceType.Rook,
-            "position":Square.F1,
+            "square":Square.F1,
         },
         {
             "color":Color.Black,
             "piece":PieceType.Rook,
-            "position":Square.D1,
+            "square":Square.D1,
         }
     ]
 }
