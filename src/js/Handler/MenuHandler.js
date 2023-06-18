@@ -88,11 +88,14 @@ class MenuHandler{
      * @returns {void}
      */
     static deletePieceWithForm(){
-        let square = document.querySelector('input[name="form-square-delete"]').value;
+        let chess = new Chess(); // Singleton Chess Object
 
-        if(DOMHandler.controlSquareInput(MenuOperation.DeletePiece)){
+        let square = document.querySelector('input[name="form-input-delete"]').value;
+
+        if(MenuValidator.isValueSquare(square, "square-error"))
             chess.destroyPiece(Converter.convertSquareToSquareID(square));
-        }
+        else if(MenuValidator.isValueSquareId(square, "square-error"))
+            chess.destroyPiece(parseInt(square));
     }
       
     /**
@@ -101,14 +104,38 @@ class MenuHandler{
      * @returns {void}
      */
     static createPieceWithForm(){
+        let chess = new Chess(); // Singleton Chess Object
+
         let color = document.querySelector('input[name="form-color"]:checked').value.toLowerCase();
         let piece = document.querySelector('input[name="form-piece"]:checked').value.toLowerCase();
-        let square = document.querySelector('input[name="form-square-create"]').value;
+        let square = document.querySelector('input[name="form-input-create"]').value;
 
-        if(DomValidator.validateInput(MenuOperation.CreatePiece)){
-            chess.createPiece(color, piece, Converter.convertSquareToSquareID(square));
-        }
+        if(MenuValidator.isValueSquare(square, "square-error"))
+            chess.createPiece(piece, color, Converter.convertSquareToSquareID(square));
+        else if(MenuValidator.isValueSquareId(square, "square-error"))
+            chess.createPiece(piece, color, parseInt(square));
 
     }
 
+    /**
+     * @static
+     * Start Empty Game
+     * @returns {void}
+     */
+    static startEmptyGame(){
+        let chess = new Chess(); // Singleton Chess Object
+
+        chess.startCustomGame();
+    }
+
+    /**
+     * @static
+     * Start Standart Game
+     * @returns {void}
+     */
+    static startStandartGame(){
+        let chess = new Chess(); // Singleton Chess Object
+
+        chess.startStandartGame();
+    }
 }

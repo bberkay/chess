@@ -400,17 +400,6 @@ const SquareEffect = {
 }
 
 /**
- * Menu Operation Enum
- * @enum {string}
- */
-const MenuOperation = {
-    StartNewGame:"startNewGame",
-    StartEmptyGame:"startEmptyGame",
-    DeletePiece:"delete",
-    CreatePiece:"create",
-}
-
-/**
  * Square Click Move Type Enum
  * @enum {string}
  */
@@ -419,6 +408,7 @@ const SquareClickMode = {
     KillEnemy:"killPiece",
     MovePiece:"movePiece",
     ClickSquare:"clickSquare",
+    Castling:"castling",
 }
 
 /**

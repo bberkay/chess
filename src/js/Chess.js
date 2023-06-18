@@ -11,10 +11,6 @@ class Chess{
             this.#board = new Board();
             this.#playable_squares = [];
             this.#selected_piece = null;
-    
-            // Create squares
-            for (let i = 1; i < 65; i++)
-                Global.setSquare(i, 0);
 
             // Singleton instance
             Chess.instance = this;    
@@ -28,6 +24,10 @@ class Chess{
     * @returns {void}
     */
     startStandartGame() {
+        // Create squares/backend
+        for (let i = 1; i < 65; i++)
+            Global.setSquare(i, 0);
+
         // Create Board
         this.#board.createBoard();
 
@@ -57,8 +57,12 @@ class Chess{
     * @returns {void}
     */
     startCustomGame(pieces = null) {
+        // Create squares/backend
+        for (let i = 1; i < 65; i++)
+            Global.setSquare(i, 0);
+
         // Create Board
-        this.board.createBoard();
+        this.#board.createBoard();
 
         // Create Pieces
         if(pieces){ 
@@ -138,6 +142,17 @@ class Chess{
 
         // Set selected piece
         this.#selected_piece = piece;
+        
+        // If selected piece is king then control castling
+        if(this.#selected_piece.type === Type.King || this.#selected_piece.type === Type.Rook){
+            if(GameManager.isShortCastlingAvailable()){
+                this.#board.changeSquareClickMode(this.#selected_piece.color === Color.White ? [5, 8] : [61, 64], SquareClickMode.Castling); // Change square click mode for castling
+            }
+            if(GameManager.isLongCastlingAvailable()){  
+                this.#board.changeSquareClickMode(this.#selected_piece.color === Color.White ? [1, 5] : [57, 61], SquareClickMode.Castling); // Change square click mode for castling
+            }
+        }
+        
         this.#board.addEffectToSquare(this.#selected_piece.getSquareId(), SquareEffect.Selected);
 
         // Get playable squares of selected piece 
@@ -197,7 +212,7 @@ class Chess{
         Global.setSquare(square_id, 0);
 
         // Remove Piece From Board
-        this.board.clearSquare(square_id);
+        this.#board.destroyPieceOnBoard(square_id);
     }
 
     /**
@@ -206,11 +221,7 @@ class Chess{
      * @param {int} square_id Square ID of rook
      * @returns {void}
      */
-    #castling(square_id){
-        // If first click is rook and second click is king 
-        if(square_id == 61 || square_id == 5)
-            square_id = BoardManager.getSquareIDByPiece(this.selected_piece) 
-
+    castling(square_id){
         let castling_type = square_id % 8 == 0 ? CastlingType.Short : CastlingType.Long;
         let player_king = BoardManager.getPlayerKing();
         if(castling_type == CastlingType.Short){ 
@@ -283,20 +294,6 @@ class Chess{
             Global.setCheckedPlayer(player_king.color);
             this.board.addEffectToSquare(player_king.getSquareID(), SquareEffect.Checked);
         }
-    }
-
-    /**
-     * @private
-     * Is Castling Move?
-     * @param {int} clicked_piece Square ID of clicked square
-     * @returns {boolean} 
-     */
-    #isCastlingMove(clicked_piece){
-        // If selected piece is king or rook and clicked square is king or rook, but not the same as selected piece, start castling operation
-        if(this.selected_piece && [Type.Rook, Type.King].includes(this.selected_piece.type) && [Type.Rook, Type.King].includes(clicked_piece.type) && this.selected_piece.type != clicked_piece.type)
-            return true;
-        
-        return false;
     }
     
     /**

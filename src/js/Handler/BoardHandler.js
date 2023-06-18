@@ -30,6 +30,9 @@ class BoardHandler{
             case SquareClickMode.MovePiece:
                 chess.movePiece(square_id);
                 break;
+            case SquareClickMode.Castling:
+                chess.castling(square_id);
+                break;
             default:
                 break;
         }

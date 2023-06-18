@@ -16,6 +16,9 @@ class Board{
      * @returns {void}
      */
     createBoard() {
+        if(document.getElementById("chessboard") != null) // If chessboard already created then remove it
+            document.getElementById("chessboard").innerHTML = "";
+
         let chessboard = document.getElementById("chessboard"); // Chessboard Element
         let square_color = Color.White; // Square Color
         let board_numbers = 8; // Board Numbers
@@ -215,13 +218,20 @@ class Board{
 
     /**
      * Change Square Mode/Function
-     * @param {(int|Element)} square_id_or_element Square ID or Element of the square to be changed
+     * @param {(Array<int>|Array<Element>|int|Element)} square_id_or_element Square ID or Element of the square to be changed
      * @param {SquareClickMode} mode Mode 
      */
     changeSquareClickMode(square_id_or_element, mode){
-        if(typeof square_id_or_element == "number")
-            document.getElementById(square_id_or_element.toString()).setAttribute("onclick", `BoardHandler.clickSquare(this, '${mode}')`);
-        else
-            square_id_or_element.setAttribute("onclick", `BoardHandler.clickSquare(this, '${mode}')`);
+        if(Array.isArray(square_id_or_element)){
+            let l = square_id_or_element.length;
+            for(let i = 0; i < l; i++){
+                if(typeof square_id_or_element[i] == "number")
+                    document.getElementById(square_id_or_element[i].toString()).setAttribute("onclick", `BoardHandler.clickSquare(this, '${mode}')`);
+                else
+                    square_id_or_element[i].setAttribute("onclick", `BoardHandler.clickSquare(this, '${mode}')`);
+            }
+        }else{
+            this.changeSquareClickMode([square_id_or_element], mode);
+        }
     }
 }

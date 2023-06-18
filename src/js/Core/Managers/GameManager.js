@@ -91,18 +91,12 @@ class GameManager{
         return dangerous_squares.length !== 0;
     }
 
-    static isCheckMate(){
-    }
-
-    static isStaleMate(){
-    }
-
     /**
      * @static
      * Is current player can long castling?
      * @returns {boolean}
      */
-    static canLongCastling(){
+    static isLongCastlingAvailable(){
         let gl_castling_control = BoardManager.getCastlingControl();
         let gl_current_move = BoardManager.getCurrentMove();
         let gl_squares = BoardManager.getSquares();
@@ -129,7 +123,7 @@ class GameManager{
      * Is current player can short castling?
      * @returns {boolean}
      */
-    static canShortCastling(){
+    static isShortCastlingAvailable(){
         let gl_castling_control = BoardManager.getCastlingControl();
         let gl_current_move = BoardManager.getCurrentMove();
         let gl_squares = BoardManager.getSquares();
