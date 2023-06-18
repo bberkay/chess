@@ -143,6 +143,7 @@ class Chess{
         this.#selected_piece = piece;
         
         // If selected piece is king then control castling
+        // FIXME: Bu bölüm kısaltılacak.
         if(this.#selected_piece.type === PieceType.King || this.#selected_piece.type === PieceType.Rook){
             if(GameManager.isShortCastlingAvailable()){
                 if(this.#selected_piece.type === PieceType.King)
@@ -196,6 +197,9 @@ class Chess{
     #movePiece(target_square_id, _piece=null){
         let piece = _piece == null ? this.#selected_piece : _piece;
         
+        if(piece.type == PieceType.Rook || piece.type == PieceType.King)
+            piece.is_moved = true;
+
         // Move Piece On Board
         this.#board.refreshBoard();
         this.#board.movePieceOnBoard(piece, target_square_id);
@@ -257,28 +261,6 @@ class Chess{
             }
         }
     }
-
-    /**
-     * @private
-     * Is enemy player checked after move? If checked then set gl_checked_player to enemy player
-     * @returns {void}
-     */ 
-    #controlCheck(){
-        // If moved piece is king then don't control check
-        if(this.#selected_piece.type === PieceType.King){
-            this.#board.removeEffectOfSquare(this.#selected_piece.getSquareId(), SquareEffect.Checked); 
-            Global.setCheckedPlayer(null); // set checked status to null
-            return;
-        }
-            
-        const player_king = Cache.get(Global.getCurrentMove() + "-king")[0]; // Get king of current player
-
-        // Set checked player and give effect the checked king
-        if(GameManager.isCheck()){
-            Global.setCheckedPlayer(player_king.color);
-            this.#board.addEffectToSquare(player_king.getSquareId(), SquareEffect.Checked);
-        }
-    }
     
     /**
      * @private
@@ -286,20 +268,28 @@ class Chess{
      * @returns {void}
      */
     #endTurn() {
-        // Control en passant
-        GameManager.isEnPassantAvailable();
+        // Control en passant after move
+        GameManager.controlEnPassantAfterMove();
 
-        // Control castling
-        GameManager.isCastlingAvailable();
+        // Control castling after move
+        GameManager.controlCastlingAfterMove();
 
-        // Set New Turn 
+        // Set New Turn(change current player)
         Global.setNextMove();
 
         // Increase Move Count
         Global.increaseMoveCount();
 
-        // Control check
-        this.#controlCheck();
+        // If moved piece is king then don't control check
+        if(this.#selected_piece.type === PieceType.King){
+            this.#board.removeEffectOfSquare(this.#selected_piece.getSquareId(), SquareEffect.Checked); 
+            Global.setCheckedPlayer(null); // set checked status to null
+        }else{ // Control check after move
+            GameManager.#controlCheckAfterMove();
+            if(Global.getCheckedPlayer() === Global.getCurrentMove()){ // If checked
+                this.#board.addEffectToSquare(this.#selected_piece.getSquareId(), SquareEffect.Checked); // Add checked effect to king
+            }
+        }
 
         // Clear current select
         this.#clearSelect();

@@ -378,22 +378,22 @@ const StartPosition = {
         {
             "color":Color.White,
             "piece":PieceType.Rook,
-            "square":Square.H8,
+            "square":Square.H1,
         },
         {
             "color":Color.White,
             "piece":PieceType.Rook,
-            "square":Square.A8,
+            "square":Square.A1,
         },
         {
             "color":Color.White,
             "piece":PieceType.King,
-            "square":Square.E8,
+            "square":Square.E1,
         },
         {
             "color":Color.Black,
             "piece":PieceType.Bishop,
-            "square":Square.B2,
+            "square":Square.G7,
         }
     ],
     EnPassant:[

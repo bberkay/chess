@@ -86,8 +86,8 @@ class GameManager{
         }
 
         if(change_status){
-            BoardManager.changeSquare(square_id, temp_player_piece);
-            BoardManager.changeSquare(temp_king_square_id, temp_player_king);
+            Global.setSquare(square_id, temp_player_piece);
+            Global.setSquare(temp_king_square_id, temp_player_king);
         }
         return dangerous_squares.length !== 0;
     }
@@ -98,7 +98,7 @@ class GameManager{
      * @returns {boolean}
      */
     static isLongCastlingAvailable(){
-        if(Global.getCastling(gl_current_move + "-" + CastlingPieceType.Long) == false)
+        if(Global.getCastling(Global.getCurrentMove() + "-" + CastlingType.Long) == false)
             return false;            
 
         // Find long rook square_id by player's color
@@ -121,7 +121,7 @@ class GameManager{
      * @returns {boolean}
      */
     static isShortCastlingAvailable(){
-        if(Global.getCastling(Global.getCurrentMove() + "-" + CastlingPieceType.Short) == false)
+        if(Global.getCastling(Global.getCurrentMove() + "-" + CastlingType.Short) == false)
             return false;
 
         // Find short rook square_id by player's color
@@ -140,43 +140,35 @@ class GameManager{
 
     /**
      * @static
-     * Is current player can castling?
+     * Control castling status of every piece that can castling after move
      * @returns {void}
      */
-    static isCastlingAvailable(){
-        // If king is moved then disable short and long castling
-        let player_king = BoardManager.getPiecesWithFilter(PieceType.King, Global.getCurrentMove())[0];
-        let player_king_square_id = player_king.getSquareId();
-        if(player_king_square_id != 5)
-        Global.setCastling(Global.getCurrentMove() + "-" + CastlingPieceType.Short, false);
-        Global.setCastling(Global.getCurrentMove() + "-" + CastlingPieceType.Long, false);
-        Global.setCastling(gl_current_move + "-" + CastlingPieceType.Long, false);
-        Global.setCastling(gl_current_move + "-" + CastlingPieceType.Long, false);
-        else if(moved_piece_type == PieceType.Rook){
-            if(moved_piece_color == Color.White){
-                // If short rook(id=64) moved then disable white short castling
-                if(gl_squares[64] == 0 || gl_squares[64].color != Color.White || gl_squares[64].type != PieceType.Rook) 
-                    Global.setCastling(CastlingPieceType.WhiteShort, false);
-                // If long rook(id=57) moved then disable white long castling
-                if(gl_squares[57] == 0 || gl_squares[57].color != Color.White || gl_squares[57].type != PieceType.Rook)
-                    Global.setCastling(CastlingPieceType.WhiteLong, false);
-            }else{
-                // If short rook(id=8) moved then disable black short castling
-                if(gl_squares[8] == 0 || gl_squares[8].color != Color.Black || gl_squares[8].type != PieceType.Rook) 
-                    Global.setCastling(CastlingPieceType.BlackShort, false);
-                // If long rook(id=1) moved then disable black long castling
-                if(gl_squares[1] == 0 || gl_squares[1].color != Color.Black || gl_squares[1].type != PieceType.Rook)
-                    Global.setCastling(CastlingPieceType.BlackLong, false);
+    static controlCastlingAfterMove(){
+        // Find player's king and king's square_id
+        let pieces = BoardManager.getPiecesWithFilter(PieceType.Rook).concat(Cache.get("black-king"), Cache.get("white-king"));
+
+        // Control every piece, if piece is moved then set castling status false
+        pieces.forEach(piece => {
+            if(piece.is_moved){
+                if(piece.type == PieceType.King){
+                    Global.setCastling(piece.color + "-" + CastlingType.Short, false);
+                    Global.setCastling(piece.color + "-" + CastlingType.Long, false);
+                }else if(piece.type == PieceType.Rook){
+                    if(piece.square_id == 1 || piece.square_id == 57)
+                        Global.setCastling(piece.color + "-" + CastlingType.Long, false);
+                    else if(piece.square_id == 8 || piece.square_id == 64)
+                        Global.setCastling(piece.color + "-" + CastlingType.Short, false);
+                }
             }
-        }
+        });
     }
 
     /**
      * @static
-     * Is any pawn can do en passant?
+     * Control en passant status of every pawn after move
      * @returns {void}
      */
-    static isEnPassantAvailable(){
+    static controlEnPassantAfterMove(){
         // find all pawns
         let pawns = BoardManager.getPiecesWithFilter(PieceType.Pawn, Global.getCurrentMove());
         for(let pawn of pawns){
@@ -190,5 +182,18 @@ class GameManager{
             else// if pawn is white and has not yet reached row number 4 then not-ready, if pawn is black and has not reached yet row number 5 then not-ready
                 Global.addEnPassant(pawn.id, EnPassantStatus.NotReady);
         }
+    }
+
+    /**
+     * @static
+     * Control check status after move
+     * @returns {void}
+     */
+    static controlCheckAfterMove(){
+        const player_king = Cache.get(Global.getCurrentMove() + "-king")[0]; // Get king of current player
+
+        // Control, is current player check
+        if(this.isCheck())
+            Global.setCheckedPlayer(player_king.color);
     }
 }

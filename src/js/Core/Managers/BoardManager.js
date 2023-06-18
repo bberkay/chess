@@ -2,16 +2,16 @@ class BoardManager {
     /**
      * @static
      * Get Pieces By Filter
-     * @param {PieceType} type Type of pieces to get
-     * @param {Color} color Color of pieces to get
+     * @param {PieceType|null} type Type of pieces to get
+     * @param {Color|null} color Color of pieces to get
      * @returns {(Array<Piece>|null)}
      */
-    static getPiecesWithFilter(type, color) {
+    static getPiecesWithFilter(type=null, color=null) {
         let pieces = [];
         let gl_squares = Global.getSquares();
         for (let square in gl_squares) {
             let piece = this.getPieceBySquareId(parseInt(square));
-            if (piece.color === color && piece.type === type)
+            if ((!color || piece.color === color) && (!type || piece.type === type))
                 pieces.push(piece);
         }
         return pieces.length > 0 ? pieces : null;

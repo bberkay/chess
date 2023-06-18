@@ -11,6 +11,8 @@ class Piece {
         this.id = this.#piece_engine.createPieceId();
         this.type = type;
         this.color = color;
+        if(this.type === PieceType.Rook || this.type === PieceType.King)
+            this.is_moved = false;
 
         // Set Target Square Content to this piece
         Global.setSquare(square, this);

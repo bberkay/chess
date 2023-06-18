@@ -61,7 +61,7 @@ class PieceEngine{
         let playable_squares = [];
         let squares = Converter.jsonPathToArrayPath(RouteEngine.calcKingPath(square_id));
         
-        let king = BoardManager.getPlayerKing();
+        let king = Cache.get(Global.getCurrentMove() + "-king");
 
         squares.forEach(square => {
             if(!GameManager.isCheck(square))
@@ -69,10 +69,10 @@ class PieceEngine{
         });
 
         // Castling
-        if(GameManager.canShortCastling())
-            playable_squares.push(king.color == "white" ? 64 : 8);
-        if(GameManager.canLongCastling())
-            playable_squares.push(king.color == "white" ? 57 : 1);
+        if(GameManager.isShortCastlingAvailable())
+            playable_squares.push(king.color == Color.White ? 64 : 8);
+        if(GameManager.isLongCastlingAvailable())
+            playable_squares.push(king.color == Color.White ? 57 : 1);
 
         return playable_squares;
     }

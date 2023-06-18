@@ -62,10 +62,10 @@ class RouteEngine{
         let row_of_pawn = path_engine.calcRowOfSquare(square_id);
 
         let color_of_pawn = BoardManager.getPieceBySquareId(square_id).color;
-        if (color_of_pawn === Color.Black) {
+        if (color_of_pawn === Color.White) {
             limit = row_of_pawn === 7 ? 2 : 1;  // if black pawn is start position then 2 square limit else 1
             route = [Route.Top]; // black goes top
-        } else if (color_of_pawn === Color.White) {
+        } else if (color_of_pawn === Color.Black) {
             limit = row_of_pawn === 2 ? 2 : 1;
             route = [Route.Bottom]; // white goes bottom
         }
