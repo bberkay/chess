@@ -37,24 +37,6 @@ class Global{
 
     /**
      * @static
-     */
-    static #gl_turn_control = {
-        "is_game_created":false,
-        "is_any_piece_created":false,
-        "is_white_king_created":false,
-        "is_black_king_created":false,
-        "is_player_checked":false,
-        "is_player_king_selected":false,
-        "is_piece_moved":false,
-        "is_enemy_checked":false,
-        "is_checkmate":false,
-        "is_stalemate":false,
-        "is_game_finished":false,
-        "is_turn_changed":false,
-    }
-
-    /**
-     * @static
      * Get Current Board
      * @returns {JSON}
      */
@@ -81,7 +63,6 @@ class Global{
         return this.#gl_current_move;
     }
     
-
     /**
      * @static
      * Get Checked Player
@@ -120,21 +101,14 @@ class Global{
     
     /**
      * @static
-     * Get En passant Status of all pawns
-     * @returns {JSON}
+     * Get En passant Status
+     * @param {(int|null)} pawn_id
+     * @returns {(JSON|EnPassantStatus)}
      */
-    static getEnPassantOfAllPawns(){
+    static getEnPassantStatus(pawn_id=null){
+        if(pawn_id)
+            return this.#gl_en_passant_control[pawn_id];
         return this.#gl_en_passant_control;
-    }
-
-    /**
-     * @static
-     * Get En passant Status of pawn
-     * @param {int} pawn_id
-     * @returns {EnPassantStatus}
-     */
-    static getEnPassantOfPawn(pawn_id){
-        return this.#gl_en_passant_control[pawn_id];
     }
 
     /**
@@ -144,15 +118,6 @@ class Global{
      */
     static getEnemyColor(){
         return this.getCurrentMove() == Color.White ? Color.Black : Color.White;
-    }
-
-    /**
-     * @static
-     * Get Turn Control
-     * @returns {JSON}
-     */
-    static getTurnControl(){
-        return this.#gl_turn_control;
     }
 
     /**
@@ -172,7 +137,7 @@ class Global{
      * @returns {void}
      */
     static setNextMove(){
-        this.#gl_current_move = "white" ? "black" : "white";
+        this.#gl_current_move = this.#gl_current_move === Color.White ? Color.Black : Color.White;
     }
 
     /**
@@ -226,16 +191,6 @@ class Global{
         this.#gl_checked_player = color;
     }
 
-    /**
-     * @static
-     * Set Turn Control
-     * @param {TurnControl} key Key of control
-     * @param {boolean} value Value of control
-     * @returns {void}
-     */
-    static setTurnControl(key, value){
-        this.#gl_turn_control[key] = value;
-    }
 }
 
 /**
@@ -405,27 +360,7 @@ const SquareEffect = {
  */
 const SquareClickMode = {
     SelectPiece:"selectPiece",
-    KillEnemy:"killPiece",
     MovePiece:"movePiece",
     ClickSquare:"clickSquare",
     Castling:"castling",
-}
-
-/**
- * Turn Control Enum
- * @enum {string}
- */
-const TurnControl = {
-    IsGameCreated:"is_game_created",
-    IsAnyPieceCreated:"is_any_piece_created",
-    IsWhiteKingCreated:"is_white_king_created",
-    IsBlackKingCreated:"is_black_king_created",
-    IsPlayerChecked:"is_player_checked",
-    IsPlayerKingSelected:"is_player_king_selected",
-    IsPieceMoved:"is_piece_moved",
-    IsEnemyChecked:"is_enemy_checked",
-    IsCheckmate:"is_checkmate",
-    IsStalemate:"is_stalemate",
-    IsGameFinished:"is_game_finished",
-    IsTurnChanged:"is_turn_changed",
 }

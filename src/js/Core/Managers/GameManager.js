@@ -42,18 +42,19 @@ class GameManager{
         let temp_player_king;
         let temp_player_piece;
         let change_status = false;
+        let player_king = Cache.get(Global.getCurrentMove() + "-king");
 
         // If square_id is not null then control target id for check
         if(square_id){
-            temp_king_square_id = BoardManager.getPlayerKingSquareID();
-            temp_player_king = BoardManager.getPlayerKing();
-            temp_player_piece = BoardManager.getPieceBySquareID(square_id);
-            Global.setSquare(BoardManager.getPlayerKingSquareID(), 0);
+            temp_king_square_id = player_king.getSquareId();
+            temp_player_king = player_king;
+            temp_player_piece = BoardManager.getPieceBySquareId(square_id);
+            Global.setSquare(player_king.getSquareId(), 0);
             Global.setSquare(square_id, temp_player_king);
             change_status = true;
         }
 
-        square_id = BoardManager.getPlayerKingSquareID();
+        square_id = player_king.getSquareId();
         const enemy_color = Global.getEnemyColor();
 
         // Control for Enemy Bishop, Queen, Rook
@@ -63,7 +64,7 @@ class GameManager{
             l = diagonal_row_column_path[i].length;
             for (let j = 0; j < l; j++) {
                 let enemy_types = [];
-                // Set enemy types by path(example, if i is bottom-left then control bishop at the bottom-left and top-right)
+                // Set enemy types by path(example, if i is bottom-left then control bishop, at the bottom-left and top-right)
                 enemy_types = getPathConnection(i,
                     () => enemy_types.concat(enemy_types.includes(Type.Queen) ? [Type.Bishop] : [Type.Queen, Type.Bishop]),
                     () => enemy_types.concat(enemy_types.includes(Type.Queen) ? [Type.Rook] : [Type.Queen, Type.Rook]))
@@ -177,6 +178,27 @@ class GameManager{
                 if(gl_squares[1] == 0 || gl_squares[1].color != Color.Black || gl_squares[1].type != Type.Rook)
                     Global.setCastling(CastlingType.BlackLong, false);
             }
+        }
+    }
+
+    /**
+     * @static
+     * Control En Passant
+     * @returns {void}
+     */
+    static controlEnPassant(){
+        // find all pawns
+        let pawns = BoardManager.getPiecesWithFilter(Type.Pawn, Global.getCurrentMove());
+        for(let pawn of pawns){
+            // find square id of pawn
+            let square_id = pawn.getSquareId();
+            // if pawn is white and row number is 4 then pawn can do en passant, if pawn is black and row number is 5 then pawn can do en passant
+            if(pawn.color == Color.White && 40 >= parseInt(square_id) && parseInt(square_id) >= 33 || pawn.color == Color.Black && 32 >= parseInt(square_id) && parseInt(square_id) >= 25)
+                Global.addEnPassant(pawn.id, EnPassantStatus.Ready);
+            else if(Global.getEnPassantStatus(pawn.id) == EnPassantStatus.Ready) // if pawn can do en passant already then can't do anymore or has already false then continue its status
+                Global.addEnPassant(pawn.id, EnPassantStatus.Cant);
+            else// if pawn is white and has not yet reached row number 4 then not-ready, if pawn is black and has not reached yet row number 5 then not-ready
+                Global.addEnPassant(pawn.id, EnPassantStatus.NotReady);
         }
     }
 }

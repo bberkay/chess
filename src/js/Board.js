@@ -175,7 +175,7 @@ class Board{
             // If square has enemy piece then add killable effect to square and change square to kill enemy mode
             if (BoardManager.isSquareHasPiece(playable_squares[i], enemy_color)){
                 this.addEffectToSquare(playable_squares[i], SquareEffect.Killable)
-                this.changeSquareClickMode(playable_squares[i], SqureClickMode.KillEnemy) // Change square click mode
+                this.changeSquareClickMode(playable_squares[i], SquareClickMode.MovePiece) // Change square click mode
             }
             // Else add playable effect to square and change square to move piece mode
             else{

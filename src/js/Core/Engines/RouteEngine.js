@@ -61,10 +61,11 @@ class RouteEngine{
         let route = "";
         let row_of_pawn = path_engine.calcRowOfSquare(square_id);
 
-        if (Global.getCurrentMove() === Color.Black) {
+        let color_of_pawn = BoardManager.getPieceBySquareId(square_id).color;
+        if (color_of_pawn === Color.Black) {
             limit = row_of_pawn === 7 ? 2 : 1;  // if black pawn is start position then 2 square limit else 1
             route = [Route.Top]; // black goes top
-        } else if (Global.getCurrentMove() === Color.White) {
+        } else if (color_of_pawn === Color.White) {
             limit = row_of_pawn === 2 ? 2 : 1;
             route = [Route.Bottom]; // white goes bottom
         }
@@ -104,7 +105,7 @@ class RouteEngine{
         const path_engine = new PathEngine(); // singleton instance, all path engine in this class will be the same
 
         // get 2 squares of column
-        let column = JSONConverter.jsonPathToArrayPath(path_engine.calcPlayableColumnSquares({
+        let column = Converter.jsonPathToArrayPath(path_engine.calcPlayableColumnSquares({
             square_id: square_id,
             distance_limit: 2,
             piece_sensivity: false
@@ -114,7 +115,7 @@ class RouteEngine{
         });
 
         // get 2 squares of row
-        let row = JSONConverter.jsonPathToArrayPath(path_engine.calcPlayableRowSquares({
+        let row = Converter.jsonPathToArrayPath(path_engine.calcPlayableRowSquares({
             square_id: square_id,
             distance_limit: 2,
             piece_sensivity: false
@@ -126,7 +127,7 @@ class RouteEngine{
         // get first square of left side and right side at end of the column 
         let column_sides = [];
         column.forEach(item => {
-            column_sides.push(JSONConverter.jsonPathToArrayPath(path_engine.calcPlayableRowSquares({
+            column_sides.push(Converter.jsonPathToArrayPath(path_engine.calcPlayableRowSquares({
                 square_id: item,
                 distance_limit: 1,
                 piece_sensivity: false
@@ -136,7 +137,7 @@ class RouteEngine{
         // get first square of top side and bottom side at end of the row
         let row_sides = [];
         row.forEach(item => {
-            row_sides.push(JSONConverter.jsonPathToArrayPath(path_engine.calcPlayableColumnSquares({
+            row_sides.push(Converter.jsonPathToArrayPath(path_engine.calcPlayableColumnSquares({
                 square_id: item,
                 distance_limit: 1,
                 piece_sensivity: false

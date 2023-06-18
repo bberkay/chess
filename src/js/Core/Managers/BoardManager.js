@@ -10,7 +10,7 @@ class BoardManager {
         let pieces = [];
         let gl_squares = Global.getSquares();
         for (let square in gl_squares) {
-            let piece = this.getPieceBySquareID(parseInt(square));
+            let piece = this.getPieceBySquareId(parseInt(square));
             if (piece.color === color && piece.type === type)
                 pieces.push(piece);
         }

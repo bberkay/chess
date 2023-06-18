@@ -20,7 +20,7 @@ class PieceEngine{
      * @returns {Array<int>}
      */
     #getPlayableSquaresOfBishop(square_id) {
-        return JSONConverter.jsonPathToArrayPath((this.#filterPlayableSquares(square_id, RouteEngine.calcBishopPath(square_id))));
+        return Converter.jsonPathToArrayPath((this.#filterPlayableSquares(square_id, RouteEngine.calcBishopPath(square_id))));
     }
 
     /**
@@ -30,7 +30,7 @@ class PieceEngine{
      * @returns {Array<int>}
      */
     #getPlayableSquaresOfRook(square_id) {
-        let playable_squares = JSONConverter.jsonPathToArrayPath(this.#filterPlayableSquares(square_id, RouteEngine.calcRookPath(square_id)));
+        let playable_squares = Converter.jsonPathToArrayPath(this.#filterPlayableSquares(square_id, RouteEngine.calcRookPath(square_id)));
 
         // Castling
         if(GameManager.canShortCastling())
@@ -48,7 +48,7 @@ class PieceEngine{
      * @returns {Array<int>}
      */
     #getPlayableSquaresOfQueen(square_id) {
-        return JSONConverter.jsonPathToArrayPath(this.#filterPlayableSquares(square_id, RouteEngine.calcQueenPath(square_id)));
+        return Converter.jsonPathToArrayPath(this.#filterPlayableSquares(square_id, RouteEngine.calcQueenPath(square_id)));
     }
 
     /**
@@ -59,7 +59,7 @@ class PieceEngine{
      */
     #getPlayableSquaresOfKing(square_id) {
         let playable_squares = [];
-        let squares = JSONConverter.jsonPathToArrayPath(RouteEngine.calcKingPath(square_id));
+        let squares = Converter.jsonPathToArrayPath(RouteEngine.calcKingPath(square_id));
         
         let king = BoardManager.getPlayerKing();
 

@@ -25,6 +25,7 @@ class Cache{
 
     /**
      * Clear the cache
+     * @param {string} key Key that will be removed from the cache
      * @returns {void}
      */
     static clear(key = null){
@@ -36,6 +37,8 @@ class Cache{
 
     /**
      * Add a value to the cache
+     * @param {string} key 
+     * @param {any} value
      * @returns {void}
      */
     static add(key, value){
