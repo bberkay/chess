@@ -19,7 +19,7 @@ body{
 /* -------------- Main End -------------- */
 
 /* -------------- Menu START -------------- */
-.menu{
+.left-menu{
     width:350px;
     margin-right:50px;
 }
@@ -34,6 +34,11 @@ fieldset{
 
 .menu-buttons input[type="button"]{
     margin-bottom:5px;
+}
+
+.right-menu{
+    width:350px;
+    margin-left:50px;
 }
 /* -------------- Menu END -------------- */
 

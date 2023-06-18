@@ -11,11 +11,18 @@
 
 <body>
     <div class = "main">
-        <div class = "menu">
+        <div class = "left-menu">
             <fieldset class = "menu-buttons">
                 <legend>Games</legend>
                 <input type="button" value="Start New Game" onclick="MenuHandler.startNewGame()">
                 <input type="button" value="Start Empty Game" onclick="MenuHandler.startEmptyGame()">
+            </fieldset>
+            <fieldset class = "menu-buttons">
+                <legend>Positions</legend>
+                <input type="button" value="Castling Position" onclick="MenuHandler.startFromPosition(StartPosition.Castling)">
+                <input type="button" value="En Passant Position" onclick="MenuHandler.startEmptyGame(StartPosition.EnPassant)">
+                <input type="button" value="Check Scenario #1" onclick="MenuHandler.startEmptyGame(StartPosition.Check1)">
+                <input type="button" value="Check Scenario #2" onclick="MenuHandler.startEmptyGame(StartPosition.Check2)">
             </fieldset>
             <fieldset class = "menu-buttons">
                 <legend>Info</legend>
@@ -70,16 +77,36 @@
                 <br>
                 <input type="button" value = "Delete Piece" onclick="MenuHandler.deletePieceWithForm()">
             </fieldset>  
+        </div>
+        <div class = "game">
+            <div id="chessboard"></div> <!-- Create Game -->
             <fieldset>
                 <legend>Note</legend>
                 <p>You may encounter some errors because it is not finished yet, and some days it may not work completely.<a href="https://github.com/bberkay/chess-engine" target="_blank"> For source code</a></p>
             </fieldset>
         </div>
-        <div class = "game">
-            <div id="chessboard"></div> <!-- Create Game -->
+        <div class="right-menu">
+            <div class="notation">
+                <fieldset>
+                    <legend>Notation</legend>
+                    <table border="true">
+                        <tr>
+                            <td>A1xE2</td>
+                            <td>A2xE2</td>
+                        </tr>
+                        <tr>
+                            <td>A1xE2</td>
+                            <td>A2xE2</td>
+                        </tr>
+                        <tr>
+                            <td>A1xE2</td>
+                            <td>A2xE2</td>
+                        </tr>
+                    </table>
+                </fieldset>
+            </div>
         </div>
     </div>
-    
 
     <!-- Import Files -->
     <script src="src/js/Client/Global.js"></script>

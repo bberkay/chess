@@ -66,8 +66,8 @@ class GameManager{
                 let enemy_types = [];
                 // Set enemy types by path(example, if i is bottom-left then control bishop, at the bottom-left and top-right)
                 enemy_types = getPathConnection(i,
-                    () => enemy_types.concat(enemy_types.includes(Type.Queen) ? [Type.Bishop] : [Type.Queen, Type.Bishop]),
-                    () => enemy_types.concat(enemy_types.includes(Type.Queen) ? [Type.Rook] : [Type.Queen, Type.Rook]))
+                    () => enemy_types.concat(enemy_types.includes(PieceType.Queen) ? [PieceType.Bishop] : [PieceType.Queen, PieceType.Bishop]),
+                    () => enemy_types.concat(enemy_types.includes(PieceType.Queen) ? [PieceType.Rook] : [PieceType.Queen, PieceType.Rook]))
 
                 // If current square has an any dangerous enemy then player's "checked" and return true or dangerous squares
                 let res = BoardManager.isSquareHasPiece(diagonal_row_column_path[i][j], enemy_color, enemy_types);
@@ -81,7 +81,7 @@ class GameManager{
         const knight_control = RouteEngine.calcKnightPath(square_id);
         l = knight_control.length;
         for (let i = 0; i < l; i++) {
-            if (BoardManager.isSquareHasPiece(knight_control[i], enemy_color, [Type.Knight]))
+            if (BoardManager.isSquareHasPiece(knight_control[i], enemy_color, [PieceType.Knight]))
                 dangerous_squares = dangerous_squares.concat(knight_control);
         }
 
@@ -102,14 +102,14 @@ class GameManager{
         let gl_current_move = BoardManager.getCurrentMove();
         let gl_squares = BoardManager.getSquares();
 
-        if(gl_castling_control[gl_current_move + "-" + CastlingType.Long] == false)
+        if(gl_castling_control[gl_current_move + "-" + CastlingPieceType.Long] == false)
             return false;            
 
         // Find long rook square_id by player's color
         let long_rook = gl_current_move == Color.White ? 57 : 1;
 
         // If between long rook and king is not empty or long rook is color not equal player's color or long rook is type not rook then return false
-        if(gl_squares[long_rook + 1] != 0 || gl_squares[long_rook + 2] != 0 || gl_squares[long_rook + 3] != 0 || gl_squares[long_rook].color != gl_current_move || gl_squares[long_rook].type != Type.Rook)
+        if(gl_squares[long_rook + 1] != 0 || gl_squares[long_rook + 2] != 0 || gl_squares[long_rook + 3] != 0 || gl_squares[long_rook].color != gl_current_move || gl_squares[long_rook].type != PieceType.Rook)
             return false;
 
         // Control check status of every squares between long rook and king
@@ -129,14 +129,14 @@ class GameManager{
         let gl_current_move = BoardManager.getCurrentMove();
         let gl_squares = BoardManager.getSquares();
 
-        if(gl_castling_control[gl_current_move + "-" + CastlingType.Short] == false)
+        if(gl_castling_control[gl_current_move + "-" + CastlingPieceType.Short] == false)
             return false;
 
         // Find short rook square_id by player's color
         let short_rook = gl_current_move == Color.White ? 64 : 8;
 
         // If between short rook and king is not empty or short rook is color not equal player's color or short rook is type not rook then return false
-        if(gl_squares[short_rook - 1] != 0 || gl_squares[short_rook - 2] != 0 || gl_squares[short_rook].color != gl_current_move || gl_squares[short_rook].type != Type.Rook)
+        if(gl_squares[short_rook - 1] != 0 || gl_squares[short_rook - 2] != 0 || gl_squares[short_rook].color != gl_current_move || gl_squares[short_rook].type != PieceType.Rook)
             return false;
         
         // Control check status of every squares between short rook and king
@@ -158,25 +158,25 @@ class GameManager{
         let gl_squares = BoardManager.getSquares();
 
         // If king is moved then disable short and long castling
-        if(moved_piece_type == Type.King){
-            Global.setCastling(gl_current_move + "-" + CastlingType.Short, false);
-            Global.setCastling(gl_current_move + "-" + CastlingType.Long, false);
+        if(moved_piece_type == PieceType.King){
+            Global.setCastling(gl_current_move + "-" + CastlingPieceType.Short, false);
+            Global.setCastling(gl_current_move + "-" + CastlingPieceType.Long, false);
         }
-        else if(moved_piece_type == Type.Rook){
+        else if(moved_piece_type == PieceType.Rook){
             if(moved_piece_color == Color.White){
                 // If short rook(id=64) moved then disable white short castling
-                if(gl_squares[64] == 0 || gl_squares[64].color != Color.White || gl_squares[64].type != Type.Rook) 
-                    Global.setCastling(CastlingType.WhiteShort, false);
+                if(gl_squares[64] == 0 || gl_squares[64].color != Color.White || gl_squares[64].type != PieceType.Rook) 
+                    Global.setCastling(CastlingPieceType.WhiteShort, false);
                 // If long rook(id=57) moved then disable white long castling
-                if(gl_squares[57] == 0 || gl_squares[57].color != Color.White || gl_squares[57].type != Type.Rook)
-                    Global.setCastling(CastlingType.WhiteLong, false);
+                if(gl_squares[57] == 0 || gl_squares[57].color != Color.White || gl_squares[57].type != PieceType.Rook)
+                    Global.setCastling(CastlingPieceType.WhiteLong, false);
             }else{
                 // If short rook(id=8) moved then disable black short castling
-                if(gl_squares[8] == 0 || gl_squares[8].color != Color.Black || gl_squares[8].type != Type.Rook) 
-                    Global.setCastling(CastlingType.BlackShort, false);
+                if(gl_squares[8] == 0 || gl_squares[8].color != Color.Black || gl_squares[8].type != PieceType.Rook) 
+                    Global.setCastling(CastlingPieceType.BlackShort, false);
                 // If long rook(id=1) moved then disable black long castling
-                if(gl_squares[1] == 0 || gl_squares[1].color != Color.Black || gl_squares[1].type != Type.Rook)
-                    Global.setCastling(CastlingType.BlackLong, false);
+                if(gl_squares[1] == 0 || gl_squares[1].color != Color.Black || gl_squares[1].type != PieceType.Rook)
+                    Global.setCastling(CastlingPieceType.BlackLong, false);
             }
         }
     }
@@ -188,7 +188,7 @@ class GameManager{
      */
     static controlEnPassant(){
         // find all pawns
-        let pawns = BoardManager.getPiecesWithFilter(Type.Pawn, Global.getCurrentMove());
+        let pawns = BoardManager.getPiecesWithFilter(PieceType.Pawn, Global.getCurrentMove());
         for(let pawn of pawns){
             // find square id of pawn
             let square_id = pawn.getSquareId();

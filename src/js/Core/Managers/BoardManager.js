@@ -48,7 +48,7 @@ class BoardManager {
      * @param {Array<Type>} specific_pieces Specific piece types(optional)
      * @returns {boolean}
      */
-    static isSquareHasPiece(square_id, specific_color = null, specific_pieces = [Type.Queen, Type.King, Type.Pawn, Type.Bishop, Type.Rook, Type.Knight]) {
+    static isSquareHasPiece(square_id, specific_color = null, specific_pieces = [PieceType.Queen, PieceType.King, PieceType.Pawn, PieceType.Bishop, PieceType.Rook, PieceType.Knight]) {
         let piece = BoardManager.getPieceBySquareId(square_id);
         if (piece)
             return !(specific_color && piece.color !== specific_color || !specific_pieces.includes(piece.type));

@@ -138,4 +138,16 @@ class MenuHandler{
 
         chess.startStandartGame();
     }
+
+    /**
+     * @static
+     * Start From Position
+     * @param {StartPosition} position
+     * @returns {void}
+     */
+    static startFromPosition(position){
+        let chess = new Chess(); // Singleton Chess Object
+
+        chess.startCustomGame(position);
+    }
 }

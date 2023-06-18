@@ -278,10 +278,10 @@ const Color = {
 }
 
 /**
- * Type Input Enum
+ * Piece Type Input Enum
  * @enum {string}
  */
-const Type = {
+const PieceType = {
     Knight:"knight",
     Queen:"queen",
     King:"king",
@@ -338,7 +338,7 @@ const ValidationType = {
     Boolean:"boolean",
     Object:"object",
     Color:Color,
-    Type:Type,
+    PieceType:PieceType,
     CastlingType:CastlingType,
     EnPassantStatus:EnPassantStatus
 }
@@ -363,4 +363,79 @@ const SquareClickMode = {
     MovePiece:"movePiece",
     ClickSquare:"clickSquare",
     Castling:"castling",
+}
+
+/**
+ * Start Position Enum
+ * @enum {string}
+ */
+const StartPosition = {
+    Castling:[
+        {
+            "color":Color.White,
+            "piece":PieceType.Rook,
+            "position":Square.H8,
+        },
+        {
+            "color":Color.White,
+            "piece":PieceType.Rook,
+            "position":Square.A8,
+        },
+        {
+            "color":Color.White,
+            "piece":PieceType.King,
+            "position":Square.E8,
+        },
+        {
+            "color":Color.Black,
+            "piece":PieceType.Bishop,
+            "position":Square.B2,
+        }
+    ],
+    EnPassant:[
+        {
+            "color":Color.Black,
+            "piece":PieceType.Pawn,
+            "position":Square.E2,
+        },
+        {
+            "color":Color.White,
+            "piece":PieceType.Pawn,
+            "position":Square.D7,
+        }
+    ],
+    Check1:[
+        {
+            "color":Color.Black,
+            "piece":PieceType.King,
+            "position":Square.E1,
+        },
+        {
+            "color":Color.White,
+            "piece":PieceType.Queen,
+            "position":Square.H5,
+        },
+        {
+            "color":Color.Black,
+            "piece":PieceType.Rook,
+            "position":Square.G2,
+        }
+    ],
+    Check2:[
+        {
+            "color":Color.White,
+            "piece":PieceType.King,
+            "position":Square.E9,
+        },
+        {
+            "color":Color.Black,
+            "piece":PieceType.Rook,
+            "position":Square.F1,
+        },
+        {
+            "color":Color.Black,
+            "piece":PieceType.Rook,
+            "position":Square.D1,
+        }
+    ]
 }
