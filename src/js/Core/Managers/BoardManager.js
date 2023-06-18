@@ -2,7 +2,7 @@ class BoardManager {
     /**
      * @static
      * Get Pieces By Filter
-     * @param {Type} type Type of pieces to get
+     * @param {PieceType} type Type of pieces to get
      * @param {Color} color Color of pieces to get
      * @returns {(Array<Piece>|null)}
      */
@@ -26,18 +26,6 @@ class BoardManager {
     static getPieceBySquareId(square_id) {
         let piece = Global.getSquare(square_id);
         return piece !== 0 ? piece : false;
-    }
-
-    /**
-     * @static
-     * Get Piece By Filter
-     * @param {Type} type 
-     * @param {Color} color 
-     * @returns {(Piece|nulll)}
-     */
-    static getPieceByFilter(type, color){
-        let pieces = this.getPiecesWithFilter(type, color);
-        return pieces ? pieces[0] : null;
     }
 
     /**

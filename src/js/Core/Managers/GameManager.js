@@ -98,18 +98,14 @@ class GameManager{
      * @returns {boolean}
      */
     static isLongCastlingAvailable(){
-        let gl_castling_control = BoardManager.getCastlingControl();
-        let gl_current_move = BoardManager.getCurrentMove();
-        let gl_squares = BoardManager.getSquares();
-
-        if(gl_castling_control[gl_current_move + "-" + CastlingPieceType.Long] == false)
+        if(Global.getCastling(gl_current_move + "-" + CastlingPieceType.Long) == false)
             return false;            
 
         // Find long rook square_id by player's color
-        let long_rook = gl_current_move == Color.White ? 57 : 1;
+        let long_rook = Global.getCurrentMove() == Color.Black ? 57 : 1;
 
         // If between long rook and king is not empty or long rook is color not equal player's color or long rook is type not rook then return false
-        if(gl_squares[long_rook + 1] != 0 || gl_squares[long_rook + 2] != 0 || gl_squares[long_rook + 3] != 0 || gl_squares[long_rook].color != gl_current_move || gl_squares[long_rook].type != PieceType.Rook)
+        if(Global.getSquare(long_rook + 1) != 0 || Global.getSquare(long_rook + 2) != 0 || Global.getSquare(long_rook + 3) != 0 || Global.getSquare(long_rook).color != Global.getCurrentMove() || Global.getSquare(long_rook).type != PieceType.Rook)
             return false;
 
         // Control check status of every squares between long rook and king
@@ -125,18 +121,14 @@ class GameManager{
      * @returns {boolean}
      */
     static isShortCastlingAvailable(){
-        let gl_castling_control = BoardManager.getCastlingControl();
-        let gl_current_move = BoardManager.getCurrentMove();
-        let gl_squares = BoardManager.getSquares();
-
-        if(gl_castling_control[gl_current_move + "-" + CastlingPieceType.Short] == false)
+        if(Global.getCastling(Global.getCurrentMove() + "-" + CastlingPieceType.Short) == false)
             return false;
 
         // Find short rook square_id by player's color
-        let short_rook = gl_current_move == Color.White ? 64 : 8;
+        let short_rook = Global.getCurrentMove() == Color.Black ? 64 : 8;
 
         // If between short rook and king is not empty or short rook is color not equal player's color or short rook is type not rook then return false
-        if(gl_squares[short_rook - 1] != 0 || gl_squares[short_rook - 2] != 0 || gl_squares[short_rook].color != gl_current_move || gl_squares[short_rook].type != PieceType.Rook)
+        if(Global.getSquare(short_rook - 1) != 0 || Global.getSquare(short_rook - 2) != 0 || Global.getSquare(short_rook).color != Global.getCurrentMove() || Global.getSquare(short_rook).type != PieceType.Rook)
             return false;
         
         // Control check status of every squares between short rook and king
@@ -148,20 +140,18 @@ class GameManager{
 
     /**
      * @static
-     * Control castling
-     * @param {Type} moved_piece_type Type of moved piece
-     * @param {Color} moved_piece_color Color of moved piece
+     * Is current player can castling?
      * @returns {void}
      */
-    static changeCastlingStatus(moved_piece_type, moved_piece_color){
-        let gl_current_move = BoardManager.getCurrentMove();
-        let gl_squares = BoardManager.getSquares();
-
+    static isCastlingAvailable(){
         // If king is moved then disable short and long castling
-        if(moved_piece_type == PieceType.King){
-            Global.setCastling(gl_current_move + "-" + CastlingPieceType.Short, false);
-            Global.setCastling(gl_current_move + "-" + CastlingPieceType.Long, false);
-        }
+        let player_king = BoardManager.getPiecesWithFilter(PieceType.King, Global.getCurrentMove())[0];
+        let player_king_square_id = player_king.getSquareId();
+        if(player_king_square_id != 5)
+        Global.setCastling(Global.getCurrentMove() + "-" + CastlingPieceType.Short, false);
+        Global.setCastling(Global.getCurrentMove() + "-" + CastlingPieceType.Long, false);
+        Global.setCastling(gl_current_move + "-" + CastlingPieceType.Long, false);
+        Global.setCastling(gl_current_move + "-" + CastlingPieceType.Long, false);
         else if(moved_piece_type == PieceType.Rook){
             if(moved_piece_color == Color.White){
                 // If short rook(id=64) moved then disable white short castling
@@ -183,10 +173,10 @@ class GameManager{
 
     /**
      * @static
-     * Control En Passant
+     * Is any pawn can do en passant?
      * @returns {void}
      */
-    static controlEnPassant(){
+    static isEnPassantAvailable(){
         // find all pawns
         let pawns = BoardManager.getPiecesWithFilter(PieceType.Pawn, Global.getCurrentMove());
         for(let pawn of pawns){

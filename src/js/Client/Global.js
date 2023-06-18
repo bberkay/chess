@@ -93,9 +93,13 @@ class Global{
     /**
      * @static
      * Get Castling Status
+     * @param {string} castling_type
      * @returns {JSON}
      */
-    static getCastling(){
+    static getCastling(castling_type=null){
+        if(castling_type)
+            return this.#gl_castling_control[castling_type];
+
         return this.#gl_castling_control;
     }
     

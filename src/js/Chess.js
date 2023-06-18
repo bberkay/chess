@@ -36,17 +36,17 @@ class Chess{
             let square_id = i <= 16 ? i : i + 32; // Position of the piece on the board
 
             if (square_id == 1 || square_id == 8 || square_id == 57 || square_id == 64) // Rook
-                this.createPiece(PieceType.Rook, square_id < 57 ? Color.White : Color.Black, square_id);
+                this.createPiece(PieceType.Rook, square_id < 57 ? Color.Black : Color.White, square_id);
             else if (square_id == 2 || square_id == 7 || square_id == 58 || square_id == 63) // Knight
-                this.createPiece(PieceType.Knight, square_id < 58 ? Color.White : Color.Black, square_id);
+                this.createPiece(PieceType.Knight, square_id < 58 ? Color.Black : Color.White, square_id);
             else if (square_id == 3 || square_id == 6 || square_id == 59 || square_id == 62)// Bishop
-                this.createPiece(PieceType.Bishop, square_id < 58 ? Color.White : Color.Black, square_id);
+                this.createPiece(PieceType.Bishop, square_id < 58 ? Color.Black : Color.White, square_id);
             else if (square_id == 4 || square_id == 60) // Queen 
-                this.createPiece(PieceType.Queen, square_id < 60 ? Color.White : Color.Black, square_id);
+                this.createPiece(PieceType.Queen, square_id < 60 ? Color.Black : Color.White, square_id);
             else if (square_id == 5 || square_id == 61) // King
-                this.createPiece(PieceType.King, square_id < 61 ? Color.White : Color.Black, square_id);            
+                this.createPiece(PieceType.King, square_id < 61 ? Color.Black : Color.White, square_id);            
             else if (square_id >= 9 && square_id < 17 || square_id > 48 && square_id < 57) // Pawn 
-                this.createPiece(PieceType.Pawn, square_id < 48 ? Color.White : Color.Black, square_id);
+                this.createPiece(PieceType.Pawn, square_id < 48 ? Color.Black : Color.White, square_id);
         }
     }
 
@@ -118,21 +118,6 @@ class Chess{
                 break;
         }
     }
-
-
-    /*test(){
-        // Move Piece, Control Castling
-        else if(this.selected_piece && this.playable_squares.includes(square_id)){
-            if(is_castling_move) // Control is castling move
-                this.#castling(square_id); // FIXME: MovePiece metodunun içine alınacak.
-            else{
-                this.#movePiece(square_id); // Move piece and control check then end turn
-
-                // If moved piece king or rook then change castling status, FIXME: MovePiece metodunun içine alınacak.
-                GameManager.changeCastlingStatus(this.selected_piece.type, this.selected_piece.color);
-            }
-        }
-    }*/
 
     /**
      * @private
@@ -302,7 +287,10 @@ class Chess{
      */
     #endTurn() {
         // Control en passant
-        GameManager.controlEnPassant();
+        GameManager.isEnPassantAvailable();
+
+        // Control castling
+        GameManager.isCastlingAvailable();
 
         // Set New Turn 
         Global.setNextMove();
