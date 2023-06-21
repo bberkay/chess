@@ -9,9 +9,13 @@
     <link rel="stylesheet" href="src/css/chess.css">
 </head>
 
-<body>
+<body class = "light-mode">
     <div class = "main">
         <div class = "left-menu">
+            <fieldset class = "menu-buttons">
+                <legend>Display</legend>
+                <input type="button" value="Toggle Mode" id="mode" onclick="toggleDisplayMode()">
+            </fieldset>
             <fieldset class = "menu-buttons">
                 <legend>Games</legend>
                 <input type="button" value="Start New Game" onclick="MenuHandler.startStandartGame()">
@@ -192,6 +196,31 @@
                 chess.startGameFromCache();
             else
                 chess.startStandartGame();
+        }
+
+
+        // Dark Mode to not be blind at night, not important
+        var body = document.getElementsByTagName("body")[0];
+        if(Cache.has("display-mode")){
+            if(Cache.get("display-mode") == "dark-mode"){
+                body.classList.add("dark-mode");
+                body.classList.remove("light-mode");
+            }else{
+                body.classList.add("light-mode");
+                body.classList.remove("dark-mode");
+            }
+        }
+
+        function toggleDisplayMode(){
+            if(body.classList.contains("light-mode")){
+                body.classList.add("dark-mode");
+                body.classList.remove("light-mode");
+                Cache.set("display-mode", "dark-mode");
+            }else{
+                body.classList.add("light-mode");
+                body.classList.remove("dark-mode");
+                Cache.set("display-mode", "light-mode");
+            }
         }
     </script>
 </body>

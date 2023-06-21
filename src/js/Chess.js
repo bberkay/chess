@@ -374,10 +374,10 @@ class Chess{
         Global.increaseMoveCount();
 
         // Control en passant after move
-        //GameManager.controlEnPassantAfterMove();
+        GameManager.controlEnPassantAfterMove();
 
         // Control castling after move
-        //GameManager.controlCastlingAfterMove();     
+        GameManager.controlCastlingAfterMove();     
 
         // Control check for player
         this.#controlCheck();

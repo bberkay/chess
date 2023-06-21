@@ -217,20 +217,20 @@ class Global{
         this.#gl_en_passant_control[piece_id] = en_passant_value;
 
         // Save to cache
-        Cache.set("en-passant", JSON.stringify(this.#gl_en_passant_control));
+        Cache.add("en-passant", this.#gl_en_passant_control);
     }
 
     /**
      * @static
      * Set En passant
      * @param {JSON} en_passant_value
-     * @returns {void1}
+     * @returns {void}
      */
     static setEnPassant(en_passant_value){
         this.#gl_en_passant_control = en_passant_value;
 
         // Save to cache
-        Cache.set("en-passant", JSON.stringify(this.#gl_en_passant_control));
+        Cache.set("en-passant", this.#gl_en_passant_control);
     }
 
     /**

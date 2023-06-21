@@ -32,6 +32,7 @@ class GameManager{
             else if (current_path_direction === Route.Top || current_path_direction === Route.Bottom)
                 return func_operation_control ? operations[1]() : operations[0][Route.Top].concat(operations[0][Route.Bottom]);
         }
+        
         // Array<int>
         let dangerous_squares = [];
         
@@ -40,7 +41,7 @@ class GameManager{
         let temp_player_king;
         let temp_player_piece;
         let change_status = false;
-        let player_king = Storage.get(Global.getCurrentMove() + "-king");
+        let player_king = Storage.get(Global.getCurrentMove() + "-king"); 
 
         // If square_id is not null then control target id for check
         if(square_id){
