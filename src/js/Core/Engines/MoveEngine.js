@@ -1,4 +1,4 @@
-class PieceEngine{
+class MoveEngine{
     /**
      * Create ID for piece(between 1000 and 9999)
      * @returns {int}
@@ -20,7 +20,7 @@ class PieceEngine{
      * @returns {Array<int>}
      */
     #getPlayableSquaresOfBishop(square_id) {
-        return Converter.jsonPathToArrayPath((this.#filterPlayableSquares(square_id, RouteEngine.calcBishopPath(square_id))));
+        return Converter.jsonPathToArrayPath((this.#filterPlayableSquares(square_id, PathEngine.calcBishopPath(square_id))));
     }
 
     /**
@@ -30,15 +30,7 @@ class PieceEngine{
      * @returns {Array<int>}
      */
     #getPlayableSquaresOfRook(square_id) {
-        let playable_squares = Converter.jsonPathToArrayPath(this.#filterPlayableSquares(square_id, RouteEngine.calcRookPath(square_id)));
-
-        // Castling
-        if(GameManager.canShortCastling())
-            playable_squares.push(square_id == 64 || square_id == 57 ? 61 : 5);
-        if(GameManager.canLongCastling())
-            playable_squares.push(square_id == 64 || square_id == 57 ? 61 : 5);
-
-        return playable_squares;
+        return Converter.jsonPathToArrayPath(this.#filterPlayableSquares(square_id, PathEngine.calcRookPath(square_id)));;
     }
 
     /**
@@ -48,7 +40,7 @@ class PieceEngine{
      * @returns {Array<int>}
      */
     #getPlayableSquaresOfQueen(square_id) {
-        return Converter.jsonPathToArrayPath(this.#filterPlayableSquares(square_id, RouteEngine.calcQueenPath(square_id)));
+        return Converter.jsonPathToArrayPath(this.#filterPlayableSquares(square_id, PathEngine.calcQueenPath(square_id)));
     }
 
     /**
@@ -59,7 +51,7 @@ class PieceEngine{
      */
     #getPlayableSquaresOfKing(square_id) {
         let playable_squares = [];
-        let squares = Converter.jsonPathToArrayPath(RouteEngine.calcKingPath(square_id));
+        let squares = Converter.jsonPathToArrayPath(PathEngine.calcKingPath(square_id));
         
         let king = Cache.get(Global.getCurrentMove() + "-king");
 
@@ -68,7 +60,7 @@ class PieceEngine{
                 playable_squares.push(square);
         });
 
-        // Castling
+        // Add Castling
         if(GameManager.isShortCastlingAvailable())
             playable_squares.push(king.color == Color.White ? 64 : 8);
         if(GameManager.isLongCastlingAvailable())
@@ -87,7 +79,7 @@ class PieceEngine{
         // En Passant
         // FIXME: En passant status testleri bitirildikten sonra aksiyon yapılacak.
 
-        return this.#filterPlayableSquares(square_id, RouteEngine.calcPawnPath(square_id));
+        return this.#filterPlayableSquares(square_id, PathEngine.calcPawnPath(square_id));
     }
 
     /**
@@ -97,7 +89,7 @@ class PieceEngine{
      * @returns {Array<int>}
      */
     #getPlayableSquaresOfKnight(square_id) {
-        return this.#filterPlayableSquares(square_id, RouteEngine.calcKnightPath(square_id));
+        return this.#filterPlayableSquares(square_id, PathEngine.calcKnightPath(square_id));
     }
 
     /**
@@ -113,7 +105,7 @@ class PieceEngine{
             return playable_squares;
             
         // get diagonal, row and column with calcqueenpath method
-        let routes = RouteEngine.calcQueenPath(square_id);
+        let routes = PathEngine.calcQueenPath(square_id);
         let king_guard_route = [];
         let enemy_types = [];
         let control = null;

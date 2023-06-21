@@ -1,5 +1,5 @@
 class Piece {
-    #piece_engine = new PieceEngine();
+    #move_engine = new MoveEngine();
 
     /**
      * Create Piece Object
@@ -8,7 +8,7 @@ class Piece {
      * @param {int} square 
      */
     constructor(type, color, square) {
-        this.id = this.#piece_engine.createPieceId();
+        this.id = this.#move_engine.createPieceId();
         this.type = type;
         this.color = color;
         if(this.type === PieceType.Rook || this.type === PieceType.King)
@@ -24,7 +24,7 @@ class Piece {
      * @returns {Array<int>}
      */
     getPlayableSquares() {
-        return this.#piece_engine.getPlayableSquaresOfPiece(this.type, this.getSquareId());
+        return this.#move_engine.getPlayableSquaresOfPiece(this.type, this.getSquareId());
     }
 
     

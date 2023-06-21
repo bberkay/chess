@@ -1,260 +1,187 @@
-class PathEngine {
+class PathEngine{
     /**
-     * Singleton Instance
+     * @static
+     * Calculate Bishop Path
+     * @param {int} square_id Square ID of the bishop
+     * @param {boolean} piece_sensivity To avoid tripping over other pieces.
+     * @returns {JSON}
      */
-    constructor() {
-        if (!PathEngine.instance)
-            PathEngine.instance = this;
+    static calcBishopPath(square_id, piece_sensivity = true) {
+        const route_engine = new RouteEngine(); // singleton instance, all route engine in this class will be the same
+
+        return {
+            // get all squares of diagonal
+            ...route_engine.calcPlayableDiagonalSquares({square_id: square_id, piece_sensivity: piece_sensivity})
+        }
+    }
+
+    /**
+     * @static
+     * Calculate Rook Path
+     * @param {int} square_id Square ID of the rook
+     * @param {boolean} piece_sensivity To avoid tripping over other pieces.
+     * @returns {JSON}
+     */
+    static calcRookPath(square_id, piece_sensivity = true) {
+        const route_engine = new RouteEngine(); // singleton instance, all route engine in this class will be the same
+
+        return {
+            // get all squares of column and row
+            ...route_engine.calcPlayableColumnSquares({square_id: square_id, piece_sensivity: piece_sensivity}),
+            ...route_engine.calcPlayableRowSquares({square_id: square_id, piece_sensivity: piece_sensivity}),
+        }
+    }
+
+    /**
+     * Calculate Queen Path
+     * @param {int} square_id Square ID of the queen
+     * @param {boolean} piece_sensivity To avoid tripping over other pieces.
+     * @returns {JSON}
+     */
+    static calcQueenPath(square_id, piece_sensivity = true) {
+        const route_engine = new RouteEngine(); // singleton instance, all route engine in this class will be the same
+
+        return {
+            // get all squares of column, row and diagonal(UNLIMITED POWEEEER!!!)
+            ...route_engine.calcPlayableColumnSquares({square_id: square_id, piece_sensivity: piece_sensivity}),
+            ...route_engine.calcPlayableRowSquares({square_id: square_id, piece_sensivity: piece_sensivity}),
+            ...route_engine.calcPlayableDiagonalSquares({square_id: square_id, piece_sensivity: piece_sensivity})
+        }
+    }
+
+    /**
+     * Calculate Pawn Path
+     * @param {int} square_id Square ID of the pawn
+     * @returns {JSON}
+     */
+    static calcPawnPath(square_id) {
+        const route_engine = new RouteEngine(); // singleton instance, all route engine in this class will be the same
+
+        let limit = 0;
+        let route = "";
+        let row_of_pawn = route_engine.calcRowOfSquare(square_id);
+
+        let color_of_pawn = BoardManager.getPieceBySquareId(square_id).color;
+        if (color_of_pawn === Color.White) {
+            limit = row_of_pawn === 7 ? 2 : 1;  // if black pawn is start position then 2 square limit else 1
+            route = [Route.Top]; // black goes top
+        } else if (color_of_pawn === Color.Black) {
+            limit = row_of_pawn === 2 ? 2 : 1;
+            route = [Route.Bottom]; // white goes bottom
+        }
+
+        // get first [limit] square of [route] column
+        let playable_squares = route_engine.calcPlayableColumnSquares({
+            square_id: square_id,
+            distance_limit: limit,
+        })[route];
         
-        return PathEngine.instance;
-    }
-    
-    /**
-     * Calculate Column of Square
-     * @param {int} square_id Square ID of the active piece
-     * @returns {int}
-     */
-    calcColumnOfSquare(square_id) {
-        return square_id % 8 === 0 ? 8 : square_id % 8;
-    }
+        // Remove if squares has any piece
+        playable_squares = playable_squares.filter(square => { return Global.getSquare(square) == 0});
 
-    /**
-     * Calculate Row of Square
-     * @param {int} square_id Square ID of the active piece
-     * @returns {int}
-     */
-    calcRowOfSquare(square_id) {
-        return Math.ceil(square_id / 8);
-    }
+        // get first diagonal squares
+        let diagonal_control = route_engine.calcPlayableDiagonalSquares({
+            square_id: square_id,
+            distance_limit: 1,
+        });
 
-    /**
-     * Calculate Column Squares List of Square
-     * @param {int} square_id Square ID of the active piece
-     * @param {(int|null)} distance_limit Move away at most [distance_limit] squares from square.
-     * @param {boolean} piece_sensivity To avoid tripping over other pieces.
-     * @example if square id is 29 then result will be {"top":[5,13,21], "bottom":[37,45,53,61]}
-     * @returns {JSON}
-     */
-    calcPlayableColumnSquares({ square_id, distance_limit = null, piece_sensivity = true }) {
-        let playable_squares = {};
-        let counter, path;
+        // is first diagonal squares has enemy piece then add playable squares
+        if (BoardManager.isSquareHasPiece(diagonal_control[route+"-"+Route.Left][0], Global.getEnemyColor()))
+            playable_squares.push(diagonal_control[route+"-"+Route.Left][0]);
 
-        // Top of Column
-        counter = 1;
-        path = [];
-
-        for (let i = square_id - 8; i > 0; i -= 8) {
-            if (distance_limit && counter > distance_limit)
-                break;
-
-            path = path.concat(this.#calcPlayablePath(i, piece_sensivity));
-            if (path.includes("break")) { // delete "break" from path
-                path.pop();
-                break;
-            }
-            counter += 1;
-        }
-        playable_squares["top"] = path;
-
-        // Bottom of Column
-        counter = 1;
-        path = [];
-
-        for (let i = square_id + 8; i < 65; i += 8) {
-            if (distance_limit && counter > distance_limit)
-                break;
-            path = path.concat(this.#calcPlayablePath(i, piece_sensivity));
-            if (path.includes("break")) {
-                path.pop();
-                break;
-            }
-            counter += 1;
-        }
-        playable_squares["bottom"] = path;
-
-
-        return playable_squares;
-
-    }
-
-    /**
-     * Calculate Row Squares List of Square
-     * @param {int} square_id Square ID of the active piece
-     * @param {(int|null)} distance_limit Move away at most [distance_limit] squares from square.
-     * @param {boolean} piece_sensivity To avoid tripping over other pieces.
-     * @example if square id is 29 then result will be {"left":[25, 26, 27, 28], "right":[30, 31, 32]}
-     * @returns {JSON}
-     */
-    calcPlayableRowSquares({ square_id, distance_limit = null, piece_sensivity = true }) {
-        let playable_squares = {};
-        let row = this.calcRowOfSquare(square_id);
-        let path, counter;
-
-        // Right of Square
-        counter = 1;
-        path = [];
-
-        for (let i = square_id + 1; i <= row * 8; i++) {
-            if (distance_limit && counter > distance_limit)
-                break;
-            path = path.concat(this.#calcPlayablePath(i, piece_sensivity));
-            if (path.includes("break")) { // delete "break" from path
-                path.pop();
-                break;
-            }
-            counter += 1;
-        }
-        playable_squares["right"] = path;
-
-        // Left of Square
-        counter = 1;
-        path = [];
-
-        for (let i = square_id - 1; i >= (row * 8) - 7; i--) {
-            if (distance_limit && counter > distance_limit)
-                break;
-            path = path.concat(this.#calcPlayablePath(i, piece_sensivity));
-            if (path.includes("break")) {
-                path.pop();
-                break;
-            }
-            counter += 1;
-        }
-        playable_squares["left"] = path;
+        if (BoardManager.isSquareHasPiece(diagonal_control[route+"-"+Route.Right][0], Global.getEnemyColor()))
+            playable_squares.push(diagonal_control[route+"-"+Route.Right][0]);
 
         return playable_squares;
     }
 
     /**
-     * Calculate Diagonal Squares List of Piece
-     * @param {int} square_id Square ID of the active piece
-     * @param {(int|null)} distance_limit Move away at most [distance_limit] squares from square.
-     * @param {boolean} piece_sensivity To avoid tripping over other pieces.
-     * @example If square id is 29 then result will be {"top-left": [2, 11, 20], "bottom-right":[38, 47, 56], "top-right": [8, 15, 22], "bottom-left":[36, 43, 50, 57]}
-     * @returns {JSON}
-     */
-    calcPlayableDiagonalSquares({ square_id, distance_limit = null, piece_sensivity = true }) {
-        let playable_squares = {};
-        let path, counter;
-
-        // Top Left Diagonal of Piece
-        path = [];
-        counter = 1;
-
-        if (this.calcColumnOfSquare(square_id) !== 1) { // if piece not on the far left
-            for (let i = square_id - 9; i > 0; i -= 9) {
-                if (distance_limit && counter > distance_limit)
-                    break;
-
-                path = path.concat(this.#calcPlayablePath(i, piece_sensivity));
-                if (path.includes("break")) { // delete "break" from path
-                    path.pop();
-                    break;
-                }
-
-                if(i % 8 == 0 || i % 8 == 1) // if square reach the edges of the board
-                    break;
-
-                counter += 1;
-            }
-        }
-        playable_squares["top-left"] = path;
-
-        // Left Bottom Diagonal of Piece
-        path = [];
-        counter = 1;
-
-        if (this.calcColumnOfSquare(square_id) !== 1) {
-            for (let i = square_id + 7; i < 65; i += 7) {
-                if (distance_limit && counter > distance_limit)
-                    break;
-
-                path = path.concat(this.#calcPlayablePath(i, piece_sensivity));
-                if (path.includes("break")) {
-                    path.pop();
-                    break;
-                }
-
-                if(i % 8 == 0 || i % 8 == 1)
-                    break;
-
-                counter += 1;
-            }
-        }
-        playable_squares["bottom-left"] = path;
-
-        // Top Right Diagonal of Piece
-        path = [];
-        counter = 1;
-
-        if (this.calcColumnOfSquare(square_id) !== 8) { // if piece not on the far right
-            for (let i = square_id - 7; i > 0; i -= 7) {
-                if (distance_limit && counter > distance_limit)
-                    break;
-
-                path = path.concat(this.#calcPlayablePath(i, piece_sensivity));
-                if (path.includes("break")) {
-                    path.pop();
-                    break;
-                }
-
-                if(i % 8 == 0 || i % 8 == 1)
-                    break;
-
-                counter += 1;
-            }
-        }
-        playable_squares["top-right"] = path;
-
-        // Bottom Right Diagonal of Piece
-        path = [];
-        counter = 1;
-        if (this.calcColumnOfSquare(square_id) !== 8) {
-            for (let i = square_id + 9; i < 65; i += 9) {
-                if (distance_limit && counter > distance_limit)
-                    break;
-
-                path = path.concat(this.#calcPlayablePath(i, piece_sensivity));
-                if (path.includes("break")) {
-                    path.pop();
-                    break;
-                }
-
-                if(i % 8 == 0 || i % 8 == 1)
-                    break;
-
-                counter += 1;
-            }
-        }
-        playable_squares["bottom-right"] = path;
-
-        return playable_squares;
-    }
-
-    /**
-     * Calculate Playable Path
-     * @param {int} target_square_id Square ID of square to check
+     * Calculate Knight Path
+     * @param {int} square_id Square ID of the knight
      * @param {boolean} piece_sensivity To avoid tripping over other pieces.
      * @returns {Array<int>}
      */
-    #calcPlayablePath(target_square_id, piece_sensivity = true) {
-        let squares = [];
+    static calcKnightPath(square_id, piece_sensivity = true) {
+        const route_engine = new RouteEngine(); // singleton instance, all route engine in this class will be the same
 
-        // if piece sensivity is true then calculate every piece on the path
-        if (piece_sensivity) {
-            if (BoardManager.isSquareHasPiece(target_square_id, Global.getCurrentMove())) {
-                squares.push("break");
-                return squares;
-            } else if (BoardManager.isSquareHasPiece(target_square_id, Global.getEnemyColor())) {
-                squares.push(target_square_id);
-                squares.push("break");
-                return squares;
-            } else
-                squares.push(target_square_id);
-        } else // if piece sensivity is false then no need control
-            squares.push(target_square_id);
+        // get 2 squares of column
+        let column = Converter.jsonPathToArrayPath(route_engine.calcPlayableColumnSquares({
+            square_id: square_id,
+            distance_limit: 2,
+            piece_sensivity: false
+        })).sort();
+        column = column.filter(item => {
+            return square_id === item - 16 || square_id === item + 16
+        });
 
-        
-        return squares;
+        // get 2 squares of row
+        let row = Converter.jsonPathToArrayPath(route_engine.calcPlayableRowSquares({
+            square_id: square_id,
+            distance_limit: 2,
+            piece_sensivity: false
+        })).sort();
+        row = row.filter(item => {
+            return square_id === item - 2 || square_id === item + 2
+        });
+
+        // get first square of left side and right side at end of the column 
+        let column_sides = [];
+        column.forEach(item => {
+            column_sides.push(Converter.jsonPathToArrayPath(route_engine.calcPlayableRowSquares({
+                square_id: item,
+                distance_limit: 1,
+                piece_sensivity: false
+            })))
+        })
+
+        // get first square of top side and bottom side at end of the row
+        let row_sides = [];
+        row.forEach(item => {
+            row_sides.push(Converter.jsonPathToArrayPath(route_engine.calcPlayableColumnSquares({
+                square_id: item,
+                distance_limit: 1,
+                piece_sensivity: false
+            })))
+        });
+
+        // concat all playable squares
+        let playable_squares = [];
+        column_sides.concat(row_sides).forEach(item => {
+            item.forEach(square => {
+                if(!BoardManager.isSquareHasPiece(square, Global.getCurrentMove()))
+                    playable_squares.push(square);
+            })
+        })
+
+        return playable_squares;
+    }
+
+    /**
+     * @static 
+     * Calculate King Path
+     * @param {int} square_id Square ID of the king
+     * @returns {JSON}
+     */
+    static calcKingPath(square_id) {
+        const route_engine = new RouteEngine(); // singleton instance, all route engine in this class will be the same
+
+        return {
+            // get first square of column, row and diagonal
+            ...route_engine.calcPlayableColumnSquares({
+                square_id: square_id,
+                piece_sensivity: true,
+                distance_limit: 1
+            }),
+            ...route_engine.calcPlayableRowSquares({
+                square_id: square_id,
+                piece_sensivity: true,
+                distance_limit: 1
+            }),
+            ...route_engine.calcPlayableDiagonalSquares({
+                square_id: square_id,
+                piece_sensivity: true,
+                distance_limit: 1
+            })
+        }
     }
 }

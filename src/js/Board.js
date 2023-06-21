@@ -217,6 +217,20 @@ class Board{
     }
 
     /**
+     * Remove effect of all squares
+     * @param {(SquareEffect|Array<SquareEffect>)} effect
+     * @returns {void}
+     */
+    removeEffectOfAllSquares(effect){
+        let squares = document.querySelectorAll(".square");
+        let l = squares.length;
+        for(let i = 0; i < l; i++){
+            this.removeEffectOfSquare(squares[i].id, effect);
+        }
+    }
+
+
+    /**
      * Change Square Mode/Function
      * @param {(Array<int>|Array<Element>|int|Element)} square_id_or_element Square ID or Element of the square to be changed
      * @param {SquareClickMode} mode Mode 

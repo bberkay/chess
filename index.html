@@ -14,7 +14,7 @@
         <div class = "left-menu">
             <fieldset class = "menu-buttons">
                 <legend>Games</legend>
-                <input type="button" value="Start New Game" onclick="MenuHandler.startNewGame()">
+                <input type="button" value="Start New Game" onclick="MenuHandler.startStandartGame()">
                 <input type="button" value="Start Empty Game" onclick="MenuHandler.startEmptyGame()">
             </fieldset>
             <fieldset class = "menu-buttons">
@@ -103,12 +103,64 @@
                             <td>A2xE2</td>
                         </tr>
                     </table>
+                    <fieldset class = "menu-buttons">
+                        <legend>Moves</legend>
+                        <input type="button" value="Show Previous" onclick="">
+                        <input type="button" value="Show Next" onclick="">
+                    </fieldset>
                 </fieldset>
             </div>
-            <div class="notation">
+            <div>
+                <fieldset class = "menu-buttons">
+                    <legend>Match</legend>
+                    <input type="button" value="Propose a Takeback" onclick="">
+                    <input type="button" value="Offer Draw" onclick="">
+                    <input type="button" value="Resign" onclick="">
+                </fieldset>
+            </div>
+            <hr style="margin-top:30px;margin-bottom:30px;">
+            <div>
                 <fieldset>
                     <legend>Log</legend>
                     <p>Coming soon...</p>
+                </fieldset>
+            </div>
+            <div>
+                <fieldset>
+                    <legend>Cache</legend>
+                    <table border="true">
+                        <tr>
+                            <td>A1xE2</td>
+                            <td>A2xE2</td>
+                        </tr>
+                        <tr>
+                            <td>A1xE2</td>
+                            <td>A2xE2</td>
+                        </tr>
+                        <tr>
+                            <td>A1xE2</td>
+                            <td>A2xE2</td>
+                        </tr>
+                    </table>
+                </fieldset>
+            </div>
+            <div>
+                <fieldset>
+                    <legend>Storage</legend>
+                    <table border="true">
+                        <tr>
+                            <td>A1xE2</td>
+                            <td>A2xE2</td>
+                        </tr>
+                        <tr>
+                            <td>A1xE2</td>
+                            <td>A2xE2</td>
+                        </tr>
+                        <tr>
+                            <td>A1xE2</td>
+                            <td>A2xE2</td>
+                        </tr>
+                    </table>
                 </fieldset>
             </div>
         </div>
@@ -117,14 +169,15 @@
     <!-- Import Files -->
     <script src="src/js/Client/Global.js"></script>
     <script src="src/js/Client/Cache.js"></script>
+    <script src="src/js/Client/Storage.js"></script>
     <script src="src/js/Validators/MenuValidator.js"></script>
     <script src="src/js/Validators/ParamValidator.js"></script>
     <script src="src/js/Core/Managers/BoardManager.js"></script>
     <script src="src/js/Core/Managers/GameManager.js"></script>
     <script src="src/js/Core/Utils/Converter.js"></script>
-    <script src="src/js/Core/Engines/PathEngine.js"></script>
     <script src="src/js/Core/Engines/RouteEngine.js"></script>
-    <script src="src/js/Core/Engines/PieceEngine.js"></script>
+    <script src="src/js/Core/Engines/PathEngine.js"></script>
+    <script src="src/js/Core/Engines/MoveEngine.js"></script>
     <script src="src/js/Handler/BoardHandler.js"></script>
     <script src="src/js/Handler/MenuHandler.js"></script>
     <script src="src/js/Models/Validation.js"></script>
@@ -134,13 +187,12 @@
     <script>
         const chess = new Chess();
 
-        if(document.getElementById("chessboard").innerHTML == "")
-            chess.startStandartGame();
-
-        /*chess.startCustomGame([
-             { "piece": Piece.pawn, "color": Color.white, "square": Square.e7 },
-             { "piece": Piece.pawn, "color": Color.black, "square": Square.c2 }
-        ]);*/
+        if(document.getElementById("chessboard").innerHTML == ""){
+            if(Cache.has("current-game"))
+                chess.startGameFromCache();
+            else
+                chess.startStandartGame();
+        }
     </script>
 </body>
 

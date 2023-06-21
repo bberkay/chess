@@ -137,11 +137,14 @@ class Global{
 
     /**
      * @static
-     * Set Current Move
+     * Set Next Move
      * @returns {void}
      */
     static setNextMove(){
         this.#gl_current_move = this.#gl_current_move === Color.White ? Color.Black : Color.White;
+
+        // Save to cache
+        Cache.set("current-move", this.#gl_current_move);
     }
 
     /**
@@ -151,6 +154,35 @@ class Global{
      */
     static increaseMoveCount(){
         this.#gl_move_count += 1;
+
+        // Save to cache
+        Cache.set("move-count", this.#gl_move_count);
+    }
+
+    /**
+     * @static
+     * Set Current Move
+     * @param {string} move 
+     * @returns {void}
+     */
+    static setCurrentMove(move){
+        this.#gl_current_move = move;
+
+        // Save to cache
+        Cache.set("current-move", this.#gl_current_move);
+    }
+
+    /**
+     * @static
+     * Set Move Count
+     * @param {int} count
+     * @returns {void}
+     */
+    static setMoveCount(count){
+        this.#gl_move_count = count;
+
+        // Save to cache
+        Cache.set("move-count", this.#gl_move_count);
     }
 
     /**
@@ -183,6 +215,22 @@ class Global{
      */
     static addEnPassant(piece_id, en_passant_value){
         this.#gl_en_passant_control[piece_id] = en_passant_value;
+
+        // Save to cache
+        Cache.set("en-passant", JSON.stringify(this.#gl_en_passant_control));
+    }
+
+    /**
+     * @static
+     * Set En passant
+     * @param {JSON} en_passant_value
+     * @returns {void1}
+     */
+    static setEnPassant(en_passant_value){
+        this.#gl_en_passant_control = en_passant_value;
+
+        // Save to cache
+        Cache.set("en-passant", JSON.stringify(this.#gl_en_passant_control));
     }
 
     /**
@@ -193,6 +241,9 @@ class Global{
      */
     static setCheckedPlayer(color=null){
         this.#gl_checked_player = color;
+
+        // Save to cache
+        Cache.set("checked-player", this.#gl_checked_player);
     }
 
 }
