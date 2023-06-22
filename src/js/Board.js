@@ -158,8 +158,10 @@ class Board{
 
             // Clear effects on the squares
             this.removeEffectOfSquare(squares[i].id, [SquareEffect.Playable, SquareEffect.Killable, SquareEffect.Selected]);
-            if(squares[i].getAttribute("onclick").includes("movePiece")) // If square click mode is move piece then change it to click square
+            if(!BoardManager.getPieceBySquareId(squares[i].id)) // If square click mode is move piece then change it to click square
                 this.changeSquareClickMode(squares[i], SquareClickMode.ClickSquare); // Change square click mode
+            else
+                this.changeSquareClickMode(squares[i], SquareClickMode.SelectPiece); // Change square click mode
         }
     }   
 

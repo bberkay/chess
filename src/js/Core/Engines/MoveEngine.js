@@ -30,7 +30,18 @@ class MoveEngine{
      * @returns {Array<int>}
      */
     #getPlayableSquaresOfRook(square_id) {
-        return Converter.jsonPathToArrayPath(this.#filterPlayableSquares(square_id, PathEngine.calcRookPath(square_id)));;
+        /*
+        TODO: Castling with rook
+        let playable_squares = Converter.jsonPathToArrayPath(this.#filterPlayableSquares(square_id, PathEngine.calcRookPath(square_id)));
+
+        // Add Castling
+        if((GameManager.isShortCastlingAvailable() && square_id == 64 || square_id == 8) || (GameManager.isLongCastlingAvailable() && square_id == 57 || square_id == 1))
+            playable_squares.push(Global.getCurrentMove() == Color.White ? 61 : 5);
+        
+        return playable_squares;
+        */
+
+        return Converter.jsonPathToArrayPath(this.#filterPlayableSquares(square_id, PathEngine.calcRookPath(square_id)));
     }
 
     /**
@@ -52,8 +63,6 @@ class MoveEngine{
     #getPlayableSquaresOfKing(square_id) {
         let playable_squares = [];
         let squares = Converter.jsonPathToArrayPath(PathEngine.calcKingPath(square_id));
-        
-        let king = Cache.get(Global.getCurrentMove() + "-king");
 
         squares.forEach(square => {
             if(!GameManager.isCheck(square))
@@ -62,9 +71,9 @@ class MoveEngine{
 
         // Add Castling
         if(GameManager.isShortCastlingAvailable())
-            playable_squares.push(king.color == Color.White ? 64 : 8);
+            playable_squares.push(Global.getCurrentMove() == Color.White ? 64 : 8);
         if(GameManager.isLongCastlingAvailable())
-            playable_squares.push(king.color == Color.White ? 57 : 1);
+            playable_squares.push(Global.getCurrentMove() == Color.White ? 57 : 1);  
 
         return playable_squares;
     }

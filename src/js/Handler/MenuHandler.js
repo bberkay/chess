@@ -96,6 +96,9 @@ class MenuHandler{
             chess.destroyPiece(Converter.convertSquareToSquareID(square));
         else if(MenuValidator.isValueSquareId(square, "square-error"))
             chess.destroyPiece(parseInt(square));
+
+        // Update current game
+        Cache.set("current-game", Global.getSquares());
     }
       
     /**
@@ -115,6 +118,8 @@ class MenuHandler{
         else if(MenuValidator.isValueSquareId(square, "square-error"))
             chess.createPiece(piece, color, parseInt(square));
 
+        // Update current game
+        Cache.set("current-game", Global.getSquares());
     }
 
     /**

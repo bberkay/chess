@@ -197,10 +197,6 @@ class Chess{
         // Set selected piece
         this.#selected_piece = piece;
         
-        // If selected piece is king or rook then add castling move to piece
-        if(this.#selected_piece.type === PieceType.King || this.#selected_piece.type === PieceType.Rook)
-            this.#addCastlingMoveToPiece();
-        
         // Add selected effect to selected piece
         this.#board.addEffectToSquare(this.#selected_piece.getSquareId(), SquareEffect.Selected);
 
@@ -221,27 +217,6 @@ class Chess{
 
     /**
      * @private
-     * Add castling move to piece(king or rook)
-     * @returns {void}
-     */
-    #addCastlingMoveToPiece(){
-        // FIXME: Bu bölüm engine'e taşınacak.
-        if(GameManager.isShortCastlingAvailable()){
-            if(this.#selected_piece.type === PieceType.King)
-                this.#board.changeSquareClickMode(this.#selected_piece.color === Color.White ? 8 : 64, SquareClickMode.Castling); // Change square click mode for castling
-            else
-                this.#board.changeSquareClickMode(this.#selected_piece.color === Color.White ? 5 : 61, SquareClickMode.Castling); // Change square click mode for castling
-        }
-        if(GameManager.isLongCastlingAvailable()){  
-            if(this.#selected_piece.type === PieceType.King)
-                this.#board.changeSquareClickMode(this.#selected_piece.color === Color.White ? 1 : 57, SquareClickMode.Castling); // Change square click mode for castling
-            else
-                this.#board.changeSquareClickMode(this.#selected_piece.color === Color.White ? 5 : 61, SquareClickMode.Castling); // Change square click mode for castling
-        }
-    }
-
-    /**
-     * @private
      * Clear selected piece
      * @returns {void}
      */
@@ -258,20 +233,26 @@ class Chess{
      * @param {Piece} piece Optional piece information(default selected piece)
      * @returns {void}
      */
-    #movePiece(target_square_id, _piece=null){
-        let piece = _piece == null ? this.#selected_piece : _piece;
+    #movePiece(target_square_id, piece=null){
+        piece = piece == null ? this.#selected_piece : piece;
         
         if(piece.type == PieceType.Rook || piece.type == PieceType.King)
             piece.is_moved = true;
 
-        // Move Piece On Board
+        // Refresh board
         this.#board.refreshBoard();
-        this.#board.movePieceOnBoard(piece, target_square_id);
 
-        // Move Piece To Target Position 
-        const old_square_id = piece.getSquareId();
-        Global.setSquare(target_square_id, piece);
-        Global.setSquare(old_square_id, 0);        
+        // If castling move
+        if(BoardManager.isSquareHasPiece(target_square_id, Color.White, [PieceType.Rook]))
+            this.#castling(target_square_id);
+        else{
+            this.#board.movePieceOnBoard(piece, target_square_id);
+
+            // Move Piece To Target Position 
+            const old_square_id = piece.getSquareId();
+            Global.setSquare(target_square_id, piece);
+            Global.setSquare(old_square_id, 0);        
+        }
     }
 
     /**
@@ -280,7 +261,7 @@ class Chess{
      * @param {int} square_id 
      * @returns {void}
      */
-    #destroyPiece(square_id){
+    destroyPiece(square_id){
         // Remove Piece From Global Squares
         Global.setSquare(square_id, 0);
 
@@ -291,39 +272,23 @@ class Chess{
     /**
      * @private
      * Castling
-     * @param {int} square_id Square ID of rook
+     * @param {int} square_id Square id of rook
      * @returns {void}
      */
-    #castling(square_id){   4
-        let castling_type = square_id % 8 == 0 ? CastlingPieceType.Short : CastlingPieceType.Long;
+    #castling(square_id){
+        let target_square_id;
+
+        // Find castling type and player's king
+        let castling_type = square_id % 8 == 0 ? CastlingType.Short : CastlingType.Long;
         let player_king = Storage.get(Global.getCurrentMove() + "-king");
-        if(castling_type == CastlingPieceType.Short){ 
-            // If castling type short and square id is 64 then for white, else for black(square id is 8)
-            if(square_id == 64){
-                // White King goes to 59(c1) and white short rook(h1, 64) goes to 62(f1)
-                this.#movePiece(63, player_king);
-                this.#movePiece(62, BoardManager.getPieceBySquareID(64));
-                Global.setCastling(CastlingPieceType.WhiteShort, false);
-            }else if(square_id == 8){ 
-                // White King goes to 59(c1) and black short rook(h8, 8) goes to 6(f8)
-                this.#movePiece(7, player_king);
-                this.#movePiece(6, BoardManager.getPieceBySquareID(8));
-                Global.setCastling(CastlingPieceType.BlackShort, false);
-            }
-        }else{
-            // If castling type long and square id is 57 then for white, else for black(square id is 1)
-            if(square_id == 57){ 
-                // White King goes to 59(c1) and white long rook(a1, 57) goes to 60(d1)
-                this.#movePiece(59, player_king);
-                this.#movePiece(60, BoardManager.getPieceBySquareID(57));
-                Global.setCastling(CastlingPieceType.WhiteLong, false);
-            }else if(square_id == 1){
-                // Black King goes to 3(c8) and black long rook(a8, 1) goes to 4(d8)
-                this.#movePiece(3, player_king);
-                this.#movePiece(4, BoardManager.getPieceBySquareID(1));
-                Global.setCastling(CastlingPieceType.BlackLong, false);
-            }
-        }
+        
+        // Move King(if castling type is short then move king to 1 square to the left of rook else move king to 2 square to the right of rook)
+        target_square_id = castling_type == CastlingType.Short ? square_id - 1 : square_id + 2;
+        this.#movePiece(target_square_id, player_king);
+
+        // Move Rook(if castling type is short then move rook to 2 square left of himself else move rook to 3 square right of himself)
+        target_square_id = castling_type == CastlingType.Short ? square_id - 2 : square_id + 3;
+        this.#movePiece(target_square_id, BoardManager.getPieceBySquareId(square_id));
     }
 
     /**

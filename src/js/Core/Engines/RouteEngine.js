@@ -8,24 +8,6 @@ class RouteEngine {
         
         return RouteEngine.instance;
     }
-    
-    /**
-     * Calculate Column of Square
-     * @param {int} square_id Square ID of the active piece
-     * @returns {int}
-     */
-    calcColumnOfSquare(square_id) {
-        return square_id % 8 === 0 ? 8 : square_id % 8;
-    }
-
-    /**
-     * Calculate Row of Square
-     * @param {int} square_id Square ID of the active piece
-     * @returns {int}
-     */
-    calcRowOfSquare(square_id) {
-        return Math.ceil(square_id / 8);
-    }
 
     /**
      * Calculate Column Squares List of Square
@@ -87,7 +69,7 @@ class RouteEngine {
      */
     calcPlayableRowSquares({ square_id, distance_limit = null, piece_sensivity = true }) {
         let playable_squares = {};
-        let row = this.calcRowOfSquare(square_id);
+        let row = Calculator.calcRowOfSquare(square_id);
         let path, counter;
 
         // Right of Square
@@ -141,7 +123,7 @@ class RouteEngine {
         path = [];
         counter = 1;
 
-        if (this.calcColumnOfSquare(square_id) !== 1) { // if piece not on the far left
+        if (Calculator.calcColumnOfSquare(square_id) !== 1) { // if piece not on the far left
             for (let i = square_id - 9; i > 0; i -= 9) {
                 if (distance_limit && counter > distance_limit)
                     break;
@@ -164,7 +146,7 @@ class RouteEngine {
         path = [];
         counter = 1;
 
-        if (this.calcColumnOfSquare(square_id) !== 1) {
+        if (Calculator.calcColumnOfSquare(square_id) !== 1) {
             for (let i = square_id + 7; i < 65; i += 7) {
                 if (distance_limit && counter > distance_limit)
                     break;
@@ -187,7 +169,7 @@ class RouteEngine {
         path = [];
         counter = 1;
 
-        if (this.calcColumnOfSquare(square_id) !== 8) { // if piece not on the far right
+        if (Calculator.calcColumnOfSquare(square_id) !== 8) { // if piece not on the far right
             for (let i = square_id - 7; i > 0; i -= 7) {
                 if (distance_limit && counter > distance_limit)
                     break;
@@ -209,7 +191,7 @@ class RouteEngine {
         // Bottom Right Diagonal of Piece
         path = [];
         counter = 1;
-        if (this.calcColumnOfSquare(square_id) !== 8) {
+        if (Calculator.calcColumnOfSquare(square_id) !== 8) {
             for (let i = square_id + 9; i < 65; i += 9) {
                 if (distance_limit && counter > distance_limit)
                     break;

@@ -100,7 +100,7 @@ class GameManager{
             return false;         
                
         // Find long rook square_id by player's color
-        let long_rook = Global.getCurrentMove() == Color.Black ? 57 : 1;
+        let long_rook = Global.getCurrentMove() == Color.White ? 57 : 1;
 
         // If between long rook and king is not empty or long rook is color not equal player's color or long rook is type not rook then return false
         if(Global.getSquare(long_rook + 1) != 0 || Global.getSquare(long_rook + 2) != 0 || Global.getSquare(long_rook + 3) != 0 || Global.getSquare(long_rook).color != Global.getCurrentMove() || Global.getSquare(long_rook).type != PieceType.Rook)
@@ -123,7 +123,7 @@ class GameManager{
             return false;
 
         // Find short rook square_id by player's color
-        let short_rook = Global.getCurrentMove() == Color.Black ? 64 : 8;
+        let short_rook = Global.getCurrentMove() == Color.White ? 64 : 8;
 
         // If between short rook and king is not empty or short rook is color not equal player's color or short rook is type not rook then return false
         if(Global.getSquare(short_rook - 1) != 0 || Global.getSquare(short_rook - 2) != 0 || Global.getSquare(short_rook).color != Global.getCurrentMove() || Global.getSquare(short_rook).type != PieceType.Rook)
@@ -147,14 +147,14 @@ class GameManager{
 
         // Control every piece, if piece is moved then set castling status false
         pieces.forEach(piece => {
-            if(piece.is_moved){
+            if(piece != undefined && piece.is_moved){
                 if(piece.type == PieceType.King){
                     Global.setCastling(piece.color + "-" + CastlingType.Short, false);
                     Global.setCastling(piece.color + "-" + CastlingType.Long, false);
                 }else if(piece.type == PieceType.Rook){
-                    if(piece.square_id == 1 || piece.square_id == 57)
+                    if(piece.first_square_id == 1 || piece.first_square_id == 57)
                         Global.setCastling(piece.color + "-" + CastlingType.Long, false);
-                    else if(piece.square_id == 8 || piece.square_id == 64)
+                    else if(piece.first_square_id == 8 || piece.first_square_id == 64)
                         Global.setCastling(piece.color + "-" + CastlingType.Short, false);
                 }
             }
@@ -174,7 +174,7 @@ class GameManager{
                 // find square id of pawn
                 let square_id = pawn.getSquareId();
                 // if pawn is white and row number is 4 then pawn can do en passant, if pawn is black and row number is 5 then pawn can do en passant
-                if(pawn.color == Color.White && 40 >= parseInt(square_id) && parseInt(square_id) >= 33 || pawn.color == Color.Black && 32 >= parseInt(square_id) && parseInt(square_id) >= 25)
+                if(pawn.color == Color.White && Calculator.calcRowOfSquare(square_id) == 4 || pawn.color == Color.Black && Calculator.calcRowOfSquare(square_id) == 5)
                     Global.addEnPassant(pawn.id, EnPassantStatus.Ready);
                 else if(Global.getEnPassantStatus(pawn.id) == EnPassantStatus.Ready) // if pawn can do en passant already then can't do anymore or has already false then continue its status
                     Global.addEnPassant(pawn.id, EnPassantStatus.Cant);

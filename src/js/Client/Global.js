@@ -449,14 +449,24 @@ const StartPosition = {
     ],
     EnPassant:[
         {
-            "color":Color.Black,
+            "color":Color.White,
             "piece":PieceType.Pawn,
             "square":Square.E2,
         },
         {
             "color":Color.White,
             "piece":PieceType.Pawn,
+            "square":Square.F2,
+        },
+        {
+            "color":Color.Black,
+            "piece":PieceType.Pawn,
             "square":Square.D7,
+        },
+        {
+            "color":Color.Black,
+            "piece":PieceType.Pawn,
+            "square":Square.C7,
         }
     ],
     Check1:[
