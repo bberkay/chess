@@ -123,7 +123,7 @@ class Chess{
             Global.setCheckedPlayer(checked_player);            
             this.#board.addEffectToSquare(checked_player == Color.White ? Storage.get("white-king").getSquareId() : Storage.get("black-king").getSquareId(), SquareEffect.Checked);
         }
-        Global.setEnPassant(Cache.get("en-passant") || null);
+        GameManager.controlEnPassantAfterMove();
     }
 
     /**
@@ -137,9 +137,10 @@ class Chess{
         // FIXME: Bir den fazla şah olamaz. Validate edilecek.
 
         let piece = new Piece(piece_type, color, target_square_id);
-        if(piece_type == PieceType.King){
+        if(piece_type == PieceType.King)
             Storage.set(color + "-king", piece);
-        }
+        else if(piece_type == PieceType.Pawn)
+            Global.addEnPassant(piece.id, EnPassantStatus.NotReady);
 
         // Create piece on board
         this.#board.createPieceOnBoard(piece, target_square_id);
@@ -342,9 +343,9 @@ class Chess{
         GameManager.controlEnPassantAfterMove();
 
         // Control castling after move
-        GameManager.controlCastlingAfterMove();     
+        //GameManager.controlCastlingAfterMove();     
 
         // Control check for player
-        this.#controlCheck();
+        //this.#controlCheck();
     }
 }

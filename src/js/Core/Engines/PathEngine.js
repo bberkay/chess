@@ -59,7 +59,7 @@ class PathEngine{
 
         let limit = 0;
         let route = "";
-        let row_of_pawn = route_engine.calcRowOfSquare(square_id);
+        let row_of_pawn = Calculator.calcRowOfSquare(square_id);
 
         let color_of_pawn = BoardManager.getPieceBySquareId(square_id).color;
         if (color_of_pawn === Color.White) {

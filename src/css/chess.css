@@ -155,7 +155,7 @@ fieldset{
 }
 
 .en-passant-container{
-    margin-top:-60px;
+    margin-top:-55px;
 }
 
 .en-passant-info{
@@ -164,13 +164,19 @@ fieldset{
     margin:5px;
 }
 
-.en-passant-info[value="true"]{
+.en-passant-info[value="can"]{
     background-color: #379767;
     border:1px solid #379767;
     color: #fff;
 }
 
-.en-passant-info[value="false"]{
+.en-passant-info[value="ready"]{
+    background-color: #D8BA36;
+    border:1px solid #D8BA36;
+    color: #fff;
+}
+
+.en-passant-info[value="cant"]{
     background-color: rgb(223, 48, 48);
     border:1px solid rgb(223, 48, 48);
     color: #fff;

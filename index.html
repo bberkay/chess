@@ -28,12 +28,6 @@
                 <input type="button" value="Check Scenario #1" onclick="MenuHandler.startFromPosition(StartPosition.Check1)">
                 <input type="button" value="Check Scenario #2" onclick="MenuHandler.startFromPosition(StartPosition.Check2)">
             </fieldset>
-            <fieldset class = "menu-buttons">
-                <legend>Info</legend>
-                <input type="button" value="Show Square ID" onclick="MenuHandler.toggleSquareIdList()">
-                <input type="button" value="Show Piece ID" onclick="MenuHandler.togglePieceIdList()">
-                <input type="button" value="Show En Passant Status" onclick="MenuHandler.toggleEnPassantStatus()">
-            </fieldset>
             <fieldset>
                 <legend>Create Piece</legend>
                 <fieldset>
@@ -123,6 +117,14 @@
                 </fieldset>
             </div>
             <hr style="margin-top:30px;margin-bottom:30px;">
+            <div>
+                <fieldset class = "menu-buttons">
+                    <legend>Info</legend>
+                    <input type="button" value="Show Square ID" onclick="MenuHandler.toggleSquareIdList()">
+                    <input type="button" value="Show Piece ID" onclick="MenuHandler.togglePieceIdList()">
+                    <input type="button" value="Show En Passant Status" onclick="MenuHandler.toggleEnPassantStatus()">
+                </fieldset>
+            </div>
             <div>
                 <fieldset>
                     <legend>Log</legend>

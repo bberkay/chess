@@ -168,17 +168,19 @@ class GameManager{
      */
     static controlEnPassantAfterMove(){
         // find all pawns
-        let pawns = BoardManager.getPiecesWithFilter(PieceType.Pawn, Global.getCurrentMove());
+        let pawns = BoardManager.getPiecesWithFilter(PieceType.Pawn);
         if(pawns){
             for(let pawn of pawns){
                 // find square id of pawn
                 let square_id = pawn.getSquareId();
-                // if pawn is white and row number is 4 then pawn can do en passant, if pawn is black and row number is 5 then pawn can do en passant
-                if(pawn.color == Color.White && Calculator.calcRowOfSquare(square_id) == 4 || pawn.color == Color.Black && Calculator.calcRowOfSquare(square_id) == 5)
-                    Global.addEnPassant(pawn.id, EnPassantStatus.Ready);
-                else if(Global.getEnPassantStatus(pawn.id) == EnPassantStatus.Ready) // if pawn can do en passant already then can't do anymore or has already false then continue its status
+                // if pawn can do en passant already then can't do anymore or has already false then continue its status
+                if(Global.getEnPassantStatus(pawn.id) == EnPassantStatus.Ready)
                     Global.addEnPassant(pawn.id, EnPassantStatus.Cant);
-                else// if pawn is white and has not yet reached row number 4 then not-ready, if pawn is black and has not reached yet row number 5 then not-ready
+                // if pawn is white and row number is 4 then pawn can do en passant, if pawn is black and row number is 5 then pawn can do en passant
+                else if((pawn.color == Color.White && Calculator.calcRowOfSquare(square_id) == 4) || (pawn.color == Color.Black && Calculator.calcRowOfSquare(square_id) == 5))
+                    Global.addEnPassant(pawn.id, EnPassantStatus.Ready);
+                // if pawn is white and has not yet reached row number 4 then not-ready, if pawn is black and has not reached yet row number 5 then not-ready
+                else
                     Global.addEnPassant(pawn.id, EnPassantStatus.NotReady);
             }   
         }

@@ -63,11 +63,12 @@ class MenuHandler{
         if(this.is_piece_id_list_shown)
             this.togglePieceID();
 
-        let squares = document.getElementsByClassName("square");
-        for(let square of squares){
-            let status = Global.getEnPassantOfPawn(Global.getSquare(parseInt(square.id)).id); // find en passant status of piece in square
+        let pawns = BoardManager.getPiecesWithFilter(PieceType.Pawn);
+        for(let pawn of pawns){
+            let status = Global.getEnPassantStatus(pawn.id); // find en passant status of piece in square
+            let square = document.getElementById(pawn.getSquareId().toString()); // find square of piece
             if(status != undefined){
-                if(!gl_show_en_passant_status){ // Add info to square
+                if(!this.is_en_passant_status_shown){ // Add info to square
                     square.innerHTML +=  "<div class = 'en-passant-container'><div class = 'en-passant-info' value='" + status + "'>" + status + "</div></div>";     
                 }
                 else{ // remove info from square

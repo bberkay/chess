@@ -215,9 +215,6 @@ class Global{
      */
     static addEnPassant(piece_id, en_passant_value){
         this.#gl_en_passant_control[piece_id] = en_passant_value;
-
-        // Save to cache
-        Cache.add("en-passant", this.#gl_en_passant_control);
     }
 
     /**
@@ -228,9 +225,6 @@ class Global{
      */
     static setEnPassant(en_passant_value){
         this.#gl_en_passant_control = en_passant_value;
-
-        // Save to cache
-        Cache.set("en-passant", this.#gl_en_passant_control);
     }
 
     /**
@@ -363,6 +357,7 @@ const CastlingType = {
  * @enum {string}
  */
 const EnPassantStatus = {
+    Can:"can",
     Ready:"ready",
     NotReady:"not-ready",
     Cant:"cant"
