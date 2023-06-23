@@ -111,6 +111,9 @@ class Chess{
                 this.createPiece(square.type, square.color, i, square.id);
         }
 
+        // Set Playable Squares
+        this.#playable_squares = Cache.get("playable-squares") || [];
+
         // Set Current Move
         Global.setCurrentMove(Cache.get("current-move") || Color.White);
 
@@ -153,7 +156,6 @@ class Chess{
      */
     createPiece(piece_type, color, target_square_id, id=null){
         // FIXME: Bir den fazla şah olamaz. Validate edilecek.
-
         let piece = new Piece(piece_type, color, target_square_id, id);
 
         if(piece_type == PieceType.King)
@@ -351,9 +353,6 @@ class Chess{
      * @returns {void}
      */
     #changeTurn() {
-        // Update current game in cache
-        Cache.set("current-game", Global.getSquares());
-
         // Set last moved piece
         Storage.set("last-moved-piece", this.#selected_piece);
 
@@ -374,5 +373,8 @@ class Chess{
 
         // Control check for player
         //this.#controlCheck();
+
+        // Update game in cache
+        this.#saveGameToCache();
     }
 }

@@ -146,20 +146,36 @@ class GameManager{
     static canPawnEnPassant(square_id, direction){
         const BLACK_EN_PASSANT_ROW = 5;
         const WHITE_EN_PASSANT_ROW = 4;
+        const WHITE_START_ROW = 7;
+        const BLACK_START_ROW = 2;
 
-        const piece = BoardManager.getPieceBySquareId(square_id);
-        const currentRow = Calculator.calcRowOfSquare(square_id);
-        const targetRow = (piece.color === Color.White) ? WHITE_EN_PASSANT_ROW : BLACK_EN_PASSANT_ROW;
+        let piece = BoardManager.getPieceBySquareId(square_id);
+        let currentRow = Calculator.calcRowOfSquare(square_id);
+        let targetRow = (piece.color === Color.White) ? WHITE_EN_PASSANT_ROW : BLACK_EN_PASSANT_ROW;
 
         if (currentRow === targetRow) {
-            const enemyPiece = BoardManager.getPieceBySquareId(direction === EnPassantDirection.Left ? square_id - 1 : square_id + 1);
-            console.log(enemyPiece);
-            if (enemyPiece.type === PieceType.Pawn && enemyPiece.move_count === 1)
+            let targetEnemy = BoardManager.getPieceBySquareId(direction === EnPassantDirection.Left ? square_id - 1 : square_id + 1);
+
+            if (targetEnemy.type === PieceType.Pawn && targetEnemy.moveCount === 1)
                 return true;
-        } 
+
+        }else if(currentRow < targetRow){
+            let targetSquare = 0;
+
+            if(piece.color == Color.White)
+                targetSquare = square_id - ((currentRow - BLACK_START_ROW) * 8 + (direction == EnPassantDirection.Left ? 1 : -1));
+            else
+                targetSquare = square_id + ((WHITE_START_ROW - currentRow) * 8 + (direction == EnPassantDirection.Left ? -1 : 1));
+            
+            if(!BoardManager.getPieceBySquareId(targetSquare))
+                Global.addDisabledEnPassant(piece.id, direction);
+            
+            return false;
+        }
+
+        Global.addDisabledEnPassant(piece.id, true);
 
         return false;
-
     }
 
     /**

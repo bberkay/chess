@@ -209,12 +209,12 @@ class Global{
 
     /**
      * @static
-     * Set En passant
+     * Add piece that can't en passant
      * @param {int} piece_id ID of piece
-     * @param {EnPassant} en_passant_value EN_PASSANT Enum
+     * @param {EnPassantDirection|true} en_passant_value If true, all direction can't en passant
      * @returns {void}
      */
-    static setEnPassant(piece_id, en_passant_value){
+    static addDisabledEnPassant(piece_id, en_passant_value){
         this.#gl_en_passant_control[piece_id] = en_passant_value;
     }
 

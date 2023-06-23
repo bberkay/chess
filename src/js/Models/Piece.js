@@ -12,6 +12,7 @@ class Piece {
      * @param {string} type 
      * @param {string} color 
      * @param {int} square 
+     * @param {int|null} id
      */
     constructor(type, color, square, id = null) {
         this.#type = type;
@@ -19,8 +20,7 @@ class Piece {
         this.#moveCount = 0;
         this.#startPosition = square;
         this.#moveEngine = new MoveEngine();
-        if(!id)
-            this.#id = this.#moveEngine.createPieceId();
+        this.#id = !id ? this.#moveEngine.createPieceId() : id;
 
         // Set Target Square Content to this piece
         Global.setSquare(square, this);
