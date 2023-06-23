@@ -138,6 +138,54 @@ class GameManager{
 
     /**
      * @static
+     * Can current player's(or selected pawn) pawn do left en passant?
+     * @param {int} square_id Square Id of pawn
+     * @param {EnPassantDirection} direction Direction of en passant
+     * @returns {boolean}
+     */
+    static canPawnEnPassant(square_id, direction){
+        const BLACK_EN_PASSANT_ROW = 5;
+        const WHITE_EN_PASSANT_ROW = 4;
+
+        const piece = BoardManager.getPieceBySquareId(square_id);
+        const currentRow = Calculator.calcRowOfSquare(square_id);
+        const targetRow = (piece.color === Color.White) ? WHITE_EN_PASSANT_ROW : BLACK_EN_PASSANT_ROW;
+
+        if (currentRow === targetRow) {
+            const enemyPiece = BoardManager.getPieceBySquareId(direction === EnPassantDirection.Left ? square_id - 1 : square_id + 1);
+            console.log(enemyPiece);
+            if (enemyPiece.type === PieceType.Pawn && enemyPiece.move_count === 1)
+                return true;
+        } 
+
+        return false;
+
+    }
+
+    /**
+     * @static
+     * Can current player's(or selected pawn) pawn do left en passant?
+     * @param {int} square_id Square Id of pawn
+     * @returns {boolean}
+     */
+    static canPawnDoLeftEnPassant(square_id){
+        return this.canPawnEnPassant(square_id, EnPassantDirection.Left);
+    }
+
+
+    /**
+     * @static
+     * Can current player's(or selected pawn) pawn do right en passant?
+     * @param {int} square_id Square Id of pawn
+     * @returns {boolean}
+     */
+    static canPawnDoRightEnPassant(square_id){
+        return this.canPawnEnPassant(square_id, EnPassantDirection.Right);
+    }
+
+    
+    /**
+     * @static
      * Control castling status of every piece that can castling after move
      * @returns {void}
      */
@@ -160,30 +208,4 @@ class GameManager{
             }
         });
     }
-
-    /**
-     * @static
-     * Control en passant status of every pawn after move
-     * @returns {void}
-     */
-    static controlEnPassantAfterMove(){
-        // find all pawns
-        let pawns = BoardManager.getPiecesWithFilter(PieceType.Pawn);
-        if(pawns){
-            for(let pawn of pawns){
-                // find square id of pawn
-                let square_id = pawn.getSquareId();
-                // if pawn can do en passant already then can't do anymore or has already false then continue its status
-                if(Global.getEnPassantStatus(pawn.id) == EnPassantStatus.Ready)
-                    Global.addEnPassant(pawn.id, EnPassantStatus.Cant);
-                // if pawn is white and row number is 4 then pawn can do en passant, if pawn is black and row number is 5 then pawn can do en passant
-                else if((pawn.color == Color.White && Calculator.calcRowOfSquare(square_id) == 4) || (pawn.color == Color.Black && Calculator.calcRowOfSquare(square_id) == 5))
-                    Global.addEnPassant(pawn.id, EnPassantStatus.Ready);
-                // if pawn is white and has not yet reached row number 4 then not-ready, if pawn is black and has not reached yet row number 5 then not-ready
-                else
-                    Global.addEnPassant(pawn.id, EnPassantStatus.NotReady);
-            }   
-        }
-    }
-
 }

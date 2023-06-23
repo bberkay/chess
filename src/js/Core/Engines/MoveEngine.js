@@ -71,9 +71,9 @@ class MoveEngine{
 
         // Add Castling
         if(GameManager.isShortCastlingAvailable())
-            playable_squares.push(Global.getCurrentMove() == Color.White ? 64 : 8);
+            playable_squares.push(Global.getCurrentMove() === Color.White ? 64 : 8);
         if(GameManager.isLongCastlingAvailable())
-            playable_squares.push(Global.getCurrentMove() == Color.White ? 57 : 1);  
+            playable_squares.push(Global.getCurrentMove() === Color.White ? 57 : 1);  
 
         return playable_squares;
     }
@@ -85,10 +85,16 @@ class MoveEngine{
      * @returns {Array<int>}
      */
     #getPlayableSquaresOfPawn(square_id) {
-        // En Passant
-        // FIXME: En passant status testleri bitirildikten sonra aksiyon yapılacak.
+        let piece = BoardManager.getPieceBySquareId(square_id);
+        let playable_squares = this.#filterPlayableSquares(square_id, PathEngine.calcPawnPath(square_id));
 
-        return this.#filterPlayableSquares(square_id, PathEngine.calcPawnPath(square_id));
+        // Add En Passant
+        if(GameManager.canPawnDoLeftEnPassant(square_id))
+            playable_squares.push(piece.color == Color.White ? square_id - 9 : square_id + 7);
+        if(GameManager.canPawnDoRightEnPassant(square_id))
+            playable_squares.push(piece.color == Color.White ? square_id - 7 : square_id + 9);
+
+        return playable_squares;
     }
 
     /**
@@ -109,7 +115,7 @@ class MoveEngine{
      * @returns {Array<int>}
      */
     #filterPlayableSquares(square_id, playable_squares = null) {
-        let king = Cache.get(Global.getCurrentMove() + "-king");
+        let king = Storage.get(Global.getCurrentMove() + "-king");
         if(!king)
             return playable_squares;
             

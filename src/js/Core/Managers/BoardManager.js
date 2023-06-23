@@ -33,13 +33,17 @@ class BoardManager {
      * Is Square Has Piece ?
      * @param {int} square_id Square ID of the target square
      * @param {Color} specific_color Specific Color(optional)
-     * @param {Array<Type>} specific_pieces Specific piece types(optional)
+     * @param {PieceType|Array<PieceType>} specific_pieces Specific piece types(optional)
      * @returns {boolean}
      */
     static isSquareHasPiece(square_id, specific_color = null, specific_pieces = [PieceType.Queen, PieceType.King, PieceType.Pawn, PieceType.Bishop, PieceType.Rook, PieceType.Knight]) {
+        if(specific_pieces instanceof String)
+            specific_pieces = [specific_pieces];
+
         let piece = BoardManager.getPieceBySquareId(square_id);
         if (piece)
             return !(specific_color && piece.color !== specific_color || !specific_pieces.includes(piece.type));
+        
         return false;
     }
 }

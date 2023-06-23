@@ -65,23 +65,4 @@ class Cache{
     static has(key){
         return localStorage.getItem(key) != undefined;
     }
-
-    /**
-     * Find a value in the list
-     * @param {string} list_name
-     * @param {string} value
-     * @returns {any|boolean} If value is found then return value, else return false
-     */
-    static find(list_name, value){
-        let item = JSON.parse(localStorage.getItem(list_name));
-
-        if(item != null){         
-            for(let i = 0; i < item.length; i++)
-                if(value in item[i])
-                    return item[i][value];
-   
-        }
-
-        return false;
-    }
 }

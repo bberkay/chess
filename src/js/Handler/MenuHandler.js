@@ -4,7 +4,6 @@ class MenuHandler{
      * Menu variables
      */
     is_piece_id_list_shown = false; // Is piece id list shown ?
-    is_en_passant_status_shown = false; // Is en passant status shown ?
 
     /**
      * @static
@@ -51,36 +50,6 @@ class MenuHandler{
         }
 
         this.is_piece_id_list_shown = !this.is_piece_id_list_shown;
-    }
-
-    /**
-     * @static
-     * Show/Visible En Passant Status
-     * @returns {void}
-     */
-    static toggleEnPassantStatus(){
-        // If piece id list is shown then hide it
-        if(this.is_piece_id_list_shown)
-            this.togglePieceID();
-
-        let pawns = BoardManager.getPiecesWithFilter(PieceType.Pawn);
-        for(let pawn of pawns){
-            let status = Global.getEnPassantStatus(pawn.id); // find en passant status of piece in square
-            let square = document.getElementById(pawn.getSquareId().toString()); // find square of piece
-            if(status != undefined){
-                if(!this.is_en_passant_status_shown){ // Add info to square
-                    square.innerHTML +=  "<div class = 'en-passant-container'><div class = 'en-passant-info' value='" + status + "'>" + status + "</div></div>";     
-                }
-                else{ // remove info from square
-                    let info = document.getElementsByClassName("en-passant-container");
-                    for(let element of info){
-                        element.remove();
-                    }
-                }
-            }
-        }
-                
-        this.is_en_passant_status_shown = !this.is_en_passant_status_shown;
     }
 
     /**

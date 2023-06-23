@@ -1,5 +1,11 @@
 class Piece {
-    #move_engine = new MoveEngine();
+    // Private properties
+    #color;
+    #type;
+    #moveCount;
+    #startPosition;
+    #moveEngine;
+    #id;
 
     /**
      * Create Piece Object
@@ -7,12 +13,14 @@ class Piece {
      * @param {string} color 
      * @param {int} square 
      */
-    constructor(type, color, square) {
-        this.id = this.#move_engine.createPieceId();
-        this.type = type;
-        this.color = color;
-        this.first_square_id = square;
-        this.is_moved = false;
+    constructor(type, color, square, id = null) {
+        this.#type = type;
+        this.#color = color;
+        this.#moveCount = 0;
+        this.#startPosition = square;
+        this.#moveEngine = new MoveEngine();
+        if(!id)
+            this.#id = this.#moveEngine.createPieceId();
 
         // Set Target Square Content to this piece
         Global.setSquare(square, this);
@@ -24,9 +32,8 @@ class Piece {
      * @returns {Array<int>}
      */
     getPlayableSquares() {
-        return this.#move_engine.getPlayableSquaresOfPiece(this.type, this.getSquareId());
+        return this.#moveEngine.getPlayableSquaresOfPiece(this.#type, this.getSquareId());
     }
-
     
     /**
      * @public
@@ -38,5 +45,59 @@ class Piece {
             if (Global.getSquare(parseInt(k)) === this)
                 return parseInt(k);
         }
+    }
+
+    /**
+     * @public
+     * Increase move count of Piece
+     * @returns {void}
+     */
+    increaseMoveCount() {
+        this.#moveCount++;
+    }
+
+    /**
+     * @public
+     * Get Move Count of Piece
+     * @returns {int}
+     */
+    get moveCount() {
+        return this.#moveCount;
+    }
+
+    /**
+     * @public
+     * Get Start Position of Piece
+     * @returns {int}
+     */
+    get startPosition() {
+        return this.#startPosition;
+    }
+
+    /**
+     * @public
+     * Get Type of Piece
+     * @returns {string}
+     */
+    get type() {
+        return this.#type;
+    }
+
+    /**
+     * @public
+     * Get Color of Piece
+     * @returns {string}
+     */
+    get color() {
+        return this.#color;
+    }
+
+    /**
+     * @public
+     * Get ID of Piece
+     * @returns {int}
+     */
+    get id() {
+        return this.#id;
     }
 }

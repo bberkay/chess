@@ -105,13 +105,14 @@ class Global{
     
     /**
      * @static
-     * Get En passant Status
+     * Get En passant
      * @param {(int|null)} pawn_id
      * @returns {(JSON|EnPassantStatus)}
      */
-    static getEnPassantStatus(pawn_id=null){
+    static getEnPassant(pawn_id=null){
         if(pawn_id)
             return this.#gl_en_passant_control[pawn_id];
+
         return this.#gl_en_passant_control;
     }
 
@@ -176,7 +177,7 @@ class Global{
      * @static
      * Set Move Count
      * @param {int} count
-     * @returns {void}
+     * @returns {voi d}
      */
     static setMoveCount(count){
         this.#gl_move_count = count;
@@ -208,23 +209,13 @@ class Global{
 
     /**
      * @static
-     * Add En passant to list
+     * Set En passant
      * @param {int} piece_id ID of piece
      * @param {EnPassant} en_passant_value EN_PASSANT Enum
      * @returns {void}
      */
-    static addEnPassant(piece_id, en_passant_value){
+    static setEnPassant(piece_id, en_passant_value){
         this.#gl_en_passant_control[piece_id] = en_passant_value;
-    }
-
-    /**
-     * @static
-     * Set En passant
-     * @param {JSON} en_passant_value
-     * @returns {void}
-     */
-    static setEnPassant(en_passant_value){
-        this.#gl_en_passant_control = en_passant_value;
     }
 
     /**
@@ -352,15 +343,9 @@ const CastlingType = {
     Long:"long"
 }
 
-/**
- * En Passant Enum
- * @enum {string}
- */
-const EnPassantStatus = {
-    Can:"can",
-    Ready:"ready",
-    NotReady:"not-ready",
-    Cant:"cant"
+const EnPassantDirection = {
+    Left:"left",
+    Right:"right"
 }
 
 /**
@@ -390,7 +375,7 @@ const ValidationType = {
     Color:Color,
     PieceType:PieceType,
     CastlingType:CastlingType,
-    EnPassantStatus:EnPassantStatus
+    EnPassantDirection:EnPassantDirection
 }
 
 /**
@@ -412,7 +397,6 @@ const SquareClickMode = {
     SelectPiece:"selectPiece",
     MovePiece:"movePiece",
     ClickSquare:"clickSquare",
-    Castling:"castling",
 }
 
 /**

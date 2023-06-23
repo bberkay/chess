@@ -31,12 +31,12 @@ class Chess{
         Global.setCurrentMove("white");
         Global.setMoveCount(1);
 
+        // Create Board
+        this.#board.createBoard();
+
         // Create squares/backend
         for (let i = 1; i < 65; i++)
             Global.setSquare(i, 0);   
-
-        // Create Board
-        this.#board.createBoard();
 
         // Create Pieces
         for (let i = 1; i <= 32; i++) {
@@ -57,7 +57,7 @@ class Chess{
         }
 
         // Add to cache current game
-        Cache.set("current-game", Global.getSquares());
+        this.#saveGameToCache();
     }
 
     /**
@@ -74,12 +74,12 @@ class Chess{
         Global.setCurrentMove("white");
         Global.setMoveCount(1);
 
+        // Create Board
+        this.#board.createBoard();
+
         // Create squares/backend
         for (let i = 1; i < 65; i++)
             Global.setSquare(i, 0);
-
-        // Create Board
-        this.#board.createBoard();
 
         // Create Pieces
         if(pieces){ 
@@ -89,7 +89,7 @@ class Chess{
         }
 
         // Add to cache current game
-        Cache.set("current-game", Global.getSquares());
+        this.#saveGameToCache();
     }
     
     /**
@@ -99,31 +99,48 @@ class Chess{
     startGameFromCache(){
         let squares = Cache.get("current-game");
 
-        // Create squares/backend
-        for (let i = 1; i < 65; i++)
-            Global.setSquare(i, squares[i]);
-
         // Create Board
         this.#board.createBoard();
 
         // Create Pieces
         for (let i = 1; i < 65; i++){
-            const temp = squares[i];
+            let square = squares[i];
             Global.setSquare(i, 0);
 
-            if(squares[i] != 0)
-                this.createPiece(temp.type, temp.color, i);
+            if(square != 0)
+                this.createPiece(square.type, square.color, i, square.id);
         }
 
-        // Set status
+        // Set Current Move
         Global.setCurrentMove(Cache.get("current-move") || Color.White);
+
+        // Set Move Count
         Global.setMoveCount(Cache.get("move-count") || 0);
+
+        // Set Checked Player
         let checked_player = Cache.get("checked-player");
         if(checked_player){
             Global.setCheckedPlayer(checked_player);            
             this.#board.addEffectToSquare(checked_player == Color.White ? Storage.get("white-king").getSquareId() : Storage.get("black-king").getSquareId(), SquareEffect.Checked);
         }
-        GameManager.controlEnPassantAfterMove();
+    }
+
+    /**
+     * @private
+     * Save Game To Cache
+     * @returns {void}
+     */
+    #saveGameToCache(){
+        let squares = Global.getSquares();
+        let cacheData = {};
+
+        // Save Current Game
+        for (let square in squares) {
+            let content = squares[square];
+            cacheData[square] = content == 0 ? 0 : { id: content.id, type: content.type, color: content.color };
+        }
+
+        Cache.set("current-game", cacheData);
     }
 
     /**
@@ -131,16 +148,16 @@ class Chess{
      * @param {string} piece_type Type of the piece
      * @param {string} color Color of the piece
      * @param {int} target_square_id Target square id of the piece
+     * @param {int} id ID of the piece
      * @returns {void}
      */
-    createPiece(piece_type, color, target_square_id){
+    createPiece(piece_type, color, target_square_id, id=null){
         // FIXME: Bir den fazla şah olamaz. Validate edilecek.
 
-        let piece = new Piece(piece_type, color, target_square_id);
+        let piece = new Piece(piece_type, color, target_square_id, id);
+
         if(piece_type == PieceType.King)
             Storage.set(color + "-king", piece);
-        else if(piece_type == PieceType.Pawn)
-            Global.addEnPassant(piece.id, EnPassantStatus.NotReady);
 
         // Create piece on board
         this.#board.createPieceOnBoard(piece, target_square_id);
@@ -164,10 +181,6 @@ class Chess{
                 break;
             case SquareClickMode.MovePiece:
                 this.#movePiece(square_id);
-                this.#changeTurn();
-                break;
-            case SquareClickMode.Castling:
-                this.#castling(square_id);
                 this.#changeTurn();
                 break;
             default:
@@ -201,15 +214,19 @@ class Chess{
         // Add selected effect to selected piece
         this.#board.addEffectToSquare(this.#selected_piece.getSquareId(), SquareEffect.Selected);
 
-        // Get playable squares of selected piece 
-        if(!Cache.find("playable_squares", this.#selected_piece.id)){ // If playable squares not in cache
+        // Get playable squares of selected piece
+        let cache_playable_squares = Cache.get("playable_squares");
+
+        // If playable squares not in cache
+        if(!cache_playable_squares || cache_playable_squares[this.#selected_piece.id] === undefined){ 
             this.#playable_squares = this.#selected_piece.getPlayableSquares();   
 
             // Add playable squares to cache
             Cache.add("playable_squares", {[this.#selected_piece.id]:this.#playable_squares});
         }
-        else{ // If playable squares in cache
-            this.#playable_squares = Cache.get("playable_squares")[this.#selected_piece.id];
+        // If playable squares in cache
+        else{ 
+            this.#playable_squares = cache_playable_squares[this.#selected_piece.id];
         } 
         
         // Show playable squares of selected piece
@@ -236,24 +253,25 @@ class Chess{
      */
     #movePiece(target_square_id, piece=null){
         piece = piece == null ? this.#selected_piece : piece;
-        
-        if(piece.type == PieceType.Rook || piece.type == PieceType.King)
-            piece.is_moved = true;
+        piece.increaseMoveCount();
 
         // Refresh board
         this.#board.refreshBoard();
 
         // If castling move
-        if(BoardManager.isSquareHasPiece(target_square_id, Color.White, [PieceType.Rook]))
-            this.#castling(target_square_id);
-        else{
-            this.#board.movePieceOnBoard(piece, target_square_id);
+        if(BoardManager.isSquareHasPiece(target_square_id, Color.White, PieceType.Rook))
+            this.#doCastling(target_square_id, BoardManager.getPieceBySquareId(target_square_id));
+        // If en passant move
+        else if(piece.type == PieceType.Pawn && !BoardManager.getPieceBySquareId(target_square_id) && (target_square_id != piece.getSquareId() + 8 && target_square_id != piece.getSquareId() - 8))
+            this.#doEnPassant(target_square_id, piece);
 
-            // Move Piece To Target Position 
-            const old_square_id = piece.getSquareId();
-            Global.setSquare(target_square_id, piece);
-            Global.setSquare(old_square_id, 0);        
-        }
+        // Move piece on the board
+        this.#board.movePieceOnBoard(piece, target_square_id);
+
+        // Move Piece To Target Position 
+        const old_square_id = piece.getSquareId();
+        Global.setSquare(target_square_id, piece);
+        Global.setSquare(old_square_id, 0);        
     }
 
     /**
@@ -274,9 +292,10 @@ class Chess{
      * @private
      * Castling
      * @param {int} square_id Square id of rook
+     * @param {Piece} rook Rook piece
      * @returns {void}
      */
-    #castling(square_id){
+    #doCastling(square_id, rook){
         let target_square_id;
 
         // Find castling type and player's king
@@ -289,7 +308,18 @@ class Chess{
 
         // Move Rook(if castling type is short then move rook to 2 square left of himself else move rook to 3 square right of himself)
         target_square_id = castling_type == CastlingType.Short ? square_id - 2 : square_id + 3;
-        this.#movePiece(target_square_id, BoardManager.getPieceBySquareId(square_id));
+        this.#movePiece(target_square_id, rook);
+    }
+
+    /**
+     * @private
+     * En Passant
+     * @param {int} square_id Square id of pawn
+     * @param {Piece} pawn Pawn piece
+     * @returns {void}
+     */
+    #doEnPassant(square_id, pawn){
+        this.destroyPiece(square_id + (pawn.color === Color.White ? 8 : -8));
     }
 
     /**
@@ -338,9 +368,6 @@ class Chess{
 
         // Increase Move Count
         Global.increaseMoveCount();
-
-        // Control en passant after move
-        GameManager.controlEnPassantAfterMove();
 
         // Control castling after move
         //GameManager.controlCastlingAfterMove();     
