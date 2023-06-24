@@ -30,7 +30,7 @@ class Board{
             let square = document.createElement('div');
             square.classList.add('square');
             square.setAttribute("id", i); // Square position
-            this.changeSquareClickMode(square, SquareClickMode.ClickSquare); // Change square click mode
+            this.changeSquareClickMode(square, SquareClickMode.ClickBoard); // Change square click mode
 
             if (i % 8 == 0) { // Create Board Numbers
                 square.innerHTML += "<span class = 'number'>" + board_numbers + "</span>";
@@ -97,7 +97,8 @@ class Board{
 
         // Remove enemy from target square and change square to click square mode
         let target_piece = document.getElementById(target_square);
-        this.changeSquareClickMode(target_piece, SquareClickMode.ClickSquare); // Change square click mode
+        this.changeSquareClickMode(target_piece, SquareClickMode.ClickBoard); // Change square click mode
+
         piece_obj = target_piece.querySelector(".piece");
         if (piece_obj)
             target_piece.removeChild(piece_obj);
@@ -159,7 +160,7 @@ class Board{
             // Clear effects on the squares
             this.removeEffectOfSquare(squares[i].id, [SquareEffect.Playable, SquareEffect.Killable, SquareEffect.Selected]);
             if(!BoardManager.getPieceBySquareId(squares[i].id)) // If square click mode is move piece then change it to click square
-                this.changeSquareClickMode(squares[i], SquareClickMode.ClickSquare); // Change square click mode
+                this.changeSquareClickMode(squares[i], SquareClickMode.ClickBoard); // Change square click mode
             else
                 this.changeSquareClickMode(squares[i], SquareClickMode.SelectPiece); // Change square click mode
         }
@@ -184,6 +185,26 @@ class Board{
                 this.addEffectToSquare(playable_squares[i], SquareEffect.Playable)
                 this.changeSquareClickMode(playable_squares[i], SquareClickMode.MovePiece) // Change square click mode
             }
+        }
+    }
+
+    /**
+     * @public
+     * Show Promotion Options
+     * @param {int} square_id Square of the promotion options to be shown
+     * @returns {void}
+     */
+    showPromotions(square_id){
+        const PROMOTION_OPTIONS = ["queen", "rook", "bishop", "knight"];
+        const LENGTH_OF_PROMOTION_OPTIONS = PROMOTION_OPTIONS.length;
+
+        for(let i = 0; i < LENGTH_OF_PROMOTION_OPTIONS; i++){
+            let promotion_option = document.createElement("div");
+            promotion_option.classList.add("piece");
+            promotion_option.classList.add("promotion-option");
+            promotion_option.setAttribute("data-piece", PROMOTION_OPTIONS[i]);
+            promotion_option.setAttribute("data-color", Global.getCurrentMove());
+            document.getElementById(square_id + (i * 8)).appendChild(promotion_option);
         }
     }
 

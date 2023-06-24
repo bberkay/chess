@@ -169,14 +169,14 @@ class Chess{
     makeMove(square_id, move_type){
         // Make move according to move type
         switch(move_type){
-            case SquareClickMode.ClickSquare:
+            case SquareClickMode.ClickBoard:
                 this.#clearSelect();
                 break;
             case SquareClickMode.SelectPiece:
                 this.#selectPiece(BoardManager.getPieceBySquareId(square_id));
                 break;
-            case SquareClickMode.MovePiece:
-                this.#movePiece(square_id);
+            case SquareClickMode.PlayPiece:
+                this.#playPiece(square_id);
                 this.#changeTurn();
                 break;
             default:
@@ -242,46 +242,68 @@ class Chess{
 
     /**
      * @private
-     * Move piece to playable square
+     * Play piece
      * @param {int} target_square_id Square ID of the Target Square that piece will be moved
      * @param {Piece} piece Optional piece information(default selected piece)
      * @returns {void}
      */
-    #movePiece(target_square_id, piece=null){
-        piece = piece == null ? this.#selected_piece : piece;
+    #playPiece(target_square_id, piece=this.#selected_piece){
         piece.increaseMoveCount();
 
         // Refresh board
         this.#board.refreshBoard();
 
-        // If castling move
-        if(BoardManager.isSquareHasPiece(target_square_id, Color.White, PieceType.Rook))
-            this.#doCastling(target_square_id, BoardManager.getPieceBySquareId(target_square_id));
-        // If en passant move
-        else if(piece.type == PieceType.Pawn && !BoardManager.getPieceBySquareId(target_square_id) && (target_square_id != piece.getSquareId() + 8 && target_square_id != piece.getSquareId() - 8))
-            this.#doEnPassant(target_square_id, piece);
+        // Define and do special move like castling, en passant or promotion if move is not special then move piece to square 
+        if(!this.#checkAndDoSpecialMove(piece, target_square_id))
+            this.#movePiece(piece, target_square_id);
+    }
 
+    /**
+     * @private
+     * Move piece to square
+     * @param {int} target_square_id Square ID of the Target Square that piece will be moved
+     * @param {Piece} piece Piece that will be moved
+     * @returns {void}
+     */
+    #movePiece(piece=this.#selected_piece, target_square_id){
         // Move piece on the board
         this.#board.movePieceOnBoard(piece, target_square_id);
 
         // Move Piece To Target Position 
         const old_square_id = piece.getSquareId();
         Global.setSquare(target_square_id, piece);
-        Global.setSquare(old_square_id, 0);        
+        Global.setSquare(old_square_id, 0);           
     }
 
     /**
      * @private
-     * Destroy piece by square id
-     * @param {int} square_id 
-     * @returns {void}
+     * Define and do special move like castling, en passant or promotion
+     * @param {Piece} piece Piece that will do special move
+     * @param {int} target_square_id Square ID of the Target Square that piece will be moved
+     * @returns {boolean}
      */
-    destroyPiece(square_id){
-        // Remove Piece From Global Squares
-        Global.setSquare(square_id, 0);
+    #checkAndDoSpecialMove(piece, target_square_id){
+        let pieceOfTargetSquareId = BoardManager.getPieceBySquareId(target_square_id);
 
-        // Remove Piece From Board
-        this.#board.destroyPieceOnBoard(square_id);
+        // If castling move
+        if(BoardManager.isSquareHasPiece(target_square_id, Color.White, PieceType.Rook)){
+            this.#doCastling(target_square_id, pieceOfTargetSquareId);
+            return true;
+        }
+
+        // If en passant move
+        else if(piece.type == PieceType.Pawn && !pieceOfTargetSquareId && (target_square_id != piece.getSquareId() + 8 && target_square_id != piece.getSquareId() - 8)){
+            this.#doEnPassant(target_square_id, piece);
+            return true;
+        }
+
+        // If promote move
+        else if(piece.type == PieceType.Pawn && !pieceOfTargetSquareId && ((piece.color === Color.White && target_square_id < 9) || (piece.color === Color.Black && target_square_id > 56))){
+            this.#board.showPromotions(target_square_id);
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -300,11 +322,11 @@ class Chess{
         
         // Move King(if castling type is short then move king to 1 square to the left of rook else move king to 2 square to the right of rook)
         target_square_id = castling_type == CastlingType.Short ? square_id - 1 : square_id + 2;
-        this.#movePiece(target_square_id, player_king);
+        this.#movePiece(target_square_id, player_king, true);
 
         // Move Rook(if castling type is short then move rook to 2 square left of himself else move rook to 3 square right of himself)
         target_square_id = castling_type == CastlingType.Short ? square_id - 2 : square_id + 3;
-        this.#movePiece(target_square_id, rook);
+        this.#movePiece(target_square_id, rook, true);
     }
 
     /**
@@ -316,6 +338,33 @@ class Chess{
      */
     #doEnPassant(square_id, pawn){
         this.destroyPiece(square_id + (pawn.color === Color.White ? 8 : -8));
+        this.#movePiece(square_id, pawn, true);
+    }
+
+    /**
+     * @private
+     * En Passant
+     * @param {int} square_id Square id of pawn
+     * @param {string} promotion_type Type of piece that pawn will be promoted
+     * @returns {void}
+     */
+    #doPromote(square_id, promotion_type){
+        this.destroyPiece(square_id);
+        this.createPiece(promotion_type, pawn.color, square_id);
+    }
+
+    /**
+     * @private
+     * Destroy piece by square id
+     * @param {int} square_id 
+     * @returns {void}
+     */
+    destroyPiece(square_id){
+        // Remove Piece From Global Squares
+        Global.setSquare(square_id, 0);
+
+        // Remove Piece From Board
+        this.#board.destroyPieceOnBoard(square_id);
     }
 
     /**

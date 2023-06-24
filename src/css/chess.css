@@ -154,39 +154,11 @@ fieldset{
     margin:5px;
 }
 
-.en-passant-container{
-    margin-top:-55px;
+.promotion{
+    z-index:99;
+    background-color: #000;
 }
 
-.en-passant-info{
-    opacity: 1;
-    border-radius:15px;
-    margin:5px;
-}
-
-.en-passant-info[value="can"]{
-    background-color: #379767;
-    border:1px solid #379767;
-    color: #fff;
-}
-
-.en-passant-info[value="ready"]{
-    background-color: #D8BA36;
-    border:1px solid #D8BA36;
-    color: #fff;
-}
-
-.en-passant-info[value$="cant"]{
-    background-color: rgb(223, 48, 48);
-    border:1px solid rgb(223, 48, 48);
-    color: #fff;
-}
-
-.en-passant-info[value="not-ready"]{
-    background-color:rgb(46, 121, 235);
-    border:1px solid rgb(46, 121, 235);
-    color: #fff;
-}
 /* -------------- Pieces END -------------- */
 
 /* -------------- Squares Start -------------- */

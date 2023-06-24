@@ -416,7 +416,8 @@ const SquareEffect = {
 const SquareClickMode = {
     SelectPiece:"selectPiece",
     MovePiece:"movePiece",
-    ClickSquare:"clickSquare",
+    ClickBoard:"clickBoard",
+    SelectPromotion:"selectPromotion"
 }
 
 /**
@@ -522,6 +523,29 @@ const StartPosition = {
             "color":Color.Black,
             "piece":PieceType.Rook,
             "square":Square.D1,
+        }
+    ],
+    PawnPromotion:[
+        {
+            "color":Color.White,
+            "piece":PieceType.King,
+            "square":Square.E1
+        },
+        {
+            "color":Color.White,
+            "piece":PieceType.Pawn,
+            "square":Square.E2
+        },
+        {
+            "color":Color.Black,
+            "piece":PieceType.King,
+            "square":Square.C8
+        },
+        ,
+        {
+            "color":Color.Black,
+            "piece":PieceType.Pawn,
+            "square":Square.C7
         }
     ]
 }

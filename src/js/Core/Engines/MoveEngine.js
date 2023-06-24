@@ -103,7 +103,6 @@ class MoveEngine{
         if(canEnPassant)
             Global.addDisabledEnPassant(piece.id);
 
-
         return playable_squares;
     }
 
