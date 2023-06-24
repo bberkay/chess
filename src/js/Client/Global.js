@@ -415,7 +415,7 @@ const SquareEffect = {
  */
 const SquareClickMode = {
     SelectPiece:"selectPiece",
-    MovePiece:"movePiece",
+    PlayPiece:"playPiece",
     ClickBoard:"clickBoard",
     SelectPromotion:"selectPromotion"
 }

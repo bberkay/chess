@@ -177,7 +177,6 @@ class Chess{
                 break;
             case SquareClickMode.PlayPiece:
                 this.#playPiece(square_id);
-                this.#changeTurn();
                 break;
             default:
                 break;
@@ -254,8 +253,10 @@ class Chess{
         this.#board.refreshBoard();
 
         // Define and do special move like castling, en passant or promotion if move is not special then move piece to square 
-        if(!this.#checkAndDoSpecialMove(piece, target_square_id))
+        if(!this.#checkAndDoSpecialMove(piece, target_square_id)){
             this.#movePiece(piece, target_square_id);
+            this.#changeTurn();    
+        }
     }
 
     /**
@@ -272,7 +273,7 @@ class Chess{
         // Move Piece To Target Position 
         const old_square_id = piece.getSquareId();
         Global.setSquare(target_square_id, piece);
-        Global.setSquare(old_square_id, 0);           
+        Global.setSquare(old_square_id, 0);       
     }
 
     /**
@@ -287,7 +288,7 @@ class Chess{
 
         // If castling move
         if(BoardManager.isSquareHasPiece(target_square_id, Color.White, PieceType.Rook)){
-            this.#doCastling(target_square_id, pieceOfTargetSquareId);
+            this.#doCastling(target_square_id, pieceOfTargetSquareId);  
             return true;
         }
 
@@ -322,11 +323,13 @@ class Chess{
         
         // Move King(if castling type is short then move king to 1 square to the left of rook else move king to 2 square to the right of rook)
         target_square_id = castling_type == CastlingType.Short ? square_id - 1 : square_id + 2;
-        this.#movePiece(target_square_id, player_king, true);
+        this.#movePiece(player_king, target_square_id);
 
         // Move Rook(if castling type is short then move rook to 2 square left of himself else move rook to 3 square right of himself)
         target_square_id = castling_type == CastlingType.Short ? square_id - 2 : square_id + 3;
-        this.#movePiece(target_square_id, rook, true);
+        this.#movePiece(rook, target_square_id);
+
+        this.#changeTurn();
     }
 
     /**
@@ -338,7 +341,9 @@ class Chess{
      */
     #doEnPassant(square_id, pawn){
         this.destroyPiece(square_id + (pawn.color === Color.White ? 8 : -8));
-        this.#movePiece(square_id, pawn, true);
+        this.#movePiece(pawn, square_id);
+
+        this.#changeTurn();
     }
 
     /**
@@ -351,6 +356,7 @@ class Chess{
     #doPromote(square_id, promotion_type){
         this.destroyPiece(square_id);
         this.createPiece(promotion_type, pawn.color, square_id);
+        this.#changeTurn();
     }
 
     /**
