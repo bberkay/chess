@@ -150,11 +150,16 @@ class GameManager{
         const BLACK_START_ROW = 2;
 
         let piece = BoardManager.getPieceBySquareId(square_id);
+
+        // NOT: En son burada kaldık, siyahlar çalışıyor, beyazlar çalışmıyor gibi gözüküyor.
+        if(Global.isEnPassantDisabled(piece.id, direction))
+            return false;
+
+
         let currentRow = Calculator.calcRowOfSquare(square_id);
         let targetRow = (piece.color === Color.White) ? WHITE_EN_PASSANT_ROW : BLACK_EN_PASSANT_ROW;
-        console.log(currentRow, targetRow);
 
-        if (currentRow === targetRow && !Global.isEnPassantDisabled(piece.id, direction)) {
+        if (currentRow === targetRow) {
             let targetEnemy = BoardManager.getPieceBySquareId(direction === EnPassantDirection.Left ? square_id - 1 : square_id + 1);
 
             if (targetEnemy.type === PieceType.Pawn && targetEnemy.moveCount === 1)

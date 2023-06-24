@@ -85,14 +85,24 @@ class MoveEngine{
      * @returns {Array<int>}
      */
     #getPlayableSquaresOfPawn(square_id) {
+        let canEnPassant = false;
         let piece = BoardManager.getPieceBySquareId(square_id);
         let playable_squares = this.#filterPlayableSquares(square_id, PathEngine.calcPawnPath(square_id));
 
         // Add En Passant
-        if(GameManager.canPawnDoLeftEnPassant(square_id))
+        if(GameManager.canPawnDoLeftEnPassant(square_id)){
             playable_squares.push(piece.color == Color.White ? square_id - 9 : square_id + 7);
-        if(GameManager.canPawnDoRightEnPassant(square_id))
+            canEnPassant = true;
+        }
+        if(GameManager.canPawnDoRightEnPassant(square_id)){
             playable_squares.push(piece.color == Color.White ? square_id - 7 : square_id + 9);
+            canEnPassant = true;
+        }
+
+        // Add piece to disabled en passant list(For disable en passant after move)
+        if(canEnPassant)
+            Global.addDisabledEnPassant(piece.id);
+
 
         return playable_squares;
     }

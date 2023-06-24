@@ -24,12 +24,9 @@ class Chess{
     * @returns {void}
     */
     startStandartGame() {   
-        // Clear Cache
+        // Clear Cache and Session
         Cache.clear();
-        
-        // Set Current Move and Count
-        Global.setCurrentMove("white");
-        Global.setMoveCount(1);
+        Global.clearSession();
 
         // Create Board
         this.#board.createBoard();
@@ -67,12 +64,9 @@ class Chess{
     * @returns {void}
     */
     startCustomGame(pieces = null) {
-        // Clear Cache
+        // Clear Cache and Session
         Cache.clear();
-
-        // Set Current Move and Count
-        Global.setCurrentMove("white");
-        Global.setMoveCount(1);
+        Global.clearSession();
 
         // Create Board
         this.#board.createBoard();

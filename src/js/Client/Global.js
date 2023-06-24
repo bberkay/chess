@@ -107,15 +107,11 @@ class Global{
      * @static
      * Is en passant of piece disabled?
      * @param {int} piece_id ID of piece
-     * @param {EnPassantDirection direction Direction of en passant
-     * @returns {void}
+     * @param {EnPassantDirection|boolean} true(default) for any direction, direction Direction of en passant
+     * @returns {boolean}
      */
-    static isEnPassantDisabled(piece_id, direction){
-        console.log(this.#gl_en_passant_control);
-        if(this.#gl_en_passant_control[piece_id])
-            return this.#gl_en_passant_control[piece_id] === direction;
-
-        return false;
+    static isEnPassantDisabled(piece_id, direction=true){
+        return this.#gl_en_passant_control[piece_id] === true || this.#gl_en_passant_control[piece_id] === direction; 
     }
 
     /**
@@ -233,6 +229,24 @@ class Global{
         Cache.set("checked-player", this.#gl_checked_player);
     }
 
+    /**
+     * @static
+     * Clear all variables
+     * @returns {void}
+     */
+    static clearSession(){
+        this.setMoveCount(1);
+        this.setCurrentMove(Color.White);
+        this.setCheckedPlayer(null);
+        this.#gl_en_passant_control = {};
+        this.#gl_castling_control = {
+            "white-long": true,
+            "white-short": true,
+            "black-long": true,
+            "black-short": true
+        };
+    }
+
 }
 
 /**
@@ -345,6 +359,10 @@ const CastlingType = {
     Long:"long"
 }
 
+/**
+ * En Passant Direction Enum
+ * @enum {string}
+ */
 const EnPassantDirection = {
     Left:"left",
     Right:"right"
@@ -428,7 +446,7 @@ const StartPosition = {
             "square":Square.G7,
         }
     ],
-    EnPassant:[
+    EnPassantRight:[
         {
             "color":Color.White,
             "piece":PieceType.Pawn,
@@ -448,6 +466,28 @@ const StartPosition = {
             "color":Color.Black,
             "piece":PieceType.Pawn,
             "square":Square.C7,
+        }
+    ],
+    EnPassantLeft:[
+        {
+            "color":Color.White,
+            "piece":PieceType.Pawn,
+            "square":Square.C2,
+        },
+        {
+            "color":Color.White,
+            "piece":PieceType.Pawn,
+            "square":Square.D2,
+        },
+        {
+            "color":Color.Black,
+            "piece":PieceType.Pawn,
+            "square":Square.E7,
+        },
+        {
+            "color":Color.Black,
+            "piece":PieceType.Pawn,
+            "square":Square.F7,
         }
     ],
     Check1:[
