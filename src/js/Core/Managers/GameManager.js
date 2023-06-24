@@ -144,40 +144,53 @@ class GameManager{
      * @returns {boolean}
      */
     static canPawnEnPassant(square_id, direction){
-        const BLACK_EN_PASSANT_ROW = 5;
-        const WHITE_EN_PASSANT_ROW = 4;
+        // Set const variables like row that pawn can do en passant and start row of pawn
+        const BLACK_EN_PASSANT_ROW = 5; // Row that black pawn can do en passant
+        const WHITE_EN_PASSANT_ROW = 4; // Row that white pawn can do en passant
         const WHITE_START_ROW = 7;
         const BLACK_START_ROW = 2;
 
+        // Find piece
         let piece = BoardManager.getPieceBySquareId(square_id);
 
-        // NOT: En son burada kaldık, siyahlar çalışıyor, beyazlar çalışmıyor gibi gözüküyor.
+        // If piece can't do en passant then return false
         if(Global.isEnPassantDisabled(piece.id, direction))
             return false;
 
-
+        // If piece can do en passant then find current row and target row(row that piece can do en passant)
         let currentRow = Calculator.calcRowOfSquare(square_id);
         let targetRow = (piece.color === Color.White) ? WHITE_EN_PASSANT_ROW : BLACK_EN_PASSANT_ROW;
 
+        // If current row is equal target row then find en passant square and return true
         if (currentRow === targetRow) {
             let targetEnemy = BoardManager.getPieceBySquareId(direction === EnPassantDirection.Left ? square_id - 1 : square_id + 1);
 
+            // If en passant square has an enemy and enemy is pawn and enemy's move count is 1 then pawn can en passant, return true
             if (targetEnemy.type === PieceType.Pawn && targetEnemy.moveCount === 1)
                 return true;
 
-        }else if(currentRow < targetRow){
+        }
+        // If piece has not reached yet to target row, control en passant target(enemy of current piece) position
+        else if((piece.color == Color.Black && currentRow < targetRow) || (piece.color == Color.White && currentRow > targetRow)){
             let targetSquare = 0;
 
+            /**
+             * Find target square(Enemy of current piece like if piece square id is 53(e2 white pawn) then 
+             * left enemy target's positon must be 12, right enemy target's position must be 14
+             */
             if(piece.color == Color.White)
                 targetSquare = square_id - ((currentRow - BLACK_START_ROW) * 8 + (direction == EnPassantDirection.Left ? 1 : -1));
             else
                 targetSquare = square_id + ((WHITE_START_ROW - currentRow) * 8 + (direction == EnPassantDirection.Left ? -1 : 1));
             
+            // If target square is empty then return false(en passant is not available anymore)
             if(!BoardManager.getPieceBySquareId(targetSquare))
                 Global.addDisabledEnPassant(piece.id, direction);
             
             return false;
-        }else{
+        }
+        // If piece is pass the target row then disable en passant
+        else{
             Global.addDisabledEnPassant(piece.id);
         }
 
