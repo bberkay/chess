@@ -152,8 +152,9 @@ class GameManager{
         let piece = BoardManager.getPieceBySquareId(square_id);
         let currentRow = Calculator.calcRowOfSquare(square_id);
         let targetRow = (piece.color === Color.White) ? WHITE_EN_PASSANT_ROW : BLACK_EN_PASSANT_ROW;
+        console.log(currentRow, targetRow);
 
-        if (currentRow === targetRow) {
+        if (currentRow === targetRow && !Global.isEnPassantDisabled(piece.id, direction)) {
             let targetEnemy = BoardManager.getPieceBySquareId(direction === EnPassantDirection.Left ? square_id - 1 : square_id + 1);
 
             if (targetEnemy.type === PieceType.Pawn && targetEnemy.moveCount === 1)
@@ -171,9 +172,9 @@ class GameManager{
                 Global.addDisabledEnPassant(piece.id, direction);
             
             return false;
+        }else{
+            Global.addDisabledEnPassant(piece.id);
         }
-
-        Global.addDisabledEnPassant(piece.id, true);
 
         return false;
     }

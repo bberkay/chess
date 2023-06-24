@@ -105,15 +105,17 @@ class Global{
     
     /**
      * @static
-     * Get En passant
-     * @param {(int|null)} pawn_id
-     * @returns {(JSON|EnPassantStatus)}
+     * Is en passant of piece disabled?
+     * @param {int} piece_id ID of piece
+     * @param {EnPassantDirection direction Direction of en passant
+     * @returns {void}
      */
-    static getEnPassant(pawn_id=null){
-        if(pawn_id)
-            return this.#gl_en_passant_control[pawn_id];
+    static isEnPassantDisabled(piece_id, direction){
+        console.log(this.#gl_en_passant_control);
+        if(this.#gl_en_passant_control[piece_id])
+            return this.#gl_en_passant_control[piece_id] === direction;
 
-        return this.#gl_en_passant_control;
+        return false;
     }
 
     /**
@@ -211,11 +213,11 @@ class Global{
      * @static
      * Add piece that can't en passant
      * @param {int} piece_id ID of piece
-     * @param {EnPassantDirection|true} en_passant_value If true, all direction can't en passant
+     * @param {EnPassantDirection|true(default)} direction If true, all direction can't en passant
      * @returns {void}
      */
-    static addDisabledEnPassant(piece_id, en_passant_value){
-        this.#gl_en_passant_control[piece_id] = en_passant_value;
+    static addDisabledEnPassant(piece_id, direction=true){
+        this.#gl_en_passant_control[piece_id] = direction;
     }
 
     /**
