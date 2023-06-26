@@ -121,7 +121,7 @@ class Board{
      */
     destroyPieceOnBoard(square_id){
         // Remove piece from his square
-        let target_piece = document.getElementById(square_id);
+        let target_piece = document.getElementById(square_id.toString());
         let piece_obj = target_piece.querySelector(".piece");
         if(piece_obj)
             target_piece.removeChild(piece_obj);
@@ -136,7 +136,7 @@ class Board{
      */
     destroyPiecesOnBoard(){
         let pieces = document.getElementsByClassName("piece");
-        if(pieces.length == 0) // If there is no piece on the board then
+        if(pieces.length === 0) // If there is no piece on the board then
             return;
 
         let l = pieces.length;
@@ -153,13 +153,15 @@ class Board{
         let squares = document.querySelectorAll(".square");
         let l = squares.length;
         for (let i = 0; i < l; i++) {
+            let id = parseInt(squares[i].id);
+
             // Control Squares and piece ID for changing on DOM(Security measures). If any id change after the start then set its id to its position
-            if (squares[i].id != i + 1)
-                squares[i].id = i + 1;
+            if (id !== i + 1)
+                squares[i].id = (i+1).toString();
 
             // Clear effects on the squares
-            this.removeEffectOfSquare(squares[i].id, [SquareEffect.Playable, SquareEffect.Killable, SquareEffect.Selected]);
-            if(!BoardManager.getPieceBySquareId(squares[i].id)) // If square click mode is move piece then change it to click square
+            this.removeEffectOfSquare(id, [SquareEffect.Playable, SquareEffect.Killable, SquareEffect.Selected]);
+            if(!BoardManager.getPieceBySquareId(id)) // If square click mode is move piece then change it to click square
                 this.changeSquareClickMode(squares[i], SquareClickMode.ClickBoard); // Change square click mode
             else
                 this.changeSquareClickMode(squares[i], SquareClickMode.SelectPiece); // Change square click mode
@@ -194,17 +196,45 @@ class Board{
      * @param {int} square_id Square of the promotion options to be shown
      * @returns {void}
      */
-    showPromotions(square_id){
+    showPromotionScreen(square_id){
         const PROMOTION_OPTIONS = ["queen", "rook", "bishop", "knight"];
         const LENGTH_OF_PROMOTION_OPTIONS = PROMOTION_OPTIONS.length;
 
+        let current_color = Global.getCurrentMove();
+
+        // Hidden current pawn
+        let pawnId = current_color === Color.White ? square_id + 8 : square_id - 8;
+        document.getElementById(pawnId.toString()).querySelector(".piece").style.display = "none";
+
+
+        // Add promotion options to board 
         for(let i = 0; i < LENGTH_OF_PROMOTION_OPTIONS; i++){
             let promotion_option = document.createElement("div");
             promotion_option.classList.add("piece");
             promotion_option.classList.add("promotion-option");
             promotion_option.setAttribute("data-piece", PROMOTION_OPTIONS[i]);
-            promotion_option.setAttribute("data-color", Global.getCurrentMove());
-            document.getElementById(square_id + (i * 8)).appendChild(promotion_option);
+            promotion_option.setAttribute("data-color", current_color);
+
+            // If current color is white then add promotion option to square below the pawn else add promotion option to square above the pawn
+            let targetSquareId = current_color === Color.White ? square_id + (i * 8) : square_id - (i * 8);
+
+            // Create promotion on the board and change square click mode
+            let targetSquareObj = document.getElementById(targetSquareId);
+            this.changeSquareClickMode(targetSquareObj, SquareClickMode.SelectPromotion);
+            targetSquareObj.appendChild(promotion_option);
+        }
+    }
+
+    /**
+     * @public
+     * Disable Promotion Screen
+     * @returns {void}
+     */
+    disablePromotionScreen(){
+        let promotionOptions = document.querySelectorAll(".promotion-option");
+        let l = promotionOptions.length;
+        for(let i = 0; i < l; i++){
+            promotionOptions[i].remove();
         }
     }
 
@@ -221,12 +251,12 @@ class Board{
     /**
      * Remove effect of the square
      * @param {int} square_id Square of the effect to be removed
-     * @param {(SquareEffect|null|Array<SquareEffect>)} effect If null then remove all effects
+     * @param {SquareEffect|null|Array<SquareEffect>} effect If null then remove all effects
      * @returns {void}
      */
     removeEffectOfSquare(square_id, effect=null){
         if(effect == null)
-            document.getElementById(square_id.toString()).classList.remove(SquareEffect.playable, SquareEffect.killable, SquareEffect.checked);
+            document.getElementById(square_id.toString()).classList.remove(SquareEffect.Playable, SquareEffect.Killable, SquareEffect.Checked);
         else{
             if(Array.isArray(effect)){
                 let l = effect.length;
@@ -248,7 +278,7 @@ class Board{
         let squares = document.querySelectorAll(".square");
         let l = squares.length;
         for(let i = 0; i < l; i++){
-            this.removeEffectOfSquare(squares[i].id, effect);
+            this.removeEffectOfSquare(parseInt(squares[i].id), effect);
         }
     }
 
@@ -256,16 +286,16 @@ class Board{
     /**
      * Change Square Mode/Function
      * @param {(Array<int>|Array<Element>|int|Element)} square_id_or_element Square ID or Element of the square to be changed
-     * @param {SquareClickMode} mode Mode 
+     * @param {SquareClickMode} mode Mode
      */
     changeSquareClickMode(square_id_or_element, mode){
         if(Array.isArray(square_id_or_element)){
             let l = square_id_or_element.length;
             for(let i = 0; i < l; i++){
                 if(typeof square_id_or_element[i] == "number")
-                    document.getElementById(square_id_or_element[i].toString()).setAttribute("onclick", `BoardHandler.clickSquare(this, '${mode}')`);
+                    document.getElementById(square_id_or_element[i].toString()).setAttribute("onclick", `BoardHandler.${mode}(this)`);
                 else
-                    square_id_or_element[i].setAttribute("onclick", `BoardHandler.clickSquare(this, '${mode}')`);
+                    square_id_or_element[i].setAttribute("onclick", `BoardHandler.${mode}(this)`);
             }
         }else{
             this.changeSquareClickMode([square_id_or_element], mode);

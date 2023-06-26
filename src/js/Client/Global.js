@@ -120,17 +120,17 @@ class Global{
      * @returns {string}
      */
     static getEnemyColor(){
-        return this.getCurrentMove() == Color.White ? Color.Black : Color.White;
+        return this.getCurrentMove() === Color.White ? Color.Black : Color.White;
     }
 
     /**
      * @static
      * Set Square
      * @param {int} square_id Square ID of square
-     * @param {Piece} content Content of square(default 0)
+     * @param {Piece|int} content Content of square, 0 means empty
      * @returns {void}
      */
-    static setSquare(square_id, content=0){
+    static setSquare(square_id, content= 0){
         this.#gl_squares[square_id] = content;
     }
 
@@ -175,7 +175,7 @@ class Global{
      * @static
      * Set Move Count
      * @param {int} count
-     * @returns {voi d}
+     * @returns {void}
      */
     static setMoveCount(count){
         this.#gl_move_count = count;
@@ -385,7 +385,7 @@ const Route = {
 
 /**
  * Validation Type Enum
- * @enum {(string|Enum)}
+ * @enum {string|Color|PieceType|CastlingType|EnPassantDirection}
  */
 const ValidationType = {
     Number:"number",

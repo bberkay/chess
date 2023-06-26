@@ -23,7 +23,7 @@ class Chess{
     * Start Game
     * @returns {void}
     */
-    startStandartGame() {   
+    startStandartGame() {
         // Clear Cache and Session
         Cache.clear();
         Global.clearSession();
@@ -33,23 +33,30 @@ class Chess{
 
         // Create squares/backend
         for (let i = 1; i < 65; i++)
-            Global.setSquare(i, 0);   
+            Global.setSquare(i);
+
+        // Find Squares
+        const ROOK_SQUARES = [1, 8, 57, 64];
+        const KNIGHT_SQUARES = [2, 7, 58, 63];
+        const BISHOP_SQUARES = [3, 6, 59, 62];
+        const QUEEN_SQUARES = [4, 60];
+        const KING_SQUARES = [5, 61];
 
         // Create Pieces
         for (let i = 1; i <= 32; i++) {
             let square_id = i <= 16 ? i : i + 32; // Position of the piece on the board
 
-            if (square_id == 1 || square_id == 8 || square_id == 57 || square_id == 64) // Rook
+            if (ROOK_SQUARES.includes(square_id)) // Rook
                 this.createPiece(PieceType.Rook, square_id < 57 ? Color.Black : Color.White, square_id);
-            else if (square_id == 2 || square_id == 7 || square_id == 58 || square_id == 63) // Knight
+            else if (KNIGHT_SQUARES.includes(square_id)) // Knight
                 this.createPiece(PieceType.Knight, square_id < 58 ? Color.Black : Color.White, square_id);
-            else if (square_id == 3 || square_id == 6 || square_id == 59 || square_id == 62)// Bishop
+            else if (BISHOP_SQUARES.includes(square_id)) // Bishop
                 this.createPiece(PieceType.Bishop, square_id < 58 ? Color.Black : Color.White, square_id);
-            else if (square_id == 4 || square_id == 60) // Queen 
+            else if (QUEEN_SQUARES.includes(square_id)) // Queen
                 this.createPiece(PieceType.Queen, square_id < 60 ? Color.Black : Color.White, square_id);
-            else if (square_id == 5 || square_id == 61) // King
+            else if (KING_SQUARES.includes(square_id)) // King
                 this.createPiece(PieceType.King, square_id < 61 ? Color.Black : Color.White, square_id);            
-            else if (square_id >= 9 && square_id < 17 || square_id > 48 && square_id < 57) // Pawn 
+            else if (square_id >= 9 && square_id < 17 || square_id > 48 && square_id < 57) // Pawn, 9-16(1st row), 49-56(8th row)
                 this.createPiece(PieceType.Pawn, square_id < 48 ? Color.Black : Color.White, square_id);
         }
 
@@ -101,7 +108,7 @@ class Chess{
             let square = squares[i];
             Global.setSquare(i, 0);
 
-            if(square != 0)
+            if(square !== 0)
                 this.createPiece(square.type, square.color, i, square.id);
         }
 
@@ -118,7 +125,7 @@ class Chess{
         let checked_player = Cache.get("checked-player");
         if(checked_player){
             Global.setCheckedPlayer(checked_player);            
-            this.#board.addEffectToSquare(checked_player == Color.White ? Storage.get("white-king").getSquareId() : Storage.get("black-king").getSquareId(), SquareEffect.Checked);
+            this.#board.addEffectToSquare(checked_player === Color.White ? Storage.get("white-king").getSquareId() : Storage.get("black-king").getSquareId(), SquareEffect.Checked);
         }
     }
 
@@ -134,7 +141,7 @@ class Chess{
         // Save Current Game
         for (let square in squares) {
             let content = squares[square];
-            cacheData[square] = content == 0 ? 0 : { id: content.id, type: content.type, color: content.color };
+            cacheData[square] = content === 0 ? 0 : { id: content.id, type: content.type, color: content.color };
         }
 
         Cache.set("current-game", cacheData);
@@ -145,14 +152,14 @@ class Chess{
      * @param {string} piece_type Type of the piece
      * @param {string} color Color of the piece
      * @param {int} target_square_id Target square id of the piece
-     * @param {int} id ID of the piece
+     * @param {int|null} id ID of the piece
      * @returns {void}
      */
     createPiece(piece_type, color, target_square_id, id=null){
         // FIXME: Bir den fazla şah olamaz. Validate edilecek.
         let piece = new Piece(piece_type, color, target_square_id, id);
 
-        if(piece_type == PieceType.King)
+        if(piece_type === PieceType.King)
             Storage.set(color + "-king", piece);
 
         // Create piece on board
@@ -160,43 +167,22 @@ class Chess{
     }
 
     /**
-     * @public
-     * Make move
-     * @param {int} square_id Square ID of the clicked square
-     * @param {SquareClickMode} move_type Move Type
-     * @returns {void}
-     */
-    makeMove(square_id, move_type){
-        // Make move according to move type
-        switch(move_type){
-            case SquareClickMode.ClickBoard:
-                this.#clearSelect();
-                break;
-            case SquareClickMode.SelectPiece:
-                this.#selectPiece(BoardManager.getPieceBySquareId(square_id));
-                break;
-            case SquareClickMode.PlayPiece:
-                this.#playPiece(square_id);
-                break;
-            default:
-                break;
-        }
-    }
-
-    /**
      * @private
      * Select Piece
-     * @param {Piece} piece
+     * @param {int} square_id Square id of the piece
      * @returns {void}
     */
-    #selectPiece(piece){
+    selectPiece(square_id){
+        // Get piece
+        let piece = BoardManager.getPieceBySquareId(square_id);
+
         // If selected piece is not current move's piece or player is checked and selected piece is not king then return
-        if(piece.color != Global.getCurrentMove())
+        if(piece.color !== Global.getCurrentMove())
             return;
 
         // If clicked piece is selected piece then unselect piece
-        if(this.#selected_piece == piece){
-            this.#clearSelect();
+        if(this.#selected_piece === piece){
+            this.clearSelect();
             return;
         }
 
@@ -233,7 +219,7 @@ class Chess{
      * Clear selected piece
      * @returns {void}
      */
-    #clearSelect(){
+    clearSelect(){
         this.#board.refreshBoard();
         this.#selected_piece = null;
         this.#playable_squares = [];
@@ -243,18 +229,17 @@ class Chess{
      * @private
      * Play piece
      * @param {int} target_square_id Square ID of the Target Square that piece will be moved
-     * @param {Piece} piece Optional piece information(default selected piece)
      * @returns {void}
      */
-    #playPiece(target_square_id, piece=this.#selected_piece){
-        piece.increaseMoveCount();
+    playPiece(target_square_id){
+        this.#selected_piece.increaseMoveCount();
 
         // Refresh board
         this.#board.refreshBoard();
 
         // Define and do special move like castling, en passant or promotion if move is not special then move piece to square 
-        if(!this.#checkAndDoSpecialMove(piece, target_square_id)){
-            this.#movePiece(piece, target_square_id);
+        if(!this.#checkAndDoSpecialMove(this.#selected_piece, target_square_id)){
+            this.#movePiece(this.#selected_piece, target_square_id);
             this.#changeTurn();    
         }
     }
@@ -293,14 +278,16 @@ class Chess{
         }
 
         // If en passant move
-        else if(piece.type == PieceType.Pawn && !pieceOfTargetSquareId && (target_square_id != piece.getSquareId() + 8 && target_square_id != piece.getSquareId() - 8)){
+        else if(piece.type === PieceType.Pawn && !pieceOfTargetSquareId && (target_square_id !== piece.getSquareId() + 8 && target_square_id !== piece.getSquareId() - 8)){
             this.#doEnPassant(target_square_id, piece);
             return true;
         }
 
         // If promote move
-        else if(piece.type == PieceType.Pawn && !pieceOfTargetSquareId && ((piece.color === Color.White && target_square_id < 9) || (piece.color === Color.Black && target_square_id > 56))){
-            this.#board.showPromotions(target_square_id);
+        else if(piece.type === PieceType.Pawn && !pieceOfTargetSquareId && ((piece.color === Color.White && target_square_id < 9) || (piece.color === Color.Black && target_square_id > 56))){
+            Storage.set("promotion-screen", true);
+            Storage.set("promote-piece", piece);
+            this.#board.showPromotionScreen(target_square_id);
             return true;
         }
 
@@ -318,15 +305,15 @@ class Chess{
         let target_square_id;
 
         // Find castling type and player's king
-        let castling_type = square_id % 8 == 0 ? CastlingType.Short : CastlingType.Long;
+        let castling_type = square_id % 8 === 0 ? CastlingType.Short : CastlingType.Long;
         let player_king = Storage.get(Global.getCurrentMove() + "-king");
         
         // Move King(if castling type is short then move king to 1 square to the left of rook else move king to 2 square to the right of rook)
-        target_square_id = castling_type == CastlingType.Short ? square_id - 1 : square_id + 2;
+        target_square_id = castling_type === CastlingType.Short ? square_id - 1 : square_id + 2;
         this.#movePiece(player_king, target_square_id);
 
         // Move Rook(if castling type is short then move rook to 2 square left of himself else move rook to 3 square right of himself)
-        target_square_id = castling_type == CastlingType.Short ? square_id - 2 : square_id + 3;
+        target_square_id = castling_type === CastlingType.Short ? square_id - 2 : square_id + 3;
         this.#movePiece(rook, target_square_id);
 
         this.#changeTurn();
@@ -353,9 +340,17 @@ class Chess{
      * @param {string} promotion_type Type of piece that pawn will be promoted
      * @returns {void}
      */
-    #doPromote(square_id, promotion_type){
-        this.destroyPiece(square_id);
-        this.createPiece(promotion_type, pawn.color, square_id);
+    doPromote(square_id, promotion_type){
+        let columnOfSquareId = Calculator.calcColumnOfSquare(square_id);
+        let current_color = Global.getCurrentMove();
+        this.destroyPiece(Storage.get("promote-piece").getSquareId());
+
+        // If promoted pawn is white then target square id is 1-8 else 57-64
+        let targetSquareId = current_color === Color.White ? columnOfSquareId : columnOfSquareId + 56;
+
+        this.createPiece(promotion_type, current_color, targetSquareId);
+        this.#board.disablePromotionScreen();
+        Storage.set("promotion-screen", false);
         this.#changeTurn();
     }
 
@@ -382,7 +377,7 @@ class Chess{
         // If moved piece is king then don't control check
         if(Storage.get("last-moved-piece").type === PieceType.King){
             Global.setCheckedPlayer(null); // set checked status to null
-            this.#board.removeEffectOfAllSquares(SquareEffect.Checked); 
+            this.#board.removeEffectOfAllSquares(SquareEffect.Checked);
             return;
         }
 
@@ -406,7 +401,7 @@ class Chess{
         Storage.set("last-moved-piece", this.#selected_piece);
 
         // Clear current select
-        this.#clearSelect();
+        this.clearSelect();
 
         // Clear playable_squares from cache
         Cache.clear("playable_squares");

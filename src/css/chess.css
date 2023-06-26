@@ -154,10 +154,16 @@ fieldset{
     margin:5px;
 }
 
-.promotion{
+.promotion-option{
     z-index:99;
-    background-color: #000;
+    position:inherit;
+    background-color: lightgray;
+    border-radius: 50%;
 }
+
+.promotion-option:hover{
+    background-color: gray;
+}   
 
 /* -------------- Pieces END -------------- */
 

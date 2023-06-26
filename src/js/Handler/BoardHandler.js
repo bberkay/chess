@@ -1,16 +1,57 @@
-class BoardHandler{        
+class BoardHandler{
+    static #chessInstance = null;
+
+    static {
+        this.#chessInstance = new Chess(); // Singleton Chess Object
+    }
+
     /**
      * @static
-     * Get Clicked Square From DOM
-     * @param {Element} e Element of the clicked square('this' object comes from DOM)
-     * @param {SquareClickMode} move_type Mode of the clicked square
+     * Is Any Popup Open? (like Promotion Screen, Checkmate Screen, etc.)
+     * @param {string|null} exception Exception Popup Name
+     * @returns {boolean}
+     */
+    static isAnyPopupOpen(exception = null){
+        return (Storage.get("promotion-screen") && exception !== "promotion-screen");
+    }
+
+    /**
+     * @static
+     * Click Board From DOM (Clear Select)
      * @returns {void}
      */
-    static clickSquare(e, move_type){
-        let chess = new Chess(); // Singleton Chess Object
+    static clickBoard(){
+        if(this.isAnyPopupOpen())
+            return;
 
-        chess.makeMove(parseInt(e.id), move_type);
-    }    
+        this.#chessInstance.clearSelect();
+    }
+
+    /**
+     * @static
+     * Select Piece From DOM
+     * @param {Element} e Element of the clicked square('this' object comes from DOM)
+     * @returns {void}
+     */
+    static selectPiece(e){
+        if(this.isAnyPopupOpen())
+            return;
+
+        this.#chessInstance.selectPiece(parseInt(e.id));
+    }
+
+    /**
+     * @static
+     * Play Piece From DOM
+     * @param {Element} e Element of the clicked square('this' object comes from DOM)
+     * @returns {void}
+     */
+    static playPiece(e){
+        if(this.isAnyPopupOpen())
+            return;
+
+        this.#chessInstance.playPiece(parseInt(e.id));
+    }
 
     /**
      * @static
@@ -19,8 +60,9 @@ class BoardHandler{
      * @returns {void}
      */
     static selectPromotion(e){
-        let chess = new Chess(); // Singleton Chess Object
+        if(this.isAnyPopupOpen("promotion-screen"))
+            return;
 
-        chess.doPromote(e.getAttribute("data-piece"));
+        this.#chessInstance.doPromote(parseInt(e.id), e.querySelector(".promotion-option").getAttribute("data-piece"));
     }    
 }
