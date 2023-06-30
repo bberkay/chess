@@ -23,7 +23,7 @@ class Chess{
     * Start Game
     * @returns {void}
     */
-    startStandartGame() {
+    startStandardGame() {
         // Clear Cache and Session
         Cache.clear();
         Global.clearSession();
@@ -413,10 +413,10 @@ class Chess{
         Global.increaseMoveCount();
 
         // Control castling after move
-        //GameManager.controlCastlingAfterMove();     
+        GameManager.controlCastlingAfterMove();
 
         // Control check for player
-        //this.#controlCheck();
+        this.#controlCheck();
 
         // Update game in cache
         this.#saveGameToCache();

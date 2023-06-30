@@ -491,7 +491,7 @@ const StartPosition = {
             "square":Square.F7,
         }
     ],
-    Check1:[
+    Check:[
         {
             "color":Color.Black,
             "piece":PieceType.King,
@@ -508,7 +508,24 @@ const StartPosition = {
             "square":Square.G2,
         }
     ],
-    Check2:[
+    Checkmate:[
+        {
+            "color":Color.White,
+            "piece":PieceType.King,
+            "square":Square.E8,
+        },
+        {
+            "color":Color.Black,
+            "piece":PieceType.Rook,
+            "square":Square.F1,
+        },
+        {
+            "color":Color.Black,
+            "piece":PieceType.Rook,
+            "square":Square.D1,
+        }
+    ],
+    Stalemate:[
         {
             "color":Color.White,
             "piece":PieceType.King,

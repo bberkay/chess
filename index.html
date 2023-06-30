@@ -18,7 +18,7 @@
             </fieldset>
             <fieldset class = "menu-buttons">
                 <legend>Games</legend>
-                <input type="button" value="Start New Game" onclick="MenuHandler.startStandartGame()">
+                <input type="button" value="Start New Game" onclick="MenuHandler.startStandardGame()">
                 <input type="button" value="Start Empty Game" onclick="MenuHandler.startEmptyGame()">
             </fieldset>
             <fieldset class = "menu-buttons">
@@ -27,8 +27,9 @@
                 <input type="button" value="Castling Position" onclick="MenuHandler.startFromPosition(StartPosition.Castling)">
                 <input type="button" value="En Passant Position - Right" onclick="MenuHandler.startFromPosition(StartPosition.EnPassantRight)">
                 <input type="button" value="En Passant Position - Left" onclick="MenuHandler.startFromPosition(StartPosition.EnPassantLeft)">
-                <input type="button" value="Check Scenario #1" onclick="MenuHandler.startFromPosition(StartPosition.Check1)">
-                <input type="button" value="Check Scenario #2" onclick="MenuHandler.startFromPosition(StartPosition.Check2)">
+                <input type="button" value="Check Position" onclick="MenuHandler.startFromPosition(StartPosition.Check)">
+                <input type="button" value="Checkmate Position" onclick="MenuHandler.startFromPosition(StartPosition.Checkmate)">
+                <input type="button" value="Stalemate Position" onclick="MenuHandler.startFromPosition(StartPosition.Stalemate)">
             </fieldset>
             <fieldset>
                 <legend>Create Piece</legend>
@@ -214,18 +215,18 @@
     <script>
         const chess = new Chess();
 
-        if(document.getElementById("chessboard").innerHTML == ""){
+        if(document.getElementById("chessboard").innerHTML === ""){
             if(Cache.has("current-game"))
                 chess.startGameFromCache();
             else
-                chess.startStandartGame();
+                chess.startStandardGame();
         }
 
 
         // Dark Mode to not be blind at night, not important
         var body = document.getElementsByTagName("body")[0];
         if(Cache.has("display-mode")){
-            if(Cache.get("display-mode") == "dark-mode"){
+            if(Cache.get("display-mode") === "dark-mode"){
                 body.classList.add("dark-mode");
                 body.classList.remove("light-mode");
             }else{

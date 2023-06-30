@@ -100,29 +100,32 @@ class MenuHandler{
     static startEmptyGame(){
         let chess = new Chess(); // Singleton Chess Object
 
-        chess.startCustomGame();
+        if(confirm("Wait, are you sure you want to start an empty game ?"))
+            chess.startCustomGame();
     }
 
     /**
      * @static
-     * Start Standart Game
+     * Start Standard Game
      * @returns {void}
      */
-    static startStandartGame(){
+    static startStandardGame(){
         let chess = new Chess(); // Singleton Chess Object
 
-        chess.startStandartGame();
+        if(confirm("Wait, are you sure you want to start an standard game ?"))
+            chess.startStandardGame();
     }
 
     /**
      * @static
      * Start From Position
-     * @param {StartPosition} position
+     * @param {StartPosition|Array<JSON>} position
      * @returns {void}
      */
     static startFromPosition(position){
         let chess = new Chess(); // Singleton Chess Object
 
-        chess.startCustomGame(position);
+        if(confirm("Wait, are you sure you want to start an custom game ?"))
+            chess.startCustomGame(position);
     }
 }
