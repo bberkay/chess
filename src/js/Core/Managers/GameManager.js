@@ -101,6 +101,7 @@ class GameManager{
     static isStalemate(){
         // Get board squares
         let squares = Global.getSquares();
+
         // Get playable squares in cache
         let cached_playable_squares = Cache.get("playable_squares");
 
@@ -112,7 +113,7 @@ class GameManager{
                 let piece = squares[square]; // Get piece
                 let playable_squares = null; // Define playable squares
 
-                if(square in cached_playable_squares) // If playable squares is in cache then get from cache
+                if(cached_playable_squares && piece.id in cached_playable_squares) // If playable squares is in cache then get from cache
                     playable_squares = cached_playable_squares[piece.id];
                 else // Else calculate playable squares and add to cache
                 {

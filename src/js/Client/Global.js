@@ -510,36 +510,46 @@ const StartPosition = {
     ],
     Checkmate:[
         {
+            "color":Color.Black,
+            "piece":PieceType.King,
+            "square":Square.A8,
+        },
+        {
+            "color":Color.White,
+            "piece":PieceType.Rook,
+            "square":Square.B1,
+        },
+        {
+            "color":Color.White,
+            "piece":PieceType.Rook,
+            "square":Square.B2,
+        },
+        {
             "color":Color.White,
             "piece":PieceType.King,
-            "square":Square.E8,
-        },
-        {
-            "color":Color.Black,
-            "piece":PieceType.Rook,
-            "square":Square.F1,
-        },
-        {
-            "color":Color.Black,
-            "piece":PieceType.Rook,
-            "square":Square.D1,
+            "square":Square.H2,
         }
     ],
     Stalemate:[
         {
+            "color":Color.Black,
+            "piece":PieceType.King,
+            "square":Square.A8,
+        },
+        {
+            "color":Color.White,
+            "piece":PieceType.Rook,
+            "square":Square.B1,
+        },
+        {
+            "color":Color.White,
+            "piece":PieceType.Rook,
+            "square":Square.F6,
+        },
+        {
             "color":Color.White,
             "piece":PieceType.King,
-            "square":Square.E8,
-        },
-        {
-            "color":Color.Black,
-            "piece":PieceType.Rook,
-            "square":Square.F1,
-        },
-        {
-            "color":Color.Black,
-            "piece":PieceType.Rook,
-            "square":Square.D1,
+            "square":Square.H2,
         }
     ],
     PawnPromotion:[

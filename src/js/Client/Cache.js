@@ -68,6 +68,6 @@ class Cache{
      * @returns {boolean}
      */
     static has(key){
-        return localStorage.getItem(key) != undefined;
+        return localStorage.getItem(key) !== undefined;
     }
 }
