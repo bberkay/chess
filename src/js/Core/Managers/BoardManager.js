@@ -46,4 +46,33 @@ class BoardManager {
         
         return false;
     }
+
+    /**
+     * @static
+     * Get All Playable Squares For A Color
+     * @param {Color} color
+     * @returns {Array<int>}
+     */
+    static getAllPlayableSquares(color) {
+
+        // Get playable squares in cache
+        let cached_playable_squares = Cache.get("playable_squares");
+        let playable_squares = [];
+
+        // Get all pieces
+        let pieces = BoardManager.getPiecesWithFilter(null, color);
+        for (let piece of pieces) {
+            if(cached_playable_squares && piece.id in cached_playable_squares) // If playable squares are in cache, get from cache
+            {
+                playable_squares = playable_squares.concat(cached_playable_squares[piece.id]);
+            }
+            else // Else calculate playable squares and add to cache
+            {
+                playable_squares = playable_squares.concat(piece.getPlayableSquares());
+                Cache.add("playable_squares", {[piece.id]:piece.getPlayableSquares()});
+            }
+        }
+
+        return playable_squares;
+    }
 }

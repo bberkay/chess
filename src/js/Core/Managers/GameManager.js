@@ -99,38 +99,33 @@ class GameManager{
      * @returns {boolean}
      */
     static isStalemate(){
-        // Get board squares
-        let squares = Global.getSquares();
+        // Get all playable squares for current player
+        let playable_squares = BoardManager.getAllPlayableSquares(Global.getCurrentMove());
 
-        // Get playable squares in cache
-        let cached_playable_squares = Cache.get("playable_squares");
-
-        for(let square in squares)
-        {
-            // If square has a piece and piece's color is current player's color
-            if(squares[square] !== 0 && squares[square].color === Global.getCurrentMove())
-            {
-                let piece = squares[square]; // Get piece
-                let playable_squares = null; // Define playable squares
-
-                if(cached_playable_squares && piece.id in cached_playable_squares) // If playable squares is in cache then get from cache
-                    playable_squares = cached_playable_squares[piece.id];
-                else // Else calculate playable squares and add to cache
-                {
-                    playable_squares = piece.getPlayableSquares();
-                    Cache.add("playable_squares", {[piece.id]:playable_squares});
-                }
-
-                // If playable squares is not empty then return false
-                if(playable_squares.length !== 0)
-                    return false;
-            }
-        }
+        if (playable_squares.length !== 0)
+            return false;
 
         // If there is no playable squares then return true
         return true;
     }
 
+    /**
+     * @static
+     * Is Game Checkmate ?
+     * @returns {boolean}
+     */
+    static isCheckmate(){
+        // Get all playable squares for current player
+        let playable_squares = BoardManager.getAllPlayableSquares(Global.getCurrentMove());
+
+        for(let playable_square in playable_squares){
+            if(playable_square in Cache.get("dangerous_squares"))
+                return false;
+        }
+
+        // If there is no playable squares then return true
+        return true;
+    }
 
     /**
      * @static

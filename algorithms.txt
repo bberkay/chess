@@ -1,6 +1,3 @@
-Pat Algoritması
-- isStalemate fonksiyonunda, Tahtada ki tüm current move taşların playable square lengthlerı 0 ise(en passantlar ve castlingler unutulmayacak, muhtemelen zaten playable square bilgisinin içinde geliyor bunlar) pat ve finish game
-
 Mat Algoritması
 - isCheckmate fonksiyonunda, tahta da ki tüm curent move taşların playable squareleri içinde gez hangisinin playable square i dangrouse square ile aynı ise zorunlu hamle yap. 
 

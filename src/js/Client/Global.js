@@ -57,7 +57,7 @@ class Global{
     /**
      * @static
      * Get Current Move
-     * @returns {string}
+     * @returns {string|Color}
      */
     static getCurrentMove(){
         return this.#gl_current_move;
