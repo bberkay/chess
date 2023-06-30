@@ -20,14 +20,19 @@ class Cache{
 
     /**
      * Clear the cache
+     * @returns {void}
+     */
+    static clear(){
+        localStorage.clear();
+    }
+
+    /**
+     * Clear the cache
      * @param {string} key Key that will be removed from the cache
      * @returns {void}
      */
-    static clear(key=null){
-        if(key == null)
-            localStorage.clear();
-        else
-            localStorage.removeItem(key);
+    static remove(key){
+        localStorage.removeItem(key);
     }
 
     /**

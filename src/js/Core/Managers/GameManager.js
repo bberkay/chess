@@ -87,8 +87,49 @@ class GameManager{
             Global.setSquare(temp_king_square_id, temp_player_king);
         }
 
-        return dangerous_squares.length !== 0;
+        if(dangerous_squares.length !== 0){
+            Cache.set("dangerous_squares", dangerous_squares);
+            return true
+        }
     }
+
+    /**
+     * @static
+     * Is Game Stalemate ?
+     * @returns {boolean}
+     */
+    static isStalemate(){
+        // Get board squares
+        let squares = Global.getSquares();
+        // Get playable squares in cache
+        let cached_playable_squares = Cache.get("playable_squares");
+
+        for(let square in squares)
+        {
+            // If square has a piece and piece's color is current player's color
+            if(squares[square] !== 0 && squares[square].color === Global.getCurrentMove())
+            {
+                let piece = squares[square]; // Get piece
+                let playable_squares = null; // Define playable squares
+
+                if(square in cached_playable_squares) // If playable squares is in cache then get from cache
+                    playable_squares = cached_playable_squares[piece.id];
+                else // Else calculate playable squares and add to cache
+                {
+                    playable_squares = piece.getPlayableSquares();
+                    Cache.add("playable_squares", {[piece.id]:playable_squares});
+                }
+
+                // If playable squares is not empty then return false
+                if(playable_squares.length !== 0)
+                    return false;
+            }
+        }
+
+        // If there is no playable squares then return true
+        return true;
+    }
+
 
     /**
      * @static
@@ -98,7 +139,7 @@ class GameManager{
     static isLongCastlingAvailable(){
         if(Global.getCastling(Global.getCurrentMove() + "-" + CastlingType.Long) == false)
             return false;         
-               
+
         // Find long rook square_id by player's color
         let long_rook = Global.getCurrentMove() == Color.White ? 57 : 1;
 

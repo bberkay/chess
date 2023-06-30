@@ -21,4 +21,23 @@ class Storage{
 	static get(key){
 		return this.#storage[key];
 	}
+
+	/**
+	 * @static
+	 * Remove a key-value pair from storage
+	 * @param {string} key
+	 * @returns {void}
+	 */
+	static remove(key){
+		delete this.#storage[key];
+	}
+
+	/**
+	 * @static
+	 * Clear storage
+	 * @returns {void}
+	 */
+	static clear(){
+		this.#storage = {};
+	}
 }

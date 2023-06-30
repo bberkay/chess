@@ -24,8 +24,9 @@ class Chess{
     * @returns {void}
     */
     startStandardGame() {
-        // Clear Cache and Session
+        // Clear Cache, Storage and Session
         Cache.clear();
+        Storage.clear();
         Global.clearSession();
 
         // Create Board
@@ -71,8 +72,9 @@ class Chess{
     * @returns {void}
     */
     startCustomGame(pieces = null) {
-        // Clear Cache and Session
+        // Clear Cache, Storage and Session
         Cache.clear();
+        Storage.clear();
         Global.clearSession();
 
         // Create Board
@@ -375,17 +377,35 @@ class Chess{
     */ 
     #controlCheck(){
         // If moved piece is king then don't control check
-        if(Storage.get("last-moved-piece").type === PieceType.King){
+        if(Storage.get("last-moved-piece").type === PieceType.King)
+        {
             Global.setCheckedPlayer(null); // set checked status to null
             this.#board.removeEffectOfAllSquares(SquareEffect.Checked);
             return;
         }
 
         // Set checked player and give effect the checked king
-        if(GameManager.isCheck()){
+        if(GameManager.isCheck())
+        {
+            // Is Checkmate?
+            if(GameManager.isCheckmate())
+            {
+                //this.#board.showCheckmateScreen();
+                alert("Checkmate");
+                return;
+            }
             Global.setCheckedPlayer(Global.getCurrentMove());
             this.#board.addEffectToSquare(Storage.get(Global.getCurrentMove() + "-king").getSquareId(), SquareEffect.Checked);
-        }else{
+        }
+        else
+        {
+            // Is Stalemate?
+            if(GameManager.isStalemate())
+            {
+                //this.#board.showStalemateScreen();
+                alert("Stalemate");
+                return;
+            }
             Global.setCheckedPlayer(null);
             this.#board.removeEffectOfAllSquares(SquareEffect.Checked); 
         }
@@ -404,7 +424,7 @@ class Chess{
         this.clearSelect();
 
         // Clear playable_squares from cache
-        Cache.clear("playable_squares");
+        Cache.remove("playable_squares");
 
         // Set New Turn(change current player)
         Global.setNextMove();
