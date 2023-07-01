@@ -2,6 +2,7 @@ class Chess{
     #board; // Board
     #playable_squares; // Playable squares of the clicked piece
     #selected_piece; // Selected piece
+    #zugzwang_pieces; // Zugzwang pieces
 
     /**
      * @constructor
@@ -11,6 +12,7 @@ class Chess{
             this.#board = new Board();
             this.#playable_squares = [];
             this.#selected_piece = null;
+            this.#zugzwang_pieces = [];
 
             // Singleton instance
             Chess.instance = this;    
@@ -381,33 +383,39 @@ class Chess{
         {
             Global.setCheckedPlayer(null); // set checked status to null
             this.#board.removeEffectOfAllSquares(SquareEffect.Checked);
+            this.#zugzwang_pieces = [];
             return;
         }
 
         // Set checked player and give effect the checked king
         if(GameManager.isCheck())
         {
-            // Is Checkmate?
-            if(GameManager.isCheckmate())
-            {
-                //this.#board.showCheckmateScreen();
-                alert("Checkmate");
-                return;
-            }
             Global.setCheckedPlayer(Global.getCurrentMove());
             this.#board.addEffectToSquare(Storage.get(Global.getCurrentMove() + "-king").getSquareId(), SquareEffect.Checked);
+
+            if(GameManager.isCheckmate()) // Is Checkmate?
+            {
+                //this.#board.showCheckmateScreen(); // Show checkmate screen
+                alert("Checkmate");
+                // TODO: End game
+
+            }else{ // If not checkmate then set zugzwang pieces
+                this.#zugzwang_pieces = GameManager.getZugzwangPieces();
+            }
         }
         else
         {
+            Global.setCheckedPlayer(null);
+            this.#board.removeEffectOfAllSquares(SquareEffect.Checked);
+            this.#zugzwang_pieces = [];
+
             // Is Stalemate?
             if(GameManager.isStalemate())
             {
                 //this.#board.showStalemateScreen();
                 alert("Stalemate");
-                return;
+                // TODO: End game
             }
-            Global.setCheckedPlayer(null);
-            this.#board.removeEffectOfAllSquares(SquareEffect.Checked); 
         }
     }
 

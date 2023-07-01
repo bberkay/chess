@@ -87,6 +87,7 @@ class GameManager{
             Global.setSquare(temp_king_square_id, temp_player_king);
         }
 
+        // TODO: En son burada kaldık dangrous square kontrol edilecek, notlara bak.
         if(dangerous_squares.length !== 0){
             Cache.set("dangerous_squares", dangerous_squares);
             return true
@@ -119,12 +120,30 @@ class GameManager{
         let playable_squares = BoardManager.getAllPlayableSquares(Global.getCurrentMove());
 
         for(let playable_square in playable_squares){
-            if(playable_square in Cache.get("dangerous_squares"))
+            if(playable_square in Cache.get("dangerous_squares")){
+                Cache.add("zugzwang_squares", playable_squares);
                 return false;
+            }
         }
 
         // If there is no playable squares then return true
         return true;
+    }
+
+    /**
+     * @static
+     * Get Zugzwang Pieces
+     * @returns {Array<Piece>}
+     */
+    static getZugzwangPieces() {
+        let zugzwang_squares = Cache.get("zugzwang_squares");
+        let zugzwang_pieces = [];
+        for (let i in zugzwang_squares) {
+            let piece = BoardManager.getPieceBySquareId(zugzwang_squares[i]);
+            if (piece)
+                zugzwang_pieces.push(piece);
+        }
+        return zugzwang_pieces;
     }
 
     /**

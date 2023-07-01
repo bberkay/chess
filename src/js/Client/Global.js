@@ -528,6 +528,16 @@ const StartPosition = {
             "color":Color.White,
             "piece":PieceType.King,
             "square":Square.H2,
+        },
+        {
+            "color":Color.Black,
+            "piece":PieceType.Rook,
+            "square":Square.E6,
+        },
+        {
+            "color":Color.Black,
+            "piece":PieceType.Pawn,
+            "square":Square.F6,
         }
     ],
     Stalemate:[

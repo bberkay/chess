@@ -1,5 +1,0 @@
-Mat Algoritması
-- isCheckmate fonksiyonunda, tahta da ki tüm curent move taşların playable squareleri içinde gez hangisinin playable square i dangrouse square ile aynı ise zorunlu hamle yap. 
-
-Zorunlu Hamle
-- zorunlu hamle yapacak taşı chess.js içinde bir property olarak tanımla ve selectPiece de kontrol ettir var mı diye?
