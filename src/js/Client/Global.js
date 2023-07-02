@@ -131,6 +131,9 @@ class Global{
      * @returns {void}
      */
     static setSquare(square_id, content= 0){
+        if(content !== 0 && typeof content !== "object")
+            throw new Error("Content must be a piece object or 0");
+
         this.#gl_squares[square_id] = content;
     }
 
@@ -143,7 +146,7 @@ class Global{
         this.#gl_current_move = this.#gl_current_move === Color.White ? Color.Black : Color.White;
 
         // Save to cache
-        Cache.set("current-move", this.#gl_current_move);
+        Cache.set(CacheLayer.Game, "gl_squares", this.#gl_current_move);
     }
 
     /**
@@ -155,7 +158,7 @@ class Global{
         this.#gl_move_count += 1;
 
         // Save to cache
-        Cache.set("move-count", this.#gl_move_count);
+        Cache.set(CacheLayer.Game,"gl_move_count", this.#gl_move_count);
     }
 
     /**
@@ -168,7 +171,7 @@ class Global{
         this.#gl_current_move = move;
 
         // Save to cache
-        Cache.set("current-move", this.#gl_current_move);
+        Cache.set(CacheLayer.Game, "gl_squares", this.#gl_current_move);
     }
 
     /**
@@ -181,7 +184,7 @@ class Global{
         this.#gl_move_count = count;
 
         // Save to cache
-        Cache.set("move-count", this.#gl_move_count);
+        Cache.set(CacheLayer.Game, "gl_move_count", this.#gl_move_count);
     }
 
     /**
@@ -226,7 +229,7 @@ class Global{
         this.#gl_checked_player = color;
 
         // Save to cache
-        Cache.set("checked-player", this.#gl_checked_player);
+        Cache.set(CacheLayer.Game, "gl_checked_player", this.#gl_checked_player);
     }
 
     /**
@@ -234,7 +237,7 @@ class Global{
      * Clear all variables
      * @returns {void}
      */
-    static clearSession(){
+    static reset(){
         this.setMoveCount(1);
         this.setCurrentMove(Color.White);
         this.setCheckedPlayer(null);
@@ -427,6 +430,11 @@ const SquareClickMode = {
 const StartPosition = {
     Castling:[
         {
+            "color":Color.Black,
+            "piece":PieceType.King,
+            "square":Square.E8,
+        },
+        {
             "color":Color.White,
             "piece":PieceType.Rook,
             "square":Square.H1,
@@ -571,18 +579,26 @@ const StartPosition = {
         {
             "color":Color.White,
             "piece":PieceType.Pawn,
-            "square":Square.E2
+            "square":Square.E7
         },
         {
             "color":Color.Black,
             "piece":PieceType.King,
             "square":Square.C8
         },
-        ,
         {
             "color":Color.Black,
             "piece":PieceType.Pawn,
-            "square":Square.C7
+            "square":Square.C2
         }
     ]
+}
+
+/**
+ * Cache Layer Enum
+ * @enum {string}
+ */
+const CacheLayer = {
+    Game:"currentGame",
+    UI:"userInterface",
 }

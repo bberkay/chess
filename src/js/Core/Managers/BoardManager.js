@@ -56,7 +56,7 @@ class BoardManager {
     static getAllPlayableSquares(color) {
 
         // Get playable squares in cache
-        let cached_playable_squares = Cache.get("playable_squares");
+        let cached_playable_squares = Cache.get(CacheLayer.Game, "playable_squares");
         let playable_squares = [];
 
         // Get all pieces
@@ -69,7 +69,7 @@ class BoardManager {
             else // Else calculate playable squares and add to cache
             {
                 playable_squares = playable_squares.concat(piece.getPlayableSquares());
-                Cache.add("playable_squares", {[piece.id]:piece.getPlayableSquares()});
+                Cache.add(CacheLayer.Game,"playable_squares", {[piece.id]:piece.getPlayableSquares()});
             }
         }
 

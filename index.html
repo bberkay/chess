@@ -216,7 +216,7 @@
         const chess = new Chess();
 
         if(document.getElementById("chessboard").innerHTML === ""){
-            if(Cache.has("current-game"))
+            if(Cache.has(CacheLayer.Game, "gl_squares"))
                 chess.startGameFromCache();
             else
                 chess.startStandardGame();
@@ -225,8 +225,8 @@
 
         // Dark Mode to not be blind at night, not important
         var body = document.getElementsByTagName("body")[0];
-        if(Cache.has("display-mode")){
-            if(Cache.get("display-mode") === "dark-mode"){
+        if(Cache.has(CacheLayer.UI, "display-mode")){
+            if(Cache.get(CacheLayer.UI, "display-mode") === "dark-mode"){
                 body.classList.add("dark-mode");
                 body.classList.remove("light-mode");
             }else{
@@ -239,11 +239,11 @@
             if(body.classList.contains("light-mode")){
                 body.classList.add("dark-mode");
                 body.classList.remove("light-mode");
-                Cache.set("display-mode", "dark-mode");
+                Cache.set(CacheLayer.UI, "display-mode", "dark-mode");
             }else{
                 body.classList.add("light-mode");
                 body.classList.remove("dark-mode");
-                Cache.set("display-mode", "light-mode");
+                Cache.set(CacheLayer.UI, "display-mode", "light-mode");
             }
         }
     </script>

@@ -27,9 +27,9 @@ class Chess{
     */
     startStandardGame() {
         // Clear Cache, Storage and Session
-        Cache.clear();
+        Cache.clear(CacheLayer.Game);
         Storage.clear();
-        Global.clearSession();
+        Global.reset();
 
         // Create Board
         this.#board.createBoard();
@@ -75,9 +75,9 @@ class Chess{
     */
     startCustomGame(pieces = null) {
         // Clear Cache, Storage and Session
-        Cache.clear();
+        Cache.clear(CacheLayer.Game);
         Storage.clear();
-        Global.clearSession();
+        Global.reset();
 
         // Create Board
         this.#board.createBoard();
@@ -102,7 +102,7 @@ class Chess{
      * @returns {void}
      */
     startGameFromCache(){
-        let squares = Cache.get("current-game");
+        let squares = Cache.get(CacheLayer.Game, "gl_squares");
 
         // Create Board
         this.#board.createBoard();
@@ -117,16 +117,16 @@ class Chess{
         }
 
         // Set Playable Squares
-        this.#playable_squares = Cache.get("playable-squares") || [];
+        this.#playable_squares = Cache.get(CacheLayer.Game, "playable_squares") || [];
 
         // Set Current Move
-        Global.setCurrentMove(Cache.get("current-move") || Color.White);
+        Global.setCurrentMove(Cache.get(CacheLayer.Game,"gl_current_move") || Color.White);
 
         // Set Move Count
-        Global.setMoveCount(Cache.get("move-count") || 0);
+        Global.setMoveCount(Cache.get(CacheLayer.Game,"gl_move_count") || 0);
 
         // Set Checked Player
-        let checked_player = Cache.get("checked-player");
+        let checked_player = Cache.get(CacheLayer.Game,"gl_checked_player");
         if(checked_player){
             Global.setCheckedPlayer(checked_player);            
             this.#board.addEffectToSquare(checked_player === Color.White ? Storage.get("white-king").getSquareId() : Storage.get("black-king").getSquareId(), SquareEffect.Checked);
@@ -148,7 +148,7 @@ class Chess{
             cacheData[square] = content === 0 ? 0 : { id: content.id, type: content.type, color: content.color };
         }
 
-        Cache.set("current-game", cacheData);
+        Cache.set(CacheLayer.Game,"gl_squares", cacheData);
     }
 
     /**
@@ -200,14 +200,14 @@ class Chess{
         this.#board.addEffectToSquare(this.#selected_piece.getSquareId(), SquareEffect.Selected);
 
         // Get playable squares of selected piece
-        let cache_playable_squares = Cache.get("playable_squares");
+        let cache_playable_squares = Cache.get(CacheLayer.Game, "playable_squares");
 
         // If playable squares not in cache
         if(!cache_playable_squares || cache_playable_squares[this.#selected_piece.id] === undefined){ 
             this.#playable_squares = this.#selected_piece.getPlayableSquares();   
 
             // Add playable squares to cache
-            Cache.add("playable_squares", {[this.#selected_piece.id]:this.#playable_squares});
+            Cache.add(CacheLayer.Game,"playable_squares", {[this.#selected_piece.id]:this.#playable_squares});
         }
         // If playable squares in cache
         else{ 
@@ -355,6 +355,7 @@ class Chess{
         this.createPiece(promotion_type, current_color, targetSquareId);
         this.#board.disablePromotionScreen();
         Storage.set("promotion-screen", false);
+
         this.#changeTurn();
     }
 
@@ -390,6 +391,8 @@ class Chess{
         // Set checked player and give effect the checked king
         if(GameManager.isCheck())
         {
+            alert("Check");
+
             Global.setCheckedPlayer(Global.getCurrentMove());
             this.#board.addEffectToSquare(Storage.get(Global.getCurrentMove() + "-king").getSquareId(), SquareEffect.Checked);
 
@@ -432,7 +435,7 @@ class Chess{
         this.clearSelect();
 
         // Clear playable_squares from cache
-        Cache.remove("playable_squares");
+        Cache.remove(CacheLayer.Game, "playable_squares");
 
         // Set New Turn(change current player)
         Global.setNextMove();

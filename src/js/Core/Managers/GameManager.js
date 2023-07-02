@@ -41,7 +41,7 @@ class GameManager{
         let temp_player_king;
         let temp_player_piece;
         let change_status = false;
-        let player_king = Storage.get(Global.getCurrentMove() + "-king"); 
+        let player_king = Storage.get(Global.   getCurrentMove() + "-king");
 
         // If square_id is not null then control target id for check
         if(square_id){
@@ -83,13 +83,13 @@ class GameManager{
         }
 
         if(change_status){
-            Global.setSquare(square_id, temp_player_piece);
+            Global.setSquare(square_id, !temp_player_piece ? 0 : temp_player_piece);
             Global.setSquare(temp_king_square_id, temp_player_king);
         }
 
         // TODO: En son burada kaldık dangrous square kontrol edilecek, notlara bak.
         if(dangerous_squares.length !== 0){
-            Cache.set("dangerous_squares", dangerous_squares);
+            Cache.set(CacheLayer.Game, "dangerous_squares", dangerous_squares);
             return true
         }
     }
@@ -120,8 +120,8 @@ class GameManager{
         let playable_squares = BoardManager.getAllPlayableSquares(Global.getCurrentMove());
 
         for(let playable_square in playable_squares){
-            if(playable_square in Cache.get("dangerous_squares")){
-                Cache.add("zugzwang_squares", playable_squares);
+            if(playable_square in Cache.get(CacheLayer.Game,"dangerous_squares")){
+                Cache.add(CacheLayer.Game, "zugzwang_squares", playable_squares);
                 return false;
             }
         }
@@ -136,7 +136,7 @@ class GameManager{
      * @returns {Array<Piece>}
      */
     static getZugzwangPieces() {
-        let zugzwang_squares = Cache.get("zugzwang_squares");
+        let zugzwang_squares = Cache.get(CacheLayer.Game, "zugzwang_squares");
         let zugzwang_pieces = [];
         for (let i in zugzwang_squares) {
             let piece = BoardManager.getPieceBySquareId(zugzwang_squares[i]);
@@ -286,7 +286,7 @@ class GameManager{
 
         // Control every piece, if piece is moved then set castling status false
         pieces.forEach(piece => {
-            if(piece != undefined && piece.is_moved){
+            if(piece != undefined && piece.moveCount > 0){
                 if(piece.type == PieceType.King){
                     Global.setCastling(piece.color + "-" + CastlingType.Short, false);
                     Global.setCastling(piece.color + "-" + CastlingType.Long, false);

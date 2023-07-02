@@ -3,7 +3,7 @@ class MenuHandler{
     /*
      * Menu variables
      */
-    is_piece_id_list_shown = false; // Is piece id list shown ?
+    static is_piece_id_list_shown = false; // Is piece id list shown ?
 
     /**
      * @static
@@ -29,10 +29,6 @@ class MenuHandler{
      * @returns {void}
      */
     static togglePieceIdList(){
-        // If en passant status is shown then hide it
-        if(this.is_en_passant_status_shown)
-            this.toggleEnPassantStatus();
-        
         let squares = document.getElementsByClassName("square");
         for (let square of squares) {
             let identity = Global.getSquare(parseInt(square.id)); // find real piece in global squares
@@ -68,7 +64,7 @@ class MenuHandler{
             chess.destroyPiece(parseInt(square));
 
         // Update current game
-        Cache.set("current-game", Global.getSquares());
+        Cache.set(CacheLayer.Game,"gl_squares", Global.getSquares());
     }
       
     /**
@@ -89,7 +85,7 @@ class MenuHandler{
             chess.createPiece(piece, color, parseInt(square));
 
         // Update current game
-        Cache.set("current-game", Global.getSquares());
+        Cache.set(CacheLayer.Game, "gl_squares", Global.getSquares());
     }
 
     /**
