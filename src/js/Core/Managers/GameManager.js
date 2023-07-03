@@ -120,7 +120,8 @@ class GameManager{
         let playable_squares = BoardManager.getAllPlayableSquares(Global.getCurrentMove());
 
         for(let playable_square in playable_squares){
-            if(playable_square in Cache.get(CacheLayer.Game,"dangerous_squares")){
+            let dangerous_squares = Cache.get(CacheLayer.Game,"dangerous_squares");
+            if(dangerous_squares && playable_square in dangerous_squares){
                 Cache.add(CacheLayer.Game, "zugzwang_squares", playable_squares);
                 return false;
             }
@@ -282,7 +283,13 @@ class GameManager{
      */
     static controlCastlingAfterMove(){
         // Find player's king and king's square_id
-        let pieces = BoardManager.getPiecesWithFilter(PieceType.Rook).concat(Storage.get("black-king"), Storage.get("white-king"));
+        let pieces = BoardManager.getPiecesWithFilter(PieceType.Rook);
+
+        // If no rook on board then return
+        if(pieces === null)
+            return;
+
+        pieces = pieces.concat(Storage.get("black-king"), Storage.get("white-king"));
 
         // Control every piece, if piece is moved then set castling status false
         pieces.forEach(piece => {

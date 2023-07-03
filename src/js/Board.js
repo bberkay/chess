@@ -197,6 +197,11 @@ class Board{
      * @returns {void}
      */
     showPromotionScreen(square_id){
+        // Disable all squares on the board
+        for(let i = 1; i <= 64; i++){
+            this.addEffectToSquare(i, SquareEffect.Disabled);
+        }
+
         const PROMOTION_OPTIONS = ["queen", "rook", "bishop", "knight"];
         const LENGTH_OF_PROMOTION_OPTIONS = PROMOTION_OPTIONS.length;
 
@@ -219,7 +224,8 @@ class Board{
             let targetSquareId = current_color === Color.White ? square_id + (i * 8) : square_id - (i * 8);
 
             // Create promotion on the board and change square click mode
-            let targetSquareObj = document.getElementById(targetSquareId);
+            let targetSquareObj = document.getElementById(targetSquareId.toString());
+            this.removeEffectOfSquare(targetSquareId, SquareEffect.Disabled);
             this.changeSquareClickMode(targetSquareObj, SquareClickMode.SelectPromotion);
             targetSquareObj.appendChild(promotion_option);
         }
@@ -235,6 +241,25 @@ class Board{
         let l = promotionOptions.length;
         for(let i = 0; i < l; i++){
             promotionOptions[i].remove();
+        }
+
+        // Enable all squares on the board
+        for(let i = 1; i <= 64; i++)
+            this.removeEffectOfSquare(i, SquareEffect.Disabled);
+    }
+
+    /**
+     * Show Finish Screen
+     * @param {FinalStatus} final_status
+     * @param {Color} winner_color
+     * @returns {void}
+     */
+    showFinishScreen(final_status, winner_color){
+        if(final_status === FinalStatus.Checkmate){
+            document.getElementById("finish-screen-text").innerHTML = winner_color + " wins by checkmate";
+        }
+        else if(final_status === FinalStatus.Stalemate){
+            document.getElementById("finish-screen-text").innerHTML = "Stalemate";
         }
     }
 
@@ -281,7 +306,6 @@ class Board{
             this.removeEffectOfSquare(parseInt(squares[i].id), effect);
         }
     }
-
 
     /**
      * Change Square Mode/Function

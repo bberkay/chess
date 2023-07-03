@@ -146,7 +146,7 @@ class Global{
         this.#gl_current_move = this.#gl_current_move === Color.White ? Color.Black : Color.White;
 
         // Save to cache
-        Cache.set(CacheLayer.Game, "gl_squares", this.#gl_current_move);
+        Cache.set(CacheLayer.Game, "gl_current_move", this.#gl_current_move);
     }
 
     /**
@@ -171,7 +171,7 @@ class Global{
         this.#gl_current_move = move;
 
         // Save to cache
-        Cache.set(CacheLayer.Game, "gl_squares", this.#gl_current_move);
+        Cache.set(CacheLayer.Game, "gl_current_move", this.#gl_current_move);
     }
 
     /**
@@ -249,7 +249,6 @@ class Global{
             "black-short": true
         };
     }
-
 }
 
 /**
@@ -409,7 +408,8 @@ const SquareEffect = {
     Checked:"checked-effect", 
     Killable:"killable-effect", 
     Playable:"playable-effect",
-    Selected:"selected-effect"
+    Selected:"selected-effect",
+    Disabled:"disabled-effect"
 }
 
 /**
@@ -420,7 +420,8 @@ const SquareClickMode = {
     SelectPiece:"selectPiece",
     PlayPiece:"playPiece",
     ClickBoard:"clickBoard",
-    SelectPromotion:"selectPromotion"
+    SelectPromotion:"selectPromotion",
+    DisableSquare:"disableSquare"
 }
 
 /**
@@ -601,4 +602,13 @@ const StartPosition = {
 const CacheLayer = {
     Game:"currentGame",
     UI:"userInterface",
+}
+
+/**
+ * Final Status Enum
+ * @enum {string}
+ */
+const FinalStatus = {
+    Checkmate:"checkmate",
+    Stalemate:"stalemate",
 }

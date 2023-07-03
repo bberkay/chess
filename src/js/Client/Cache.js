@@ -8,8 +8,14 @@ class Cache{
      */
     static set(layer, key, value){
         let layer_data = JSON.parse(localStorage.getItem(layer));
-        layer_data[key] = value;
 
+        // If layer is empty then create it
+        if(layer_data == null){
+            localStorage.setItem(layer, JSON.stringify({}));
+            layer_data = {};
+        }
+
+        layer_data[key] = value;
         localStorage.setItem(layer, JSON.stringify(layer_data));
     }
 

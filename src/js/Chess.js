@@ -3,6 +3,8 @@ class Chess{
     #playable_squares; // Playable squares of the clicked piece
     #selected_piece; // Selected piece
     #zugzwang_pieces; // Zugzwang pieces
+    #is_promoting; // Is on promotion
+    #is_finished; // Is game finished
 
     /**
      * @constructor
@@ -13,6 +15,8 @@ class Chess{
             this.#playable_squares = [];
             this.#selected_piece = null;
             this.#zugzwang_pieces = [];
+            this.#is_promoting = false;
+            this.#is_finished = false;
 
             // Singleton instance
             Chess.instance = this;    
@@ -180,8 +184,8 @@ class Chess{
         // Get piece
         let piece = BoardManager.getPieceBySquareId(square_id);
 
-        // If selected piece is not current move's piece or player is checked and selected piece is not king then return
-        if(piece.color !== Global.getCurrentMove())
+        // If selected piece is not current move's piece or player is checked and selected piece is not king then return, also if game is finished or player is on promoting screen then return
+        if(piece.color !== Global.getCurrentMove() || this.#is_promoting || this.#is_finished)
             return;
 
         // If clicked piece is selected piece then unselect piece
@@ -289,6 +293,7 @@ class Chess{
 
         // If promote move
         else if(piece.type === PieceType.Pawn && !pieceOfTargetSquareId && ((piece.color === Color.White && target_square_id < 9) || (piece.color === Color.Black && target_square_id > 56))){
+            this.#is_promoting = true;
             Storage.set("promotion-screen", true);
             Storage.set("promote-piece", piece);
             this.#board.showPromotionScreen(target_square_id);
@@ -355,6 +360,7 @@ class Chess{
         this.createPiece(promotion_type, current_color, targetSquareId);
         this.#board.disablePromotionScreen();
         Storage.set("promotion-screen", false);
+        this.#is_promoting = false;
 
         this.#changeTurn();
     }
@@ -391,20 +397,13 @@ class Chess{
         // Set checked player and give effect the checked king
         if(GameManager.isCheck())
         {
-            alert("Check");
-
             Global.setCheckedPlayer(Global.getCurrentMove());
             this.#board.addEffectToSquare(Storage.get(Global.getCurrentMove() + "-king").getSquareId(), SquareEffect.Checked);
 
             if(GameManager.isCheckmate()) // Is Checkmate?
-            {
-                //this.#board.showCheckmateScreen(); // Show checkmate screen
-                alert("Checkmate");
-                // TODO: End game
-
-            }else{ // If not checkmate then set zugzwang pieces
+                this.#finishGame(FinalStatus.Checkmate, Global.getEnemyPlayer());
+            else // If not checkmate then set zugzwang pieces
                 this.#zugzwang_pieces = GameManager.getZugzwangPieces();
-            }
         }
         else
         {
@@ -414,12 +413,20 @@ class Chess{
 
             // Is Stalemate?
             if(GameManager.isStalemate())
-            {
-                //this.#board.showStalemateScreen();
-                alert("Stalemate");
-                // TODO: End game
-            }
+                this.#finishGame(FinalStatus.Stalemate);
         }
+    }
+
+    /**
+     * @private
+     * Finish game
+     * @param {FinalStatus} final_status
+     * @param {Color} winner
+     * @returns {void}
+     */
+    #finishGame(final_status, winner= null){
+        this.#is_finished = true;
+        this.#board.showFinishScreen(final_status, winner);
     }
 
     /**

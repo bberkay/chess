@@ -2,7 +2,6 @@ body{
     font-family: Arial;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
-    -khtml-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
@@ -186,6 +185,18 @@ fieldset{
 
 .selected-effect{
     box-shadow:inset 0px 0px 100px #47a17338!important;
+}
+
+.disabled-effect{
+    box-shadow:inset 0px 0px 100px #000!important;
+}
+
+.disabled-effect div.piece{
+    opacity: 0.4;
+}
+
+.disabled-effect span{
+    opacity: 0.2;
 }
 
 span.number{
