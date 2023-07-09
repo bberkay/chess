@@ -96,7 +96,7 @@ class MenuHandler{
     static startEmptyGame(){
         let chess = new Chess(); // Singleton Chess Object
 
-        if(confirm("Wait, are you sure you want to start an empty game ?"))
+        if(Alert.showConfirm("Wait, are you sure you want to start a empty game ?"))
             chess.startCustomGame();
     }
 
@@ -108,7 +108,7 @@ class MenuHandler{
     static startStandardGame(){
         let chess = new Chess(); // Singleton Chess Object
 
-        if(confirm("Wait, are you sure you want to start an standard game ?"))
+        if(Alert.showConfirm("Wait, are you sure you want to start a standard game ?"))
             chess.startStandardGame();
     }
 
@@ -121,7 +121,18 @@ class MenuHandler{
     static startFromPosition(position){
         let chess = new Chess(); // Singleton Chess Object
 
-        if(confirm("Wait, are you sure you want to start an custom game ?"))
+        if(Alert.showConfirm("Wait, are you sure you want to start a custom game ?"))
             chess.startCustomGame(position);
+    }
+
+    /**
+     * @static
+     * Start Game With Form
+     * @returns {void}
+     */
+    static startGameWithForm(){
+        let chess = new Chess(); // Singleton Chess Object
+
+        chess.startGame();
     }
 }

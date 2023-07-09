@@ -18,6 +18,7 @@
             </fieldset>
             <fieldset class = "menu-buttons">
                 <legend>Games</legend>
+                <input type="hidden" id="start-game-btn" value="Start Current Game" onclick="MenuHandler.startGameWithForm()">
                 <input type="button" value="Start New Game" onclick="MenuHandler.startStandardGame()">
                 <input type="button" value="Start Empty Game" onclick="MenuHandler.startEmptyGame()">
             </fieldset>
@@ -191,6 +192,25 @@
                 </fieldset>
             </div>
         </div>
+
+        <!-- Alert -->
+        <div id="alert" class="alert">
+            <strong id="alert-text">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce varius, urna ac egestas vehicula, felis ex viverra leo, id tristique orci tellus ullamcorper libero. Fusce vitae imperdiet diam, vel rutrum nulla.
+            </strong>
+            <div class="confirm-buttons">
+                <input type="button" value="OK" onclick="">
+            </div>
+        </div>
+
+        <!-- Confirm -->
+        <div id="confirm" class="alert">
+            <strong id="confirm-text"></strong>
+            <div class="confirm-buttons">
+                <input type="button" value="Yes" onclick="">
+                <input type="button" value="No" onclick="">
+            </div>
+        </div>
     </div>
 
     <!-- Import Files -->
@@ -209,7 +229,8 @@
     <script src="src/js/Handler/MenuHandler.js"></script>
     <script src="src/js/Models/Validation.js"></script>
     <script src="src/js/Models/Piece.js"></script>
-    <script src="src/js/Board.js"></script>
+    <script src="src/js/Board/Board.js"></script>
+    <script src="src/js/Board/Alert.js"></script>
     <script src="src/js/Chess.js"></script>
     <script src="src/js/Handler/BoardHandler.js"></script>
     <script>
@@ -228,22 +249,18 @@
         if(Cache.has(CacheLayer.UI, "display-mode")){
             if(Cache.get(CacheLayer.UI, "display-mode") === "dark-mode"){
                 body.classList.add("dark-mode");
-                body.classList.remove("light-mode");
             }else{
-                body.classList.add("light-mode");
                 body.classList.remove("dark-mode");
             }
         }
 
         function toggleDisplayMode(){
-            if(body.classList.contains("light-mode")){
-                body.classList.add("dark-mode");
-                body.classList.remove("light-mode");
-                Cache.set(CacheLayer.UI, "display-mode", "dark-mode");
-            }else{
-                body.classList.add("light-mode");
+            if(body.classList.contains("dark-mode")){
                 body.classList.remove("dark-mode");
                 Cache.set(CacheLayer.UI, "display-mode", "light-mode");
+            }else{
+                body.classList.add("dark-mode");
+                Cache.set(CacheLayer.UI, "display-mode", "dark-mode");
             }
         }
     </script>

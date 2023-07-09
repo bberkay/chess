@@ -5,6 +5,7 @@ class Chess{
     #zugzwang_pieces; // Zugzwang pieces
     #is_promoting; // Is on promotion
     #is_finished; // Is game finished
+    #is_started; // Is game started
 
     /**
      * @constructor
@@ -17,9 +18,10 @@ class Chess{
             this.#zugzwang_pieces = [];
             this.#is_promoting = false;
             this.#is_finished = false;
+            this.#is_started = false;
 
             // Singleton instance
-            Chess.instance = this;    
+            Chess.instance = this;
         }
 
         return Chess.instance;
@@ -62,10 +64,13 @@ class Chess{
             else if (QUEEN_SQUARES.includes(square_id)) // Queen
                 this.createPiece(PieceType.Queen, square_id < 60 ? Color.Black : Color.White, square_id);
             else if (KING_SQUARES.includes(square_id)) // King
-                this.createPiece(PieceType.King, square_id < 61 ? Color.Black : Color.White, square_id);            
+                this.createPiece(PieceType.King, square_id < 61 ? Color.Black : Color.White, square_id);
             else if (square_id >= 9 && square_id < 17 || square_id > 48 && square_id < 57) // Pawn, 9-16(1st row), 49-56(8th row)
                 this.createPiece(PieceType.Pawn, square_id < 48 ? Color.Black : Color.White, square_id);
         }
+
+        // Start Game
+        this.startGame();
 
         // Add to cache current game
         this.#saveGameToCache();
@@ -91,16 +96,21 @@ class Chess{
             Global.setSquare(i, 0);
 
         // Create Pieces
-        if(pieces){ 
+        if(pieces){
             pieces.forEach(item => {
                 this.createPiece(item["piece"], item["color"],  item["square"]);
             });
+
+            // Start Game
+            this.startGame();
+        }else{
+            this.#board.showStartScreen();
         }
 
         // Add to cache current game
         this.#saveGameToCache();
     }
-    
+
     /**
      * Start Game From Cache
      * @returns {void}
@@ -132,9 +142,12 @@ class Chess{
         // Set Checked Player
         let checked_player = Cache.get(CacheLayer.Game,"gl_checked_player");
         if(checked_player){
-            Global.setCheckedPlayer(checked_player);            
+            Global.setCheckedPlayer(checked_player);
             this.#board.addEffectToSquare(checked_player === Color.White ? Storage.get("white-king").getSquareId() : Storage.get("black-king").getSquareId(), SquareEffect.Checked);
         }
+
+        // Start Game
+        this.startGame();
     }
 
     /**
@@ -196,10 +209,10 @@ class Chess{
 
         // Clear board
         this.#board.refreshBoard();
- 
+
         // Set selected piece
         this.#selected_piece = piece;
-        
+
         // Add selected effect to selected piece
         this.#board.addEffectToSquare(this.#selected_piece.getSquareId(), SquareEffect.Selected);
 
@@ -207,17 +220,17 @@ class Chess{
         let cache_playable_squares = Cache.get(CacheLayer.Game, "playable_squares");
 
         // If playable squares not in cache
-        if(!cache_playable_squares || cache_playable_squares[this.#selected_piece.id] === undefined){ 
-            this.#playable_squares = this.#selected_piece.getPlayableSquares();   
+        if(!cache_playable_squares || cache_playable_squares[this.#selected_piece.id] === undefined){
+            this.#playable_squares = this.#selected_piece.getPlayableSquares();
 
             // Add playable squares to cache
             Cache.add(CacheLayer.Game,"playable_squares", {[this.#selected_piece.id]:this.#playable_squares});
         }
         // If playable squares in cache
-        else{ 
+        else{
             this.#playable_squares = cache_playable_squares[this.#selected_piece.id];
-        } 
-        
+        }
+
         // Show playable squares of selected piece
         this.#board.showPlayableSquaresOnBoard(this.#playable_squares);
     }
@@ -245,10 +258,10 @@ class Chess{
         // Refresh board
         this.#board.refreshBoard();
 
-        // Define and do special move like castling, en passant or promotion if move is not special then move piece to square 
+        // Define and do special move like castling, en passant or promotion if move is not special then move piece to square
         if(!this.#checkAndDoSpecialMove(this.#selected_piece, target_square_id)){
             this.#movePiece(this.#selected_piece, target_square_id);
-            this.#changeTurn();    
+            this.#changeTurn();
         }
     }
 
@@ -263,10 +276,10 @@ class Chess{
         // Move piece on the board
         this.#board.movePieceOnBoard(piece, target_square_id);
 
-        // Move Piece To Target Position 
+        // Move Piece To Target Position
         const old_square_id = piece.getSquareId();
         Global.setSquare(target_square_id, piece);
-        Global.setSquare(old_square_id, 0);       
+        Global.setSquare(old_square_id, 0);
     }
 
     /**
@@ -281,7 +294,7 @@ class Chess{
 
         // If castling move
         if(BoardManager.isSquareHasPiece(target_square_id, Color.White, PieceType.Rook)){
-            this.#doCastling(target_square_id, pieceOfTargetSquareId);  
+            this.#doCastling(target_square_id, pieceOfTargetSquareId);
             return true;
         }
 
@@ -316,7 +329,7 @@ class Chess{
         // Find castling type and player's king
         let castling_type = square_id % 8 === 0 ? CastlingType.Short : CastlingType.Long;
         let player_king = Storage.get(Global.getCurrentMove() + "-king");
-        
+
         // Move King(if castling type is short then move king to 1 square to the left of rook else move king to 2 square to the right of rook)
         target_square_id = castling_type === CastlingType.Short ? square_id - 1 : square_id + 2;
         this.#movePiece(player_king, target_square_id);
@@ -368,7 +381,7 @@ class Chess{
     /**
      * @private
      * Destroy piece by square id
-     * @param {int} square_id 
+     * @param {int} square_id
      * @returns {void}
      */
     destroyPiece(square_id){
@@ -383,7 +396,7 @@ class Chess{
      * @private
      * Is enemy player checked after move? If checked then set gl_checked_player to enemy player
      * @returns {void}
-    */ 
+    */
     #controlCheck(){
         // If moved piece is king then don't control check
         if(Storage.get("last-moved-piece").type === PieceType.King)
@@ -418,6 +431,21 @@ class Chess{
     }
 
     /**
+     * @public
+     * Start Game
+     * @returns {void}
+     */
+    startGame(){
+        if(!this.#is_started && !this.#is_finished && Storage.get("white-king") && Storage.get("black-king")){
+            this.#is_started = true;
+            this.#is_finished = false;
+            this.#board.closeStartScreen();
+        }else{
+            Alert.showAlert("You can't start game! Please add kings to board.");
+        }
+    }
+
+    /**
      * @private
      * Finish game
      * @param {FinalStatus} final_status
@@ -425,6 +453,7 @@ class Chess{
      * @returns {void}
      */
     #finishGame(final_status, winner= null){
+        this.#is_started = false;
         this.#is_finished = true;
         this.#board.showFinishScreen(final_status, winner);
     }

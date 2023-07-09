@@ -249,6 +249,34 @@ class Board{
     }
 
     /**
+     * Show Start Screen
+     * @returns {void}
+     */
+    showStartScreen(){
+        // Disable all squares on the board
+        for(let i = 1; i <= 64; i++){
+            this.addEffectToSquare(i, SquareEffect.Disabled);
+        }
+
+        // Show start screen
+        document.getElementById("start-game-btn").setAttribute("type", "button");
+    }
+
+    /**
+     * Close Start Screen
+     * @returns {void}
+     */
+    closeStartScreen(){
+        // Enable all squares on the board
+        for(let i = 1; i <= 64; i++){
+            this.removeEffectOfSquare(i, SquareEffect.Disabled);
+        }
+
+        // Hide start screen
+        document.getElementById("start-game-btn").setAttribute("type", "hidden");
+    }
+
+    /**
      * Show Finish Screen
      * @param {FinalStatus} final_status
      * @param {Color} winner_color
