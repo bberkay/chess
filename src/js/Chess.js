@@ -6,6 +6,7 @@ class Chess{
     #is_promoting; // Is on promotion
     #is_finished; // Is game finished
     #is_started; // Is game started
+    #is_start_screen_opened; // Is start screen opened
 
     /**
      * @constructor
@@ -19,6 +20,7 @@ class Chess{
             this.#is_promoting = false;
             this.#is_finished = false;
             this.#is_started = false;
+            this.#is_start_screen_opened = false;
 
             // Singleton instance
             Chess.instance = this;
@@ -103,8 +105,10 @@ class Chess{
 
             // Start Game
             this.startGame();
+
         }else{
             this.#board.showStartScreen();
+            this.#is_start_screen_opened = true;
         }
 
         // Add to cache current game
@@ -116,6 +120,10 @@ class Chess{
      * @returns {void}
      */
     startGameFromCache(){
+        // Clear Storage and session
+        Storage.clear();
+        Global.reset();
+
         let squares = Cache.get(CacheLayer.Game, "gl_squares");
 
         // Create Board
@@ -147,7 +155,8 @@ class Chess{
         }
 
         // Start Game
-        this.startGame();
+        if(Storage.get("white-king") && Storage.get("black-king"))
+            this.startGame();
     }
 
     /**
@@ -177,7 +186,19 @@ class Chess{
      * @returns {void}
      */
     createPiece(piece_type, color, target_square_id, id=null){
-        // FIXME: Bir den fazla şah olamaz. Validate edilecek.
+        // If piece is king and already created then return
+        if(piece_type === PieceType.King){
+            if(color === Color.White && Storage.get("white-king")){
+                Alert.showAlert(AlertMessage.WhiteKingAlreadyCreated);
+                return;
+            }
+            else if(color === Color.Black && Storage.get("black-king")){
+                Alert.showAlert(AlertMessage.BlackKingAlreadyCreated);
+                return;
+            }
+        }
+
+        // Create piece
         let piece = new Piece(piece_type, color, target_square_id, id);
 
         if(piece_type === PieceType.King)
@@ -185,6 +206,8 @@ class Chess{
 
         // Create piece on board
         this.#board.createPieceOnBoard(piece, target_square_id);
+
+        // Burada cache e eklenebilir yaratılan taşlar.
     }
 
     /**
@@ -198,7 +221,7 @@ class Chess{
         let piece = BoardManager.getPieceBySquareId(square_id);
 
         // If selected piece is not current move's piece or player is checked and selected piece is not king then return, also if game is finished or player is on promoting screen then return
-        if(piece.color !== Global.getCurrentMove() || this.#is_promoting || this.#is_finished)
+        if(piece.color !== Global.getCurrentMove() || this.#is_promoting || this.#is_finished || !this.#is_started)
             return;
 
         // If clicked piece is selected piece then unselect piece
@@ -436,12 +459,16 @@ class Chess{
      * @returns {void}
      */
     startGame(){
-        if(!this.#is_started && !this.#is_finished && Storage.get("white-king") && Storage.get("black-king")){
+        if(Storage.get("white-king") && Storage.get("black-king")){
             this.#is_started = true;
             this.#is_finished = false;
             this.#board.closeStartScreen();
         }else{
-            Alert.showAlert("You can't start game! Please add kings to board.");
+            Alert.showAlert(AlertMessage.KingsNotCreated);
+            if(!this.#is_start_screen_opened){
+                this.#board.showStartScreen();
+                this.#is_start_screen_opened = true;
+            }
         }
     }
 
@@ -455,7 +482,10 @@ class Chess{
     #finishGame(final_status, winner= null){
         this.#is_started = false;
         this.#is_finished = true;
-        this.#board.showFinishScreen(final_status, winner);
+        if(final_status === FinalStatus.Checkmate)
+            Alert.showAlert(winner === Color.White ? AlertMessage.WhiteWin : AlertMessage.BlackWin);
+        else if(final_status === FinalStatus.Stalemate)
+            Alert.showAlert(AlertMessage.Stalemate);
     }
 
     /**

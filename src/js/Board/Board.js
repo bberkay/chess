@@ -253,11 +253,6 @@ class Board{
      * @returns {void}
      */
     showStartScreen(){
-        // Disable all squares on the board
-        for(let i = 1; i <= 64; i++){
-            this.addEffectToSquare(i, SquareEffect.Disabled);
-        }
-
         // Show start screen
         document.getElementById("start-game-btn").setAttribute("type", "button");
     }
@@ -267,28 +262,8 @@ class Board{
      * @returns {void}
      */
     closeStartScreen(){
-        // Enable all squares on the board
-        for(let i = 1; i <= 64; i++){
-            this.removeEffectOfSquare(i, SquareEffect.Disabled);
-        }
-
         // Hide start screen
         document.getElementById("start-game-btn").setAttribute("type", "hidden");
-    }
-
-    /**
-     * Show Finish Screen
-     * @param {FinalStatus} final_status
-     * @param {Color} winner_color
-     * @returns {void}
-     */
-    showFinishScreen(final_status, winner_color){
-        if(final_status === FinalStatus.Checkmate){
-            document.getElementById("finish-screen-text").innerHTML = winner_color + " wins by checkmate";
-        }
-        else if(final_status === FinalStatus.Stalemate){
-            document.getElementById("finish-screen-text").innerHTML = "Stalemate";
-        }
     }
 
     /**

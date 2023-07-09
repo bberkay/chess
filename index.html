@@ -193,22 +193,27 @@
             </div>
         </div>
 
+        <!-- Alert Layer -->
+        <div id="alert-layer" class="alert-layer" style="display:none"></div>
+
         <!-- Alert -->
-        <div id="alert" class="alert">
+        <div id="alert" class="alert" style="display:none">
             <strong id="alert-text">
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce varius, urna ac egestas vehicula, felis ex viverra leo, id tristique orci tellus ullamcorper libero. Fusce vitae imperdiet diam, vel rutrum nulla.
             </strong>
             <div class="confirm-buttons">
-                <input type="button" value="OK" onclick="">
+                <input type="button" value="OK" onclick="Alert.hide();">
             </div>
         </div>
 
         <!-- Confirm -->
-        <div id="confirm" class="alert">
-            <strong id="confirm-text"></strong>
+        <div id="confirm" class="alert" style="display:none">
+            <strong id="confirm-text">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce varius, urna ac egestas vehicula, felis ex viverra leo, id tristique orci tellus ullamcorper libero. Fusce vitae imperdiet diam, vel rutrum nulla.
+            </strong>
             <div class="confirm-buttons">
-                <input type="button" value="Yes" onclick="">
-                <input type="button" value="No" onclick="">
+                <input type="button" value="No" id = "confirm-cancel">
+                <input type="button" value="Yes" id="confirm-ok">
             </div>
         </div>
     </div>

@@ -612,3 +612,27 @@ const FinalStatus = {
     Checkmate:"checkmate",
     Stalemate:"stalemate",
 }
+
+/**
+ * Alert Message Enum
+ * @enum {string}
+ */
+const AlertMessage = {
+    WhiteKingAlreadyCreated:"White King is already created",
+    BlackKingAlreadyCreated:"Black King is already created",
+    KingsNotCreated:"You can't start a game without white and black king",
+    WhiteWin:"White wins by checkmate!",
+    BlackWin:"Black wins by checkmate!",
+    Stalemate:"Stalemate!",
+}
+
+/**
+ * Confirm Message Enum
+ * @enum {string}
+ */
+const ConfirmMessage = {
+    StartCustomGame:"Wait, are you sure you want to start a custom game ?",
+    StartStandardGame:"Wait, are you sure you want to start a new game ?",
+    StartEmptyGame:"Wait, are you sure you want to start an empty game ?",
+    StartPositionGame:"Wait, are you sure you want to start a game from a position ?",
+}
