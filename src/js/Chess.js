@@ -155,8 +155,7 @@ class Chess{
         }
 
         // Start Game
-        if(Storage.get("white-king") && Storage.get("black-king"))
-            this.startGame();
+        this.startGame();
     }
 
     /**
@@ -437,7 +436,7 @@ class Chess{
             this.#board.addEffectToSquare(Storage.get(Global.getCurrentMove() + "-king").getSquareId(), SquareEffect.Checked);
 
             if(GameManager.isCheckmate()) // Is Checkmate?
-                this.#finishGame(FinalStatus.Checkmate, Global.getEnemyPlayer());
+                this.#finishGame(FinalStatus.Checkmate, Global.getEnemyColor());
             else // If not checkmate then set zugzwang pieces
                 this.#zugzwang_pieces = GameManager.getZugzwangPieces();
         }

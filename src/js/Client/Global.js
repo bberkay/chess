@@ -117,7 +117,7 @@ class Global{
     /**
      * @static
      * Get Enemy Color
-     * @returns {string}
+     * @returns {Color}
      */
     static getEnemyColor(){
         return this.getCurrentMove() === Color.White ? Color.Black : Color.White;
@@ -515,6 +515,11 @@ const StartPosition = {
             "color":Color.Black,
             "piece":PieceType.Rook,
             "square":Square.G2,
+        },
+        {
+            "color":Color.White,
+            "piece":PieceType.King,
+            "square":Square.H8,
         }
     ],
     Checkmate:[
