@@ -66,7 +66,7 @@ class Global{
     /**
      * @static
      * Get Checked Player
-     * @returns {string}
+     * @returns {Color|null}
      */
     static getCheckedPlayer(){
         return this.#gl_checked_player;
@@ -640,4 +640,13 @@ const ConfirmMessage = {
     StartStandardGame:"Wait, are you sure you want to start a new game ?",
     StartEmptyGame:"Wait, are you sure you want to start an empty game ?",
     StartPositionGame:"Wait, are you sure you want to start a game from a position ?",
+}
+
+/**
+ * VariableType Enum
+ * @enum {string}
+ */
+const VariableType = {
+    Cache:"Cache",
+    Storage:"Storage",
 }

@@ -80,24 +80,28 @@
             <div id="chessboard"></div> <!-- Create Game -->
             <fieldset style="margin-bottom:10px">
                 <legend>Variables</legend>
-                <input type="button" value="Show Storage" onclick="MenuHandler.showStorage()">
-                <input type="button" value="Show Global" onclick="MenuHandler.showGlobal()">
-                <input type="button" value="Show Cache" onclick="MenuHandler.showCache()">
+                <div class="menu-buttons-between">
+                    <div>
+                        <input type="button" value="Show Cache" onclick="MenuHandler.showVariables(VariableType.Cache)">
+                        <input type="button" value="Show Storage" onclick="MenuHandler.showVariables(VariableType.Storage)">
+                    </div>
+                    <div>
+                        <input type="button" value="Toggle Beautify" onclick="MenuHandler.toggleBeautify()">
+                        <input type="button" value="Refresh" onclick="MenuHandler.refreshVariables()">
+                    </div>
+                </div>
                 <fieldset>
-                    <legend>Storage</legend>
+                    <legend id="variable-title">Show</legend>
                     <table border="true">
-                        <tr>
-                            <td>A1xE2</td>
-                            <td>A2xE2</td>
-                        </tr>
-                        <tr>
-                            <td>A1xE2</td>
-                            <td>A2xE2</td>
-                        </tr>
-                        <tr>
-                            <td>A1xE2</td>
-                            <td>A2xE2</td>
-                        </tr>
+                        <thead>
+                            <tr>
+                                <th>Key</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody id="variable-content">
+                            <!-- Content -->
+                        </tbody>
                     </table>
                 </fieldset>
             </fieldset>
@@ -212,6 +216,9 @@
     <script src="src/js/Handler/BoardHandler.js"></script>
     <script>
         const chess = new Chess();
+
+        // init, Show Cache Variables
+        MenuHandler.showVariables(VariableType.Cache);
 
         if(document.getElementById("chessboard").innerHTML === ""){
             if(Cache.has(CacheLayer.Game, "gl_squares"))

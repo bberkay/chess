@@ -264,3 +264,19 @@ span.square-id{
     display: flex;
 }
 /* -------------- Alert End -------------- */
+
+/* -------------- Fieldset Start -------------- */
+#variable-content{
+    font-family: monospace;
+    user-select: text;
+}
+
+.beautify{
+    white-space: pre;
+}
+
+.menu-buttons-between{
+    justify-content: space-between;
+    display: flex;
+}
+/* -------------- Fieldset Start -------------- */

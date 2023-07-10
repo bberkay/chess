@@ -15,11 +15,11 @@ class Storage{
 	/**
 	 * @static
 	 * Get a value from storage
-	 * @param {string} key 
+	 * @param {string|null} key
 	 * @returns {any}
 	 */
-	static get(key){
-		return this.#storage[key];
+	static get(key=null){
+		return key ? this.#storage[key] : this.#storage;
 	}
 
 	/**

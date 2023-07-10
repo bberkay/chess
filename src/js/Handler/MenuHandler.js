@@ -4,6 +4,10 @@ class MenuHandler{
      * Menu variables
      */
     static is_piece_id_list_shown = false; // Is piece id list shown ?
+    static is_cache_shown = false; // Is cache shown ?
+    static is_global_shown = false; // Is global shown ?
+    static is_storage_shown = false; // Is storage shown ?
+    static is_beautify_enabled = false; // Is beautify shown ?
 
     /**
      * @static
@@ -142,29 +146,49 @@ class MenuHandler{
 
     /**
      * @static
-     * Show Cache
+     * Show Variables
+     * @param {VariableType} variableType
+     * @param {int} indent
      * @returns {void}
      */
-    static showCache(){
-        let cache = Cache.get(CacheLayer.Game);
-        console.log(JSON.stringify(cache));
+    static showVariables(variableType, indent = 1){
+        document.getElementById("variable-title").innerHTML = variableType;
+        document.getElementById("variable-content").innerHTML = "";
+
+
+        let data = variableType === VariableType.Storage ? Storage.get() : Cache.get(CacheLayer.Game);
+        for(let i in data){
+            let value = data[i];
+            document.getElementById("variable-content").innerHTML += "<tr><td>" + i + "</td><td>" + JSON.stringify(value, null, indent) + "</td></tr>";
+        }
+
+        this.is_cache_shown = variableType === VariableType.Cache;
+        this.is_storage_shown = variableType === VariableType.Storage;
     }
 
     /**
      * @static
-     * Show Global
+     * Refresh Variables
      * @returns {void}
      */
-    static showGlobal(){
-
+    static refreshVariables(){
+        // Refresh current shown
+        this.showVariables(this.is_cache_shown ? VariableType.Cache : VariableType.Storage, this.is_beautify_enabled ? 3 : 1);
     }
 
     /**
      * @static
-     * Show Storage
+     * Toggle Beautify
      * @returns {void}
      */
-    static showStorage(){
+    static toggleBeautify(){
+        let variable_content = document.getElementById("variable-content");
 
+        // Toggle beautify
+        variable_content.classList.toggle("beautify");
+        this.is_beautify_enabled = !this.is_beautify_enabled;
+
+        // Update current shown
+        this.refreshVariables();
     }
 }
