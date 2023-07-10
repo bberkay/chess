@@ -6,12 +6,14 @@ class Chess{
     #is_finished; // Is game finished
     #is_started; // Is game started
     #is_start_screen_opened; // Is start screen opened
+    #log_handler; // Log handler
 
     /**
      * @constructor
      */
     constructor() {
         if (!Chess.instance){
+            this.#log_handler = new LogHandler(document.currentScript.src);
             this.#board = new Board();
             this.#playable_squares = [];
             this.#selected_piece = null;
@@ -186,11 +188,11 @@ class Chess{
         // If piece is king and already created then return
         if(piece_type === PieceType.King){
             if(color === Color.White && Storage.get("white-king")){
-                Alert.showAlert(AlertMessage.WhiteKingAlreadyCreated);
+                AlertHandler.showAlert(AlertMessage.WhiteKingAlreadyCreated);
                 return;
             }
             else if(color === Color.Black && Storage.get("black-king")){
-                Alert.showAlert(AlertMessage.BlackKingAlreadyCreated);
+                AlertHandler.showAlert(AlertMessage.BlackKingAlreadyCreated);
                 return;
             }
         }
@@ -232,6 +234,8 @@ class Chess{
 
         // Set selected piece
         this.#selected_piece = piece;
+
+        this.#log_handler.info("_Piece_ selected", {"id":this.#selected_piece.id, "color": this.#selected_piece.color, "type": this.#selected_piece.type}, "selectPiece()");
 
         // Add selected effect to selected piece
         this.#board.addEffectToSquare(this.#selected_piece.getSquareId(), SquareEffect.Selected);
@@ -457,7 +461,7 @@ class Chess{
             this.#is_finished = false;
             this.#board.closeStartScreen();
         }else{
-            Alert.showAlert(AlertMessage.KingsNotCreated);
+            AlertHandler.showAlert(AlertMessage.KingsNotCreated);
             if(!this.#is_start_screen_opened){
                 this.#board.showStartScreen();
                 this.#is_start_screen_opened = true;
@@ -476,9 +480,9 @@ class Chess{
         this.#is_started = false;
         this.#is_finished = true;
         if(final_status === FinalStatus.Checkmate)
-            Alert.showAlert(winner === Color.White ? AlertMessage.WhiteWin : AlertMessage.BlackWin);
+            AlertHandler.showAlert(winner === Color.White ? AlertMessage.WhiteWin : AlertMessage.BlackWin);
         else if(final_status === FinalStatus.Stalemate)
-            Alert.showAlert(AlertMessage.Stalemate);
+            AlertHandler.showAlert(AlertMessage.Stalemate);
     }
 
     /**

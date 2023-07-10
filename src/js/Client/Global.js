@@ -619,7 +619,7 @@ const FinalStatus = {
 }
 
 /**
- * Alert Message Enum
+ * AlertHandler Message Enum
  * @enum {string}
  */
 const AlertMessage = {
@@ -649,4 +649,14 @@ const ConfirmMessage = {
 const VariableType = {
     Cache:"Cache",
     Storage:"Storage",
+}
+
+/**
+ * LogType Enum
+ * @enum {string}
+ */
+const LogType = {
+    Info:"INFO",
+    Warning:"WARNING",
+    Error:"ERROR",
 }

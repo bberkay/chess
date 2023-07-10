@@ -82,8 +82,8 @@
                 <legend>Variables</legend>
                 <div class="menu-buttons-between">
                     <div>
-                        <input type="button" value="Show Cache" onclick="MenuHandler.showVariables(VariableType.Cache)">
-                        <input type="button" value="Show Storage" onclick="MenuHandler.showVariables(VariableType.Storage)">
+                        <input type="button" value="Show Cache" onclick="MenuHandler.showCache()">
+                        <input type="button" value="Show Storage" onclick="MenuHandler.showStorage()">
                     </div>
                     <div>
                         <input type="button" value="Toggle Beautify" onclick="MenuHandler.toggleBeautify()">
@@ -161,24 +161,27 @@
             </div>
         </div>
         <div class = "right-menu-wide">
-            <fieldset>
+            <fieldset id="log-container">
                 <legend>Log</legend>
-                <p>You may encounter some errors because it is not finished yet, and some days it may not work completely.<a href="https://github.com/bberkay/chess-engine" target="_blank"> For source code</a></p>
+                <div id="log">
+                    <p class = "log-item">&#9679; 12:02:45 <span class="log-status">SUCCESS</span> - Lorem ipsum dolar sit amet</p>
+                    <p class = "log-item">&#9679; 12:02:45 <span class="log-status">SUCCESS</span> - Lorem ipsum dolar sit amet</p>
+                </div>
             </fieldset>
         </div>
     </div>
 
     <div id="hidden-elements">
-        <!-- Alert Layer -->
+        <!-- AlertHandler Layer -->
         <div id="alert-layer" class="alert-layer" style="display:none"></div>
 
-        <!-- Alert -->
+        <!-- AlertHandler -->
         <div id="alert" class="alert" style="display:none">
             <strong id="alert-text">
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce varius, urna ac egestas vehicula, felis ex viverra leo, id tristique orci tellus ullamcorper libero. Fusce vitae imperdiet diam, vel rutrum nulla.
             </strong>
             <div class="confirm-buttons">
-                <input type="button" value="OK" onclick="Alert.hide();">
+                <input type="button" value="OK" onclick="AlertHandler.hide();">
             </div>
         </div>
 
@@ -211,7 +214,8 @@
     <script src="src/js/Models/Validation.js"></script>
     <script src="src/js/Models/Piece.js"></script>
     <script src="src/js/Board/Board.js"></script>
-    <script src="src/js/Board/Alert.js"></script>
+    <script src="src/js/Handler/AlertHandler.js"></script>
+    <script src="src/js/Handler/LogHandler.js"></script>
     <script src="src/js/Chess.js"></script>
     <script src="src/js/Handler/BoardHandler.js"></script>
     <script>
@@ -220,13 +224,13 @@
         // init, Show Cache Variables
         MenuHandler.showVariables(VariableType.Cache);
 
+        // init, Create Board
         if(document.getElementById("chessboard").innerHTML === ""){
             if(Cache.has(CacheLayer.Game, "gl_squares"))
                 chess.startGameFromCache();
             else
                 chess.startStandardGame();
         }
-
 
         // Dark Mode to not be blind at night, not important
         var body = document.getElementsByTagName("body")[0];

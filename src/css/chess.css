@@ -48,9 +48,9 @@ fieldset{
 }
 
 .right-menu-wide{
-    width:15vw;
-    margin-left:50px;
+    margin-left:20px;
 }
+
 /* -------------- Menu END -------------- */
 
 
@@ -228,7 +228,7 @@ span.square-id{
 }
 /* -------------- Squares End -------------- */
 
-/* -------------- Alert Start -------------- */
+/* -------------- AlertHandler Start -------------- */
 .alert-layer{
     position: absolute;
     top:0;
@@ -263,7 +263,7 @@ span.square-id{
     justify-content: space-between;
     display: flex;
 }
-/* -------------- Alert End -------------- */
+/* -------------- AlertHandler End -------------- */
 
 /* -------------- Fieldset Start -------------- */
 #variable-content{
@@ -278,5 +278,17 @@ span.square-id{
 .menu-buttons-between{
     justify-content: space-between;
     display: flex;
+}
+
+#log-container{
+    user-select: text;
+}
+
+.log-item{
+    font-family: monospace;
+}
+
+.log-status{
+    font-weight: bold;
 }
 /* -------------- Fieldset Start -------------- */

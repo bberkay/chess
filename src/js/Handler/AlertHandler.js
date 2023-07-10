@@ -1,8 +1,8 @@
-class Alert{
+class AlertHandler {
     /**
      * @static
-     * Show Alert
-     * @param {AlertMessage} msg Message to be shown
+     * Show AlertHandler
+     * @param {AlertMessage|string} msg Message to be shown
      * @returns {void}
      */
     static showAlert(msg){
@@ -22,7 +22,7 @@ class Alert{
     /**
      * @static
      * Show Confirm
-     * @param {ConfirmMessage} msg Message to be shown
+     * @param {ConfirmMessage|string} msg Message to be shown
      * @returns {Promise} True if user clicked on "OK" button, false otherwise
      */
     static showConfirm(msg){
@@ -44,12 +44,12 @@ class Alert{
 
         return new Promise((resolve, reject) => {
             ok.addEventListener("click", () => {
-                Alert.hide();
+                AlertHandler.hide();
                 resolve(true);
             });
 
             cancel.addEventListener("click", () => {
-                Alert.hide();
+                AlertHandler.hide();
                 resolve(false);
             }
         )});

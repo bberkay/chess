@@ -100,7 +100,7 @@ class MenuHandler{
     static async startEmptyGame(){
         let chess = new Chess(); // Singleton Chess Object
 
-        let res = await Alert.showConfirm(ConfirmMessage.StartEmptyGame);
+        let res = await AlertHandler.showConfirm(ConfirmMessage.StartEmptyGame);
         if(res)
             chess.startCustomGame();
     }
@@ -113,7 +113,7 @@ class MenuHandler{
     static async startStandardGame(){
         let chess = new Chess(); // Singleton Chess Object
 
-        let res = await Alert.showConfirm(ConfirmMessage.StartStandardGame);
+        let res = await AlertHandler.showConfirm(ConfirmMessage.StartStandardGame);
         if(res)
             chess.startStandardGame();
     }
@@ -127,7 +127,7 @@ class MenuHandler{
     static async startFromPosition(position){
         let chess = new Chess(); // Singleton Chess Object
 
-        let res = await Alert.showConfirm(ConfirmMessage.StartPositionGame);
+        let res = await AlertHandler.showConfirm(ConfirmMessage.StartPositionGame);
         if(res)
             chess.startCustomGame(position);
     }
@@ -143,6 +143,23 @@ class MenuHandler{
         chess.startGame();
     }
 
+    /**
+     * @static
+     * Show Cache
+     * @returns {void}
+     */
+    static showCache(){
+        this.showVariables(VariableType.Cache);
+    }
+
+    /**
+     * @static
+     * Show Storage
+     * @returns {void}
+     */
+    static showStorage(){
+        this.showVariables(VariableType.Storage);
+    }
 
     /**
      * @static
