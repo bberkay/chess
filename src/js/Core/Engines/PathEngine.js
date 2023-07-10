@@ -3,15 +3,15 @@ class PathEngine{
      * @static
      * Calculate Bishop Path
      * @param {int} square_id Square ID of the bishop
-     * @param {boolean} piece_sensivity To avoid tripping over other pieces.
+     * @param {boolean} piece_sensitivity To avoid tripping over other pieces.
      * @returns {JSON}
      */
-    static calcBishopPath(square_id, piece_sensivity = true) {
+    static calcBishopPath(square_id, piece_sensitivity = true) {
         const route_engine = new RouteEngine(); // singleton instance, all route engine in this class will be the same
 
         return {
             // get all squares of diagonal
-            ...route_engine.calcPlayableDiagonalSquares({square_id: square_id, piece_sensivity: piece_sensivity})
+            ...route_engine.calcPlayableDiagonalSquares({square_id: square_id, piece_sensitivity: piece_sensitivity})
         }
     }
 
@@ -19,33 +19,33 @@ class PathEngine{
      * @static
      * Calculate Rook Path
      * @param {int} square_id Square ID of the rook
-     * @param {boolean} piece_sensivity To avoid tripping over other pieces.
+     * @param {boolean} piece_sensitivity To avoid tripping over other pieces.
      * @returns {JSON}
      */
-    static calcRookPath(square_id, piece_sensivity = true) {
+    static calcRookPath(square_id, piece_sensitivity = true) {
         const route_engine = new RouteEngine(); // singleton instance, all route engine in this class will be the same
 
         return {
             // get all squares of column and row
-            ...route_engine.calcPlayableColumnSquares({square_id: square_id, piece_sensivity: piece_sensivity}),
-            ...route_engine.calcPlayableRowSquares({square_id: square_id, piece_sensivity: piece_sensivity}),
+            ...route_engine.calcPlayableColumnSquares({square_id: square_id, piece_sensitivity: piece_sensitivity}),
+            ...route_engine.calcPlayableRowSquares({square_id: square_id, piece_sensitivity: piece_sensitivity}),
         }
     }
 
     /**
      * Calculate Queen Path
      * @param {int} square_id Square ID of the queen
-     * @param {boolean} piece_sensivity To avoid tripping over other pieces.
+     * @param {boolean} piece_sensitivity To avoid tripping over other pieces.
      * @returns {JSON}
      */
-    static calcQueenPath(square_id, piece_sensivity = true) {
+    static calcQueenPath(square_id, piece_sensitivity = true) {
         const route_engine = new RouteEngine(); // singleton instance, all route engine in this class will be the same
 
         return {
             // get all squares of column, row and diagonal(UNLIMITED POWEEEER!!!)
-            ...route_engine.calcPlayableColumnSquares({square_id: square_id, piece_sensivity: piece_sensivity}),
-            ...route_engine.calcPlayableRowSquares({square_id: square_id, piece_sensivity: piece_sensivity}),
-            ...route_engine.calcPlayableDiagonalSquares({square_id: square_id, piece_sensivity: piece_sensivity})
+            ...route_engine.calcPlayableColumnSquares({square_id: square_id, piece_sensitivity: piece_sensitivity}),
+            ...route_engine.calcPlayableRowSquares({square_id: square_id, piece_sensitivity: piece_sensitivity}),
+            ...route_engine.calcPlayableDiagonalSquares({square_id: square_id, piece_sensitivity: piece_sensitivity})
         }
     }
 
@@ -98,17 +98,17 @@ class PathEngine{
     /**
      * Calculate Knight Path
      * @param {int} square_id Square ID of the knight
-     * @param {boolean} piece_sensivity To avoid tripping over other pieces.
+     * @param {boolean} piece_sensitivity To avoid tripping over other pieces.
      * @returns {Array<int>}
      */
-    static calcKnightPath(square_id, piece_sensivity = true) {
+    static calcKnightPath(square_id, piece_sensitivity = true) {
         const route_engine = new RouteEngine(); // singleton instance, all route engine in this class will be the same
 
         // get 2 squares of column
         let column = Converter.jsonPathToArrayPath(route_engine.calcPlayableColumnSquares({
             square_id: square_id,
             distance_limit: 2,
-            piece_sensivity: false
+            piece_sensitivity: false
         })).sort();
         column = column.filter(item => {
             return square_id === item - 16 || square_id === item + 16
@@ -118,7 +118,7 @@ class PathEngine{
         let row = Converter.jsonPathToArrayPath(route_engine.calcPlayableRowSquares({
             square_id: square_id,
             distance_limit: 2,
-            piece_sensivity: false
+            piece_sensitivity: false
         })).sort();
         row = row.filter(item => {
             return square_id === item - 2 || square_id === item + 2
@@ -130,7 +130,7 @@ class PathEngine{
             column_sides.push(Converter.jsonPathToArrayPath(route_engine.calcPlayableRowSquares({
                 square_id: item,
                 distance_limit: 1,
-                piece_sensivity: false
+                piece_sensitivity: false
             })))
         })
 
@@ -140,7 +140,7 @@ class PathEngine{
             row_sides.push(Converter.jsonPathToArrayPath(route_engine.calcPlayableColumnSquares({
                 square_id: item,
                 distance_limit: 1,
-                piece_sensivity: false
+                piece_sensitivity: false
             })))
         });
 
@@ -169,17 +169,17 @@ class PathEngine{
             // get first square of column, row and diagonal
             ...route_engine.calcPlayableColumnSquares({
                 square_id: square_id,
-                piece_sensivity: true,
+                piece_sensitivity: true,
                 distance_limit: 1
             }),
             ...route_engine.calcPlayableRowSquares({
                 square_id: square_id,
-                piece_sensivity: true,
+                piece_sensitivity: true,
                 distance_limit: 1
             }),
             ...route_engine.calcPlayableDiagonalSquares({
                 square_id: square_id,
-                piece_sensivity: true,
+                piece_sensitivity: true,
                 distance_limit: 1
             })
         }

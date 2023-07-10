@@ -68,10 +68,14 @@ class BoardManager {
             }
             else // Else calculate playable squares and add to cache
             {
-                playable_squares = playable_squares.concat(piece.getPlayableSquares());
-                Cache.add(CacheLayer.Game,"playable_squares", {[piece.id]:piece.getPlayableSquares()});
+                let piece_playable_squares = piece.getPlayableSquares();
+                playable_squares = playable_squares.concat(piece_playable_squares);
+                Cache.add(CacheLayer.Game,"playable_squares", {[piece.id]: piece_playable_squares});
             }
         }
+
+        // Remove duplicates
+        playable_squares = [...new Set(playable_squares)];
 
         return playable_squares;
     }

@@ -1,7 +1,7 @@
 class Cache{
     /**
      * Set a value in the cache
-     * @param {string} layer
+     * @param {CacheLayer} layer
      * @param {string} key
      * @param {any} value
      * @returns {void}
@@ -26,7 +26,9 @@ class Cache{
      * @returns {any}
      */
     static get(layer, key){
-        return JSON.parse(localStorage.getItem(layer))[key];
+        if(Cache.has(layer, key))
+            return JSON.parse(localStorage.getItem(layer))[key];
+        return null;
     }
 
     /**
@@ -58,24 +60,26 @@ class Cache{
      * @returns {void}
      */
     static add(layer, key, value){
-        let item = JSON.parse(localStorage.getItem(layer))[key];
+        let layer_data = JSON.parse(localStorage.getItem(layer));
+        let item = Cache.get(layer, key);
 
         // If item is array then push value to the array
-        if(value.length){
+        if(Array.isArray(value)){
             if(item == null)
                 item = []
 
-            item.push(value);
+            item.push(value)
         }
         // If item is json then set value to the key
-        else{
+        else if(typeof value == "object"){
             if(item == null)
                 item = {};
 
             item[Object.keys(value)[0]] = Object.values(value)[0];
         }
 
-        localStorage.setItem(layer, JSON.stringify({key, item}));
+        layer_data[key] = {[key]: item};
+        localStorage.setItem(layer, JSON.stringify(layer_data));
     }
 
     /**

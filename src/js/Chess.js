@@ -439,6 +439,8 @@ class Chess{
                 this.#finishGame(FinalStatus.Checkmate, Global.getEnemyColor());
             else // If not checkmate then set zugzwang pieces
                 this.#zugzwang_pieces = GameManager.getZugzwangPieces();
+
+            console.log(this.#zugzwang_pieces);
         }
         else
         {

@@ -107,7 +107,7 @@ class Global{
      * @static
      * Is en passant of piece disabled?
      * @param {int} piece_id ID of piece
-     * @param {EnPassantDirection|boolean} true(default) for any direction, direction Direction of en passant
+     * @param {EnPassantDirection|boolean} direction If true, all direction can't en passant
      * @returns {boolean}
      */
     static isEnPassantDisabled(piece_id, direction=true){

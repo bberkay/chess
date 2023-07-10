@@ -2,7 +2,7 @@ class GameManager{
     /**
      * @static
      * Is Current Player Checked ?
-     * @param {int} square_id Is square(square_id) checked?
+     * @param {int|null} square_id Is square(square_id) checked? If square_id is null then control current player's king
      * @returns {boolean}
      */
     static isCheck(square_id = null) {
@@ -19,14 +19,14 @@ class GameManager{
             let func_operation_control = operations.length > 1;
             // If path is top-left, bottom-right ...
             // then dangerous enemies are queen and bishop(if operations is functions)
-            // then return top-left and bottom-right or top-right and bottom-left of squares that came from operations(if operations is json)
+            // then return top-left and bottom-right or top-right and bottom-left of squares that came from operations(if operations is array)
             if (current_path_direction === Route.TopLeft || current_path_direction === Route.BottomRight)
                 return func_operation_control ? operations[0]() : operations[0][Route.TopLeft].concat(operations[0][Route.BottomRight]);
             else if (current_path_direction === Route.TopRight || current_path_direction === Route.BottomLeft)
                 return func_operation_control ? operations[0]() : operations[0][Route.TopRight].concat(operations[0][Route.BottomLeft]);
             // If path is left, right ...
             // then dangerous enemies are queen and rook(if operations is functions)
-            // then return left and right or top and bottom of squares that came from operations(if operations is json)
+            // then return left and right or top and bottom of squares that came from operations(if operations is array)
             else if (current_path_direction === Route.Left || current_path_direction === Route.Right)
                 return func_operation_control ? operations[1]() : operations[0][Route.Left].concat(operations[0][Route.Right]);
             else if (current_path_direction === Route.Top || current_path_direction === Route.Bottom)
@@ -87,9 +87,12 @@ class GameManager{
             Global.setSquare(temp_king_square_id, temp_player_king);
         }
 
-        // TODO: En son burada kaldık dangrous square kontrol edilecek, notlara bak.
         if(dangerous_squares.length !== 0){
-            Cache.set(CacheLayer.Game, "dangerous_squares", dangerous_squares);
+            // Find dangerous squares for current player's king and set cache for zugzwang control
+            if(BoardManager.getPieceBySquareId(square_id).type === PieceType.King){
+                Cache.set(CacheLayer.Game, "dangerous_squares", dangerous_squares);
+            }
+
             return true
         }
     }
@@ -116,19 +119,25 @@ class GameManager{
      * @returns {boolean}
      */
     static isCheckmate(){
+        let is_not_found = true;
+
         // Get all playable squares for current player
         let playable_squares = BoardManager.getAllPlayableSquares(Global.getCurrentMove());
 
-        for(let playable_square in playable_squares){
-            let dangerous_squares = Cache.get(CacheLayer.Game,"dangerous_squares");
-            if(dangerous_squares && playable_square in dangerous_squares){
-                Cache.add(CacheLayer.Game, "zugzwang_squares", playable_squares);
-                return false;
+        let dangerous_squares = Cache.get(CacheLayer.Game, "dangerous_squares");
+        if(dangerous_squares) {
+            let l = playable_squares.length;
+            for (let i = 0; i < l; i++) {
+                // If any piece can block the check then return false
+                if (dangerous_squares.includes(playable_squares[i])) {
+                    Cache.add(CacheLayer.Game, "zugzwang_squares", playable_squares[i]);
+                    is_not_found = false;
+                }
             }
         }
 
         // If there is no playable squares then return true
-        return true;
+        return is_not_found;
     }
 
     /**
@@ -138,6 +147,7 @@ class GameManager{
      */
     static getZugzwangPieces() {
         let zugzwang_squares = Cache.get(CacheLayer.Game, "zugzwang_squares");
+        console.log(zugzwang_squares);
         let zugzwang_pieces = [];
         for (let i in zugzwang_squares) {
             let piece = BoardManager.getPieceBySquareId(zugzwang_squares[i]);

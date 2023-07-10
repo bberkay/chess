@@ -13,11 +13,11 @@ class RouteEngine {
      * Calculate Column Squares List of Square
      * @param {int} square_id Square ID of the active piece
      * @param {(int|null)} distance_limit Move away at most [distance_limit] squares from square.
-     * @param {boolean} piece_sensivity To avoid tripping over other pieces.
+     * @param {boolean} piece_sensitivity To avoid tripping over other pieces.
      * @example if square id is 29 then result will be {"top":[5,13,21], "bottom":[37,45,53,61]}
      * @returns {JSON}
      */
-    calcPlayableColumnSquares({ square_id, distance_limit = null, piece_sensivity = true }) {
+    calcPlayableColumnSquares({ square_id, distance_limit = null, piece_sensitivity = true }) {
         let playable_squares = {};
         let counter, path;
 
@@ -29,7 +29,7 @@ class RouteEngine {
             if (distance_limit && counter > distance_limit)
                 break;
 
-            path = path.concat(this.#calcPlayablePath(i, piece_sensivity));
+            path = path.concat(this.#calcPlayablePath(i, piece_sensitivity));
             if (path.includes("break")) { // delete "break" from path
                 path.pop();
                 break;
@@ -45,7 +45,7 @@ class RouteEngine {
         for (let i = square_id + 8; i < 65; i += 8) {
             if (distance_limit && counter > distance_limit)
                 break;
-            path = path.concat(this.#calcPlayablePath(i, piece_sensivity));
+            path = path.concat(this.#calcPlayablePath(i, piece_sensitivity));
             if (path.includes("break")) {
                 path.pop();
                 break;
@@ -63,11 +63,11 @@ class RouteEngine {
      * Calculate Row Squares List of Square
      * @param {int} square_id Square ID of the active piece
      * @param {(int|null)} distance_limit Move away at most [distance_limit] squares from square.
-     * @param {boolean} piece_sensivity To avoid tripping over other pieces.
+     * @param {boolean} piece_sensitivity To avoid tripping over other pieces.
      * @example if square id is 29 then result will be {"left":[25, 26, 27, 28], "right":[30, 31, 32]}
      * @returns {JSON}
      */
-    calcPlayableRowSquares({ square_id, distance_limit = null, piece_sensivity = true }) {
+    calcPlayableRowSquares({ square_id, distance_limit = null, piece_sensitivity = true }) {
         let playable_squares = {};
         let row = Calculator.calcRowOfSquare(square_id);
         let path, counter;
@@ -79,7 +79,7 @@ class RouteEngine {
         for (let i = square_id + 1; i <= row * 8; i++) {
             if (distance_limit && counter > distance_limit)
                 break;
-            path = path.concat(this.#calcPlayablePath(i, piece_sensivity));
+            path = path.concat(this.#calcPlayablePath(i, piece_sensitivity));
             if (path.includes("break")) { // delete "break" from path
                 path.pop();
                 break;
@@ -95,7 +95,7 @@ class RouteEngine {
         for (let i = square_id - 1; i >= (row * 8) - 7; i--) {
             if (distance_limit && counter > distance_limit)
                 break;
-            path = path.concat(this.#calcPlayablePath(i, piece_sensivity));
+            path = path.concat(this.#calcPlayablePath(i, piece_sensitivity));
             if (path.includes("break")) {
                 path.pop();
                 break;
@@ -111,11 +111,11 @@ class RouteEngine {
      * Calculate Diagonal Squares List of Piece
      * @param {int} square_id Square ID of the active piece
      * @param {(int|null)} distance_limit Move away at most [distance_limit] squares from square.
-     * @param {boolean} piece_sensivity To avoid tripping over other pieces.
+     * @param {boolean} piece_sensitivity To avoid tripping over other pieces.
      * @example If square id is 29 then result will be {"top-left": [2, 11, 20], "bottom-right":[38, 47, 56], "top-right": [8, 15, 22], "bottom-left":[36, 43, 50, 57]}
      * @returns {JSON}
      */
-    calcPlayableDiagonalSquares({ square_id, distance_limit = null, piece_sensivity = true }) {
+    calcPlayableDiagonalSquares({ square_id, distance_limit = null, piece_sensitivity = true }) {
         let playable_squares = {};
         let path, counter;
 
@@ -128,7 +128,7 @@ class RouteEngine {
                 if (distance_limit && counter > distance_limit)
                     break;
 
-                path = path.concat(this.#calcPlayablePath(i, piece_sensivity));
+                path = path.concat(this.#calcPlayablePath(i, piece_sensitivity));
                 if (path.includes("break")) { // delete "break" from path
                     path.pop();
                     break;
@@ -151,7 +151,7 @@ class RouteEngine {
                 if (distance_limit && counter > distance_limit)
                     break;
 
-                path = path.concat(this.#calcPlayablePath(i, piece_sensivity));
+                path = path.concat(this.#calcPlayablePath(i, piece_sensitivity));
                 if (path.includes("break")) {
                     path.pop();
                     break;
@@ -174,7 +174,7 @@ class RouteEngine {
                 if (distance_limit && counter > distance_limit)
                     break;
 
-                path = path.concat(this.#calcPlayablePath(i, piece_sensivity));
+                path = path.concat(this.#calcPlayablePath(i, piece_sensitivity));
                 if (path.includes("break")) {
                     path.pop();
                     break;
@@ -196,7 +196,7 @@ class RouteEngine {
                 if (distance_limit && counter > distance_limit)
                     break;
 
-                path = path.concat(this.#calcPlayablePath(i, piece_sensivity));
+                path = path.concat(this.#calcPlayablePath(i, piece_sensitivity));
                 if (path.includes("break")) {
                     path.pop();
                     break;
@@ -216,14 +216,14 @@ class RouteEngine {
     /**
      * Calculate Playable Path
      * @param {int} target_square_id Square ID of square to check
-     * @param {boolean} piece_sensivity To avoid tripping over other pieces.
+     * @param {boolean} piece_sensitivity To avoid tripping over other pieces.
      * @returns {Array<int>}
      */
-    #calcPlayablePath(target_square_id, piece_sensivity = true) {
+    #calcPlayablePath(target_square_id, piece_sensitivity = true) {
         let squares = [];
 
-        // if piece sensivity is true then calculate every piece on the path
-        if (piece_sensivity) {
+        // if piece sensitivity is true then calculate every piece on the path
+        if (piece_sensitivity) {
             if (BoardManager.isSquareHasPiece(target_square_id, Global.getCurrentMove())) {
                 squares.push("break");
                 return squares;
@@ -233,7 +233,7 @@ class RouteEngine {
                 return squares;
             } else
                 squares.push(target_square_id);
-        } else // if piece sensivity is false then no need control
+        } else // if piece sensitivity is false then no need control
             squares.push(target_square_id);
 
         
