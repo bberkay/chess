@@ -22,12 +22,14 @@ class Cache{
     /**
      * Get a value from the cache
      * @param {CacheLayer} layer
-     * @param {string} key
+     * @param {string|null} key
      * @returns {any}
      */
-    static get(layer, key){
-        if(Cache.has(layer, key))
+    static get(layer, key=null){
+        if(key && Cache.has(layer, key))
             return JSON.parse(localStorage.getItem(layer))[key];
+        else if(key == null)
+            return JSON.parse(localStorage.getItem(layer));
         return null;
     }
 
@@ -55,31 +57,25 @@ class Cache{
     /**
      * Add a value in the cache
      * @param {CacheLayer} layer
-     * @param {string} key 
+     * @param {string} key
      * @param {any} value
      * @returns {void}
      */
     static add(layer, key, value){
-        let layer_data = JSON.parse(localStorage.getItem(layer));
-        let item = Cache.get(layer, key);
+        if(!Cache.has(layer, key))
+            Cache.set(layer, key, value);
+        else{
+            let key_data = Cache.get(layer, key);
 
-        // If item is array then push value to the array
-        if(Array.isArray(value)){
-            if(item == null)
-                item = []
+            if(Array.isArray(key_data)) // If key_data is an array then push the value
+                key_data.push(value);
+            else if(typeof key_data !== "object") // If key_data is not an object then create an array
+                key_data = [key_data, value];
+            else // If key_data is an object then add the value
+                key_data[Object.keys(value)[0]] = Object.values(value)[0];
 
-            item.push(value)
+            Cache.set(layer, key, key_data);
         }
-        // If item is json then set value to the key
-        else if(typeof value == "object"){
-            if(item == null)
-                item = {};
-
-            item[Object.keys(value)[0]] = Object.values(value)[0];
-        }
-
-        layer_data[key] = {[key]: item};
-        localStorage.setItem(layer, JSON.stringify(layer_data));
     }
 
     /**

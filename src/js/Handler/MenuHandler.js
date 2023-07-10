@@ -138,4 +138,33 @@ class MenuHandler{
 
         chess.startGame();
     }
+
+
+    /**
+     * @static
+     * Show Cache
+     * @returns {void}
+     */
+    static showCache(){
+        let cache = Cache.get(CacheLayer.Game);
+        console.log(JSON.stringify(cache));
+    }
+
+    /**
+     * @static
+     * Show Global
+     * @returns {void}
+     */
+    static showGlobal(){
+
+    }
+
+    /**
+     * @static
+     * Show Storage
+     * @returns {void}
+     */
+    static showStorage(){
+
+    }
 }

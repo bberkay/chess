@@ -13,10 +13,6 @@
     <div class = "main">
         <div class = "left-menu">
             <fieldset class = "menu-buttons">
-                <legend>Display</legend>
-                <input type="button" value="Toggle Mode" id="mode" onclick="toggleDisplayMode()">
-            </fieldset>
-            <fieldset class = "menu-buttons">
                 <legend>Games</legend>
                 <input type="hidden" id="start-game-btn" value="Start Current Game" onclick="MenuHandler.startGameWithForm()">
                 <input type="button" value="Start New Game" onclick="MenuHandler.startStandardGame()">
@@ -82,12 +78,31 @@
         </div>
         <div class = "game">
             <div id="chessboard"></div> <!-- Create Game -->
-            <fieldset>
-                <legend>Note</legend>
-                <p>You may encounter some errors because it is not finished yet, and some days it may not work completely.<a href="https://github.com/bberkay/chess-engine" target="_blank"> For source code</a></p>
+            <fieldset style="margin-bottom:10px">
+                <legend>Variables</legend>
+                <input type="button" value="Show Storage" onclick="MenuHandler.showStorage()">
+                <input type="button" value="Show Global" onclick="MenuHandler.showGlobal()">
+                <input type="button" value="Show Cache" onclick="MenuHandler.showCache()">
+                <fieldset>
+                    <legend>Storage</legend>
+                    <table border="true">
+                        <tr>
+                            <td>A1xE2</td>
+                            <td>A2xE2</td>
+                        </tr>
+                        <tr>
+                            <td>A1xE2</td>
+                            <td>A2xE2</td>
+                        </tr>
+                        <tr>
+                            <td>A1xE2</td>
+                            <td>A2xE2</td>
+                        </tr>
+                    </table>
+                </fieldset>
             </fieldset>
         </div>
-        <div class="right-menu">
+        <div class = "right-menu">
             <div class="notation">
                 <fieldset>
                     <legend>Notation</legend>
@@ -130,69 +145,26 @@
             </div>
             <div>
                 <fieldset>
-                    <legend>Log</legend>
-                    <p>Coming soon...</p>
+                    <legend>Note</legend>
+                    <p>You may encounter some errors because it is not finished yet, and some days it may not work completely.<a href="https://github.com/bberkay/chess-engine" target="_blank"> For source code</a></p>
                 </fieldset>
             </div>
             <div>
-                <fieldset>
-                    <legend>Global</legend>
-                    <table border="true">
-                        <tr>
-                            <td>A1xE2</td>
-                            <td>A2xE2</td>
-                        </tr>
-                        <tr>
-                            <td>A1xE2</td>
-                            <td>A2xE2</td>
-                        </tr>
-                        <tr>
-                            <td>A1xE2</td>
-                            <td>A2xE2</td>
-                        </tr>
-                    </table>
-                </fieldset>
-            </div>
-            <div>
-                <fieldset>
-                    <legend>Cache</legend>
-                    <table border="true">
-                        <tr>
-                            <td>A1xE2</td>
-                            <td>A2xE2</td>
-                        </tr>
-                        <tr>
-                            <td>A1xE2</td>
-                            <td>A2xE2</td>
-                        </tr>
-                        <tr>
-                            <td>A1xE2</td>
-                            <td>A2xE2</td>
-                        </tr>
-                    </table>
-                </fieldset>
-            </div>
-             <div>
-                <fieldset>
-                    <legend>Storage</legend>
-                    <table border="true">
-                        <tr>
-                            <td>A1xE2</td>
-                            <td>A2xE2</td>
-                        </tr>
-                        <tr>
-                            <td>A1xE2</td>
-                            <td>A2xE2</td>
-                        </tr>
-                        <tr>
-                            <td>A1xE2</td>
-                            <td>A2xE2</td>
-                        </tr>
-                    </table>
+                <fieldset class = "menu-buttons">
+                    <legend>Display</legend>
+                    <input type="button" value="Toggle Mode" id="mode" onclick="toggleDisplayMode()">
                 </fieldset>
             </div>
         </div>
+        <div class = "right-menu-wide">
+            <fieldset>
+                <legend>Log</legend>
+                <p>You may encounter some errors because it is not finished yet, and some days it may not work completely.<a href="https://github.com/bberkay/chess-engine" target="_blank"> For source code</a></p>
+            </fieldset>
+        </div>
+    </div>
 
+    <div id="hidden-elements">
         <!-- Alert Layer -->
         <div id="alert-layer" class="alert-layer" style="display:none"></div>
 

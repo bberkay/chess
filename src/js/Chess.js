@@ -2,7 +2,6 @@ class Chess{
     #board; // Board
     #playable_squares; // Playable squares of the clicked piece
     #selected_piece; // Selected piece
-    #zugzwang_pieces; // Zugzwang pieces
     #is_promoting; // Is on promotion
     #is_finished; // Is game finished
     #is_started; // Is game started
@@ -16,7 +15,6 @@ class Chess{
             this.#board = new Board();
             this.#playable_squares = [];
             this.#selected_piece = null;
-            this.#zugzwang_pieces = [];
             this.#is_promoting = false;
             this.#is_finished = false;
             this.#is_started = false;
@@ -425,7 +423,6 @@ class Chess{
         {
             Global.setCheckedPlayer(null); // set checked status to null
             this.#board.removeEffectOfAllSquares(SquareEffect.Checked);
-            this.#zugzwang_pieces = [];
             return;
         }
 
@@ -437,16 +434,11 @@ class Chess{
 
             if(GameManager.isCheckmate()) // Is Checkmate?
                 this.#finishGame(FinalStatus.Checkmate, Global.getEnemyColor());
-            else // If not checkmate then set zugzwang pieces
-                this.#zugzwang_pieces = GameManager.getZugzwangPieces();
-
-            console.log(this.#zugzwang_pieces);
         }
         else
         {
             Global.setCheckedPlayer(null);
             this.#board.removeEffectOfAllSquares(SquareEffect.Checked);
-            this.#zugzwang_pieces = [];
 
             // Is Stalemate?
             if(GameManager.isStalemate())

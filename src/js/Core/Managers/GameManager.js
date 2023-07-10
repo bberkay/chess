@@ -142,23 +142,6 @@ class GameManager{
 
     /**
      * @static
-     * Get Zugzwang Pieces
-     * @returns {Array<Piece>}
-     */
-    static getZugzwangPieces() {
-        let zugzwang_squares = Cache.get(CacheLayer.Game, "zugzwang_squares");
-        console.log(zugzwang_squares);
-        let zugzwang_pieces = [];
-        for (let i in zugzwang_squares) {
-            let piece = BoardManager.getPieceBySquareId(zugzwang_squares[i]);
-            if (piece)
-                zugzwang_pieces.push(piece);
-        }
-        return zugzwang_pieces;
-    }
-
-    /**
-     * @static
      * Is current player can long castling?
      * @returns {boolean}
      */
