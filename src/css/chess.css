@@ -282,6 +282,9 @@ span.square-id{
 
 #log-container{
     user-select: text;
+    overflow-x: scroll;
+    max-height: 750px;
+    max-width:300px;
 }
 
 .log-item{

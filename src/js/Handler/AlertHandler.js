@@ -7,10 +7,7 @@ class AlertHandler {
      */
     static showAlert(msg){
         // Show alert layer
-        document.getElementsByClassName("alert-layer")[0].style.display = "block";
-
-        // Disable scroll
-        document.body.style.overflow = "hidden";
+        AlertHandler.showLayer();
 
         // Show alert
         document.getElementById("alert").style.display = "block";
@@ -27,10 +24,7 @@ class AlertHandler {
      */
     static showConfirm(msg){
         // Show alert layer
-        document.getElementsByClassName("alert-layer")[0].style.display = "block";
-
-        // Disable scroll
-        document.body.style.overflow = "hidden";
+        AlertHandler.showLayer();
 
         // Show confirm
         document.getElementById("confirm").style.display = "block";
@@ -62,10 +56,7 @@ class AlertHandler {
      */
     static showDetail(file_path, funcName, detail){
         // Show alert layer
-        document.getElementsByClassName("alert-layer")[0].style.display = "block";
-
-        // Disable scroll
-        document.body.style.overflow = "hidden";
+        AlertHandler.showLayer();
 
         // Show Detail
         document.getElementById("file-path").innerHTML = file_path + " | " + funcName + "()";
@@ -91,5 +82,19 @@ class AlertHandler {
 
         // Hide alerts
         Array.from(document.getElementsByClassName("alert")).map((alert) => { alert.style.display = "none"; });
+    }
+
+    /**
+     * @static
+     * Show layer
+     * @returns {void}
+     */
+    static showLayer(){
+        // Show alert layer
+        document.getElementsByClassName("alert-layer")[0].style.display = "block";
+
+        // Scroll to top and disable scroll
+        window.scrollTo(0, 0);
+        document.body.style.overflow = "hidden";
     }
 }

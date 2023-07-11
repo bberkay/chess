@@ -38,7 +38,6 @@ class LogHandler{
     }
 
     /**
-     * @static
      * Info logging
      * @param {string} msg The message to log
      * @param {string} detail The detail to log
@@ -50,7 +49,6 @@ class LogHandler{
     }
 
     /**
-     * @static
      * Error logging
      * @param {string} msg The message to log
      * @returns {void}
@@ -60,7 +58,6 @@ class LogHandler{
     }
 
     /**
-     * @static
      * Warning logging
      * @param {string} msg The message to log
      * @returns {void}
@@ -74,7 +71,7 @@ class LogHandler{
      * Clear log
      * @returns {void}
      */
-    clear(){
+    static clear(){
         document.getElementById("log").innerHTML = "";
     }
 }

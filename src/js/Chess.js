@@ -13,7 +13,7 @@ class Chess{
      */
     constructor() {
         if (!Chess.instance){
-            this.#log_handler = new LogHandler(document.currentScript.src);
+            this.#log_handler = new LogHandler("src/js/Chess.js");
             this.#board = new Board();
             this.#playable_squares = [];
             this.#selected_piece = null;
@@ -34,7 +34,9 @@ class Chess{
     * @returns {void}
     */
     startStandardGame() {
-        // Clear Cache, Storage and Session
+        // Clear
+        LogHandler.clear();
+        MenuHandler.refreshVariables();
         Cache.clear(CacheLayer.Game);
         Storage.clear();
         Global.reset();
@@ -85,7 +87,9 @@ class Chess{
     * @returns {void}
     */
     startCustomGame(pieces = null) {
-        // Clear Cache, Storage and Session
+        // Clear
+        LogHandler.clear();
+        MenuHandler.refreshVariables();
         Cache.clear(CacheLayer.Game);
         Storage.clear();
         Global.reset();
@@ -120,9 +124,12 @@ class Chess{
      * @returns {void}
      */
     startGameFromCache(){
-        // Clear Storage and session
+        // Clear
+        LogHandler.clear();
+        MenuHandler.refreshVariables();
         Storage.clear();
         Global.reset();
+
 
         let squares = Cache.get(CacheLayer.Game, "gl_squares");
 
@@ -235,7 +242,8 @@ class Chess{
         // Set selected piece
         this.#selected_piece = piece;
 
-        this.#log_handler.info("_Piece_ selected", {"id":this.#selected_piece.id, "color": this.#selected_piece.color, "type": this.#selected_piece.type}, "selectPiece");
+        // Add Log
+        this.#log_handler.info("_Piece_ selected, now dangerous squares will be calculated", {"id":this.#selected_piece.id, "color": this.#selected_piece.color, "type": this.#selected_piece.type}, "selectPiece");
 
         // Add selected effect to selected piece
         this.#board.addEffectToSquare(this.#selected_piece.getSquareId(), SquareEffect.Selected);
