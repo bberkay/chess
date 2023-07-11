@@ -252,9 +252,9 @@ span.square-id{
     color:#000;
 }
 
-#alert .confirm-buttons{
+#alert .confirm-buttons, #detail .confirm-buttons{
     margin-top:15px;
-    justify-content: center;
+    justify-content: end;
     display: flex;
 }
 
@@ -290,5 +290,43 @@ span.square-id{
 
 .log-status{
     font-weight: bold;
+}
+
+.log-item .clickable{
+    cursor: pointer;
+    text-decoration: underline;
+    color: #0000ff;
+}
+
+#detail-text{
+    user-select: text;
+    font-family:monospace;
+    white-space: pre;
+}
+
+#detail-text-container{
+    background-color: #e2e2e2;
+    border:1px solid silver;
+    padding:5px;
+}
+
+#file-path{
+    background-color: #e2e2e2;
+    border:1px solid silver;
+    padding:5px;
+    user-select: text;
+    font-family:monospace;
+    white-space: pre;
+    margin-top:10px;
+}
+
+.alert h4{
+    padding-top:5px;
+    padding-bottom:5px;
+    margin:0;
+}
+
+#detail div{
+    margin-bottom:10px;
 }
 /* -------------- Fieldset Start -------------- */

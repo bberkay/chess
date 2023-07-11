@@ -19,9 +19,8 @@ class LogHandler{
         const currentDateTime = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
         // Find clickable section of message
-        detail = JSON.stringify(detail);
-        let clickableSectionOnClicked = `AlertHandler.showDetail('${this.#file_path}', '${funcName}', '${detail}')`;
-        msg = msg.replace("_", `<span class='clickable' onclick='${clickableSectionOnClicked}'>`);
+        detail = JSON.stringify(detail).replace(/"/g, "&quot;");
+        msg = msg.replace("_", `<span class='clickable' onclick="AlertHandler.showDetail('${this.#file_path}', '${funcName}', ${detail})">`);
         msg = msg.replace("_", `</span>`);
 
 
@@ -68,5 +67,14 @@ class LogHandler{
      */
     warning(msg){
         this.#log(msg, LogType.Warning);
+    }
+
+    /**
+     * @static
+     * Clear log
+     * @returns {void}
+     */
+    clear(){
+        document.getElementById("log").innerHTML = "";
     }
 }

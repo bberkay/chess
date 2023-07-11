@@ -172,10 +172,10 @@
     </div>
 
     <div id="hidden-elements">
-        <!-- AlertHandler Layer -->
+        <!-- Alert Layer -->
         <div id="alert-layer" class="alert-layer" style="display:none"></div>
 
-        <!-- AlertHandler -->
+        <!-- Alert -->
         <div id="alert" class="alert" style="display:none">
             <strong id="alert-text">
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce varius, urna ac egestas vehicula, felis ex viverra leo, id tristique orci tellus ullamcorper libero. Fusce vitae imperdiet diam, vel rutrum nulla.
@@ -193,6 +193,29 @@
             <div class="confirm-buttons">
                 <input type="button" value="No" id = "confirm-cancel">
                 <input type="button" value="Yes" id="confirm-ok">
+            </div>
+        </div>
+
+        <!-- Detail -->
+        <div id="detail" class="alert" style="display:none">
+            <div>
+                <h4>Detail</h4>
+                <hr>
+                <div id="detail-text-container">
+                    <strong id="detail-text">
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce varius, urna ac egestas vehicula, felis ex viverra leo, id tristique orci tellus ullamcorper libero. Fusce vitae imperdiet diam, vel rutrum nulla.
+                    </strong>
+                </div>
+            </div>
+            <div>
+                <h4>File Path</h4>
+                <hr>
+                <div>
+                    <small id="file-path"></small>
+                </div>
+                <div class="confirm-buttons">
+                    <input type="button" value="OK" onclick="AlertHandler.hide();">
+                </div>
             </div>
         </div>
     </div>

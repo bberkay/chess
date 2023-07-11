@@ -235,7 +235,7 @@ class Chess{
         // Set selected piece
         this.#selected_piece = piece;
 
-        this.#log_handler.info("_Piece_ selected", {"id":this.#selected_piece.id, "color": this.#selected_piece.color, "type": this.#selected_piece.type}, "selectPiece()");
+        this.#log_handler.info("_Piece_ selected", {"id":this.#selected_piece.id, "color": this.#selected_piece.color, "type": this.#selected_piece.type}, "selectPiece");
 
         // Add selected effect to selected piece
         this.#board.addEffectToSquare(this.#selected_piece.getSquareId(), SquareEffect.Selected);

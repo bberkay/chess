@@ -7,16 +7,16 @@ class AlertHandler {
      */
     static showAlert(msg){
         // Show alert layer
-        let alert_layer = document.getElementsByClassName("alert-layer")[0];
-        alert_layer.style.display = "block";
+        document.getElementsByClassName("alert-layer")[0].style.display = "block";
+
+        // Disable scroll
+        document.body.style.overflow = "hidden";
 
         // Show alert
-        let alert = document.getElementById("alert");
-        alert.style.display = "block";
+        document.getElementById("alert").style.display = "block";
 
         // Set alert message
-        let alert_msg = document.getElementById("alert-text");
-        alert_msg.innerHTML = msg;
+        document.getElementById("alert-text").innerHTML = msg;
     }
 
     /**
@@ -27,32 +27,54 @@ class AlertHandler {
      */
     static showConfirm(msg){
         // Show alert layer
-        let alert_layer = document.getElementsByClassName("alert-layer")[0];
-        alert_layer.style.display = "block";
+        document.getElementsByClassName("alert-layer")[0].style.display = "block";
+
+        // Disable scroll
+        document.body.style.overflow = "hidden";
 
         // Show confirm
-        let confirm = document.getElementById("confirm");
-        confirm.style.display = "block";
+        document.getElementById("confirm").style.display = "block";
 
         // Show confirm message
-        let confirm_msg = document.getElementById("confirm-text");
-        confirm_msg.innerHTML = msg;
+        document.getElementById("confirm-text").innerHTML = msg;
 
-        // Find confirm buttons
-        let cancel = document.getElementById("confirm-cancel");
-        let ok = document.getElementById("confirm-ok");
-
+        // Return promise
         return new Promise((resolve, reject) => {
-            ok.addEventListener("click", () => {
+            document.getElementById("confirm-ok").addEventListener("click", () => {
                 AlertHandler.hide();
                 resolve(true);
             });
 
-            cancel.addEventListener("click", () => {
+            document.getElementById("confirm-cancel").addEventListener("click", () => {
                 AlertHandler.hide();
                 resolve(false);
             }
         )});
+    }
+
+    /**
+     * @static
+     * Show detail of log
+     * @param {string} file_path
+     * @param {string} funcName
+     * @param {any }detail
+     * @returns {void}
+     */
+    static showDetail(file_path, funcName, detail){
+        // Show alert layer
+        document.getElementsByClassName("alert-layer")[0].style.display = "block";
+
+        // Disable scroll
+        document.body.style.overflow = "hidden";
+
+        // Show Detail
+        document.getElementById("file-path").innerHTML = file_path + " | " + funcName + "()";
+
+        // Show detail
+        document.getElementById("detail").style.display = "block";
+
+        // Set detail message
+        document.getElementById("detail-text").innerHTML = JSON.stringify(detail, null, 4);
     }
 
     /**
@@ -62,8 +84,10 @@ class AlertHandler {
      */
     static hide(){
         // Hide alert layer
-        let alert_layer = document.getElementsByClassName("alert-layer")[0];
-        alert_layer.style.display = "none";
+        document.getElementsByClassName("alert-layer")[0].style.display = "none";
+
+        // Enable scroll
+        document.body.style.overflow = "auto";
 
         // Hide alerts
         Array.from(document.getElementsByClassName("alert")).map((alert) => { alert.style.display = "none"; });

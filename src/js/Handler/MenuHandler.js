@@ -5,7 +5,6 @@ class MenuHandler{
      */
     static is_piece_id_list_shown = false; // Is piece id list shown ?
     static is_cache_shown = false; // Is cache shown ?
-    static is_global_shown = false; // Is global shown ?
     static is_storage_shown = false; // Is storage shown ?
     static is_beautify_enabled = false; // Is beautify shown ?
 
