@@ -524,3 +524,22 @@ class Chess{
         this.#saveGameToCache();
     }
 }
+
+
+/**
+ * Initialization
+ */
+
+// create chess object
+const chess = new Chess();
+
+// show cache in variables menu
+MenuHandler.showVariables(VariableType.Cache);
+
+// create board
+if(document.getElementById("chessboard").innerHTML === ""){
+    if(Cache.has(CacheLayer.Game, "gl_squares"))
+        chess.startGameFromCache();
+    else
+        chess.startStandardGame();
+}

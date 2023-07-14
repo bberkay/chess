@@ -245,19 +245,6 @@
     <script src="src/js/Chess.js"></script>
     <script src="src/js/Handler/BoardHandler.js"></script>
     <script>
-        const chess = new Chess();
-
-        // init, Show Cache Variables
-        MenuHandler.showVariables(VariableType.Cache);
-
-        // init, Create Board
-        if(document.getElementById("chessboard").innerHTML === ""){
-            if(Cache.has(CacheLayer.Game, "gl_squares"))
-                chess.startGameFromCache();
-            else
-                chess.startStandardGame();
-        }
-
         // Dark Mode to not be blind at night, not important
         var body = document.getElementsByTagName("body")[0];
         if(Cache.has(CacheLayer.UI, "display-mode")){
