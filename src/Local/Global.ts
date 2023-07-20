@@ -201,7 +201,10 @@ export class Global {
     static addIdList(id: number): void
     {
         this._idList.push(id);
-    }
+
+        // Add to cache
+        Cache.set(CacheLayer.Game, "idList", this._idList);
+    }}
 
     /**
      * Change castling status
