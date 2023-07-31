@@ -1,6 +1,6 @@
 class Calculator{
     /**
-     * This class contains static methods that are used to calculate the row and column of a square. 
+     * This class contains static methods that are used to calculate the row and column of a square.
      */
 
     /**
