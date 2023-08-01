@@ -39,7 +39,7 @@ class Converter{
 
     /**
      * Convert FEN to JSON
-     * @example input is "8/8/8/8/8/8/P7/8 w - - 0 1" and output is {"color": Color.White, "type": PieceType.Pawn, "position": Square.a2}
+     * @example input is "8/8/8/8/8/8/P7/8 w - - 0 1" and output is {"color": Color.White, "type": PieceType.Pawn, "square": Square.a2}
      */
     static convertFENToJSON(fenNotation: string): Array<{color:Color, type:PieceType, square:Square}>
     {
@@ -108,7 +108,7 @@ class Converter{
 
     /**
      * Convert JSON to FEN
-     * @example input is {"color": Color.White, "type": PieceType.Pawn, "position": Square.a2} and output is "8/8/8/8/8/8/P7/8 w - - 0 1"
+     * @example input is {"color": Color.White, "type": PieceType.Pawn, "square": Square.a2} and output is "8/8/8/8/8/8/P7/8 w - - 0 1"
      */
     static convertJSONToFEN(jsonNotation: Array<{color:Color, type:PieceType, square:Square}>): string
     {
