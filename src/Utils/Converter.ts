@@ -1,4 +1,7 @@
-class Converter{
+// Types
+import { StartPosition, Color, PieceType, Square } from "../Enums.ts";
+
+export class Converter{
     /**
      * This class is used to convert data from one type to another.
      */
@@ -41,8 +44,9 @@ class Converter{
      * Convert FEN to JSON
      * @example input is "8/8/8/8/8/8/P7/8 w - - 0 1" and output is {"color": Color.White, "type": PieceType.Pawn, "square": Square.a2}
      */
-    static convertFENToJSON(fenNotation: string): Array<{color:Color, type:PieceType, square:Square}>
+    static convertFENToJSON(fenNotation: StartPosition): Array<{ color: Color; type: PieceType; square: Square }>
     {
+
         let jsonNotation:Array<{color:Color, type:PieceType, square:Square}> = [];
 
         // Schemes
@@ -69,9 +73,7 @@ class Converter{
         // Rows of the board (first part of the FEN)
         const rows: string[] = fenNotation.split(" ")[0].split("/");
 
-        // Delete rows that are empty(8 is empty)
-        rows.splice(rows.indexOf("8"), 1);
-
+        // Loop through the rows
         for(let i:number = 0; i < 8; i++) {
             // Current row and column
             const row: string = rows[i];

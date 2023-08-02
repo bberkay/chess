@@ -1,0 +1,335 @@
+body{
+    font-family: Arial;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    width:100%;
+    background-color: #f5f5f5;
+    color: #141414;
+    display: flex;
+    height:100vh;
+    padding:50px 50px;
+}
+
+body.dark-mode{
+    background-color: #141414;
+    color: #f5f5f5;
+}
+
+/* -------------- Main START -------------- */
+.main{
+    display:flex;
+}
+/* -------------- Main End -------------- */
+
+/* -------------- Menu START -------------- */
+.left-menu{
+    width:250px;
+    margin-right:50px;
+}
+
+.game{
+    width:800px;
+}
+
+fieldset{
+    margin-top:10px;
+}
+
+.menu-buttons input[type="button"]{
+    margin-bottom:5px;
+}
+
+.right-menu{
+    width:200px;
+    margin-left:50px;
+}
+
+.right-menu-wide{
+    margin-left:20px;
+}
+
+/* -------------- Menu END -------------- */
+
+
+/* -------------- Board START -------------- */
+#chessboard {
+    width: 800px;
+    height: 800px;
+    border:1px solid black;
+    display:flex;
+    flex-wrap: wrap;
+    cursor: pointer;
+}
+
+#chessboard .square{
+    position: relative;
+    width:100px;
+    height:100px;
+    box-shadow: inset 0 0 1px #000;
+    text-align: center;
+}
+
+#chessboard .square-black{
+    background-image:url("../assets/brown_dark.png");
+}
+
+#chessboard .square-white{
+    background-image:url("../assets/brown_light.png");
+}
+/* -------------- Board END -------------- */
+
+/* -------------- Pieces START -------------- */
+.piece{
+    background-position: center;
+    background-size:cover;
+    background-repeat: no-repeat;
+    margin:0 auto;
+    margin-top:10px;
+    width:80px;
+    height:80px;
+}
+
+[data-piece="rook"][data-color="white"]{
+    background-image:url("../assets/rook_white.png");
+}
+
+[data-piece="knight"][data-color="white"]{
+    background-image:url("../assets/knight_white.png");
+}
+
+[data-piece="bishop"][data-color="white"]{
+    background-image:url("../assets/bishop_white.png");
+}
+
+[data-piece="queen"][data-color="white"]{
+    background-image:url("../assets/queen_white.png");
+}
+
+[data-piece="king"][data-color="white"]{
+    background-image:url("../assets/king_white.png");
+}
+
+[data-piece="pawn"][data-color="white"]{
+    background-image:url("../assets/pawn_white.png");
+}
+
+[data-piece="rook"][data-color="black"]{
+    background-image:url("../assets/rook_black.png");
+}
+
+[data-piece="knight"][data-color="black"]{
+    background-image:url("../assets/knight_black.png");
+}
+
+[data-piece="bishop"][data-color="black"]{
+    background-image:url("../assets/bishop_black.png");
+}
+
+[data-piece="queen"][data-color="black"]{
+    background-image:url("../assets/queen_black.png");
+}
+
+[data-piece="king"][data-color="black"]{
+    background-image:url("../assets/king_black.png");
+}
+
+[data-piece="pawn"][data-color="black"]{
+    background-image:url("../assets/pawn_black.png");
+}
+
+.piece-info-container{
+    margin-top:-80px;
+}
+
+.piece-info{
+    background-color: #000;
+    opacity: 0.8;
+    color: #fff;
+    border:1px solid #000;
+    border-radius:15px;
+    margin:5px;
+}
+
+.promotion-option{
+    z-index:99;
+    position:inherit;
+    background-color: lightgray;
+    border-radius: 50%;
+}
+
+.promotion-option:hover{
+    background-color: gray;
+}   
+
+/* -------------- Pieces END -------------- */
+
+/* -------------- Squares Start -------------- */
+.clicked-effect{
+    box-shadow:inset 0px 0px 15px #000!important;
+}
+
+.playable-effect{
+    box-shadow:inset 0px 0px 15px #57ce92!important;
+}
+
+.killable-effect{
+    box-shadow:inset 0px 0px 15px rgb(223, 48, 48)!important;
+}
+
+.checked-effect{
+    box-shadow:inset 0px 0px 15px rgb(46, 121, 235)!important;
+}
+
+.selected-effect{
+    box-shadow:inset 0px 0px 100px #47a17338!important;
+}
+
+.disabled-effect{
+    box-shadow:inset 0px 0px 100px #000!important;
+}
+
+.disabled-effect div.piece{
+    opacity: 0.4;
+}
+
+.disabled-effect span{
+    opacity: 0.2;
+}
+
+span.number{
+    position:absolute;
+    right:0;
+    margin-right:5px;
+    font-size:17px;
+    color:#C19285;
+    margin-top:5px;
+    font-weight: bold;
+}
+
+span.chars{
+    position:absolute;
+    bottom:0px;
+    margin-left:-43px;
+    font-size:17px;
+    color:#C19285;
+    margin-bottom:0px;
+    font-weight: bold;
+}
+
+span.square-id{
+    position: absolute;
+    top:5px;
+    left:5px;
+    color:#ffffffef;
+    font-size: 12px;
+}
+/* -------------- Squares End -------------- */
+
+/* -------------- AlertHandler Start -------------- */
+.alert-layer{
+    position: absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100vh;
+    background-color: #000000a6;
+    z-index: 98;
+}
+
+.alert{
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding:15px;
+    border-radius: 15px;
+    background-color: #fff;
+    box-shadow: 0px 0px 15px #000;
+    z-index: 99;
+    color:#000;
+}
+
+#alert .confirm-buttons, #detail .confirm-buttons{
+    margin-top:15px;
+    justify-content: end;
+    display: flex;
+}
+
+#confirm .confirm-buttons{
+    margin-top:15px;
+    justify-content: space-between;
+    display: flex;
+}
+/* -------------- AlertHandler End -------------- */
+
+/* -------------- Fieldset Start -------------- */
+#variable-content{
+    font-family: monospace;
+    user-select: text;
+}
+
+.beautify{
+    white-space: pre;
+}
+
+.menu-buttons-between{
+    justify-content: space-between;
+    display: flex;
+}
+
+#log-container{
+    user-select: text;
+    overflow-x: scroll;
+    max-height: 750px;
+    max-width:300px;
+}
+
+.log-item{
+    font-family: monospace;
+}
+
+.log-status{
+    font-weight: bold;
+}
+
+.log-item .clickable{
+    cursor: pointer;
+    text-decoration: underline;
+    color: #0000ff;
+}
+
+#detail-text{
+    user-select: text;
+    font-family:monospace;
+    white-space: pre;
+}
+
+#detail-text-container{
+    background-color: #e2e2e2;
+    border:1px solid silver;
+    padding:5px;
+}
+
+#file-path{
+    background-color: #e2e2e2;
+    border:1px solid silver;
+    padding:5px;
+    user-select: text;
+    font-family:monospace;
+    white-space: pre;
+    margin-top:10px;
+}
+
+.alert h4{
+    padding-top:5px;
+    padding-bottom:5px;
+    margin:0;
+}
+
+#detail div{
+    margin-bottom:10px;
+}
+/* -------------- Fieldset Start -------------- */

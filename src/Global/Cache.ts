@@ -1,6 +1,6 @@
 export class Cache{
     /**
-     * This static class provides a way to store data in the local storage.
+     * This static class provides a way to store data in a layered way in local storage.
      */
 
     /**
@@ -64,5 +64,13 @@ export class Cache{
             layerData = { ...layerData, ...value };
 
         Cache.set(layer, key, layerData);
+    }
+
+    /**
+     * Clear layer
+     */
+    static clear(layer: CacheLayer): void
+    {
+        localStorage.setItem(layer, JSON.stringify({}));
     }
 }

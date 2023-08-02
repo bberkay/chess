@@ -1,25 +1,25 @@
 /****************************************************
  *
- *  GAME ENUMS
- *  The enums below are used for the game logic like
+ *  CHESS ENUMS
+ *  The export enums below are used for the game logic like
  *  the player colors, piece types, castling types etc.
  *
  ****************************************************/
 
 /**
- * Enum for the color of the chess pieces and the players.
- * @enum {string}
+ * export enum for the color of the chess pieces and the players.
+ * @export enum {string}
  */
-enum Color{
+export enum Color{
     White = "White",
     Black = "Black"
 }
 
 /**
- * Enum for
- * @enum {number}
+ * export enum for
+ * @export enum {number}
  */
-enum Square{
+export enum Square{
     a1 = 57, a2 = 49, a3 = 41, a4 = 33, a5 = 25, a6 = 17, a7 = 9, a8 = 1,
     b1 = 58, b2 = 50, b3 = 42, b4 = 34, b5 = 26, b6 = 18, b7 = 10, b8 = 2,
     c1 = 59, c2 = 51, c3 = 43, c4 = 35, c5 = 27, c6 = 19, c7 = 11, c8 = 3,
@@ -31,10 +31,10 @@ enum Square{
 }
 
 /**
- * Enum for the type of the chess pieces.
- * @enum {string}
+ * export enum for the type of the chess pieces.
+ * @export enum {string}
  */
-enum PieceType{
+export enum PieceType{
     Pawn = "Pawn",
     Knight = "Knight",
     Bishop = "Bishop",
@@ -44,10 +44,10 @@ enum PieceType{
 }
 
 /**
- * Enum for the castling types.
- * @enum {string}
+ * export enum for the castling types.
+ * @export enum {string}
  */
-enum CastlingType{
+export enum CastlingType{
     WhiteLong = "WhiteLong",
     WhiteShort = "WhiteShort",
     BlackLong = "BlackLong",
@@ -58,19 +58,20 @@ enum CastlingType{
 
 
 /**
- * Enum for the en passant directions
- * @enum {string}
+ * export enum for the en passant directions
+ * @export enum {string}
  */
-enum EnPassantDirection{
+export enum EnPassantDirection{
     Left = "Left",
-    Right = "Right"
+    Right = "Right",
+    Both = "Both"
 }
 
 /**
- * Enum for the route of the move.
- * @enum {string}
+ * export enum for the route of the move.
+ * @export enum {string}
  */
-enum MoveRoute{
+export enum MoveRoute{
     BottomLeft = "BottomLeft",
     BottomRight = "BottomRight",
     TopLeft = "TopLeft",
@@ -84,8 +85,8 @@ enum MoveRoute{
 
 /****************************************************
  *
- *  BOARD ENUMS
- *  The enums below are used for the board like the
+ *  BOARD export enumS
+ *  The export enums below are used for the board like the
  *  square effects, square click modes etc. So they
  *  are used for the chess board visualization and player
  *  interaction.
@@ -93,10 +94,10 @@ enum MoveRoute{
  ****************************************************/
 
 /**
- * Enum for the effects of the move/square
- * @enum {string}
+ * export enum for the effects of the move/square
+ * @export enum {string}
  */
-enum SquareEffect{
+export enum SquareEffect{
     Checked = "Checked",
     Killable = "Killable",
     Playable = "Playable",
@@ -105,9 +106,9 @@ enum SquareEffect{
 }
 
 /**
- * Enum for the click modes of the chess board.
+ * export enum for the click modes of the chess board.
  */
-enum SquareClickMode{
+export enum SquareClickMode{
     Select = "Select",
     Play = "Play",
     Clear = "Clear",
@@ -117,34 +118,34 @@ enum SquareClickMode{
 
 /****************************************************
  *
- *  SESSION ENUMS
- *  The enums below are used for the current session
+ *  SESSION export enumS
+ *  The export enums below are used for the current session
  *  like the cache layers, session types etc.
  *
  ****************************************************/
 
 /**
- * Enum for the cache layers.
- * @enum {string}
+ * export enum for the cache layers.
+ * @export enum {string}
  */
-enum CacheLayer{
+export enum CacheLayer{
     Game = "Game",
     UI = "UI"
 }
 
 /****************************************************
  *
- *  UI ENUMS
- *  The enums below are used for the UI elements like
+ *  UI export enumS
+ *  The export enums below are used for the UI elements like
  *  the Alerts, Forms etc.
  *
  ****************************************************/
 
 /**
- * Enum for some(ready-made) alert messages.
- * @enum {string}
+ * export enum for some(ready-made) alert messages.
+ * @export enum {string}
  */
-enum AlertMessage{
+export enum AlertMessage{
     WhiteKingAlreadyCreated = "White king is already created.",
     BlackKingAlreadyCreated = "Black king is already created.",
     KingsNotCreated = "You can't start a game without white and black kings.",
@@ -154,10 +155,10 @@ enum AlertMessage{
 }
 
 /**
- * Enum for some(ready-made) confirm messages
- * @enum {string}
+ * export enum for some(ready-made) confirm messages
+ * @export enum {string}
  */
-enum ConfirmMessage{
+export enum ConfirmMessage{
     StartCustomGame = "Are you sure you want to start a custom game?",
     StartStandardGame = "Are you sure you want to start a standard game?",
     StartEmptyGame = "Are you sure you want to start an empty game?",
@@ -165,10 +166,10 @@ enum ConfirmMessage{
 }
 
 /**
- * Enum for the LOG types.
- * @enum {string}
+ * export enum for the LOG types.
+ * @export enum {string}
  */
-enum LogType{
+export enum LogType{
     Info = "Info",
     Warning = "Warning",
     Error = "Error"
@@ -176,92 +177,23 @@ enum LogType{
 
 /****************************************************
  *
- *  POSITION ENUMS
- *  The enums below are used for test some moves and
+ *  POSITION export enumS
+ *  The export enums below are used for test some moves and
  *  positions. Like the castling, en passant etc.
  *
  ****************************************************/
 
 /**
- * Enum for the start positions
- * @enum {Array<Object>}
+ * export enum for the start positions
+ * @export enum {string}
  */
-const StartPosition = {
-    Standard: [
-        {"color": Color.White, "piece": PieceType.Rook, "position": Square.a1},
-        {"color": Color.White, "piece": PieceType.Knight, "position": Square.b1},
-        {"color": Color.White, "piece": PieceType.Bishop, "position": Square.c1},
-        {"color": Color.White, "piece": PieceType.Queen, "position": Square.d1},
-        {"color": Color.White, "piece": PieceType.King, "position": Square.e1},
-        {"color": Color.White, "piece": PieceType.Bishop, "position": Square.f1},
-        {"color": Color.White, "piece": PieceType.Knight, "position": Square.g1},
-        {"color": Color.White, "piece": PieceType.Rook, "position": Square.h1},
-        {"color": Color.White, "piece": PieceType.Pawn, "position": Square.a2},
-        {"color": Color.White, "piece": PieceType.Pawn, "position": Square.b2},
-        {"color": Color.White, "piece": PieceType.Pawn, "position": Square.c2},
-        {"color": Color.White, "piece": PieceType.Pawn, "position": Square.d2},
-        {"color": Color.White, "piece": PieceType.Pawn, "position": Square.e2},
-        {"color": Color.White, "piece": PieceType.Pawn, "position": Square.f2},
-        {"color": Color.White, "piece": PieceType.Pawn, "position": Square.g2},
-        {"color": Color.White, "piece": PieceType.Pawn, "position": Square.h2},
-        {"color": Color.Black, "piece": PieceType.Rook, "position": Square.a8},
-        {"color": Color.Black, "piece": PieceType.Knight, "position": Square.b8},
-        {"color": Color.Black, "piece": PieceType.Bishop, "position": Square.c8},
-        {"color": Color.Black, "piece": PieceType.Queen, "position": Square.d8},
-        {"color": Color.Black, "piece": PieceType.King, "position": Square.e8},
-        {"color": Color.Black, "piece": PieceType.Bishop, "position": Square.f8},
-        {"color": Color.Black, "piece": PieceType.Knight, "position": Square.g8},
-        {"color": Color.Black, "piece": PieceType.Rook, "position": Square.h8},
-        {"color": Color.Black, "piece": PieceType.Pawn, "position": Square.a7},
-        {"color": Color.Black, "piece": PieceType.Pawn, "position": Square.b7},
-        {"color": Color.Black, "piece": PieceType.Pawn, "position": Square.c7},
-        {"color": Color.Black, "piece": PieceType.Pawn, "position": Square.d7},
-        {"color": Color.Black, "piece": PieceType.Pawn, "position": Square.e7},
-        {"color": Color.Black, "piece": PieceType.Pawn, "position": Square.f7},
-        {"color": Color.Black, "piece": PieceType.Pawn, "position": Square.g7},
-        {"color": Color.Black, "piece": PieceType.Pawn, "position": Square.h7},
-    ],
-    Empty: [],
-    EnPassantRight: [
-        {"color": Color.White, "piece": PieceType.Pawn, "position": Square.e2},
-        {"color": Color.White, "piece": PieceType.Pawn, "position": Square.f2},
-        {"color": Color.Black, "piece": PieceType.Pawn, "position": Square.d7},
-        {"color": Color.Black, "piece": PieceType.Pawn, "position": Square.c7},
-        {"color": Color.White, "piece": PieceType.King, "position": Square.h1},
-        {"color": Color.Black, "piece": PieceType.King, "position": Square.a8}
-    ],
-    EnPassantLeft: [
-        {"color": Color.White, "piece": PieceType.Pawn, "position": Square.c2},
-        {"color": Color.White, "piece": PieceType.Pawn, "position": Square.d2},
-        {"color": Color.Black, "piece": PieceType.Pawn, "position": Square.e7},
-        {"color": Color.Black, "piece": PieceType.Pawn, "position": Square.f7},
-        {"color": Color.White, "piece": PieceType.King, "position": Square.h1},
-        {"color": Color.Black, "piece": PieceType.King, "position": Square.a8}
-    ],
-    Check:[
-        {"color": Color.Black, "piece": PieceType.King, "position": Square.e1},
-        {"color": Color.White, "piece": PieceType.Queen, "position": Square.h5},
-        {"color": Color.Black, "piece": PieceType.Rook, "position": Square.g2},
-        {"color": Color.White, "piece": PieceType.King, "position": Square.h8},
-    ],
-    Checkmate:[
-        {"color": Color.Black, "piece": PieceType.King, "position": Square.a8},
-        {"color": Color.White, "piece": PieceType.Rook, "position": Square.b1},
-        {"color": Color.Black, "piece": PieceType.Rook, "position": Square.e6},
-        {"color": Color.White, "piece": PieceType.King, "position": Square.h2},
-        {"color": Color.Black, "piece": PieceType.Pawn, "position": Square.f6},
-        {"color": Color.White, "piece": PieceType.Rook, "position": Square.b2},
-    ],
-    Stalemate:[
-        {"color": Color.Black, "piece": PieceType.King, "position": Square.a8},
-        {"color": Color.White, "piece": PieceType.Rook, "position": Square.b1},
-        {"color": Color.White, "piece": PieceType.Rook, "position": Square.f6},
-        {"color": Color.White, "piece": PieceType.King, "position": Square.h2}
-    ],
-    Promotion:[
-        {"color": Color.Black, "piece": PieceType.King, "position": Square.c8},
-        {"color": Color.White, "piece": PieceType.Pawn, "position": Square.e7},
-        {"color": Color.White, "piece": PieceType.King, "position": Square.e1},
-        {"color": Color.Black, "piece": PieceType.Pawn, "position": Square.c2}
-    ]
+export enum StartPosition{
+    Standard = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    Empty = "8/8/8/8/8/8/8/8 w - - 0 1",
+    EnPassantRight = "8/k1pp4/8/8/8/8/4PP1K/8 w - - 0 1",
+    EnPassantLeft = "8/k3pp2/8/8/8/8/2PP3K/8 w - - 0 1",
+    Check = "7k/5r2/8/3Q4/8/8/8/4K3 w - - 0 1",
+    Checkmate = "k7/8/4rp2/8/8/8/1R5K/1R6 w - - 0 1",
+    Stalemate = "k7/8/5R2/8/8/8/7K/1R6 w - - 0 1",
+    Promotion = "2k5/4P3/8/8/8/8/2p5/4K3 w - - 0 1"
 }
