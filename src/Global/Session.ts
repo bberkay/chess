@@ -27,6 +27,9 @@ export class Session {
     // Piece ID's of pawn that "can't" en passant(why don't we store as "can"? because this way more easy and optimize, see GameManager.canPawnDoEnPassant).
     private static bannedEnPassantPawns: EnPassant = {};
 
+    // Piece ID List(unique 64 number between 1000 and 9999 for each piece)
+    private static pieceIDList: Array<number> = [];
+
     /*********************************************
      *
      * GETTER
@@ -97,6 +100,11 @@ export class Session {
     static getEnPassantStatus(pieceID: number): EnPassantDirection
     {
         return Session.bannedEnPassantPawns[pieceID];
+    }
+
+    static getPieceIDList(): Array<number>
+    {
+        return Session.pieceIDList;
     }
 
 
@@ -199,6 +207,34 @@ export class Session {
     }
 
     /**
+     * Add id to piece id list
+     */
+    static addToPieceIDList(id: number): void
+    {
+        Session.pieceIDList.push(id);
+
+        // Add to cache
+        Cache.set(CacheLayer.Game, "pieceIDList", Session.pieceIDList);
+    }
+
+    /**
+     * Set piece id list
+     */
+    static setPieceIDList(newPieceIDList: Array<number>): void
+    {
+        Session.pieceIDList = newPieceIDList;
+
+        // Add to cache
+        Cache.set(CacheLayer.Game, "pieceIDList", Session.pieceIDList);
+    }
+
+    /*********************************************
+     *
+     * METHODS
+     *
+     *********************************************/
+
+    /**
      * Clear all variables
      */
     static clear(): void
@@ -219,6 +255,7 @@ export class Session {
             [CastlingType.Long]: true,
             [CastlingType.Short]: true,
         }
+        Session.pieceIDList = [];
     }
 
 }

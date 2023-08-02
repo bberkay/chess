@@ -16,9 +16,6 @@ import { PathEngine } from "./Core/PathEngine";
 import { RouteEngine } from "./Core/RouteEngine";
 
 export class ChessEngine{
-    /**
-     * This class provides users to create and manage a game.
-     */
 
     private moveEngine: MoveEngine;
     private pathEngine: PathEngine;
@@ -35,7 +32,6 @@ export class ChessEngine{
      */
     public createGame(position:StartPosition|Array<{color: Color, type:PieceType, square:Square}> = StartPosition.Standard): void
     {
-
         // Set the game position.
         if(!Array.isArray(position)) // If fen notation is given
             position = Converter.convertFENToJSON(position);
