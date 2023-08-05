@@ -1,3 +1,5 @@
+import { CacheLayer } from "../Enums";
+
 export class Cache{
     /**
      * This static class provides a way to store data in a layered way in local storage.
@@ -21,7 +23,7 @@ export class Cache{
      */
     static get(layer: CacheLayer, key: string|null = null): any
     {
-        let layerData: object = JSON.parse(localStorage.getItem(layer));
+        let layerData: Record<string, any> = JSON.parse(localStorage.getItem(layer) as string);
 
         // If key is null, return the whole layer data. Otherwise, return the data of the key if it exists.
         if(!key)

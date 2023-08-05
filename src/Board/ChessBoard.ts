@@ -6,19 +6,22 @@
  * @url https://github.com/bberkay/chess
  */
 
-import { Converter } from "../Utils/Converter";
-import { StartPosition, Color, PieceType, Square, SquareClickMode, SquareEffect } from "../Enums.ts";
+import {Color, PieceType, Square, SquareClickMode, SquareEffect, StartPosition} from "../Enums.ts";
+import {Converter} from "../Utils/Converter.ts";
 
 export class ChessBoard {
+
     /**
      * This function creates a chess board with the given position(fen notation or json notation).
+     * @example createGame(StartPosition.Standard);
+     * @example createGame("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
+     * @example createGame([{"color":Color.White, "type":PieceType.Pawn, "square":Square.a2}, {"color":Color.White, "type":PieceType.Pawn, "square":Square.b2}, ...]);
      */
-    createBoard(position:StartPosition|Array<{color: Color, type:PieceType, square:Square}> = StartPosition.Standard): void
+    public createBoard(position: Array<{color: Color, type:PieceType, square:Square}> | StartPosition | string = StartPosition.Standard): void
     {
-
         // Set the game position.
         if(!Array.isArray(position)) // If fen notation is given
-            position = Converter.convertFENToJSON(position);
+            position = Converter.convertFENToJSON(position as StartPosition);
 
         // Create the board.
         this.createSquares();
@@ -28,18 +31,12 @@ export class ChessBoard {
     }
 
     /**
-     * This function creates the background of the chess board.
+     * This function creates the background of the chess board in #chessboard div
      */
     private createSquares(): void
     {
-        // Remove the board if it exists.
-        document.getElementById("chessboard")?.remove();
-
-        // Create the board.
-        let board: HTMLDivElement = document.createElement("div");
-        board.id = "chessboard";
-        board.className = "chessboard";
-        document.body.appendChild(board);
+        // Clear board.
+        let board: HTMLDivElement = document.getElementById("chessboard") as HTMLDivElement;
 
         // Create the squares.
         for (let i = 1; i <= 64; i++) {
@@ -49,21 +46,18 @@ export class ChessBoard {
             square.className = "square";
 
             // Set the background color of the square.
-            if (i % 2 == 0)
-                square.className += " square-white";
-            else
-                square.className += " square-black";
+            square.className += ((Math.floor((i - 1) / 8) + i) % 2 === 0) ? " square--white" : " square--black";
 
             // Create numbers of the board
             if(i > 56 && i < 65)
-                square.innerHTML = `<div class="column-coordinate">${String.fromCharCode(64 + (i % 8 || 8))}</div>`;
+                square.innerHTML += `<div class="column-coordinate">${String.fromCharCode(64 + (i % 8 || 8)).toLowerCase()}</div>`;
 
             // Create letters of the board
             if(i % 8 == 0)
-                square.innerHTML = `<div class="row-coordinate">${8 - Math.floor(i / 8)}</div>`;
+                square.innerHTML += `<div class="row-coordinate">${9 - Math.floor(i / 8)}</div>`;
 
             // Set the click mode of the square.
-            this.setClickModeForSquare(square, SquareClickMode.Clear);
+            this.setClickModeForSquare(square, SquareClickMode.Refresh);
 
             // Add the square to the board.
             board.appendChild(square);
@@ -73,7 +67,7 @@ export class ChessBoard {
     /**
      * This function creates the pieces on the chess board.
      */
-    createPieces(position:Array<{color: Color, type:PieceType, square:Square}>): void
+    public createPieces(position:Array<{color: Color, type:PieceType, square:Square}>): void
     {
         for(let piece of position)
             this.createPiece(piece.color, piece.type, piece.square);
@@ -82,16 +76,16 @@ export class ChessBoard {
     /**
      * This function creates a piece on the chess board.
      */
-    createPiece(color: Color, type:PieceType, square:Square): void
+    public createPiece(color: Color, type:PieceType, square:Square): void
     {
-        // Remove the piece if it exists.
-        this.removePiece(square);
+        // Clear square.
+        this.clearSquare(square);
 
         // Create the piece.
         let piece: HTMLDivElement = document.createElement("div");
         piece.className = "piece";
-        piece.setAttribute("data-piece", type);
-        piece.setAttribute("data-color", color);
+        piece.setAttribute("data-piece", type.toLowerCase());
+        piece.setAttribute("data-color", color.toLowerCase());
 
         // Set the click mode of the piece square.
         this.setClickModeForSquare(square, SquareClickMode.Select);
@@ -103,45 +97,57 @@ export class ChessBoard {
     /**
      * This function removes the piece from the chess board.
      */
-    removePiece(square:Square): void
+    public clearSquare(square:Square): void
     {
         // Clear the effects of the square.
         this.removeEffectOfSquare(square);
 
-        // Remove the piece if it exists.
-        document.getElementById(square.toString())?.firstChild?.remove();
-
-        // Set the click mode of the square.
-        this.setClickModeForSquare(square, SquareClickMode.Clear);
+        // Remove the piece element if it exists.
+        const squareElement = document.getElementById(square.toString());
+        squareElement?.querySelector(".piece")?.remove();
     }
 
     /**
-     * This function moves the piece from the given square to the given square.
+     * This function selects the square on the chess board.
      */
-    movePiece(from:Square, to:Square): void
+    public highlightSquare(squareID: Square): void
+    {
+        // Clear the effects of the board.
+        this.refreshBoard();
+
+        // Get the selected square.
+        const selectedSquare: HTMLDivElement = document.getElementById(squareID.toString()) as HTMLDivElement;
+
+        // Set the effect of the selected square.
+        this.setEffectOfSquare(selectedSquare, SquareEffect.Selected);
+
+        // Set the click mode of the selected square.
+        this.setClickModeForSquare(selectedSquare, SquareClickMode.Refresh);
+    }
+
+    /**
+     * This function moves the piece from the given square to the given square on the chess board.
+     */
+    public highlightMove(from:Square, to:Square): void
     {
         // Remove the piece if it exists.
-        this.removePiece(to);
+        this.clearSquare(to);
 
-        // Move the piece.
+        // Move the piece to the square(to).
         document.getElementById(to.toString())?.appendChild(document.getElementById(from.toString())?.firstChild as HTMLDivElement);
-
-        // Set the click mode of the square.
-        this.setClickModeForSquare(from, SquareClickMode.Clear);
-        this.setClickModeForSquare(to, SquareClickMode.Select);
     }
 
     /**
-     * This function shows the possible moves of the given piece.
+     * This function shows the possible moves of the given piece on the chess board.
      */
-    showMoves(moves:Array<Square>): void
+    public highlightMoves(moves:Array<Square>): void
     {
         for(let move of moves){
             // Set the effect of the square.
             if(document.getElementById(move.toString())?.firstChild) // If the square has a piece
-                this.setEffectForSquare(move, SquareEffect.Killable);
+                this.setEffectOfSquare(move, SquareEffect.Killable);
             else // If the square does not have a piece
-                this.setEffectForSquare(move, SquareEffect.Playable);
+                this.setEffectOfSquare(move, SquareEffect.Playable);
 
             // Set the click mode of the square.
             this.setClickModeForSquare(move, SquareClickMode.Play);
@@ -151,10 +157,10 @@ export class ChessBoard {
     /**
      * This function removes the effects from board.
      */
-    refreshBoard(): void
+    public refreshBoard(): void
     {
         let squares = document.querySelectorAll(".square");
-        for(let i = 1; i <= 64; i++){
+        for(let i = 0; i <= 63; i++){
             // Get ID of the square.
             let id = parseInt(squares[i].id);
 
@@ -166,10 +172,10 @@ export class ChessBoard {
             this.removeEffectOfSquare(squares[i], [SquareEffect.Playable, SquareEffect.Killable, SquareEffect.Selected]);
 
             // Set the click mode of the square.
-            if (squares[i].firstChild) // If the square has a piece
-                this.setClickModeForSquare(squares[i], SquareClickMode.Select);
+            if (squares[i].lastElementChild?.className.includes("piece")) // If the square has a piece
+                this.setClickModeForSquare(squares[i] as HTMLDivElement, SquareClickMode.Select);
             else // If the square does not have a piece
-                this.setClickModeForSquare(squares[i], SquareClickMode.Clear);
+                this.setClickModeForSquare(squares[i] as HTMLDivElement, SquareClickMode.Refresh);
         }
     }
 
@@ -178,7 +184,7 @@ export class ChessBoard {
      * @param disableClick Disable click mode of the squares.
      * @param disableEffect Disable effect of the squares.
      */
-    disableBoard(disableClick: boolean = true, disableEffect: boolean = true): void
+    public disableBoard(disableClick: boolean = true, disableEffect: boolean = true): void
     {
         // Disable all squares.
         let squares = document.querySelectorAll(".square");
@@ -189,14 +195,14 @@ export class ChessBoard {
 
             // Set the effect of the square.
             if(disableEffect)
-                this.setEffectForSquare(squares[i], SquareEffect.Disabled);
+                this.setEffectOfSquare(squares[i], SquareEffect.Disabled);
         }
     }
 
     /**
      * Toggle promotion window.
      */
-    togglePromotion(square: Square): void
+    public togglePromotion(square: Square): void
     {
         // Disable the board.
         this.disableBoard();
@@ -237,16 +243,16 @@ export class ChessBoard {
      */
     private setClickModeForSquare(square: Square|HTMLDivElement|Element, mode:SquareClickMode): void
     {
-        if(typeof square === "number")
-            square = document.getElementById(square.toString()) as HTMLDivElement;
+       if(typeof square === "number")
+           square = document.getElementById(square.toString()) as HTMLDivElement;
 
-        square.setAttribute("onclick", `BoardHandler.${mode}(this)`);
+       square.setAttribute("data-click-mode", mode);
     }
 
     /**
      * This function sets the effect of the given square element or id(squareID).
      */
-    private setEffectForSquare(square: Square|HTMLDivElement|Element, effect: SquareEffect): void
+    private setEffectOfSquare(square: Square|HTMLDivElement|Element, effect: SquareEffect): void
     {
         if(typeof square === "number")
             square = document.getElementById(square.toString()) as HTMLDivElement;

@@ -85,7 +85,7 @@ export enum MoveRoute{
 
 /****************************************************
  *
- *  BOARD export enumS
+ *  BOARD ENUMS
  *  The export enums below are used for the board like the
  *  square effects, square click modes etc. So they
  *  are used for the chess board visualization and player
@@ -98,11 +98,11 @@ export enum MoveRoute{
  * @export enum {string}
  */
 export enum SquareEffect{
-    Checked = "Checked",
-    Killable = "Killable",
-    Playable = "Playable",
-    Selected = "Selected",
-    Disabled = "Disabled",
+    Checked = "checked",
+    Killable = "killable",
+    Playable = "playable",
+    Selected = "selected",
+    Disabled = "disabled",
 }
 
 /**
@@ -111,14 +111,14 @@ export enum SquareEffect{
 export enum SquareClickMode{
     Select = "Select",
     Play = "Play",
-    Clear = "Clear",
+    Refresh = "Refresh",
     Promote = "Promote",
     Disable = "Disable"
 }
 
 /****************************************************
  *
- *  SESSION export enumS
+ *  SESSION ENUMS
  *  The export enums below are used for the current session
  *  like the cache layers, session types etc.
  *
@@ -135,7 +135,7 @@ export enum CacheLayer{
 
 /****************************************************
  *
- *  UI export enumS
+ *  UI ENUMS
  *  The export enums below are used for the UI elements like
  *  the Alerts, Forms etc.
  *
@@ -177,7 +177,7 @@ export enum LogType{
 
 /****************************************************
  *
- *  POSITION export enumS
+ *  POSITION ENUMS
  *  The export enums below are used for test some moves and
  *  positions. Like the castling, en passant etc.
  *

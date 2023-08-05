@@ -6,7 +6,7 @@
  * @url https://github.com/bberkay/chess
  */
 
-import { Color, PieceType, Square, StartPosition} from "../Enums.ts";
+import { Color, PieceType, Square, StartPosition, SquareClickMode } from "../Enums.ts";
 import { PieceFactory } from "./Factory/PieceFactory";
 import { Converter } from "../Utils/Converter";
 
@@ -29,14 +29,25 @@ export class ChessEngine{
 
     /**
      * This function creates a new game with the given position(fen notation or json notation).
+     * @example createGame(StartPosition.Standard);
+     * @example createGame("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
+     * @example createGame([{"color":Color.White, "type":PieceType.Pawn, "square":Square.a2}, {"color":Color.White, "type":PieceType.Pawn, "square":Square.b2}, ...]);
      */
-    public createGame(position:StartPosition|Array<{color: Color, type:PieceType, square:Square}> = StartPosition.Standard): void
+    public createGame(position: Array<{color: Color, type:PieceType, square:Square}> | StartPosition | string = StartPosition.Standard): void
     {
         // Set the game position.
         if(!Array.isArray(position)) // If fen notation is given
-            position = Converter.convertFENToJSON(position);
+            position = Converter.convertFENToJSON(position as StartPosition);
 
         // Create the game.
         PieceFactory.createPieces(position);
+    }
+
+    /**
+     * This function returns the possible moves of the given square.
+     */
+    public getMoves(square: Square): Array<Square>
+    {
+        return [Square.a1, Square.a2];
     }
 }
