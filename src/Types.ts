@@ -11,7 +11,7 @@ export type Board = {
     [Square.f1]: Piece | null, [Square.f2]: Piece | null, [Square.f3]: Piece | null, [Square.f4]: Piece | null, [Square.f5]: Piece | null, [Square.f6]: Piece | null, [Square.f7]: Piece | null, [Square.f8]: Piece | null,
     [Square.g1]: Piece | null, [Square.g2]: Piece | null, [Square.g3]: Piece | null, [Square.g4]: Piece | null, [Square.g5]: Piece | null, [Square.g6]: Piece | null, [Square.g7]: Piece | null, [Square.g8]: Piece | null,
     [Square.h1]: Piece | null, [Square.h2]: Piece | null, [Square.h3]: Piece | null, [Square.h4]: Piece | null, [Square.h5]: Piece | null, [Square.h6]: Piece | null, [Square.h7]: Piece | null, [Square.h8]: Piece | null,
-}
+};
 
 // Color Long mean Color player's queen side, Color Short mean Color player's king side.
 export type Castling = {

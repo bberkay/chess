@@ -20,23 +20,11 @@ export class Piece{
     /**
      * Getters
      */
-    public getColor(): Color
-    {
-        return this.color;
-    }
+    public getColor(): Color { return this.color; }
 
-    public getType(): PieceType
-    {
-        return this.type;
-    }
+    public getType(): PieceType { return this.type; }
 
-    public getStartPosition(): Square
-    {
-        return this.startPosition;
-    }
+    public getStartPosition(): Square { return this.startPosition; }
 
-    public getID(): number
-    {
-        return this.id;
-    }
+    public getID(): number { return this.id; }
 }

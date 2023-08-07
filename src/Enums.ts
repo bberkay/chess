@@ -111,16 +111,16 @@ export enum SquareEffect{
 export enum SquareClickMode{
     Select = "Select",
     Play = "Play",
-    Refresh = "Refresh",
+    Clear = "Clear",
     Promote = "Promote",
     Disable = "Disable"
 }
 
 /****************************************************
  *
- *  SESSION ENUMS
- *  The export enums below are used for the current session
- *  like the cache layers, session types etc.
+ *  Game ENUMS
+ *  The export enums below are used for the current Game
+ *  like the cache layers, Game types etc.
  *
  ****************************************************/
 

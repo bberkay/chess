@@ -6,25 +6,21 @@
  * @url https://github.com/bberkay/chess
  */
 
-import { Color, PieceType, Square, StartPosition, SquareClickMode } from "../Enums.ts";
+import { Color, PieceType, Square, StartPosition } from "../Enums.ts";
 import { PieceFactory } from "./Factory/PieceFactory";
 import { Converter } from "../Utils/Converter";
+import { Piece } from "../Models/Piece";
 
 // Core
 import { MoveEngine } from "./Core/MoveEngine";
-import { PathEngine } from "./Core/PathEngine";
-import { RouteEngine } from "./Core/RouteEngine";
+import { BoardNavigator } from "./Core/BoardNavigator";
 
 export class ChessEngine{
 
     private moveEngine: MoveEngine;
-    private pathEngine: PathEngine;
-    private routeEngine: RouteEngine;
 
     constructor(){
         this.moveEngine = new MoveEngine();
-        this.pathEngine = new PathEngine();
-        this.routeEngine = new RouteEngine();
     }
 
     /**
@@ -46,8 +42,26 @@ export class ChessEngine{
     /**
      * This function returns the possible moves of the given square.
      */
-    public getMoves(square: Square): Array<Square>
+    public getMoves(square: Square): Array<Square> | null
     {
-        return [Square.a1, Square.a2];
+        // Get the piece on the given square.
+        let piece: Piece | null = BoardNavigator.getPiece(square);
+        if(!piece) return null; // If there is no piece on the given square, return null;
+
+        // Get the possible moves of the piece by its type.
+        switch(piece.getType()){
+            case PieceType.Pawn:
+                return this.moveEngine.getPawnMoves(square);
+            case PieceType.Knight:
+                return this.moveEngine.getKnightMoves(square);
+            case PieceType.Bishop:
+                return this.moveEngine.getBishopMoves(square);
+            case PieceType.Rook:
+                return this.moveEngine.getRookMoves(square);
+            case PieceType.Queen:
+                return this.moveEngine.getQueenMoves(square);
+            case PieceType.King:
+                return this.moveEngine.getKingMoves(square);
+        }
     }
 }

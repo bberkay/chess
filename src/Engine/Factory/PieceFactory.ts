@@ -1,22 +1,22 @@
-/**
- * This class is responsible for creating pieces.
- */
-
 import { Color, PieceType, Square} from "../../Enums.ts";
-import { Session } from "../../Global/Session.ts";
+import { Game } from "../../Global/Game.ts";
 import { Piece } from "../../Models/Piece.ts";
 
 export class PieceFactory{
+    /**
+     * This class is responsible for creating pieces.
+     */
+
     /**
      * Create piece id for the piece(between 1000 and 9999).
      */
     private static createPieceID(): number
     {
         let id = Math.floor(Math.random() * 10000) + 1000;
-        if (Session.getPieceIDList().includes(id))
+        if (Game.getPieceIDList().includes(id)) // If the id is already used, create a new one.
             this.createPieceID();
-        else
-            Session.addToPieceIDList(id);
+        else // If the id is not used, add it to the list.
+            Game.addToPieceIDList(id);
 
         return id
     }
@@ -36,6 +36,6 @@ export class PieceFactory{
      */
     public static createPiece(color: Color, type:PieceType, square:Square): void
     {
-        Session.setSquare(square, new Piece(color, type, square, this.createPieceID()));
+        Game.setSquare(square, new Piece(color, type, square, this.createPieceID()));
     }
 }
