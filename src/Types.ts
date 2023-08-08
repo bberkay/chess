@@ -1,5 +1,5 @@
 import { Piece } from "./Models/Piece.ts";
-import { Square, CastlingType, EnPassantDirection } from "./Enums.ts";
+import { Square, CastlingType, EnPassantDirection, MoveRoute } from "./Enums.ts";
 
 // Piece | null means empty square and Piece means piece on the square
 export type Board = {
@@ -26,4 +26,9 @@ export type Castling = {
 // Piece ID's of pawn that "can't" en passant(why don't we store as "can"? because this way more easy and optimize, see GameManager.canPawnDoEnPassant).
 export type EnPassant = {
     [pieceID: number]: EnPassantDirection;
+}
+
+//
+export type Path = {
+    [key in MoveRoute]?: Array<Square>
 }

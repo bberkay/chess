@@ -1,5 +1,5 @@
 import {MoveRoute, Square} from "../../Enums";
-import {DiagonalPath, HorizontalPath, VerticalPath} from "../../Types";
+import { Path } from "../../Types";
 import {Calculator} from "../../Utils/Calculator.ts";
 import {Game} from "../../Global/Game";
 import {BoardNavigator} from "./BoardNavigator.ts";
@@ -34,7 +34,7 @@ export class PathCalculator {
      * For more information, please check the class description.
      * @See src/Engine/Core/PathCalculator.ts
      */
-    protected getDiagonalSquares(square: Square, distanceLimit: number | null = null, pieceSensitivity: boolean | null = true): DiagonalPath
+    protected getDiagonalSquares(square: Square, distanceLimit: number | null = null, pieceSensitivity: boolean | null = true): Path
     {
         // step is used to set the next square of the given square. For example, if step is -7 and
         // given square is Square.e5(29), then next square is Square.f4(22), next next square is
@@ -53,7 +53,7 @@ export class PathCalculator {
      * For more information, please check the class description.
      * @See src/Engine/Core/PathCalculator.ts
      */
-    protected getHorizontalSquares(square: Square, distanceLimit: number | null = null, pieceSensitivity: boolean | null = true): HorizontalPath
+    protected getHorizontalSquares(square: Square, distanceLimit: number | null = null, pieceSensitivity: boolean | null = true): Path
     {
         // step is used to set the next square of the given square. For example, if step is 1 and
         // given square is Square.e5(29), then next square is Square.f5(30), next next square is
@@ -70,7 +70,7 @@ export class PathCalculator {
      * For more information, please check the class description.
      * @See src/Engine/Core/PathCalculator.ts
      */
-    protected getVerticalSquares(square: Square, distanceLimit: number | null = null, pieceSensitivity: boolean | null = true): VerticalPath
+    protected getVerticalSquares(square: Square, distanceLimit: number | null = null, pieceSensitivity: boolean | null = true): Path
     {
         // step is used to set the next square of the given square. For example, if step is 8 and
         // given square is Square.e5(29), then next square is Square.e6(37), next next square is
@@ -81,6 +81,7 @@ export class PathCalculator {
             [MoveRoute.Top]: this.traverseInPath(square, -8, distanceLimit, pieceSensitivity),
         };
     }
+
 
     /**
      * Traverse in the given path(by given starter square and step for direction) and return the squares.
@@ -111,12 +112,14 @@ export class PathCalculator {
         let stepCounter = 0;
 
         while(limit == square){
-            // If the square is empty or piece sensitivity is false, add the square to the array.
-            if(!pieceSensitivity || (pieceSensitivity && !BoardNavigator.hasPiece(square, Game.getEnemyColor())))
+            // If piece sensitivity is false OR piece sensitivity true AND
+            // if square has no player's piece then add the square to the array.
+            if(!pieceSensitivity || (pieceSensitivity && !BoardNavigator.hasPiece(square, Game.getPlayerColor())))
                 squares.push(square);
 
-            // If distance limit is reached or the square is on the edge of the board, break the loop.
-            if(distanceLimit == stepCounter || isEdgeOfBoard(rowOfSquare, columnOfSquare))
+            // If distance limit is reached or the square is on the edge of the board or
+            // if piece sensitivity is true AND if square has a piece, then break the loop.
+            if(distanceLimit == stepCounter || isEdgeOfBoard(rowOfSquare, columnOfSquare) || (pieceSensitivity && BoardNavigator.hasPiece(square)))
                 break;
 
             // Increase the step counter.
