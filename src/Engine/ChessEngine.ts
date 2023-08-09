@@ -6,21 +6,22 @@
  * @url https://github.com/bberkay/chess
  */
 
-import { Color, PieceType, Square, StartPosition } from "../Enums.ts";
-import { PieceFactory } from "./Factory/PieceFactory";
-import { Converter } from "../Utils/Converter";
-import { Piece } from "../Models/Piece";
+import {Color, MoveRoute, PieceType, Square, StartPosition} from "../Enums.ts";
+import {PieceFactory} from "./Factory/PieceFactory";
+import {Converter} from "../Utils/Converter";
+import {Piece} from "../Models/Piece";
+import { Path } from "../Types";
 
 // Core
-import { MoveEngine } from "./Core/MoveEngine";
-import { BoardNavigator } from "./Core/BoardNavigator";
+import {BoardNavigator} from "./Core/BoardNavigator";
+import {RouteCalculator} from "./Core/RouteCalculator.ts";
 
 export class ChessEngine{
 
-    private moveEngine: MoveEngine;
+    private routeCalculator: RouteCalculator;
 
     constructor(){
-        this.moveEngine = new MoveEngine();
+        this.routeCalculator = new RouteCalculator();
     }
 
     /**
@@ -51,17 +52,112 @@ export class ChessEngine{
         // Get the possible moves of the piece by its type.
         switch(piece.getType()){
             case PieceType.Pawn:
-                return this.moveEngine.getPawnMoves(square);
+                return this.getPawnMoves(square, piece);
             case PieceType.Knight:
-                return this.moveEngine.getKnightMoves(square);
+                return this.getKnightMoves(square);
             case PieceType.Bishop:
-                return this.moveEngine.getBishopMoves(square);
+                return this.getBishopMoves(square);
             case PieceType.Rook:
-                return this.moveEngine.getRookMoves(square);
+                return this.getRookMoves(square);
             case PieceType.Queen:
-                return this.moveEngine.getQueenMoves(square);
+                return this.getQueenMoves(square);
             case PieceType.King:
-                return this.moveEngine.getKingMoves(square);
+                return this.getKingMoves(square);
         }
+    }
+
+    /**
+     * Get the possible moves of the pawn on the given square.
+     */
+    private getPawnMoves(square: Square, pawn: Piece): Array<Square> | null
+    {
+        let squares: Array<Square> = [];
+
+        // Find possible moves of the pawn.
+        let route: Path = this.routeCalculator.getPawnRoute(square);
+        if(!route) return null;
+
+        // Get the pawn's move routes.
+        let moveRoutes: Array<MoveRoute> = [];
+
+        // Filter pawn's moves by its color and add them to the moveRoutes array.
+        if(pawn.getColor() == Color.White)
+            moveRoutes = [MoveRoute.Top, MoveRoute.TopLeft, MoveRoute.TopRight];
+        else
+            moveRoutes = [MoveRoute.Bottom, MoveRoute.BottomLeft, MoveRoute.BottomRight];
+
+        // FIXME: moveRoutes[0]![0] kısmında problem çıkabilir ekstra bir if ile kontrol edilebilir. if(moveRoutes[0]) moveRoutes[0][0] şeklinde.
+
+        // First square of vertical route
+        squares.push(route[moveRoutes[0]]![0]); // White: MoveRoute.Top[0], Black: MoveRoute.Bottom[0]
+
+        // Second square of vertical route but only if the pawn is on its start position.
+        if(pawn.getStartPosition() == square)
+            squares.push(route[moveRoutes[0]]![1]); // White: MoveRoute.Top[1], Black: MoveRoute.Bottom[1]
+
+        // Add the diagonal routes(if has enemy)
+        if(BoardNavigator.hasPiece(route[moveRoutes[1]]![0], pawn.getColor() == Color.White ? Color.Black : Color.White))
+            squares.push(route[moveRoutes[1]]![0]); // White: MoveRoute.TopLeft[0], Black: MoveRoute.BottomLeft[0]
+
+        if(BoardNavigator.hasPiece(route[moveRoutes[2]]![0], pawn.getColor() == Color.White ? Color.Black : Color.White))
+            squares.push(route[moveRoutes[2]]![0]); // White: MoveRoute.TopRight[0], Black: MoveRoute.BottomRight[0]
+
+        return squares;
+    }
+
+    /**
+     * Get the possible moves of the knight on the given square.
+     */
+    private getKnightMoves(square: Square): Array<Square> | null
+    {
+        let route: Array<Square> = this.routeCalculator.getKnightRoute(square);
+        if(!route) return null;
+
+        // Knight has no direction, so we don't need to convert the route to moves.
+        return route;
+    }
+
+    /**
+     * Get the possible moves of the bishop on the given square.
+     */
+    private getBishopMoves(square: Square): Array<Square> | null
+    {
+        let route: Path = this.routeCalculator.getBishopRoute(square);
+        if(!route) return null;
+
+        return Converter.convertPathToMoves(route);
+    }
+
+    /**
+     * Get the possible moves of the rook on the given square.
+     */
+    private getRookMoves(square: Square): Array<Square> | null
+    {
+        let route: Path = this.routeCalculator.getRookRoute(square);
+        if(!route) return null;
+
+        return Converter.convertPathToMoves(route);
+    }
+
+    /**
+     * Get the possible moves of the queen on the given square.
+     */
+    private getQueenMoves(square: Square): Array<Square> | null
+    {
+        let route: Path = this.routeCalculator.getQueenRoute(square);
+        if(!route) return null;
+
+        return Converter.convertPathToMoves(route);
+    }
+
+    /**
+     * Get the possible moves of the king on the given square.
+     */
+    private getKingMoves(square: Square): Array<Square> | null
+    {
+        let route: Path = this.routeCalculator.getKingRoute(square);
+        if(!route) return null;
+
+        return Converter.convertPathToMoves(route);
     }
 }

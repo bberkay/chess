@@ -1,5 +1,6 @@
 // Types
-import { StartPosition, Color, PieceType, Square } from "../Enums.ts";
+import { StartPosition, Color, PieceType, Square, MoveRoute } from "../Enums.ts";
+import { Path } from "../Types";
 
 export class Converter{
     /**
@@ -42,7 +43,7 @@ export class Converter{
 
     /**
      * Convert FEN to JSON
-     * @example input is "8/8/8/8/8/8/P7/8 w - - 0 1" and output is {"color": Color.White, "type": PieceType.Pawn, "square": Square.a2}
+     * @example input is "8/8/8/8/8/8/P7/8 w - - 0 1" and output is [{"color": Color.White, "type": PieceType.Pawn, "square": Square.a2}]
      */
     static convertFENToJSON(fenNotation: StartPosition): Array<{ color: Color; type: PieceType; square: Square }>
     {
@@ -59,6 +60,7 @@ export class Converter{
             "q":"Queen"
         };
 
+        // FIXME: String.fromCharCode() kullanılacak.
         const columnScheme:Record<number, string> = {
             1:"a",
             2:"b",
@@ -187,16 +189,16 @@ export class Converter{
     }
 
     /**
-     * Convert JSON Path to ArrayList Path
-     * @example input is {"top":[3,4,5], "bottom":[8,9,10]} and output is [3,4,5,8,9,10]
+     * Convert direction path to array of squares(moves).
+     * @example input is {MoveRoute.Bottom:[3,4,5], MoveRoute.Top:[8,9,10]} and output is [3,4,5,8,9,10]
      */
-    static convertJSONPathToArrayPath(jsonPath: {MoveRoute:Array<number>}): Array<number>
+    static convertPathToMoves(path: Path): Array<Square>
     {
-        let arrayPath: Array<number> = [];
+        let arrayPath: Array<Square> = [];
 
-        for(let i in jsonPath)
+        for(let i in path)
         {
-            arrayPath = arrayPath.concat(jsonPath[i as keyof typeof jsonPath]);
+            arrayPath = arrayPath.concat(path[i as MoveRoute]!);
         }
 
         return arrayPath;

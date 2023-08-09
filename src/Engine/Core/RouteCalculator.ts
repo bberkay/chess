@@ -59,9 +59,9 @@ export class RouteCalculator extends PathCalculator{
         for (const path in firstPath) {
             if(firstPath[path as MoveRoute]!.length == 2){ // If the path has 2 squares
                 if(path == MoveRoute.Bottom || path == MoveRoute.Top) // If the path is vertical, then get the horizontal squares of last square of the path.
-                    route = Converter.convertPathToArray(this.getHorizontalSquares(firstPath[path as MoveRoute]![1], 1)).concat(route);
+                    route = Converter.convertPathToMoves(this.getHorizontalSquares(firstPath[path as MoveRoute]![1], 1)).concat(route);
                 else // If the path is horizontal, then get the vertical squares of last square of the path.
-                    route = Converter.convertPathToArray(this.getVerticalSquares(firstPath[path as MoveRoute]![1], 1)).concat(route);
+                    route = Converter.convertPathToMoves(this.getVerticalSquares(firstPath[path as MoveRoute]![1], 1)).concat(route);
             }
         }
 

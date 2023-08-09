@@ -34,7 +34,7 @@ export class Chess{
      */
     private checkAndLoadGameFromCache(): void
     {
-        this.createGame();
+        this.createGame([{color: Color.White, type:PieceType.Pawn, square: Square.e2}, {color: Color.Black, type:PieceType.Pawn, square: Square.d3}]);
         /*if(!Cache.get(CacheLayer.Game))
             this.createGame();
         else{
@@ -83,7 +83,7 @@ export class Chess{
         {
             this.selectedSquare = square;
             this.chessBoard.selectSquare(square);
-            this.chessBoard.highlightMoves(this.chessEngine.getMoves(square));
+            this.chessBoard.highlightMoves(this.chessEngine.getMoves(square)!);
         }
         // If move type is clear, unset selected square and clear the board.
         else if(moveType == SquareClickMode.Clear)

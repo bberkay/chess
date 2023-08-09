@@ -1,8 +1,8 @@
-import {MoveRoute, Square} from "../../Enums";
+import { MoveRoute, Square } from "../../Enums";
 import { Path } from "../../Types";
-import {Calculator} from "../../Utils/Calculator.ts";
-import {Game} from "../../Global/Game";
-import {BoardNavigator} from "./BoardNavigator.ts";
+import { Calculator } from "../../Utils/Calculator.ts";
+import { BoardNavigator } from "./BoardNavigator.ts";
+import { Piece } from "../../Models/Piece.ts";
 
 export class PathCalculator {
     /**
@@ -90,44 +90,64 @@ export class PathCalculator {
      */
     private traverseInPath(square: Square, step: number, distanceLimit: number | null, pieceSensitivity: boolean | null): Array<Square>
     {
-        // Get the row and column of the given square.
-        const rowOfSquare = Calculator.calculateRowOfSquare(square);
-        const columnOfSquare = Calculator.calculateColumnOfSquare(square);
+        // This variable is used to check if the edge is changed.
+        // For more information, please check the isEdgeChanged function.
+        let prevRow: number = Calculator.getRow(square);
+        let prevColumn: number = Calculator.getColumn(square);
 
         /**
-         * This function checks if the given row and column is on the edge of the board.
+         * This function checks if the edge is changed or not. For example,
+         * If the given square is Square.h3(48) and step is 1, then the next square
+         * is Square.a2(49). In this case, the edge is changed.
          */
-        function isEdgeOfBoard(row: number, column: number): boolean
+        function isEdgeChanged(square: Square): boolean
         {
-            return row == 1 || row == 8 || column == 1 || column == 8;
+            // Get the current row and column of the square.
+            let currentRow = Calculator.getRow(square);
+            let currentColumn = Calculator.getColumn(square);
+
+            // If the previous row and column is far away from the current row and column, then the edge is changed.
+            if(prevRow > currentRow + 1 || prevRow < currentRow - 1 || prevColumn > currentColumn + 1 || prevColumn < currentColumn - 1)
+                return true;
+
+            // Update the previous row and column.
+            prevRow = currentRow;
+            prevColumn = currentColumn;
+
+            return false;
         }
 
         let squares: Array<Square> = [];
 
-        // If step is positive, it means we are going to the right or bottom.
-        // If step is negative, it means we are going to the left or top.
-        const limit = step < 0 ? 1 : 64;
+        // If piece sensitivity is true, then get the piece of the given square(for color).
+        const piece: Piece | null = pieceSensitivity ? BoardNavigator.getPiece(square) : null;
 
         // This variable is used to count the steps for the distance limit.
         let stepCounter = 0;
 
-        while(limit == square){
-            // If piece sensitivity is false OR piece sensitivity true AND
-            // if square has no player's piece then add the square to the array.
-            if(!pieceSensitivity || (pieceSensitivity && !BoardNavigator.hasPiece(square, Game.getPlayerColor())))
-                squares.push(square);
+        while((square + step) <= 64 && (square + step) >= 1){
+            // Set the next square. For example, if step is 1 and given square is Square.e5(29),
+            // then next square is Square.f5(30). Also, We are doing this operation before the
+            // push operation because we don't want to add the given square itself to the array.
+            square += step;
 
             // If distance limit is reached or the square is on the edge of the board or
             // if piece sensitivity is true AND if square has a piece, then break the loop.
-            if(distanceLimit == stepCounter || isEdgeOfBoard(rowOfSquare, columnOfSquare) || (pieceSensitivity && BoardNavigator.hasPiece(square)))
+            if(distanceLimit == stepCounter || isEdgeChanged(square))
+                break;
+
+            // If piece sensitivity is false OR piece sensitivity true AND
+            // if square has enemy's piece then add the square to the array.
+            if(!pieceSensitivity || (pieceSensitivity && !BoardNavigator.hasPiece(square, piece!.getColor())))
+                squares.push(square);
+
+            // If piece sensitivity is true AND if square has a piece(enemy or player), then break the loop.
+            // Because we can't go further.
+            if(pieceSensitivity && BoardNavigator.hasPiece(square))
                 break;
 
             // Increase the step counter.
             stepCounter++;
-
-            // If we are going to the right or bottom, increase the square by step.
-            // If we are going to the left or top, decrease the square by step.
-            square = limit == 64 ? square + step : square - step;
         }
 
         return squares;

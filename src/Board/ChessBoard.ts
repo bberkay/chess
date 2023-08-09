@@ -50,11 +50,11 @@ export class ChessBoard {
             // Set the background color of the square.
             square.className += ((Math.floor((i - 1) / 8) + i) % 2 === 0) ? " square--white" : " square--black";
 
-            // Create numbers of the board
+            // Create letters of the board
             if(i > 56 && i < 65)
                 square.innerHTML += `<div class="column-coordinate">${String.fromCharCode(64 + (i % 8 || 8)).toLowerCase()}</div>`;
 
-            // Create letters of the board
+            // Create numbers of the board
             if(i % 8 == 0)
                 square.innerHTML += `<div class="row-coordinate">${9 - Math.floor(i / 8)}</div>`;
 
@@ -146,7 +146,7 @@ export class ChessBoard {
     {
         for(let move of moves){
             // Set the effect of the square.
-            if(document.getElementById(move.toString())?.firstChild) // If the square has a piece
+            if(document.getElementById(move.toString())?.lastElementChild?.className.includes("piece")) // If the square has a piece
                 this.setSquareEffect(move, SquareEffect.Killable);
             else // If the square does not have a piece
                 this.setSquareEffect(move, SquareEffect.Playable);
