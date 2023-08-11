@@ -6,21 +6,17 @@
  * @url https://github.com/bberkay/chess
  */
 
-import {Color, MoveRoute, PieceType, Square, StartPosition} from "../Enums.ts";
-import {PieceFactory} from "./Factory/PieceFactory";
-import {Converter} from "../Utils/Converter";
-import {Piece} from "../Models/Piece";
-import { Path } from "../Types";
-
-// Core
-import {BoardNavigator} from "./Core/BoardNavigator";
-import {RouteCalculator} from "./Core/RouteCalculator.ts";
+import { PieceFactory } from "./Factory/PieceFactory";
+import { Converter } from "../Utils/Converter";
+import { BoardManager } from "../Managers/BoardManager";
+import { RouteCalculator } from "./Calculator/RouteCalculator.ts";
 
 export class ChessEngine{
 
     private routeCalculator: RouteCalculator;
 
-    constructor(){
+    constructor(isStandalone: boolean = true){
+        console.log("isStandalone: " + isStandalone);
         this.routeCalculator = new RouteCalculator();
     }
 
@@ -46,7 +42,7 @@ export class ChessEngine{
     public getMoves(square: Square): Array<Square> | null
     {
         // Get the piece on the given square.
-        let piece: Piece | null = BoardNavigator.getPiece(square);
+        let piece: Piece | null = BoardManager.getPiece(square);
         if(!piece) return null; // If there is no piece on the given square, return null;
 
         // Get the possible moves of the piece by its type.
@@ -63,7 +59,19 @@ export class ChessEngine{
                 return this.getQueenMoves(square);
             case PieceType.King:
                 return this.getKingMoves(square);
+            default:
+                return null;
         }
+    }
+
+    /**
+     * This function plays the given move.
+     * @param from
+     * @param to
+     */
+    public playMove(from: Square, to: Square): void
+    {
+        // BoardManager.
     }
 
     /**
@@ -96,10 +104,10 @@ export class ChessEngine{
             squares.push(route[moveRoutes[0]]![1]); // White: MoveRoute.Top[1], Black: MoveRoute.Bottom[1]
 
         // Add the diagonal routes(if has enemy)
-        if(BoardNavigator.hasPiece(route[moveRoutes[1]]![0], pawn.getColor() == Color.White ? Color.Black : Color.White))
+        if(BoardManager.hasPiece(route[moveRoutes[1]]![0], pawn.getColor() == Color.White ? Color.Black : Color.White))
             squares.push(route[moveRoutes[1]]![0]); // White: MoveRoute.TopLeft[0], Black: MoveRoute.BottomLeft[0]
 
-        if(BoardNavigator.hasPiece(route[moveRoutes[2]]![0], pawn.getColor() == Color.White ? Color.Black : Color.White))
+        if(BoardManager.hasPiece(route[moveRoutes[2]]![0], pawn.getColor() == Color.White ? Color.Black : Color.White))
             squares.push(route[moveRoutes[2]]![0]); // White: MoveRoute.TopRight[0], Black: MoveRoute.BottomRight[0]
 
         return squares;

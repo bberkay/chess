@@ -1,6 +1,4 @@
-import { CacheLayer } from "../Enums";
-
-export class Cache{
+export class CacheManager {
     /**
      * This static class provides a way to store data in a layered way in local storage.
      */
@@ -11,7 +9,7 @@ export class Cache{
      */
     static set(layer: CacheLayer, key: string, value: any): void
     {
-        let layerData: object = Cache.get(layer) || {};
+        let layerData: object = CacheManager.get(layer) || {};
 
         // If the layer is not created yet, create it. Otherwise, add the new data to the layer.
         localStorage.setItem(layer, JSON.stringify({...layerData, [key]: value}));
@@ -38,7 +36,7 @@ export class Cache{
      */
     static remove(layer: CacheLayer, key: string): void
     {
-        let layerData: any = Cache.get(layer);
+        let layerData: any = CacheManager.get(layer);
 
         // If the data is null, there is no data to remove.
         if(!layerData)
@@ -55,7 +53,7 @@ export class Cache{
      * @example Cache.add(CacheLayer.Game, "moves", {1212: ["a1", "a2"]}); // moves = {1111: ["d5"]} -> moves = {1111: ["d5"], 1212: ["a1", "a2"]}
      */
     static add(layer: CacheLayer, key: string, value: any){
-        let layerData: any = Cache.get(layer, key) || {};
+        let layerData: any = CacheManager.get(layer, key) || {};
 
         // Find the type of the layer data and add the value to the layer data.
         if(Array.isArray(layerData)) // If layer data is array, push the value to the array.
@@ -65,7 +63,7 @@ export class Cache{
         else // If layer data is object, add the value to the object.
             layerData = { ...layerData, ...value };
 
-        Cache.set(layer, key, layerData);
+        CacheManager.set(layer, key, layerData);
     }
 
     /**

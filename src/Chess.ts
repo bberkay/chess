@@ -1,16 +1,17 @@
 /**
  * @module Chess
- * @description This module provides users to a playable game on the web by connecting chessEngine and chessBoard.
+ * @description This module provides users to a playable game on the web by connecting ChessEngine and ChessBoard.
  * @version 1.0.0
  * @created by Berkay Kaya
  * @url https://github.com/bberkay/chess
  */
 
-import {Color, PieceType, Square, SquareClickMode, StartPosition} from "./Enums.ts";
 import {ChessEngine} from "./Engine/ChessEngine";
-import {ChessBoard} from "./Board/ChessBoard";
-import {Game} from "./Global/Game.ts";
+import {ChessBoard} from "./Interface/ChessBoard";
 import {Converter} from "./Utils/Converter.ts";
+import {BoardManager} from "./Managers/BoardManager.ts";
+import {StateManager} from "./Managers/StateManager.ts";
+import {CacheManager} from "./Managers/CacheManager.ts";
 
 export class Chess{
     /**
@@ -22,8 +23,8 @@ export class Chess{
     private selectedSquare: Square | null = null;
 
     constructor(){
-        this.chessEngine = new ChessEngine();
-        this.chessBoard = new ChessBoard();
+        this.chessEngine = new ChessEngine(false);
+        this.chessBoard = new ChessBoard(false);
 
         // Check the cache and load the game(if exists).
         this.checkAndLoadGameFromCache();
@@ -51,7 +52,7 @@ export class Chess{
     public createGame(position: Array<{color: Color, type:PieceType, square:Square}> | StartPosition | string = StartPosition.Standard): void
     {
         // Clear the cache and global variables.
-        Game.clear()
+        this.clear()
 
         // Set the game position.
         if(!Array.isArray(position)) // If fen notation is given
@@ -60,7 +61,7 @@ export class Chess{
         // Create a new game.
         this.chessEngine.createGame(position);
 
-        // Setup the chess board.
+        // Set up the chess board.
         this.chessBoard.createBoard(position);
     }
 
@@ -75,6 +76,7 @@ export class Chess{
         // If move is play, move the selected square then unset selected square.
         if(moveType === SquareClickMode.Play && this.selectedSquare !== null)
         {
+            this.chessEngine.playMove(this.selectedSquare, square);
             this.chessBoard.movePiece(this.selectedSquare, square);
             this.selectedSquare = null;
         }
@@ -91,5 +93,15 @@ export class Chess{
             this.selectedSquare = null;
             this.chessBoard.clearBoard();
         }
+    }
+
+    /**
+     * @description This function clear the current game and cache then creates a new game.
+     */
+    private clear(): void
+    {
+        BoardManager.clear();
+        StateManager.clear();
+        CacheManager.clear(CacheLayer.Game);
     }
 }

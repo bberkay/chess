@@ -1,6 +1,5 @@
-import { Color, PieceType, Square} from "../../Enums.ts";
-import { Game } from "../../Global/Game.ts";
-import { Piece } from "../../Models/Piece.ts";
+import { BoardManager } from "../../Managers/BoardManager.ts";
+import { PieceModel } from "../../Models/PieceModel";
 
 export class PieceFactory{
     /**
@@ -13,10 +12,10 @@ export class PieceFactory{
     private static createPieceID(): number
     {
         let id = Math.floor(Math.random() * 10000) + 1000;
-        if (Game.getPieceIDList().includes(id)) // If the id is already used, create a new one.
+        if (BoardManager.getPieceIds().includes(id)) // If the id is already used, create a new one.
             this.createPieceID();
         else // If the id is not used, add it to the list.
-            Game.addToPieceIDList(id);
+            BoardManager.addPieceIds(id);
 
         return id
     }
@@ -36,6 +35,6 @@ export class PieceFactory{
      */
     public static createPiece(color: Color, type:PieceType, square:Square): void
     {
-        Game.setSquare(square, new Piece(color, type, square, this.createPieceID()));
+        BoardManager.addPiece(square, new PieceModel(color, type, square, this.createPieceID()));
     }
 }

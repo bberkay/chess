@@ -13,6 +13,10 @@ export class ChessBoard {
     // Store locked squares default click modes to restore them after lock the board.
     private lockedSquaresModes: Array<SquareClickMode> = [];
 
+    constructor(isStandalone: boolean = true) {
+        console.log("isStandalone: " + isStandalone);
+    }
+
     /**
      * This function creates a chess board with the given position(fen notation or json notation).
      * @example createGame(StartPosition.Standard);
