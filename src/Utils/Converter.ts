@@ -1,7 +1,3 @@
-// Types
-import { StartPosition, Color, PieceType, Square, MoveRoute } from "../Enums.ts";
-import { Path } from "../Types";
-
 export class Converter{
     /**
      * This class is used to convert data from one type to another.
@@ -9,7 +5,9 @@ export class Converter{
 
     /**
      * Convert square to squareID
-     * @example input is "a1" and output is 57, input is "h8" and output is 8 (you can see the squareID table in the "../Enums.ts" file)
+     * @example Converter.convertSquareToSquareID("a1"), return 57
+     * @example Converter.convertSquareToSquareID("h8"), return 8
+     * @see For more information see Square Enum in src/Types.ts
      */
     static convertSquareToSquareID(square:string): number
     {
@@ -26,9 +24,11 @@ export class Converter{
 
     /**
      * Convert squareID to square
-     * @example input is 57 and output is "a1", input is 8 and output is "h8" (you can see the squareID table in the "../Enums.ts" file)
+     * @example Converter.convertSquareIDToSquare(57), return "a1"
+     * @example Converter.convertSquareIDToSquare(8), return "h8"
+     * @see For more information see Square Enum in src/Types.ts
      */
-    static convertSquareIDToSquare(squareID:number): string
+    static convertSquareIDToSquare(squareID: number): string
     {
         let square: string = "";
 
@@ -43,65 +43,82 @@ export class Converter{
 
     /**
      * Convert FEN to JSON
-     * @example input is "8/8/8/8/8/8/P7/8 w - - 0 1" and output is [{"color": Color.White, "type": PieceType.Pawn, "square": Square.a2}]
+     * @example Converter.convertFENToJSON("8/8/8/8/8/8/P7/8"), return [{"color": Color.White, "type": PieceType.Pawn, "square": Square.a1}]
+     * @see For more information about fen notation  https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
      */
-    static convertFENToJSON(fenNotation: StartPosition): Array<{ color: Color; type: PieceType; square: Square }>
+    static convertFENToJSON(fenNotation: StartPosition): Array<{ color: Color, type: PieceType, square: Square }>
     {
 
         let jsonNotation:Array<{color:Color, type:PieceType, square:Square}> = [];
 
-        // Schemes
-        const typeScheme:Record<string, string> = {
-            "n":"Knight",
-            "b":"Bishop",
-            "p":"Pawn",
-            "r":"Rook",
-            "k":"King",
-            "q":"Queen"
+        /**
+         * Type scheme (first letter of the piece type except for the knight) for convert letter to the piece type
+         * @see For more information please see above wikipedia page
+         */
+        const typeScheme:Record<string, PieceType> = {
+            "n":PieceType.Knight,
+            "b":PieceType.Bishop,
+            "p":PieceType.Pawn,
+            "r":PieceType.Rook,
+            "k":PieceType.King,
+            "q":PieceType.Queen
         };
 
-        // FIXME: String.fromCharCode() kullanılacak.
-        const columnScheme:Record<number, string> = {
-            1:"a",
-            2:"b",
-            3:"c",
-            4:"d",
-            5:"e",
-            6:"f",
-            7:"g",
-            8:"h"
-        };
-
-        // Rows of the board (first part of the FEN)
+        // Rows of the board (first part of the FEN, for example "8/8/8/8/8/8/P7/8")
         const rows: string[] = fenNotation.split(" ")[0].split("/");
 
-        // Loop through the rows
+        // Loop through the fen board
         for(let i:number = 0; i < 8; i++) {
-            // Current row and column
-            const row: string = rows[i];
-            const currentRow: number = 8 - i; // 8 - i because the row starts from 8
-            let currentColumn: string = columnScheme[i + 1]; // i + 1 because the column starts from 1
-            let columnCounter: number = 0; // This is used to calculate the column
 
-            // Loop through the row
-            for (let j:number = 0; j < row.length; j++)
+            // Get current row of fen notation
+            const currentRow: string = rows[i]; // 8 or P7 of the "8/8/8/8/8/8/P7/8"
+
+            /**
+             * Calculate row and column counter, for change to the json notation.
+             * Row is 8 - i, because current for loop starts from 0 and fen notation starts from 8
+             * Column is 0, because this is the starting point, we'll change this below.
+             * @see For more information please see the wikipedia link in the description of the function.
+             */
+            const jsonRow: number = 8 - i;
+            let jsonColumn: string = String.fromCharCode(64 + (i + 1)); // i + 1 because the column starts from 1
+            let columnCounter: number = 0;
+
+
+            // Loop through the current row
+            for (let j:number = 0; j < currentRow.length; j++)
             {
-                let square: string = row[j];
-                if (parseInt(square)) // If square is a number
+                // Find current square from the current row, can be 8 or P7
+                let square: string = currentRow[j];
+
+                if (parseInt(square)) // If square is a number(is 8 or 7)
                 {
+                    /**
+                     * Add square to column counter for change squareID to square
+                     * and find current column by column counter.
+                     * @see For more information see Square Enum in src/Types.ts
+                     */
                     columnCounter += parseInt(square);
-                    currentColumn = columnScheme[columnCounter];
+                    jsonColumn = String.fromCharCode(columnCounter);
                 }
                 else // If square is a letter
                 {
+                    /**
+                     * Add 1 to column counter for change squareID to square(means set next square)
+                     * and find current column by column counter, for example if columnCounter is 52(d2)
+                     * then do 53(e2) by add 1 to columnCounter.
+                     * @see For more information see Square Enum in src/Types.ts
+                     */
                     columnCounter += 1;
-                    currentColumn = columnScheme[columnCounter];
+                    jsonColumn = String.fromCharCode(64 + columnCounter).toString().toLowerCase();
 
-                    // Push the square to the jsonBoard
+                    /**
+                     * If square is a letter, that means square has piece then
+                     * add piece to json notation
+                     */
                     jsonNotation.push({
-                        color: square == square.toLowerCase() ? Color.Black : Color.White, // If square is lowercase, it is black, otherwise it is white
-                        type: PieceType[typeScheme[square.toLowerCase()] as keyof typeof PieceType], // Convert the letter to the piece type
-                        square: Square[(currentColumn.toString() + currentRow.toString()) as keyof typeof Square] // Convert the column and row to the square
+                        color: square == square.toLowerCase() ? Color.Black : Color.White, // If square is lowercase, piece is black, otherwise piece is white
+                        type: typeScheme[square.toLowerCase()], // Convert the letter to the piece type
+                        square: Square[(jsonColumn + jsonRow.toString()) as keyof typeof Square]  // Convert the column and row to the square
                     });
                 }
             }
@@ -112,7 +129,8 @@ export class Converter{
 
     /**
      * Convert JSON to FEN
-     * @example input is {"color": Color.White, "type": PieceType.Pawn, "square": Square.a2} and output is "8/8/8/8/8/8/P7/8 w - - 0 1"
+     * @example Converter.convertJSONToFen([{"color": Color.White, "type": PieceType.Pawn, "square": Square.a1}]), return "8/8/8/8/8/8/P7/8"
+     * @see For more information about fen notation https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
      */
     static convertJSONToFEN(jsonNotation: Array<{color:Color, type:PieceType, square:Square}>): string
     {
@@ -124,83 +142,130 @@ export class Converter{
             return c >= "0" && c <= "9";
         }
 
+        /**
+         * Default fen notation, 8 rows and 8 columns and all of them are empty
+         * @see For more information please see above wikipedia page
+         */
         let fenNotation: Array<number|string> = [8, 8, 8, 8, 8, 8, 8, 8];
-        let typeScheme: Record<string, string> = {
-            "knight": "n",
-            "bishop": "b",
-            "pawn": "p",
-            "rook": "r",
-            "king": "k",
-            "queen": "q"
+
+        /**
+         * Type scheme (first letter of the piece type except for the knight) for convert piece type to the fen notation
+         * @see For more information please see above wikipedia page
+         */
+        const typeScheme: Record<PieceType, string> = {
+            [PieceType.Knight]: "n",
+            [PieceType.Bishop]: "b",
+            [PieceType.Pawn]: "p",
+            [PieceType.Rook]: "r",
+            [PieceType.King]: "k",
+            [PieceType.Queen]: "q"
         };
 
-        // Initialize the board with 8 rows and 8 columns and fill it with 1
-        let board:Record<number, Array<number|string>> = {};
+        /**
+         * Board for convert json notation to the fen notation.
+         * Initialize the board with 8 rows and 8 columns and fill it with 1, means empty.
+         * This board is a bridge between json notation and fen notation. Why we need this?
+         * Because if convert json notation to the fen notation directly then our algorithm will be
+         * big-o(n^3) but if we use this bridge then we can reduce(but we will use more space) it to big-o(n^2).
+         *
+         * Bridge: {8:[1, 1, 1, 1, 1, 1, 1, 1], 7:[1, 1, 1, 1, 1, 1, 1, 1], ..., 1:[1, 1, 1, 1, 1, 1, 1, 1]}
+         */
+        let jsonToFenBridgeBoard:Record<number, Array<number|string>> = {};
+
         for(let i = 0; i<8; i++)
         {
-            /*
-                {8:[1, 1, 1, 1, 1, 1, 1, 1], 7..., 1:[1, 1, 1, ...]}
-            */
-            board[i+1] = [1, 1, 1, 1, 1, 1, 1, 1];
+            jsonToFenBridgeBoard[i+1] = [1, 1, 1, 1, 1, 1, 1, 1];
         }
 
         // Loop through the jsonNotation
         for(let i in jsonNotation)
         {
+            // Current piece
             let piece: {color:Color, type:PieceType, square:Square} = jsonNotation[i];
+
+            // Convert squareID to square
             let square: string = Converter.convertSquareIDToSquare(piece["square"]);
+
+            // Type of the piece
+            let type: string = typeScheme[piece["type"]];
+
+            /**
+             * Convert square to the place, for example if square is a1 then square.charCodeAt(0) is 97
+             * and 'a'.charCodeAt(0) is 97 then 97 - 97 = 0, means place is 0 or if square is b1 then
+             * square.charCodeAt(0) is 98 and 'a'.charCodeAt(0) is 97 then 98 - 97 = 1, means place is 1
+             */
             let place: number = square.charCodeAt(0) - 'a'.charCodeAt(0);
-            let type: string = typeScheme[piece["type"].toLowerCase()];
-            board[parseInt(square.charAt(1))][place] = piece["color"] == Color.Black ? type.toLowerCase() : type.toUpperCase();
+
+            /**
+             * If piece is black then convert type to lowercase, otherwise convert type to uppercase(fen notation)
+             * and set the piece to the board by place and row.
+             * @see For more information about fen notation please see above wikipedia page
+             */
+            const row: number = parseInt(square.charAt(1));
+            jsonToFenBridgeBoard[row][place] = piece["color"] == Color.Black ? type.toLowerCase() : type.toUpperCase();
         }
 
-        // Loop through the board
-        let fenCounter: number = 0;
-        for(let i= 8; i>0; i--)
-        {
-            // Current row
-            let row: Array<number|string> = board[i];
+        // Row counter for fen notation. Example, every "/" of (8/8/8/8/8/8/8/8)
+        let fenRowCounter: number = 0;
 
-            // Fen string of the row
-            let fenString: string = "0";
+        // Loop through the board
+        for(let i= 8; i>0; i--) // We start from 8 to 0 because fen notation starts from 8th row
+        {
+            // Current row of the board
+            let row: Array<number|string> = jsonToFenBridgeBoard[i];
+
+            /**
+             * Fen string initialize for current row. We will increment this string
+             * with the square or number.
+             */
+            let fenRow: string = "0";
 
             // Loop through the row
             for(let t = 0; t<8; t++)
             {
+                // Current square of the row (square can be number or letter)
                 let square: number|string = row[t];
 
-                //
+                // If square is number then increment fenString with square
                 if(isNumeric(square.toString()))
                 {
-                    fenString = fenString.slice(0, -1);
-                    fenString += (parseInt(square.toString()) + 1).toString();
+                    /**
+                     * Get last char of the fenRow and add 1 to it then add it to the fenRow again.
+                     * For example, if fenString is "7" then last char is "7" and "7" + 1 is "8" or
+                     * if fenString is "p1" then last char is "1" and "1" + 1 is "2" then add it to
+                     * the fenString again, so fenString is "p2".
+                     */
+                    fenRow = fenRow.slice(0, -1);
+                    fenRow += (parseInt(square.toString()) + 1).toString();
                 }
                 else
                 {
-                    fenString += square;
+                    /**
+                     * If square is not number then add it to the fenRow directly. For example,
+                     * if fenString is "7" then last char is "7" and "7" + "p" is "7p" or if
+                     * fenString is "k1" then last char is "1" and "1" + "p" is "1p" then add it to
+                     * the fenString again, so fenString is "k1p".
+                     */
+                    fenRow += square;
                 }
             }
 
-            fenNotation[fenCounter] = fenString.replace("0", "");
-            fenCounter++;
+            // Set fenRow to the fenNotation array and increment fenRowCounter by 1 for next row
+            // Also replace 0(initialize value) with empty string because fen notation does not have 0
+            fenNotation[fenRowCounter] = fenRow.replace("0", "");
+            fenRowCounter++;
         }
 
+        // Return fen notation as string with "/" separator
         return fenNotation.join("/");
     }
 
     /**
      * Convert direction path to array of squares(moves).
-     * @example input is {MoveRoute.Bottom:[3,4,5], MoveRoute.Top:[8,9,10]} and output is [3,4,5,8,9,10]
+     * @example Converter.convertPathToMoves({MoveRoute.Bottom:[3,4,5], MoveRoute.Top:[8,9,10]}), return [3,4,5,8,9,10]
      */
     static convertPathToMoves(path: Path): Array<Square>
     {
-        let arrayPath: Array<Square> = [];
-
-        for(let i in path)
-        {
-            arrayPath = arrayPath.concat(path[i as MoveRoute]!);
-        }
-
-        return arrayPath;
+        return Object.values(path).flat();
     }
 }
