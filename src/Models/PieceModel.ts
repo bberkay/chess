@@ -1,6 +1,6 @@
 export class PieceModel implements Piece{
     /**
-     * This class is the abstract class of the pieces.
+     * This class is the model of the piece.
      */
 
     private readonly color: Color;
