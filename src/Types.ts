@@ -18,7 +18,7 @@ declare interface Piece {
  * @description Board is used to define a board.
  * @see src/Managers/BoardManager.ts For more information.
  */
-declare type Board = Record<Square, IPiece | null>;
+declare type Board = Record<Square, Piece | null>;
 
 /**
  * @description White/Black Long mean White/Black player's queen side, White/Black Short mean White/Black player's king side.
@@ -36,8 +36,16 @@ declare type EnPassant = Record<number, EnPassantDirection>
  * @description Path is used for the path calculation of the pieces.
  * @see src/Engine/Calculator/PathCalculator For more information.
  */
-declare type Path = Record<MoveRoute, Square[]>
-
+declare type Path = {
+    [MoveRoute.BottomRight]?: Square[],
+    [MoveRoute.Right]?: Square[],
+    [MoveRoute.TopRight]?: Square[],
+    [MoveRoute.Top]?: Square[],
+    [MoveRoute.TopLeft]?: Square[],
+    [MoveRoute.Left]?: Square[],
+    [MoveRoute.BottomLeft]?: Square[],
+    [MoveRoute.Bottom]?: Square[],
+}
 
 /**
  * Chess Enums
