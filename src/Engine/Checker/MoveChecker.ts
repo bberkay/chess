@@ -1,21 +1,21 @@
 export class MoveChecker{
-    public isLongCastlingAvailable(){
+    public static isLongCastlingAvailable(){
 
     }
 
-    public isShortCastlingAvailable(){
+    public static isShortCastlingAvailable(){
 
     }
 
-    public isEnPassantAvailable(){
+    public static isEnPassantAvailable(){
 
     }
 
-    public isLeftEnPassantAvailable(){
+    public static isLeftEnPassantAvailable(){
 
     }
 
-    public isRightEnPassantAvailable(){
+    public static isRightEnPassantAvailable(){
 
     }
 }

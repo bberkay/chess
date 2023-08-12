@@ -1,16 +1,16 @@
 export class StateChecker {
-    public isDangerous(){
+    public static isDangerous(){
 
     }
-    public isCheck(){
-
-    }
-
-    public isCheckmate(){
+    public static isCheck(){
 
     }
 
-    public isStalemate(){
+    public static isCheckmate(){
+
+    }
+
+    public static isStalemate(){
 
     }
 }

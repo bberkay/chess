@@ -33,10 +33,6 @@ export class StateManager{
     private static bannedEnPassantPawns: EnPassant = {};
 
     /**
-     * GETTERS
-     */
-
-    /**
      * @description Get current player
      */
     public static getPlayerColor(): Color
@@ -85,10 +81,6 @@ export class StateManager{
     {
         return StateManager.bannedEnPassantPawns[pieceID];
     }
-
-    /**
-     * SETTERS
-     */
 
     /**
      * @description Set next move(change current player's color to enemy's color)

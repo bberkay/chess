@@ -1,7 +1,18 @@
+import {Color, PieceType, Square, StartPosition, Path} from "../Types";
+
 export class Converter{
     /**
      * This class is used to convert data from one type to another.
      */
+
+    /**
+     * Convert direction path to array of squares(moves).
+     * @example Converter.convertPathToMoves({MoveRoute.Bottom:[3,4,5], MoveRoute.Top:[8,9,10]}), return [3,4,5,8,9,10]
+     */
+    static convertPathToMoves(path: Path): Array<Square>
+    {
+        return Object.values(path).flat();
+    }
 
     /**
      * Convert square to squareID
@@ -258,14 +269,5 @@ export class Converter{
 
         // Return fen notation as string with "/" separator
         return fenNotation.join("/");
-    }
-
-    /**
-     * Convert direction path to array of squares(moves).
-     * @example Converter.convertPathToMoves({MoveRoute.Bottom:[3,4,5], MoveRoute.Top:[8,9,10]}), return [3,4,5,8,9,10]
-     */
-    static convertPathToMoves(path: Path): Array<Square>
-    {
-        return Object.values(path).flat();
     }
 }

@@ -58,8 +58,8 @@ export class Chess{
         // Clear the current/old game.
         this.clear()
 
-        // Set the game position.
-        if(!Array.isArray(position)) // If fen notation is given
+        // If fen notation is given, convert it to json notation.
+        if(!Array.isArray(position))
             position = Converter.convertFENToJSON(position as StartPosition);
 
         // Create a new game.
@@ -104,6 +104,7 @@ export class Chess{
      */
     private clear(): void
     {
+        // Clear the complete game.
         BoardManager.clear();
         StateManager.clear();
         CacheManager.clear(CacheLayer.Game);

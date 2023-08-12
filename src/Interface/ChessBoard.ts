@@ -10,6 +10,11 @@ import { Converter } from "../Utils/Converter.ts";
 import { Color, PieceType, SquareClickMode, SquareEffect, StartPosition, Square } from "../Types.ts";
 
 export class ChessBoard {
+    /**
+     * This class provides users to create and manage a chess board(does not include any mechanic/logic).
+     * TODO: Interface Bitince, Bu dosyanın yorum satırları en üstte tüm interface klasörünü kapsayacak şekilde ve burada genel
+     * TODO: chess board kapsayacak şekilde geliştirilecek.
+     */
 
     /**
      * Store locked squares click modes
@@ -221,7 +226,7 @@ export class ChessBoard {
         // Get all squares on the board.
         let squares: NodeListOf<Element> = document.querySelectorAll(".square");
 
-        for(let i = 1; i <= 64; i++){
+        for(let i = 0; i <= 63; i++){
             // Get ID of the square.
             let id = parseInt(squares[i].id);
 

@@ -1,3 +1,5 @@
+import { Color, Piece, PieceType, Square } from "../Types";
+
 export class PieceModel implements Piece{
     /**
      * This class is the model of the piece.

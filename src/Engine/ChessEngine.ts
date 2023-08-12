@@ -9,14 +9,21 @@
 import { PieceFactory } from "./Factory/PieceFactory";
 import { Converter } from "../Utils/Converter";
 import { BoardManager } from "../Managers/BoardManager";
-import { RouteCalculator } from "./Calculator/RouteCalculator.ts";
+import { MoveEngine } from "./Core/MoveEngine";
+import { Piece, Color, PieceType, Square, StartPosition} from "../Types.ts";
 
 export class ChessEngine{
-
     /**
-     * This calculator is used to calculate the possible routes of the pieces.
+     * This class provides users to create and manage a game(does not include board or other ui elements).
+     * TODO: Engine Bitince, Bu dosyanın yorum satırları en üstte tüm engine klasörünü kapsayacak şekilde ve burada genel
+     * TODO: chess engini kapsayacak şekilde geliştirilecek.
      */
-    private routeCalculator: RouteCalculator;
+
+    // Piece factory property of the engine. It is used to create piece/pieces.
+    private pieceFactory: PieceFactory;
+
+    // Move engine property of the engine. It is used to get possible moves of a piece.
+    private moveEngine: MoveEngine;
 
     /**
      * Constructor of the ChessEngine class.
@@ -24,7 +31,8 @@ export class ChessEngine{
      */
     constructor(isStandalone: boolean = true){
         console.log("isStandalone: " + isStandalone);
-        this.routeCalculator = new RouteCalculator();
+        this.pieceFactory = new PieceFactory()
+        this.moveEngine = new MoveEngine();
     }
 
     /**
@@ -35,12 +43,12 @@ export class ChessEngine{
      */
     public createGame(position: Array<{color: Color, type:PieceType, square:Square}> | StartPosition | string = StartPosition.Standard): void
     {
-        // Set the game position.
-        if(!Array.isArray(position)) // If fen notation is given
+        // If fen notation is given, convert it to json notation.
+        if(!Array.isArray(position))
             position = Converter.convertFENToJSON(position as StartPosition);
 
         // Create the game.
-        PieceFactory.createPieces(position);
+        this.pieceFactory.createPieces(position);
     }
 
     /**
@@ -50,22 +58,27 @@ export class ChessEngine{
     {
         // Get the piece on the given square.
         let piece: Piece | null = BoardManager.getPiece(square);
-        if(!piece) return null; // If there is no piece on the given square, return null;
 
-        // Get the possible moves of the piece by its type.
+        // If there is no piece on the given square, return null;
+        if(!piece) return null;
+
+        /**
+         * If there is a piece on the given square, get
+         * the possible moves of the piece by its type.
+         */
         switch(piece.getType()){
             case PieceType.Pawn:
-                return this.getPawnMoves(square, piece);
+                return this.moveEngine.getPawnMoves(square);
             case PieceType.Knight:
-                return this.getKnightMoves(square);
+                return this.moveEngine.getKnightMoves(square);
             case PieceType.Bishop:
-                return this.getBishopMoves(square);
+                return this.moveEngine.getBishopMoves(square);
             case PieceType.Rook:
-                return this.getRookMoves(square);
+                return this.moveEngine.getRookMoves(square);
             case PieceType.Queen:
-                return this.getQueenMoves(square);
+                return this.moveEngine.getQueenMoves(square);
             case PieceType.King:
-                return this.getKingMoves(square);
+                return this.moveEngine.getKingMoves(square);
             default:
                 return null;
         }
@@ -79,98 +92,7 @@ export class ChessEngine{
     public playMove(from: Square, to: Square): void
     {
         // BoardManager.
+        console.log("playMove: " + from + " " + to);
     }
 
-    /**
-     * Get the possible moves of the pawn on the given square.
-     */
-    private getPawnMoves(square: Square, pawn: Piece): Array<Square> | null
-    {
-        let squares: Array<Square> = [];
-
-        // Find the enemy color by the pawn's color.
-        const enemyColor: Color = pawn.getColor() == Color.White ? Color.Black : Color.White;
-
-        // Find possible moves of the pawn.
-        let route: Path = this.routeCalculator.getPawnRoute(square);
-        if(!route) return null;
-
-        // Filter pawn's moves by its color and add them to the moveRoutes array.
-        const moveRoutes: Array<MoveRoute> = pawn.getColor() === Color.White
-            ? [MoveRoute.Top, MoveRoute.TopLeft, MoveRoute.TopRight]
-            : [MoveRoute.Bottom, MoveRoute.BottomLeft, MoveRoute.BottomRight];
-
-        // First square of vertical route
-        squares.push(route[moveRoutes[0]]![0]); // White: MoveRoute.Top[0], Black: MoveRoute.Bottom[0]
-
-        // Second square of vertical route but only if the pawn is on its start position.
-        if(pawn.getStartPosition() == square)
-            squares.push(route[moveRoutes[0]]![1]); // White: MoveRoute.Top[1], Black: MoveRoute.Bottom[1]
-
-
-        // Add the diagonal routes(if has enemy)
-        if(BoardManager.hasPiece(route[moveRoutes[1]]![0], enemyColor))
-            squares.push(route[moveRoutes[1]]![0]); // White: MoveRoute.TopLeft[0], Black: MoveRoute.BottomLeft[0]
-
-        if(BoardManager.hasPiece(route[moveRoutes[2]]![0], enemyColor))
-            squares.push(route[moveRoutes[2]]![0]); // White: MoveRoute.TopRight[0], Black: MoveRoute.BottomRight[0]
-
-        return squares;
-    }
-
-    /**
-     * Get the possible moves of the knight on the given square.
-     */
-    private getKnightMoves(square: Square): Array<Square> | null
-    {
-        let route: Array<Square> = this.routeCalculator.getKnightRoute(square);
-        if(!route) return null;
-
-        // Knight has no direction, so we don't need to convert the route to moves.
-        return route;
-    }
-
-    /**
-     * Get the possible moves of the bishop on the given square.
-     */
-    private getBishopMoves(square: Square): Array<Square> | null
-    {
-        let route: Path = this.routeCalculator.getBishopRoute(square);
-        if(!route) return null;
-
-        return Converter.convertPathToMoves(route);
-    }
-
-    /**
-     * Get the possible moves of the rook on the given square.
-     */
-    private getRookMoves(square: Square): Array<Square> | null
-    {
-        let route: Path = this.routeCalculator.getRookRoute(square);
-        if(!route) return null;
-
-        return Converter.convertPathToMoves(route);
-    }
-
-    /**
-     * Get the possible moves of the queen on the given square.
-     */
-    private getQueenMoves(square: Square): Array<Square> | null
-    {
-        let route: Path = this.routeCalculator.getQueenRoute(square);
-        if(!route) return null;
-
-        return Converter.convertPathToMoves(route);
-    }
-
-    /**
-     * Get the possible moves of the king on the given square.
-     */
-    private getKingMoves(square: Square): Array<Square> | null
-    {
-        let route: Path = this.routeCalculator.getKingRoute(square);
-        if(!route) return null;
-
-        return Converter.convertPathToMoves(route);
-    }
 }

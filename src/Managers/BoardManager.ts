@@ -25,10 +25,6 @@ export class BoardManager {
     private static pieceIds: Array<number> = [];
 
     /**
-     * GETTER
-     */
-
-    /**
      * @description Get current board
      */
     static getBoard(): Board
@@ -112,10 +108,6 @@ export class BoardManager {
     {
         return BoardManager.pieceIds;
     }
-
-    /**
-     * SETTER
-     */
 
     /**
      * @description Add piece to square
