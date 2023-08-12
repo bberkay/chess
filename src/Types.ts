@@ -7,7 +7,7 @@
  * @description Piece is used to define a piece.
  * @see src/Models/Piece.ts For more information.
  */
-declare interface Piece {
+export interface Piece {
     getColor(): Color;
     getType(): PieceType;
     getStartPosition(): Square;
@@ -18,25 +18,25 @@ declare interface Piece {
  * @description Board is used to define a board.
  * @see src/Managers/BoardManager.ts For more information.
  */
-declare type Board = Record<Square, Piece | null>;
+export type Board = Record<Square, Piece | null>;
 
 /**
  * @description White/Black Long mean White/Black player's queen side, White/Black Short mean White/Black player's king side.
  * @see src/Engine/Checker/MoveChecker.ts For more information.
  */
-declare type Castling = Record<CastlingType, boolean>
+export type Castling = Record<CastlingType, boolean>
 
 /**
  * @description Piece ID's of pawn that "can't" en passant(why don't we store as "can"? because this way more easy and optimize.
  * @see src/Engine/Checker/MoveChecker.ts For more information.
  */
-declare type EnPassant = Record<number, EnPassantDirection>
+export type EnPassant = Record<number, EnPassantDirection>
 
 /**
  * @description Path is used for the path calculation of the pieces.
  * @see src/Engine/Calculator/PathCalculator For more information.
  */
-declare type Path = {
+export type Path = {
     [MoveRoute.BottomRight]?: Square[],
     [MoveRoute.Right]?: Square[],
     [MoveRoute.TopRight]?: Square[],
@@ -58,7 +58,7 @@ declare type Path = {
  * @type {string}
  * @see src/Models/Piece.ts For more information.
  */
-declare enum Color{
+export enum Color{
     White = "White",
     Black = "Black"
 }
@@ -68,7 +68,7 @@ declare enum Color{
  * @type {string}
  * @see src/Managers/BoardManager.ts For more information.
  */
-declare enum Square{
+export enum Square{
     a1 = 57, a2 = 49, a3 = 41, a4 = 33, a5 = 25, a6 = 17, a7 = 9, a8 = 1,
     b1 = 58, b2 = 50, b3 = 42, b4 = 34, b5 = 26, b6 = 18, b7 = 10, b8 = 2,
     c1 = 59, c2 = 51, c3 = 43, c4 = 35, c5 = 27, c6 = 19, c7 = 11, c8 = 3,
@@ -84,7 +84,7 @@ declare enum Square{
  * @type {string}
  * @see src/Models/Piece.ts For more information.
  */
-declare enum PieceType{
+export enum PieceType{
     Pawn = "Pawn",
     Knight = "Knight",
     Bishop = "Bishop",
@@ -104,7 +104,7 @@ declare enum PieceType{
  * @type {string}
  * @see src/Engine/Checker/MoveChecker.ts For more information.
  */
-declare enum CastlingType{
+export enum CastlingType{
     WhiteLong = "WhiteLong",
     WhiteShort = "WhiteShort",
     BlackLong = "BlackLong",
@@ -119,7 +119,7 @@ declare enum CastlingType{
  * @type {string}
  * @see src/Engine/Checker/MoveChecker.ts For more information.
  */
-declare enum EnPassantDirection{
+export enum EnPassantDirection{
     Left = "Left",
     Right = "Right",
     Both = "Both"
@@ -130,7 +130,7 @@ declare enum EnPassantDirection{
  * @type {string}
  * @see src/Engine/Calculator/PathCalculator For more information.
  */
-declare enum MoveRoute{
+export enum MoveRoute{
     BottomLeft = "BottomLeft",
     BottomRight = "BottomRight",
     TopLeft = "TopLeft",
@@ -152,7 +152,7 @@ declare enum MoveRoute{
  * @type {string}
  * @see src/UI/ChessBoard.ts For more information.
  */
-declare enum SquareEffect{
+export enum SquareEffect{
     Checked = "checked",
     Killable = "killable",
     Playable = "playable",
@@ -165,7 +165,7 @@ declare enum SquareEffect{
  * @type {string}
  * @see src/UI/ChessBoard.ts For more information.
  */
-declare enum SquareClickMode{
+export enum SquareClickMode{
     Select = "Select",
     Play = "Play",
     Clear = "Clear",
@@ -184,7 +184,7 @@ declare enum SquareClickMode{
  * @type {string}
  * @see src/Managers/CacheManager.ts For more information.
  */
-declare enum CacheLayer{
+export enum CacheLayer{
     Game = "Game",
     UI = "UI"
 }
@@ -194,7 +194,7 @@ declare enum CacheLayer{
  * @type {string
  * @see src/Managers/LogManager.ts For more information.
  */
-declare enum LogType{
+export enum LogType{
     Info = "Info",
     Warning = "Warning",
     Error = "Error"
@@ -211,7 +211,7 @@ declare enum LogType{
  * @type {string}
  * @see src/Utils/Converter and src/Chess.ts For more information.
  */
-declare enum StartPosition{
+export enum StartPosition{
     Standard = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
     Empty = "8/8/8/8/8/8/8/8 w - - 0 1",
     EnPassantRight = "8/k1pp4/8/8/8/8/4PP1K/8 w - - 0 1",

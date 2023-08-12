@@ -2,7 +2,7 @@
  * @module Chess
  * @description This module provides users to a playable game on the web by connecting ChessEngine and ChessBoard.
  * @version 1.0.0
- * @created by Berkay Kaya
+ * @author Berkay Kaya
  * @url https://github.com/bberkay/chess
  */
 
@@ -12,6 +12,7 @@ import {Converter} from "./Utils/Converter.ts";
 import {BoardManager} from "./Managers/BoardManager.ts";
 import {StateManager} from "./Managers/StateManager.ts";
 import {CacheManager} from "./Managers/CacheManager.ts";
+import {Square, Color, CacheLayer, PieceType, StartPosition, SquareClickMode} from "./Types.ts";
 
 export class Chess{
     /**
@@ -22,6 +23,9 @@ export class Chess{
     private chessBoard: ChessBoard;
     private selectedSquare: Square | null = null;
 
+    /**
+     * Constructor of the Chess class.b
+     */
     constructor(){
         this.chessEngine = new ChessEngine(false);
         this.chessBoard = new ChessBoard(false);
@@ -51,7 +55,7 @@ export class Chess{
      */
     public createGame(position: Array<{color: Color, type:PieceType, square:Square}> | StartPosition | string = StartPosition.Standard): void
     {
-        // Clear the cache and global variables.
+        // Clear the current/old game.
         this.clear()
 
         // Set the game position.

@@ -1,5 +1,5 @@
 import { BoardManager } from "../../Managers/BoardManager.ts";
-import { PieceModel } from "../../Models/PieceModel";
+import { PieceModel } from "../../Models/PieceModel.ts";
 
 export class PieceFactory{
     /**
@@ -11,8 +11,10 @@ export class PieceFactory{
      */
     private static createPieceID(): number
     {
-        let id = Math.floor(Math.random() * 10000) + 1000;
-        if (BoardManager.getPieceIds().includes(id)) // If the id is already used, create a new one.
+        let id = Math.floor(Math.random() * 10000) + 1000
+
+        // If the id is already used, create a new one.
+        if (BoardManager.getPieceIds().includes(id))
             this.createPieceID();
         else // If the id is not used, add it to the list.
             BoardManager.addPieceIds(id);

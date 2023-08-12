@@ -1,4 +1,5 @@
 import { CacheManager } from "./CacheManager.ts";
+import { Color, CastlingType, EnPassant, EnPassantDirection, Castling, CacheLayer } from "../Types.ts";
 
 export class StateManager{
     /**
@@ -201,7 +202,7 @@ export class StateManager{
     }
 
     /**
-     * @description Reset state manager
+     * @description Reset state manager to default
      */
     public static clear(): void
     {

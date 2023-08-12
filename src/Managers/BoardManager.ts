@@ -1,5 +1,5 @@
 import { CacheManager } from "./CacheManager.ts";
-
+import { Board, Square, Piece, Color, PieceType, CacheLayer } from "../Types.ts";
 export class BoardManager {
     /**
      * This class provides the board management of the game.
@@ -25,7 +25,7 @@ export class BoardManager {
     private static pieceIds: Array<number> = [];
 
     /**
-     * GETTERS
+     * GETTER
      */
 
     /**
@@ -114,7 +114,7 @@ export class BoardManager {
     }
 
     /**
-     * SETTERS
+     * SETTER
      */
 
     /**
@@ -151,7 +151,7 @@ export class BoardManager {
     }
 
     /**
-     * @description Set piece id list
+     * @description Set piece id list to the given list
      */
     public static setPieceIds(pieceIds: Array<number> | null): void
     {
@@ -162,7 +162,7 @@ export class BoardManager {
     }
 
     /**
-     * @description Clear current board and piece ids
+     * @description Clear current board and piece ids list
      */
     public static clear(): void
     {
@@ -171,6 +171,7 @@ export class BoardManager {
             // Convert square to Square type.
             let squareKey: Square = Number(square) as Square;
 
+            // Remove piece from square
             BoardManager.removePiece(squareKey);
         }
 

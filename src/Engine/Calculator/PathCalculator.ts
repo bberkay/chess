@@ -1,8 +1,5 @@
-import { MoveRoute, Square } from "../../Enums";
-import { Path } from "../../Types";
-import { Calculator } from "../../Utils/Calculator.ts";
-import { BoardTraveller } from "./BoardTraveller.ts";
-import { Piece } from "../../Models/Piece.ts";
+import { Locator } from "../Utils/Locator.ts";
+import { BoardManager } from "../../Managers/BoardManager.ts";
 
 export class PathCalculator {
     /**
@@ -92,8 +89,8 @@ export class PathCalculator {
     {
         // This variable is used to check if the edge is changed.
         // For more information, please check the isEdgeChanged function.
-        let prevRow: number = Calculator.getRow(square);
-        let prevColumn: number = Calculator.getColumn(square);
+        let prevRow: number = Locator.getRow(square);
+        let prevColumn: number = Locator.getColumn(square);
 
         /**
          * This function checks if the edge is changed or not. For example,
@@ -103,8 +100,8 @@ export class PathCalculator {
         function isEdgeChanged(square: Square): boolean
         {
             // Get the current row and column of the square.
-            let currentRow = Calculator.getRow(square);
-            let currentColumn = Calculator.getColumn(square);
+            let currentRow = Locator.getRow(square);
+            let currentColumn = Locator.getColumn(square);
 
             // If the previous row and column is far away from the current row and column, then the edge is changed.
             if(prevRow > currentRow + 1 || prevRow < currentRow - 1 || prevColumn > currentColumn + 1 || prevColumn < currentColumn - 1)
@@ -120,7 +117,7 @@ export class PathCalculator {
         let squares: Array<Square> = [];
 
         // If piece sensitivity is true, then get the piece of the given square(for color).
-        const piece: Piece | null = pieceSensitivity ? BoardTraveller.getPiece(square) : null;
+        const piece: Piece | null = pieceSensitivity ? BoardManager.getPiece(square) : null;
 
         // This variable is used to count the steps for the distance limit.
         let stepCounter = 0;
@@ -138,12 +135,12 @@ export class PathCalculator {
 
             // If piece sensitivity is false OR piece sensitivity true AND
             // if square has enemy's piece then add the square to the array.
-            if(!pieceSensitivity || (pieceSensitivity && !BoardTraveller.hasPiece(square, piece!.getColor())))
+            if(!pieceSensitivity || (pieceSensitivity && !BoardManager.hasPiece(square, piece!.getColor())))
                 squares.push(square);
 
             // If piece sensitivity is true AND if square has a piece(enemy or player), then break the loop.
             // Because we can't go further.
-            if(pieceSensitivity && BoardTraveller.hasPiece(square))
+            if(pieceSensitivity && BoardManager.hasPiece(square))
                 break;
 
             // Increase the step counter.
