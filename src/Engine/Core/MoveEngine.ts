@@ -20,8 +20,6 @@ export class MoveEngine{
      */
     public getPawnMoves(square: Square): Array<Square> | null
     {
-        let squares: Array<Square> = [];
-
         // Find possible moves of the pawn.
         let moves: Path = this.routeCalculator.getPawnRoute(square);
         if(!moves) return null;
@@ -31,47 +29,48 @@ export class MoveEngine{
         const enemyColor: Color = color === Color.White ? Color.Black : Color.White;
 
         /**
-         * Filter the route by the pawn's color. For example,
+         * Find routes of the pawn by its color. For example,
          * if the pawn is white, we need to get the top route of the pawn.
          * if the pawn is black, we need to get the bottom route of the pawn.
          */
-        const moveRoutes: Array<MoveRoute> = color === Color.White
-            ? [MoveRoute.Top, MoveRoute.TopLeft, MoveRoute.TopRight]
-            : [MoveRoute.Bottom, MoveRoute.BottomLeft, MoveRoute.BottomRight];
+        const moveDirection: Record<string, MoveRoute> = color === Color.White
+            ? {vertical: MoveRoute.Top, leftDiagonal: MoveRoute.TopLeft, rightDiagonal: MoveRoute.TopRight}
+            : {vertical: MoveRoute.Bottom, leftDiagonal: MoveRoute.BottomLeft, rightDiagonal: MoveRoute.BottomRight};
 
         /**
-         * Add the first square of vertical route to the squares array.
-         * If the pawn is white, then moveRoutes[0] is MoveRoute.Top
-         * If the pawn is black, then moveRoutes[0] is MoveRoute.Bottom
-         * and add the first square of the vertical route to the squares array.
+         * Filter the route by the pawn's color. For example,
+         * if the pawn is white, we need to delete the bottom route of the pawn.
+         * if the pawn is black, we need to delete the top route of the pawn.
          */
-        squares.push(moves[moveRoutes[0]]![0]);
+        for(let route in moves){
+            if(route != moveDirection.vertical && route != moveDirection.leftDiagonal && route != moveDirection.rightDiagonal)
+                delete moves[route as MoveRoute];
+        }
 
         /**
-         * Add the second square of vertical route to the squares array.
-         * If the pawn is white and pawn is on the second row
-         * or if the pawn is black and pawn is on the seventh row,
-         * then add the second square of the vertical route to the squares array.
+         * Filter second square of the vertical route by the pawn's color and row.
+         *
+         * If pawn is white and is not on the seventh row
+         * or if pawn is black and is not on the second row,
+         * then remove the second square of the vertical route.
          */
-        if(Locator.getRow(square) == (color == Color.White ? 2 : 7))
-            squares.push(moves[moveRoutes[0]]![1]);
-
+        if(Locator.getRow(square) != (color == Color.White ? 7 : 2))
+            moves[moveDirection.vertical]!.splice(1, 1);
 
         /**
-         * Add the diagonal squares to the squares array.
-         * If the pawn is white, then moveRoutes[1] is MoveRoute.TopLeft and moveRoutes[2] is MoveRoute.TopRight
-         * If the pawn is black, then moveRoutes[1] is MoveRoute.BottomLeft and moveRoutes[2] is MoveRoute.BottomRight
-         * and add the diagonal squares to the squares array if there is an enemy piece.
+         * Filter diagonal routes by the pawn's color and has enemy status.
+         *
+         * If the diagonal squares has no enemy piece, then remove
+         * the diagonal routes from the moves.
          */
-        if(BoardManager.hasPiece(moves[moveRoutes[1]]![0], enemyColor)) // Top/Bottom Left
-            squares.push(moves[moveRoutes[1]]![0]);
+        if(!BoardManager.hasPiece(moves[moveDirection.leftDiagonal]![0], enemyColor))
+            delete moves[moveDirection.leftDiagonal];
 
-        if(BoardManager.hasPiece(moves[moveRoutes[2]]![0], enemyColor)) // Top/Bottom Right
-            squares.push(moves[moveRoutes[2]]![0])
+        if(!BoardManager.hasPiece(moves[moveDirection.rightDiagonal]![0], enemyColor))
+            delete moves[moveDirection.rightDiagonal];
 
-
-        // Return the squares array.
-        return squares;
+        // Return filtered moves.
+        return Converter.convertPathToMoves(moves);
     }
 
     /**
@@ -126,6 +125,8 @@ export class MoveEngine{
     {
         let moves: Path = this.routeCalculator.getKingRoute(square);
         if(!moves) return null;
+
+        // Add castling moves to the king's moves.
 
         return Converter.convertPathToMoves(moves);
     }
