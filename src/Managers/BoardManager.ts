@@ -1,5 +1,5 @@
 import { CacheManager } from "./CacheManager.ts";
-import { Board, Square, Piece, Color, PieceType, CacheLayer } from "../Types.ts";
+import { Kings, Board, Square, Piece, Color, PieceType, CacheLayer } from "../Types.ts";
 
 export class BoardManager {
     /**
@@ -21,6 +21,11 @@ export class BoardManager {
     };
 
     /**
+     * @description Store the kings of the game.
+     */
+    private static kings: Kings;
+
+    /**
      * @description List of piece ids.
      */
     private static pieceIds: Array<number> = [];
@@ -28,7 +33,7 @@ export class BoardManager {
     /**
      * @description Get current board
      */
-    static getBoard(): Board
+    public static getBoard(): Board
     {
         return BoardManager.currentBoard;
     }
@@ -103,6 +108,14 @@ export class BoardManager {
     }
 
     /**
+     * Get king of the given color
+     */
+    public static getKing(color: Color): Piece | null
+    {
+        return this.kings[color];
+    }
+
+    /**
      * @description Get all piece ids
      */
     public static getPieceIds(): Array<number>
@@ -117,8 +130,20 @@ export class BoardManager {
     {
         this.currentBoard[square] = piece;
 
+        // Set king if the piece is a king
+        if(piece.getType() === PieceType.King)
+            this.setKing(piece);
+
         // Add to cache
         CacheManager.set(CacheLayer.Game,"currentBoard", BoardManager.currentBoard);
+    }
+
+    /**
+     * Set king of the given color
+     */
+    private static setKing(piece: Piece): void
+    {
+        this.kings[piece.getColor()] = piece;
     }
 
     /**

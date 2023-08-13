@@ -97,6 +97,11 @@ export class ChessEngine{
     {
         // BoardManager.
         console.log("playMove: " + from + " " + to);
+        // TODO: isMoved property of the piece should be set to true.
     }
 
+    public isFinished(): boolean
+    {
+        // TODO: Implement this function.
+    }
 }

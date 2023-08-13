@@ -3,6 +3,7 @@ import {BoardManager} from "../../Managers/BoardManager.ts";
 import {Converter} from "../../Utils/Converter.ts";
 import {Locator} from "../Utils/Locator.ts";
 import {RouteCalculator} from "./Calculator/RouteCalculator.ts";
+import {MoveChecker} from "../Checker/MoveChecker.ts";
 
 export class MoveEngine{
     /**
@@ -126,8 +127,29 @@ export class MoveEngine{
         let moves: Path = this.routeCalculator.getKingRoute(square);
         if(!moves) return null;
 
-        // Add castling moves to the king's moves.
+        // Find the king's color and enemy's color by the given square.
+        const color: Color = BoardManager.getPiece(square)!.getColor();
 
+        /**
+         * Add castling moves to the king's moves. For example,
+         * If the king is white, add Square.a1 to king's left route
+         * and Square.h1 to king's right route. If the king is black,
+         * add Square.a8 to king's left route and Square.h8 to king's
+         * right route.
+         *
+         * @see for more information src/Engine/Checker/MoveChecker.ts
+         */
+
+        // Add long castling move to the king's moves.
+        if(MoveChecker.isLongCastlingAvailable(color))
+            moves[MoveRoute.Left]!.push(color == Color.White ? Square.a1 : Square.a8);
+
+        // Add short castling move to the king's moves.
+        if(MoveChecker.isShortCastlingAvailable(color))
+            moves[MoveRoute.Right]!.push(color == Color.White ? Square.h1 : Square.h8);
+
+
+        // Return extended moves.
         return Converter.convertPathToMoves(moves);
     }
 }
