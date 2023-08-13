@@ -1,3 +1,5 @@
+import { CacheLayer } from "../Types";
+
 export class CacheManager {
     /**
      * This static class provides a way to store data in a layered way in local storage.
@@ -55,12 +57,17 @@ export class CacheManager {
     static add(layer: CacheLayer, key: string, value: any){
         let layerData: any = CacheManager.get(layer, key) || {};
 
-        // Find the type of the layer data and add the value to the layer data.
-        if(Array.isArray(layerData)) // If layer data is array, push the value to the array.
+        /**
+         * Find the type of the layer data and add the value to the layer data.
+         * If layer data is array, push the value to the array.
+         * If layer data is not array or object, create an array and push the value to the array.
+         * If layer data is object, add the value to the object.
+         */
+        if(Array.isArray(layerData)) // Array
             layerData.push(value);
-        else if(typeof layerData !== "object") // If layer data is not array or object, create an array and push the value to the array.
+        else if(typeof layerData !== "object") // Not array or object (string, number, boolean)
             layerData = [layerData, value];
-        else // If layer data is object, add the value to the object.
+        else // Object
             layerData = { ...layerData, ...value };
 
         CacheManager.set(layer, key, layerData);

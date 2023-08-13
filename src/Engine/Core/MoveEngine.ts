@@ -13,14 +13,7 @@ export class MoveEngine{
      * @description This class contains king, queen, rook, bishop, knight and pawn route calculates methods for the given square.
      * @see for more information src/Engine/Core/Calculator/RouteCalculator.ts
      */
-    private routeCalculator: RouteCalculator;
-
-    /**
-     * @description Constructor of the class.
-     */
-    constructor() {
-        this.routeCalculator = new RouteCalculator();
-    }
+    private routeCalculator: RouteCalculator = new RouteCalculator();
 
     /**
      * Get the possible moves of the pawn on the given square.

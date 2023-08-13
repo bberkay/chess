@@ -219,5 +219,6 @@ export enum StartPosition{
     Check = "7k/5r2/8/3Q4/8/8/8/4K3 w - - 0 1",
     Checkmate = "k7/8/4rp2/8/8/8/1R5K/1R6 w - - 0 1",
     Stalemate = "k7/8/5R2/8/8/8/7K/1R6 w - - 0 1",
-    Promotion = "2k5/4P3/8/8/8/8/2p5/4K3 w - - 0 1"
+    Promotion = "2k5/4P3/8/8/8/8/2p5/4K3 w - - 0 1",
+    Castling = "r3k2r/8/8/4b3/4B3/8/8/R3K2R w KQkq - 0 1",
 }

@@ -22,14 +22,7 @@ export class RouteCalculator{
      * @description This class contains column, row and diagonal path calculates methods for the given square.
      * @see src/Engine/Core/Calculator/RouteCalculator.ts
      */
-    private pathCalculator: PathCalculator;
-
-    /**
-     * @description Constructor of the class.
-     */
-    constructor() {
-        this.pathCalculator = new PathCalculator();
-    }
+    private pathCalculator: PathCalculator = new PathCalculator();
 
     /**
      * This function returns pawn route scheme(2 horizontal and 1 diagonal for each direction).
@@ -63,10 +56,12 @@ export class RouteCalculator{
             ...this.pathCalculator.getHorizontalSquares(square, 2, false)
         }
 
-        // Now, get first squares of the firstPath's horizontal and vertical directions.
-        // Example, if the firstPath is {MoveRoute.Bottom: [Square.b1, Square.b2], MoveRoute.Right: [Square.b2, Square.c2], ...},
-        // then the route will be [Square.c2, Square.a2, Square.c3, Square.c1]. Square.c2, Square.a2 are right and left of
-        // MoveRoute.Bottom squares and Square.c3, Square.c1 are top and bottom of MoveRoute.Right squares.
+        /**
+         * Now, get first squares of the firstPath's horizontal and vertical directions.
+         * Example, if the firstPath is {MoveRoute.Bottom: [Square.b1, Square.b2], MoveRoute.Right: [Square.b2, Square.c2], ...},
+         * then the route will be [Square.c2, Square.a2, Square.c3, Square.c1]. Square.c2, Square.a2 are right and left of
+         * MoveRoute.Bottom squares and Square.c3, Square.c1 are top and bottom of MoveRoute.Right squares.
+         */
         for (const path in firstPath) {
             if(firstPath[path as MoveRoute]!.length == 2){ // If the path has 2 squares
                 if(path == MoveRoute.Bottom || path == MoveRoute.Top) // If the path is vertical, then get the horizontal squares of last square of the path.

@@ -19,11 +19,17 @@ export class ChessEngine{
      * TODO: chess engini kapsayacak şekilde geliştirilecek.
      */
 
-    // Piece factory property of the engine. It is used to create piece/pieces.
-    private pieceFactory: PieceFactory;
+    /**
+     * Piece factory property of the engine. It is used to create piece/pieces.
+     * @see for more information src/Engine/Factory/PieceFactory.ts
+     */
+    private pieceFactory: PieceFactory = new PieceFactory();
 
-    // Move engine property of the engine. It is used to get possible moves of a piece.
-    private moveEngine: MoveEngine;
+    /**
+     * Move engine property of the engine. It is used to get possible moves of a piece.
+     * @see for more information src/Engine/Core/MoveEngine.ts
+     */
+    private moveEngine: MoveEngine = new MoveEngine();
 
     /**
      * Constructor of the ChessEngine class.
@@ -31,8 +37,6 @@ export class ChessEngine{
      */
     constructor(isStandalone: boolean = true){
         console.log("isStandalone: " + isStandalone);
-        this.pieceFactory = new PieceFactory()
-        this.moveEngine = new MoveEngine();
     }
 
     /**

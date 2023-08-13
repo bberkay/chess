@@ -12,7 +12,7 @@ import {Converter} from "./Utils/Converter.ts";
 import {BoardManager} from "./Managers/BoardManager.ts";
 import {StateManager} from "./Managers/StateManager.ts";
 import {CacheManager} from "./Managers/CacheManager.ts";
-import {Square, Color, CacheLayer, PieceType, StartPosition, SquareClickMode} from "./Types.ts";
+import {CacheLayer, Color, PieceType, Square, SquareClickMode, StartPosition} from "./Types.ts";
 
 export class Chess{
     /**
@@ -39,7 +39,7 @@ export class Chess{
      */
     private checkAndLoadGameFromCache(): void
     {
-        this.createGame([{color: Color.White, type:PieceType.Pawn, square: Square.e2}, {color: Color.Black, type:PieceType.Pawn, square: Square.d3}]);
+        this.createGame(StartPosition.Castling);
         /*if(!Cache.get(CacheLayer.Game))
             this.createGame();
         else{

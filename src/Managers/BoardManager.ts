@@ -1,5 +1,6 @@
 import { CacheManager } from "./CacheManager.ts";
 import { Board, Square, Piece, Color, PieceType, CacheLayer } from "../Types.ts";
+
 export class BoardManager {
     /**
      * This class provides the board management of the game.
@@ -52,9 +53,12 @@ export class BoardManager {
             // Convert square to Square type.
             let squareKey: Square = Number(square) as Square;
 
-            // If the square has a piece and the piece color and type is the same with the given color and type
+            /**
+             * If the square has a piece and the piece color and type is the same with the given color and type
+             * then add the piece to the list.
+             */
             if(BoardManager.hasPiece(squareKey, targetColor, targetTypes))
-                pieces.push(this.getPiece(squareKey) as Piece); // Add the piece to the list.
+                pieces.push(this.getPiece(squareKey) as Piece);
         }
 
         return pieces;
@@ -76,11 +80,8 @@ export class BoardManager {
         if(specificColor && squareContent.getColor() != specificColor)
             return false;
 
-        // If the piece type is not the same with the given type
-        if(specificTypes && !specificTypes.includes(squareContent.getType()))
-            return false;
-
-        return true;
+        // If the piece type is not the same with the given type then return false otherwise return true.
+        return !(specificTypes && !specificTypes.includes(squareContent.getType()));
     }
 
     /**

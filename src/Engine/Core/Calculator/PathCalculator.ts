@@ -34,10 +34,12 @@ export class PathCalculator {
      */
     public getDiagonalSquares(square: Square, distanceLimit: number | null = null, pieceSensitivity: boolean | null = true): Path
     {
-        // step is used to set the next square of the given square. For example, if step is -7 and
-        // given square is Square.e5(29), then next square is Square.f4(22), next next square is
-        // Square.g3(15) etc.
-        // For more information, please check the Square enum.
+        /**
+         * Step is used to set the next square of the given square. For example, if step is -7 and
+         * given square is Square.e5(29), then next square is Square.f4(22), next next square is
+         * Square.g3(15) etc.
+         * @see For more information, please check the Square enum.
+         */
         return {
             [MoveRoute.BottomRight]: this.traverseInPath(square, 9, distanceLimit, pieceSensitivity),
             [MoveRoute.TopRight]: this.traverseInPath(square, -7, distanceLimit, pieceSensitivity),
@@ -53,10 +55,12 @@ export class PathCalculator {
      */
     public getHorizontalSquares(square: Square, distanceLimit: number | null = null, pieceSensitivity: boolean | null = true): Path
     {
-        // step is used to set the next square of the given square. For example, if step is 1 and
-        // given square is Square.e5(29), then next square is Square.f5(30), next next square is
-        // Square.g5(31) etc.
-        // For more information, please check the Square enum.
+        /**
+         * Step is used to set the next square of the given square. For example, if step is 1 and
+         * given square is Square.e5(29), then next square is Square.f5(30), next next square is
+         * Square.g5(31) etc.
+         * @see For more information, please check the Square enum.
+         */
         return {
             [MoveRoute.Right]: this.traverseInPath(square, 1, distanceLimit, pieceSensitivity),
             [MoveRoute.Left]: this.traverseInPath(square, -1, distanceLimit, pieceSensitivity),
@@ -70,10 +74,13 @@ export class PathCalculator {
      */
     public getVerticalSquares(square: Square, distanceLimit: number | null = null, pieceSensitivity: boolean | null = true): Path
     {
-        // step is used to set the next square of the given square. For example, if step is 8 and
-        // given square is Square.e5(29), then next square is Square.e6(37), next next square is
-        // Square.e7(45) etc.
-        // For more information, please check the Square enum.
+
+        /**
+         * Step is used to set the next square of the given square. For example, if step is 8 and
+         * given square is Square.e5(29), then next square is Square.e6(37), next next square is
+         * Square.e7(45) etc.
+         * @see For more information, please check the Square enum.
+         */
         return {
             [MoveRoute.Bottom]: this.traverseInPath(square, 8, distanceLimit, pieceSensitivity),
             [MoveRoute.Top]: this.traverseInPath(square, -8, distanceLimit, pieceSensitivity),
