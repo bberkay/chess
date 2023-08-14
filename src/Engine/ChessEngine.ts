@@ -98,6 +98,7 @@ export class ChessEngine{
         // BoardManager.
         console.log("playMove: " + from + " " + to);
         // TODO: isMoved property of the piece should be set to true.
+        // TODO: Castling and en passant state management should be implemented.
     }
 
     public isFinished(): boolean

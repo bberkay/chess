@@ -9,14 +9,14 @@ export class PieceModel implements Piece{
     private readonly color: Color;
     private readonly type: PieceType;
     private readonly startPosition: Square;
-    private isPieceMoved: boolean;
+    private moveCount: number;
 
     public constructor(color: Color, type: PieceType, startPosition:Square, id: number){
         this.id = id;
         this.color = color;
         this.type = type;
         this.startPosition = startPosition;
-        this.isPieceMoved = false;
+        this.moveCount = 0;
     }
 
     /**
@@ -42,10 +42,16 @@ export class PieceModel implements Piece{
     /**
      * This function returns the moved status of the piece.
      */
-    public isMoved(): boolean { return this.isPieceMoved; }
+    public getMoveCount(): number { return this.moveCount; }
 
     /**
      * This function sets the moved status of the piece.
      */
-    public setToMoved(): void { this.isPieceMoved = true; }
+    public increaseMoveCount(): void { this.moveCount++; }
+
+    /**
+     * This function set move count of the piece.
+     * Note: Generally, this function is used for loading unfinished games.
+     */
+    public setMoveCount(moveCount: number): void { this.moveCount = moveCount; }
 }

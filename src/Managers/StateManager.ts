@@ -41,45 +41,22 @@ export class StateManager{
     }
 
     /**
+     * @description Set current player's color(generally used at start and reset operations)
+     */
+    public static setPlayerColor(color: Color): void
+    {
+        StateManager.currentColor = color;
+
+        // Add to cache
+        CacheManager.set(CacheLayer.Game, "currentColor", StateManager.currentColor);
+    }
+
+    /**
      * @description Get enemy color
      */
     public static getEnemyColor(): Color
     {
         return StateManager.currentColor === Color.White ? Color.Black : Color.White;
-    }
-
-    /**
-     * @description Get checked player
-     */
-    public static getCheckedColor(): Color|null
-    {
-        return StateManager.checkedColor;
-    }
-
-    /**
-     * @description Get move count
-     */
-    public static getMoveCount(): number
-    {
-        return StateManager.moveCount;
-    }
-
-    /**
-     * @description Get castling status
-     * @example StateManager.getCastlingStatus(CastlingType.WhiteLong)
-     */
-    static getCastlingStatus(castlingType: CastlingType): boolean
-    {
-        return StateManager.castlingStatus[castlingType];
-    }
-
-    /**
-     * @description Get en passant status of pawn
-     * @example StateManager.getEnPassantStatus(1000) // Returns EnPassantDirection.Left and/or EnPassantDirection.Right and/or EnPassantDirection.Both
-     */
-    static getEnPassantStatus(pieceID: number): EnPassantDirection
-    {
-        return StateManager.bannedEnPassantPawns[pieceID];
     }
 
     /**
@@ -94,6 +71,33 @@ export class StateManager{
     }
 
     /**
+     * @description Get checked player
+     */
+    public static getCheckedColor(): Color|null
+    {
+        return StateManager.checkedColor;
+    }
+
+    /**
+     * @description Set Checked Color
+     */
+    public static setCheckedColor(color: Color|null): void
+    {
+        StateManager.checkedColor = color;
+
+        // Add to cache
+        CacheManager.set(CacheLayer.Game, "checkedColor", StateManager.checkedColor);
+    }
+
+    /**
+     * @description Get move count
+     */
+    public static getMoveCount(): number
+    {
+        return StateManager.moveCount;
+    }
+
+    /**
      * @description Increase move count
      */
     public static increaseMoveCount(): void
@@ -102,17 +106,6 @@ export class StateManager{
 
         // Add to cache
         CacheManager.set(CacheLayer.Game, "moveCount", StateManager.moveCount);
-    }
-
-    /**
-     * @description Set current player's color(generally used at start and reset operations)
-     */
-    public static setPlayerColor(color: Color): void
-    {
-        StateManager.currentColor = color;
-
-        // Add to cache
-        CacheManager.set(CacheLayer.Game, "currentColor", StateManager.currentColor);
     }
 
     /**
@@ -130,21 +123,19 @@ export class StateManager{
     }
 
     /**
-     * @description Set Checked Color
+     * @description Get castling status
+     * @example StateManager.getCastlingStatus(CastlingType.WhiteLong)
      */
-    public static setCheckedColor(color: Color|null): void
+    public static getCastlingStatus(castlingType: CastlingType): boolean
     {
-        StateManager.checkedColor = color;
-
-        // Add to cache
-        CacheManager.set(CacheLayer.Game, "checkedColor", StateManager.checkedColor);
+        return StateManager.castlingStatus[castlingType];
     }
 
     /**
      * @description Change castling status
      * @example StateManager.setCastlingStatus(CastlingType.WhiteLong, false), That means white long castling is disabled
      */
-    static changeCastlingStatus(castlingType: CastlingType, value: boolean): void
+    public static changeCastlingStatus(castlingType: CastlingType, value: boolean): void
     {
         StateManager.castlingStatus[castlingType] = value;
 
@@ -155,7 +146,7 @@ export class StateManager{
     /**
      * @description Set castling status
      */
-    static setCastlingStatus(castlingStatus: Castling | null): void
+    public static setCastlingStatus(castlingStatus: Castling | null): void
     {
         StateManager.castlingStatus = castlingStatus ? castlingStatus : {
             [CastlingType.WhiteLong]: true,
@@ -171,10 +162,19 @@ export class StateManager{
     }
 
     /**
+     * @description Get en passant status of pawn
+     * @example StateManager.getEnPassantStatus(1000) // Returns EnPassantDirection.Left and/or EnPassantDirection.Right and/or EnPassantDirection.Both
+     */
+    public static getBannedEnPassantPawns(pieceID: number): EnPassantDirection
+    {
+        return StateManager.bannedEnPassantPawns[pieceID];
+    }
+
+    /**
      * @description Add piece(id) that can't en passant to en passant status list
      * @example StateManager.addBannedEnPassantPawn(pieceId, EnPassantDirection.Left), That means piece(id) can't en passant to left.
      */
-    static addBannedEnPassantPawn(pieceID: number, direction: EnPassantDirection): void
+    public static addBannedEnPassantPawn(pieceID: number, direction: EnPassantDirection): void
     {
         StateManager.bannedEnPassantPawns[pieceID] = direction;
 
@@ -185,7 +185,7 @@ export class StateManager{
     /**
      * @description Set en passant status of pawn list
      */
-    static setBannedEnPassantPawns(enPassantPawns: {[pieceID: number]: EnPassantDirection} | null): void
+    public static setBannedEnPassantPawns(enPassantPawns: {[pieceID: number]: EnPassantDirection} | null): void
     {
         StateManager.bannedEnPassantPawns = !enPassantPawns ? {} : enPassantPawns;
 

@@ -1,8 +1,24 @@
-import { Color, Square, Piece, CastlingType } from "../../Types";
-import { BoardManager } from "../../Managers/BoardManager";
-import { StateChecker } from "./StateChecker.ts";
+import {CastlingType, Color, EnPassantDirection, Piece, PieceType, Square} from "../../Types";
+import {BoardManager} from "../../Managers/BoardManager";
+import {StateChecker} from "./StateChecker.ts";
+import {Locator} from "../Utils/Locator.ts";
+import {StateManager} from "../../Managers/StateManager.ts";
+
 export class MoveChecker{
-    private static isCastlingAvailable(king: Piece, chosenRook: Piece, betweenSquares: Array<Square>): boolean
+    /**
+     * This class is responsible for checking if the specific move is available like
+     * castling and en passant. Also, the methods are separated by the direction or
+     * type because of the get one direction or type of move(check move engine).
+     *
+     * @see src/Engine/Core/MoveEngine.ts
+     * @see for more information about state management src/Mangers/StateManager.ts
+     */
+
+    /**
+     * @description Check if the castling is available for the given king, rook and squares between king and rook.
+     * @see src/Engine/Checker/MoveChecker.ts For more information.
+     */
+    private static isCastlingAvailable(color: Color, castlingType: CastlingType): boolean
     {
         /**
          * Rules for castling:
@@ -11,14 +27,43 @@ export class MoveChecker{
          * 3. There are no pieces or dangerous squares between king and the chosen rook.
          *
          * @see for more information about castling https://en.wikipedia.org/wiki/Castling
-         * @see for more information about dangerous squares src/Engine/Checker/StateChecker.ts
          */
+
+        /**
+         * If castling is not available for the given color and castling type, return false.
+         *
+         * @see src/Manager/StateManager.ts
+         */
+        if(!StateManager.getCastlingStatus(color == Color.Black
+            ? (castlingType == CastlingType.Long ? CastlingType.BlackLong : CastlingType.BlackShort)
+            : (castlingType == CastlingType.Long ? CastlingType.WhiteLong : CastlingType.WhiteShort)))
+            return false;
+
+        /**
+         * Find the king, the chosen rook and squares between king
+         * and rook by the given color.
+         *
+         * For find chosen rook and squares between king and rook:
+         * Color: white, castling type: long, king: e1, chosen rook: a1, between squares: b1, c1, d1
+         * Color: white, castling type: short, king: e1, chosen rook: h1, between squares: f1, g1
+         * Color: black, castling type: long, king: e8, chosen rook: a8, between squares: b8, c8, d8
+         * Color: black, castling type: short, king: e8, chosen rook: h8, between squares: f8, g8
+         */
+        const king: Piece = BoardManager.getKing(color)!;
+        const chosenRook: Piece = BoardManager.getPiece(castlingType == CastlingType.Long
+            ? (color == Color.White ? Square.a1 : Square.h1)
+            : (color == Color.White ? Square.a8 : Square.h8))!;
+        const betweenSquares: Array<Square> = castlingType == CastlingType.Long
+            ? (color == Color.White ? [Square.b1, Square.c1, Square.d1] : [Square.b8, Square.c8, Square.d8])
+            : (color == Color.White ? [Square.f1, Square.g1] : [Square.f8, Square.g8]);
 
         /**
          * Check first and second rules, if the king or the long rook
          * hasn't moved previously or if the king is not in check.
+         *
+         * @see for more information about dangerous squares src/Engine/Checker/StateChecker.ts
          */
-        if(king.isMoved() || chosenRook!.isMoved() || StateChecker.isPlayerInCheck())
+        if(king.getMoveCount() != 0 || chosenRook.getMoveCount() != 0 || StateChecker.isPlayerInCheck())
             return false;
 
         /**
@@ -41,13 +86,7 @@ export class MoveChecker{
      */
     public static isLongCastlingAvailable(color: Color): boolean
     {
-        // Find the king, the long rook and squares between king and rook(a1 or h1) by the given color.
-        const king: Piece = BoardManager.getKing(color)!;
-        const rook: Piece = BoardManager.getPiece(color == Color.White ? Square.a1 : Square.h1)!;
-        const betweenSquares: Array<Square> = color == Color.White ? [Square.b1, Square.c1, Square.d1] : [Square.b8, Square.c8, Square.d8];
-
-        // Check if the long castling is available.
-        return this.isCastlingAvailable(king, rook, betweenSquares);
+        return this.isCastlingAvailable(color, CastlingType.Long);
     }
 
     /**
@@ -56,27 +95,81 @@ export class MoveChecker{
      */
     public static isShortCastlingAvailable(color: Color): boolean
     {
-        // Find the king, the short rook and squares between king and rook(a8 or h8) by the given color.
-        const king: Piece = BoardManager.getKing(color)!;
-        const rook: Piece = BoardManager.getPiece(color == Color.White ? Square.a8 : Square.h8)!;
-        const betweenSquares: Array<Square> = color == Color.White ? [Square.f1, Square.g1] : [Square.f8, Square.g8];
-
-        // Check if the short castling is available.
-        return this.isCastlingAvailable(king, rook, betweenSquares);
+        return this.isCastlingAvailable(color, CastlingType.Short);
     }
 
-    private static isEnPassantAvailable(): boolean
+    /**
+     * @description Check if the en passant is available for the given square and direction.
+     * @see src/Engine/Checker/MoveChecker.ts For more information.
+     */
+    private static isEnPassantAvailable(square: Square, direction: EnPassantDirection): boolean
     {
+        /**
+         * Rules for en passant:
+         * 1. The pawn must be on its fifth rank.
+         * 2. The enemy pawn must be on an adjacent square to the moving pawn.
+         * 3. The enemy pawn must have just moved two squares in a single move.
+         * 4. The en passant capture must be made on the very next turn.
+         *
+         * @see for more information about en passant https://en.wikipedia.org/wiki/En_passant
+         */
 
+        // Find the pawn by the given square.
+        const pawn: Piece = BoardManager.getPiece(square)!;
+
+        /**
+         * If en passant is not available for the given pawn, return false.
+         *
+         * @see for more information about en passant state management src/Manager/StateManager.ts
+         */
+        if(StateManager.getBannedEnPassantPawns(pawn.getID()))
+            return false;
+
+        // Find fifth rank for black and white pawns.
+        const BLACK_EN_PASSANT_ROW: number = 4;
+        const WHITE_EN_PASSANT_ROW: number = 3;
+
+        // Find the pawn's color and row.
+        const color: Color = pawn.getColor();
+        const row: number = Locator.getRow(square);
+
+        /**
+         * Check first rule, if the pawn is on its fifth rank.
+         * If the pawn is not on its fifth rank, return false.
+         */
+        if((color == Color.Black && row != BLACK_EN_PASSANT_ROW) || (color == Color.White && row != WHITE_EN_PASSANT_ROW))
+            return false;
+
+        /**
+         * Check second rule, if the enemy pawn is on an adjacent
+         * square to the moving pawn.
+         */
+        const adjacentSquare: number = direction == EnPassantDirection.Left ? square - 1 : square + 1;
+        const pieceOfTargetSquare: Piece | null = BoardManager.getPiece(adjacentSquare);
+
+        /**
+         * Check third rule, if target square is empty or if the piece
+         * on the target square is not an enemy pawn or if the enemy pawn
+         * has not just moved two squares in a single move then return false.
+         */
+        return !(!pieceOfTargetSquare || pieceOfTargetSquare.getColor() == color || pieceOfTargetSquare.getType() != PieceType.Pawn || pieceOfTargetSquare.getMoveCount() != 1);
     }
 
-    public static isLeftEnPassantAvailable(): boolean
+    /**
+     * @description Check if the left en passant is available for the given square.
+     * @see src/Engine/Checker/MoveChecker.ts For more information.
+     */
+    public static isLeftEnPassantAvailable(square: Square): boolean
     {
-
+        return this.isEnPassantAvailable(square, EnPassantDirection.Left);
     }
 
-    public static isRightEnPassantAvailable(): boolean
+    /**
+     * @description Check if the right en passant is available for the given square.
+     * @see src/Engine/Checker/MoveChecker.ts For more information.
+     */
+    public static isRightEnPassantAvailable(square: Square): boolean
     {
-
+        return this.isEnPassantAvailable(square, EnPassantDirection.Right);
     }
 }

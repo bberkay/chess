@@ -25,6 +25,15 @@ export class MoveEngine{
         let moves: Path = this.routeCalculator.getPawnRoute(square);
         if(!moves) return null;
 
+        /**************************************************************************
+         * Filter the moves of the pawn by the pawn's color, position
+         * and has enemy status of the diagonal squares(these filter operations
+         * made because pawn has different move capabilities by its color and position
+         * also has a special move called en passant).
+         *
+         * @see for more information about pawn moves https://en.wikipedia.org/wiki/Pawn_(chess)
+         **************************************************************************/
+
         // Find the pawn's color and enemy's color by the given square.
         const color: Color = BoardManager.getPiece(square)!.getColor();
         const enemyColor: Color = color === Color.White ? Color.Black : Color.White;
@@ -70,7 +79,28 @@ export class MoveEngine{
         if(!BoardManager.hasPiece(moves[moveDirection.rightDiagonal]![0], enemyColor))
             delete moves[moveDirection.rightDiagonal];
 
-        // Return filtered moves.
+        /**
+         * Add en passant capability to the pawn. For example,
+         * if the pawn is white and left en passant is available,
+         * then add the left top square(current square id - 9) to the pawn's
+         * moves. Also, if right en passant is available, then add the right
+         * top square(current square id - 7) to the pawn's moves. For black
+         * pawn, add the left bottom square(current square id + 7) and right
+         * bottom square(current square id + 9) to the pawn's moves.
+         *
+         * @see for more information about square id check Square enum in src/Types.ts
+         * @see for more information about en passant check src/Engine/Checker/MoveChecker.ts
+         */
+
+        // Add left en passant move to the pawn's moves.
+        if(MoveChecker.isLeftEnPassantAvailable(square))
+            moves[moveDirection.leftDiagonal]!.push(color == Color.White ? square - 9 : square + 7);
+
+        // Add right en passant move to the pawn's moves.
+        if(MoveChecker.isRightEnPassantAvailable(square))
+            moves[moveDirection.rightDiagonal]!.push(color == Color.White ? square - 7 : square + 9);
+
+
         return Converter.convertPathToMoves(moves);
     }
 
@@ -82,7 +112,14 @@ export class MoveEngine{
         let moves: Array<Square> = this.routeCalculator.getKnightRoute(square);
         if(!moves) return null;
 
-        // Knight has no direction, so we don't need to convert the route to moves.
+        /**
+         * Knight has no defined route(top, bottom, etc.) like other pieces.
+         * So, getKnightRoute() method returns an array of squares, and we
+         * don't need to convert it(with convertPathToMoves method) like
+         * other pieces.
+         *
+         * @see for more information about knight moves https://en.wikipedia.org/wiki/Knight_(chess)
+         */
         return moves;
     }
 
@@ -147,7 +184,6 @@ export class MoveEngine{
         // Add short castling move to the king's moves.
         if(MoveChecker.isShortCastlingAvailable(color))
             moves[MoveRoute.Right]!.push(color == Color.White ? Square.h1 : Square.h8);
-
 
         // Return extended moves.
         return Converter.convertPathToMoves(moves);

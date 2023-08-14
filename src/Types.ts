@@ -12,8 +12,9 @@ export interface Piece {
     getType(): PieceType;
     getStartPosition(): Square;
     getID(): number;
-    isMoved(): boolean;
-    setToMoved(): void;
+    getMoveCount(): number;
+    increaseMoveCount(): void;
+    setMoveCount(moveCount: number): void;
 }
 
 /**
