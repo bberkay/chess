@@ -15,25 +15,6 @@ export class Converter{
     }
 
     /**
-     * Convert square to squareID
-     * @example Converter.convertSquareToSquareID("a1"), return 57
-     * @example Converter.convertSquareToSquareID("h8"), return 8
-     * @see For more information see Square Enum in src/Types.ts
-     */
-    static convertSquareToSquareID(square:string): number
-    {
-        let squareID: number = 1;
-
-        let file = square[0];
-        let rank = square[1];
-
-        squareID += (file.charCodeAt(0) - 97); // 97 is the char code of "a"
-        squareID += (8 - parseInt(rank)) * 8; // 8 - parseInt(rank) because the rank starts from 8
-
-        return squareID;
-    }
-
-    /**
      * Convert squareID to square
      * @example Converter.convertSquareIDToSquare(57), return "a1"
      * @example Converter.convertSquareIDToSquare(8), return "h8"
@@ -46,8 +27,11 @@ export class Converter{
         let file = squareID % 8;
         let rank = Math.floor(squareID / 8);
 
-        square += String.fromCharCode(file + 97); // 97 is the char code of "a"
-        square += (8 - rank).toString(); // 8 - rank because the rank starts from 8
+        // 97 is the char code of "a" and file + 96 because the file starts from 1
+        square += String.fromCharCode(file + 96);
+
+        // 8 - rank because the rank starts from 8
+        square += (8 - rank).toString();
 
         return square;
     }

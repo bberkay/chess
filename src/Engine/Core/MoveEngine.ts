@@ -14,7 +14,7 @@ export class MoveEngine{
      * Properties of the MoveEngine class.
      */
     private piece: Piece | null;
-    private squareOfPiece: Square | null;
+    private pieceSquare: Square | null;
 
     /**
      * @description This class contains king, queen, rook, bishop, knight and pawn route calculates methods for the given square.
@@ -28,7 +28,7 @@ export class MoveEngine{
     constructor() {
         this.routeCalculator = new RouteCalculator();
         this.piece = null;
-        this.squareOfPiece = null;
+        this.pieceSquare = null;
     }
 
     /**
@@ -41,7 +41,7 @@ export class MoveEngine{
 
         // Get the piece on the given square.
         this.piece = BoardManager.getPiece(square);
-        this.squareOfPiece = square;
+        this.pieceSquare = square;
 
         // If there is no piece on the given square, return null;
         if(!this.piece) return null;
@@ -74,7 +74,7 @@ export class MoveEngine{
     private getPawnMoves(): Path | null
     {
         // Find possible moves of the pawn.
-        let moves: Path = this.routeCalculator.getPawnRoute(this.squareOfPiece!);
+        let moves: Path = this.routeCalculator.getPawnRoute(this.pieceSquare!);
         if(!moves) return null;
 
         /**************************************************************************
@@ -116,7 +116,7 @@ export class MoveEngine{
          * or if pawn is black and is not on the second row,
          * then remove the second square of the vertical route.
          */
-        if(Locator.getRow(this.squareOfPiece!) != (color == Color.White ? 7 : 2))
+        if(Locator.getRow(this.pieceSquare!) != (color == Color.White ? 7 : 2))
             moves[moveDirection.vertical]!.splice(1, 1);
 
         /**
@@ -145,16 +145,16 @@ export class MoveEngine{
          */
 
         // Add left en passant move to the pawn's moves.
-        if(MoveChecker.isLeftEnPassantAvailable(this.squareOfPiece!))
-            moves[moveDirection.leftDiagonal]!.push(color == Color.White ? this.squareOfPiece! - 9 : this.squareOfPiece! + 7);
+        if(MoveChecker.isLeftEnPassantAvailable(this.pieceSquare!))
+            moves[moveDirection.leftDiagonal]!.push(color == Color.White ? this.pieceSquare! - 9 : this.pieceSquare! + 7);
 
         // Add right en passant move to the pawn's moves.
-        if(MoveChecker.isRightEnPassantAvailable(this.squareOfPiece!))
-            moves[moveDirection.rightDiagonal]!.push(color == Color.White ? this.squareOfPiece! - 7 : this.squareOfPiece! + 9);
+        if(MoveChecker.isRightEnPassantAvailable(this.pieceSquare!))
+            moves[moveDirection.rightDiagonal]!.push(color == Color.White ? this.pieceSquare! - 7 : this.pieceSquare! + 9);
 
 
         // Filter the moves for king safety.
-        return this.kingSafetyFilter(moves) as Path;
+        return this.doKingSafety(moves) as Path;
     }
 
     /**
@@ -162,7 +162,7 @@ export class MoveEngine{
      */
     private getKnightMoves(): Array<Square> | null
     {
-        let moves: Array<Square> = this.routeCalculator.getKnightRoute(this.squareOfPiece!);
+        let moves: Array<Square> = this.routeCalculator.getKnightRoute(this.pieceSquare!);
         if(!moves) return null;
 
         /**
@@ -174,7 +174,7 @@ export class MoveEngine{
          * @see for more information about knight moves https://en.wikipedia.org/wiki/Knight_(chess)
          */
         // Filter the moves for king safety.
-        return this.kingSafetyFilter(moves) as Array<Square>;
+        return this.doKingSafety(moves) as Array<Square>;
     }
 
     /**
@@ -182,11 +182,11 @@ export class MoveEngine{
      */
     private getBishopMoves(): Path | null
     {
-        let moves: Path = this.routeCalculator.getBishopRoute(this.squareOfPiece!);
+        let moves: Path = this.routeCalculator.getBishopRoute(this.pieceSquare!);
         if(!moves) return null;
 
         // Filter the moves for king safety.
-        return this.kingSafetyFilter(moves) as Path;
+        return this.doKingSafety(moves) as Path;
     }
 
     /**
@@ -194,11 +194,11 @@ export class MoveEngine{
      */
     private getRookMoves(): Path | null
     {
-        let moves: Path = this.routeCalculator.getRookRoute(this.squareOfPiece!);
+        let moves: Path = this.routeCalculator.getRookRoute(this.pieceSquare!);
         if(!moves) return null;
 
         // Filter the moves for king safety.
-        return this.kingSafetyFilter(moves) as Path;
+        return this.doKingSafety(moves) as Path;
     }
 
     /**
@@ -206,11 +206,11 @@ export class MoveEngine{
      */
     private getQueenMoves(): Path| null
     {
-        let moves: Path = this.routeCalculator.getQueenRoute(this.squareOfPiece!);
+        let moves: Path = this.routeCalculator.getQueenRoute(this.pieceSquare!);
         if(!moves) return null;
 
         // Filter the moves for king safety.
-        return this.kingSafetyFilter(moves) as Path;
+        return this.doKingSafety(moves) as Path;
     }
 
     /**
@@ -218,11 +218,11 @@ export class MoveEngine{
      */
     private getKingMoves(): Path | null
     {
-        let moves: Path = this.routeCalculator.getKingRoute(this.squareOfPiece!);
+        let moves: Path = this.routeCalculator.getKingRoute(this.pieceSquare!);
         if(!moves) return null;
 
         // Find the king's color and enemy's color by the given square.
-        const color: Color = BoardManager.getPiece(this.squareOfPiece!)!.getColor();
+        const color: Color = BoardManager.getPiece(this.pieceSquare!)!.getColor();
 
         /**
          * Add castling moves to the king's moves. For example,
@@ -267,7 +267,7 @@ export class MoveEngine{
      *
      * @see src/Engine/Core/MoveEngine.ts For more information.
      */
-    private kingSafetyFilter(moveRoutes: Array<Square> | Path): Array<Square> | Path
+    private doKingSafety(moveRoutes: Array<Square> | Path): Array<Square> | Path
     {
         /**
          * Find the king and king's square and enemy's color
@@ -281,42 +281,30 @@ export class MoveEngine{
         const enemyColor: Color = this.piece!.getColor() == Color.White ? Color.Black : Color.White;
 
         /**
-         * Find pairs of routes. For example, if route is top,
-         * then route's pair is bottom. If route is top left,
-         * then route's pair is bottom right, etc. We will use
-         * this pairs to find the dangerous route for the king
-         * at the next step.
-         */
-        const routePairs: {[key in MoveRoute]: MoveRoute} = {
-            [MoveRoute.Top]: MoveRoute.Bottom,
-            [MoveRoute.Bottom]: MoveRoute.Top,
-            [MoveRoute.Left]: MoveRoute.Right,
-            [MoveRoute.Right]: MoveRoute.Left,
-            [MoveRoute.TopLeft]: MoveRoute.BottomRight,
-            [MoveRoute.TopRight]: MoveRoute.BottomLeft,
-            [MoveRoute.BottomLeft]: MoveRoute.TopRight,
-            [MoveRoute.BottomRight]: MoveRoute.TopLeft
-        }
-
-        /**
-         * Get all routes of piece then find the dangerous route for the king.
-         * For example, if the king is in top left route of the piece, then
-         * bottom right route is dangerous for the king.
+         * Find the dangerous route for the king. For example,
+         * if the king is in bottom left of the piece, then
+         * the dangerous route is top right(because piece can
+         * only protect king from one route at the same time).
          */
         let dangerousRoute: MoveRoute | null = null;
 
-        // Get all routes of piece(queen route is equals all routes).
-        const allRoutes: Path = this.routeCalculator.getQueenRoute(this.squareOfPiece!);
-        for(const route in allRoutes){
-            for(const square of allRoutes[route as MoveRoute]!){
-                // If the king is in square of the route, then this routes' pair is dangerous for the king.
-                if(square == kingSquare)
-                    dangerousRoute = routePairs[route as MoveRoute];
-            }
-        }
+        /**
+         * For find the dangerous route, get relative route of the piece and king.
+         * Relative route is the route between piece and king.
+         *
+         * @see for more information about relative route src/Engine/Utils/Locator.ts
+         */
+        const relativeRoute = Locator.getRelative(this.pieceSquare!, kingSquare);
+        if(!relativeRoute)
+            // If dangerous route is null, then return the moves/routes without filtering.
+            return moveRoutes;
 
-        // If dangerous route is null, then return the moves/routes without filtering.
-        if(!dangerousRoute) return moveRoutes;
+        /**
+         * For find the dangerous route, get opposite route of relative route.
+         *
+         * @see for more information about opposite route src/Engine/Utils/Locator.ts
+         */
+        dangerousRoute = Locator.getOpposite(relativeRoute);
 
         /**
          * Find the dangerous piece types by the dangerous route. For example,
@@ -329,9 +317,12 @@ export class MoveEngine{
             : [PieceType.Rook, PieceType.Queen];
 
         /**
-         * Traverse the routes and remove the moves/routes that doesn't
-         * protect the king from the dangerous pieces.
+         * Traverse the all routes(getQueenRoute() method returns all routes like
+         * diagonal, horizontal and vertical routes) of the piece and find the
+         * dangerous pieces by dangerous route in all routes. Then, remove the
+         * routes that doesn't protect the king from the dangerous pieces.
          */
+        const allRoutes: Path = this.routeCalculator.getQueenRoute(this.pieceSquare!);
         for(const square of allRoutes[dangerousRoute]!){
             // If route has any dangerous piece, then(next step)
             if(BoardManager.hasPiece(square, enemyColor, dangerousPieces)){
@@ -352,7 +343,7 @@ export class MoveEngine{
                  * top and bottom routes from the moveRoutes.
                  */
                 for (const route in moveRoutes) {
-                    if(route != dangerousRoute)
+                    if(route != dangerousRoute && route != relativeRoute)
                         delete moveRoutes[route as MoveRoute];
                 }
                 break;
