@@ -8,9 +8,8 @@
 
 import { PieceFactory } from "./Factory/PieceFactory";
 import { Converter } from "../Utils/Converter";
-import { BoardManager } from "../Managers/BoardManager";
 import { MoveEngine } from "./Core/MoveEngine";
-import { Piece, Color, PieceType, Square, StartPosition} from "../Types.ts";
+import { Color, PieceType, Square, StartPosition} from "../Types.ts";
 
 export class ChessEngine{
     /**
@@ -56,42 +55,15 @@ export class ChessEngine{
     }
 
     /**
-     * This function returns the possible moves of the given square.
+     * This function returns the moves of the given square with move engine.
      */
     public getMoves(square: Square): Array<Square> | null
     {
-        // Get the piece on the given square.
-        let piece: Piece | null = BoardManager.getPiece(square);
-
-        // If there is no piece on the given square, return null;
-        if(!piece) return null;
-
-        /**
-         * If there is a piece on the given square, get
-         * the possible moves of the piece by its type.
-         */
-        switch(piece.getType()){
-            case PieceType.Pawn:
-                return this.moveEngine.getPawnMoves(square);
-            case PieceType.Knight:
-                return this.moveEngine.getKnightMoves(square);
-            case PieceType.Bishop:
-                return this.moveEngine.getBishopMoves(square);
-            case PieceType.Rook:
-                return this.moveEngine.getRookMoves(square);
-            case PieceType.Queen:
-                return this.moveEngine.getQueenMoves(square);
-            case PieceType.King:
-                return this.moveEngine.getKingMoves(square);
-            default:
-                return null;
-        }
+        return this.moveEngine.getMoves(square);
     }
 
     /**
      * This function plays the given move.
-     * @param from
-     * @param to
      */
     public playMove(from: Square, to: Square): void
     {
@@ -101,8 +73,13 @@ export class ChessEngine{
         // TODO: Castling and en passant state management should be implemented.
     }
 
+    /**
+     * This function checks if the game is finished after move is played.
+     */
     public isFinished(): boolean
     {
         // TODO: Implement this function.
+        // TODO: StateManagement burada yapılabilir.
+        return false;
     }
 }

@@ -1,4 +1,4 @@
-import { Color, Piece, PieceType, Square } from "../Types";
+import { Color, Piece, PieceType } from "../Types";
 
 export class PieceModel implements Piece{
     /**
@@ -8,14 +8,12 @@ export class PieceModel implements Piece{
     private readonly id: number;
     private readonly color: Color;
     private readonly type: PieceType;
-    private readonly startPosition: Square;
     private moveCount: number;
 
-    public constructor(color: Color, type: PieceType, startPosition:Square, id: number){
+    public constructor(color: Color, type: PieceType, id: number){
         this.id = id;
         this.color = color;
         this.type = type;
-        this.startPosition = startPosition;
         this.moveCount = 0;
     }
 
@@ -28,11 +26,6 @@ export class PieceModel implements Piece{
      * This function returns the type of the piece.
      */
     public getType(): PieceType { return this.type; }
-
-    /**
-     * This function returns the start position of the piece.
-     */
-    public getStartPosition(): Square { return this.startPosition; }
 
     /**
      * This function returns the id of the piece.

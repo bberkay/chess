@@ -1,6 +1,7 @@
-import { Piece, Square, Path, MoveRoute } from "../../../Types.ts";
+import { Color, Piece, Square, Path, MoveRoute } from "../../../Types.ts";
 import { Locator } from "../../Utils/Locator.ts";
 import { BoardManager } from "../../../Managers/BoardManager.ts";
+import {StateManager} from "../../../Managers/StateManager.ts";
 
 export class PathCalculator {
     /**
@@ -87,7 +88,6 @@ export class PathCalculator {
         };
     }
 
-
     /**
      * Traverse in the given path(by given starter square and step for direction) and return the squares.
      * For more information, please check the class description.
@@ -122,32 +122,47 @@ export class PathCalculator {
             return false;
         }
 
+        // This array is used to store the squares.
         let squares: Array<Square> = [];
 
-        // If piece sensitivity is true, then get the piece of the given square(for color).
-        const piece: Piece | null = pieceSensitivity ? BoardManager.getPiece(square) : null;
+        /**
+         * If piece sensitivity is true, then get the current player's color with the piece on the given square.
+         * If square has no piece, then use StateManager.
+         *
+         * @see For more information about the StateManager, please check the src/Managers/StateManager.ts
+         */
+        const piece: Piece | null = BoardManager.getPiece(square);
+        const currentColor: Color = pieceSensitivity && piece ? piece.getColor() : StateManager.getPlayerColor();
 
         // This variable is used to count the steps for the distance limit.
         let stepCounter = 0;
 
         while((square + step) <= 64 && (square + step) >= 1){
-            // Set the next square. For example, if step is 1 and given square is Square.e5(29),
-            // then next square is Square.f5(30). Also, We are doing this operation before the
-            // push operation because we don't want to add the given square itself to the array.
+            /**
+             * Set the next square. For example, if step is 1 and given square is Square.e5(29),
+             * then next square is Square.f5(30). Also, We are doing this operation before the
+             * push operation because we don't want to add the given square itself to the array.
+             */
             square += step;
 
-            // If distance limit is reached or the square is on the edge of the board or
-            // if piece sensitivity is true AND if square has a piece, then break the loop.
+            /**
+             * If distance limit is reached or the square is on the edge of the board or
+             * if piece sensitivity is true AND if square has a piece, then break the loop.
+             */
             if(distanceLimit == stepCounter || isEdgeChanged(square))
                 break;
 
-            // If piece sensitivity is false OR piece sensitivity true AND
-            // if square has enemy's piece then add the square to the array.
-            if(!pieceSensitivity || (pieceSensitivity && !BoardManager.hasPiece(square, piece!.getColor())))
+            /**
+             * If piece sensitivity is false OR piece sensitivity true AND
+             * if square has no player's piece(has enemy piece) then add the square to the array.
+             */
+            if(!pieceSensitivity || (pieceSensitivity && !BoardManager.hasPiece(square, currentColor)))
                 squares.push(square);
 
-            // If piece sensitivity is true AND if square has a piece(enemy or player), then break the loop.
-            // Because we can't go further.
+            /**
+             * If piece sensitivity is true AND if square has a piece(enemy or player), then break the loop.
+             * Because we can't go further.
+             */
             if(pieceSensitivity && BoardManager.hasPiece(square))
                 break;
 

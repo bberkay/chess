@@ -23,7 +23,10 @@ export class BoardManager {
     /**
      * @description Store the kings of the game.
      */
-    private static kings: Kings;
+    private static kings: Kings = {
+        [Color.White]: null,
+        [Color.Black]: null
+    }
 
     /**
      * @description List of piece ids.
@@ -44,6 +47,23 @@ export class BoardManager {
     public static getPiece(square: Square): Piece | null
     {
         return BoardManager.currentBoard[square] ?? null;
+    }
+
+    /**
+     * @description Get square of the given piece.
+     */
+    public static getSquare(piece: Piece): Square | null
+    {
+        for(let square in BoardManager.getBoard()){
+            // Convert square to Square type.
+            let squareKey: Square = Number(square) as Square;
+
+            // If the square has a piece and the piece is the same with the given piece then return the square.
+            if(BoardManager.hasPiece(squareKey) && BoardManager.getPiece(squareKey) === piece)
+                return squareKey;
+        }
+
+        return null;
     }
 
     /**
@@ -73,7 +93,7 @@ export class BoardManager {
      * Has the given square a piece?
      * @example hasPiece(Square.a1, Color.White, [PieceType.King, PieceType.Queen]); // Returns true if the square has a white king or queen.
      */
-    public static hasPiece(square: Square, specificColor: Color | null = null, specificTypes: Array<PieceType> | null = null): boolean
+    public static hasPiece(square: Square, specificColor: Color | null = null, specificTypes: Array<PieceType> | PieceType | null = null): boolean
     {
         const squareContent: Piece | null = this.getPiece(square);
 
@@ -85,42 +105,18 @@ export class BoardManager {
         if(specificColor && squareContent.getColor() != specificColor)
             return false;
 
-        // If the piece type is not the same with the given type then return false otherwise return true.
-        return !(specificTypes && !specificTypes.includes(squareContent.getType()));
-    }
+        /**
+         * If specificTypes is null then return true, if not null then:
+         * - If the given type is an array then check if the piece type is in the array
+         * - If the given type is not an array then check if the piece type is the same with the given type
+         */
+        return !(specificTypes && (
+            (Array.isArray(specificTypes) && !specificTypes.includes(squareContent.getType()))
+            ||
+            (!Array.isArray(specificTypes) && squareContent.getType() != specificTypes)
+        ));
 
-    /**
-     * Get square of the given piece
-     * @example getLocation(pieceObject); // Returns Square.a1 if the piece is on a1.
-     */
-    public static getLocation(piece: Piece): Square | null
-    {
-        for(let square in BoardManager.getBoard()){
-            // Convert square to Square type.
-            let squareKey: Square = Number(square) as Square;
 
-            // If the square has a piece and the piece is the same with the given piece
-            if(BoardManager.hasPiece(squareKey) && BoardManager.getPiece(squareKey) === piece)
-                return squareKey;
-        }
-
-        return null;
-    }
-
-    /**
-     * Get king of the given color
-     */
-    public static getKing(color: Color): Piece | null
-    {
-        return this.kings[color];
-    }
-
-    /**
-     * @description Get all piece ids
-     */
-    public static getPieceIds(): Array<number>
-    {
-        return BoardManager.pieceIds;
     }
 
     /**
@@ -139,14 +135,6 @@ export class BoardManager {
     }
 
     /**
-     * Set king of the given color
-     */
-    private static setKing(piece: Piece): void
-    {
-        this.kings[piece.getColor()] = piece;
-    }
-
-    /**
      * @description Remove piece from square
      */
     public static removePiece(square: Square): void
@@ -155,6 +143,30 @@ export class BoardManager {
 
         // Add to cache
         CacheManager.set(CacheLayer.Game,"currentBoard", BoardManager.currentBoard);
+    }
+
+    /**
+     * Get king of the given color
+     */
+    public static getKing(color: Color): Piece | null
+    {
+        return this.kings[color];
+    }
+
+    /**
+     * Set king of the given color
+     */
+    private static setKing(piece: Piece): void
+    {
+        this.kings[piece.getColor()] = piece;
+    }
+
+    /**
+     * @description Get all piece ids
+     */
+    public static getPieceIds(): Array<number>
+    {
+        return BoardManager.pieceIds;
     }
 
     /**

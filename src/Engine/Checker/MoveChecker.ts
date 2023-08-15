@@ -50,9 +50,9 @@ export class MoveChecker{
          * Color: black, castling type: short, king: e8, chosen rook: h8, between squares: f8, g8
          */
         const king: Piece = BoardManager.getKing(color)!;
-        const chosenRook: Piece = BoardManager.getPiece(castlingType == CastlingType.Long
+        const chosenRook: Piece | null = BoardManager.getPiece(castlingType == CastlingType.Long
             ? (color == Color.White ? Square.a1 : Square.h1)
-            : (color == Color.White ? Square.a8 : Square.h8))!;
+            : (color == Color.White ? Square.a8 : Square.h8));
         const betweenSquares: Array<Square> = castlingType == CastlingType.Long
             ? (color == Color.White ? [Square.b1, Square.c1, Square.d1] : [Square.b8, Square.c8, Square.d8])
             : (color == Color.White ? [Square.f1, Square.g1] : [Square.f8, Square.g8]);
@@ -63,7 +63,7 @@ export class MoveChecker{
          *
          * @see for more information about dangerous squares src/Engine/Checker/StateChecker.ts
          */
-        if(king.getMoveCount() != 0 || chosenRook.getMoveCount() != 0 || StateChecker.isPlayerInCheck())
+        if(!chosenRook || king.getMoveCount() != 0 || chosenRook.getMoveCount() != 0 || StateChecker.isPlayerInCheck())
             return false;
 
         /**

@@ -10,7 +10,6 @@
 export interface Piece {
     getColor(): Color;
     getType(): PieceType;
-    getStartPosition(): Square;
     getID(): number;
     getMoveCount(): number;
     increaseMoveCount(): void;
@@ -47,14 +46,14 @@ export type Path = {
     [MoveRoute.TopLeft]?: Square[],
     [MoveRoute.Left]?: Square[],
     [MoveRoute.BottomLeft]?: Square[],
-    [MoveRoute.Bottom]?: Square[],
+    [MoveRoute.Bottom]?: Square[]
 }
 
 /**
  * @description Kings is stores the kings of the players.
  * @see src/Managers/BoardManager.ts For more information.
  */
-export type Kings = Record<Color, Piece>;
+export type Kings = Record<Color, Piece | null>;
 
 /**
  * Chess Enums
