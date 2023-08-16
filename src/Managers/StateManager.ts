@@ -60,9 +60,9 @@ export class StateManager{
     }
 
     /**
-     * @description Set next move(change current player's color to enemy's color)
+     * @description Change turn
      */
-    public static setNextMove(): void
+    public static changeTurn(): void
     {
         StateManager.currentColor = StateManager.getEnemyColor();
 

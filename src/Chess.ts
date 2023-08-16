@@ -13,19 +13,21 @@ import {BoardManager} from "./Managers/BoardManager.ts";
 import {StateManager} from "./Managers/StateManager.ts";
 import {CacheManager} from "./Managers/CacheManager.ts";
 import {CacheLayer, Color, PieceType, Square, SquareClickMode, StartPosition} from "./Types.ts";
-import {StateChecker} from "./Engine/Checker/StateChecker.ts";
 
+/**
+ * This class provides users to a playable game on the web by connecting chessEngine and chessBoard.
+ */
 export class Chess{
-    /**
-     * This class provides users to a playable game on the web by connecting chessEngine and chessBoard.
-     */
 
+    /**
+     * Properties of the Chess class.
+     */
     private chessEngine: ChessEngine;
     private chessBoard: ChessBoard;
     private selectedSquare: Square | null = null;
 
     /**
-     * Constructor of the Chess class.b
+     * Constructor of the Chess class.
      */
     constructor(){
         this.chessEngine = new ChessEngine(false);
@@ -40,8 +42,7 @@ export class Chess{
      */
     private checkAndLoadGameFromCache(): void
     {
-        this.createGame("K7/8/2n5/4k3/8/8/8/8");
-        console.log(StateChecker.isSquareThreatened(Square.a8));
+        this.createGame(StartPosition.Standard);
         /*if(!Cache.get(CacheLayer.Game))
             this.createGame();
         else{
@@ -64,38 +65,52 @@ export class Chess{
         if(!Array.isArray(position))
             position = Converter.convertFENToJSON(position as StartPosition);
 
-        // Create a new game.
+        // Create a new game on engine.
         this.chessEngine.createGame(position);
 
-        // Set up the chess board.
-        this.chessBoard.createBoard(position);
+        // Create a new game on board.
+        this.chessBoard.createGame(position);
     }
 
     /**
-     * Make a move on the board.
-     * @example makeMove(SquareClickMode.Select, Square.a2); // Select the piece on the square a2.
-     * @example makeMove(SquareClickMode.Play, Square.a3); // Play the selected piece(a2) to the square a3.
-     * @example makeMove(SquareClickMode.Promote, Square.a8); // Promote the selected piece(a2) to the piece on the square a8.
+     * Make action on the game.
+     * @example doAction(SquareClickMode.Select, Square.a2); // Select the piece on the square a2.
+     * @example doAction(SquareClickMode.Play, Square.a3); // Play the selected piece(a2) to the square a3.
+     * @example doAction(SquareClickMode.Promote, Square.a8); // Promote the selected piece(a2) to the piece on the square a8.
      */
-    public makeMove(moveType: SquareClickMode, square: Square): void
+    public doAction(moveType: SquareClickMode, square: Square): void
     {
-        // If move is play, move the selected square then unset selected square.
+        if(this.selectedSquare && BoardManager.getPiece(this.selectedSquare)!.getColor() !== StateManager.getPlayerColor())
+            return;
+
         if(moveType === SquareClickMode.Play && this.selectedSquare !== null)
         {
+            /**
+             * If move type is play, move the selected square on chessEngine and chessBoard,
+             * then set the selected square to null and clear the board.
+             */
             this.chessEngine.playMove(this.selectedSquare, square);
-            this.chessBoard.movePiece(this.selectedSquare, square);
+            this.chessBoard.playMove(this.selectedSquare, square);
             this.selectedSquare = null;
+            this.chessBoard.clearBoard();
         }
-        // If move type is select, select the square.
         else if(moveType === SquareClickMode.Select)
         {
+            /**
+             * If move type is select, set the selected square and highlight select on
+             * chessBoard then get the possible moves of the selected square
+             * with chessEngine and highlight them on chessBoard.
+             */
             this.selectedSquare = square;
-            this.chessBoard.selectSquare(square);
+            this.chessBoard.highlightSelect(square);
             this.chessBoard.highlightMoves(this.chessEngine.getMoves(square)!);
         }
-        // If move type is clear, unset selected square and clear the board.
         else if(moveType == SquareClickMode.Clear)
         {
+            /**
+             * If move type is clear, clear the selected square and clear
+             * the board on chessBoard.
+             */
             this.selectedSquare = null;
             this.chessBoard.clearBoard();
         }

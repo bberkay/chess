@@ -52,7 +52,7 @@ export class BoardManager {
     /**
      * @description Get square of the given piece.
      */
-    public static getSquare(piece: Piece): Square | null
+    public static getLocation(piece: Piece): Square | null
     {
         for(let square in BoardManager.getBoard()){
             // Convert square to Square type.
@@ -120,14 +120,14 @@ export class BoardManager {
     }
 
     /**
-     * @description Add piece to square
+     * @description Set piece of the given square
      */
-    public static addPiece(square: Square, piece: Piece): void
+    public static setPiece(square: Square, piece: Piece): void
     {
         this.currentBoard[square] = piece;
 
-        // Set king if the piece is a king
-        if(piece.getType() === PieceType.King)
+        // Set king if the piece is a king and there is no king of the same color
+        if(piece.getType() === PieceType.King && !this.getKing(piece.getColor()))
             this.setKing(piece);
 
         // Add to cache

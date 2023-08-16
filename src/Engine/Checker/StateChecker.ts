@@ -127,7 +127,7 @@ export class StateChecker {
          * check if it is threatened.
          */
         return this.isSquareThreatened(
-            BoardManager.getSquare(BoardManager.getKing(StateManager.getPlayerColor())!)!
+            BoardManager.getLocation(BoardManager.getKing(StateManager.getPlayerColor())!)!
         );
     }
 

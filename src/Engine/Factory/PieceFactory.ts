@@ -42,6 +42,6 @@ export class PieceFactory{
      */
     public createPiece(color: Color, type:PieceType, square:Square): void
     {
-        BoardManager.addPiece(square, new PieceModel(color, type, square, this.createPieceID()));
+        BoardManager.setPiece(square, new PieceModel(color, type, this.createPieceID()));
     }
 }

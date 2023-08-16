@@ -9,25 +9,19 @@
 import { PieceFactory } from "./Factory/PieceFactory";
 import { Converter } from "../Utils/Converter";
 import { MoveEngine } from "./Core/MoveEngine";
-import { Color, PieceType, Square, StartPosition, Moves } from "../Types.ts";
+import {Color, Piece, PieceType, Square, StartPosition} from "../Types.ts";
+import {BoardManager} from "../Managers/BoardManager.ts";
+import {StateManager} from "../Managers/StateManager.ts";
 
+/**
+ * This class provides users to create and manage a game(does not include board or other ui elements).
+ */
 export class ChessEngine{
-    /**
-     * This class provides users to create and manage a game(does not include board or other ui elements).
-     * TODO: Engine Bitince, Bu dosyanın yorum satırları en üstte tüm engine klasörünü kapsayacak şekilde ve burada genel
-     * TODO: chess engini kapsayacak şekilde geliştirilecek.
-     */
 
     /**
-     * Piece factory property of the engine. It is used to create piece/pieces.
-     * @see for more information src/Engine/Factory/PieceFactory.ts
+     * Properties of the ChessEngine class.
      */
     private pieceFactory: PieceFactory = new PieceFactory();
-
-    /**
-     * Move engine property of the engine. It is used to get possible moves of a piece.
-     * @see for more information src/Engine/Core/MoveEngine.ts
-     */
     private moveEngine: MoveEngine = new MoveEngine();
 
     /**
@@ -58,7 +52,7 @@ export class ChessEngine{
     /**
      * This function returns the moves of the given square with move engine.
      */
-    public getMoves(square: Square): Moves | null
+    public getMoves(square: Square): Square[] | null
     {
         return this.moveEngine.getMoves(square);
     }
@@ -68,9 +62,9 @@ export class ChessEngine{
      */
     public playMove(from: Square, to: Square): void
     {
-        // BoardManager.
-        console.log("playMove: " + from + " " + to);
-        // TODO: isMoved property of the piece should be set to true.
+        BoardManager.setPiece(to, BoardManager.getPiece(from)!);
+        BoardManager.removePiece(from);
+        StateManager.changeTurn();
         // TODO: Castling and en passant state management should be implemented.
     }
 

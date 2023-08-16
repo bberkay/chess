@@ -49,17 +49,17 @@ export class MoveEngine{
          */
         switch(this.piece.getType()){
             case PieceType.Pawn:
-                return Converter.convertRouteToSquareArray(this.getPawnMoves()!);
+                return this.getPawnMoves();
             case PieceType.Knight:
-                return Converter.convertRouteToSquareArray(this.getKnightMoves()!);
+                return this.getKnightMoves();
             case PieceType.Bishop:
-                return Converter.convertRouteToSquareArray(this.getBishopMoves()!);
+                return this.getBishopMoves();
             case PieceType.Rook:
-                return Converter.convertRouteToSquareArray(this.getRookMoves()!);
+                return this.getRookMoves();
             case PieceType.Queen:
-                return Converter.convertRouteToSquareArray(this.getQueenMoves()!);
+                return this.getQueenMoves();
             case PieceType.King:
-                return Converter.convertRouteToSquareArray(this.getKingMoves()!);
+                return this.getKingMoves();
             default:
                 return null;
         }
@@ -68,7 +68,7 @@ export class MoveEngine{
     /**
      * Get the possible moves of the pawn on the given square.
      */
-    private getPawnMoves(): Route | null
+    private getPawnMoves(): Array<Square> | null
     {
         // Find possible moves of the pawn.
         const route: Route = this.routeCalculator.getPawnRoute(this.pieceSquare!);
@@ -149,62 +149,62 @@ export class MoveEngine{
         if(MoveChecker.isRightEnPassantAvailable(this.pieceSquare!))
             route[moveDirection.rightDiagonal]!.push(color == Color.White ? this.pieceSquare! - 7 : this.pieceSquare! + 9);
 
-        // Filter the moves for king safety.
-        return this.doKingSafety(route);
+        // Filter the moves for king safety and convert the route to squares array.
+        return Converter.convertRouteToSquareArray(this.doKingSafety(route)!);
     }
 
     /**
      * Get the possible moves of the knight on the given square.
      */
-    private getKnightMoves(): Route | null
+    private getKnightMoves(): Array<Square> | null
     {
         let moves: Route = this.routeCalculator.getKnightRoute(this.pieceSquare!);
         if(!moves) return null;
 
-        // Filter the moves for king safety.
-        return this.doKingSafety(moves);
+        // Filter the moves for king safety and convert the route to squares array.
+        return Converter.convertRouteToSquareArray(this.doKingSafety(moves)!);
     }
 
     /**
      * Get the possible moves of the bishop on the given square.
      */
-    private getBishopMoves(): Route | null
+    private getBishopMoves(): Array<Square> | null
     {
         let moves: Route = this.routeCalculator.getBishopRoute(this.pieceSquare!);
         if(!moves) return null;
 
-        // Filter the moves for king safety.
-        return this.doKingSafety(moves);
+        // Filter the moves for king safety and convert the route to squares array.
+        return Converter.convertRouteToSquareArray(this.doKingSafety(moves)!);
     }
 
     /**
      * Get the possible moves of the rook on the given square.
      */
-    private getRookMoves(): Route | null
+    private getRookMoves(): Array<Square> | null
     {
         let moves: Route = this.routeCalculator.getRookRoute(this.pieceSquare!);
         if(!moves) return null;
 
-        // Filter the moves for king safety.
-        return this.doKingSafety(moves);
+        // Filter the moves for king safety and convert the route to squares array.
+        return Converter.convertRouteToSquareArray(this.doKingSafety(moves)!);
     }
 
     /**
      * Get the possible moves of the queen on the given square.
      */
-    private getQueenMoves(): Route | null
+    private getQueenMoves(): Array<Square> | null
     {
         let moves: Route = this.routeCalculator.getQueenRoute(this.pieceSquare!);
         if(!moves) return null;
 
-        // Filter the moves for king safety.
-        return this.doKingSafety(moves);
+        // Filter the moves for king safety and convert the route to squares array.
+        return Converter.convertRouteToSquareArray(this.doKingSafety(moves)!);
     }
 
     /**
      * Get the possible moves of the king on the given square.
      */
-    private getKingMoves(): Route | null
+    private getKingMoves(): Array<Square> | null
     {
         let moves: Route = this.routeCalculator.getKingRoute(this.pieceSquare!);
         if(!moves) return null;
@@ -230,8 +230,8 @@ export class MoveEngine{
         if(MoveChecker.isShortCastlingAvailable(color))
             moves[MoveRoute.Right]!.push(color == Color.White ? Square.h1 : Square.h8);
 
-        // Return extended moves. Also, king doesn't need to filter for king safety.
-        return moves;
+        // Return extended and converted moves. Also, king doesn't need to filter for king safety.
+        return Converter.convertRouteToSquareArray(moves);
     }
 
     /**
@@ -265,7 +265,7 @@ export class MoveEngine{
         if(!king) return moveRoute;
 
         // Square of the king and enemy's color.
-        const kingSquare: Square = BoardManager.getSquare(king)!;
+        const kingSquare: Square = BoardManager.getLocation(king)!;
         const enemyColor: Color = this.piece!.getColor() == Color.White ? Color.Black : Color.White;
 
         /**

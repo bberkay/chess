@@ -12,8 +12,6 @@ import { Color, PieceType, SquareClickMode, SquareEffect, StartPosition, Square 
 export class ChessBoard {
     /**
      * This class provides users to create and manage a chess board(does not include any mechanic/logic).
-     * TODO: Interface Bitince, Bu dosyanın yorum satırları en üstte tüm interface klasörünü kapsayacak şekilde ve burada genel
-     * TODO: chess board kapsayacak şekilde geliştirilecek.
      */
 
     /**
@@ -21,6 +19,7 @@ export class ChessBoard {
      * to restore them after unlock the board.
      */
     private lockedSquaresModes: Array<SquareClickMode> = [];
+    private colorOfSelectedPiece: Color | null = null;
 
     /**
      * Constructor of the ChessBoard class.
@@ -28,6 +27,7 @@ export class ChessBoard {
      */
     constructor(isStandalone: boolean = true) {
         console.log("isStandalone: " + isStandalone);
+        // IsStandalone olduğunda managerlar ile beraber geliştirilir.
     }
 
     /**
@@ -36,14 +36,14 @@ export class ChessBoard {
      * @example createGame("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
      * @example createGame([{"color":Color.White, "type":PieceType.Pawn, "square":Square.a2}, {"color":Color.White, "type":PieceType.Pawn, "square":Square.b2}, ...]);
      */
-    public createBoard(position: Array<{color: Color, type:PieceType, square:Square}> | StartPosition | string = StartPosition.Standard): void
+    public createGame(position: Array<{color: Color, type:PieceType, square:Square}> | StartPosition | string = StartPosition.Standard): void
     {
         // If position is not an array(string means fen notation), convert it to JSON notation.
         if(!Array.isArray(position))
             position = Converter.convertFENToJSON(position as StartPosition);
 
         // Create squares in the board.
-        this.createSquares();
+        this.createBoard();
 
         // Create the pieces.
         this.createPieces(position);
@@ -52,7 +52,7 @@ export class ChessBoard {
     /**
      * This function creates the background of the chess board in #chessboard div
      */
-    private createSquares(): void
+    private createBoard(): void
     {
         // Find the chess board element and clear it.
         let board: HTMLDivElement = document.getElementById("chessboard") as HTMLDivElement;
@@ -168,13 +168,16 @@ export class ChessBoard {
     /**
      * This function selects the square on the chess board.
      */
-    public selectSquare(squareID: Square): void
+    public highlightSelect(squareID: Square): void
     {
         // Clear/Restore the board its default state before selecting the square.
         this.clearBoard();
 
         // Get the selected square by its id.
         const selectedSquare: HTMLDivElement = document.getElementById(squareID.toString()) as HTMLDivElement;
+
+        // Get the color of the selected piece(if exists).
+        this.colorOfSelectedPiece = selectedSquare.querySelector(".piece")?.getAttribute("data-color") as Color;
 
         // Add selected effect to the selected square.
         this.setSquareEffect(selectedSquare, SquareEffect.Selected);
@@ -189,7 +192,7 @@ export class ChessBoard {
     /**
      * This function moves the piece from the given square to the given square on the chess board.
      */
-    public movePiece(from:Square, to:Square): void
+    public playMove(from:Square, to:Square): void
     {
         // Remove piece at the target square(to) if it exists.
         this.clearSquare(to);
@@ -208,7 +211,8 @@ export class ChessBoard {
              * If the move square has a piece then set the square
              * effect "Killable" otherwise set "Playable".
              */
-            if(document.getElementById(move.toString())?.lastElementChild?.className.includes("piece"))
+            let squareContent = document.getElementById(move.toString())?.lastElementChild;
+            if(squareContent && squareContent.className.includes("piece") && squareContent.getAttribute("data-color") !== this.colorOfSelectedPiece)
                 this.setSquareEffect(move, SquareEffect.Killable);
             else
                 this.setSquareEffect(move, SquareEffect.Playable);

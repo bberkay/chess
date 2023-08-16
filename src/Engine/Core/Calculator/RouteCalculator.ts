@@ -84,31 +84,28 @@ export class RouteCalculator{
          * MoveRoute.Bottom squares and Square.c3, Square.c1 are top and bottom of MoveRoute.Right squares.
          */
         for (const path in firstPath) {
-            // If the path has 2 squares
-            if(firstPath[path as MoveRoute]!.length == 2){
-                /**
-                 * Get the last square of the path. Example, if the path is MoveRoute.Bottom and the squares are
-                 * [Square.b1, Square.b2], then the last square is Square.b2.
-                 */
-                const lastSquare = firstPath[path as MoveRoute]![1];
+            /**
+             * Get the last square of the path. Example, if the path is MoveRoute.Bottom and the squares are
+             * [Square.b1, Square.b2], then the last square is Square.b2.
+             */
+            const lastSquare = firstPath[path as MoveRoute]![firstPath[path as MoveRoute]!.length - 1];
 
-                /**
-                 * Get the horizontal and vertical squares of the last square of the path.
-                 * Example, if the path is MoveRoute.Bottom and the squares are [Square.b1, Square.b2],
-                 * then the horizontal squares of the Square.b2 are [Square.c2, Square.a2] and the vertical squares of the Square.b2 are
-                 * [Square.b3, Square.b1].
-                 */
-                let lastRoute: Route | null = null;
+            /**
+             * Get the horizontal and vertical squares of the last square of the path.
+             * Example, if the path is MoveRoute.Bottom and the squares are [Square.b1, Square.b2],
+             * then the horizontal squares of the Square.b2 are [Square.c2, Square.a2] and the vertical squares of the Square.b2 are
+             * [Square.b3, Square.b1].
+             */
+            let lastRoute: Route | null = null;
 
-                // If the path is vertical, then get the horizontal squares of last square of the path.
-                if(path == MoveRoute.Bottom || path == MoveRoute.Top)
-                    lastRoute = this.directionCalculator.getHorizontalSquares(lastSquare, color, 1);
-                else // If the path is horizontal, then get the vertical squares of last square of the path.
-                    lastRoute = this.directionCalculator.getVerticalSquares(lastSquare, color, 1);
+            // If the path is vertical, then get the horizontal squares of last square of the path.
+            if(path == MoveRoute.Bottom || path == MoveRoute.Top)
+                lastRoute = this.directionCalculator.getHorizontalSquares(lastSquare, color, 1);
+            else // If the path is horizontal, then get the vertical squares of last square of the path.
+                lastRoute = this.directionCalculator.getVerticalSquares(lastSquare, color, 1);
 
-                // Update the route
-                route[MoveRoute.L] = Converter.convertRouteToSquareArray(lastRoute).concat(route[MoveRoute.L]);
-            }
+            // Update the route
+            route[MoveRoute.L] = Converter.convertRouteToSquareArray(lastRoute).concat(route[MoveRoute.L]);
         }
 
         return route;
