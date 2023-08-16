@@ -3,7 +3,7 @@ import { Locator } from "../../Utils/Locator.ts";
 import { BoardManager } from "../../../Managers/BoardManager.ts";
 import {StateManager} from "../../../Managers/StateManager.ts";
 
-export class PathCalculator {
+export class DirectionCalculator {
     /**
      * This class calculates the path and distance of the given square.
      * Also piece sensitivity can be set to true or false (true means,
@@ -33,7 +33,7 @@ export class PathCalculator {
      * For more information, please check the class description.
      * @See src/Engine/Core/PathCalculator.ts
      */
-    public getDiagonalSquares(square: Square, distanceLimit: number | null = null, pieceSensitivity: boolean | null = true): Route
+    public getDiagonalSquares(square: Square, distanceLimit: number | null = null, pieceSensitivity: boolean = true): Route
     {
         /**
          * Step is used to set the next square of the given square. For example, if step is -7 and
@@ -54,7 +54,7 @@ export class PathCalculator {
      * For more information, please check the class description.
      * @See src/Engine/Core/PathCalculator.ts
      */
-    public getHorizontalSquares(square: Square, distanceLimit: number | null = null, pieceSensitivity: boolean | null = true): Route
+    public getHorizontalSquares(square: Square, distanceLimit: number | null = null, pieceSensitivity: boolean = true): Route
     {
         /**
          * Step is used to set the next square of the given square. For example, if step is 1 and
@@ -73,7 +73,7 @@ export class PathCalculator {
      * For more information, please check the class description.
      * @See src/Engine/Core/PathCalculator.ts
      */
-    public getVerticalSquares(square: Square, distanceLimit: number | null = null, pieceSensitivity: boolean | null = true): Route
+    public getVerticalSquares(square: Square, distanceLimit: number | null = null, pieceSensitivity: boolean = true): Route
     {
 
         /**
@@ -93,7 +93,7 @@ export class PathCalculator {
      * For more information, please check the class description.
      * @See src/Engine/Core/PathCalculator.ts
      */
-    private traversePath(square: Square, step: number, distanceLimit: number | null, pieceSensitivity: boolean | null): Array<Square>
+    private traversePath(square: Square, step: number, distanceLimit: number | null, pieceSensitivity: boolean): Array<Square>
     {
         // This variable is used to check if the edge is changed.
         // For more information, please check the isEdgeChanged function.
