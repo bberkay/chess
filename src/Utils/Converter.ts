@@ -1,4 +1,4 @@
-import {Color, PieceType, Square, StartPosition, Path} from "../Types";
+import {Color, PieceType, Square, StartPosition, Route} from "../Types";
 
 export class Converter{
     /**
@@ -7,9 +7,9 @@ export class Converter{
 
     /**
      * Convert direction path to array of squares(moves).
-     * @example Converter.convertPathToMoves({MoveRoute.Bottom:[3,4,5], MoveRoute.Top:[8,9,10]}), return [3,4,5,8,9,10]
+     * @example Converter.convertRouteToSquareArray({MoveRoute.Bottom:[3,4,5], MoveRoute.Top:[8,9,10]}), return [3,4,5,8,9,10]
      */
-    static convertPathToMoves(path: Path): Array<Square>
+    static convertRouteToSquareArray(path: Route): Array<Square>
     {
         return Object.values(path).flat();
     }

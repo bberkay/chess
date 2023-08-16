@@ -13,6 +13,7 @@ import {BoardManager} from "./Managers/BoardManager.ts";
 import {StateManager} from "./Managers/StateManager.ts";
 import {CacheManager} from "./Managers/CacheManager.ts";
 import {CacheLayer, Color, PieceType, Square, SquareClickMode, StartPosition} from "./Types.ts";
+import {StateChecker} from "./Engine/Checker/StateChecker.ts";
 
 export class Chess{
     /**
@@ -39,7 +40,8 @@ export class Chess{
      */
     private checkAndLoadGameFromCache(): void
     {
-        this.createGame(StartPosition.Standard);
+        this.createGame("k7/8/1N6/4K3/8/8/8/8");
+        console.log(StateChecker.isSquareThreatened(Square.a8));
         /*if(!Cache.get(CacheLayer.Game))
             this.createGame();
         else{

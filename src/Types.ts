@@ -35,10 +35,10 @@ export type Castling = Record<CastlingType, boolean>
 export type EnPassant = Record<number, EnPassantDirection>
 
 /**
- * @description Path is used for the path calculation of the pieces.
+ * @description Route is used for the store move directions of the pieces.
  * @see src/Engine/Calculator/PathCalculator For more information.
  */
-export type Path = {
+export type Route = {
     [MoveRoute.BottomRight]?: Square[],
     [MoveRoute.Right]?: Square[],
     [MoveRoute.TopRight]?: Square[],
@@ -47,6 +47,7 @@ export type Path = {
     [MoveRoute.Left]?: Square[],
     [MoveRoute.BottomLeft]?: Square[],
     [MoveRoute.Bottom]?: Square[]
+    [MoveRoute.L]?: Square[],
 }
 
 /**
@@ -54,6 +55,7 @@ export type Path = {
  * @see src/Managers/BoardManager.ts For more information.
  */
 export type Kings = Record<Color, Piece | null>;
+
 
 /**
  * Chess Enums
@@ -146,7 +148,8 @@ export enum MoveRoute{
     Left = "Left",
     Right = "Right",
     Top = "Top",
-    Bottom = "Bottom"
+    Bottom = "Bottom",
+    L = "L"
 }
 
 /**

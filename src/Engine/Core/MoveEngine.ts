@@ -1,4 +1,4 @@
-import {Color, MoveRoute, Path, Square, PieceType, Piece} from "../../Types.ts";
+import {Color, MoveRoute, Square, PieceType, Piece, Route} from "../../Types.ts";
 import {BoardManager} from "../../Managers/BoardManager.ts";
 import {Converter} from "../../Utils/Converter.ts";
 import {Locator} from "../Utils/Locator.ts";
@@ -36,9 +36,6 @@ export class MoveEngine{
      */
     public getMoves(square: Square): Array<Square> | null
     {
-        // TODO: getMoves Array<Square> | null yerine {square: MoveType} şeklinde bir obje döndürülebilir.
-        // TODO: Eğer object e döndürülürse zaten converter ile çevirmeye gerek kalmaz.
-
         // Get the piece on the given square.
         this.piece = BoardManager.getPiece(square);
         this.pieceSquare = square;
@@ -52,17 +49,17 @@ export class MoveEngine{
          */
         switch(this.piece.getType()){
             case PieceType.Pawn:
-                return Converter.convertPathToMoves(this.getPawnMoves()!);
+                return Converter.convertRouteToSquareArray(this.getPawnMoves()!);
             case PieceType.Knight:
-                return this.getKnightMoves();
+                return Converter.convertRouteToSquareArray(this.getKnightMoves()!);
             case PieceType.Bishop:
-                return Converter.convertPathToMoves(this.getBishopMoves()!);
+                return Converter.convertRouteToSquareArray(this.getBishopMoves()!);
             case PieceType.Rook:
-                return Converter.convertPathToMoves(this.getRookMoves()!);
+                return Converter.convertRouteToSquareArray(this.getRookMoves()!);
             case PieceType.Queen:
-                return Converter.convertPathToMoves(this.getQueenMoves()!);
+                return Converter.convertRouteToSquareArray(this.getQueenMoves()!);
             case PieceType.King:
-                return Converter.convertPathToMoves(this.getKingMoves()!);
+                return Converter.convertRouteToSquareArray(this.getKingMoves()!);
             default:
                 return null;
         }
@@ -71,11 +68,11 @@ export class MoveEngine{
     /**
      * Get the possible moves of the pawn on the given square.
      */
-    private getPawnMoves(): Path | null
+    private getPawnMoves(): Route | null
     {
         // Find possible moves of the pawn.
-        let moves: Path = this.routeCalculator.getPawnRoute(this.pieceSquare!);
-        if(!moves) return null;
+        const route: Route = this.routeCalculator.getPawnRoute(this.pieceSquare!);
+        if(!route) return null;
 
         /**************************************************************************
          * Filter the moves of the pawn by the pawn's color, position
@@ -86,7 +83,7 @@ export class MoveEngine{
          * @see for more information about pawn moves https://en.wikipedia.org/wiki/Pawn_(chess)
          **************************************************************************/
 
-            // Find the pawn's color and enemy's color by the given square.
+        // Find the pawn's color and enemy's color by the given square.
         const color: Color = this.piece!.getColor();
         const enemyColor: Color = color === Color.White ? Color.Black : Color.White;
 
@@ -104,9 +101,9 @@ export class MoveEngine{
          * if the pawn is white, we need to delete the bottom route of the pawn.
          * if the pawn is black, we need to delete the top route of the pawn.
          */
-        for(let route in moves){
-            if(route != moveDirection.vertical && route != moveDirection.leftDiagonal && route != moveDirection.rightDiagonal)
-                delete moves[route as MoveRoute];
+        for(let path in route){
+            if(path != moveDirection.vertical && path != moveDirection.leftDiagonal && path != moveDirection.rightDiagonal)
+                delete route[path as MoveRoute];
         }
 
         /**
@@ -117,7 +114,7 @@ export class MoveEngine{
          * then remove the second square of the vertical route.
          */
         if(Locator.getRow(this.pieceSquare!) != (color == Color.White ? 7 : 2))
-            moves[moveDirection.vertical]!.splice(1, 1);
+            route[moveDirection.vertical]!.splice(1, 1);
 
         /**
          * Filter diagonal routes by the pawn's color and has enemy status.
@@ -125,11 +122,11 @@ export class MoveEngine{
          * If the diagonal squares has no enemy piece, then remove
          * the diagonal routes from the moves.
          */
-        if(!BoardManager.hasPiece(moves[moveDirection.leftDiagonal]![0], enemyColor))
-            delete moves[moveDirection.leftDiagonal];
+        if(!BoardManager.hasPiece(route[moveDirection.leftDiagonal]![0], enemyColor))
+            delete route[moveDirection.leftDiagonal];
 
-        if(!BoardManager.hasPiece(moves[moveDirection.rightDiagonal]![0], enemyColor))
-            delete moves[moveDirection.rightDiagonal];
+        if(!BoardManager.hasPiece(route[moveDirection.rightDiagonal]![0], enemyColor))
+            delete route[moveDirection.rightDiagonal];
 
         /**
          * Add en passant capability to the pawn. For example,
@@ -146,78 +143,70 @@ export class MoveEngine{
 
         // Add left en passant move to the pawn's moves.
         if(MoveChecker.isLeftEnPassantAvailable(this.pieceSquare!))
-            moves[moveDirection.leftDiagonal]!.push(color == Color.White ? this.pieceSquare! - 9 : this.pieceSquare! + 7);
+            route[moveDirection.leftDiagonal]!.push(color == Color.White ? this.pieceSquare! - 9 : this.pieceSquare! + 7);
 
         // Add right en passant move to the pawn's moves.
         if(MoveChecker.isRightEnPassantAvailable(this.pieceSquare!))
-            moves[moveDirection.rightDiagonal]!.push(color == Color.White ? this.pieceSquare! - 7 : this.pieceSquare! + 9);
+            route[moveDirection.rightDiagonal]!.push(color == Color.White ? this.pieceSquare! - 7 : this.pieceSquare! + 9);
 
         // Filter the moves for king safety.
-        return this.doKingSafety(moves) as Path;
+        return this.doKingSafety(route);
     }
 
     /**
      * Get the possible moves of the knight on the given square.
      */
-    private getKnightMoves(): Array<Square> | null
+    private getKnightMoves(): Route | null
     {
-        let moves: Array<Square> = this.routeCalculator.getKnightRoute(this.pieceSquare!);
+        let moves: Route = this.routeCalculator.getKnightRoute(this.pieceSquare!);
         if(!moves) return null;
 
-        /**
-         * Knight has no defined route(top, bottom, etc.) like other pieces.
-         * So, getKnightRoute() method returns an array of squares, and we
-         * don't need to convert it(with convertPathToMoves method) like
-         * other pieces.
-         *
-         * @see for more information about knight moves https://en.wikipedia.org/wiki/Knight_(chess)
-         */
         // Filter the moves for king safety.
-        return this.doKingSafety(moves) as Array<Square>;
+        return this.doKingSafety(moves);
     }
 
     /**
      * Get the possible moves of the bishop on the given square.
      */
-    private getBishopMoves(): Path | null
+    private getBishopMoves(): Route | null
     {
-        let moves: Path = this.routeCalculator.getBishopRoute(this.pieceSquare!);
+        let moves: Route = this.routeCalculator.getBishopRoute(this.pieceSquare!);
         if(!moves) return null;
 
         // Filter the moves for king safety.
-        return this.doKingSafety(moves) as Path;
+        return this.doKingSafety(moves);
     }
 
     /**
      * Get the possible moves of the rook on the given square.
      */
-    private getRookMoves(): Path | null
+    private getRookMoves(): Route | null
     {
-        let moves: Path = this.routeCalculator.getRookRoute(this.pieceSquare!);
+        let moves: Route = this.routeCalculator.getRookRoute(this.pieceSquare!);
         if(!moves) return null;
 
         // Filter the moves for king safety.
-        return this.doKingSafety(moves) as Path;
+        return this.doKingSafety(moves);
     }
 
     /**
      * Get the possible moves of the queen on the given square.
      */
-    private getQueenMoves(): Path| null
+    private getQueenMoves(): Route | null
     {
-        let moves: Path = this.routeCalculator.getQueenRoute(this.pieceSquare!);
+        let moves: Route = this.routeCalculator.getQueenRoute(this.pieceSquare!);
         if(!moves) return null;
 
         // Filter the moves for king safety.
-        return this.doKingSafety(moves) as Path;
+        return this.doKingSafety(moves);
     }
 
     /**
      * Get the possible moves of the king on the given square.
      */
-    private getKingMoves(): Path | null
+    private getKingMoves(): Route | null
     {
-        let moves: Path = this.routeCalculator.getKingRoute(this.pieceSquare!);
+        let moves: Route = this.routeCalculator.getKingRoute(this.pieceSquare!);
         if(!moves) return null;
 
         // Find the king's color and enemy's color by the given square.
@@ -241,7 +230,7 @@ export class MoveEngine{
         if(MoveChecker.isShortCastlingAvailable(color))
             moves[MoveRoute.Right]!.push(color == Color.White ? Square.h1 : Square.h8);
 
-        // Return extended moves.
+        // Return extended moves. Also, king doesn't need to filter for king safety.
         return moves;
     }
 
@@ -266,14 +255,14 @@ export class MoveEngine{
      *
      * @see src/Engine/Core/MoveEngine.ts For more information.
      */
-    private doKingSafety(moveRoutes: Array<Square> | Path): Array<Square> | Path
+    private doKingSafety(moveRoute: Route): Route | null
     {
         /**
          * Find the king and king's square and enemy's color
          * by the given piece color.
          */
         const king: Piece | null = BoardManager.getKing(this.piece!.getColor());
-        if(!king) return moveRoutes;
+        if(!king) return moveRoute;
 
         // Square of the king and enemy's color.
         const kingSquare: Square = BoardManager.getSquare(king)!;
@@ -296,7 +285,7 @@ export class MoveEngine{
         const relativeRoute = Locator.getRelative(this.pieceSquare!, kingSquare);
         if(!relativeRoute)
             // If dangerous route is null, then return the moves/routes without filtering.
-            return moveRoutes;
+            return moveRoute;
 
         /**
          * For find the dangerous route, get opposite route of relative route.
@@ -321,18 +310,18 @@ export class MoveEngine{
          * dangerous pieces by dangerous route in all routes. Then, remove the
          * routes that doesn't protect the king from the dangerous pieces.
          */
-        const allRoutes: Path = this.routeCalculator.getQueenRoute(this.pieceSquare!);
+        const allRoutes: Route = this.routeCalculator.getQueenRoute(this.pieceSquare!);
         for(const square of allRoutes[dangerousRoute]!){
             // If route has any dangerous piece, then(next step)
             if(BoardManager.hasPiece(square, enemyColor, dangerousPieces)){
                 /**
-                 * If moveRoutes is array, then it means that we are in
+                 * If moveRoute has MoveRoute.L, then it means that we are in
                  * getKnightMoves() method. In this case, knight can't
                  * attack while protecting the king. So, we can return
-                 * empty array.
+                 * null.
                  */
-                if(moveRoutes instanceof Array)
-                    return [];
+                if(moveRoute[MoveRoute.L])
+                    return null;
 
                 /**
                  * Remove the moves/routes that doesn't protect the king.
@@ -341,16 +330,16 @@ export class MoveEngine{
                  * queen is in bottom right of the piece, then remove
                  * top and bottom routes from the moveRoutes.
                  */
-                for (const route in moveRoutes) {
+                for (const route in moveRoute) {
                     if(route != dangerousRoute && route != relativeRoute)
-                        delete moveRoutes[route as MoveRoute];
+                        delete moveRoute[route as MoveRoute];
                 }
                 break;
             }
         }
 
         // Return the filtered moves/routes.
-        return moveRoutes;
+        return moveRoute;
     }
 }
 

@@ -1,5 +1,5 @@
-import { Path, Square, MoveRoute } from "../../../Types.ts";
-import { PathCalculator } from "./PathCalculator.ts";
+import {Square, MoveRoute, Route} from "../../../Types.ts";
+import { DirectionCalculator } from "./DirectionCalculator.ts";
 import { Converter } from "../../../Utils/Converter.ts";
 
 export class RouteCalculator{
@@ -22,19 +22,19 @@ export class RouteCalculator{
      * @description This class contains column, row and diagonal path calculates methods for the given square.
      * @see src/Engine/Core/Calculator/RouteCalculator.ts
      */
-    private pathCalculator: PathCalculator = new PathCalculator();
+    private directionCalculator: DirectionCalculator = new DirectionCalculator();
 
     /**
      * This function returns pawn route scheme(2 horizontal and 1 diagonal for each direction).
      * For more information, please check the class description.
      * @See src/Engine/Core/RouteCalculator.ts
      */
-    public getPawnRoute(square: Square): Path
+    public getPawnRoute(square: Square): Route
     {
         // Get first 2 vertical squares and first 1 diagonal squares.
         return {
-            ...this.pathCalculator.getVerticalSquares(square, 2),
-            ...this.pathCalculator.getDiagonalSquares(square, 1)
+            ...this.directionCalculator.getVerticalSquares(square, 2),
+            ...this.directionCalculator.getDiagonalSquares(square, 1)
         }
     }
 
@@ -43,17 +43,17 @@ export class RouteCalculator{
      * For more information, please check the class description.
      * @See src/Engine/Core/RouteCalculator.ts
      */
-    public getKnightRoute(square: Square): Array<Square>
+    public getKnightRoute(square: Square): Route
     {
 
         // Knight can't move to any direction, it can move only 2 horizontal and 1 vertical or 2 vertical and 1 horizontal.
         // So, we can't return Path type here.
-        let route: Array<Square> = [];
+        let route: { [MoveRoute.L]: Square[] } = { [MoveRoute.L]: [] };
 
         // Get the 2 horizontal and vertical squares.
         const firstPath = {
-            ...this.pathCalculator.getVerticalSquares(square, 2, false),
-            ...this.pathCalculator.getHorizontalSquares(square, 2, false)
+            ...this.directionCalculator.getVerticalSquares(square, 2, false),
+            ...this.directionCalculator.getHorizontalSquares(square, 2, false)
         }
 
         /**
@@ -65,9 +65,9 @@ export class RouteCalculator{
         for (const path in firstPath) {
             if(firstPath[path as MoveRoute]!.length == 2){ // If the path has 2 squares
                 if(path == MoveRoute.Bottom || path == MoveRoute.Top) // If the path is vertical, then get the horizontal squares of last square of the path.
-                    route = Converter.convertPathToMoves(this.pathCalculator.getHorizontalSquares(firstPath[path as MoveRoute]![1], 1)).concat(route);
+                    route[MoveRoute.L] = Converter.convertRouteToSquareArray(this.directionCalculator.getHorizontalSquares(firstPath[path as MoveRoute]![1], 1)).concat(route[MoveRoute.L]);
                 else // If the path is horizontal, then get the vertical squares of last square of the path.
-                    route = Converter.convertPathToMoves(this.pathCalculator.getVerticalSquares(firstPath[path as MoveRoute]![1], 1)).concat(route);
+                    route[MoveRoute.L] = Converter.convertRouteToSquareArray(this.directionCalculator.getVerticalSquares(firstPath[path as MoveRoute]![1], 1)).concat(route[MoveRoute.L]);
             }
         }
 
@@ -79,10 +79,10 @@ export class RouteCalculator{
      * For more information, please check the class description.
      * @See src/Engine/Core/RouteCalculator.ts
      */
-    public getBishopRoute(square: Square): Path
+    public getBishopRoute(square: Square): Route
     {
         // Get the diagonal squares.
-        return this.pathCalculator.getDiagonalSquares(square);
+        return this.directionCalculator.getDiagonalSquares(square);
     }
 
     /**
@@ -90,12 +90,12 @@ export class RouteCalculator{
      * For more information, please check the class description.
      * @See src/Engine/Core/RouteCalculator.ts
      */
-    public getRookRoute(square: Square): Path
+    public getRookRoute(square: Square): Route
     {
         // Get the horizontal and vertical squares.
         return {
-            ...this.pathCalculator.getHorizontalSquares(square),
-            ...this.pathCalculator.getVerticalSquares(square)
+            ...this.directionCalculator.getHorizontalSquares(square),
+            ...this.directionCalculator.getVerticalSquares(square)
         };
     }
 
@@ -104,13 +104,13 @@ export class RouteCalculator{
      * For more information, please check the class description.
      * @See src/Engine/Core/RouteCalculator.ts
      */
-    public getQueenRoute(square: Square): Path
+    public getQueenRoute(square: Square): Route
     {
         // Get the horizontal, vertical and diagonal squares.
         return {
-            ...this.pathCalculator.getHorizontalSquares(square),
-            ...this.pathCalculator.getVerticalSquares(square),
-            ...this.pathCalculator.getDiagonalSquares(square)
+            ...this.directionCalculator.getHorizontalSquares(square),
+            ...this.directionCalculator.getVerticalSquares(square),
+            ...this.directionCalculator.getDiagonalSquares(square)
         };
     }
 
@@ -119,13 +119,13 @@ export class RouteCalculator{
      * For more information, please check the class description.
      * @See src/Engine/Core/RouteCalculator.ts
      */
-    public getKingRoute(square: Square): Path
+    public getKingRoute(square: Square): Route
     {
         // Get the horizontal, vertical and diagonal squares but only one square away.
         return {
-            ...this.pathCalculator.getHorizontalSquares(square, 1),
-            ...this.pathCalculator.getVerticalSquares(square, 1),
-            ...this.pathCalculator.getDiagonalSquares(square, 1)
+            ...this.directionCalculator.getHorizontalSquares(square, 1),
+            ...this.directionCalculator.getVerticalSquares(square, 1),
+            ...this.directionCalculator.getDiagonalSquares(square, 1)
         };
     }
 }

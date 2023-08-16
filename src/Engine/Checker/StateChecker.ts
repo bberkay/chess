@@ -1,4 +1,4 @@
-import {Color, MoveRoute, Path, Piece, PieceType, Square} from "../../Types";
+import {Color, MoveRoute, Piece, PieceType, Route, Square} from "../../Types";
 import {RouteCalculator} from "../Core/Calculator/RouteCalculator.ts";
 import {BoardManager} from "../../Managers/BoardManager.ts";
 import {StateManager} from "../../Managers/StateManager.ts";
@@ -40,6 +40,7 @@ export class StateChecker {
          */
         const piece: Piece | null = BoardManager.getPiece(square);
         const enemyColor: Color = piece ? (piece.getColor() == Color.White ? Color.Black : Color.White) : StateManager.getEnemyColor();
+        console.log(enemyColor);
 
         /**
          * Get all routes of the opponent pieces.
@@ -49,30 +50,32 @@ export class StateChecker {
          *
          * @see src/Engine/Core/Calculator/RouteCalculator.ts For more information.
          */
-        const allRoutesExceptKnight: Path = this.routeCalculator.getQueenRoute(square);
+        const allRoutes: Route = {
+            ...this.routeCalculator.getQueenRoute(square),
+            ...this.routeCalculator.getKnightRoute(square)
+        };
 
         /**
          * Traverse all routes and check if the route contains any dangerous enemy piece.
          * For example, if diagonal route contains any bishop or queen, then return true.
-         * If horizontal route contains rook or queen, then return true, ..., etc. but
-         * except knight. Because knight route is different from other pieces' routes.
+         * If horizontal route contains rook or queen, then return true, ..., etc.
          *
          * @see src/Engine/Core/Calculator/RouteCalculator.ts For more information.
          */
         const diagonalRoutes: Array<MoveRoute> = [MoveRoute.TopLeft, MoveRoute.TopRight, MoveRoute.BottomLeft, MoveRoute.BottomRight];
 
-        // Loop through all routes for bishop, rook and queen threat.
-        for(const route in allRoutesExceptKnight){
+        // Loop through all routes for all piece types except pawn threat.
+        for(const route in allRoutes){
             /**
              * If the route is diagonal, then enemy types are bishop and queen.
-             * Otherwise, the route must be horizontal or vertical, then enemy
-             * types are rook and queen.
+             * Otherwise, if the route is horizontal or vertical, then enemy types
+             * are rook and queen. If the route is L, then enemy type is knight.
              */
             const enemyTypes: Array<PieceType> = diagonalRoutes.includes(route as MoveRoute) ? [PieceType.Bishop, PieceType.Queen]
-                : [PieceType.Rook, PieceType.Queen];
+                : (route == MoveRoute.L ? [PieceType.Knight] : [PieceType.Rook, PieceType.Queen]);
 
             // Check if any squares at the route contain any enemy piece.
-            for(let square of allRoutesExceptKnight[route as MoveRoute]!){
+            for(let square of allRoutes[route as MoveRoute]!){
                 if(BoardManager.hasPiece(square, enemyColor, enemyTypes))
                     return true;
             }
@@ -103,26 +106,10 @@ export class StateChecker {
              * Get first square of the bottom left route and square
              * has a white pawn, then return true.
              */
-            const square: Square = allRoutesExceptKnight[route]![0]!;
+            const square: Square = allRoutes[route]![0]!;
 
             // Check if any squares at the route contain any enemy piece.
             if(BoardManager.hasPiece(square, enemyColor, PieceType.Pawn))
-                return true;
-        }
-
-        /**
-         * Now, we have to check if any knight is threatening the given square.
-         * Why didn't we check the knight in the previous loop? Because knight
-         * has a different route than other pieces. getKnightRoute returns
-         * Array<Square> instead of Array<MoveRoute>. So, it's easier to
-         * check the knight in a different loop/scope.
-         */
-        const knightRoutes: Array<Square> = this.routeCalculator.getKnightRoute(square);
-
-        // Loop through all knight routes for enemy knight threat.
-        for(const square of knightRoutes){
-            // Check if any squares at the route contain any enemy knight
-            if(BoardManager.hasPiece(square, enemyColor, PieceType.Knight))
                 return true;
         }
 

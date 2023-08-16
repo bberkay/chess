@@ -9,7 +9,7 @@
 import { PieceFactory } from "./Factory/PieceFactory";
 import { Converter } from "../Utils/Converter";
 import { MoveEngine } from "./Core/MoveEngine";
-import { Color, PieceType, Square, StartPosition} from "../Types.ts";
+import { Color, PieceType, Square, StartPosition, Moves } from "../Types.ts";
 
 export class ChessEngine{
     /**
@@ -58,7 +58,7 @@ export class ChessEngine{
     /**
      * This function returns the moves of the given square with move engine.
      */
-    public getMoves(square: Square): Array<Square> | null
+    public getMoves(square: Square): Moves | null
     {
         return this.moveEngine.getMoves(square);
     }
