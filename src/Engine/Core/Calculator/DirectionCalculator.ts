@@ -1,7 +1,6 @@
-import {Color, Piece, Square, MoveRoute, Route} from "../../../Types.ts";
+import { Color, Square, MoveRoute, Route } from "../../../Types.ts";
 import { Locator } from "../../Utils/Locator.ts";
 import { BoardManager } from "../../../Managers/BoardManager.ts";
-import {StateManager} from "../../../Managers/StateManager.ts";
 
 export class DirectionCalculator {
     /**
@@ -33,7 +32,7 @@ export class DirectionCalculator {
      * For more information, please check the class description.
      * @See src/Engine/Core/PathCalculator.ts
      */
-    public getDiagonalSquares(square: Square, distanceLimit: number | null = null, pieceSensitivity: boolean = true): Route
+    public getDiagonalSquares(square: Square, safeColor: Color, distanceLimit: number | null = null, pieceSensitivity: boolean = true): Route
     {
         /**
          * Step is used to set the next square of the given square. For example, if step is -7 and
@@ -42,10 +41,10 @@ export class DirectionCalculator {
          * @see For more information, please check the Square enum.
          */
         return {
-            [MoveRoute.BottomRight]: this.traversePath(square, 9, distanceLimit, pieceSensitivity),
-            [MoveRoute.TopRight]: this.traversePath(square, -7, distanceLimit, pieceSensitivity),
-            [MoveRoute.TopLeft]: this.traversePath(square, -9, distanceLimit, pieceSensitivity),
-            [MoveRoute.BottomLeft]: this.traversePath(square, 7, distanceLimit, pieceSensitivity),
+            [MoveRoute.BottomRight]: this.traversePath(square, 9, distanceLimit, pieceSensitivity, safeColor),
+            [MoveRoute.TopRight]: this.traversePath(square, -7, distanceLimit, pieceSensitivity, safeColor),
+            [MoveRoute.TopLeft]: this.traversePath(square, -9, distanceLimit, pieceSensitivity, safeColor),
+            [MoveRoute.BottomLeft]: this.traversePath(square, 7, distanceLimit, pieceSensitivity, safeColor),
         };
     }
 
@@ -54,7 +53,7 @@ export class DirectionCalculator {
      * For more information, please check the class description.
      * @See src/Engine/Core/PathCalculator.ts
      */
-    public getHorizontalSquares(square: Square, distanceLimit: number | null = null, pieceSensitivity: boolean = true): Route
+    public getHorizontalSquares(square: Square, safeColor: Color, distanceLimit: number | null = null, pieceSensitivity: boolean = true): Route
     {
         /**
          * Step is used to set the next square of the given square. For example, if step is 1 and
@@ -63,8 +62,8 @@ export class DirectionCalculator {
          * @see For more information, please check the Square enum.
          */
         return {
-            [MoveRoute.Right]: this.traversePath(square, 1, distanceLimit, pieceSensitivity),
-            [MoveRoute.Left]: this.traversePath(square, -1, distanceLimit, pieceSensitivity),
+            [MoveRoute.Right]: this.traversePath(square, 1, distanceLimit, pieceSensitivity, safeColor),
+            [MoveRoute.Left]: this.traversePath(square, -1, distanceLimit, pieceSensitivity, safeColor),
         };
     }
 
@@ -73,9 +72,8 @@ export class DirectionCalculator {
      * For more information, please check the class description.
      * @See src/Engine/Core/PathCalculator.ts
      */
-    public getVerticalSquares(square: Square, distanceLimit: number | null = null, pieceSensitivity: boolean = true): Route
+    public getVerticalSquares(square: Square, safeColor: Color, distanceLimit: number | null = null, pieceSensitivity: boolean = true): Route
     {
-
         /**
          * Step is used to set the next square of the given square. For example, if step is 8 and
          * given square is Square.e5(29), then next square is Square.e6(37), next next square is
@@ -83,8 +81,8 @@ export class DirectionCalculator {
          * @see For more information, please check the Square enum.
          */
         return {
-            [MoveRoute.Bottom]: this.traversePath(square, 8, distanceLimit, pieceSensitivity),
-            [MoveRoute.Top]: this.traversePath(square, -8, distanceLimit, pieceSensitivity),
+            [MoveRoute.Bottom]: this.traversePath(square, 8, distanceLimit, pieceSensitivity, safeColor),
+            [MoveRoute.Top]: this.traversePath(square, -8, distanceLimit, pieceSensitivity, safeColor),
         };
     }
 
@@ -93,7 +91,7 @@ export class DirectionCalculator {
      * For more information, please check the class description.
      * @See src/Engine/Core/PathCalculator.ts
      */
-    private traversePath(square: Square, step: number, distanceLimit: number | null, pieceSensitivity: boolean): Array<Square>
+    private traversePath(square: Square, step: number, distanceLimit: number | null, pieceSensitivity: boolean, safeColor: Color): Array<Square>
     {
         // This variable is used to check if the edge is changed.
         // For more information, please check the isEdgeChanged function.
@@ -125,18 +123,8 @@ export class DirectionCalculator {
         // This array is used to store the squares.
         let squares: Array<Square> = [];
 
-        /**
-         * If piece sensitivity is true, then get the current player's color with the piece on the given square.
-         * If square has no piece, then use StateManager.
-         *
-         * @see For more information about the StateManager, please check the src/Managers/StateManager.ts
-         */
-        const piece: Piece | null = BoardManager.getPiece(square);
-        const currentColor: Color = pieceSensitivity && piece ? piece.getColor() : StateManager.getPlayerColor();
-
         // This variable is used to count the steps for the distance limit.
         let stepCounter = 0;
-
         while((square + step) <= 64 && (square + step) >= 1){
             /**
              * Set the next square. For example, if step is 1 and given square is Square.e5(29),
@@ -153,10 +141,9 @@ export class DirectionCalculator {
                 break;
 
             /**
-             * If piece sensitivity is false OR piece sensitivity true AND
              * if square has no player's piece(has enemy piece) then add the square to the array.
              */
-            if(!pieceSensitivity || (pieceSensitivity && !BoardManager.hasPiece(square, currentColor)))
+            if(!BoardManager.hasPiece(square, safeColor))
                 squares.push(square);
 
             /**

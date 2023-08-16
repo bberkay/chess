@@ -40,7 +40,7 @@ export class Chess{
      */
     private checkAndLoadGameFromCache(): void
     {
-        this.createGame("k7/8/1N6/4K3/8/8/8/8");
+        this.createGame("K7/8/2n5/4k3/8/8/8/8");
         console.log(StateChecker.isSquareThreatened(Square.a8));
         /*if(!Cache.get(CacheLayer.Game))
             this.createGame();

@@ -40,7 +40,6 @@ export class StateChecker {
          */
         const piece: Piece | null = BoardManager.getPiece(square);
         const enemyColor: Color = piece ? (piece.getColor() == Color.White ? Color.Black : Color.White) : StateManager.getEnemyColor();
-        console.log(enemyColor);
 
         /**
          * Get all routes of the opponent pieces.
