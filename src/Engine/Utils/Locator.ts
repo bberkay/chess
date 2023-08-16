@@ -90,11 +90,11 @@ export class Locator{
         if(distance % 8 == 0)
             relativeRoute = relativeTo! > relative ? MoveRoute.Top : MoveRoute.Bottom;
         else if(distance % 9 == 0)
-            relativeRoute = relativeTo! > relative ? MoveRoute.TopRight : MoveRoute.BottomLeft;
-        else if(distance % 7 == 0)
             relativeRoute = relativeTo! > relative ? MoveRoute.TopLeft : MoveRoute.BottomRight;
+        else if(distance % 7 == 0)
+            relativeRoute = relativeTo! > relative ? MoveRoute.TopRight : MoveRoute.BottomLeft;
         else if(distance < 8)
-            relativeRoute = relativeTo! > relative ? MoveRoute.Right : MoveRoute.Left;
+            relativeRoute = relativeTo! > relative ? MoveRoute.Left : MoveRoute.Right;
 
         // Return the relative route if it's null or not.
         return relativeRoute;

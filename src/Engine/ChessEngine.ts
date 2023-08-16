@@ -36,6 +36,7 @@ export class ChessEngine{
      */
     constructor(isStandalone: boolean = true){
         console.log("isStandalone: " + isStandalone);
+        // Standalone unit testing ile beraber geliştirilir.
     }
 
     /**

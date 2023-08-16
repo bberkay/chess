@@ -152,7 +152,6 @@ export class MoveEngine{
         if(MoveChecker.isRightEnPassantAvailable(this.pieceSquare!))
             moves[moveDirection.rightDiagonal]!.push(color == Color.White ? this.pieceSquare! - 7 : this.pieceSquare! + 9);
 
-
         // Filter the moves for king safety.
         return this.doKingSafety(moves) as Path;
     }
