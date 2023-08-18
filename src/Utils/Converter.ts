@@ -1,19 +1,9 @@
-import {Color, PieceType, Square, StartPosition, Route} from "../Types";
+import { Color, PieceType, Square, StartPosition } from "Types";
 
+/**
+ * This class is used to convert data from one type to another.
+ */
 export class Converter{
-    /**
-     * This class is used to convert data from one type to another.
-     */
-
-    /**
-     * Convert direction path to array of squares(moves).
-     * @example Converter.convertRouteToSquareArray({MoveRoute.Bottom:[3,4,5], MoveRoute.Top:[8,9,10]}), return [3,4,5,8,9,10]
-     */
-    static convertRouteToSquareArray(path: Route): Array<Square>
-    {
-        return Object.values(path).flat();
-    }
-
     /**
      * Convert squareID to square
      * @example Converter.convertSquareIDToSquare(57), return "a1"
@@ -41,7 +31,7 @@ export class Converter{
      * @example Converter.convertFENToJSON("8/8/8/8/8/8/P7/8"), return [{"color": Color.White, "type": PieceType.Pawn, "square": Square.a1}]
      * @see For more information about fen notation  https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
      */
-    static convertFENToJSON(fenNotation: StartPosition): Array<{ color: Color, type: PieceType, square: Square }>
+    static convertFENToJSON(fenNotation: StartPosition | string): Array<{ color: Color, type: PieceType, square: Square }>
     {
 
         let jsonNotation:Array<{color:Color, type:PieceType, square:Square}> = [];

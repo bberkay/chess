@@ -4,15 +4,18 @@
  * @version 1.0.0
  * @author Berkay Kaya
  * @url https://github.com/bberkay/chess
+ * @license MIT
  */
 
+import { Color, PieceType, Square, StartPosition } from "@types";
+import { SquareClickMode, SquareEffect } from "types/board";
 import { Converter } from "../Utils/Converter.ts";
-import { Color, PieceType, SquareClickMode, SquareEffect, StartPosition, Square } from "../Types.ts";
 
+/**
+ * TODO: Tüm interface tamamlandıktan sonra, açıklama güncellenecek.
+ * This class provides users to create and manage a chess board(does not include any mechanic/logic).
+ */
 export class ChessBoard {
-    /**
-     * This class provides users to create and manage a chess board(does not include any mechanic/logic).
-     */
 
     /**
      * Store locked squares click modes
@@ -27,7 +30,6 @@ export class ChessBoard {
      */
     constructor(isStandalone: boolean = true) {
         console.log("isStandalone: " + isStandalone);
-        // IsStandalone olduğunda managerlar ile beraber geliştirilir.
     }
 
     /**

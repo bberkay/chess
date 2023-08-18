@@ -1,38 +1,38 @@
-import { Color, Square, MoveRoute, Route } from "../../../Types.ts";
-import { Locator } from "../../Utils/Locator.ts";
-import { BoardManager } from "../../../Managers/BoardManager.ts";
+import { Square, Color } from "Types";
+import { MoveRoute, Route } from "Types/Engine";
+import { Locator } from "Engine/Core/Utils/Locator.ts";
+import { BoardTraverser } from "Engine/Core/Board/BoardTraverser.ts";
 
+/**
+ * This class calculates the path and distance of the given square.
+ * Also piece sensitivity can be set to true or false (true means,
+ * finish the calculation if the enemy piece is in the target square).
+ *
+ * Example: pathCalculator.getDiagonalSquares(Square.e5, 2, true);
+ * Scenarios:
+ * 1. If there is no enemy piece in any diagonal path, return:
+ * {
+ *  bottomRight: [Square.f4, Square.g3],
+ *  topRight: [Square.f6, Square.g7],
+ *  topLeft: [Square.d6, Square.c7],
+ *  bottomLeft: [Square.d4, Square.c3]
+ * }
+ * 2. If Square.f6 and Square.d6 have enemy piece, return:
+ * {
+ *  bottomRight: [Square.f4, Square.g3],
+ *  topRight: [Square.f6],
+ *  topLeft: [Square.d6, Square.c7],
+ *  bottomLeft: [Square.d6]
+ * }
+ * ...
+ */
 export class DirectionCalculator {
-    /**
-     * This class calculates the path and distance of the given square.
-     * Also piece sensitivity can be set to true or false (true means,
-     * finish the calculation if the enemy piece is in the target square).
-     *
-     * Example: pathCalculator.getDiagonalSquares(Square.e5, 2, true);
-     * Scenarios:
-     * 1. If there is no enemy piece in any diagonal path, return:
-     * {
-     *  bottomRight: [Square.f4, Square.g3],
-     *  topRight: [Square.f6, Square.g7],
-     *  topLeft: [Square.d6, Square.c7],
-     *  bottomLeft: [Square.d4, Square.c3]
-     * }
-     * 2. If Square.f6 and Square.d6 have enemy piece, return:
-     * {
-     *  bottomRight: [Square.f4, Square.g3],
-     *  topRight: [Square.f6],
-     *  topLeft: [Square.d6, Square.c7],
-     *  bottomLeft: [Square.d6]
-     * }
-     * ...
-     */
-
     /**
      * This function returns the diagonal squares of the given square.
      * For more information, please check the class description.
      * @See src/Engine/Core/PathCalculator.ts
      */
-    public getDiagonalSquares(square: Square, safeColor: Color, distanceLimit: number | null = null, pieceSensitivity: boolean = true): Route
+    public static getDiagonalSquares(square: Square, safeColor: Color, distanceLimit: number | null = null, pieceSensitivity: boolean = true): Route
     {
         /**
          * Step is used to set the next square of the given square. For example, if step is -7 and
@@ -53,7 +53,7 @@ export class DirectionCalculator {
      * For more information, please check the class description.
      * @See src/Engine/Core/PathCalculator.ts
      */
-    public getHorizontalSquares(square: Square, safeColor: Color, distanceLimit: number | null = null, pieceSensitivity: boolean = true): Route
+    public static getHorizontalSquares(square: Square, safeColor: Color, distanceLimit: number | null = null, pieceSensitivity: boolean = true): Route
     {
         /**
          * Step is used to set the next square of the given square. For example, if step is 1 and
@@ -72,7 +72,7 @@ export class DirectionCalculator {
      * For more information, please check the class description.
      * @See src/Engine/Core/PathCalculator.ts
      */
-    public getVerticalSquares(square: Square, safeColor: Color, distanceLimit: number | null = null, pieceSensitivity: boolean = true): Route
+    public static getVerticalSquares(square: Square, safeColor: Color, distanceLimit: number | null = null, pieceSensitivity: boolean = true): Route
     {
         /**
          * Step is used to set the next square of the given square. For example, if step is 8 and
@@ -91,7 +91,7 @@ export class DirectionCalculator {
      * For more information, please check the class description.
      * @See src/Engine/Core/PathCalculator.ts
      */
-    private traversePath(square: Square, step: number, distanceLimit: number | null, pieceSensitivity: boolean, safeColor: Color): Array<Square>
+    private static traversePath(square: Square, step: number, distanceLimit: number | null, pieceSensitivity: boolean, safeColor: Color): Array<Square>
     {
         // This variable is used to check if the edge is changed.
         // For more information, please check the isEdgeChanged function.
@@ -143,14 +143,14 @@ export class DirectionCalculator {
             /**
              * if square has no player's piece(has enemy piece) then add the square to the array.
              */
-            if(!BoardManager.hasPiece(square, safeColor))
+            if(!BoardTraverser.hasPiece(square, safeColor))
                 squares.push(square);
 
             /**
              * If piece sensitivity is true AND if square has a piece(enemy or player), then break the loop.
              * Because we can't go further.
              */
-            if(pieceSensitivity && BoardManager.hasPiece(square))
+            if(pieceSensitivity && BoardTraverser.hasPiece(square))
                 break;
 
             // Increase the step counter.

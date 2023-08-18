@@ -1,9 +1,10 @@
-import {MoveRoute, Square} from "../../Types";
+import { Square } from "Types";
+import { MoveRoute } from "Types/Engine";
 
+/**
+ * This class contains static methods that are used to calculate the row and column of a square.
+ */
 export class Locator{
-    /**
-     * This class contains static methods that are used to calculate the row and column of a square.
-     */
 
     /**
      * Calculates the row of a square
@@ -33,7 +34,7 @@ export class Locator{
     static getOpposite(route: MoveRoute): MoveRoute
     {
         // Init the opposite route scheme.
-        const oppositeRoutes: {[key in MoveRoute]: MoveRoute} = {
+        const oppositeRoutes: {[key in MoveRoute]?: MoveRoute} = {
             [MoveRoute.Top]: MoveRoute.Bottom,
             [MoveRoute.TopRight]: MoveRoute.BottomLeft,
             [MoveRoute.Right]: MoveRoute.Left,
@@ -44,7 +45,7 @@ export class Locator{
             [MoveRoute.TopLeft]: MoveRoute.BottomRight
         };
 
-        return oppositeRoutes[route];
+        return oppositeRoutes[route]!;
     }
 
     /**

@@ -1,21 +1,23 @@
 /**
  * @module Chess
- * @description This module provides users to a playable game on the web by connecting ChessEngine and ChessBoard.
+ * @description This module provides users to a playable chess game on the web by connecting ChessEngine and ChessBoard with CacheManager.
  * @version 1.0.0
  * @author Berkay Kaya
  * @url https://github.com/bberkay/chess
+ * @license MIT
  */
 
-import {ChessEngine} from "./Engine/ChessEngine";
-import {ChessBoard} from "./Interface/ChessBoard";
-import {Converter} from "./Utils/Converter.ts";
-import {BoardManager} from "./Managers/BoardManager.ts";
-import {StateManager} from "./Managers/StateManager.ts";
-import {CacheManager} from "./Managers/CacheManager.ts";
-import {CacheLayer, Color, PieceType, Square, SquareClickMode, StartPosition} from "./Types.ts";
+import { Color, PieceType, Square, StartPosition, CacheLayer } from "Types";
+import { SquareClickMode } from "Types/board";
+import { ChessEngine } from "./Engine/ChessEngine";
+import { ChessBoard } from "./Interface/ChessBoard";
+import { Converter } from "./Utils/Converter.ts";
+import { CacheManager } from "./Managers/CacheManager.ts";
+
 
 /**
- * This class provides users to a playable game on the web by connecting chessEngine and chessBoard.
+ * This class provides users to a playable chess game on the web by connecting ChessEngine and ChessBoard. Also,
+ * it uses CacheManager which provides users to save the game to the cache and load the game from the cache.
  */
 export class Chess{
 
@@ -39,6 +41,7 @@ export class Chess{
 
     /**
      * This function loads the game from the cache. If there is no game in the cache, it creates a new game.
+     * @see For more information about cache management check src/Managers/CacheManager.ts
      */
     private checkAndLoadGameFromCache(): void
     {
@@ -51,19 +54,20 @@ export class Chess{
     }
 
     /**
-     * This function creates a new game with the given position(fen notation or json notation).
+     * This function creates a new game with the given position(fen notation, json notation or StartPosition enum).
      * @example createGame(StartPosition.Standard);
      * @example createGame("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
      * @example createGame([{"color":Color.White, "type":PieceType.Pawn, "square":Square.a2}, {"color":Color.White, "type":PieceType.Pawn, "square":Square.b2}, ...]);
+     * @see For more information about StartPosition enum check src/types.ts
      */
     public createGame(position: Array<{color: Color, type:PieceType, square:Square}> | StartPosition | string = StartPosition.Standard): void
     {
-        // Clear the current/old game.
-        this.clear()
+        // Clear the game from the cache.
+        CacheManager.clear(CacheLayer.Game);
 
         // If fen notation is given, convert it to json notation.
         if(!Array.isArray(position))
-            position = Converter.convertFENToJSON(position as StartPosition);
+            position = Converter.convertFENToJSON(position as string);
 
         // Create a new game on engine.
         this.chessEngine.createGame(position);
@@ -80,50 +84,60 @@ export class Chess{
      */
     public doAction(moveType: SquareClickMode, square: Square): void
     {
-        if(this.selectedSquare && BoardManager.getPiece(this.selectedSquare)!.getColor() !== StateManager.getPlayerColor())
-            return;
-
-        if(moveType === SquareClickMode.Play && this.selectedSquare !== null)
+        // TODO : Check the move is legal or not with chess engine.
+        if(moveType === SquareClickMode.Play && this.selectedSquare !== null && this.selectedSquare !== square)
         {
             /**
-             * If move type is play, move the selected square on chessEngine and chessBoard,
-             * then set the selected square to null and clear the board.
+             * If the selected square is not null and the selected square is not the same as the square
              */
-            this.chessEngine.playMove(this.selectedSquare, square);
-            this.chessBoard.playMove(this.selectedSquare, square);
-            this.selectedSquare = null;
-            this.chessBoard.clearBoard();
+            this._doPlayAction(square);
         }
-        else if(moveType === SquareClickMode.Select)
+        else if(moveType === SquareClickMode.Select && this.selectedSquare === null)
         {
             /**
-             * If move type is select, set the selected square and highlight select on
-             * chessBoard then get the possible moves of the selected square
-             * with chessEngine and highlight them on chessBoard.
+             * If the selected square is null
              */
-            this.selectedSquare = square;
-            this.chessBoard.highlightSelect(square);
-            this.chessBoard.highlightMoves(this.chessEngine.getMoves(square)!);
+            this._doSelectAction(square);
         }
         else if(moveType == SquareClickMode.Clear)
         {
             /**
-             * If move type is clear, clear the selected square and clear
-             * the board on chessBoard.
+             * If the move type is clear or
              */
-            this.selectedSquare = null;
-            this.chessBoard.clearBoard();
+            this._doClearAction();
         }
     }
 
     /**
-     * @description This function clear the current game and cache then creates a new game.
+     * This function clears the selected square and clears the board on chessBoard.
      */
-    private clear(): void
+    private _doClearAction(): void
     {
-        // Clear the complete game.
-        BoardManager.clear();
-        StateManager.clear();
-        CacheManager.clear(CacheLayer.Game);
+        this.selectedSquare = null;
+        this.chessBoard.clearBoard();
+    }
+
+    /**
+     * This function set the selected square and highlight select on
+     * chessBoard then get the possible moves of the selected square
+     * with chessEngine and highlight them on chessBoard.
+     */
+    private _doSelectAction(square: Square): void
+    {
+        this.selectedSquare = square;
+        this.chessBoard.highlightSelect(square);
+        this.chessBoard.highlightMoves(this.chessEngine.getMoves(square)!);
+    }
+
+    /**
+     * This function move the selected square on chessEngine and chessBoard,
+     * then set the selected square to null and clear the board.
+     */
+    private _doPlayAction(square: Square): void
+    {
+        this.chessEngine.playMove(this.selectedSquare!, square);
+        this.chessBoard.playMove(this.selectedSquare!, square);
+        this.selectedSquare = null;
+        this.chessBoard.clearBoard();
     }
 }

@@ -1,15 +1,22 @@
-import { Color, Piece, PieceType } from "../Types";
+import { Color, PieceType } from "@types";
+import { Piece } from "types/engine";
 
+/**
+ * This class is the model of the piece.
+ */
 export class PieceModel implements Piece{
-    /**
-     * This class is the model of the piece.
-     */
 
+    /**
+     * Properties of the PieceModel class.
+     */
     private readonly id: number;
     private readonly color: Color;
     private readonly type: PieceType;
     private moveCount: number;
 
+    /**
+     * Constructor of the PieceModel class.
+     */
     public constructor(color: Color, type: PieceType, id: number){
         this.id = id;
         this.color = color;
@@ -33,12 +40,12 @@ export class PieceModel implements Piece{
     public getID(): number { return this.id; }
 
     /**
-     * This function returns the moved status of the piece.
+     * This function returns the move count of the piece.
      */
     public getMoveCount(): number { return this.moveCount; }
 
     /**
-     * This function sets the moved status of the piece.
+     * This function increases move count of the piece.
      */
     public increaseMoveCount(): void { this.moveCount++; }
 

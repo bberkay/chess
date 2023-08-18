@@ -1,18 +1,19 @@
-import {CastlingType, Color, EnPassantDirection, Piece, PieceType, Square} from "../../Types";
-import {BoardManager} from "../../Managers/BoardManager";
-import {StateChecker} from "./StateChecker.ts";
-import {Locator} from "../Utils/Locator.ts";
-import {StateManager} from "../../Managers/StateManager.ts";
+import { Color, PieceType, Square } from "Types";
+import { CastlingType, EnPassantDirection, Piece } from "Types/Engine";
+import { BoardTraverser } from "Engine/Core/Board/BoardTraverser";
+import { StateChecker } from "Engine/Core/State/Checker/StateChecker";
+import { Locator } from "Engine/Core/Utils/Locator";
+import { StateInspector } from "Engine/Core/State/StateInspector";
 
+/**
+ * This class is responsible for checking if the specific move is available like
+ * castling and en passant. Also, the methods are separated by the direction or
+ * type because of the get one direction or type of move(check move engine).
+ *
+ * @see src/Engine/Core/MoveEngine.ts
+ * @see for more information about state management src/Mangers/StateManager.ts
+ */
 export class MoveChecker{
-    /**
-     * This class is responsible for checking if the specific move is available like
-     * castling and en passant. Also, the methods are separated by the direction or
-     * type because of the get one direction or type of move(check move engine).
-     *
-     * @see src/Engine/Core/MoveEngine.ts
-     * @see for more information about state management src/Mangers/StateManager.ts
-     */
 
     /**
      * @description Check if the castling is available for the given king, rook and squares between king and rook.
@@ -34,7 +35,7 @@ export class MoveChecker{
          *
          * @see src/Manager/StateManager.ts
          */
-        if(!StateManager.getCastlingStatus(color == Color.Black
+        if(!StateInspector.getCastlingStatus(color == Color.Black
             ? (castlingType == CastlingType.Long ? CastlingType.BlackLong : CastlingType.BlackShort)
             : (castlingType == CastlingType.Long ? CastlingType.WhiteLong : CastlingType.WhiteShort)))
             return false;
@@ -49,8 +50,8 @@ export class MoveChecker{
          * Color: black, castling type: long, king: e8, chosen rook: a8, between squares: b8, c8, d8
          * Color: black, castling type: short, king: e8, chosen rook: h8, between squares: f8, g8
          */
-        const king: Piece = BoardManager.getKing(color)!;
-        const chosenRook: Piece | null = BoardManager.getPiece(castlingType == CastlingType.Long
+        const king: Piece = BoardTraverser.getKing(color)!;
+        const chosenRook: Piece | null = BoardTraverser.getPiece(castlingType == CastlingType.Long
             ? (color == Color.White ? Square.a1 : Square.h1)
             : (color == Color.White ? Square.a8 : Square.h8));
         const betweenSquares: Array<Square> = castlingType == CastlingType.Long
@@ -72,7 +73,7 @@ export class MoveChecker{
          */
         for(let square of betweenSquares!){
             // If there is a piece or a dangerous square between king and the long rook, return false.
-            if(BoardManager.getPiece(square) || StateChecker.isSquareThreatened(square))
+            if(BoardTraverser.getPiece(square) || BoardChecker.isSquareThreatened(square))
                 return false;
         }
 
@@ -115,14 +116,14 @@ export class MoveChecker{
          */
 
         // Find the pawn by the given square.
-        const pawn: Piece = BoardManager.getPiece(square)!;
+        const pawn: Piece = StateEngine.getPiece(square)!;
 
         /**
          * If en passant is not available for the given pawn, return false.
          *
          * @see for more information about en passant state management src/Manager/StateManager.ts
          */
-        if(StateManager.getBannedEnPassantPawns(pawn.getID()))
+        if(StateEngine.getBannedEnPassantPawns(pawn.getID()))
             return false;
 
         // Find fifth rank for black and white pawns.
@@ -145,7 +146,7 @@ export class MoveChecker{
          * square to the moving pawn.
          */
         const adjacentSquare: number = direction == EnPassantDirection.Left ? square - 1 : square + 1;
-        const pieceOfTargetSquare: Piece | null = BoardManager.getPiece(adjacentSquare);
+        const pieceOfTargetSquare: Piece | null = StateEngine.getPiece(adjacentSquare);
 
         /**
          * Check third rule, if target square is empty or if the piece
