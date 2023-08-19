@@ -1,4 +1,4 @@
-import { Color, PieceType, Square } from "@types";
+import { Color, PieceType, Square, EnPassantDirection, CastlingStatus } from "Types";
 
 /**
  * @description Piece is used to define a piece.
@@ -14,16 +14,22 @@ export interface Piece {
 }
 
 /**
- * @description White/Black Long mean White/Black player's queen side, White/Black Short mean White/Black player's king side.
- * @see src/Engine/Checker/MoveChecker.ts For more information.
+ * @description StartConfig is used to define a start configuration.
+ * @see src/Engine/Board/BoardManager.ts For more information.
  */
-export type Castling = Record<CastlingType, boolean>
+export interface StartConfig {
+    startColor?: Color;
+    moveCount?: number;
+    castlingStatus?: CastlingStatus;
+    enPassantBanStatus?: EnPassantBanStatus;
+    pieceIds?: Array<number>;
+}
 
 /**
  * @description Piece ID's of pawn that "can't" en passant(why don't we store as "can"? because this way more easy and optimize.
  * @see src/Engine/Checker/MoveChecker.ts For more information.
  */
-export type EnPassant = Record<number, EnPassantDirection>
+export type EnPassantBanStatus = Record<number, EnPassantDirection>
 
 /**
  * @description Kings is stores the kings of the players.
@@ -45,29 +51,6 @@ export type Route = {
     [MoveRoute.BottomLeft]?: Square[],
     [MoveRoute.Bottom]?: Square[]
     [MoveRoute.L]?: Square[],
-}
-
-/**
- * @description CastlingType enum for the castling types.
- * @see src/Engine/Checker/MoveChecker.ts For more information.
- */
-export enum CastlingType{
-    WhiteLong = "WhiteLong",
-    WhiteShort = "WhiteShort",
-    BlackLong = "BlackLong",
-    BlackShort = "BlackShort",
-    Long = "Long",
-    Short = "Short"
-}
-
-/**
- * @description EnPassantDirection enum for the en passant directions.
- * @see src/Engine/Checker/MoveChecker.ts For more information.
- */
-export enum EnPassantDirection{
-    Left = "Left",
-    Right = "Right",
-    Both = "Both"
 }
 
 /**

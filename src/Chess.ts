@@ -7,9 +7,9 @@
  * @license MIT
  */
 
-import { Color, PieceType, Square, StartPosition, CacheLayer } from "Types";
-import { SquareClickMode } from "Types/board";
-import { ChessEngine } from "./Engine/ChessEngine";
+import { Color, PieceType, Square, StartPosition, CacheLayer, JsonNotation } from "Types";
+import { SquareClickMode } from "Types/Board";
+import { ChessEngine } from "Engine/ChessEngine";
 import { ChessBoard } from "./Interface/ChessBoard";
 import { Converter } from "./Utils/Converter.ts";
 import { CacheManager } from "./Managers/CacheManager.ts";
@@ -50,24 +50,22 @@ export class Chess{
             this.createGame();
         else{
             console.log("Game is loaded from the cache.");
+            // TODO: Json Notation ile yüklenebilir.
         }*/
     }
 
     /**
      * This function creates a new game with the given position(fen notation, json notation or StartPosition enum).
-     * @example createGame(StartPosition.Standard);
-     * @example createGame("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
-     * @example createGame([{"color":Color.White, "type":PieceType.Pawn, "square":Square.a2}, {"color":Color.White, "type":PieceType.Pawn, "square":Square.b2}, ...]);
      * @see For more information about StartPosition enum check src/types.ts
      */
-    public createGame(position: Array<{color: Color, type:PieceType, square:Square}> | StartPosition | string = StartPosition.Standard): void
+    public createGame(position: JsonNotation | StartPosition | string = StartPosition.Standard): void
     {
-        // Clear the game from the cache.
+        // Clear the game from the cache before creating a new game.
         CacheManager.clear(CacheLayer.Game);
 
         // If fen notation is given, convert it to json notation.
-        if(!Array.isArray(position))
-            position = Converter.convertFENToJSON(position as string);
+        if(typeof position === "string")
+            position = Converter.convertFenToJson(position);
 
         // Create a new game on engine.
         this.chessEngine.createGame(position);

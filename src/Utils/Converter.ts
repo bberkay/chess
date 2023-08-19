@@ -1,4 +1,4 @@
-import { Color, PieceType, Square, StartPosition } from "Types";
+import {Color, PieceType, Square, StartPosition, JsonNotation, CastlingType, CastlingStatus} from "Types";
 
 /**
  * This class is used to convert data from one type to another.
@@ -28,13 +28,34 @@ export class Converter{
 
     /**
      * Convert FEN to JSON
-     * @example Converter.convertFENToJSON("8/8/8/8/8/8/P7/8"), return [{"color": Color.White, "type": PieceType.Pawn, "square": Square.a1}]
-     * @see For more information about fen notation  https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
+     * @example Converter.convertFENToJSON("8/8/8/8/8/8/P7/8 w - - 0 1")
+     * @see For more information about fen notation https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
+     * @see For more information about Json notation etc. check src/Types.ts
      */
-    static convertFENToJSON(fenNotation: StartPosition | string): Array<{ color: Color, type: PieceType, square: Square }>
+    static convertFenToJson(fenNotation: StartPosition | string): JsonNotation
     {
+        // Split fen notation by space
+        const splitFen = fenNotation.split(" ");
 
-        let jsonNotation:Array<{color:Color, type:PieceType, square:Square}> = [];
+        /**
+         * Find castling availability from the fen notation
+         */
+        const castlingAvailability: CastlingStatus = {
+            [CastlingType.WhiteLong] : splitFen[2].includes("Q"),
+            [CastlingType.WhiteShort] : splitFen[2].includes("K"),
+            [CastlingType.BlackLong] : splitFen[2].includes("q"),
+            [CastlingType.BlackShort] : splitFen[2].includes("k")
+        }
+
+        // Json notation
+        let jsonNotation: JsonNotation = {
+            board:[],
+            turn: splitFen[1] === "w" ? Color.White : Color.Black,
+            castling: castlingAvailability,
+            enPassant: splitFen[3].includes("-") ? null : Square[splitFen[3] as keyof typeof Square],
+            halfMoveClock: parseInt(splitFen[4]),
+            fullMoveNumber: parseInt(splitFen[5])
+        };
 
         /**
          * Type scheme (first letter of the piece type except for the knight) for convert letter to the piece type
@@ -50,7 +71,7 @@ export class Converter{
         };
 
         // Rows of the board (first part of the FEN, for example "8/8/8/8/8/8/P7/8")
-        const rows: string[] = fenNotation.split(" ")[0].split("/");
+        const rows: string[] = splitFen[0].split("/");
 
         // Loop through the fen board
         for(let i:number = 0; i < 8; i++) {
@@ -100,7 +121,7 @@ export class Converter{
                      * If square is a letter, that means square has piece then
                      * add piece to json notation
                      */
-                    jsonNotation.push({
+                    jsonNotation.board.push({
                         color: square == square.toLowerCase() ? Color.Black : Color.White, // If square is lowercase, piece is black, otherwise piece is white
                         type: typeScheme[square.toLowerCase()], // Convert the letter to the piece type
                         square: Square[(jsonColumn + jsonRow.toString()) as keyof typeof Square]  // Convert the column and row to the square
@@ -114,10 +135,9 @@ export class Converter{
 
     /**
      * Convert JSON to FEN
-     * @example Converter.convertJSONToFen([{"color": Color.White, "type": PieceType.Pawn, "square": Square.a1}]), return "8/8/8/8/8/8/P7/8"
      * @see For more information about fen notation https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
      */
-    static convertJSONToFEN(jsonNotation: Array<{color:Color, type:PieceType, square:Square}>): string
+    static convertJsonToFen(jsonNotation: JsonNotation): string
     {
         /**
          * Is char a numeric?
@@ -166,7 +186,7 @@ export class Converter{
         for(let i in jsonNotation)
         {
             // Current piece
-            let piece: {color:Color, type:PieceType, square:Square} = jsonNotation[i];
+            let piece: {color:Color, type:PieceType, square:Square} = jsonNotation.board[Number(i)];
 
             // Convert squareID to square
             let square: string = Converter.convertSquareIDToSquare(piece["square"]);
@@ -241,7 +261,18 @@ export class Converter{
             fenRowCounter++;
         }
 
-        // Return fen notation as string with "/" separator
-        return fenNotation.join("/");
+        /**
+         * Get turn, castling, en passant, half move clock and full move number from the json notation
+         * and convert them to the fen notation.
+         */
+        const turn: string = jsonNotation.turn == Color.White ? "w" : "b";
+        const castling: string = (jsonNotation.castling.WhiteShort ? "K" : "") +
+            (jsonNotation.castling.WhiteLong ? "Q" : "") +
+            (jsonNotation.castling.BlackShort ? "k" : "") +
+            (jsonNotation.castling.BlackLong ? "q" : "");
+        const enPassant: string =  jsonNotation.enPassant == null ? "-" : Converter.convertSquareIDToSquare(jsonNotation.enPassant);
+
+        // Return fen notation as string with space between them
+        return fenNotation.join("/") + " " + turn + " " + castling + " " + enPassant + " " + jsonNotation.halfMoveClock.toString() + " " + jsonNotation.fullMoveNumber.toString();
     }
 }

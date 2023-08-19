@@ -19,7 +19,7 @@ export class Board {
         [Square.g1]: null, [Square.g2]: null, [Square.g3]: null, [Square.g4]: null, [Square.g5]: null, [Square.g6]: null, [Square.g7]: null, [Square.g8]: null,
         [Square.h1]: null, [Square.h2]: null, [Square.h3]: null, [Square.h4]: null, [Square.h5]: null, [Square.h6]: null, [Square.h7]: null, [Square.h8]: null,
     };
-    protected static currentColor: Color = Color.White;
+    protected static currentTurn: Color = Color.White;
     protected static checkedColor: Color | null = null;
     protected static moveCount: number = 0;
 
@@ -43,13 +43,11 @@ export class Board {
         [CastlingType.WhiteLong]: true,
         [CastlingType.WhiteShort]: true,
         [CastlingType.BlackLong]: true,
-        [CastlingType.BlackShort]: true,
-        [CastlingType.Long]: true,
-        [CastlingType.Short]: true,
+        [CastlingType.BlackShort]: true
     }
 
     /**
      * Piece ID's of pawn that "can't" en passant(why don't we store as "can"? because this way more easy and optimized).
      */
-    protected static bannedEnPassantPawns: EnPassant = {};
+    protected static enPassantBanStatus: EnPassant = {};
 }

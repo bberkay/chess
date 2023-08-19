@@ -1,9 +1,7 @@
 import { Color, PieceType, Square } from "Types";
 import { CastlingType, EnPassantDirection, Piece } from "Types/Engine";
-import { BoardTraverser } from "Engine/Core/Board/BoardTraverser";
-import { StateChecker } from "Engine/Core/State/Checker/StateChecker";
+import { BoardQueryer } from "Engine/Core/Board/BoardQueryer.ts";
 import { Locator } from "Engine/Core/Utils/Locator";
-import { StateInspector } from "Engine/Core/State/StateInspector";
 
 /**
  * This class is responsible for checking if the specific move is available like
@@ -19,7 +17,7 @@ export class MoveChecker{
      * @description Check if the castling is available for the given king, rook and squares between king and rook.
      * @see src/Engine/Checker/MoveChecker.ts For more information.
      */
-    private static isCastlingAvailable(color: Color, castlingType: CastlingType): boolean
+    protected isCastlingAvailable(color: Color, castlingType: "Long" | "Short"): boolean
     {
         /**
          * Rules for castling:
@@ -36,8 +34,8 @@ export class MoveChecker{
          * @see src/Manager/StateManager.ts
          */
         if(!StateInspector.getCastlingStatus(color == Color.Black
-            ? (castlingType == CastlingType.Long ? CastlingType.BlackLong : CastlingType.BlackShort)
-            : (castlingType == CastlingType.Long ? CastlingType.WhiteLong : CastlingType.WhiteShort)))
+            ? (castlingType == "Short" ? CastlingType.BlackLong : CastlingType.BlackShort)
+            : (castlingType == "Long" ? CastlingType.WhiteLong : CastlingType.WhiteShort)))
             return false;
 
         /**
@@ -50,11 +48,11 @@ export class MoveChecker{
          * Color: black, castling type: long, king: e8, chosen rook: a8, between squares: b8, c8, d8
          * Color: black, castling type: short, king: e8, chosen rook: h8, between squares: f8, g8
          */
-        const king: Piece = BoardTraverser.getKing(color)!;
-        const chosenRook: Piece | null = BoardTraverser.getPiece(castlingType == CastlingType.Long
+        const king: Piece = BoardQueryer.getKingByColor(color)!;
+        const chosenRook: Piece | null = BoardQueryer.getPieceOnSquare(castlingType == "Short"
             ? (color == Color.White ? Square.a1 : Square.h1)
             : (color == Color.White ? Square.a8 : Square.h8));
-        const betweenSquares: Array<Square> = castlingType == CastlingType.Long
+        const betweenSquares: Array<Square> = castlingType == "Long"
             ? (color == Color.White ? [Square.b1, Square.c1, Square.d1] : [Square.b8, Square.c8, Square.d8])
             : (color == Color.White ? [Square.f1, Square.g1] : [Square.f8, Square.g8]);
 
@@ -64,7 +62,7 @@ export class MoveChecker{
          *
          * @see for more information about dangerous squares src/Engine/Checker/StateChecker.ts
          */
-        if(!chosenRook || king.getMoveCount() != 0 || chosenRook.getMoveCount() != 0 || StateChecker.isPlayerInCheck())
+        if(!chosenRook || king.getMoveCount() != 0 || chosenRook.getMoveCount() != 0 || BoardQueryer.isPlayerInCheck())
             return false;
 
         /**
@@ -73,7 +71,7 @@ export class MoveChecker{
          */
         for(let square of betweenSquares!){
             // If there is a piece or a dangerous square between king and the long rook, return false.
-            if(BoardTraverser.getPiece(square) || BoardChecker.isSquareThreatened(square))
+            if(BoardQueryer.getPiece(square) || BoardChecker.isSquareThreatened(square))
                 return false;
         }
 
@@ -85,25 +83,25 @@ export class MoveChecker{
      * @description Check if the long castling is available for the given color.
      * @see src/Engine/Checker/MoveChecker.ts For more information.
      */
-    public static isLongCastlingAvailable(color: Color): boolean
+    protected isLongCastlingAvailable(color: Color): boolean
     {
-        return this.isCastlingAvailable(color, CastlingType.Long);
+        return this.isCastlingAvailable(color, "Long");
     }
 
     /**
      * @description Check if the short castling is available for the given color.
      * @see src/Engine/Checker/MoveChecker.ts For more information.
      */
-    public static isShortCastlingAvailable(color: Color): boolean
+    protected isShortCastlingAvailable(color: Color): boolean
     {
-        return this.isCastlingAvailable(color, CastlingType.Short);
+        return this.isCastlingAvailable(color, "Short");
     }
 
     /**
      * @description Check if the en passant is available for the given square and direction.
      * @see src/Engine/Checker/MoveChecker.ts For more information.
      */
-    private static isEnPassantAvailable(square: Square, direction: EnPassantDirection): boolean
+    protected isEnPassantAvailable(square: Square, direction: EnPassantDirection): boolean
     {
         /**
          * Rules for en passant:
@@ -160,7 +158,7 @@ export class MoveChecker{
      * @description Check if the left en passant is available for the given square.
      * @see src/Engine/Checker/MoveChecker.ts For more information.
      */
-    public static isLeftEnPassantAvailable(square: Square): boolean
+    protected isLeftEnPassantAvailable(square: Square): boolean
     {
         return this.isEnPassantAvailable(square, EnPassantDirection.Left);
     }
@@ -169,7 +167,7 @@ export class MoveChecker{
      * @description Check if the right en passant is available for the given square.
      * @see src/Engine/Checker/MoveChecker.ts For more information.
      */
-    public static isRightEnPassantAvailable(square: Square): boolean
+    protected isRightEnPassantAvailable(square: Square): boolean
     {
         return this.isEnPassantAvailable(square, EnPassantDirection.Right);
     }

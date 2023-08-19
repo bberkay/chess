@@ -7,7 +7,7 @@
  * @license MIT
  */
 
-import { Color, PieceType, Square, StartPosition } from "@types";
+import {Color, JsonNotation, PieceType, Square, StartPosition} from "Types";
 import { SquareClickMode, SquareEffect } from "types/board";
 import { Converter } from "../Utils/Converter.ts";
 
@@ -34,27 +34,24 @@ export class ChessBoard {
 
     /**
      * This function creates a chess board with the given position(fen notation or json notation).
-     * @example createGame(StartPosition.Standard);
-     * @example createGame("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
-     * @example createGame([{"color":Color.White, "type":PieceType.Pawn, "square":Square.a2}, {"color":Color.White, "type":PieceType.Pawn, "square":Square.b2}, ...]);
      */
-    public createGame(position: Array<{color: Color, type:PieceType, square:Square}> | StartPosition | string = StartPosition.Standard): void
+    public createGame(position: JsonNotation | StartPosition | string = StartPosition.Standard): void
     {
-        // If position is not an array(string means fen notation), convert it to JSON notation.
-        if(!Array.isArray(position))
-            position = Converter.convertFENToJSON(position as StartPosition);
+        // If fen notation is given, convert it to json notation.
+        if(typeof position === "string")
+            position = Converter.convertFenToJson(position as StartPosition);
 
         // Create squares in the board.
-        this.createBoard();
+        this.createSquares();
 
         // Create the pieces.
-        this.createPieces(position);
+        this.createPieces(position.board);
     }
 
     /**
      * This function creates the background of the chess board in #chessboard div
      */
-    private createBoard(): void
+    private createSquares(): void
     {
         // Find the chess board element and clear it.
         let board: HTMLDivElement = document.getElementById("chessboard") as HTMLDivElement;

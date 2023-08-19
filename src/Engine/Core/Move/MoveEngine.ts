@@ -1,6 +1,6 @@
 import { Color, Square, PieceType } from "Types";
 import { MoveRoute, Piece, Route } from "Types/Engine";
-import { BoardTraverser } from "../Board/BoardTraverser.ts";
+import { BoardQueryer } from "Engine/Core/Board/BoardQueryer.ts";
 import { Locator } from "../Utils/Locator.ts";
 import { RouteCalculator } from "./Calculator/RouteCalculator.ts";
 import { MoveChecker } from "./Checker/MoveChecker.ts";
@@ -9,7 +9,7 @@ import { Flattener } from "Engine/Core/Utils/Flattener.ts";
 /**
  * This class calculates the possible moves of the pieces.
  */
-export class MoveEngine{
+export class MoveEngine extends MoveChecker{
 
     /**
      * Properties of the MoveEngine class.
@@ -21,6 +21,7 @@ export class MoveEngine{
      * Constructor of the MoveEngine class.
      */
     constructor() {
+        super();
         this.piece = null;
         this.pieceSquare = null;
     }
@@ -31,7 +32,7 @@ export class MoveEngine{
     public getMoves(square: Square): Array<Square> | null
     {
         // Get the piece on the given square.
-        this.piece = BoardTraverser.getPiece(square);
+        this.piece = BoardQueryer.getPieceOnSquare(square);
         this.pieceSquare = square;
 
         // If there is no piece on the given square, return null;
@@ -116,10 +117,10 @@ export class MoveEngine{
          * If the diagonal squares has no enemy piece, then remove
          * the diagonal routes from the moves.
          */
-        if(!BoardTraverser.hasPiece(route[moveDirection.leftDiagonal]![0], enemyColor))
+        if(!BoardQueryer.hasPiece(route[moveDirection.leftDiagonal]![0], enemyColor))
             delete route[moveDirection.leftDiagonal];
 
-        if(!BoardTraverser.hasPiece(route[moveDirection.rightDiagonal]![0], enemyColor))
+        if(!BoardQueryer.hasPiece(route[moveDirection.rightDiagonal]![0], enemyColor))
             delete route[moveDirection.rightDiagonal];
 
         /**
@@ -136,11 +137,11 @@ export class MoveEngine{
          */
 
         // Add left en passant move to the pawn's moves.
-        if(MoveChecker.isLeftEnPassantAvailable(this.pieceSquare!))
+        if(this.isLeftEnPassantAvailable(this.pieceSquare!))
             route[moveDirection.leftDiagonal]!.push(color == Color.White ? this.pieceSquare! - 9 : this.pieceSquare! + 7);
 
         // Add right en passant move to the pawn's moves.
-        if(MoveChecker.isRightEnPassantAvailable(this.pieceSquare!))
+        if(this.isRightEnPassantAvailable(this.pieceSquare!))
             route[moveDirection.rightDiagonal]!.push(color == Color.White ? this.pieceSquare! - 7 : this.pieceSquare! + 9);
 
         // Filter the moves for king safety and convert the route to squares array.
@@ -204,7 +205,7 @@ export class MoveEngine{
         if(!moves) return null;
 
         // Find the king's color and enemy's color by the given square.
-        const color: Color = BoardTraverser.getPiece(this.pieceSquare!)!.getColor();
+        const color: Color = BoardQueryer.getPiece(this.pieceSquare!)!.getColor();
 
         /**
          * Add castling moves to the king's moves. For example,
@@ -217,11 +218,11 @@ export class MoveEngine{
          */
 
         // Add long castling move to the king's moves.
-        if(MoveChecker.isLongCastlingAvailable(color))
+        if(this.isLongCastlingAvailable(color))
             moves[MoveRoute.Left]!.push(color == Color.White ? Square.a1 : Square.a8);
 
         // Add short castling move to the king's moves.
-        if(MoveChecker.isShortCastlingAvailable(color))
+        if(this.isShortCastlingAvailable(color))
             moves[MoveRoute.Right]!.push(color == Color.White ? Square.h1 : Square.h8);
 
         // Return extended and converted moves. Also, king doesn't need to filter for king safety.
@@ -255,11 +256,11 @@ export class MoveEngine{
          * Find the king and king's square and enemy's color
          * by the given piece color.
          */
-        const king: Piece | null = BoardTraverser.getKing(this.piece!.getColor());
+        const king: Piece | null = BoardQueryer.getKing(this.piece!.getColor());
         if(!king) return moveRoute;
 
         // Square of the king and enemy's color.
-        const kingSquare: Square = BoardTraverser.getLocation(king)!;
+        const kingSquare: Square = BoardQueryer.getLocation(king)!;
         const enemyColor: Color = this.piece!.getColor() == Color.White ? Color.Black : Color.White;
 
         /**
@@ -307,7 +308,7 @@ export class MoveEngine{
         const allRoutes: Route = RouteCalculator.getQueenRoute(this.pieceSquare!);
         for(const square of allRoutes[dangerousRoute]!){
             // If route has any dangerous piece, then(next step)
-            if(BoardTraverser.hasPiece(square, enemyColor, dangerousPieces)){
+            if(BoardQueryer.hasPiece(square, enemyColor, dangerousPieces)){
                 /**
                  * If moveRoute has MoveRoute.L, then it means that we are in
                  * getKnightMoves() method. In this case, knight can't
