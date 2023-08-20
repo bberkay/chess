@@ -7,7 +7,7 @@
  * @license MIT
  */
 
-import {Color, JsonNotation, PieceType, Square, StartPosition} from "Types";
+import { JsonNotation, Square, StartPosition } from "Types";
 import { MoveEngine } from "Engine/Core/Move/MoveEngine";
 import { BoardManager } from "Engine/Core/Board/BoardManager.ts";
 import { Converter } from "../Utils/Converter";
@@ -46,8 +46,8 @@ export class ChessEngine{
         if(typeof position === "string")
             position = Converter.convertFenToJson(position as StartPosition);
 
-        // Create the pieces with the given position.
-        this.boardManager.createPieces(position);
+        // Create the board with the given position.
+        this.boardManager.createBoard(position);
     }
 
     /**
@@ -63,8 +63,8 @@ export class ChessEngine{
      */
     public playMove(from: Square, to: Square): void
     {
-        this.boardManager.movePiece(to, BoardQueryer.getPiece(from)!);
-        this.stateManager.changeTurn();
+        this.boardManager.movePiece(to, BoardQueryer.getPieceOnSquare(from)!);
+        this.boardManager.changeTurn();
         // TODO: Castling and en passant state management should be implemented.
     }
 

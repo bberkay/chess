@@ -7,7 +7,7 @@
  * @license MIT
  */
 
-import { Color, PieceType, Square, StartPosition, CacheLayer, JsonNotation } from "Types";
+import { Square, StartPosition, CacheLayer, JsonNotation } from "Types";
 import { SquareClickMode } from "Types/Board";
 import { ChessEngine } from "Engine/ChessEngine";
 import { ChessBoard } from "./Interface/ChessBoard";

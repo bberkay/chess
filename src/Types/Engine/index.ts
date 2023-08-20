@@ -1,4 +1,4 @@
-import { Color, PieceType, Square, EnPassantDirection, CastlingStatus } from "Types";
+import { Color, PieceType, Square, EnPassantDirection } from "Types";
 
 /**
  * @description Piece is used to define a piece.
@@ -11,18 +11,6 @@ export interface Piece {
     getMoveCount(): number;
     increaseMoveCount(): void;
     setMoveCount(moveCount: number): void;
-}
-
-/**
- * @description StartConfig is used to define a start configuration.
- * @see src/Engine/Board/BoardManager.ts For more information.
- */
-export interface StartConfig {
-    startColor?: Color;
-    moveCount?: number;
-    castlingStatus?: CastlingStatus;
-    enPassantBanStatus?: EnPassantBanStatus;
-    pieceIds?: Array<number>;
 }
 
 /**

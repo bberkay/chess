@@ -1,6 +1,6 @@
 import { Board } from "./Board";
-import { Square, Color, PieceType } from "Types";
-import { Piece, Route, MoveRoute, CastlingType, EnPassantDirection } from "Types/Engine";
+import { Square, Color, PieceType, EnPassantDirection, CastlingType } from "Types";
+import { Piece, Route, MoveRoute } from "Types/Engine";
 import { RouteCalculator } from "Engine/Core/Move/Calculator/RouteCalculator.ts";
 
 
@@ -18,19 +18,19 @@ export class BoardQueryer extends Board{
     }
 
     /**
-     * Get current player
+     * Get current turn's color
      */
     public static getTurn(): Color
     {
-        return Board.currentColor;
+        return Board.currentTurn;
     }
 
     /**
-     * Get enemy color
+     * Get opponent's color
      */
     public static getOpponent(): Color
     {
-        return Board.currentColor === Color.White ? Color.Black : Color.White;
+        return Board.currentTurn === Color.White ? Color.Black : Color.White;
     }
 
     /**
@@ -39,6 +39,24 @@ export class BoardQueryer extends Board{
     public static getMoveCount(): number
     {
         return Board.moveCount;
+    }
+
+    /**
+     * Get castling status
+     * @example StateManager.getCastlingStatus(CastlingType.WhiteLong)
+     */
+    public static getCastlingStatus(castlingType: CastlingType): boolean
+    {
+        return Board.castlingStatus[castlingType];
+    }
+
+    /**
+     * Get en passant status of pawn
+     * @example StateManager.getEnPassantStatus(fourth number piece id) // Returns EnPassantDirection.Left and/or EnPassantDirection.Right and/or EnPassantDirection.Both
+     */
+    public static getEnPassantBanStatus(pieceID: number): EnPassantDirection
+    {
+        return Board.enPassantBanStatus[pieceID];
     }
 
     /**
@@ -154,7 +172,7 @@ export class BoardQueryer extends Board{
          * @see For more information about the StateManager, please check the src/Managers/StateManager.ts
          */
         const piece: Piece | null = this.getPieceOnSquare(square);
-        const enemyColor: Color = piece ? (piece.getColor() == Color.White ? Color.Black : Color.White) : this.getEnemyColor();
+        const enemyColor: Color = piece ? (piece.getColor() == Color.White ? Color.Black : Color.White) : this.getOpponent();
 
         /**
          * Get all routes of the opponent pieces.
@@ -234,32 +252,30 @@ export class BoardQueryer extends Board{
     /**
      * Is player checked?
      */
-    public static isPlayerChecked(): boolean
+    public static isPlayerInCheck(): boolean
     {
         /**
          * Find the square of the player's king and
          * check if it is threatened.
          */
         return this.isSquareThreatened(
-            this.getSquareOfPiece(this.getKingByColor(this.getPlayerColor())!)!
+            this.getSquareOfPiece(this.getKingByColor(this.getTurn())!)!
         );
     }
 
     /**
-     * Get castling status
-     * @example StateManager.getCastlingStatus(CastlingType.WhiteLong)
+     * Is player checked mate?
      */
-    public static getCastlingStatus(castlingType: CastlingType): boolean
+    public static isPlayerInCheckMate(): boolean
     {
-        return Board.castlingStatus[castlingType];
+        return false;
     }
 
     /**
-     * Get en passant status of pawn
-     * @example StateManager.getEnPassantStatus(fourth number piece id) // Returns EnPassantDirection.Left and/or EnPassantDirection.Right and/or EnPassantDirection.Both
+     * Is stalemate?
      */
-    public static getBannedEnPassantPawns(pieceID: number): EnPassantDirection
+    public static isStaleMate(): boolean
     {
-        return Board.enPassantBanStatus[pieceID];
+        return false;
     }
 }

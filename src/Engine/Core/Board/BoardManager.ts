@@ -1,6 +1,6 @@
 import { Board } from "./Board";
-import { Color, Square, PieceType } from "Types";
-import { CastlingType, EnPassantDirection, Piece, StartConfig } from "Types/Engine";
+import { Color, Square, PieceType, CastlingType, EnPassantDirection, JsonNotation } from "Types";
+import { Piece } from "Types/Engine";
 import { BoardQueryer } from "./BoardQueryer.ts";
 import { PieceModel } from "Engine/Models/PieceModel";
 
@@ -12,22 +12,30 @@ export class BoardManager extends Board{
 
     /**
      * Constructor of the BoardController class.
-     * @example new BoardController({startColor: Color.White, moveCount: 0, castlingStatus: {whiteLong: true, whiteShort: true, blackLong: true, blackShort: true}, enPassantBanStatus: {}, pieceIds: []});
      */
-    constructor(startOption: StartConfig | null = null) {
+    constructor() {
         super();
+    }
 
-        /**
-         * If startOption is not null, set the start options.
-         * If options is not given, set the default options.
-         */
-        if(startOption !== null){
-            Board.currentColor = startOption.startColor ?? Board.currentColor;
-            Board.moveCount = startOption.moveCount ?? Board.moveCount;
-            Board.castlingStatus = startOption.castlingStatus ?? Board.castlingStatus;
-            Board.enPassantBanStatus = startOption.enPassantBanStatus ?? Board.enPassantBanStatus;
-            Board.pieceIds = startOption.pieceIds ?? Board.pieceIds;
-        }
+    /**
+     * This function creates a new board with the given json notation.
+     */
+    public createBoard(jsonNotation: JsonNotation): void
+    {
+        Board.currentTurn = jsonNotation.turn;
+        Board.moveCount = jsonNotation.fullMoveNumber;
+        Board.castlingStatus = jsonNotation.castling;
+        Board.enPassantBanStatus = jsonNotation.enPassant;
+        Board.halfMoveCount = jsonNotation.halfMoveClock;
+    }
+
+    /**
+     * Load the board from the given json notation.
+     */
+    public loadBoard(jsonNotation: JsonNotation, pieceIds: Array<number>): void
+    {
+        this.createBoard(jsonNotation);
+        Board.pieceIds = pieceIds;
     }
 
     /**
@@ -35,7 +43,7 @@ export class BoardManager extends Board{
      */
     public changeTurn(): void
     {
-        Board.currentColor = BoardQueryer.getEnemyColor();
+        Board.currentTurn = BoardQueryer.getOpponent();
     }
 
     /**
@@ -81,14 +89,14 @@ export class BoardManager extends Board{
      */
     public createPiece(color: Color, type:PieceType, square:Square): void
     {
-        const piece = new PieceModel(color, type, this.createPieceID());
+        const piece: PieceModel = new PieceModel(color, type, this.createPieceID());
 
         // Set piece to square
         this.movePiece(square, piece);
 
         // Set king if the piece is a king and there is no king of the same color
         if(type === PieceType.King && !BoardQueryer.getKingByColor(color))
-            BoardController.kings[piece.getColor() as Color] = piece;
+            BoardManager.kings[piece.getColor() as Color] = piece;
     }
 
     /**
@@ -96,8 +104,8 @@ export class BoardManager extends Board{
      */
     public movePiece(to: Square, piece: Piece): void
     {
-        BoardController.currentBoard[to] = piece;
-        BoardController.currentBoard[BoardQueryer.getSquareOfPiece(piece)!] = null;
+        BoardManager.currentBoard[to] = piece;
+        BoardManager.currentBoard[BoardQueryer.getSquareOfPiece(piece)!] = null;
     }
 
     /**
@@ -105,7 +113,7 @@ export class BoardManager extends Board{
      */
     public removePiece(square: Square): void
     {
-        BoardController.currentBoard[square] = null;
+        BoardManager.currentBoard[square] = null;
     }
 
     /**
@@ -121,8 +129,8 @@ export class BoardManager extends Board{
      * Add piece(id) that can't en passant to en passant status list
      * @example StateManager.addBannedEnPassantPawn(pieceId, EnPassantDirection.Left), That means piece(id) can't en passant to left.
      */
-    public addBannedEnPassantPawn(pieceID: number, direction: EnPassantDirection): void
+    public setBannedEnPassant(pieceID: number, direction: EnPassantDirection): void
     {
-        Board.bannedEnPassantPawns[pieceID] = direction;
+        Board.enPassantBanStatus[pieceID] = direction;
     }
 }
