@@ -7,7 +7,7 @@
  * @license MIT
  */
 
-import { Square, StartPosition, CacheLayer, JsonNotation } from "./Types";
+import { Square, StartPosition, CacheLayer, JsonNotation, Moves } from "./Types";
 import { SquareClickMode } from "./Types/Board";
 import { ChessEngine } from "./Engine/ChessEngine";
 import { ChessBoard } from "./Interface/ChessBoard";
@@ -27,6 +27,7 @@ export class Chess{
     private chessEngine: ChessEngine;
     private chessBoard: ChessBoard;
     private selectedSquare: Square | null = null;
+    private currentMoves: Moves | null = null;
 
     /**
      * Constructor of the Chess class.
@@ -45,7 +46,7 @@ export class Chess{
      */
     private checkAndLoadGameFromCache(): void
     {
-        this.createGame(StartPosition.Standard);
+        this.createGame(StartPosition.Castling);
         /*if(!Cache.get(CacheLayer.Game))
             this.createGame();
         else{
@@ -82,7 +83,7 @@ export class Chess{
      */
     public doAction(moveType: SquareClickMode, square: Square): void
     {
-        if(moveType === SquareClickMode.Play)
+        if([SquareClickMode.Play, SquareClickMode.Castling, SquareClickMode.Promote, SquareClickMode.EnPassant].includes(moveType))
         {
             /**
              * If the selected square is not null and the selected square is not the same as the square
@@ -123,7 +124,8 @@ export class Chess{
     {
         this.selectedSquare = square;
         this.chessBoard.highlightSelect(square);
-        this.chessBoard.highlightMoves(this.chessEngine.getMoves(square)!);
+        this.currentMoves = this.chessEngine.getMoves(square);
+        this.chessBoard.highlightMoves(this.currentMoves!);
     }
 
     /**

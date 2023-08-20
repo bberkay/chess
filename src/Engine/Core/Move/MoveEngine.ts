@@ -1,4 +1,4 @@
-import { Color, Square, PieceType } from "../../../Types";
+import { Color, Square, PieceType, Moves, MoveType } from "../../../Types";
 import { MoveRoute, Piece, Route } from "../../../Types/Engine";
 import { BoardQueryer } from "../Board/BoardQueryer.ts";
 import { Locator } from "../Utils/Locator.ts";
@@ -29,7 +29,7 @@ export class MoveEngine extends MoveChecker{
     /**
      * Get the possible moves of the piece on the given square.
      */
-    public getMoves(square: Square): Array<Square> | null
+    public getMoves(square: Square): Moves | null
     {
         // Get the piece on the given square.
         this.piece = BoardQueryer.getPieceOnSquare(square);
@@ -63,8 +63,11 @@ export class MoveEngine extends MoveChecker{
     /**
      * Get the possible moves of the pawn on the given square.
      */
-    private getPawnMoves(): Array<Square> | null
+    private getPawnMoves(): Moves | null
     {
+        // Initialize the moves of the pawn.
+        let moves: Moves = {[MoveType.Normal]: [], [MoveType.EnPassant]: [], [MoveType.Promotion]: []};
+
         // Find possible moves of the pawn.
         const route: Route = RouteCalculator.getPawnRoute(this.pieceSquare!);
         if(!route) return null;
@@ -123,6 +126,9 @@ export class MoveEngine extends MoveChecker{
         if(!BoardQueryer.isSquareHasPiece(route[moveDirection.rightDiagonal]![0], enemyColor))
             delete route[moveDirection.rightDiagonal];
 
+        // Add normal moves to the pawn's moves.
+        moves[MoveType.Normal] = Flattener.flattenRoute(this.doKingSafety(route)!);
+
         /**
          * Add en passant capability to the pawn. For example,
          * if the pawn is white and left en passant is available,
@@ -136,6 +142,16 @@ export class MoveEngine extends MoveChecker{
          * @see for more information about en passant check src/Engine/Checker/MoveChecker.ts
          */
 
+        /**
+         * Clear the pawn's routes. Because we will add en passant moves
+         * to the pawn's moves. If we don't clear the pawn's routes, then
+         * the pawn's moves will be duplicated for every move type. For example,
+         * if the pawn has 2 normal moves, 1 en passant move and 1 promotion move,
+         * then the pawn's moves will be 2 normal moves, 3 en passant moves(2 normal
+         * + 1 en passant) and 4 promotion moves(2 normal + 1 en passant + 1 promotion).
+         */
+        for(let path in route) route[path as MoveRoute] = [];
+
         // Add left en passant move to the pawn's moves.
         if(this.isLeftEnPassantAvailable(this.pieceSquare!))
             route[moveDirection.leftDiagonal]!.push(color == Color.White ? this.pieceSquare! - 9 : this.pieceSquare! + 7);
@@ -144,68 +160,104 @@ export class MoveEngine extends MoveChecker{
         if(this.isRightEnPassantAvailable(this.pieceSquare!))
             route[moveDirection.rightDiagonal]!.push(color == Color.White ? this.pieceSquare! - 7 : this.pieceSquare! + 9);
 
-        // Filter the moves for king safety and convert the route to squares array.
-        return Flattener.flattenRoute(this.doKingSafety(route)!);
+        // Add filtered(for king's safety) en passant moves to the pawn's moves.
+        moves[MoveType.EnPassant] = Flattener.flattenRoute(this.doKingSafety(route)!);
+
+        /**
+         * Add promotion capability to the pawn. For example,
+         * if the pawn is white and is on the seventh row,
+         * then add the top square(current square id + 8) to the pawn's
+         * moves. Also, if the pawn is black and is on the second row,
+         * then add the bottom square(current square id - 8) to the pawn's moves.
+         *
+         * @see for more information about square id check Square enum in src/Types.ts
+         * @see for more information about promotion check src/Engine/Checker/MoveChecker.ts
+         */
+
+        /**
+         * Clear the pawn's routes. Because we will add promotion moves
+         * to the pawn's moves. For more information check the en passant
+         * section above.
+         */
+        for(let path in route) route[path as MoveRoute] = [];
+
+        // Add promotion moves to the pawn's moves.
+        if(this.isPromotionAvailable(this.pieceSquare!))
+            route[moveDirection.vertical]!.push(this.pieceSquare! + (color == Color.White ? -8 : 8));
+
+        // Add filtered(for king's safety) promotion moves to the pawn's moves.
+        moves[MoveType.Promotion] = Flattener.flattenRoute(this.doKingSafety(route)!);
+
+        // Return the moves of the pawn.
+        return moves;
     }
 
     /**
      * Get the possible moves of the knight on the given square.
      */
-    private getKnightMoves(): Array<Square> | null
+    private getKnightMoves(): Moves | null
     {
-        let moves: Route = RouteCalculator.getKnightRoute(this.pieceSquare!);
-        if(!moves) return null;
+        // Find moves of the knight.
+        let route: Route = RouteCalculator.getKnightRoute(this.pieceSquare!);
+        if(!route) return null;
 
         // Filter the moves for king safety and convert the route to squares array.
-        return Flattener.flattenRoute(this.doKingSafety(moves)!);
+        return {[MoveType.Normal]: Flattener.flattenRoute(this.doKingSafety(route)!)};
     }
 
     /**
      * Get the possible moves of the bishop on the given square.
      */
-    private getBishopMoves(): Array<Square> | null
+    private getBishopMoves(): Moves | null
     {
-        let moves: Route = RouteCalculator.getBishopRoute(this.pieceSquare!);
-        if(!moves) return null;
+        // Find moves of the bishop.
+        let route: Route = RouteCalculator.getBishopRoute(this.pieceSquare!);
+        if(!route) return null;
 
         // Filter the moves for king safety and convert the route to squares array.
-        return Flattener.flattenRoute(this.doKingSafety(moves)!);
+        return {[MoveType.Normal]: Flattener.flattenRoute(this.doKingSafety(route)!)};
     }
 
     /**
      * Get the possible moves of the rook on the given square.
      */
-    private getRookMoves(): Array<Square> | null
+    private getRookMoves(): Moves | null
     {
-        let moves: Route = RouteCalculator.getRookRoute(this.pieceSquare!);
-        if(!moves) return null;
+        // Find moves of the rook.
+        let route: Route = RouteCalculator.getRookRoute(this.pieceSquare!);
+        if(!route) return null;
 
         // Filter the moves for king safety and convert the route to squares array.
-        return Flattener.flattenRoute(this.doKingSafety(moves)!);
+        return {[MoveType.Normal]: Flattener.flattenRoute(this.doKingSafety(route)!)};
     }
 
     /**
      * Get the possible moves of the queen on the given square.
      */
-    private getQueenMoves(): Array<Square> | null
+    private getQueenMoves(): Moves | null
     {
-        let moves: Route = RouteCalculator.getQueenRoute(this.pieceSquare!);
-        if(!moves) return null;
+        // Find moves of the queen.
+        let route: Route = RouteCalculator.getQueenRoute(this.pieceSquare!);
+        if(!route) return null;
 
         // Filter the moves for king safety and convert the route to squares array.
-        return Flattener.flattenRoute(this.doKingSafety(moves)!);
+        return {[MoveType.Normal]: Flattener.flattenRoute(this.doKingSafety(route)!)};
     }
 
     /**
      * Get the possible moves of the king on the given square.
      */
-    private getKingMoves(): Array<Square> | null
+    private getKingMoves(): Moves | null
     {
-        let moves: Route = RouteCalculator.getKingRoute(this.pieceSquare!);
-        if(!moves) return null;
+        // Initialize the moves.
+        let moves: Moves = {[MoveType.Normal]: [], [MoveType.Castling]: []};
 
-        // Find the king's color and enemy's color by the given square.
-        const color: Color = BoardQueryer.getPieceOnSquare(this.pieceSquare!)!.getColor();
+        // Get the king's route.
+        let route = RouteCalculator.getKingRoute(this.pieceSquare!);
+        if(!route) return null;
+
+        // Get normal moves of the king.
+        moves[MoveType.Normal] = Flattener.flattenRoute(route);
 
         /**
          * Add castling moves to the king's moves. For example,
@@ -217,16 +269,32 @@ export class MoveEngine extends MoveChecker{
          * @see for more information src/Engine/Checker/MoveChecker.ts
          */
 
+        /**
+         * Clear the king's routes. Because we will add castling moves
+         * to the king's moves. If we don't clear the king's routes,
+         * then king's normal moves also will be added to the king's
+         * castling moves. For example, if the king has 2 normal moves
+         * and 2 castling moves, then normal moves will be [Square.x1, Square.x2],
+         * castling moves will be [Square.a1, Square.h1, Square.x1, Square.x2].
+         */
+        for(let path in route) route[path as MoveRoute] = [];
+
+        // Find the king's color
+        const color: Color = BoardQueryer.getPieceOnSquare(this.pieceSquare!)!.getColor();
+
         // Add long castling move to the king's moves.
         if(this.isLongCastlingAvailable(color))
-            moves[MoveRoute.Left]!.push(color == Color.White ? Square.a1 : Square.a8);
+            route[MoveRoute.Left]!.push(color == Color.White ? Square.a1 : Square.a8);
 
         // Add short castling move to the king's moves.
         if(this.isShortCastlingAvailable(color))
-            moves[MoveRoute.Right]!.push(color == Color.White ? Square.h1 : Square.h8);
+            route[MoveRoute.Right]!.push(color == Color.White ? Square.h1 : Square.h8);
 
-        // Return extended and converted moves. Also, king doesn't need to filter for king safety.
-        return Flattener.flattenRoute(moves);
+        // Get castling moves of the king.
+        moves[MoveType.Castling] = Flattener.flattenRoute(route);
+
+        // King doesn't need to filter for king safety. Because, it can't move to the dangerous square.
+        return moves;
     }
 
     /**

@@ -171,4 +171,41 @@ export class MoveChecker{
     {
         return this.isEnPassantAvailable(square, EnPassantDirection.Right);
     }
+
+    /**
+     * @description Check if the promotion is available for the given square.
+     */
+    protected isPromotionAvailable(square: Square): boolean
+    {
+        /**
+         * Rules for promotion:
+         * 1. The pawn must be on its last rank.
+         *
+         * @see for more information about promotion https://en.wikipedia.org/wiki/Promotion_(chess)
+         */
+
+        // Find the pawn by the given square.
+        const pawn: Piece = BoardQueryer.getPieceOnSquare(square)!;
+
+        /**
+         * Find last rank for black and white pawns.
+         */
+        const BLACK_PROMOTION_ROW: number = 8;
+        const WHITE_PROMOTION_ROW: number = 1;
+
+        // Find the pawn's color and row.
+        const color: Color = pawn.getColor();
+        const row: number = Locator.getRow(square);
+
+        /**
+         * Check first rule, if the pawn is before one last rank
+         * return true. If the pawn is not before one last rank,
+         * return false. For example, if white pawn is on the 7th
+         * row, return true. If black pawn is on the 2nd row,
+         * return true.
+         *
+         * @see for more information about row calculation src/Manager/Locator.ts
+         */
+        return (color == Color.Black && row == BLACK_PROMOTION_ROW - 1) || (color == Color.White && row == WHITE_PROMOTION_ROW + 1);
+    }
 }

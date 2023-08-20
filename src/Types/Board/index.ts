@@ -21,5 +21,7 @@ export enum SquareClickMode{
     Play = "Play",
     Clear = "Clear",
     Promote = "Promote",
-    Disable = "Disable"
+    Disable = "Disable",
+    Castling = "Castling",
+    EnPassant = "EnPassant"
 }

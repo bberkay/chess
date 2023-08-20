@@ -36,7 +36,7 @@ export enum PieceType{
 }
 
 /**
- * @description CastlingType enum for the castling types.
+ * CastlingType enum for the castling types.
  * @see src/Engine/Checker/MoveChecker.ts For more information.
  */
 export enum CastlingType{
@@ -47,13 +47,18 @@ export enum CastlingType{
 }
 
 /**
- * @description White/Black Long mean White/Black player's queen side, White/Black Short mean White/Black player's king side.
- * @see src/Engine/Checker/MoveChecker.ts For more information.
+ * MoveType enum for the move types.
+ * @see src/Engine/ChessEngine.ts For more information.
  */
-export type CastlingStatus = Record<CastlingType, boolean>;
+export enum MoveType {
+    Normal = "Normal",
+    EnPassant = "EnPassant",
+    Castling = "Castling",
+    Promotion = "Promotion"
+}
 
 /**
- * @description EnPassantDirection enum for the en passant directions.
+ * EnPassantDirection enum for the en passant directions.
  * @see src/Engine/Checker/MoveChecker.ts For more information.
  */
 export enum EnPassantDirection{
@@ -61,6 +66,18 @@ export enum EnPassantDirection{
     Right = "Right",
     Both = "Both"
 }
+
+/**
+ * White/Black Long mean White/Black player's queen side, White/Black Short mean White/Black player's king side.
+ * @see src/Engine/Checker/MoveChecker.ts For more information.
+ */
+export type CastlingStatus = Record<CastlingType, boolean>;
+
+/**
+ * Moves type for the moves.
+ * @see For more information, check src/Chess.ts
+ */
+export type Moves = {[key in MoveType]?: Array<Square>};
 
 /**
  * Json notation for is alternative notation for the FEN notation.

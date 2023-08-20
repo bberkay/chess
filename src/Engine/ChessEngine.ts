@@ -7,7 +7,7 @@
  * @license MIT
  */
 
-import { JsonNotation, Square, StartPosition } from "../Types";
+import { JsonNotation, Square, StartPosition, Moves } from "../Types";
 import { MoveEngine } from "./Core/Move/MoveEngine";
 import { BoardManager } from "./Core/Board/BoardManager.ts";
 import { Converter } from "../Utils/Converter";
@@ -23,7 +23,7 @@ export class ChessEngine{
      */
     private moveEngine: MoveEngine;
     private boardManager: BoardManager;
-    private currentMoves: Square[] | null = null;
+    private currentMoves: Moves | null = null;
 
     /**
      * Constructor of the ChessEngine class.
@@ -53,16 +53,17 @@ export class ChessEngine{
     /**
      * This function returns the moves of the given square with move engine.
      */
-    public getMoves(square: Square): Square[] | null
+    public getMoves(square: Square): Moves | null
     {
         this.currentMoves = this.moveEngine.getMoves(square);
         return this.currentMoves;
     }
 
     /**
-     * This function check if the move is legal or not.
+     * This function finds and checks the given move. For example,
+     * if the given move is not in the currentMoves, it returns false.
      */
-    public isLegalMove(from: Square, to: Square): boolean
+    public findAndCheckMove(from: Square, to: Square): boolean
     {
         /**
          * If currentMoves is null, then return false. Because,
@@ -72,12 +73,10 @@ export class ChessEngine{
         if(this.currentMoves === null)
             return false;
 
-        for(let i = 0; i < this.currentMoves.length; i++){
-            if(this.currentMoves[i].x === to.x && this.currentMoves[i].y === to.y)
-                return true;
-        }
+        // TODO: Implement this function.
+        console.log(from, to);
 
-        return false;
+        return true;
     }
 
     /**
@@ -85,6 +84,7 @@ export class ChessEngine{
      */
     public playMove(from: Square, to: Square): void
     {
+        this.findAndCheckMove(from, to);
         this.boardManager.movePiece(from, to);
         this.boardManager.changeTurn();
         // TODO: Castling and en passant state management should be implemented.
@@ -96,8 +96,6 @@ export class ChessEngine{
     public isFinished(): boolean
     {
         // TODO: Implement this function.
-        // TODO: StateManagement burada yapılabilir.
-        // this.stateManager.isFinished();
         return false;
     }
 }

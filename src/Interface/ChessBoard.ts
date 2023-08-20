@@ -7,9 +7,9 @@
  * @license MIT
  */
 
-import {Color, JsonNotation, PieceType, Square, StartPosition} from "../Types";
-import { SquareClickMode, SquareEffect } from "../Types/Board";
-import { Converter } from "../Utils/Converter.ts";
+import {Color, JsonNotation, Moves, MoveType, PieceType, Square, StartPosition} from "../Types";
+import {SquareClickMode, SquareEffect} from "../Types/Board";
+import {Converter} from "../Utils/Converter.ts";
 
 /**
  * TODO: Tüm interface tamamlandıktan sonra, açıklama güncellenecek.
@@ -189,36 +189,110 @@ export class ChessBoard {
     }
 
     /**
+     * This function shows the possible moves of the given piece on the chess board.
+     */
+    public highlightMoves(moves: Moves): void
+    {
+        for(let moveType in moves){
+            // If the move type is null or undefined then skip the loop.
+            if(!moves[moveType as MoveType])
+                continue;
+
+            // Loop through the moves of the move type.
+            for(let move of moves[moveType as MoveType]!){
+                /**
+                 * If the move square has a piece then set the square
+                 * effect "Killable" otherwise set "Playable".
+                 */
+                let squareContent = document.getElementById(move.toString())?.lastElementChild;
+                if(squareContent && squareContent.className.includes("piece") && squareContent.getAttribute("data-color") !== this.colorOfSelectedPiece)
+                    this.setSquareEffect(move, SquareEffect.Killable);
+                else
+                    this.setSquareEffect(move, SquareEffect.Playable);
+
+                /**
+                 * Set the click mode by move type.
+                 * @see For more information about click modes, see SquareClickMode enum in src/Types/Board/index.ts
+                 */
+                const clickMode: SquareClickMode = (moveType == MoveType.Castling ? SquareClickMode.Castling : null)
+                    || (moveType == MoveType.EnPassant ? SquareClickMode.EnPassant : null)
+                    || (moveType == MoveType.Promotion ? SquareClickMode.Promote : null) || SquareClickMode.Play;
+
+                this.setSquareClickMode(move, clickMode);
+            }
+        }
+    }
+
+    /**
      * This function moves the piece from the given square to the given square on the chess board.
      */
     public playMove(from:Square, to:Square): void
     {
-        // Remove piece at the target square(to) if it exists.
-        this.clearSquare(to);
+        // Get the source and target square elements.
+        const fromSquare: HTMLDivElement = document.getElementById(from.toString()) as HTMLDivElement;
+        const toSquare: HTMLDivElement = document.getElementById(to.toString()) as HTMLDivElement;
 
-        // Move piece from the source square(from) to the target square(to).
-        document.getElementById(to.toString())?.appendChild(document.getElementById(from.toString())?.lastChild as HTMLDivElement);
+        // Remove piece at the target and source squares.
+        this.clearSquare(to);
+        this.clearSquare(from);
+
+        // Get the move type by to square's click mode attribute.
+        const moveType: MoveType = toSquare.getAttribute("data-click-mode") as MoveType;
+
+        // Do the move by its type.
+        switch(moveType){
+            case MoveType.Castling:
+                this._doCastling(fromSquare, toSquare);
+                break;
+            case MoveType.EnPassant:
+                this._doEnPassant(fromSquare, toSquare);
+                break;
+            case MoveType.Promotion:
+                this._doPromotion(fromSquare, toSquare);
+                break;
+            default:
+                this._doNormalMove(fromSquare, toSquare);
+                break;
+        }
     }
 
     /**
-     * This function shows the possible moves of the given piece on the chess board.
+     * Do the castling move on the chess board.
      */
-    public highlightMoves(moves:Array<Square>): void
+    private _doCastling(fromSquare:HTMLDivElement, toSquare:HTMLDivElement): void
     {
-        for(let move of moves){
-            /**
-             * If the move square has a piece then set the square
-             * effect "Killable" otherwise set "Playable".
-             */
-            let squareContent = document.getElementById(move.toString())?.lastElementChild;
-            if(squareContent && squareContent.className.includes("piece") && squareContent.getAttribute("data-color") !== this.colorOfSelectedPiece)
-                this.setSquareEffect(move, SquareEffect.Killable);
-            else
-                this.setSquareEffect(move, SquareEffect.Playable);
+        // Move piece from the source square(from) to the target square(to).
+        toSquare.appendChild(fromSquare.querySelector(".piece")!);
+    }
 
-            // Set the click mode of the square(square's content doesn't matter because it's playable).
-            this.setSquareClickMode(move, SquareClickMode.Play);
-        }
+    /**
+     * Do the en passant move on the chess board.
+     */
+    private _doEnPassant(fromSquare:HTMLDivElement, toSquare:HTMLDivElement): void
+    {
+        // Move piece from the source square(from) to the target square(to).
+        toSquare.appendChild(fromSquare.querySelector(".piece")!);
+    }
+
+    /**
+     * Do the promotion move on the chess board.
+     */
+    private _doPromotion(fromSquare:HTMLDivElement, toSquare:HTMLDivElement): void
+    {
+        // Do the normal move.
+        this._doNormalMove(fromSquare, toSquare);
+
+        // Show the promotion menu.
+        this.showPromotionMenu(toSquare);
+    }
+
+    /**
+     * Do the normal move on the chess board.
+     */
+    private _doNormalMove(fromSquare:HTMLDivElement, toSquare:HTMLDivElement): void
+    {
+        // Move piece from the source square(from) to the target square(to).
+        toSquare.appendChild(fromSquare.querySelector(".piece")!);
     }
 
     /**
@@ -297,8 +371,11 @@ export class ChessBoard {
     /**
      * Show promotion menu.
      */
-    public showPromotionMenu(square: Square): void
+    public showPromotionMenu(promotedPawn: HTMLDivElement): void
     {
+        // Get the square of the promoted pawn.
+        const square: Square = parseInt(promotedPawn.parentElement!.id) as Square;
+
         /**
          * Disable the board. We don't want to allow player to
          * move pieces while choosing promotion piece.
@@ -306,7 +383,6 @@ export class ChessBoard {
         this.lockBoard();
 
         // Find and hide promoted pawn on the board.
-        let promotedPawn: HTMLDivElement = document.getElementById(square.toString())!.firstChild as HTMLDivElement;
         promotedPawn.style.display = "none";
 
         // Create promotion options. (Queen, Rook, Bishop, Knight)
