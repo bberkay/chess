@@ -7,11 +7,10 @@
  * @license MIT
  */
 
-import { JsonNotation, Square, StartPosition } from "Types";
-import { MoveEngine } from "Engine/Core/Move/MoveEngine";
-import { BoardManager } from "Engine/Core/Board/BoardManager.ts";
+import { JsonNotation, Square, StartPosition } from "../Types";
+import { MoveEngine } from "./Core/Move/MoveEngine";
+import { BoardManager } from "./Core/Board/BoardManager.ts";
 import { Converter } from "../Utils/Converter";
-import { BoardQueryer } from "Engine/Core/Board/BoardQueryer.ts";
 
 
 /**
@@ -24,6 +23,7 @@ export class ChessEngine{
      */
     private moveEngine: MoveEngine;
     private boardManager: BoardManager;
+    private currentMoves: Square[] | null = null;
 
     /**
      * Constructor of the ChessEngine class.
@@ -54,8 +54,30 @@ export class ChessEngine{
      * This function returns the moves of the given square with move engine.
      */
     public getMoves(square: Square): Square[] | null
-     {
-        return this.moveEngine.getMoves(square);
+    {
+        this.currentMoves = this.moveEngine.getMoves(square);
+        return this.currentMoves;
+    }
+
+    /**
+     * This function check if the move is legal or not.
+     */
+    public isLegalMove(from: Square, to: Square): boolean
+    {
+        /**
+         * If currentMoves is null, then return false. Because,
+         * there is no moves for the given square.
+         * @see getMoves function.
+         */
+        if(this.currentMoves === null)
+            return false;
+
+        for(let i = 0; i < this.currentMoves.length; i++){
+            if(this.currentMoves[i].x === to.x && this.currentMoves[i].y === to.y)
+                return true;
+        }
+
+        return false;
     }
 
     /**
@@ -63,7 +85,7 @@ export class ChessEngine{
      */
     public playMove(from: Square, to: Square): void
     {
-        this.boardManager.movePiece(to, BoardQueryer.getPieceOnSquare(from)!);
+        this.boardManager.movePiece(from, to);
         this.boardManager.changeTurn();
         // TODO: Castling and en passant state management should be implemented.
     }

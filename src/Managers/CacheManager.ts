@@ -1,4 +1,4 @@
-import { CacheLayer } from "@types";
+import { CacheLayer } from "../Types";
 
 /**
  * This static class provides a way to store data in a layered way in local storage.

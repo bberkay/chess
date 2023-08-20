@@ -1,10 +1,10 @@
-import { Color, Square, PieceType } from "Types";
-import { MoveRoute, Piece, Route } from "Types/Engine";
-import { BoardQueryer } from "Engine/Core/Board/BoardQueryer.ts";
+import { Color, Square, PieceType } from "../../../Types";
+import { MoveRoute, Piece, Route } from "../../../Types/Engine";
+import { BoardQueryer } from "../Board/BoardQueryer.ts";
 import { Locator } from "../Utils/Locator.ts";
 import { RouteCalculator } from "./Calculator/RouteCalculator.ts";
 import { MoveChecker } from "./Checker/MoveChecker.ts";
-import { Flattener } from "Engine/Core/Utils/Flattener.ts";
+import { Flattener } from "../Utils/Flattener.ts";
 
 /**
  * This class calculates the possible moves of the pieces.
@@ -117,10 +117,10 @@ export class MoveEngine extends MoveChecker{
          * If the diagonal squares has no enemy piece, then remove
          * the diagonal routes from the moves.
          */
-        if(!BoardQueryer.hasPiece(route[moveDirection.leftDiagonal]![0], enemyColor))
+        if(!BoardQueryer.isSquareHasPiece(route[moveDirection.leftDiagonal]![0], enemyColor))
             delete route[moveDirection.leftDiagonal];
 
-        if(!BoardQueryer.hasPiece(route[moveDirection.rightDiagonal]![0], enemyColor))
+        if(!BoardQueryer.isSquareHasPiece(route[moveDirection.rightDiagonal]![0], enemyColor))
             delete route[moveDirection.rightDiagonal];
 
         /**
@@ -205,7 +205,7 @@ export class MoveEngine extends MoveChecker{
         if(!moves) return null;
 
         // Find the king's color and enemy's color by the given square.
-        const color: Color = BoardQueryer.getPiece(this.pieceSquare!)!.getColor();
+        const color: Color = BoardQueryer.getPieceOnSquare(this.pieceSquare!)!.getColor();
 
         /**
          * Add castling moves to the king's moves. For example,
@@ -256,11 +256,11 @@ export class MoveEngine extends MoveChecker{
          * Find the king and king's square and enemy's color
          * by the given piece color.
          */
-        const king: Piece | null = BoardQueryer.getKing(this.piece!.getColor());
+        const king: Piece | null = BoardQueryer.getKingByColor(this.piece!.getColor());
         if(!king) return moveRoute;
 
         // Square of the king and enemy's color.
-        const kingSquare: Square = BoardQueryer.getLocation(king)!;
+        const kingSquare: Square = BoardQueryer.getSquareOfPiece(king)!;
         const enemyColor: Color = this.piece!.getColor() == Color.White ? Color.Black : Color.White;
 
         /**
@@ -308,7 +308,7 @@ export class MoveEngine extends MoveChecker{
         const allRoutes: Route = RouteCalculator.getQueenRoute(this.pieceSquare!);
         for(const square of allRoutes[dangerousRoute]!){
             // If route has any dangerous piece, then(next step)
-            if(BoardQueryer.hasPiece(square, enemyColor, dangerousPieces)){
+            if(BoardQueryer.isSquareHasPiece(square, enemyColor, dangerousPieces)){
                 /**
                  * If moveRoute has MoveRoute.L, then it means that we are in
                  * getKnightMoves() method. In this case, knight can't

@@ -7,9 +7,9 @@
  * @license MIT
  */
 
-import { Square, StartPosition, CacheLayer, JsonNotation } from "Types";
-import { SquareClickMode } from "Types/Board";
-import { ChessEngine } from "Engine/ChessEngine";
+import { Square, StartPosition, CacheLayer, JsonNotation } from "./Types";
+import { SquareClickMode } from "./Types/Board";
+import { ChessEngine } from "./Engine/ChessEngine";
 import { ChessBoard } from "./Interface/ChessBoard";
 import { Converter } from "./Utils/Converter.ts";
 import { CacheManager } from "./Managers/CacheManager.ts";
@@ -82,15 +82,14 @@ export class Chess{
      */
     public doAction(moveType: SquareClickMode, square: Square): void
     {
-        // TODO : Check the move is legal or not with chess engine.
-        if(moveType === SquareClickMode.Play && this.selectedSquare !== null && this.selectedSquare !== square)
+        if(moveType === SquareClickMode.Play)
         {
             /**
              * If the selected square is not null and the selected square is not the same as the square
              */
             this._doPlayAction(square);
         }
-        else if(moveType === SquareClickMode.Select && this.selectedSquare === null)
+        else if(moveType === SquareClickMode.Select)
         {
             /**
              * If the selected square is null

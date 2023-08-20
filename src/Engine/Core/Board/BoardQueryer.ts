@@ -1,7 +1,7 @@
 import { Board } from "./Board";
-import { Square, Color, PieceType, EnPassantDirection, CastlingType } from "Types";
-import { Piece, Route, MoveRoute } from "Types/Engine";
-import { RouteCalculator } from "Engine/Core/Move/Calculator/RouteCalculator.ts";
+import { Square, Color, PieceType, EnPassantDirection, CastlingType } from "../../../Types";
+import { Piece, Route, MoveRoute } from "../../../Types/Engine";
+import { RouteCalculator } from "../Move/Calculator/RouteCalculator.ts";
 
 
 /**
@@ -54,9 +54,9 @@ export class BoardQueryer extends Board{
      * Get en passant status of pawn
      * @example StateManager.getEnPassantStatus(fourth number piece id) // Returns EnPassantDirection.Left and/or EnPassantDirection.Right and/or EnPassantDirection.Both
      */
-    public static getEnPassantBanStatus(pieceID: number): EnPassantDirection
+    public static getEnPassantBanStatus(pieceID: number): EnPassantDirection | null
     {
-        return Board.enPassantBanStatus[pieceID];
+        return Board.enPassantBanStatus![pieceID] ?? null;
     }
 
     /**
@@ -252,7 +252,7 @@ export class BoardQueryer extends Board{
     /**
      * Is player checked?
      */
-    public static isPlayerInCheck(): boolean
+    public static isCheck(): boolean
     {
         /**
          * Find the square of the player's king and
@@ -266,7 +266,7 @@ export class BoardQueryer extends Board{
     /**
      * Is player checked mate?
      */
-    public static isPlayerInCheckMate(): boolean
+    public static isCheckMate(): boolean
     {
         return false;
     }

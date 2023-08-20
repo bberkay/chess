@@ -7,8 +7,8 @@
  * @license MIT
  */
 
-import {Color, JsonNotation, PieceType, Square, StartPosition} from "Types";
-import { SquareClickMode, SquareEffect } from "types/board";
+import {Color, JsonNotation, PieceType, Square, StartPosition} from "../Types";
+import { SquareClickMode, SquareEffect } from "../Types/Board";
 import { Converter } from "../Utils/Converter.ts";
 
 /**
@@ -197,7 +197,7 @@ export class ChessBoard {
         this.clearSquare(to);
 
         // Move piece from the source square(from) to the target square(to).
-        document.getElementById(to.toString())?.appendChild(document.getElementById(from.toString())?.firstChild as HTMLDivElement);
+        document.getElementById(to.toString())?.appendChild(document.getElementById(from.toString())?.lastChild as HTMLDivElement);
     }
 
     /**

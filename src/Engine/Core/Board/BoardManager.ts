@@ -1,8 +1,8 @@
 import { Board } from "./Board";
-import { Color, Square, PieceType, CastlingType, EnPassantDirection, JsonNotation } from "Types";
-import { Piece } from "Types/Engine";
+import { Color, Square, PieceType, CastlingType, EnPassantDirection, JsonNotation } from "../../../Types";
+import { EnPassantBanStatus } from "../../../Types/Engine";
 import { BoardQueryer } from "./BoardQueryer.ts";
-import { PieceModel } from "Engine/Models/PieceModel";
+import { PieceModel } from "../../Models/PieceModel";
 
 
 /**
@@ -22,19 +22,23 @@ export class BoardManager extends Board{
      */
     public createBoard(jsonNotation: JsonNotation): void
     {
+        // Set board properties
         Board.currentTurn = jsonNotation.turn;
         Board.moveCount = jsonNotation.fullMoveNumber;
         Board.castlingStatus = jsonNotation.castling;
-        Board.enPassantBanStatus = jsonNotation.enPassant;
         Board.halfMoveCount = jsonNotation.halfMoveClock;
+
+        // Create pieces
+        this.createPieces(jsonNotation.board);
     }
 
     /**
      * Load the board from the given json notation.
      */
-    public loadBoard(jsonNotation: JsonNotation, pieceIds: Array<number>): void
+    public loadBoard(jsonNotation: JsonNotation, enPassantBanStatus: EnPassantBanStatus, pieceIds: Array<number>): void
     {
         this.createBoard(jsonNotation);
+        Board.enPassantBanStatus = enPassantBanStatus;
         Board.pieceIds = pieceIds;
     }
 
@@ -44,30 +48,7 @@ export class BoardManager extends Board{
     public changeTurn(): void
     {
         Board.currentTurn = BoardQueryer.getOpponent();
-    }
-
-    /**
-     * Increase move count
-     */
-    public increaseMoveCount(): void
-    {
         Board.moveCount += 1;
-    }
-
-    /**
-     * Create piece id for the piece(between 1000 and 9999).
-     */
-    private createPieceID(): number
-    {
-        let id = Math.floor(Math.random() * 10000) + 1000
-
-        // If the id is already used, create a new one.
-        if (Board.pieceIds.includes(id))
-            this.createPieceID();
-        else // If the id is not used, add it to the list.
-            Board.pieceIds.push(id);
-
-        return id
     }
 
     /**
@@ -89,10 +70,27 @@ export class BoardManager extends Board{
      */
     public createPiece(color: Color, type:PieceType, square:Square): void
     {
-        const piece: PieceModel = new PieceModel(color, type, this.createPieceID());
+        /**
+         * Create piece id for the piece(between 1000 and 9999).
+         */
+        function createPieceID(): number
+        {
+            let id = Math.floor(Math.random() * 10000) + 1000
+
+            // If the id is already used, create a new one.
+            if (Board.pieceIds.includes(id))
+                createPieceID();
+            else // If the id is not used, add it to the list.
+                Board.pieceIds.push(id);
+
+            return id
+        }
+
+        // Create piece
+        const piece: PieceModel = new PieceModel(color, type, createPieceID());
 
         // Set piece to square
-        this.movePiece(square, piece);
+        BoardManager.currentBoard[square] = piece;
 
         // Set king if the piece is a king and there is no king of the same color
         if(type === PieceType.King && !BoardQueryer.getKingByColor(color))
@@ -102,10 +100,10 @@ export class BoardManager extends Board{
     /**
      * Add piece to square
      */
-    public movePiece(to: Square, piece: Piece): void
+    public movePiece(from: Square, to:Square): void
     {
-        BoardManager.currentBoard[to] = piece;
-        BoardManager.currentBoard[BoardQueryer.getSquareOfPiece(piece)!] = null;
+        BoardManager.currentBoard[to] = BoardQueryer.getPieceOnSquare(from);
+        BoardManager.currentBoard[from] = null;
     }
 
     /**
@@ -131,6 +129,6 @@ export class BoardManager extends Board{
      */
     public setBannedEnPassant(pieceID: number, direction: EnPassantDirection): void
     {
-        Board.enPassantBanStatus[pieceID] = direction;
+        Board.enPassantBanStatus![pieceID] = direction;
     }
 }

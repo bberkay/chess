@@ -1,5 +1,5 @@
-import { Square } from "Types";
-import { MoveRoute } from "Types/Engine";
+import { Square } from "../../../Types";
+import { MoveRoute } from "../../../Types/Engine";
 
 /**
  * This class contains static methods that are used to calculate the row and column of a square.

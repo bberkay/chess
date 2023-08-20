@@ -1,5 +1,5 @@
-import { Color, PieceType } from "@types";
-import { Piece } from "types/engine";
+import { Color, PieceType } from "../../Types";
+import { Piece } from "../../Types/Engine";
 
 /**
  * This class is the model of the piece.

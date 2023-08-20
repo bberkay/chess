@@ -1,4 +1,4 @@
-import {Color, PieceType, Square, StartPosition, JsonNotation, CastlingType, CastlingStatus} from "Types";
+import { Color, PieceType, Square, StartPosition, JsonNotation, CastlingType, CastlingStatus } from "../Types";
 
 /**
  * This class is used to convert data from one type to another.

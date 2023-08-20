@@ -1,5 +1,5 @@
-import { Square } from "Types";
-import { Route } from "Types/Engine";
+import { Square } from "../../../Types";
+import { Route } from "../../../Types/Engine";
 
 /**
  * Flattener class is used to flatten a route object into an array of squares.

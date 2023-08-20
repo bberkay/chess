@@ -1,9 +1,8 @@
-import { Square, Color } from "Types";
-import { MoveRoute, Route } from "Types/Engine";
-import { DirectionCalculator } from "./DirectionCalculator.ts";
-import { Flattener } from "Engine/Core/Utils/Flattener.ts";
-import { BoardQueryer } from "Engine/Core/Board/BoardQueryer.ts";
-import { StateInspector } from "Engine/Core/State/StateInspector.ts";
+import { Square, Color } from "../../../../Types";
+import { MoveRoute, Route } from "../../../../Types/Engine";
+import { DirectionCalculator } from "./DirectionCalculator";
+import { Flattener } from "../../Utils/Flattener";
+import { BoardQueryer } from "../../Board/BoardQueryer";
 
 /**
  * This class calculates the route of the given piece.
@@ -32,7 +31,7 @@ export class RouteCalculator{
          * Find player's color by given square. If square has no piece,
          * then use StateManager.
          */
-        const safeColor: Color = BoardQueryer.getColor(square) ?? StateInspector.getPlayerColor();
+        const safeColor: Color = BoardQueryer.getColorBySquare(square) ?? BoardQueryer.getTurn();
 
         // Get first 2 vertical squares and first 1 diagonal squares.
         return {
@@ -52,7 +51,7 @@ export class RouteCalculator{
          * Find player's color by given square. If square has no piece,
          * then use StateManager.
          */
-        const safeColor: Color = BoardQueryer.getColor(square) ?? StateInspector.getPlayerColor();
+        const safeColor: Color = BoardQueryer.getColorBySquare(square) ?? BoardQueryer.getTurn();
 
         // Knight can't move to any direction, it can move only 2 horizontal and 1 vertical or 2 vertical and 1 horizontal.
         // So, we can't return Path type here.
@@ -71,6 +70,10 @@ export class RouteCalculator{
          * MoveRoute.Bottom squares and Square.c3, Square.c1 are top and bottom of MoveRoute.Right squares.
          */
         for (const path in firstPath) {
+            // If knight can't move 2 horizontal or 2 vertical, then skip the path.
+            if(firstPath[path as MoveRoute]!.length != 2)
+                continue;
+
             /**
              * Get the last square of the path. Example, if the path is MoveRoute.Bottom and the squares are
              * [Square.b1, Square.b2], then the last square is Square.b2.
@@ -109,7 +112,7 @@ export class RouteCalculator{
          * Get the diagonal squares with color of square. If square has no piece,
          * then use StateManager.
          */
-        return DirectionCalculator.getDiagonalSquares(square, BoardQueryer.getColor(square) ?? StateInspector.getPlayerColor());
+        return DirectionCalculator.getDiagonalSquares(square, BoardQueryer.getColorBySquare(square) ?? BoardQueryer.getTurn());
     }
 
     /**
@@ -123,7 +126,7 @@ export class RouteCalculator{
          * Find player's color by given square. If square has no piece,
          * then use StateManager.
          */
-        const safeColor: Color = BoardQueryer.getColor(square) ?? StateInspector.getPlayerColor();
+        const safeColor: Color = BoardQueryer.getColorBySquare(square) ?? BoardQueryer.getTurn();
 
         // Get the horizontal and vertical squares.
         return {
@@ -143,7 +146,7 @@ export class RouteCalculator{
          * Find player's color by given square. If square has no piece,
          * then use StateManager.
          */
-        const safeColor: Color = BoardQueryer.getColor(square) ?? StateInspector.getPlayerColor();
+        const safeColor: Color = BoardQueryer.getColorBySquare(square) ?? BoardQueryer.getTurn();
 
         // Get the horizontal, vertical and diagonal squares.
         return {
@@ -164,7 +167,7 @@ export class RouteCalculator{
          * Find player's color by given square. If square has no piece,
          * then use StateManager.
          */
-        const safeColor: Color = BoardQueryer.getColor(square) ?? StateInspector.getPlayerColor();
+        const safeColor: Color = BoardQueryer.getColorBySquare(square) ?? BoardQueryer.getTurn();
 
         // Get the horizontal, vertical and diagonal squares but only one square away.
         return {

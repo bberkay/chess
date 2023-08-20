@@ -1,5 +1,5 @@
-import {Square, Color, CastlingType, CastlingStatus } from "Types";
-import {Piece, Kings, EnPassantBanStatus } from "Types/Engine";
+import {Square, Color, CastlingType, CastlingStatus } from "../../../Types";
+import {Piece, Kings, EnPassantBanStatus } from "../../../Types/Engine";
 
 /**
  * This class is used for the store the board.

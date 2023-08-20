@@ -1,7 +1,7 @@
-import { Color, PieceType, Square } from "Types";
-import { CastlingType, EnPassantDirection, Piece } from "Types/Engine";
-import { BoardQueryer } from "Engine/Core/Board/BoardQueryer.ts";
-import { Locator } from "Engine/Core/Utils/Locator";
+import { Color, PieceType, Square, CastlingType, EnPassantDirection } from "../../../../Types";
+import { Piece } from "../../../../Types/Engine";
+import { BoardQueryer } from "../../Board/BoardQueryer.ts";
+import { Locator } from "../../Utils/Locator";
 
 /**
  * This class is responsible for checking if the specific move is available like
@@ -33,7 +33,7 @@ export class MoveChecker{
          *
          * @see src/Manager/StateManager.ts
          */
-        if(!StateInspector.getCastlingStatus(color == Color.Black
+        if(!BoardQueryer.getCastlingStatus(color == Color.Black
             ? (castlingType == "Short" ? CastlingType.BlackLong : CastlingType.BlackShort)
             : (castlingType == "Long" ? CastlingType.WhiteLong : CastlingType.WhiteShort)))
             return false;
@@ -62,7 +62,7 @@ export class MoveChecker{
          *
          * @see for more information about dangerous squares src/Engine/Checker/StateChecker.ts
          */
-        if(!chosenRook || king.getMoveCount() != 0 || chosenRook.getMoveCount() != 0 || BoardQueryer.isPlayerInCheck())
+        if(!chosenRook || king.getMoveCount() != 0 || chosenRook.getMoveCount() != 0 || BoardQueryer.isCheck())
             return false;
 
         /**
@@ -71,7 +71,7 @@ export class MoveChecker{
          */
         for(let square of betweenSquares!){
             // If there is a piece or a dangerous square between king and the long rook, return false.
-            if(BoardQueryer.getPiece(square) || BoardChecker.isSquareThreatened(square))
+            if(BoardQueryer.getPieceOnSquare(square) || BoardQueryer.isSquareThreatened(square))
                 return false;
         }
 
@@ -114,14 +114,14 @@ export class MoveChecker{
          */
 
         // Find the pawn by the given square.
-        const pawn: Piece = StateEngine.getPiece(square)!;
+        const pawn: Piece = BoardQueryer.getPieceOnSquare(square)!;
 
         /**
          * If en passant is not available for the given pawn, return false.
          *
          * @see for more information about en passant state management src/Manager/StateManager.ts
          */
-        if(StateEngine.getBannedEnPassantPawns(pawn.getID()))
+        if(BoardQueryer.getEnPassantBanStatus(pawn.getID()))
             return false;
 
         // Find fifth rank for black and white pawns.
@@ -144,7 +144,7 @@ export class MoveChecker{
          * square to the moving pawn.
          */
         const adjacentSquare: number = direction == EnPassantDirection.Left ? square - 1 : square + 1;
-        const pieceOfTargetSquare: Piece | null = StateEngine.getPiece(adjacentSquare);
+        const pieceOfTargetSquare: Piece | null = BoardQueryer.getPieceOnSquare(adjacentSquare);
 
         /**
          * Check third rule, if target square is empty or if the piece
