@@ -16,12 +16,16 @@ export class PieceModel implements Piece{
 
     /**
      * Constructor of the PieceModel class.
+     * @param color Color of the piece.
+     * @param type Type of the piece.
+     * @param id Id of the piece.
+     * @param moveCount Move count of the piece, this is generally used when loading a game from cache.
      */
-    public constructor(color: Color, type: PieceType, id: number){
+    public constructor(color: Color, type: PieceType, id: number, moveCount: number = 0){
         this.id = id;
         this.color = color;
         this.type = type;
-        this.moveCount = 0;
+        this.moveCount = moveCount;
     }
 
     /**
@@ -48,10 +52,4 @@ export class PieceModel implements Piece{
      * This function increases move count of the piece.
      */
     public increaseMoveCount(): void { this.moveCount++; }
-
-    /**
-     * This function set move count of the piece.
-     * Note: Generally, this function is used for loading unfinished games.
-     */
-    public setMoveCount(moveCount: number): void { this.moveCount = moveCount; }
 }

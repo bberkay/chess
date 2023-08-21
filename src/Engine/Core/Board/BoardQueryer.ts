@@ -1,5 +1,5 @@
 import { Board } from "./Board";
-import { Square, Color, PieceType, EnPassantDirection, CastlingType } from "../../../Types";
+import { Square, Color, PieceType } from "../../../Types";
 import { Piece, Route, MoveRoute } from "../../../Types/Engine";
 import { RouteCalculator } from "../Move/Calculator/RouteCalculator.ts";
 
@@ -20,7 +20,7 @@ export class BoardQueryer extends Board{
     /**
      * Get current turn's color
      */
-    public static getTurn(): Color
+    public static getColorOfTurn(): Color
     {
         return Board.currentTurn;
     }
@@ -28,7 +28,7 @@ export class BoardQueryer extends Board{
     /**
      * Get opponent's color
      */
-    public static getOpponent(): Color
+    public static getColorOfOpponent(): Color
     {
         return Board.currentTurn === Color.White ? Color.Black : Color.White;
     }
@@ -41,23 +41,6 @@ export class BoardQueryer extends Board{
         return Board.moveCount;
     }
 
-    /**
-     * Get castling status
-     * @example StateManager.getCastlingStatus(CastlingType.WhiteLong)
-     */
-    public static getCastlingStatus(castlingType: CastlingType): boolean
-    {
-        return Board.castlingStatus[castlingType];
-    }
-
-    /**
-     * Get en passant status of pawn
-     * @example StateManager.getEnPassantStatus(fourth number piece id) // Returns EnPassantDirection.Left and/or EnPassantDirection.Right and/or EnPassantDirection.Both
-     */
-    public static getEnPassantBanStatus(pieceID: number): EnPassantDirection | null
-    {
-        return Board.enPassantBanStatus![pieceID] ?? null;
-    }
 
     /**
      * Get piece with the given square.
@@ -172,7 +155,7 @@ export class BoardQueryer extends Board{
          * @see For more information about the StateManager, please check the src/Managers/StateManager.ts
          */
         const piece: Piece | null = this.getPieceOnSquare(square);
-        const enemyColor: Color = piece ? (piece.getColor() == Color.White ? Color.Black : Color.White) : this.getOpponent();
+        const enemyColor: Color = piece ? (piece.getColor() == Color.White ? Color.Black : Color.White) : this.getColorOfOpponent();
 
         /**
          * Get all routes of the opponent pieces.
@@ -259,7 +242,7 @@ export class BoardQueryer extends Board{
          * check if it is threatened.
          */
         return this.isSquareThreatened(
-            this.getSquareOfPiece(this.getKingByColor(this.getTurn())!)!
+            this.getSquareOfPiece(this.getKingByColor(this.getColorOfTurn())!)!
         );
     }
 

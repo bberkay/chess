@@ -130,6 +130,18 @@ export class MoveEngine extends MoveChecker{
         moves[MoveType.Normal] = Flattener.flattenRoute(this.doKingSafety(route)!);
 
         /**
+         * Clear the pawn's routes. Because we will add en passant moves
+         * to the pawn's moves. If we don't clear the pawn's routes, then
+         * the pawn's moves will be duplicated for every move type. For example,
+         * if the pawn has 2 normal moves, 1 en passant move and 1 promotion move,
+         * then the pawn's moves will be 2 normal moves, 3 en passant moves(2 normal
+         * + 1 en passant) and 4 promotion moves(2 normal + 1 en passant + 1 promotion).
+         */
+        for(let path in route) route[path as MoveRoute] = [];
+        route[moveDirection.leftDiagonal] = [];
+        route[moveDirection.rightDiagonal] = [];
+
+        /**
          * Add en passant capability to the pawn. For example,
          * if the pawn is white and left en passant is available,
          * then add the left top square(current square id - 9) to the pawn's
@@ -141,16 +153,6 @@ export class MoveEngine extends MoveChecker{
          * @see for more information about square id check Square enum in src/Types.ts
          * @see for more information about en passant check src/Engine/Checker/MoveChecker.ts
          */
-
-        /**
-         * Clear the pawn's routes. Because we will add en passant moves
-         * to the pawn's moves. If we don't clear the pawn's routes, then
-         * the pawn's moves will be duplicated for every move type. For example,
-         * if the pawn has 2 normal moves, 1 en passant move and 1 promotion move,
-         * then the pawn's moves will be 2 normal moves, 3 en passant moves(2 normal
-         * + 1 en passant) and 4 promotion moves(2 normal + 1 en passant + 1 promotion).
-         */
-        for(let path in route) route[path as MoveRoute] = [];
 
         // Add left en passant move to the pawn's moves.
         if(this.isLeftEnPassantAvailable(this.pieceSquare!))

@@ -25,14 +25,6 @@ export class ChessBoard {
     private colorOfSelectedPiece: Color | null = null;
 
     /**
-     * Constructor of the ChessBoard class.
-     * @param isStandalone If this parameter is true, the board will work standalone. Otherwise, it will work with the Chess class.
-     */
-    constructor(isStandalone: boolean = true) {
-        console.log("isStandalone: " + isStandalone);
-    }
-
-    /**
      * This function creates a chess board with the given position(fen notation or json notation).
      */
     public createGame(position: JsonNotation | StartPosition | string = StartPosition.Standard): void
@@ -138,8 +130,8 @@ export class ChessBoard {
         piece.className = "piece";
 
         // Set the piece type and color to the piece element.
-        piece.setAttribute("data-piece", type.toLowerCase());
-        piece.setAttribute("data-color", color.toLowerCase());
+        piece.setAttribute("data-piece", type);
+        piece.setAttribute("data-color", color);
 
         /**
          * Set the click mode "Select" to the square which means
@@ -232,14 +224,8 @@ export class ChessBoard {
         const fromSquare: HTMLDivElement = document.getElementById(from.toString()) as HTMLDivElement;
         const toSquare: HTMLDivElement = document.getElementById(to.toString()) as HTMLDivElement;
 
-        // Remove piece at the target and source squares.
-        this.clearSquare(to);
-        this.clearSquare(from);
-
         // Get the move type by to square's click mode attribute.
         const moveType: MoveType = toSquare.getAttribute("data-click-mode") as MoveType;
-
-        // Do the move by its type.
         switch(moveType){
             case MoveType.Castling:
                 this._doCastling(fromSquare, toSquare);
@@ -261,8 +247,41 @@ export class ChessBoard {
      */
     private _doCastling(fromSquare:HTMLDivElement, toSquare:HTMLDivElement): void
     {
-        // Move piece from the source square(from) to the target square(to).
-        toSquare.appendChild(fromSquare.querySelector(".piece")!);
+        /**
+         * Get the castling type by measuring the distance between
+         * the fromSquare(king) and toSquare(rook). If the distance
+         * is greater than 3 then it is a long castling otherwise
+         * it is a short castling.
+         *
+         * @see For more information about castling, see https://en.wikipedia.org/wiki/Castling
+         * @see For more information about square ids, see src/Types/index.ts
+         */
+        const castlingType: "Long" | "Short" = parseInt(fromSquare.id) - parseInt(toSquare.id) > 3
+            ? "Long" : "Short";
+
+        /**
+         * If the castling is long then the king's new square is
+         * 2 squares left of the fromSquare otherwise 2 squares
+         * right of the fromSquare.
+         */
+        const kingNewSquare: number = castlingType == "Long" ? parseInt(fromSquare.id) - 2 : parseInt(fromSquare.id) + 2;
+
+        this._doNormalMove(fromSquare, document.getElementById(kingNewSquare.toString()) as HTMLDivElement);
+
+        /**
+         * If the castling is long then the rook's current square
+         * is 4 square left of "from" and rook's new square is
+         * must be 1 square right of the kingNewSquare, if the castling
+         * is short then rook's current square is 3 square right of "from"
+         * and rook's new square is must be 1 square left of the kingNewSquare.
+         * For example, if the castling is long and the king's current square
+         * is "e1" then the rook's current square is "a1" and rook's new square
+         * is "d1".
+         */
+        const rook: number = castlingType == "Long" ? parseInt(fromSquare.id) - 4 : parseInt(fromSquare.id) + 3;
+        const rookNewSquare: number = castlingType == "Long" ? kingNewSquare + 1 : kingNewSquare - 1;
+
+        this._doNormalMove(document.getElementById(rook.toString()) as HTMLDivElement, document.getElementById(rookNewSquare.toString()) as HTMLDivElement);
     }
 
     /**
@@ -270,8 +289,20 @@ export class ChessBoard {
      */
     private _doEnPassant(fromSquare:HTMLDivElement, toSquare:HTMLDivElement): void
     {
-        // Move piece from the source square(from) to the target square(to).
-        toSquare.appendChild(fromSquare.querySelector(".piece")!);
+        this._doNormalMove(fromSquare, toSquare);
+
+        /**
+         * Get the square of the killed piece by adding 8 to
+         * the target square if the piece is white or subtracting
+         * 8 if the piece is black. Because the killed piece is
+         * always in the back of the target square.
+         * @see For more information about en passant, see https://en.wikipedia.org/wiki/En_passant
+         * @see For more information about the square ids, see src/Types/index.ts
+         */
+        const killedPieceSquare = parseInt(toSquare.id) + (toSquare.querySelector(".piece")!.getAttribute("data-color") === Color.White ? 8 : -8);
+
+        // Remove the killed piece.
+        this.clearSquare(killedPieceSquare);
     }
 
     /**
@@ -279,18 +310,18 @@ export class ChessBoard {
      */
     private _doPromotion(fromSquare:HTMLDivElement, toSquare:HTMLDivElement): void
     {
-        // Do the normal move.
         this._doNormalMove(fromSquare, toSquare);
-
-        // Show the promotion menu.
         this.showPromotionMenu(toSquare);
     }
 
     /**
-     * Do the normal move on the chess board.
+     * Do the normal move(move piece to another square) on the chess board.
      */
     private _doNormalMove(fromSquare:HTMLDivElement, toSquare:HTMLDivElement): void
     {
+        // Clear the target square.
+        this.clearSquare(parseInt(toSquare.id));
+
         // Move piece from the source square(from) to the target square(to).
         toSquare.appendChild(fromSquare.querySelector(".piece")!);
     }

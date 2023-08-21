@@ -1,4 +1,4 @@
-import { Color, PieceType, Square, EnPassantDirection } from "Types";
+import { Color, PieceType, Square } from "Types";
 
 /**
  * @description Piece is used to define a piece.
@@ -10,14 +10,7 @@ export interface Piece {
     getID(): number;
     getMoveCount(): number;
     increaseMoveCount(): void;
-    setMoveCount(moveCount: number): void;
 }
-
-/**
- * @description Piece ID's of pawn that "can't" en passant(why don't we store as "can"? because this way more easy and optimize.
- * @see src/Engine/Checker/MoveChecker.ts For more information.
- */
-export type EnPassantBanStatus = Record<number, EnPassantDirection>
 
 /**
  * @description Kings is stores the kings of the players.

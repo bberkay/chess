@@ -1,5 +1,5 @@
-import {Square, Color, CastlingType, CastlingStatus } from "../../../Types";
-import {Piece, Kings, EnPassantBanStatus } from "../../../Types/Engine";
+import { Square, Color } from "../../../Types";
+import { Piece, Kings } from "../../../Types/Engine";
 
 /**
  * This class is used for the store the board.
@@ -22,21 +22,6 @@ export class Board {
     protected static currentTurn: Color = Color.White;
     protected static moveCount: number = 0;
     protected static halfMoveCount: number = 0;
-
-    /**
-     * Color Long mean Color player's queen side, Color Short mean Color player's king side.
-     */
-    protected static castlingStatus: CastlingStatus = {
-        [CastlingType.WhiteLong]: true,
-        [CastlingType.WhiteShort]: true,
-        [CastlingType.BlackLong]: true,
-        [CastlingType.BlackShort]: true
-    }
-
-    /**
-     * Piece ID's of pawn that "can't" en passant(why don't we store as "can"? because this way more easy and optimized).
-     */
-    protected static enPassantBanStatus: EnPassantBanStatus = {};
 
     /**
      * Store the kings of the game.

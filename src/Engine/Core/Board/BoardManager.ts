@@ -1,5 +1,5 @@
 import { Board } from "./Board";
-import { Color, Square, PieceType, CastlingType, EnPassantDirection, JsonNotation } from "../../../Types";
+import { Color, Square, PieceType, JsonNotation } from "../../../Types";
 import { EnPassantBanStatus } from "../../../Types/Engine";
 import { BoardQueryer } from "./BoardQueryer.ts";
 import { PieceModel } from "../../Models/PieceModel";
@@ -47,7 +47,7 @@ export class BoardManager extends Board{
      */
     public changeTurn(): void
     {
-        Board.currentTurn = BoardQueryer.getOpponent();
+        Board.currentTurn = BoardQueryer.getColorOfOpponent();
         Board.moveCount += 1;
     }
 
@@ -112,23 +112,5 @@ export class BoardManager extends Board{
     public removePiece(square: Square): void
     {
         BoardManager.currentBoard[square] = null;
-    }
-
-    /**
-     * Change castling status
-     * @example StateManager.setCastlingStatus(CastlingType.WhiteLong, false), That means white long castling is disabled
-     */
-    public changeCastlingStatus(castlingType: CastlingType, value: boolean): void
-    {
-        Board.castlingStatus[castlingType] = value;
-    }
-
-    /**
-     * Add piece(id) that can't en passant to en passant status list
-     * @example StateManager.addBannedEnPassantPawn(pieceId, EnPassantDirection.Left), That means piece(id) can't en passant to left.
-     */
-    public setBannedEnPassant(pieceID: number, direction: EnPassantDirection): void
-    {
-        Board.enPassantBanStatus![pieceID] = direction;
     }
 }

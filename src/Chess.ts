@@ -7,7 +7,7 @@
  * @license MIT
  */
 
-import { Square, StartPosition, CacheLayer, JsonNotation, Moves } from "./Types";
+import { Square, StartPosition, CacheLayer, JsonNotation } from "./Types";
 import { SquareClickMode } from "./Types/Board";
 import { ChessEngine } from "./Engine/ChessEngine";
 import { ChessBoard } from "./Interface/ChessBoard";
@@ -27,14 +27,13 @@ export class Chess{
     private chessEngine: ChessEngine;
     private chessBoard: ChessBoard;
     private selectedSquare: Square | null = null;
-    private currentMoves: Moves | null = null;
 
     /**
      * Constructor of the Chess class.
      */
     constructor(){
-        this.chessEngine = new ChessEngine(false);
-        this.chessBoard = new ChessBoard(false);
+        this.chessEngine = new ChessEngine();
+        this.chessBoard = new ChessBoard();
 
         // Check the cache and load the game(if exists).
         this.checkAndLoadGameFromCache();
@@ -46,7 +45,7 @@ export class Chess{
      */
     private checkAndLoadGameFromCache(): void
     {
-        this.createGame(StartPosition.Castling);
+        this.createGame(StartPosition.EnPassantRight);
         /*if(!Cache.get(CacheLayer.Game))
             this.createGame();
         else{
@@ -122,10 +121,13 @@ export class Chess{
      */
     private _doSelectAction(square: Square): void
     {
+        if(!this.chessEngine.isSelectLegal(square))
+            return;
+
+        // Get the possible moves of the selected square and highlight them on chessBoard.
         this.selectedSquare = square;
         this.chessBoard.highlightSelect(square);
-        this.currentMoves = this.chessEngine.getMoves(square);
-        this.chessBoard.highlightMoves(this.currentMoves!);
+        this.chessBoard.highlightMoves(this.chessEngine.getMoves(square)!);
     }
 
     /**

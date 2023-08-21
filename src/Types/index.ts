@@ -63,15 +63,8 @@ export enum MoveType {
  */
 export enum EnPassantDirection{
     Left = "Left",
-    Right = "Right",
-    Both = "Both"
+    Right = "Right"
 }
-
-/**
- * White/Black Long mean White/Black player's queen side, White/Black Short mean White/Black player's king side.
- * @see src/Engine/Checker/MoveChecker.ts For more information.
- */
-export type CastlingStatus = Record<CastlingType, boolean>;
 
 /**
  * Moves type for the moves.
@@ -85,7 +78,7 @@ export type Moves = {[key in MoveType]?: Array<Square>};
 export interface JsonNotation{
     board: Array<{color: Color, type:PieceType, square:Square}>;
     turn: Color;
-    castling: CastlingStatus;
+    castling: Record<CastlingType, boolean>;
     enPassant: Square | null;
     halfMoveClock: number | 0;
     fullMoveNumber: number | 0;

@@ -1,4 +1,4 @@
-import { Color, PieceType, Square, CastlingType, EnPassantDirection } from "../../../../Types";
+import { Color, PieceType, Square, EnPassantDirection } from "../../../../Types";
 import { Piece } from "../../../../Types/Engine";
 import { BoardQueryer } from "../../Board/BoardQueryer.ts";
 import { Locator } from "../../Utils/Locator";
@@ -29,16 +29,6 @@ export class MoveChecker{
          */
 
         /**
-         * If castling is not available for the given color and castling type, return false.
-         *
-         * @see src/Manager/StateManager.ts
-         */
-        if(!BoardQueryer.getCastlingStatus(color == Color.Black
-            ? (castlingType == "Short" ? CastlingType.BlackLong : CastlingType.BlackShort)
-            : (castlingType == "Long" ? CastlingType.WhiteLong : CastlingType.WhiteShort)))
-            return false;
-
-        /**
          * Find the king, the chosen rook and squares between king
          * and rook by the given color.
          *
@@ -49,9 +39,14 @@ export class MoveChecker{
          * Color: black, castling type: short, king: e8, chosen rook: h8, between squares: f8, g8
          */
         const king: Piece = BoardQueryer.getKingByColor(color)!;
-        const chosenRook: Piece | null = BoardQueryer.getPieceOnSquare(castlingType == "Short"
-            ? (color == Color.White ? Square.a1 : Square.h1)
-            : (color == Color.White ? Square.a8 : Square.h8));
+
+        const targetSquareForRook: Square = castlingType == "Short"
+            ? (color == Color.White ? Square.h1 : Square.h8)
+            : (color == Color.White ? Square.a1 : Square.a8);
+
+        const chosenRook: Piece | null = BoardQueryer.isSquareHasPiece(targetSquareForRook, color, PieceType.Rook)
+            ? BoardQueryer.getPieceOnSquare(targetSquareForRook) : null;
+
         const betweenSquares: Array<Square> = castlingType == "Long"
             ? (color == Color.White ? [Square.b1, Square.c1, Square.d1] : [Square.b8, Square.c8, Square.d8])
             : (color == Color.White ? [Square.f1, Square.g1] : [Square.f8, Square.g8]);
@@ -116,17 +111,9 @@ export class MoveChecker{
         // Find the pawn by the given square.
         const pawn: Piece = BoardQueryer.getPieceOnSquare(square)!;
 
-        /**
-         * If en passant is not available for the given pawn, return false.
-         *
-         * @see for more information about en passant state management src/Manager/StateManager.ts
-         */
-        if(BoardQueryer.getEnPassantBanStatus(pawn.getID()))
-            return false;
-
         // Find fifth rank for black and white pawns.
-        const BLACK_EN_PASSANT_ROW: number = 4;
-        const WHITE_EN_PASSANT_ROW: number = 3;
+        const BLACK_EN_PASSANT_ROW: number = 5;
+        const WHITE_EN_PASSANT_ROW: number = 4;
 
         // Find the pawn's color and row.
         const color: Color = pawn.getColor();

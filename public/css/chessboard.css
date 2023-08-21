@@ -54,6 +54,11 @@
     display:flex;
     flex-wrap: wrap;
     cursor: pointer;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 /* Individual square styles */
@@ -111,52 +116,52 @@
 }
 
 /* White pieces */
-#chessboard [data-piece="rook"][data-color="white"]{
+#chessboard [data-piece="Rook"][data-color="White"]{
     background-image:var(--white-rook-image);
 }
 
-#chessboard [data-piece="knight"][data-color="white"]{
+#chessboard [data-piece="Knight"][data-color="White"]{
     background-image:var(--white-knight-image);
 }
 
-#chessboard [data-piece="bishop"][data-color="white"]{
+#chessboard [data-piece="Bishop"][data-color="White"]{
     background-image:var(--white-bishop-image);
 }
 
-#chessboard [data-piece="queen"][data-color="white"]{
+#chessboard [data-piece="Queen"][data-color="White"]{
     background-image:var(--white-queen-image);
 }
 
-#chessboard [data-piece="king"][data-color="white"]{
+#chessboard [data-piece="King"][data-color="White"]{
     background-image:var(--white-king-image);
 }
 
-#chessboard [data-piece="pawn"][data-color="white"]{
+#chessboard [data-piece="Pawn"][data-color="White"]{
     background-image:var(--white-pawn-image);
 }
 
 /* Black pieces */
-#chessboard [data-piece="rook"][data-color="black"]{
+#chessboard [data-piece="Rook"][data-color="Black"]{
     background-image:var(--black-rook-image);
 }
 
-#chessboard [data-piece="knight"][data-color="black"]{
+#chessboard [data-piece="Knight"][data-color="Black"]{
     background-image:var(--black-knight-image);
 }
 
-#chessboard [data-piece="bishop"][data-color="black"]{
+#chessboard [data-piece="Bishop"][data-color="Black"]{
     background-image:var(--black-bishop-image);
 }
 
-#chessboard [data-piece="queen"][data-color="black"]{
+#chessboard [data-piece="Queen"][data-color="Black"]{
     background-image:var(--black-queen-image);
 }
 
-#chessboard [data-piece="king"][data-color="black"]{
+#chessboard [data-piece="King"][data-color="Black"]{
     background-image:var(--black-king-image);
 }
 
-#chessboard [data-piece="pawn"][data-color="black"]{
+#chessboard [data-piece="Pawn"][data-color="Black"]{
     background-image:var(--black-pawn-image);
 }
 
