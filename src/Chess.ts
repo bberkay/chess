@@ -45,7 +45,7 @@ export class Chess{
      */
     private checkAndLoadGameFromCache(): void
     {
-        this.createGame(StartPosition.EnPassantRight);
+        this.createGame(StartPosition.Promotion);
         /*if(!Cache.get(CacheLayer.Game))
             this.createGame();
         else{
@@ -82,27 +82,22 @@ export class Chess{
      */
     public doAction(moveType: SquareClickMode, square: Square): void
     {
-        if([SquareClickMode.Play, SquareClickMode.Castling, SquareClickMode.Promote, SquareClickMode.EnPassant].includes(moveType))
-        {
-            /**
-             * If the selected square is not null and the selected square is not the same as the square
-             */
+        if([SquareClickMode.Play, SquareClickMode.Castling, SquareClickMode.Promote, SquareClickMode.Promotion, SquareClickMode.EnPassant].includes(moveType)){
             this._doPlayAction(square);
+
+            /**
+             * If the move type is not promotion, clear the board.
+             * Because, we need selectedSquare(promoted pawn) to promote
+             */
+            if(moveType != SquareClickMode.Promotion)
+                this._doClearAction();
+            else
+                this.chessBoard.clearBoard();
         }
         else if(moveType === SquareClickMode.Select)
-        {
-            /**
-             * If the selected square is null
-             */
             this._doSelectAction(square);
-        }
         else if(moveType == SquareClickMode.Clear)
-        {
-            /**
-             * If the move type is clear or
-             */
             this._doClearAction();
-        }
     }
 
     /**
@@ -130,6 +125,7 @@ export class Chess{
         this.chessBoard.highlightMoves(this.chessEngine.getMoves(square)!);
     }
 
+
     /**
      * This function move the selected square on chessEngine and chessBoard,
      * then set the selected square to null and clear the board.
@@ -138,7 +134,5 @@ export class Chess{
     {
         this.chessEngine.playMove(this.selectedSquare!, square);
         this.chessBoard.playMove(this.selectedSquare!, square);
-        this.selectedSquare = null;
-        this.chessBoard.clearBoard();
     }
 }

@@ -20,7 +20,8 @@ export enum SquareClickMode{
     Select = "Select",
     Play = "Play",
     Clear = "Clear",
-    Promote = "Promote",
+    Promote = "Promote", // Promote the pawn to the selected piece.
+    Promotion = "Promotion", // Move pawn to the promotion square.
     Disable = "Disable",
     Castling = "Castling",
     EnPassant = "EnPassant"

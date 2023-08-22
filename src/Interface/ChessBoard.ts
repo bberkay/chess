@@ -208,7 +208,7 @@ export class ChessBoard {
                  */
                 const clickMode: SquareClickMode = (moveType == MoveType.Castling ? SquareClickMode.Castling : null)
                     || (moveType == MoveType.EnPassant ? SquareClickMode.EnPassant : null)
-                    || (moveType == MoveType.Promotion ? SquareClickMode.Promote : null) || SquareClickMode.Play;
+                    || (moveType == MoveType.Promotion ? SquareClickMode.Promotion : null) || SquareClickMode.Play;
 
                 this.setSquareClickMode(move, clickMode);
             }
@@ -225,16 +225,19 @@ export class ChessBoard {
         const toSquare: HTMLDivElement = document.getElementById(to.toString()) as HTMLDivElement;
 
         // Get the move type by to square's click mode attribute.
-        const moveType: MoveType = toSquare.getAttribute("data-click-mode") as MoveType;
+        const moveType: SquareClickMode = toSquare.getAttribute("data-click-mode") as SquareClickMode;
         switch(moveType){
-            case MoveType.Castling:
+            case SquareClickMode.Castling:
                 this._doCastling(fromSquare, toSquare);
                 break;
-            case MoveType.EnPassant:
+            case SquareClickMode.EnPassant:
                 this._doEnPassant(fromSquare, toSquare);
                 break;
-            case MoveType.Promotion:
+            case SquareClickMode.Promotion:
                 this._doPromotion(fromSquare, toSquare);
+                break;
+            case SquareClickMode.Promote:
+                this._doPromote(fromSquare, toSquare);
                 break;
             default:
                 this._doNormalMove(fromSquare, toSquare);
@@ -311,7 +314,27 @@ export class ChessBoard {
     private _doPromotion(fromSquare:HTMLDivElement, toSquare:HTMLDivElement): void
     {
         this._doNormalMove(fromSquare, toSquare);
-        this.showPromotionMenu(toSquare);
+        this.showPromotionMenu(toSquare.querySelector(".piece") as HTMLDivElement);
+    }
+
+    /**
+     * Do the promote move on the chess board.
+     */
+    private _doPromote(promoteSquare:HTMLDivElement, selectedSquare:HTMLDivElement): void
+    {
+        // Find selected option and create the piece.
+        const selectedOption: HTMLDivElement = selectedSquare.lastElementChild as HTMLDivElement;
+        const color: Color = selectedOption.getAttribute("data-color") as Color;
+        const pieceType: PieceType = selectedOption.getAttribute("data-piece") as PieceType;
+
+        // Create the piece first row if the piece is white otherwise create the piece last row.
+        this.createPiece(
+            color,
+            pieceType,
+            Number(promoteSquare.id) + (color == Color.White ? -8 : +8) as Square
+        );
+
+        this.closePromotionMenu();
     }
 
     /**
@@ -350,11 +373,16 @@ export class ChessBoard {
             this.removeSquareEffect(squares[i], [SquareEffect.Playable, SquareEffect.Killable, SquareEffect.Selected]);
 
             /**
-             * If the square has a piece then set the click mode "Select" otherwise
-             * set the click mode "Clear" to the square.
+             * If the square has a piece then set the click mode "Select"
+             * otherwise set the click mode "Clear".
+             * Note: Also, promotion options must not be set to "Select"
+             * when clearing the board.
              */
-            if (squares[i].lastElementChild?.className.includes("piece"))
-                this.setSquareClickMode(squares[i] as HTMLDivElement, SquareClickMode.Select);
+            const squareClassName = squares[i].lastElementChild?.className;
+            if (squareClassName?.includes("piece")){
+                if(!squareClassName?.includes("promotion-option"))
+                    this.setSquareClickMode(squares[i] as HTMLDivElement, SquareClickMode.Select);
+            }
             else // If the square does not have a piece
                 this.setSquareClickMode(squares[i] as HTMLDivElement, SquareClickMode.Clear);
         }
@@ -367,7 +395,8 @@ export class ChessBoard {
     {
         // Get all squares on the board.
         let squares: NodeListOf<Element> = document.querySelectorAll(".square");
-        for(let i = 1; i <= 64; i++){
+        for(let i = 0; i <= 63; i++){
+
             // Save the click mode of the square. We will use it when we unlock the board.
             this.lockedSquaresModes.push(squares[i].getAttribute("data-click-mode") as SquareClickMode);
 
@@ -387,12 +416,12 @@ export class ChessBoard {
         // Get all squares on the board.
         let squares: NodeListOf<Element> = document.querySelectorAll(".square");
 
-        for(let i = 1; i <= 64; i++){
+        for(let i = 0; i <= 63; i++){
             /**
              * Set the click mode of the square to the mode which we saved
              * when we locked the board.
              */
-            this.setSquareClickMode(squares[i], this.lockedSquaresModes[i-1]);
+            this.setSquareClickMode(squares[i], this.lockedSquaresModes[i]);
 
             // Remove disabled effect from the square.
             this.removeSquareEffect(squares[i], SquareEffect.Disabled);
@@ -413,8 +442,8 @@ export class ChessBoard {
          */
         this.lockBoard();
 
-        // Find and hide promoted pawn on the board.
-        promotedPawn.style.display = "none";
+        // Hide the promoted pawn.
+        promotedPawn.remove();
 
         // Create promotion options. (Queen, Rook, Bishop, Knight)
         const PROMOTION_TYPES: Array<string> = [PieceType.Queen, PieceType.Rook, PieceType.Bishop, PieceType.Knight];
@@ -427,7 +456,7 @@ export class ChessBoard {
             promotionOption.className += " promotion-option";
 
             // Set piece type of promotion option.
-            promotionOption.setAttribute("data-piece", PROMOTION_TYPES[i].toLowerCase());
+            promotionOption.setAttribute("data-piece", PROMOTION_TYPES[i]);
 
             // Set color of promotion option to the color of promoted pawn.
             promotionOption.setAttribute("data-color", promotedPawn.getAttribute("data-color") as string);
@@ -456,7 +485,7 @@ export class ChessBoard {
         let promotionOptions: NodeListOf<Element> = document.querySelectorAll(".promotion-option");
 
         // Remove promotion options.
-        for(let i = 0; i < 4; i++)
+        for(let i = 0; i < 3; i++)
             promotionOptions[i].remove();
 
         /**

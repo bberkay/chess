@@ -54,7 +54,7 @@ export enum MoveType {
     Normal = "Normal",
     EnPassant = "EnPassant",
     Castling = "Castling",
-    Promotion = "Promotion"
+    Promotion = "Promotion", // Move pawn to the promotion square.
 }
 
 /**

@@ -26,6 +26,7 @@ export class ChessEngine{
     private moveEngine: MoveEngine;
     private boardManager: BoardManager;
     private currentMoves: Moves | null = null;
+    private isPromotionMove: boolean = false;
 
     /**
      * Constructor of the ChessEngine class.
@@ -112,33 +113,51 @@ export class ChessEngine{
      */
     public playMove(from: Square, to: Square): void
     {
-        // Check if the given move is valid.
-        const move = this.checkAndFindMoveType(to);
-        if(!move)
-            return;
+        if(this.isPromotionMove){
+            /**
+             * If the given move is a promote move(not promotion),
+             * then promote the piece and return. Because, promote
+             * move isn't a move type and when user do a promotion
+             * move then the turn doesn't change and user must
+             * promote the piece from board or engine.
+             * @see _doPromote function.
+             */
+            this._doPromote(from, to);
+        }
+        else{
+            // Check if the given move is valid.
+            const move = this.checkAndFindMoveType(to);
+            if(!move)
+                return;
 
-        // Increase the move count of the piece.
-        BoardQueryer.getPieceOnSquare(from)?.increaseMoveCount();
+            // Increase the move count of the piece.
+            BoardQueryer.getPieceOnSquare(from)?.increaseMoveCount();
 
-        // Play the move according to the move type.
-        switch(move){
-            case MoveType.Castling:
-                this._doCastling(from, to);
-                break;
-            case MoveType.EnPassant:
-                this._doEnPassant(from, to);
-                break;
-            case MoveType.Promotion:
-                this._doPromotion(from, to);
-                break;
-            case MoveType.Normal:
-                this._doNormalMove(from, to);
-                break;
+            // Play the move according to the move type.
+            switch(move){
+                case MoveType.Castling:
+                    this._doCastling(from, to);
+                    break;
+                case MoveType.EnPassant:
+                    this._doEnPassant(from, to);
+                    break;
+                case MoveType.Promotion:
+                    this._doPromotion(from, to);
+                    break;
+                case MoveType.Normal:
+                    this._doNormalMove(from, to);
+                    break;
+            }
         }
 
-        // Change the turn.
-        this.boardManager.changeTurn();
-        console.log(BoardQueryer.getBoard());
+        // TODO: Check if the move is checkmate or not.
+        /**
+         * If move is promotion move, then don't change the turn.
+         * Because, user must promote the piece.
+         */
+        if(!this.isPromotionMove){
+            this.boardManager.changeTurn();
+        }
     }
 
     /**
@@ -187,7 +206,7 @@ export class ChessEngine{
      * Do the en passant move.
      */
     private _doEnPassant(from: Square, to: Square): void
-    {
+     {
         this._doNormalMove(from, to);
 
         /**
@@ -205,15 +224,36 @@ export class ChessEngine{
     }
 
     /**
-     * Do the promotion move.
+     * Do the promote move.
      */
-    private _doPromotion(from: Square, to: Square, pieceType: PieceType.Queen | PieceType.Rook | PieceType.Bishop | PieceType.Knight | null = null): void
+    private _doPromotion(from: Square, to: Square): void
+    {
+        // Move the pawn.
+        this._doNormalMove(from, to);
+        this.isPromotionMove = true;
+    }
+
+    /**
+     * Do the promote move.
+     * @example _doPromote(Square.a8, PieceType.Queen)
+     *
+     * if selectedPromote is given Square then Engine will simulate the promotion menu.
+     * @example _doPromote(Square.e8, Square.e8) // Creates a queen on e8(white),
+     * @example _doPromote(Square.e8, Square.e7) // Creates a rook on e7(white)
+     * @example _doPromote(Square.e8, Square.e6) // Creates a bishop on e6(white)
+     * @example _doPromote(Square.e8, Square.e5) // Creates a knight on e5(white),
+     * @example _doPromote(Square.e1, Square.e1) // Creates a queen on a(black),
+     * @example _doPromote(Square.e1, Square.e2) // Creates a rook on e2(black)
+     * @example _doPromote(Square.e1, Square.e3) // Creates a bishop on e3(black)
+     * @example _doPromote(Square.e1, Square.e4) // Creates a knight on e4(black)
+     */
+    private _doPromote(from: Square, selectedPromote: Square | PieceType.Queen | PieceType.Rook | PieceType.Bishop | PieceType.Knight): void
     {
         // Remove the pawn.
         this.boardManager.removePiece(from);
 
-        // If piece type is null then:
-        if(pieceType === null){
+        // If selected promote is square:
+        if(selectedPromote in Square){
             /**
              * Get the piece by clicked square's(to) row.
              * If the clicked row is 8 or 1 then the selected piece
@@ -223,18 +263,30 @@ export class ChessEngine{
              * then the selected piece type is knight(this is engine simulation/
              * version of the promotion menu)
              *
+             * (4x4) ASCII representation of the promotion menu for white(S is square, Q is queen,
+             * R is rook, B is bishop, K is knight):
+             * S | S | Q | S - 8
+             * S | S | R | S - 7
+             * S | S | B | S - 6
+             * S | S | K | S - 5
+             * S | S | S | S - 4
+             * a - b - c - d
+             *
              * @see For more information about promotion, see https://en.wikipedia.org/wiki/Promotion_(chess)
              * @see For more information about promotion menu, see showPromotionMenu() src/Interface/ChessBoard.ts
              */
-            const clickedRow: number = Locator.getRow(to);
-            pieceType = (([8, 1].includes(clickedRow) ? PieceType.Queen : null)
+            const clickedRow: number = Locator.getRow(selectedPromote as Square);
+            selectedPromote = (([8, 1].includes(clickedRow) ? PieceType.Queen : null)
                 || ([7, 2].includes(clickedRow) ? PieceType.Rook : null)
                 || ([6, 3].includes(clickedRow) ? PieceType.Bishop : null)
                 || ([5, 4].includes(clickedRow) ? PieceType.Knight : null))!;
         }
 
         // Create the new piece.
-        this.boardManager.createPiece(BoardQueryer.getColorOfTurn(), pieceType, to);
+        this.boardManager.createPiece(BoardQueryer.getColorOfTurn(), selectedPromote as PieceType, from);
+
+        // Finish the promotion.
+        this.isPromotionMove = false;
     }
 
     /**

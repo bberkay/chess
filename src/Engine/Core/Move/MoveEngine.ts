@@ -166,6 +166,14 @@ export class MoveEngine extends MoveChecker{
         moves[MoveType.EnPassant] = Flattener.flattenRoute(this.doKingSafety(route)!);
 
         /**
+         * Clear the pawn's routes. Because we will add promotion moves
+         * to the pawn's moves. For more information check the en passant
+         * section above.
+         */
+        for(let path in route) route[path as MoveRoute] = [];
+        route[moveDirection.vertical] = [];
+
+        /**
          * Add promotion capability to the pawn. For example,
          * if the pawn is white and is on the seventh row,
          * then add the top square(current square id + 8) to the pawn's
@@ -176,16 +184,13 @@ export class MoveEngine extends MoveChecker{
          * @see for more information about promotion check src/Engine/Checker/MoveChecker.ts
          */
 
-        /**
-         * Clear the pawn's routes. Because we will add promotion moves
-         * to the pawn's moves. For more information check the en passant
-         * section above.
-         */
-        for(let path in route) route[path as MoveRoute] = [];
-
         // Add promotion moves to the pawn's moves.
-        if(this.isPromotionAvailable(this.pieceSquare!))
+        if(this.isPromotionAvailable(this.pieceSquare!)){
             route[moveDirection.vertical]!.push(this.pieceSquare! + (color == Color.White ? -8 : 8));
+
+            // Delete square from the normal moves.
+            moves[MoveType.Normal]!.splice(moves[MoveType.Normal]!.indexOf(route[moveDirection.vertical]![0]), 1);
+        }
 
         // Add filtered(for king's safety) promotion moves to the pawn's moves.
         moves[MoveType.Promotion] = Flattener.flattenRoute(this.doKingSafety(route)!);
