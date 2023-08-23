@@ -1,7 +1,7 @@
-import { Color, PieceType, Square, EnPassantDirection } from "../../../../Types";
-import { Piece } from "../../../../Types/Engine";
-import { BoardQueryer } from "../../Board/BoardQueryer.ts";
-import { Locator } from "../../Utils/Locator";
+import {Color, EnPassantDirection, PieceType, Square} from "../../../../Types";
+import {Piece} from "../../../../Types/Engine";
+import {BoardQueryer} from "../../Board/BoardQueryer.ts";
+import {Locator} from "../../Utils/Locator";
 
 /**
  * This class is responsible for checking if the specific move is available like
@@ -118,6 +118,16 @@ export class MoveChecker{
         // Find the pawn's color and row.
         const color: Color = pawn.getColor();
         const row: number = Locator.getRow(square);
+
+        /**
+         * Check if the en passant square is banned or not.
+         * Ban system is used for the fourth rule.
+         * @see For more information about ban system check _controlEnPassant() in src/Engine/ChessEngine.ts
+         * @see For more information about en passant square check getPawnMoves() in src/Engine/Mover/MoveEngine.ts
+         */
+        if((direction == EnPassantDirection.Left && BoardQueryer.isEnPassantSquareBanned(color == Color.White ? square - 9 : square + 7))
+            || (direction == EnPassantDirection.Right && BoardQueryer.isEnPassantSquareBanned(color == Color.White ? square - 7 : square + 9) ))
+            return false;
 
         /**
          * Check first rule, if the pawn is on its fifth rank.

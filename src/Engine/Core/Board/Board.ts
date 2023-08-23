@@ -32,7 +32,7 @@ export class Board {
     }
 
     /**
-     * List of piece ids.
+     * Banned en passant squares.
      */
-    protected static pieceIds: Array<number> = [];
+    protected static bannedEnPassantSquares: Array<Square> = [];
 }

@@ -45,7 +45,7 @@ export class Chess{
      */
     private checkAndLoadGameFromCache(): void
     {
-        this.createGame(StartPosition.Promotion);
+        this.createGame(StartPosition.EnPassantRight);
         /*if(!Cache.get(CacheLayer.Game))
             this.createGame();
         else{
@@ -89,10 +89,10 @@ export class Chess{
              * If the move type is not promotion, clear the board.
              * Because, we need selectedSquare(promoted pawn) to promote
              */
-            if(moveType != SquareClickMode.Promotion)
-                this._doClearAction();
-            else
+            if(moveType == SquareClickMode.Promotion)
                 this.chessBoard.clearBoard();
+            else
+                this._doClearAction();
         }
         else if(moveType === SquareClickMode.Select)
             this._doSelectAction(square);
@@ -134,5 +134,13 @@ export class Chess{
     {
         this.chessEngine.playMove(this.selectedSquare!, square);
         this.chessBoard.playMove(this.selectedSquare!, square);
+    }
+
+    /**
+     * This function checks the game is finished or not.
+     */
+    public isGameFinished(): boolean
+    {
+        return this.chessEngine.isGameFinished();
     }
 }

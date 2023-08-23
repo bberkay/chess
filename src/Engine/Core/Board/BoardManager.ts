@@ -1,6 +1,5 @@
 import { Board } from "./Board";
 import { Color, Square, PieceType, JsonNotation } from "../../../Types";
-import { EnPassantBanStatus } from "../../../Types/Engine";
 import { BoardQueryer } from "./BoardQueryer.ts";
 import { PieceModel } from "../../Models/PieceModel";
 
@@ -25,8 +24,10 @@ export class BoardManager extends Board{
         // Set board properties
         Board.currentTurn = jsonNotation.turn;
         Board.moveCount = jsonNotation.fullMoveNumber;
-        Board.castlingStatus = jsonNotation.castling;
         Board.halfMoveCount = jsonNotation.halfMoveClock;
+        Board.bannedEnPassantSquares = Board.bannedEnPassantSquares
+            ? Board.bannedEnPassantSquares.splice(Board.bannedEnPassantSquares.indexOf(jsonNotation.enPassant!, 1))
+            : []; // Remove en passant square from banned en passant squares.
 
         // Create pieces
         this.createPieces(jsonNotation.board);
@@ -35,11 +36,10 @@ export class BoardManager extends Board{
     /**
      * Load the board from the given json notation.
      */
-    public loadBoard(jsonNotation: JsonNotation, enPassantBanStatus: EnPassantBanStatus, pieceIds: Array<number>): void
+    public loadBoard(jsonNotation: JsonNotation, bannedEnPassantSquares: Array<Square>): void
     {
         this.createBoard(jsonNotation);
-        Board.enPassantBanStatus = enPassantBanStatus;
-        Board.pieceIds = pieceIds;
+        Board.bannedEnPassantSquares = bannedEnPassantSquares;
     }
 
     /**
@@ -70,24 +70,8 @@ export class BoardManager extends Board{
      */
     public createPiece(color: Color, type:PieceType, square:Square): void
     {
-        /**
-         * Create piece id for the piece(between 1000 and 9999).
-         */
-        function createPieceID(): number
-        {
-            let id = Math.floor(Math.random() * 10000) + 1000
-
-            // If the id is already used, create a new one.
-            if (Board.pieceIds.includes(id))
-                createPieceID();
-            else // If the id is not used, add it to the list.
-                Board.pieceIds.push(id);
-
-            return id
-        }
-
         // Create piece
-        const piece: PieceModel = new PieceModel(color, type, createPieceID());
+        const piece: PieceModel = new PieceModel(color, type);
 
         // Set piece to square
         BoardManager.currentBoard[square] = piece;
@@ -112,5 +96,13 @@ export class BoardManager extends Board{
     public removePiece(square: Square): void
     {
         BoardManager.currentBoard[square] = null;
+    }
+
+    /**
+     * Ban en passant square
+     */
+    public banEnPassantSquare(square: Square): void
+    {
+        Board.bannedEnPassantSquares.push(square);
     }
 }

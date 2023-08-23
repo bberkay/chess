@@ -7,7 +7,6 @@ import { Color, PieceType, Square } from "Types";
 export interface Piece {
     getColor(): Color;
     getType(): PieceType;
-    getID(): number;
     getMoveCount(): number;
     increaseMoveCount(): void;
 }

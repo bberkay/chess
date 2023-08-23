@@ -41,6 +41,13 @@ export class BoardQueryer extends Board{
         return Board.moveCount;
     }
 
+    /**
+     * Get banned en passant squares
+     */
+    public static isEnPassantSquareBanned(square: Square): boolean
+    {
+        return Board.bannedEnPassantSquares.includes(square);
+    }
 
     /**
      * Get piece with the given square.
@@ -69,7 +76,7 @@ export class BoardQueryer extends Board{
 
     /**
      * Get all pieces by color and/or type.
-     * @example getPieces(Color.White, [PieceType.King, PieceType.Queen]); // Returns all white kings and queens.
+     * @example getPieces(Color.White, [PieceType.Rook, PieceType.Bishop]); // Returns all white rooks and bishops.
      */
     public static getPiecesWithFilter(targetColor: Color | null = null, targetTypes: Array<PieceType> | null = null): Array<Piece>
     {

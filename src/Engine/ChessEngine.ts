@@ -13,6 +13,7 @@ import {BoardManager} from "./Core/Board/BoardManager.ts";
 import {Converter} from "../Utils/Converter";
 import {BoardQueryer} from "./Core/Board/BoardQueryer.ts";
 import {Locator} from "./Core/Utils/Locator.ts";
+import {Piece} from "../Types/Engine";
 
 
 /**
@@ -27,6 +28,7 @@ export class ChessEngine{
     private boardManager: BoardManager;
     private currentMoves: Moves | null = null;
     private isPromotionMove: boolean = false;
+    private isFinished: boolean = false;
 
     /**
      * Constructor of the ChessEngine class.
@@ -150,13 +152,12 @@ export class ChessEngine{
             }
         }
 
-        // TODO: Check if the move is checkmate or not.
         /**
          * If move is promotion move, then don't change the turn.
          * Because, user must promote the piece.
          */
         if(!this.isPromotionMove){
-            this.boardManager.changeTurn();
+            this.finishTurn();
         }
     }
 
@@ -242,7 +243,7 @@ export class ChessEngine{
      * @example _doPromote(Square.e8, Square.e7) // Creates a rook on e7(white)
      * @example _doPromote(Square.e8, Square.e6) // Creates a bishop on e6(white)
      * @example _doPromote(Square.e8, Square.e5) // Creates a knight on e5(white),
-     * @example _doPromote(Square.e1, Square.e1) // Creates a queen on a(black),
+     * @example _doPromote(Square.e1, Square.e1) // Creates a queen on e1(black),
      * @example _doPromote(Square.e1, Square.e2) // Creates a rook on e2(black)
      * @example _doPromote(Square.e1, Square.e3) // Creates a bishop on e3(black)
      * @example _doPromote(Square.e1, Square.e4) // Creates a knight on e4(black)
@@ -298,11 +299,78 @@ export class ChessEngine{
     }
 
     /**
-     * This function checks if the game is finished after move is played.
+     * End the turn with some controls and check the game is finished or not.
      */
-    public isFinished(): boolean
+    private finishTurn(): void
     {
-        // TODO: Implement this function.
-        return false;
+        /**
+         * Order of the functions is important.
+         *
+         * Example scenario for White:
+         * 1- Control en passant moves for White(because, if White not play en passant move in one turn then remove the move)
+         * 2- Change the turn(White -> Black)
+         * 3- Check the game is finished or not for Black
+         */
+        this._controlEnPassant();
+        this.boardManager.changeTurn();
+        this._checkGameFinished();
+    }
+
+    /**
+     * Check en passant moves. If there is an en passant move not played
+     * then remove it. Because, en passant moves are only valid for one turn.
+     *
+     * @see For more information about en passant, see src/Engine/Core/Move/Checker/MoveChecker.ts
+     * @see For more information about en passant, see https://en.wikipedia.org/wiki/En_passant
+     */
+    private _controlEnPassant(): void
+    {
+        /**
+         * Find the en passant squares according to the color of the turn
+         * and the en passant row. If the color of the turn is white then
+         * the en passant row is 5, if the color of the turn is black then
+         * the en passant row is 4. And get pawn from the squares, if the
+         * square has pawn then get pawn's moves and check if there is an
+         * en passant move not played then remove it.
+         *
+         * @see For more information about please check description of the function.
+         */
+        const enPassantSquares: Array<Square> = BoardQueryer.getColorOfTurn() == Color.White
+            ? [Square.a5, Square.b5, Square.c5, Square.d5, Square.e5, Square.f5, Square.g5, Square.h5]
+            : [Square.a4, Square.b4, Square.c4, Square.d4, Square.e4, Square.f4, Square.g4, Square.h4];
+
+        for(const square of enPassantSquares){
+            const piece: Piece | null = BoardQueryer.getPieceOnSquare(square);
+            if(piece && piece.getType() == PieceType.Pawn && piece.getColor() == BoardQueryer.getColorOfTurn()){
+                const moves: Moves | null = this.moveEngine.getMoves(square);
+                if(moves && moves["EnPassant"]!.length > 0){
+                    this.boardManager.banEnPassantSquare(moves["EnPassant"]![0] as Square);
+                }
+            }
+        }
+    }
+
+    /**
+     * This function calculate the game is finished or not.
+     */
+    private _checkGameFinished(): boolean
+    {
+        // TODO: Check the game is finished or not.
+    }
+
+    /**
+     * This function returns the finished status of the game, doesn't calculate the game is finished or not.
+     */
+    public isGameFinished(): boolean
+    {
+        /**
+         * Why we separate finished status and calculation of the finished status?
+         * Because, this function is used in the Chess.ts as a getter function of the
+         * finished status, and we don't want to calculate the finished status every
+         * time when user call this function. Also, we cannot leave it to the user to check
+         * whether the game is over. Engine has to check this situation internally
+         * at the end of each turn.
+         */
+        return this.isFinished;
     }
 }
