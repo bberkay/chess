@@ -355,7 +355,13 @@ export class ChessEngine{
      */
     private _checkGameFinished(): boolean
     {
-        // TODO: Check the game is finished or not.
+        if(BoardQueryer.isCheck()){
+            this.isFinished = true;
+            console.log("Checkmate!");
+            return true;
+        }
+        console.log("Not checkmate!");
+        return false;
     }
 
     /**

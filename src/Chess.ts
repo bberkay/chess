@@ -45,7 +45,7 @@ export class Chess{
      */
     private checkAndLoadGameFromCache(): void
     {
-        this.createGame(StartPosition.EnPassantRight);
+        this.createGame(StartPosition.KingForbiddenMove);
         /*if(!Cache.get(CacheLayer.Game))
             this.createGame();
         else{

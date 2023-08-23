@@ -263,8 +263,12 @@ export class MoveEngine extends MoveChecker{
         let route = RouteCalculator.getKingRoute(this.pieceSquare!);
         if(!route) return null;
 
-        // Get normal moves of the king.
-        moves[MoveType.Normal] = Flattener.flattenRoute(route);
+        // Remove the moves that threatens the king then convert the route to squares array.
+        for(const square of Flattener.flattenRoute(route))
+        {
+            if(!BoardQueryer.isSquareThreatened(square))
+                moves[MoveType.Normal]!.push(square);
+        }
 
         /**
          * Add castling moves to the king's moves. For example,
@@ -297,10 +301,9 @@ export class MoveEngine extends MoveChecker{
         if(this.isShortCastlingAvailable(color))
             route[MoveRoute.Right]!.push(color == Color.White ? Square.h1 : Square.h8);
 
-        // Get castling moves of the king.
+        // Get castling moves of the king. Also, castling doesn't need king safety filter because it is already filtered.
         moves[MoveType.Castling] = Flattener.flattenRoute(route);
 
-        // King doesn't need to filter for king safety. Because, it can't move to the dangerous square.
         return moves;
     }
 
