@@ -56,7 +56,7 @@ export class Locator{
      *
      * @see for more information, check src/Engine/Utils/Locator.ts
      */
-    static getRelative(relativeTo: Square, relative: Square): MoveRoute | null
+    static getRelative(relative: Square, relativeTo: Square): MoveRoute | null
     {
         /**
          * Algorithm:

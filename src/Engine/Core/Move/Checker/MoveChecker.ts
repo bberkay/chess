@@ -39,6 +39,7 @@ export class MoveChecker{
          * Color: black, castling type: short, king: e8, chosen rook: h8, between squares: f8, g8
          */
         const king: Piece = BoardQueryer.getKingByColor(color)!;
+        const kingSquare: Square = color == Color.White ? Square.e1 : Square.e8;
 
         const targetSquareForRook: Square = castlingType == "Short"
             ? (color == Color.White ? Square.h1 : Square.h8)
@@ -57,7 +58,7 @@ export class MoveChecker{
          *
          * @see for more information about dangerous squares src/Engine/Checker/StateChecker.ts
          */
-        if(!chosenRook || king.getMoveCount() != 0 || chosenRook.getMoveCount() != 0 || BoardQueryer.isCheck())
+        if(!chosenRook || king.getMoveCount() != 0 || chosenRook.getMoveCount() != 0 || BoardQueryer.isSquareThreatened(kingSquare))
             return false;
 
         /**

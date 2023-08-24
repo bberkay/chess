@@ -7,13 +7,15 @@
  * @license MIT
  */
 
-import {Color, JsonNotation, Moves, MoveType, PieceType, Square, StartPosition} from "../Types";
+import {Color, GameStatus, JsonNotation, Moves, MoveType, PieceType, Square, StartPosition} from "../Types";
 import {MoveEngine} from "./Core/Move/MoveEngine";
 import {BoardManager} from "./Core/Board/BoardManager.ts";
 import {Converter} from "../Utils/Converter";
 import {BoardQueryer} from "./Core/Board/BoardQueryer.ts";
 import {Locator} from "./Core/Utils/Locator.ts";
-import {Piece} from "../Types/Engine";
+import {MoveRoute, Piece, Route} from "../Types/Engine";
+import {RouteCalculator} from "./Core/Move/Calculator/RouteCalculator.ts";
+import {Board} from "./Core/Board/Board.ts";
 
 
 /**
@@ -27,8 +29,9 @@ export class ChessEngine{
     private moveEngine: MoveEngine;
     private boardManager: BoardManager;
     private currentMoves: Moves | null = null;
+    private currentMovesOfKing: Moves | null = null;
     private isPromotionMove: boolean = false;
-    private isFinished: boolean = false;
+    private statusOfGame: GameStatus = GameStatus.Playing;
 
     /**
      * Constructor of the ChessEngine class.
@@ -73,8 +76,15 @@ export class ChessEngine{
         if(!this.isSelectLegal(square))
             return null;
 
-        // Get the moves of the given square.
-        this.currentMoves = this.moveEngine.getMoves(square);
+        /**
+         * Get the moves of square with move engine. If the piece on the square is king
+         * then get the moves of king with currentMovesOfKing property. Because at the
+         * end of each round, the king's moves are recalculated and stored in currentMovesOfKing
+         * property for check/checkmate controls.
+         */
+        this.currentMoves = BoardQueryer.getPieceOnSquare(square)?.getType() == PieceType.King
+            ? this.currentMovesOfKing
+            : this.moveEngine.getMoves(square);
         return this.currentMoves;
     }
 
@@ -311,9 +321,9 @@ export class ChessEngine{
          * 2- Change the turn(White -> Black)
          * 3- Check the game is finished or not for Black
          */
-        this._controlEnPassant();
+        this._checkEnPassant();
         this.boardManager.changeTurn();
-        this._checkGameFinished();
+        this._checkStatusOfGame();
     }
 
     /**
@@ -323,7 +333,7 @@ export class ChessEngine{
      * @see For more information about en passant, see src/Engine/Core/Move/Checker/MoveChecker.ts
      * @see For more information about en passant, see https://en.wikipedia.org/wiki/En_passant
      */
-    private _controlEnPassant(): void
+    private _checkEnPassant(): void
     {
         /**
          * Find the en passant squares according to the color of the turn
@@ -351,32 +361,104 @@ export class ChessEngine{
     }
 
     /**
-     * This function calculate the game is finished or not.
+     * This function calculate the game is finished or not and set the status of the game
+     * like GameStatus.Check, GameStatus.Checkmate, GameStatus.Stalemate.
      */
-    private _checkGameFinished(): boolean
+    private _checkStatusOfGame(): void
     {
-        if(BoardQueryer.isCheck()){
-            this.isFinished = true;
-            console.log("Checkmate!");
-            return true;
+        /**
+         * Control order of game status:
+         * 1- Check
+         * 2- Checkmate
+         * 3- Stalemate
+         *
+         * @see For more information about check please check the https://en.wikipedia.org/wiki/Check_(chess)
+         * @see For more information about check mate please check the https://en.wikipedia.org/wiki/Checkmate
+         * @see For more information about stalemate please check the https://en.wikipedia.org/wiki/Stalemate
+         * @see For more information about game status types please check the src/Types/index.ts
+         */
+
+        /**
+         * Find the color of the turn and the square of the player's king then
+         * check the square is threatened or not.
+         */
+        const playerColor: Color = BoardQueryer.getColorOfTurn();
+        const enemyColor: Color = BoardQueryer.getColorOfOpponent();
+        const squareOfPlayersKing: Square | null = BoardQueryer.getSquareOfPiece(BoardQueryer.getKingByColor(playerColor)!);
+        const threatSquares: Array<Square> | boolean = BoardQueryer.isSquareThreatened(
+            squareOfPlayersKing!, enemyColor, true
+        );
+
+        // If threatSquares is array(that means king is threatened) then the game is in check status.
+        if(Array.isArray(threatSquares))
+            this.statusOfGame = GameStatus.Check;
+
+        /**
+         * Control, checkmate and stalemate scenarios.
+         *
+         * Note: currentMovesOfKing property is used in getMoves function for avoid calculating
+         * king's moves again and again. Because, at the end of each round, the king's moves are
+         * recalculated and stored in currentMovesOfKing property for check/checkmate controls.
+         */
+        this.currentMovesOfKing = this.moveEngine.getMoves(squareOfPlayersKing!)!;
+
+        // If the king has no moves then check the checkmate and stalemate scenarios.
+        if(this.currentMovesOfKing[MoveType.Normal]!.length == 0){
+            console.log("King has no moves");
+            // If the king is threatened then the game can't be in stalemate status.
+            if(this.statusOfGame == GameStatus.Check) {
+                for (const square of threatSquares as Array<Square>) {
+                    // If player can't kill then control player can block the threat or not by
+                    // calculating the threat piece's moves.
+                    console.log("Threat square: " + square);
+                    if (!BoardQueryer.isSquareThreatened(square)) {
+                        const loc: MoveRoute = Locator.getRelative(squareOfPlayersKing!, square)!;
+                        console.log(loc);
+                        let movesOfThreat: Square[] | undefined;
+                        switch (BoardQueryer.getPieceOnSquare(square)!.getType()) {
+                            case PieceType.Queen:
+                                movesOfThreat = RouteCalculator.getQueenRoute(square)[loc];
+                                break;
+                            case PieceType.Rook:
+                                movesOfThreat = RouteCalculator.getRookRoute(square)[loc];
+                                break;
+                            case PieceType.Bishop:
+                                movesOfThreat = RouteCalculator.getBishopRoute(square)[loc];
+                                break;
+                            case PieceType.Pawn:
+                                movesOfThreat = RouteCalculator.getPawnRoute(square)[loc];
+                                break;
+                        }
+                        console.log("Moves of threat: " + movesOfThreat);
+                        if (movesOfThreat && movesOfThreat!.length > 1) {
+                            for (let moveOfThreat of movesOfThreat!) {
+                                // If player can block the threat then the game is in check status.
+                                console.log("geldi");
+                                if (BoardQueryer.isSquareThreatened(moveOfThreat, playerColor))
+                                    return;
+                            }
+                            // If player can't block the threat then the game is in checkmate status.
+                            this.statusOfGame = GameStatus.Checkmate;
+                            console.log("Checkmate");
+                        }else{
+                            // If player can't block the threat then the game is in checkmate status.
+                            this.statusOfGame = GameStatus.Checkmate;
+                            console.log("Checkmate");
+                        }
+                    }
+                }
+            }else{
+                // Control stalemate
+
+            }
         }
-        console.log("Not checkmate!");
-        return false;
     }
 
     /**
      * This function returns the finished status of the game, doesn't calculate the game is finished or not.
      */
-    public isGameFinished(): boolean
+    public getStatusOfGame(): GameStatus
     {
-        /**
-         * Why we separate finished status and calculation of the finished status?
-         * Because, this function is used in the Chess.ts as a getter function of the
-         * finished status, and we don't want to calculate the finished status every
-         * time when user call this function. Also, we cannot leave it to the user to check
-         * whether the game is over. Engine has to check this situation internally
-         * at the end of each turn.
-         */
-        return this.isFinished;
+        return this.statusOfGame;
     }
 }

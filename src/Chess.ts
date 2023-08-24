@@ -7,12 +7,12 @@
  * @license MIT
  */
 
-import { Square, StartPosition, CacheLayer, JsonNotation } from "./Types";
-import { SquareClickMode } from "./Types/Board";
-import { ChessEngine } from "./Engine/ChessEngine";
-import { ChessBoard } from "./Interface/ChessBoard";
-import { Converter } from "./Utils/Converter.ts";
-import { CacheManager } from "./Managers/CacheManager.ts";
+import {CacheLayer, JsonNotation, Square, StartPosition} from "./Types";
+import {SquareClickMode} from "./Types/Board";
+import {ChessEngine} from "./Engine/ChessEngine";
+import {ChessBoard} from "./Interface/ChessBoard";
+import {Converter} from "./Utils/Converter.ts";
+import {CacheManager} from "./Managers/CacheManager.ts";
 
 
 /**
@@ -45,7 +45,7 @@ export class Chess{
      */
     private checkAndLoadGameFromCache(): void
     {
-        this.createGame(StartPosition.KingForbiddenCapture);
+        this.createGame("rnbqkbnr/ppppp1pp/8/8/2Q1P3/1B6/PPPP1PPP/RNB1K1NR w KQkq - 0 1");
         /*if(!Cache.get(CacheLayer.Game))
             this.createGame();
         else{
@@ -138,9 +138,9 @@ export class Chess{
 
     /**
      * This function checks the game is finished or not.
-     */
+
     public isGameFinished(): boolean
     {
-       return this.chessEngine.isGameFinished();
-    }
+       return this.chessEngine.getStatusOfGame();
+     */
 }

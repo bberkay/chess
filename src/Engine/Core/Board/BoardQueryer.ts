@@ -2,7 +2,6 @@ import { Board } from "./Board";
 import { Square, Color, PieceType } from "../../../Types";
 import { Piece, Route, MoveRoute } from "../../../Types/Engine";
 import { RouteCalculator } from "../Move/Calculator/RouteCalculator.ts";
-import {Flattener} from "../Utils/Flattener.ts";
 
 
 /**
@@ -147,6 +146,10 @@ export class BoardQueryer extends Board{
     /**
      * Check if the given square is threatened by the opponent.
      *
+     * @param square Square to check
+     * @param by Color of the opponent
+     * @param getThreatening If true, then return enemy piece's square that are threatening the square.
+     *
      * Algorithm:
      * 1. Get the color of the enemy player with the piece on the given square or with the StateManager.
      * 2. Get queen, rook, bishop routes and check if any of them contains any enemy piece.
@@ -154,8 +157,10 @@ export class BoardQueryer extends Board{
      * 4. Get knight routes and check if any of them contains any enemy piece.
      * 5. If any of the routes not contains any enemy piece, then return false.
      */
-    public static isSquareThreatened(square: Square, by: Color | null = null): boolean
+    public static isSquareThreatened(square: Square, by: Color | null = null, getThreatening: boolean | null = null): boolean | Array<Square>
     {
+        const squaresOfThreateningEnemies: Array<Square> = [];
+
         /**
          * Get the color of enemy player with the piece on the given square.
          * If square has no piece, then use StateManager.
@@ -199,8 +204,12 @@ export class BoardQueryer extends Board{
 
             // Check if any squares at the route contain any enemy piece.
             for(let square of allRoutes[route as MoveRoute]!){
-                if(this.isSquareHasPiece(square, enemyColor, enemyTypes))
-                    return true;
+                if(this.isSquareHasPiece(square, enemyColor, enemyTypes)){
+                    if(getThreatening)
+                        squaresOfThreateningEnemies.push(square);
+                    else
+                        return true;
+                }
             }
         }
 
@@ -232,78 +241,16 @@ export class BoardQueryer extends Board{
             const square: Square = allRoutes[route]![0]!;
 
             // Check if any squares at the route contain any enemy piece.
-            if(this.isSquareHasPiece(square, enemyColor, PieceType.Pawn))
-                return true;
+            if(this.isSquareHasPiece(square, enemyColor, PieceType.Pawn)){
+                if(getThreatening)
+                    squaresOfThreateningEnemies.push(square);
+                else
+                    return true;
+            }
         }
 
-        // If any of the routes not contains any enemy piece, then return false.
-        return false;
-    }
-
-    /**
-     * Is player checked?
-     */
-    public static isCheck(): boolean
-    {
-        /**
-         * Find the square of the player's king and
-         * check if it is threatened.
-         *
-         * @see For more information about check please check the https://en.wikipedia.org/wiki/Check_(chess)
-         */
-        return this.isSquareThreatened(
-            this.getSquareOfPiece(this.getKingByColor(this.getColorOfTurn())!)!
-        );
-    }
-
-    /**
-     * Is player checked mate?
-     */
-    public static isCheckMate(): boolean
-    {
-        /**
-         * Control of check mate:
-         * 1. Is the player checked?
-         * 2. Can the player move the king to any square on route without being threatened?
-         * 3. Can the player kill the threatening piece?
-         * 4. Can the player block the route of the threatening piece?
-         * 5. If any of the above conditions are true, then return false.
-         * 6. Otherwise, return true.
-         *
-         * @see For more information about check mate please check the https://en.wikipedia.org/wiki/Checkmate
-         */
-
-        // Check first condition.
-        if(!this.isCheck())
-            return false;
-
-        // Find the square of the player's king with the king piece.
-        const kingSquare: Square = this.getSquareOfPiece(this.getKingByColor(this.getColorOfTurn())!)!;
-
-        // Check second condition.
-        const squares: Array<Square> = Flattener.flattenRoute(RouteCalculator.getKingRoute(kingSquare));
-        for(const square of squares){
-            // If the king can move any square without being threatened, then return false.
-            if(!this.isSquareThreatened(square))
-                return false;
-        }
-
-        // FIXME: Burada isSQuareThreatened da threat eden piece'in ve karelerinin dönmesi lazım.
-        // FIXME: Algoritma ise genel olarak şöyle olmalı: Piece'in karelerini isSquareThreated ile
-        // FIXME: Kontrol edilip, eğer var ise ise bu karelerin hepsi için, o karenin kendi piece'ini
-        // FIXME: çekip, zugzwang olarak işaretlenebilir.
-
-        // TODO: Ayrıca isCheck vb. kontrollerinden üst üste yapılması engellemek için ChessEngine de ki gib
-        // TODO: private bir mekanizma kurulabilir.
-
-        return false;
-    }
-
-    /**
-     * Is stalemate?
-     */
-    public static isStaleMate(): boolean
-    {
-        return false;
+        // Return false if getThreatening is false or threateningEnemies is null,
+        // otherwise return threateningEnemies.
+        return getThreatening && squaresOfThreateningEnemies.length > 0 ? squaresOfThreateningEnemies : false;
     }
 }

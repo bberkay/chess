@@ -105,6 +105,17 @@ export enum StartPosition{
 }
 
 /**
+ * StartPosition enum for the start positions.
+ * @see For more information, check src/Chess.ts
+ */
+export enum GameStatus{
+    Check = "Check",
+    Checkmate = "Checkmate",
+    Stalemate = "Stalemate",
+    Playing = "Playing"
+}
+
+/**
  * CacheLayer enum for the cache layers.
  * @see src/Managers/CacheManager.ts For more information.
  */
