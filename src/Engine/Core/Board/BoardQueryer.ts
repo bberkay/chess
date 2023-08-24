@@ -2,6 +2,7 @@ import { Board } from "./Board";
 import { Square, Color, PieceType } from "../../../Types";
 import { Piece, Route, MoveRoute } from "../../../Types/Engine";
 import { RouteCalculator } from "../Move/Calculator/RouteCalculator.ts";
+import {Flattener} from "../Utils/Flattener.ts";
 
 
 /**
@@ -153,7 +154,7 @@ export class BoardQueryer extends Board{
      * 4. Get knight routes and check if any of them contains any enemy piece.
      * 5. If any of the routes not contains any enemy piece, then return false.
      */
-    public static isSquareThreatened(square: Square): boolean
+    public static isSquareThreatened(square: Square, by: Color | null = null): boolean
     {
         /**
          * Get the color of enemy player with the piece on the given square.
@@ -162,7 +163,7 @@ export class BoardQueryer extends Board{
          * @see For more information about the StateManager, please check the src/Managers/StateManager.ts
          */
         const piece: Piece | null = this.getPieceOnSquare(square);
-        const enemyColor: Color = piece ? (piece.getColor() == Color.White ? Color.Black : Color.White) : this.getColorOfOpponent();
+        const enemyColor: Color = by ?? (piece ? (piece.getColor() == Color.White ? Color.Black : Color.White) : this.getColorOfOpponent());
 
         /**
          * Get all routes of the opponent pieces.
@@ -173,8 +174,8 @@ export class BoardQueryer extends Board{
          * @see src/Engine/Core/Calculator/RouteCalculator.ts For more information.
          */
         const allRoutes: Route = {
-            ...RouteCalculator.getQueenRoute(square),
-            ...RouteCalculator.getKnightRoute(square)
+            ...RouteCalculator.getQueenRoute(square, enemyColor == Color.White ? Color.Black : Color.White),
+            ...RouteCalculator.getKnightRoute(square, enemyColor == Color.White ? Color.Black : Color.White)
         };
 
         /**
@@ -247,6 +248,8 @@ export class BoardQueryer extends Board{
         /**
          * Find the square of the player's king and
          * check if it is threatened.
+         *
+         * @see For more information about check please check the https://en.wikipedia.org/wiki/Check_(chess)
          */
         return this.isSquareThreatened(
             this.getSquareOfPiece(this.getKingByColor(this.getColorOfTurn())!)!
@@ -258,6 +261,41 @@ export class BoardQueryer extends Board{
      */
     public static isCheckMate(): boolean
     {
+        /**
+         * Control of check mate:
+         * 1. Is the player checked?
+         * 2. Can the player move the king to any square on route without being threatened?
+         * 3. Can the player kill the threatening piece?
+         * 4. Can the player block the route of the threatening piece?
+         * 5. If any of the above conditions are true, then return false.
+         * 6. Otherwise, return true.
+         *
+         * @see For more information about check mate please check the https://en.wikipedia.org/wiki/Checkmate
+         */
+
+        // Check first condition.
+        if(!this.isCheck())
+            return false;
+
+        // Find the square of the player's king with the king piece.
+        const kingSquare: Square = this.getSquareOfPiece(this.getKingByColor(this.getColorOfTurn())!)!;
+
+        // Check second condition.
+        const squares: Array<Square> = Flattener.flattenRoute(RouteCalculator.getKingRoute(kingSquare));
+        for(const square of squares){
+            // If the king can move any square without being threatened, then return false.
+            if(!this.isSquareThreatened(square))
+                return false;
+        }
+
+        // FIXME: Burada isSQuareThreatened da threat eden piece'in ve karelerinin dönmesi lazım.
+        // FIXME: Algoritma ise genel olarak şöyle olmalı: Piece'in karelerini isSquareThreated ile
+        // FIXME: Kontrol edilip, eğer var ise ise bu karelerin hepsi için, o karenin kendi piece'ini
+        // FIXME: çekip, zugzwang olarak işaretlenebilir.
+
+        // TODO: Ayrıca isCheck vb. kontrollerinden üst üste yapılması engellemek için ChessEngine de ki gib
+        // TODO: private bir mekanizma kurulabilir.
+
         return false;
     }
 

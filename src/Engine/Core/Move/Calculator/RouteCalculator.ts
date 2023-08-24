@@ -25,18 +25,18 @@ export class RouteCalculator{
      * For more information, please check the class description.
      * @See src/Engine/Core/RouteCalculator.ts
      */
-    public static getPawnRoute(square: Square): Route
+    public static getPawnRoute(square: Square, color: Color | null = null): Route
     {
         /**
          * Find player's color by given square. If square has no piece,
          * then use StateManager.
          */
-        const safeColor: Color = BoardQueryer.getColorBySquare(square) ?? BoardQueryer.getColorOfTurn();
+        color = color ?? BoardQueryer.getColorBySquare(square) ?? BoardQueryer.getColorOfTurn();
 
         // Get first 2 vertical squares and first 1 diagonal squares.
         return {
-            ...DirectionCalculator.getVerticalSquares(square, safeColor,2),
-            ...DirectionCalculator.getDiagonalSquares(square, safeColor, 1)
+            ...DirectionCalculator.getVerticalSquares(square, color,2),
+            ...DirectionCalculator.getDiagonalSquares(square, color, 1)
         }
     }
 
@@ -45,13 +45,13 @@ export class RouteCalculator{
      * For more information, please check the class description.
      * @See src/Engine/Core/RouteCalculator.ts
      */
-    public static getKnightRoute(square: Square): Route
+    public static getKnightRoute(square: Square, color: Color | null = null): Route
     {
         /**
          * Find player's color by given square. If square has no piece,
          * then use StateManager.
          */
-        const safeColor: Color = BoardQueryer.getColorBySquare(square) ?? BoardQueryer.getColorOfTurn();
+        color = color ?? BoardQueryer.getColorBySquare(square) ?? BoardQueryer.getColorOfTurn();
 
         // Knight can't move to any direction, it can move only 2 horizontal and 1 vertical or 2 vertical and 1 horizontal.
         // So, we can't return Path type here.
@@ -59,8 +59,8 @@ export class RouteCalculator{
 
         // Get the 2 horizontal and vertical squares.
         const firstPath = {
-            ...DirectionCalculator.getVerticalSquares(square, safeColor,2, false),
-            ...DirectionCalculator.getHorizontalSquares(square, safeColor, 2, false)
+            ...DirectionCalculator.getVerticalSquares(square, color,2, false),
+            ...DirectionCalculator.getHorizontalSquares(square, color, 2, false)
         }
 
         /**
@@ -90,9 +90,9 @@ export class RouteCalculator{
 
             // If the path is vertical, then get the horizontal squares of last square of the path.
             if(path == MoveRoute.Bottom || path == MoveRoute.Top)
-                lastRoute = DirectionCalculator.getHorizontalSquares(lastSquare, safeColor, 1);
+                lastRoute = DirectionCalculator.getHorizontalSquares(lastSquare, color, 1);
             else // If the path is horizontal, then get the vertical squares of last square of the path.
-                lastRoute = DirectionCalculator.getVerticalSquares(lastSquare, safeColor, 1);
+                lastRoute = DirectionCalculator.getVerticalSquares(lastSquare, color, 1);
 
             // Update the route
             route[MoveRoute.L] = Flattener.flattenRoute(lastRoute).concat(route[MoveRoute.L]);
@@ -106,13 +106,13 @@ export class RouteCalculator{
      * For more information, please check the class description.
      * @See src/Engine/Core/RouteCalculator.ts
      */
-    public static getBishopRoute(square: Square): Route
+    public static getBishopRoute(square: Square, color: Color | null = null): Route
     {
         /**
          * Get the diagonal squares with color of square. If square has no piece,
          * then use StateManager.
          */
-        return DirectionCalculator.getDiagonalSquares(square, BoardQueryer.getColorBySquare(square) ?? BoardQueryer.getColorOfTurn());
+        return DirectionCalculator.getDiagonalSquares(square, color ?? BoardQueryer.getColorBySquare(square) ?? BoardQueryer.getColorOfTurn());
     }
 
     /**
@@ -120,18 +120,18 @@ export class RouteCalculator{
      * For more information, please check the class description.
      * @See src/Engine/Core/RouteCalculator.ts
      */
-    public static getRookRoute(square: Square): Route
+    public static getRookRoute(square: Square, color: Color | null = null): Route
     {
         /**
          * Find player's color by given square. If square has no piece,
          * then use StateManager.
          */
-        const safeColor: Color = BoardQueryer.getColorBySquare(square) ?? BoardQueryer.getColorOfTurn();
+        color = color ?? BoardQueryer.getColorBySquare(square) ?? BoardQueryer.getColorOfTurn();
 
         // Get the horizontal and vertical squares.
         return {
-            ...DirectionCalculator.getHorizontalSquares(square, safeColor),
-            ...DirectionCalculator.getVerticalSquares(square, safeColor)
+            ...DirectionCalculator.getHorizontalSquares(square, color),
+            ...DirectionCalculator.getVerticalSquares(square, color)
         };
     }
 
@@ -140,19 +140,19 @@ export class RouteCalculator{
      * For more information, please check the class description.
      * @See src/Engine/Core/RouteCalculator.ts
      */
-    public static getQueenRoute(square: Square): Route
+    public static getQueenRoute(square: Square, color: Color | null = null): Route
     {
         /**
          * Find player's color by given square. If square has no piece,
          * then use StateManager.
          */
-        const safeColor: Color = BoardQueryer.getColorBySquare(square) ?? BoardQueryer.getColorOfTurn();
+        color = color ?? BoardQueryer.getColorBySquare(square) ?? BoardQueryer.getColorOfTurn();
 
         // Get the horizontal, vertical and diagonal squares.
         return {
-            ...DirectionCalculator.getHorizontalSquares(square, safeColor),
-            ...DirectionCalculator.getVerticalSquares(square, safeColor),
-            ...DirectionCalculator.getDiagonalSquares(square, safeColor)
+            ...DirectionCalculator.getHorizontalSquares(square, color),
+            ...DirectionCalculator.getVerticalSquares(square, color),
+            ...DirectionCalculator.getDiagonalSquares(square, color)
         };
     }
 
@@ -161,19 +161,19 @@ export class RouteCalculator{
      * For more information, please check the class description.
      * @See src/Engine/Core/RouteCalculator.ts
      */
-    public static getKingRoute(square: Square): Route
+    public static getKingRoute(square: Square, color: Color | null = null): Route
     {
         /**
          * Find player's color by given square. If square has no piece,
          * then use StateManager.
          */
-        const safeColor: Color = BoardQueryer.getColorBySquare(square) ?? BoardQueryer.getColorOfTurn();
+        color = color ?? BoardQueryer.getColorBySquare(square) ?? BoardQueryer.getColorOfTurn();
 
         // Get the horizontal, vertical and diagonal squares but only one square away.
         return {
-            ...DirectionCalculator.getHorizontalSquares(square, safeColor, 1),
-            ...DirectionCalculator.getVerticalSquares(square, safeColor, 1),
-            ...DirectionCalculator.getDiagonalSquares(square, safeColor, 1)
+            ...DirectionCalculator.getHorizontalSquares(square, color, 1),
+            ...DirectionCalculator.getVerticalSquares(square, color, 1),
+            ...DirectionCalculator.getDiagonalSquares(square, color, 1)
         };
     }
 }

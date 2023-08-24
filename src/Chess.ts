@@ -45,7 +45,7 @@ export class Chess{
      */
     private checkAndLoadGameFromCache(): void
     {
-        this.createGame(StartPosition.KingForbiddenMove);
+        this.createGame(StartPosition.KingForbiddenCapture);
         /*if(!Cache.get(CacheLayer.Game))
             this.createGame();
         else{
@@ -141,6 +141,6 @@ export class Chess{
      */
     public isGameFinished(): boolean
     {
-        return this.chessEngine.isGameFinished();
+       return this.chessEngine.isGameFinished();
     }
 }

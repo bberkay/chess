@@ -263,10 +263,13 @@ export class MoveEngine extends MoveChecker{
         let route = RouteCalculator.getKingRoute(this.pieceSquare!);
         if(!route) return null;
 
+        // Find the king's color
+        const color: Color = BoardQueryer.getPieceOnSquare(this.pieceSquare!)!.getColor();
+
         // Remove the moves that threatens the king then convert the route to squares array.
         for(const square of Flattener.flattenRoute(route))
         {
-            if(!BoardQueryer.isSquareThreatened(square))
+            if(!BoardQueryer.isSquareThreatened(square, color == Color.White ? Color.Black : Color.White))
                 moves[MoveType.Normal]!.push(square);
         }
 
@@ -289,9 +292,6 @@ export class MoveEngine extends MoveChecker{
          * castling moves will be [Square.a1, Square.h1, Square.x1, Square.x2].
          */
         for(let path in route) route[path as MoveRoute] = [];
-
-        // Find the king's color
-        const color: Color = BoardQueryer.getPieceOnSquare(this.pieceSquare!)!.getColor();
 
         // Add long castling move to the king's moves.
         if(this.isLongCastlingAvailable(color))
