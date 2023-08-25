@@ -12,8 +12,7 @@
     --white-square-image: url("../assets/brown_dark.png");
     --black-square-image: url("../assets/brown_light.png");
     --square-shadow-color: #000;
-    --light-color: #f0d9b5;
-    --dark-color: #b58863;
+    --coordinate-texts-color: #f0d9b5;
     --clicked-color: #000;
     --promotion-option-color: #D3D3D3;
     --promotion-option-hover-color: #808080;
@@ -87,7 +86,7 @@
     right:0;
     margin-right:5px;
     font-size:calc(var(--board-size) / 50);
-    color:var(--light-color);
+    color:var(--coordinate-texts-color);
     margin-top:5px;
     font-weight: bold;
 }
@@ -98,7 +97,7 @@
     bottom:0;
     font-size:calc(var(--board-size) / 50);
     margin-left:8px;
-    color:var(--light-color);
+    color:var(--coordinate-texts-color);
     margin-bottom:5px;
     font-weight: bold;
 }
