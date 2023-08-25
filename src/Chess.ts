@@ -45,7 +45,7 @@ export class Chess{
      */
     private checkAndLoadGameFromCache(): void
     {
-        this.createGame("rnbqkbnr/ppppp1pp/8/8/2Q1P3/1B6/PPPP1PPP/RNB1K1NR w KQkq - 0 1");
+        this.createGame(StartPosition.Stalemate);
         /*if(!Cache.get(CacheLayer.Game))
             this.createGame();
         else{
@@ -93,6 +93,8 @@ export class Chess{
                 this.chessBoard.clearBoard();
             else
                 this._doClearAction();
+
+            console.log("Status: ", this.chessEngine.getStatusOfGame());
         }
         else if(moveType === SquareClickMode.Select)
             this._doSelectAction(square);
@@ -136,7 +138,7 @@ export class Chess{
         this.chessBoard.playMove(this.selectedSquare!, square);
     }
 
-    /**
+    /*
      * This function checks the game is finished or not.
 
     public isGameFinished(): boolean

@@ -149,6 +149,7 @@ export class BoardQueryer extends Board{
      * @param square Square to check
      * @param by Color of the opponent
      * @param getThreatening If true, then return enemy piece's square that are threatening the square.
+     * @return If getThreatening is true, Array<Square>. Otherwise, boolean.
      *
      * Algorithm:
      * 1. Get the color of the enemy player with the piece on the given square or with the StateManager.
@@ -249,8 +250,8 @@ export class BoardQueryer extends Board{
             }
         }
 
-        // Return false if getThreatening is false or threateningEnemies is null,
-        // otherwise return threateningEnemies.
-        return getThreatening && squaresOfThreateningEnemies.length > 0 ? squaresOfThreateningEnemies : false;
+        // If getThreatening is true, then return squares of threatening enemies.
+        // Otherwise, return false because if we are here, then there is no enemy threat.
+        return getThreatening ? squaresOfThreateningEnemies : false;
     }
 }

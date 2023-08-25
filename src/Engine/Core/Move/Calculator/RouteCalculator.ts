@@ -1,8 +1,8 @@
-import { Square, Color } from "../../../../Types";
-import { MoveRoute, Route } from "../../../../Types/Engine";
-import { DirectionCalculator } from "./DirectionCalculator";
-import { Flattener } from "../../Utils/Flattener";
-import { BoardQueryer } from "../../Board/BoardQueryer";
+import {Color, PieceType, Square} from "../../../../Types";
+import {MoveRoute, Piece, Route} from "../../../../Types/Engine";
+import {DirectionCalculator} from "./DirectionCalculator";
+import {Extractor} from "../../Utils/Extractor";
+import {BoardQueryer} from "../../Board/BoardQueryer";
 
 /**
  * This class calculates the route of the given piece.
@@ -21,6 +21,34 @@ import { BoardQueryer } from "../../Board/BoardQueryer";
 export class RouteCalculator{
 
     /**
+     * This function returns the route of the given piece.
+     * For more information, please check the class description.
+     */
+    public static getRouteByPieceOnSquare(square: Square, color: Color | null = null): Route
+    {
+        const piece: Piece | null = BoardQueryer.getPieceOnSquare(square);
+        if(!piece)
+            return {};
+
+        switch (piece.getType()) {
+            case PieceType.Pawn:
+                return this.getPawnRoute(square, color);
+            case PieceType.Knight:
+                return this.getKnightRoute(square, color);
+            case PieceType.Bishop:
+                return this.getBishopRoute(square, color);
+            case PieceType.Rook:
+                return this.getRookRoute(square, color);
+            case PieceType.Queen:
+                return this.getQueenRoute(square, color);
+            case PieceType.King:
+                return this.getKingRoute(square, color);
+            default:
+                return {};
+        }
+    }
+
+    /**
      * This function returns pawn route scheme(2 horizontal and 1 diagonal for each direction).
      * For more information, please check the class description.
      * @See src/Engine/Core/RouteCalculator.ts
@@ -35,7 +63,7 @@ export class RouteCalculator{
 
         // Get first 2 vertical squares and first 1 diagonal squares.
         return {
-            ...DirectionCalculator.getVerticalSquares(square, color,2),
+            ...DirectionCalculator.getVerticalSquares(square, null,2),
             ...DirectionCalculator.getDiagonalSquares(square, color, 1)
         }
     }
@@ -95,7 +123,7 @@ export class RouteCalculator{
                 lastRoute = DirectionCalculator.getVerticalSquares(lastSquare, color, 1);
 
             // Update the route
-            route[MoveRoute.L] = Flattener.flattenRoute(lastRoute).concat(route[MoveRoute.L]);
+            route[MoveRoute.L] = Extractor.extractSquares(lastRoute).concat(route[MoveRoute.L]);
         }
 
         return route;

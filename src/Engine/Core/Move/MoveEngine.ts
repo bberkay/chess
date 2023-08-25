@@ -127,7 +127,7 @@ export class MoveEngine extends MoveChecker{
             delete route[moveDirection.rightDiagonal];
 
         // Add normal moves to the pawn's moves.
-        moves[MoveType.Normal] = Flattener.flattenRoute(this.doKingSafety(route)!);
+        moves[MoveType.Normal] = Extractor.extractSquares(this.doKingSafety(route)!);
 
         /**
          * Clear the pawn's routes. Because we will add en passant moves
@@ -163,7 +163,7 @@ export class MoveEngine extends MoveChecker{
             route[moveDirection.rightDiagonal]!.push(color == Color.White ? this.pieceSquare! - 7 : this.pieceSquare! + 9);
 
         // Add filtered(for king's safety) en passant moves to the pawn's moves.
-        moves[MoveType.EnPassant] = Flattener.flattenRoute(this.doKingSafety(route)!);
+        moves[MoveType.EnPassant] = Extractor.extractSquares(this.doKingSafety(route)!);
 
         /**
          * Clear the pawn's routes. Because we will add promotion moves
@@ -193,7 +193,7 @@ export class MoveEngine extends MoveChecker{
         }
 
         // Add filtered(for king's safety) promotion moves to the pawn's moves.
-        moves[MoveType.Promotion] = Flattener.flattenRoute(this.doKingSafety(route)!);
+        moves[MoveType.Promotion] = Extractor.extractSquares(this.doKingSafety(route)!);
 
         // Return the moves of the pawn.
         return moves;
@@ -209,7 +209,7 @@ export class MoveEngine extends MoveChecker{
         if(!route) return null;
 
         // Filter the moves for king safety and convert the route to squares array.
-        return {[MoveType.Normal]: Flattener.flattenRoute(this.doKingSafety(route)!)};
+        return {[MoveType.Normal]: Extractor.extractSquares(this.doKingSafety(route)!)};
     }
 
     /**
@@ -222,7 +222,7 @@ export class MoveEngine extends MoveChecker{
         if(!route) return null;
 
         // Filter the moves for king safety and convert the route to squares array.
-        return {[MoveType.Normal]: Flattener.flattenRoute(this.doKingSafety(route)!)};
+        return {[MoveType.Normal]: Extractor.extractSquares(this.doKingSafety(route)!)};
     }
 
     /**
@@ -235,7 +235,7 @@ export class MoveEngine extends MoveChecker{
         if(!route) return null;
 
         // Filter the moves for king safety and convert the route to squares array.
-        return {[MoveType.Normal]: Flattener.flattenRoute(this.doKingSafety(route)!)};
+        return {[MoveType.Normal]: Extractor.extractSquares(this.doKingSafety(route)!)};
     }
 
     /**
@@ -248,7 +248,7 @@ export class MoveEngine extends MoveChecker{
         if(!route) return null;
 
         // Filter the moves for king safety and convert the route to squares array.
-        return {[MoveType.Normal]: Flattener.flattenRoute(this.doKingSafety(route)!)};
+        return {[MoveType.Normal]: Extractor.extractSquares(this.doKingSafety(route)!)};
     }
 
     /**
@@ -267,7 +267,7 @@ export class MoveEngine extends MoveChecker{
         const color: Color = BoardQueryer.getPieceOnSquare(this.pieceSquare!)!.getColor();
 
         // Remove the moves that threatens the king then convert the route to squares array.
-        for(const square of Flattener.flattenRoute(route))
+        for(const square of Extractor.extractSquares(route))
         {
             if(!BoardQueryer.isSquareThreatened(square, color == Color.White ? Color.Black : Color.White))
                 moves[MoveType.Normal]!.push(square);
@@ -302,7 +302,7 @@ export class MoveEngine extends MoveChecker{
             route[MoveRoute.Right]!.push(color == Color.White ? Square.h1 : Square.h8);
 
         // Get castling moves of the king. Also, castling doesn't need king safety filter because it is already filtered.
-        moves[MoveType.Castling] = Flattener.flattenRoute(route);
+        moves[MoveType.Castling] = Extractor.extractSquares(route);
 
         return moves;
     }
@@ -355,7 +355,7 @@ export class MoveEngine extends MoveChecker{
          *
          * @see for more information about relative route src/Engine/Utils/Locator.ts
          */
-        const relativeRoute = Locator.getRelative(this.pieceSquare!, kingSquare);
+        const relativeRoute = Locator.getRelative(kingSquare, this.pieceSquare!);
         if(!relativeRoute)
             // If dangerous route is null, then return the moves/routes without filtering.
             return moveRoute;

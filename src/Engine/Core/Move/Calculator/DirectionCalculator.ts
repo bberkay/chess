@@ -32,7 +32,7 @@ export class DirectionCalculator {
      * For more information, please check the class description.
      * @See src/Engine/Core/PathCalculator.ts
      */
-    public static getDiagonalSquares(square: Square, safeColor: Color, distanceLimit: number | null = null, pieceSensitivity: boolean = true): Route
+    public static getDiagonalSquares(square: Square, safeColor: Color | null, distanceLimit: number | null = null, pieceSensitivity: boolean = true): Route
     {
         /**
          * Step is used to set the next square of the given square. For example, if step is -7 and
@@ -53,7 +53,7 @@ export class DirectionCalculator {
      * For more information, please check the class description.
      * @See src/Engine/Core/PathCalculator.ts
      */
-    public static getHorizontalSquares(square: Square, safeColor: Color, distanceLimit: number | null = null, pieceSensitivity: boolean = true): Route
+    public static getHorizontalSquares(square: Square, safeColor: Color | null, distanceLimit: number | null = null, pieceSensitivity: boolean = true): Route
     {
         /**
          * Step is used to set the next square of the given square. For example, if step is 1 and
@@ -72,7 +72,7 @@ export class DirectionCalculator {
      * For more information, please check the class description.
      * @See src/Engine/Core/PathCalculator.ts
      */
-    public static getVerticalSquares(square: Square, safeColor: Color, distanceLimit: number | null = null, pieceSensitivity: boolean = true): Route
+    public static getVerticalSquares(square: Square, safeColor: Color | null, distanceLimit: number | null = null, pieceSensitivity: boolean = true): Route
     {
         /**
          * Step is used to set the next square of the given square. For example, if step is 8 and
@@ -91,7 +91,7 @@ export class DirectionCalculator {
      * For more information, please check the class description.
      * @See src/Engine/Core/PathCalculator.ts
      */
-    private static traversePath(square: Square, step: number, distanceLimit: number | null, pieceSensitivity: boolean, safeColor: Color): Array<Square>
+    private static traversePath(square: Square, step: number, distanceLimit: number | null, pieceSensitivity: boolean, safeColor: Color | null): Array<Square>
     {
         // This variable is used to check if the edge is changed.
         // For more information, please check the isEdgeChanged function.
