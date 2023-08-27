@@ -1,8 +1,7 @@
-import { Board } from "./Board";
-import { Color, Square, PieceType, JsonNotation } from "../../../Types";
-import { BoardQueryer } from "./BoardQueryer.ts";
-import { PieceModel } from "../../Models/PieceModel";
-
+import {Board} from "./Board";
+import {CastlingType, Color, JsonNotation, PieceType, Square} from "../../../Types";
+import {BoardQueryer} from "./BoardQueryer.ts";
+import {PieceModel} from "../../Models/PieceModel";
 
 /**
  * This class provides the board management of the game.
@@ -21,34 +20,17 @@ export class BoardManager extends Board{
      */
     public createBoard(jsonNotation: JsonNotation): void
     {
-        // Set board properties
+        /**
+         * Create board and set the current properties by the given json notation.
+         * @see for more information about json notation src/Types.ts
+         * @see for more information about fen notation https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
+         */
+        this.createPieces(jsonNotation.board);
         Board.currentTurn = jsonNotation.turn;
         Board.moveCount = jsonNotation.fullMoveNumber;
         Board.halfMoveCount = jsonNotation.halfMoveClock;
-        Board.bannedEnPassantSquares = Board.bannedEnPassantSquares
-            ? Board.bannedEnPassantSquares.splice(Board.bannedEnPassantSquares.indexOf(jsonNotation.enPassant!, 1))
-            : []; // Remove en passant square from banned en passant squares.
-
-        // Create pieces
-        this.createPieces(jsonNotation.board);
-    }
-
-    /**
-     * Load the board from the given json notation.
-     */
-    public loadBoard(jsonNotation: JsonNotation, bannedEnPassantSquares: Array<Square>): void
-    {
-        this.createBoard(jsonNotation);
-        Board.bannedEnPassantSquares = bannedEnPassantSquares;
-    }
-
-    /**
-     * Change turn(change current player's color to enemy color)
-     */
-    public changeTurn(): void
-    {
-        Board.currentTurn = BoardQueryer.getColorOfOpponent();
-        Board.moveCount += 1;
+        Board.castlingAvailability = jsonNotation.castling;
+        Board.enPassantSquare = jsonNotation.enPassant;
     }
 
     /**
@@ -70,15 +52,8 @@ export class BoardManager extends Board{
      */
     public createPiece(color: Color, type:PieceType, square:Square): void
     {
-        // Create piece
-        const piece: PieceModel = new PieceModel(color, type);
-
-        // Set piece to square
-        BoardManager.currentBoard[square] = piece;
-
-        // Set king if the piece is a king and there is no king of the same color
-        if(type === PieceType.King && !BoardQueryer.getKingByColor(color))
-            BoardManager.kings[piece.getColor() as Color] = piece;
+        // Create piece on the given square.
+        BoardManager.currentBoard[square] = new PieceModel(color, type);
     }
 
     /**
@@ -86,7 +61,7 @@ export class BoardManager extends Board{
      */
     public movePiece(from: Square, to:Square): void
     {
-        BoardManager.currentBoard[to] = BoardQueryer.getPieceOnSquare(from);
+        BoardManager.currentBoard[to] = BoardQueryer.getPieceOnSquare(from)!;
         BoardManager.currentBoard[from] = null;
     }
 
@@ -96,6 +71,39 @@ export class BoardManager extends Board{
     public removePiece(square: Square): void
     {
         BoardManager.currentBoard[square] = null;
+    }
+
+    /**
+     * Change turn(change current player's color to enemy color)
+     */
+    public changeTurn(): void
+    {
+        Board.currentTurn = BoardQueryer.getColorOfOpponent();
+        Board.moveCount += 1;
+    }
+
+    /**
+     * Add move to history
+     */
+    public addMoveToHistory(move: string): void
+    {
+        Board.moveHistory.push(move);
+    }
+
+    /**
+     * Give en passant availability to the given square
+     */
+    public enableEnPassant(square: Square | null): void
+    {
+        Board.enPassantSquare = square;
+    }
+
+    /**
+     * Change castling availability
+     */
+    public changeCastlingAvailability(castlingType: CastlingType, value: boolean): void
+    {
+        Board.castlingAvailability[castlingType] = value;
     }
 
     /**

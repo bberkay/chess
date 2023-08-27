@@ -1,5 +1,5 @@
-import { Square, Color } from "../../../Types";
-import { Piece, Kings } from "../../../Types/Engine";
+import { Square, Color, CastlingType } from "../../../Types";
+import { Piece } from "../../../Types/Engine";
 
 /**
  * This class is used for the store the board.
@@ -22,17 +22,13 @@ export class Board {
     protected static currentTurn: Color = Color.White;
     protected static moveCount: number = 0;
     protected static halfMoveCount: number = 0;
-
-    /**
-     * Store the kings of the game.
-     */
-    protected static kings: Kings = {
-        [Color.White]: null,
-        [Color.Black]: null
-    }
-
-    /**
-     * Banned en passant squares.
-     */
-    protected static bannedEnPassantSquares: Array<Square> = [];
+    protected static enPassantSquare: Square | null = null;
+    protected static castlingAvailability: Record<CastlingType, boolean> = {
+        [CastlingType.WhiteLong]: true,
+        [CastlingType.WhiteShort]: true,
+        [CastlingType.BlackLong]: true,
+        [CastlingType.BlackShort]: true
+    };
+    protected static moveHistory: string[] = [];
+    protected static bannedEnPassantSquares: Square[] = [];
 }

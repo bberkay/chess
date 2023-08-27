@@ -45,12 +45,12 @@ export class Chess{
      */
     private checkAndLoadGameFromCache(): void
     {
-        this.createGame(StartPosition.Stalemate);
-        /*if(!Cache.get(CacheLayer.Game))
+        this.createGame("rnbqkbnr/ppp1pppp/8/8/3p4/4P3/PPPP1PPP/RNBQKBNR w KQkq - 0 1");
+        /*if(!CacheManager.get(CacheLayer.Game))
             this.createGame();
         else{
-            console.log("Game is loaded from the cache.");
-            // TODO: Json Notation ile yüklenebilir.
+            console.log("Game loaded from cache.");
+            this.createGame(CacheManager.get(CacheLayer.Game, "board"));
         }*/
     }
 
@@ -72,6 +72,9 @@ export class Chess{
 
         // Create a new game on board.
         this.chessBoard.createGame(position);
+
+        // Save the game to the cache.
+        CacheManager.set(CacheLayer.Game, "board", typeof position === "string" ?? Converter.convertJsonToFen(position));
     }
 
     /**
@@ -93,8 +96,6 @@ export class Chess{
                 this.chessBoard.clearBoard();
             else
                 this._doClearAction();
-
-            console.log("Status: ", this.chessEngine.getStatusOfGame());
         }
         else if(moveType === SquareClickMode.Select)
             this._doSelectAction(square);
@@ -138,11 +139,11 @@ export class Chess{
         this.chessBoard.playMove(this.selectedSquare!, square);
     }
 
-    /*
-     * This function checks the game is finished or not.
-
-    public isGameFinished(): boolean
-    {
-       return this.chessEngine.getStatusOfGame();
+    /**
+     * This function returns the game as fen notation.
      */
+    /*private finishTurn(): void
+    {
+
+    }*/
 }

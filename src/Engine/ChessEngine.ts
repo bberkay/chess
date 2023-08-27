@@ -7,7 +7,17 @@
  * @license MIT
  */
 
-import {Color, GameStatus, JsonNotation, Moves, MoveType, PieceType, Square, StartPosition} from "../Types";
+import {
+    CastlingType,
+    Color,
+    GameStatus,
+    JsonNotation,
+    Moves,
+    MoveType,
+    PieceType,
+    Square,
+    StartPosition
+} from "../Types";
 import {MoveEngine} from "./Core/Move/MoveEngine";
 import {BoardManager} from "./Core/Board/BoardManager.ts";
 import {Converter} from "../Utils/Converter";
@@ -29,9 +39,10 @@ export class ChessEngine{
     private moveEngine: MoveEngine;
     private boardManager: BoardManager;
     private currentMoves: Moves | null = null;
-    private currentMovesOfKing: Moves | null = null;
     private isPromotionMove: boolean = false;
     private statusOfGame: GameStatus = GameStatus.Playing;
+    private currentMove: string = "";
+    private calculatedMoves: {[key in Square]?: Moves | null} = {};
 
     /**
      * Constructor of the ChessEngine class.
@@ -82,9 +93,12 @@ export class ChessEngine{
          * end of each round, the king's moves are recalculated and stored in currentMovesOfKing
          * property for check/checkmate controls.
          */
-        this.currentMoves = BoardQueryer.getPieceOnSquare(square)?.getType() == PieceType.King && this.currentMovesOfKing
-            ? this.currentMovesOfKing
-            : this.moveEngine.getMoves(square);
+        this.currentMoves = this.calculatedMoves[square] ?? this.moveEngine.getMoves(square);
+
+        // Save the current moves for avoid calculating the moves again and again.
+        this.calculatedMoves[square] = this.currentMoves;
+
+        // Return the moves.
         return this.currentMoves;
     }
 
@@ -138,12 +152,9 @@ export class ChessEngine{
         }
         else{
             // Check if the given move is valid.
-            const move = this.checkAndFindMoveType(to);
+            const move: MoveType | false = this.checkAndFindMoveType(to);
             if(!move)
                 return;
-
-            // Increase the move count of the piece.
-            BoardQueryer.getPieceOnSquare(from)?.increaseMoveCount();
 
             // Play the move according to the move type.
             switch(move){
@@ -157,7 +168,7 @@ export class ChessEngine{
                     this._doPromotion(from, to);
                     break;
                 case MoveType.Normal:
-                    this._doNormalMove(from, to);
+                    this._doNormalMove(from, to, true);
                     break;
             }
         }
@@ -167,7 +178,7 @@ export class ChessEngine{
          * Because, user must promote the piece.
          */
         if(!this.isPromotionMove){
-            this.finishTurn();
+            this.finishTurn(from, to);
         }
     }
 
@@ -211,14 +222,20 @@ export class ChessEngine{
         const rookNewSquare: number = castlingType == "Long" ? kingNewSquare + 1 : kingNewSquare - 1;
 
         this._doNormalMove(rook, rookNewSquare as Square);
+
+        // Change castling availability.
+        this.boardManager.changeCastlingAvailability((BoardQueryer.getColorOfTurn() + castlingType) as CastlingType, false);
+
+        // Set the current move for the move history.
+        this.currentMove += castlingType == "Short" ? "O-O" : "O-O-O";
     }
 
     /**
      * Do the en passant move.
      */
     private _doEnPassant(from: Square, to: Square): void
-     {
-        this._doNormalMove(from, to);
+    {
+        this._doNormalMove(from, to, true);
 
         /**
          * Get the square of the killed piece by adding 8 to
@@ -240,7 +257,7 @@ export class ChessEngine{
     private _doPromotion(from: Square, to: Square): void
     {
         // Move the pawn.
-        this._doNormalMove(from, to);
+        this._doNormalMove(from, to, true);
         this.isPromotionMove = true;
     }
 
@@ -250,13 +267,13 @@ export class ChessEngine{
      *
      * if selectedPromote is given Square then Engine will simulate the promotion menu.
      * @example _doPromote(Square.e8, Square.e8) // Creates a queen on e8(white),
-     * @example _doPromote(Square.e8, Square.e7) // Creates a rook on e7(white)
-     * @example _doPromote(Square.e8, Square.e6) // Creates a bishop on e6(white)
-     * @example _doPromote(Square.e8, Square.e5) // Creates a knight on e5(white),
+     * @example _doPromote(Square.e8, Square.e7) // Creates a rook on e8(white)
+     * @example _doPromote(Square.e8, Square.e6) // Creates a bishop on e8(white)
+     * @example _doPromote(Square.e8, Square.e5) // Creates a knight on e8(white),
      * @example _doPromote(Square.e1, Square.e1) // Creates a queen on e1(black),
-     * @example _doPromote(Square.e1, Square.e2) // Creates a rook on e2(black)
-     * @example _doPromote(Square.e1, Square.e3) // Creates a bishop on e3(black)
-     * @example _doPromote(Square.e1, Square.e4) // Creates a knight on e4(black)
+     * @example _doPromote(Square.e1, Square.e2) // Creates a rook on e1(black)
+     * @example _doPromote(Square.e1, Square.e3) // Creates a bishop on e1(black)
+     * @example _doPromote(Square.e1, Square.e4) // Creates a knight on e1(black)
      */
     private _doPromote(from: Square, selectedPromote: Square | PieceType.Queen | PieceType.Rook | PieceType.Bishop | PieceType.Knight): void
     {
@@ -293,66 +310,147 @@ export class ChessEngine{
                 || ([5, 4].includes(clickedRow) ? PieceType.Knight : null))!;
         }
 
+        // Get the player's color.
+        const playerColor: Color = BoardQueryer.getColorOfTurn();
+
         // Create the new piece.
-        this.boardManager.createPiece(BoardQueryer.getColorOfTurn(), selectedPromote as PieceType, from);
+        this.boardManager.createPiece(playerColor, selectedPromote as PieceType, from);
 
         // Finish the promotion.
         this.isPromotionMove = false;
+
+        // Set the current move for the move history.
+        this.currentMove += "=" + Converter.convertPieceTypeToPieceName(selectedPromote as PieceType, playerColor);
     }
 
     /**
      * Do the normal move.
      */
-    private _doNormalMove(from: Square, to: Square): void
+    private _doNormalMove(from: Square, to: Square, saveToHistory:boolean = false): void
     {
+        if(saveToHistory){
+            /**
+             * Set the current move for the move history.
+             * @see For more information about history, see https://en.wikipedia.org/wiki/Algebraic_notation_(chess)
+             */
+            const piece: Piece = BoardQueryer.getPieceOnSquare(from)!;
+
+            // If the piece is not pawn then add the piece name to the current move.
+            if(piece?.getType() != PieceType.Pawn)
+                this.currentMove += Converter.convertPieceTypeToPieceName(piece.getType(), piece.getColor());
+
+            // If the move kill a piece then add "x" to the current move.
+            if(BoardQueryer.isSquareHasPiece(to)){
+                // If the piece is pawn then add the column of the pawn to the current move.
+                if(piece?.getType() == PieceType.Pawn)
+                    this.currentMove += Converter.convertSquareIDToSquare(from)[0];
+                this.currentMove += "x";
+            }
+
+            // Add the target square to the current move.
+            this.currentMove += Converter.convertSquareIDToSquare(to);
+        }
+
+        // Move the piece.
         this.boardManager.movePiece(from, to);
     }
 
     /**
      * End the turn with some controls and check the game is finished or not.
      */
-    private finishTurn(): void
+    private finishTurn(from: Square, to: Square): void
     {
         /**
          * Order of the functions is important.
          *
          * Example scenario for White:
          * 1- Control en passant moves for White(because, if White not play en passant move in one turn then remove the move)
-         * 2- Change the turn(White -> Black)
-         * 3- Check the game is finished or not for Black
+         * 2- Control castling moves for White(because, if White move the king or rook then disable the castling)
+         * 3- Change the turn(White -> Black)
+         * 4- Check the game is finished or not for Black
+         * 5- Add the White player's move to the history
+         * 6- Clear the current move
          */
-        this._checkEnPassant();
+        this.calculatedMoves = {};
+        this.currentMoves = null;
+        this._checkCastling(to);
+        this._checkEnPassant(from, to);
         this.boardManager.changeTurn();
         this._checkStatusOfGame();
+        this.boardManager.addMoveToHistory(this.currentMove);
+        this.currentMove = "";
+    }
+
+    /**
+     * Check castling moves after each turn. If player move the king or rook
+     * then disable the castling.
+     *
+     * @see castling move calculation: src/Engine/Core/Move/Checker/MoveChecker.ts
+     * @see castling rules: https://en.wikipedia.org/wiki/Castling
+     */
+    private _checkCastling(squareOfMovedPiece: Square): void
+    {
+        if(this.currentMove == "O-O" || this.currentMove == "O-O-O")
+            return;
+
+        // Find piece's type by the given square of the moved piece.
+        const piece: Piece = BoardQueryer.getPieceOnSquare(squareOfMovedPiece)!;
+
+        /**
+         * If the piece is king then disable the castling short and long
+         * moves for the color of the king. If the piece is rook then
+         * disable the castling short or long move for the color of the rook
+         * and square of the rook.
+         *
+         * @see For more information about square ids, see src/Types/index.ts
+         */
+        if(piece.getType() == PieceType.King){
+            this.boardManager.changeCastlingAvailability((piece.getColor() + "Long") as CastlingType, false);
+            this.boardManager.changeCastlingAvailability((piece.getColor() + "Short") as CastlingType, false);
+        }else if(piece.getType() == PieceType.Rook){
+            const rookType: "Long" | "Short" = Number(squareOfMovedPiece) % 8 == 0 ? "Short" : "Long";
+            this.boardManager.changeCastlingAvailability((piece.getColor() + rookType) as CastlingType, false);
+        }
     }
 
     /**
      * Check en passant moves. If there is an en passant move not played
      * then remove it. Because, en passant moves are only valid for one turn.
+     *
+     * @see For more information about en passant, see src/Engine/Core/Move/Checker/MoveChecker.ts
+     * @see For more information about en passant, see https://en.wikipedia.org/wiki/En_passant
      */
-    private _checkEnPassant(): void
+    private _checkEnPassant(from: Square, to: Square): void
     {
         /**
-         * Find the en passant squares according to the color of the turn
-         * and the en passant row. If the color of the turn is white then
-         * the en passant row is 5, if the color of the turn is black then
-         * the en passant row is 4. And get pawn from the squares, if the
-         * square has pawn then get pawn's moves and check if there is an
-         * en passant move not played then remove it.
-         *
-         * @see For more information about en passant, see src/Engine/Core/Move/Checker/MoveChecker.ts
-         * @see For more information about en passant, see https://en.wikipedia.org/wiki/En_passant
+         * Find the piece by the given square of the moved piece.
+         * If the piece is pawn then ban the en passant square by
+         * piece's color.
          */
-        const enPassantSquares: Array<Square> = BoardQueryer.getColorOfTurn() == Color.White
-            ? [Square.a5, Square.b5, Square.c5, Square.d5, Square.e5, Square.f5, Square.g5, Square.h5]
-            : [Square.a4, Square.b4, Square.c4, Square.d4, Square.e4, Square.f4, Square.g4, Square.h4];
+        const piece: Piece = BoardQueryer.getPieceOnSquare(to)!;
+        if(piece.getType() == PieceType.Pawn && Locator.getRow(from) == (piece.getColor() == Color.White ? 6 : 3)){
+            this.boardManager.banEnPassantSquare(piece.getColor() == Color.White ? Number(to) + 8 : Number(to) - 8);
+        }
 
-        for(const square of enPassantSquares){
-            const piece: Piece | null = BoardQueryer.getPieceOnSquare(square);
-            if(piece && piece.getType() == PieceType.Pawn && piece.getColor() == BoardQueryer.getColorOfTurn()){
-                const moves: Moves | null = this.moveEngine.getMoves(square);
-                if(moves && moves["EnPassant"]!.length > 0){
-                    this.boardManager.banEnPassantSquare(moves["EnPassant"]![0] as Square);
+        // Find player's pawns.
+        const pawns: Array<Piece> = BoardQueryer.getPiecesWithFilter(BoardQueryer.getColorOfTurn(), [PieceType.Pawn])!;
+        for(const pawn of pawns){
+            const squareOfPawn: Square = BoardQueryer.getSquareOfPiece(pawn)!;
+            /**
+             * If any pawn has landed on the square, en passant can never
+             * be made to that square as per the rules so ban the square of
+             * the pawn.
+             */
+            this.boardManager.banEnPassantSquare(squareOfPawn);
+
+            /**
+             * If the pawn is white and on 5th row or is black and on 4th row
+             * then check the en passant moves.
+             */
+            if(Locator.getRow(squareOfPawn) == (pawn.getColor() == Color.White ? 4 : 5)){
+                const moves: Moves = this.moveEngine.getMoves(squareOfPawn)!;
+                if(moves["EnPassant"]!.length > 0){
+                    this.boardManager.banEnPassantSquare(moves["EnPassant"]![0]);
                 }
             }
         }
@@ -381,7 +479,7 @@ export class ChessEngine{
          */
         const playerColor: Color = BoardQueryer.getColorOfTurn();
         const enemyColor: Color = BoardQueryer.getColorOfOpponent();
-        const squareOfPlayersKing: Square | null = BoardQueryer.getSquareOfPiece(BoardQueryer.getKingByColor(playerColor)!);
+        const squareOfPlayersKing: Square | null = BoardQueryer.getSquareOfPiece(BoardQueryer.getPiecesWithFilter(playerColor, [PieceType.King])[0]!);
         const enemySquaresOfPlayersKing: Array<Square> = BoardQueryer.isSquareThreatened(squareOfPlayersKing!, enemyColor, true) as Array<Square>;
 
         /**
@@ -394,15 +492,11 @@ export class ChessEngine{
 
         /**
          * Control, checkmate and stalemate scenarios.
-         *
-         * Note: currentMovesOfKing property is used in getMoves function for avoid calculating
-         * king's moves again and again. Because, at the end of each round, the king's moves are
-         * recalculated and stored in currentMovesOfKing property for check/checkmate controls.
          */
-        this.currentMovesOfKing = this.moveEngine.getMoves(squareOfPlayersKing!)!;
+        this.calculatedMoves[squareOfPlayersKing!] = this.moveEngine.getMoves(squareOfPlayersKing!)!;
 
         // If the king has no moves then check the checkmate and stalemate scenarios.
-        if(this.currentMovesOfKing[MoveType.Normal]!.length == 0){
+        if(this.calculatedMoves[squareOfPlayersKing!]![MoveType.Normal]!.length == 0){
             if(enemySquaresOfPlayersKing.length > 1 && this.statusOfGame == GameStatus.Check)
             {
                 /**
@@ -486,6 +580,9 @@ export class ChessEngine{
                 this.statusOfGame = GameStatus.Stalemate;
             }
         }
+
+        // Set the current status for the move history.
+        this.currentMove += this.statusOfGame == GameStatus.Checkmate ? "#" : this.statusOfGame == GameStatus.Check ? "+" : "";
     }
 
     /**

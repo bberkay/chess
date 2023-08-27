@@ -1,9 +1,43 @@
-import { Color, PieceType, Square, StartPosition, JsonNotation, CastlingType, CastlingStatus } from "../Types";
+import { Color, PieceType, Square, StartPosition, JsonNotation, CastlingType } from "../Types";
 
 /**
  * This class is used to convert data from one type to another.
  */
 export class Converter{
+
+    /**
+     * Convert piece type to piece name
+     * @example Converter.convertPieceTypeToPieceName(PieceType.King, Color.White), return "K"
+     * @example Converter.convertPieceTypeToPieceName(PieceType.Knight, Color.Black), return "n"
+     */
+    static convertPieceTypeToPieceName(pieceType: PieceType, color: Color): string
+    {
+        let pieceName: string = "";
+
+        switch (pieceType) {
+            case PieceType.King:
+                pieceName = "K";
+                break;
+            case PieceType.Queen:
+                pieceName = "Q";
+                break;
+            case PieceType.Rook:
+                pieceName = "R";
+                break;
+            case PieceType.Bishop:
+                pieceName = "B";
+                break;
+            case PieceType.Knight:
+                pieceName = "N";
+                break;
+            case PieceType.Pawn:
+                pieceName = "P";
+                break;
+        }
+
+        return color == Color.White ? pieceName : pieceName.toLowerCase();
+    }
+
     /**
      * Convert squareID to square
      * @example Converter.convertSquareIDToSquare(57), return "a1"
@@ -14,15 +48,14 @@ export class Converter{
     {
         let square: string = "";
 
-        let file = squareID % 8;
-        let rank = Math.floor(squareID / 8);
+        let file = squareID % 8 === 0 ? 8 : squareID % 8;
+        let rank = Math.ceil(squareID / 8);
 
         // 97 is the char code of "a" and file + 96 because the file starts from 1
         square += String.fromCharCode(file + 96);
 
         // 8 - rank because the rank starts from 8
-        square += (8 - rank).toString();
-
+        square += (9 - rank).toString();
         return square;
     }
 
@@ -40,7 +73,7 @@ export class Converter{
         /**
          * Find castling availability from the fen notation
          */
-        const castlingAvailability: CastlingStatus = {
+        const castlingAvailability: Record<CastlingType, boolean> = {
             [CastlingType.WhiteLong] : splitFen[2].includes("Q"),
             [CastlingType.WhiteShort] : splitFen[2].includes("K"),
             [CastlingType.BlackLong] : splitFen[2].includes("q"),

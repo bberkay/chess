@@ -1,5 +1,5 @@
 import { Board } from "./Board";
-import { Square, Color, PieceType } from "../../../Types";
+import {Square, Color, PieceType, CastlingType} from "../../../Types";
 import { Piece, Route, MoveRoute } from "../../../Types/Engine";
 import { RouteCalculator } from "../Move/Calculator/RouteCalculator.ts";
 
@@ -42,9 +42,33 @@ export class BoardQueryer extends Board{
     }
 
     /**
-     * Get banned en passant squares
+     * Get move history
      */
-    public static isEnPassantSquareBanned(square: Square): boolean
+    public static getMoveHistory(): string[]
+    {
+        return Board.moveHistory;
+    }
+
+    /**
+     * Is en passant available for given square?
+     */
+    public static isEnPassantAvailable(square: Square): boolean
+    {
+        return Board.enPassantSquare === square;
+    }
+
+    /**
+     * Is castling available for given castling type?
+     */
+    public static isCastlingAvailable(castlingType: CastlingType): boolean
+    {
+        return Board.castlingAvailability[castlingType];
+    }
+
+    /**
+     * Is en passant banned for given square?
+     */
+    public static isEnPassantBanned(square: Square): boolean
     {
         return Board.bannedEnPassantSquares.includes(square);
     }
@@ -76,7 +100,7 @@ export class BoardQueryer extends Board{
 
     /**
      * Get all pieces by color and/or type.
-     * @example getPieces(Color.White, [PieceType.Rook, PieceType.Bishop]); // Returns all white rooks and bishops.
+     * @example getPiecesWithFilter(Color.White, [PieceType.Rook, PieceType.Bishop]); // Returns all white rooks and bishops.
      */
     public static getPiecesWithFilter(targetColor: Color | null = null, targetTypes: Array<PieceType> | null = null): Array<Piece>
     {
@@ -95,14 +119,6 @@ export class BoardQueryer extends Board{
         }
 
         return pieces;
-    }
-
-    /**
-     * Get king of the given color
-     */
-    public static getKingByColor(color: Color): Piece | null
-    {
-        return Board.kings[color];
     }
 
     /**

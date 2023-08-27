@@ -7,15 +7,7 @@ import { Color, PieceType, Square } from "Types";
 export interface Piece {
     getColor(): Color;
     getType(): PieceType;
-    getMoveCount(): number;
-    increaseMoveCount(): void;
 }
-
-/**
- * @description Kings is stores the kings of the players.
- * @see src/Managers/BoardManager.ts For more information.
- */
-export type Kings = Record<Color, Piece | null>;
 
 /**
  * @description Route is used for the store move directions of the pieces.

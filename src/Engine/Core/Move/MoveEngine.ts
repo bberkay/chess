@@ -1,15 +1,15 @@
-import { Color, Square, PieceType, Moves, MoveType } from "../../../Types";
-import { MoveRoute, Piece, Route } from "../../../Types/Engine";
-import { BoardQueryer } from "../Board/BoardQueryer.ts";
-import { Locator } from "../Utils/Locator.ts";
-import { RouteCalculator } from "./Calculator/RouteCalculator.ts";
-import { MoveChecker } from "./Checker/MoveChecker.ts";
-import { Flattener } from "../Utils/Flattener.ts";
+import {Color, Moves, MoveType, PieceType, Square} from "../../../Types";
+import {MoveRoute, Piece, Route} from "../../../Types/Engine";
+import {BoardQueryer} from "../Board/BoardQueryer.ts";
+import {Locator} from "../Utils/Locator.ts";
+import {RouteCalculator} from "./Calculator/RouteCalculator.ts";
+import {Extractor} from "../Utils/Extractor.ts";
+import {MoveExtender} from "./Extender/MoveExtender.ts";
 
 /**
  * This class calculates the possible moves of the pieces.
  */
-export class MoveEngine extends MoveChecker{
+export class MoveEngine extends MoveExtender{
 
     /**
      * Properties of the MoveEngine class.
@@ -155,12 +155,14 @@ export class MoveEngine extends MoveChecker{
          */
 
         // Add left en passant move to the pawn's moves.
-        if(this.isLeftEnPassantAvailable(this.pieceSquare!))
-            route[moveDirection.leftDiagonal]!.push(color == Color.White ? this.pieceSquare! - 9 : this.pieceSquare! + 7);
+        const leftEnPassant: Square | null = this.getLeftEnPassantMove(this.pieceSquare!);
+        if(leftEnPassant)
+            route[moveDirection.leftDiagonal]!.push(leftEnPassant);
 
         // Add right en passant move to the pawn's moves.
-        if(this.isRightEnPassantAvailable(this.pieceSquare!))
-            route[moveDirection.rightDiagonal]!.push(color == Color.White ? this.pieceSquare! - 7 : this.pieceSquare! + 9);
+        const rightEnPassant: Square | null = this.getRightEnPassantMove(this.pieceSquare!);
+        if(rightEnPassant)
+            route[moveDirection.rightDiagonal]!.push(rightEnPassant);
 
         // Add filtered(for king's safety) en passant moves to the pawn's moves.
         moves[MoveType.EnPassant] = Extractor.extractSquares(this.doKingSafety(route)!);
@@ -185,8 +187,9 @@ export class MoveEngine extends MoveChecker{
          */
 
         // Add promotion moves to the pawn's moves.
-        if(this.isPromotionAvailable(this.pieceSquare!)){
-            route[moveDirection.vertical]!.push(this.pieceSquare! + (color == Color.White ? -8 : 8));
+        const promotion: Square | null = this.getPromotionMove(this.pieceSquare!);
+        if(promotion){
+            route[moveDirection.vertical]!.push(promotion);
 
             // Delete square from the normal moves.
             moves[MoveType.Normal]!.splice(moves[MoveType.Normal]!.indexOf(route[moveDirection.vertical]![0]), 1);
@@ -294,12 +297,14 @@ export class MoveEngine extends MoveChecker{
         for(let path in route) route[path as MoveRoute] = [];
 
         // Add long castling move to the king's moves.
-        if(this.isLongCastlingAvailable(color))
-            route[MoveRoute.Left]!.push(color == Color.White ? Square.a1 : Square.a8);
+        const longCastling: Square | null = this.getLongCastlingMove(color);
+        if(longCastling)
+            route[MoveRoute.Left]!.push(longCastling);
 
         // Add short castling move to the king's moves.
-        if(this.isShortCastlingAvailable(color))
-            route[MoveRoute.Right]!.push(color == Color.White ? Square.h1 : Square.h8);
+        const shortCastling: Square | null = this.getShortCastlingMove(color);
+        if(shortCastling)
+            route[MoveRoute.Right]!.push(shortCastling);
 
         // Get castling moves of the king. Also, castling doesn't need king safety filter because it is already filtered.
         moves[MoveType.Castling] = Extractor.extractSquares(route);
@@ -334,7 +339,7 @@ export class MoveEngine extends MoveChecker{
          * Find the king and king's square and enemy's color
          * by the given piece color.
          */
-        const king: Piece | null = BoardQueryer.getKingByColor(this.piece!.getColor());
+        const king: Piece | null = BoardQueryer.getPiecesWithFilter(this.piece!.getColor(), [PieceType.King])[0];
         if(!king) return moveRoute;
 
         // Square of the king and enemy's color.
