@@ -45,7 +45,7 @@ export class Chess{
      */
     private checkAndLoadGameFromCache(): void
     {
-        if(!CacheManager.isEmpty(CacheLayer.Game))
+        if(CacheManager.isEmpty(CacheLayer.Game))
             this.createGame();
         else{
             console.log("Game loaded from cache.");
@@ -147,7 +147,7 @@ export class Chess{
         // Get status from engine and show it on board.
         this.chessBoard.showStatus(this.chessEngine.getStatus());
 
-        // Save the game to the cache as fen notation.
+        // Save the game to the cache as json notation.
         CacheManager.save(CacheLayer.Game, this.chessEngine.getGameAsJsonNotation());
     }
 }
