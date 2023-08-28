@@ -111,10 +111,12 @@ export enum StartPosition{
  * @see For more information, check src/Chess.ts
  */
 export enum GameStatus{
-    Check = "Check",
-    Checkmate = "Checkmate",
-    Stalemate = "Stalemate",
-    Playing = "Playing"
+    WhiteInCheck = "WhiteInCheck",
+    BlackInCheck = "BlackInCheck",
+    WhiteVictory = "WhiteVictory",
+    BlackVictory = "BlackVictory",
+    Draw = "Draw",
+    InPlay = "InPlay"
 }
 
 /**
@@ -123,7 +125,7 @@ export enum GameStatus{
  */
 export enum CacheLayer{
     Game = "Game",
-    UI = "UI"
+    Theme = "Theme"
 }
 
 /**

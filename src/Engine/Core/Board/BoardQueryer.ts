@@ -1,5 +1,5 @@
 import { Board } from "./Board";
-import {Square, Color, PieceType, CastlingType} from "../../../Types";
+import {Square, Color, PieceType, CastlingType, JsonNotation} from "../../../Types";
 import { Piece, Route, MoveRoute } from "../../../Types/Engine";
 import { RouteCalculator } from "../Move/Calculator/RouteCalculator.ts";
 
@@ -8,6 +8,33 @@ import { RouteCalculator } from "../Move/Calculator/RouteCalculator.ts";
  * TODO: Add description
  */
 export class BoardQueryer extends Board{
+
+    /**
+     * Get current game
+     */
+    public static getGame(): JsonNotation
+    {
+        /**
+         * Get all pieces on the board and convert them to JsonNotation.
+         * @see For more information about JsonNotation, please check the src/Types/index.ts
+         */
+        const pieces: Array<{color: Color, type:PieceType, square:Square}> = [];
+        for(let square in this.getBoard()){
+            const piece: Piece | null = this.getPieceOnSquare(Number(square) as Square);
+            if(piece)
+                pieces.push({color: piece.getColor(), type: piece.getType(), square: Number(square) as Square});
+        }
+
+        // Return the game as JsonNotation.
+        return {
+            board: pieces,
+            turn: BoardQueryer.getColorOfTurn(),
+            castling: BoardQueryer.getCastlingAvailability(),
+            enPassant: BoardQueryer.getEnPassantSquare(),
+            halfMoveClock: BoardQueryer.getHalfMoveCount(),
+            fullMoveNumber: BoardQueryer.getMoveCount(),
+        }
+    }
 
     /**
      * Get current board
@@ -39,6 +66,30 @@ export class BoardQueryer extends Board{
     public static getMoveCount(): number
     {
         return Board.moveCount;
+    }
+
+    /**
+     * Get en passant square
+     */
+    public static getEnPassantSquare(): Square | null
+    {
+        return Board.enPassantSquare;
+    }
+
+    /**
+     * Get castling availability
+     */
+    public static getCastlingAvailability(): Record<CastlingType, boolean>
+    {
+        return Board.castlingAvailability;
+    }
+
+    /**
+     * Get half move count
+     */
+    public static getHalfMoveCount(): number
+    {
+        return Board.halfMoveCount;
     }
 
     /**

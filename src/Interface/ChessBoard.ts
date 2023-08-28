@@ -7,7 +7,7 @@
  * @license MIT
  */
 
-import {Color, JsonNotation, Moves, MoveType, PieceType, Square, StartPosition} from "../Types";
+import {Color, GameStatus, JsonNotation, Moves, MoveType, PieceType, Square, StartPosition} from "../Types";
 import {SquareClickMode, SquareEffect} from "../Types/Board";
 import {Converter} from "../Utils/Converter.ts";
 
@@ -29,15 +29,11 @@ export class ChessBoard {
      */
     public createGame(position: JsonNotation | StartPosition | string = StartPosition.Standard): void
     {
-        // If fen notation is given, convert it to json notation.
-        if(typeof position === "string")
-            position = Converter.convertFenToJson(position as StartPosition);
-
         // Create squares in the board.
         this.createSquares();
 
         // Create the pieces.
-        this.createPieces(position.board);
+        this.createPieces(typeof position == "string" ? Converter.convertFenToJson(position).board : position.board);
     }
 
     /**
@@ -314,7 +310,7 @@ export class ChessBoard {
     private _doPromotion(fromSquare:HTMLDivElement, toSquare:HTMLDivElement): void
     {
         this._doNormalMove(fromSquare, toSquare);
-        this.showPromotionMenu(toSquare.querySelector(".piece") as HTMLDivElement);
+        this.showPromotions(toSquare.querySelector(".piece") as HTMLDivElement);
     }
 
     /**
@@ -334,7 +330,7 @@ export class ChessBoard {
             Number(promoteSquare.id) + (color == Color.White ? -8 : +8) as Square
         );
 
-        this.closePromotionMenu();
+        this.closePromotions();
     }
 
     /**
@@ -429,9 +425,52 @@ export class ChessBoard {
     }
 
     /**
+     * Show status on the board.
+     */
+    public showStatus(status: GameStatus): void
+    {
+        if(status == GameStatus.WhiteInCheck || status == GameStatus.BlackInCheck)
+            this._showCheck(status);
+        else if(status == GameStatus.WhiteVictory || status == GameStatus.BlackVictory)
+            this._showCheckmate(status);
+        else if(status == GameStatus.Draw)
+            this._showStalemate();
+    }
+
+    /**
+     * Show check status on the board.
+     */
+    private _showCheck(checkedStatus: GameStatus.WhiteInCheck | GameStatus.BlackInCheck): void
+    {
+        const color: Color = checkedStatus == GameStatus.WhiteInCheck ? Color.White : Color.Black;
+        const king: HTMLDivElement = document.querySelector(`.piece[data-piece="${PieceType.King}"][data-color="${color}"]`) as HTMLDivElement;
+        this.setSquareEffect(king.parentElement as HTMLDivElement, SquareEffect.Checked);
+    }
+
+    /**
+     * Show checkmate status on the board.
+     */
+    private _showCheckmate(wonStatus: GameStatus.WhiteVictory | GameStatus.BlackVictory): void
+    {
+        console.log(wonStatus);
+        // TODO: Show checkmate status on the board.
+        this.lockBoard();
+    }
+
+    /**
+     * Show stalemate status on the board.
+     */
+    private _showStalemate(): void
+    {
+        console.log("Stalemate");
+        // TODO: Show stalemate status on the board.
+        this.lockBoard();
+    }
+
+    /**
      * Show promotion menu.
      */
-    public showPromotionMenu(promotedPawn: HTMLDivElement): void
+    public showPromotions(promotedPawn: HTMLDivElement): void
     {
         // Get the square of the promoted pawn.
         const square: Square = parseInt(promotedPawn.parentElement!.id) as Square;
@@ -479,7 +518,7 @@ export class ChessBoard {
     /**
      * Close promotion menu.
      */
-    public closePromotionMenu(): void
+    public closePromotions(): void
     {
         // Find promotion options
         let promotionOptions: NodeListOf<Element> = document.querySelectorAll(".promotion-option");

@@ -11,8 +11,8 @@ import {CacheLayer, JsonNotation, Square, StartPosition} from "./Types";
 import {SquareClickMode} from "./Types/Board";
 import {ChessEngine} from "./Engine/ChessEngine";
 import {ChessBoard} from "./Interface/ChessBoard";
-import {Converter} from "./Utils/Converter.ts";
 import {CacheManager} from "./Managers/CacheManager.ts";
+import {Converter} from "./Utils/Converter.ts";
 
 
 /**
@@ -45,13 +45,12 @@ export class Chess{
      */
     private checkAndLoadGameFromCache(): void
     {
-        this.createGame("rnbqkbnr/ppp1pppp/8/8/3p4/4P3/PPPP1PPP/RNBQKBNR w KQkq - 0 1");
-        /*if(!CacheManager.get(CacheLayer.Game))
+        if(!CacheManager.isEmpty(CacheLayer.Game))
             this.createGame();
         else{
             console.log("Game loaded from cache.");
-            this.createGame(CacheManager.get(CacheLayer.Game, "board"));
-        }*/
+            this.createGame(CacheManager.load(CacheLayer.Game)!);
+        }
     }
 
     /**
@@ -63,7 +62,7 @@ export class Chess{
         // Clear the game from the cache before creating a new game.
         CacheManager.clear(CacheLayer.Game);
 
-        // If fen notation is given, convert it to json notation.
+        // Convert the position to json notation if it is not json notation.
         if(typeof position === "string")
             position = Converter.convertFenToJson(position);
 
@@ -73,8 +72,8 @@ export class Chess{
         // Create a new game on board.
         this.chessBoard.createGame(position);
 
-        // Save the game to the cache.
-        CacheManager.set(CacheLayer.Game, "board", typeof position === "string" ?? Converter.convertJsonToFen(position));
+        // Save the game to the cache as json notation.
+        CacheManager.save(CacheLayer.Game, position);
     }
 
     /**
@@ -91,6 +90,7 @@ export class Chess{
             /**
              * If the move type is not promotion, clear the board.
              * Because, we need selectedSquare(promoted pawn) to promote
+             * FIXME: Burası doPlayAction dan önce olabilir.
              */
             if(moveType == SquareClickMode.Promotion)
                 this.chessBoard.clearBoard();
@@ -119,7 +119,7 @@ export class Chess{
      */
     private _doSelectAction(square: Square): void
     {
-        if(!this.chessEngine.isSelectLegal(square))
+        if(!this.chessEngine.isSquareSelectable(square))
             return;
 
         // Get the possible moves of the selected square and highlight them on chessBoard.
@@ -128,22 +128,26 @@ export class Chess{
         this.chessBoard.highlightMoves(this.chessEngine.getMoves(square)!);
     }
 
-
     /**
      * This function move the selected square on chessEngine and chessBoard,
-     * then set the selected square to null and clear the board.
+     * then finish the turn.
      */
     private _doPlayAction(square: Square): void
     {
         this.chessEngine.playMove(this.selectedSquare!, square);
         this.chessBoard.playMove(this.selectedSquare!, square);
+        this.finishTurn();
     }
 
     /**
      * This function returns the game as fen notation.
      */
-    /*private finishTurn(): void
+    private finishTurn(): void
     {
+        // Get status from engine and show it on board.
+        this.chessBoard.showStatus(this.chessEngine.getStatus());
 
-    }*/
+        // Save the game to the cache as fen notation.
+        CacheManager.save(CacheLayer.Game, this.chessEngine.getGameAsJsonNotation());
+    }
 }

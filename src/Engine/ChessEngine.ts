@@ -38,11 +38,13 @@ export class ChessEngine{
      */
     private moveEngine: MoveEngine;
     private boardManager: BoardManager;
+    private statusOfGame: GameStatus = GameStatus.InPlay;
+    private playedFrom: Square | null = null;
+    private playedTo: Square | null = null;
+    private moveNotation: string = "";
     private currentMoves: Moves | null = null;
-    private isPromotionMove: boolean = false;
-    private statusOfGame: GameStatus = GameStatus.Playing;
-    private currentMove: string = "";
     private calculatedMoves: {[key in Square]?: Moves | null} = {};
+    private isPromotionMenuOpen: boolean = false;
 
     /**
      * Constructor of the ChessEngine class.
@@ -58,19 +60,31 @@ export class ChessEngine{
      */
     public createGame(position: JsonNotation | StartPosition | string = StartPosition.Standard): void
     {
-        // If fen notation is given, convert it to json notation.
-        if(typeof position === "string")
-            position = Converter.convertFenToJson(position as StartPosition);
-
         // Create the board with the given position.
-        this.boardManager.createBoard(position);
+        this.boardManager.createBoard(typeof position == "string" ? Converter.convertFenToJson(position) : position);
+    }
+
+    /**
+     * This function returns the current game as fen notation.
+     */
+    public getGameAsFenNotation(): string
+    {
+        return Converter.convertJsonToFen(BoardQueryer.getGame());
+    }
+
+    /**
+     * This function returns the current game as json notation.
+     */
+    public getGameAsJsonNotation(): JsonNotation
+    {
+        return BoardQueryer.getGame();
     }
 
     /**
      * This function check the select is legal or not by checking the piece's color
      * and the color of the turn.
      */
-    public isSelectLegal(select: Square): boolean
+    public isSquareSelectable(select: Square): boolean
     {
         /**
          * If there is no piece on the given square or the piece's color
@@ -80,34 +94,11 @@ export class ChessEngine{
     }
 
     /**
-     * This function returns the moves of the given square with move engine.
-     */
-    public getMoves(square: Square): Moves | null
-    {
-        if(!this.isSelectLegal(square))
-            return null;
-
-        /**
-         * Get the moves of square with move engine. If the piece on the square is king
-         * then get the moves of king with currentMovesOfKing property. Because at the
-         * end of each round, the king's moves are recalculated and stored in currentMovesOfKing
-         * property for check/checkmate controls.
-         */
-        this.currentMoves = this.calculatedMoves[square] ?? this.moveEngine.getMoves(square);
-
-        // Save the current moves for avoid calculating the moves again and again.
-        this.calculatedMoves[square] = this.currentMoves;
-
-        // Return the moves.
-        return this.currentMoves;
-    }
-
-    /**
      * This function checks and find the given move. For example,
      * if the given move is not in the currentMoves, it returns false.
      * Otherwise, it returns the move type.
      */
-    private checkAndFindMoveType(to: Square): MoveType | false
+    private findMoveType(): MoveType | null
     {
         /**
          * If currentMoves is null, then return false. Because,
@@ -115,7 +106,7 @@ export class ChessEngine{
          * @see getMoves function.
          */
         if(this.currentMoves === null)
-            return false;
+            return null;
 
         // Find the given move in the currentMoves.
         for(const moveType in this.currentMoves){
@@ -125,13 +116,32 @@ export class ChessEngine{
 
             // Loop through the moves of the move type.
             for(let move of this.currentMoves[moveType as MoveType]!){
-                if(move === to)
+                if(move === this.playedTo)
                     return moveType as MoveType;
             }
         }
 
-        // If the given move is not in the currentMoves, return false.
-        return false;
+        // If the given move is not in the currentMoves, return null.
+        return null;
+    }
+
+    /**
+     * This function returns the moves of the given square with move engine.
+     */
+    public getMoves(square: Square): Moves | null
+    {
+        if(!this.isSquareSelectable(square))
+            return null;
+
+        /**
+         * Get the moves of square with move engine. If the moves of the square
+         * is already calculated then get the moves from the calculatedMoves.
+         * Otherwise, calculate the moves with move engine and save the moves
+         */
+        this.currentMoves = this.calculatedMoves[square] ?? this.moveEngine.getMoves(square);
+        this.calculatedMoves[square] = this.currentMoves;
+
+        return this.currentMoves;
     }
 
     /**
@@ -139,7 +149,11 @@ export class ChessEngine{
      */
     public playMove(from: Square, to: Square): void
     {
-        if(this.isPromotionMove){
+        this.playedFrom = from!;
+        this.playedTo = to!;
+
+        // Do the move.
+        if(this.isPromotionMenuOpen){
             /**
              * If the given move is a promote move(not promotion),
              * then promote the piece and return. Because, promote
@@ -152,20 +166,20 @@ export class ChessEngine{
         }
         else{
             // Check if the given move is valid.
-            const move: MoveType | false = this.checkAndFindMoveType(to);
+            const move: MoveType | null = this.findMoveType();
             if(!move)
                 return;
 
             // Play the move according to the move type.
             switch(move){
                 case MoveType.Castling:
-                    this._doCastling(from, to);
+                    this._doCastling();
                     break;
                 case MoveType.EnPassant:
-                    this._doEnPassant(from, to);
+                    this._doEnPassant();
                     break;
                 case MoveType.Promotion:
-                    this._doPromotion(from, to);
+                    this._doPromotion();
                     break;
                 case MoveType.Normal:
                     this._doNormalMove(from, to, true);
@@ -177,15 +191,47 @@ export class ChessEngine{
          * If move is promotion move, then don't change the turn.
          * Because, user must promote the piece.
          */
-        if(!this.isPromotionMove){
-            this.finishTurn(from, to);
+        if(!this.isPromotionMenuOpen){
+            this.finishTurn();
         }
+    }
+
+    /**
+     * Do the normal move.
+     */
+    private _doNormalMove(from: Square, to: Square, saveToHistory:boolean = false): void
+    {
+        if(saveToHistory){
+            /**
+             * Set the current move for the move history.
+             * @see For more information about history, see https://en.wikipedia.org/wiki/Algebraic_notation_(chess)
+             */
+            const piece: Piece = BoardQueryer.getPieceOnSquare(from)!;
+
+            // If the piece is not pawn then add the piece name to the current move.
+            if(piece?.getType() != PieceType.Pawn)
+                this.moveNotation += Converter.convertPieceTypeToPieceName(piece.getType(), piece.getColor());
+
+            // If the move kill a piece then add "x" to the current move.
+            if(BoardQueryer.isSquareHasPiece(to)){
+                // If the piece is pawn then add the column of the pawn to the current move.
+                if(piece?.getType() == PieceType.Pawn)
+                    this.moveNotation += Converter.convertSquareIDToSquare(from)[0];
+                this.moveNotation += "x";
+            }
+
+            // Add the target square to the current move.
+            this.moveNotation += Converter.convertSquareIDToSquare(to);
+        }
+
+        // Move the piece.
+        this.boardManager.movePiece(from, to);
     }
 
     /**
      * Do the castling move.
      */
-    private _doCastling(from: Square, to: Square): void
+    private _doCastling(): void
     {
         /**
          * Get the castling type by measuring the distance between
@@ -196,7 +242,7 @@ export class ChessEngine{
          * @see For more information about castling, see https://en.wikipedia.org/wiki/Castling
          * @see For more information about square ids, see src/Types/index.ts
          */
-        const castlingType: "Long" | "Short" = Number(from) - Number(to) > 3
+        const castlingType: "Long" | "Short" = Number(this.playedFrom) - Number(this.playedTo) > 3
             ? "Long" : "Short";
 
         /**
@@ -204,9 +250,9 @@ export class ChessEngine{
          * 2 squares left of the "from" otherwise 2 squares
          * right of the "from".
          */
-        const kingNewSquare: number = castlingType == "Long" ? Number(from) - 2 : Number(from) + 2;
+        const kingNewSquare: number = castlingType == "Long" ? Number(this.playedFrom) - 2 : Number(this.playedFrom) + 2;
 
-        this._doNormalMove(from, kingNewSquare as Square);
+        this._doNormalMove(this.playedFrom as Square, kingNewSquare as Square);
 
         /**
          * If the castling is long then the rook's current square
@@ -218,7 +264,7 @@ export class ChessEngine{
          * is "e1" then the rook's current square is "a1" and rook's new square
          * is "d1".
          */
-        const rook: number = castlingType == "Long" ? from - 4 : from + 3;
+        const rook: number = castlingType == "Long" ? Number(this.playedFrom) - 4 : Number(this.playedFrom) + 3;
         const rookNewSquare: number = castlingType == "Long" ? kingNewSquare + 1 : kingNewSquare - 1;
 
         this._doNormalMove(rook, rookNewSquare as Square);
@@ -227,15 +273,15 @@ export class ChessEngine{
         this.boardManager.changeCastlingAvailability((BoardQueryer.getColorOfTurn() + castlingType) as CastlingType, false);
 
         // Set the current move for the move history.
-        this.currentMove += castlingType == "Short" ? "O-O" : "O-O-O";
+        this.moveNotation += castlingType == "Short" ? "O-O" : "O-O-O";
     }
 
     /**
      * Do the en passant move.
      */
-    private _doEnPassant(from: Square, to: Square): void
+    private _doEnPassant(): void
     {
-        this._doNormalMove(from, to, true);
+        this._doNormalMove(this.playedFrom as Square, this.playedTo as Square, true);
 
         /**
          * Get the square of the killed piece by adding 8 to
@@ -245,7 +291,7 @@ export class ChessEngine{
          * @see For more information about en passant, see https://en.wikipedia.org/wiki/En_passant
          * @see For more information about the square ids, see src/Types/index.ts
          */
-        const killedPieceSquare = Number(to) + (BoardQueryer.getPieceOnSquare(to)?.getColor() == Color.White ? 8 : -8);
+        const killedPieceSquare = Number(this.playedTo) + (BoardQueryer.getPieceOnSquare(this.playedTo as Square)?.getColor() == Color.White ? 8 : -8);
 
         // Remove the killed piece.
         this.boardManager.removePiece(killedPieceSquare);
@@ -254,11 +300,11 @@ export class ChessEngine{
     /**
      * Do the promote move.
      */
-    private _doPromotion(from: Square, to: Square): void
+    private _doPromotion(): void
     {
         // Move the pawn.
-        this._doNormalMove(from, to, true);
-        this.isPromotionMove = true;
+        this._doNormalMove(this.playedFrom as Square, this.playedTo as Square, true);
+        this.isPromotionMenuOpen = true;
     }
 
     /**
@@ -317,48 +363,16 @@ export class ChessEngine{
         this.boardManager.createPiece(playerColor, selectedPromote as PieceType, from);
 
         // Finish the promotion.
-        this.isPromotionMove = false;
+        this.isPromotionMenuOpen = false;
 
         // Set the current move for the move history.
-        this.currentMove += "=" + Converter.convertPieceTypeToPieceName(selectedPromote as PieceType, playerColor);
-    }
-
-    /**
-     * Do the normal move.
-     */
-    private _doNormalMove(from: Square, to: Square, saveToHistory:boolean = false): void
-    {
-        if(saveToHistory){
-            /**
-             * Set the current move for the move history.
-             * @see For more information about history, see https://en.wikipedia.org/wiki/Algebraic_notation_(chess)
-             */
-            const piece: Piece = BoardQueryer.getPieceOnSquare(from)!;
-
-            // If the piece is not pawn then add the piece name to the current move.
-            if(piece?.getType() != PieceType.Pawn)
-                this.currentMove += Converter.convertPieceTypeToPieceName(piece.getType(), piece.getColor());
-
-            // If the move kill a piece then add "x" to the current move.
-            if(BoardQueryer.isSquareHasPiece(to)){
-                // If the piece is pawn then add the column of the pawn to the current move.
-                if(piece?.getType() == PieceType.Pawn)
-                    this.currentMove += Converter.convertSquareIDToSquare(from)[0];
-                this.currentMove += "x";
-            }
-
-            // Add the target square to the current move.
-            this.currentMove += Converter.convertSquareIDToSquare(to);
-        }
-
-        // Move the piece.
-        this.boardManager.movePiece(from, to);
+        this.moveNotation += "=" + Converter.convertPieceTypeToPieceName(selectedPromote as PieceType, playerColor);
     }
 
     /**
      * End the turn with some controls and check the game is finished or not.
      */
-    private finishTurn(from: Square, to: Square): void
+    private finishTurn(): void
     {
         /**
          * Order of the functions is important.
@@ -373,12 +387,12 @@ export class ChessEngine{
          */
         this.calculatedMoves = {};
         this.currentMoves = null;
-        this._checkCastling(to);
-        this._checkEnPassant(from, to);
+        this._checkCastling();
+        this._checkEnPassant();
         this.boardManager.changeTurn();
         this._checkStatusOfGame();
-        this.boardManager.addMoveToHistory(this.currentMove);
-        this.currentMove = "";
+        this.boardManager.addMoveToHistory(this.moveNotation);
+        this.moveNotation = "";
     }
 
     /**
@@ -388,13 +402,13 @@ export class ChessEngine{
      * @see castling move calculation: src/Engine/Core/Move/Checker/MoveChecker.ts
      * @see castling rules: https://en.wikipedia.org/wiki/Castling
      */
-    private _checkCastling(squareOfMovedPiece: Square): void
+    private _checkCastling(): void
     {
-        if(this.currentMove == "O-O" || this.currentMove == "O-O-O")
+        if(this.moveNotation == "O-O" || this.moveNotation == "O-O-O")
             return;
 
         // Find piece's type by the given square of the moved piece.
-        const piece: Piece = BoardQueryer.getPieceOnSquare(squareOfMovedPiece)!;
+        const piece: Piece = BoardQueryer.getPieceOnSquare(this.playedTo as Square)!;
 
         /**
          * If the piece is king then disable the castling short and long
@@ -408,7 +422,7 @@ export class ChessEngine{
             this.boardManager.changeCastlingAvailability((piece.getColor() + "Long") as CastlingType, false);
             this.boardManager.changeCastlingAvailability((piece.getColor() + "Short") as CastlingType, false);
         }else if(piece.getType() == PieceType.Rook){
-            const rookType: "Long" | "Short" = Number(squareOfMovedPiece) % 8 == 0 ? "Short" : "Long";
+            const rookType: "Long" | "Short" = Number(this.playedTo) % 8 == 0 ? "Short" : "Long";
             this.boardManager.changeCastlingAvailability((piece.getColor() + rookType) as CastlingType, false);
         }
     }
@@ -420,33 +434,30 @@ export class ChessEngine{
      * @see For more information about en passant, see src/Engine/Core/Move/Checker/MoveChecker.ts
      * @see For more information about en passant, see https://en.wikipedia.org/wiki/En_passant
      */
-    private _checkEnPassant(from: Square, to: Square): void
+    private _checkEnPassant(): void
     {
         /**
          * Find the piece by the given square of the moved piece.
-         * If the piece is pawn then ban the en passant square by
-         * piece's color.
+         * If the piece is pawn and move 1 square forward then ban the
+         * en passant square. Because, en passant moves are only valid
+         * if the enemy pawn move 2 square forward.
          */
-        const piece: Piece = BoardQueryer.getPieceOnSquare(to)!;
-        if(piece.getType() == PieceType.Pawn && Locator.getRow(from) == (piece.getColor() == Color.White ? 6 : 3)){
-            this.boardManager.banEnPassantSquare(piece.getColor() == Color.White ? Number(to) + 8 : Number(to) - 8);
+        const piece: Piece = BoardQueryer.getPieceOnSquare(this.playedTo as Square)!;
+        if(piece.getType() == PieceType.Pawn){
+            if(Locator.getRow(Number(this.playedFrom)) == (piece.getColor() == Color.White ? 6 : 3))
+                this.boardManager.banEnPassantSquare(piece.getColor() == Color.White ? Number(this.playedTo) + 8 : Number(this.playedTo) - 8);
         }
 
         // Find player's pawns.
         const pawns: Array<Piece> = BoardQueryer.getPiecesWithFilter(BoardQueryer.getColorOfTurn(), [PieceType.Pawn])!;
         for(const pawn of pawns){
-            const squareOfPawn: Square = BoardQueryer.getSquareOfPiece(pawn)!;
-            /**
-             * If any pawn has landed on the square, en passant can never
-             * be made to that square as per the rules so ban the square of
-             * the pawn.
-             */
-            this.boardManager.banEnPassantSquare(squareOfPawn);
-
             /**
              * If the pawn is white and on 5th row or is black and on 4th row
-             * then check the en passant moves.
+             * and the pawn has at least one en passant move then ban the
+             * en passant square. Because, en passant moves are only valid
+             * for one turn.
              */
+            const squareOfPawn: Square = BoardQueryer.getSquareOfPiece(pawn)!;
             if(Locator.getRow(squareOfPawn) == (pawn.getColor() == Color.White ? 4 : 5)){
                 const moves: Moves = this.moveEngine.getMoves(squareOfPawn)!;
                 if(moves["EnPassant"]!.length > 0){
@@ -482,13 +493,17 @@ export class ChessEngine{
         const squareOfPlayersKing: Square | null = BoardQueryer.getSquareOfPiece(BoardQueryer.getPiecesWithFilter(playerColor, [PieceType.King])[0]!);
         const enemySquaresOfPlayersKing: Array<Square> = BoardQueryer.isSquareThreatened(squareOfPlayersKing!, enemyColor, true) as Array<Square>;
 
+        // Find enums by the player's color.
+        const checkEnum: GameStatus = playerColor == Color.White ? GameStatus.WhiteInCheck : GameStatus.BlackInCheck;
+        const checkmateEnum: GameStatus = playerColor == Color.White ? GameStatus.BlackVictory : GameStatus.WhiteVictory;
+
         /**
          * If the king is threatened then the game is in check status. But continue
          * the check status because the game can be in checkmate or stalemate status.
          *
          * @see For more information about check please check the https://en.wikipedia.org/wiki/Check_(chess)
          */
-        this.statusOfGame = enemySquaresOfPlayersKing.length > 0 ? GameStatus.Check : GameStatus.Playing;
+        this.statusOfGame = enemySquaresOfPlayersKing.length > 0 ? checkEnum : GameStatus.InPlay;
 
         /**
          * Control, checkmate and stalemate scenarios.
@@ -497,7 +512,7 @@ export class ChessEngine{
 
         // If the king has no moves then check the checkmate and stalemate scenarios.
         if(this.calculatedMoves[squareOfPlayersKing!]![MoveType.Normal]!.length == 0){
-            if(enemySquaresOfPlayersKing.length > 1 && this.statusOfGame == GameStatus.Check)
+            if(enemySquaresOfPlayersKing.length > 1 && this.statusOfGame == checkEnum)
             {
                 /**
                  * Control Checkmate by Double Check
@@ -508,9 +523,9 @@ export class ChessEngine{
                  *
                  * @see For more information about check mate please check the https://en.wikipedia.org/wiki/Checkmate
                  */
-                this.statusOfGame = GameStatus.Checkmate;
+                this.statusOfGame = checkmateEnum;
             }
-            else if(enemySquaresOfPlayersKing.length == 1 && this.statusOfGame == GameStatus.Check)
+            else if(enemySquaresOfPlayersKing.length == 1 && this.statusOfGame == checkEnum)
             {
                 /**
                  * Control Checkmate by Single Check
@@ -550,13 +565,13 @@ export class ChessEngine{
                                 return;
                         }
                         // If player can't block the threat then the game is in checkmate status.
-                        this.statusOfGame = GameStatus.Checkmate;
+                        this.statusOfGame = checkmateEnum;
                     }else{
-                        this.statusOfGame = GameStatus.Checkmate;
+                        this.statusOfGame = checkmateEnum;
                     }
                 }
             }
-            else if(enemySquaresOfPlayersKing.length == 0 && this.statusOfGame == GameStatus.Playing)
+            else if(enemySquaresOfPlayersKing.length == 0 && this.statusOfGame == GameStatus.InPlay)
             {
                 /**
                  * Control Stalemate
@@ -572,23 +587,23 @@ export class ChessEngine{
                         const moves: Array<Square> = Extractor.extractSquares(this.moveEngine.getMoves(BoardQueryer.getSquareOfPiece(piece)!)!);
                         if (moves.length > 0) {
                             // If the piece has at least one move then the game is not in stalemate status.
-                            this.statusOfGame = GameStatus.Playing;
+                            this.statusOfGame = GameStatus.InPlay;
                             return;
                         }
                     }
                 }
-                this.statusOfGame = GameStatus.Stalemate;
+                this.statusOfGame = GameStatus.Draw;
             }
         }
 
         // Set the current status for the move history.
-        this.currentMove += this.statusOfGame == GameStatus.Checkmate ? "#" : this.statusOfGame == GameStatus.Check ? "+" : "";
+        this.moveNotation += this.statusOfGame == checkmateEnum ? "#" : this.statusOfGame == checkEnum ? "+" : "";
     }
 
     /**
      * This function returns the finished status of the game, doesn't calculate the game is finished or not.
      */
-    public getStatusOfGame(): GameStatus
+    public getStatus(): GameStatus
     {
         return this.statusOfGame;
     }

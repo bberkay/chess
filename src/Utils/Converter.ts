@@ -216,7 +216,7 @@ export class Converter{
         }
 
         // Loop through the jsonNotation
-        for(let i in jsonNotation)
+        for(let i in jsonNotation.board)
         {
             // Current piece
             let piece: {color:Color, type:PieceType, square:Square} = jsonNotation.board[Number(i)];
@@ -273,8 +273,8 @@ export class Converter{
                      * if fenString is "p1" then last char is "1" and "1" + 1 is "2" then add it to
                      * the fenString again, so fenString is "p2".
                      */
-                    fenRow = fenRow.slice(0, -1);
-                    fenRow += (parseInt(square.toString()) + 1).toString();
+                    const lastChar = fenRow.slice(-1);
+                    fenRow = isNumeric(lastChar) ? fenRow.slice(0, -1) + (parseInt(lastChar) + 1) : fenRow + "1";
                 }
                 else
                 {
