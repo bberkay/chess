@@ -573,8 +573,13 @@ export class ChessEngine{
                 }
                 this.statusOfGame = GameStatus.Draw;
             }
-        }else{
-            // If the king has at least one move then add the moves to the mandatory moves.
+        }
+        else if(this.statusOfGame == checkEnum)
+        {
+            /**
+             * If the king has at least one move and player's checked then
+             * add the moves to the mandatory moves.
+             */
             this.mandatoryMoves[kingSquare!] = this.calculatedMoves[kingSquare!]![MoveType.Normal]!;
         }
 
