@@ -36,8 +36,7 @@ export class Chess{
         this.chessBoard = new ChessBoard();
 
         // Check the cache and load the game(if exists).
-        //this.checkAndLoadGameFromCache();
-        this.createGame("k7/8/6p1/8/3q4/1R5K/8/1R2r3 w - - 0 1");
+        this.checkAndLoadGameFromCache();
     }
 
     /**
@@ -75,6 +74,10 @@ export class Chess{
 
         // Save the game to the cache as json notation.
         CacheManager.save(CacheLayer.Game, position);
+
+        // FIXME: En başta kontrol etmiyor.
+        // Get status from engine and show it on board.
+        // this.chessBoard.showStatus(this.chessEngine.getStatus());
     }
 
     /**

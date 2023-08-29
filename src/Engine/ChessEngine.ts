@@ -64,8 +64,9 @@ export class ChessEngine{
         // Create the board with the given position.
         this.boardManager.createBoard(typeof position == "string" ? Converter.convertFenToJson(position) : position);
 
-        // Check the game FIXME: Çalışmıyor.
-        this._checkStatusOfGame();
+        // FIXME: En başta kontrol etmiyor.
+        // Check the status of the game.
+        // this._checkStatusOfGame();
     }
 
     /**
@@ -414,6 +415,7 @@ export class ChessEngine{
         this.boardManager.changeTurn();
         this._checkStatusOfGame();
         this.boardManager.addMoveToHistory(this.moveNotation);
+        console.log(this.moveNotation);
         this.moveNotation = "";
     }
 
@@ -433,10 +435,10 @@ export class ChessEngine{
         const piece: Piece = BoardQueryer.getPieceOnSquare(this.playedTo as Square)!;
 
         /**
-         * If the piece is king then disable the castling short and long
-         * moves for the color of the king. If the piece is rook then
-         * disable the castling short or long move for the color of the rook
-         * and square of the rook.
+         * If the moved piece is king then disable the short and long castling
+         * for the color of the king. If the piece is rook then disable the
+         * short or long castling for the color of the rook by the square of
+         * the moved rook.
          *
          * @see For more information about square ids, see src/Types/index.ts
          */
@@ -511,9 +513,12 @@ export class ChessEngine{
          * @see For more information about square ids, see src/Types/index.ts
          */
         const playerColor: Color = BoardQueryer.getColorOfTurn();
-        const enemyColor: Color = BoardQueryer.getColorOfOpponent();
-        const squareOfPlayersKing: Square | null = BoardQueryer.getSquareOfPiece(BoardQueryer.getPiecesWithFilter(playerColor, [PieceType.King])[0]!);
-        const enemySquaresOfPlayersKing: Array<Square> = BoardQueryer.isSquareThreatened(squareOfPlayersKing!, enemyColor, true) as Array<Square>;
+        const kingSquare: Square | null = BoardQueryer.getSquareOfPiece(
+            BoardQueryer.getPiecesWithFilter(playerColor, [PieceType.King])[0]!
+        );
+        const threateningSquares: Array<Square> = BoardQueryer.isSquareThreatened(
+            kingSquare!, BoardQueryer.getColorOfOpponent(), true
+        ) as Array<Square>;
 
         // Find enums by the player's color.
         const checkEnum: GameStatus = playerColor == Color.White ? GameStatus.WhiteInCheck : GameStatus.BlackInCheck;
@@ -525,16 +530,14 @@ export class ChessEngine{
          *
          * @see For more information about check please check the https://en.wikipedia.org/wiki/Check_(chess)
          */
-        this.statusOfGame = enemySquaresOfPlayersKing.length > 0 ? checkEnum : GameStatus.InPlay;
+        this.statusOfGame = threateningSquares.length > 0 ? checkEnum : GameStatus.InPlay;
 
-        /**
-         * Control, checkmate and stalemate scenarios.
-         */
-        this.calculatedMoves[squareOfPlayersKing!] = this.moveEngine.getMoves(squareOfPlayersKing!)!;
+        // Calculate the moves of the king.
+        this.calculatedMoves[kingSquare!] = this.moveEngine.getMoves(kingSquare!)!;
 
-        // If the king has no moves then check the checkmate and stalemate scenarios.
-        if(this.calculatedMoves[squareOfPlayersKing!]![MoveType.Normal]!.length == 0){
-            if(enemySquaresOfPlayersKing.length > 1 && this.statusOfGame == checkEnum)
+        // If the king has no moves then check the doubly check and stalemate scenarios.
+        if(this.calculatedMoves[kingSquare!]![MoveType.Normal]!.length == 0){
+            if(threateningSquares.length > 1 && this.statusOfGame == checkEnum)
             {
                 /**
                  * Control Checkmate(Double Check Scenario)
@@ -547,75 +550,7 @@ export class ChessEngine{
                  */
                 this.statusOfGame = checkmateEnum;
             }
-            else if(enemySquaresOfPlayersKing.length == 1 && this.statusOfGame == checkEnum)
-            {
-                /**
-                 * Control Checkmate(Single Check Scenario)
-                 *
-                 * If the king is threatened by only one piece then enemy moves can be blocked by
-                 * the player's pieces.
-                 */
-
-                /**
-                 * Find the player's pieces that can kill the enemy piece that threatens the king
-                 * then add the killers to the mandatory moves. For example, if the king is threatened
-                 * by the enemy queen on the square "h5" and the player has a rook on the square "h1"
-                 * then the rook can kill the enemy queen and the rook is a mandatory move. So the
-                 * mandatoryMoves is {h1: [h5]}.
-                 *
-                 */
-                const squareOfEnemy: Square = enemySquaresOfPlayersKing[0];
-                const killers: Square[] = BoardQueryer.isSquareThreatened(squareOfEnemy, playerColor, true) as Square[];
-                if(killers.length > 0){
-                    for(const killer of killers)
-                        this.mandatoryMoves[killer] = [squareOfEnemy];
-                }
-
-                /**
-                 * Find the moves of the enemy piece that relative to the king's square
-                 * and check if the enemy piece's moves can be blocked by the player's pieces.
-                 *
-                 * @see For more information about relative squares, see src/Engine/Core/Utils/Locator.ts
-                 */
-                const movesOfEnemy: Array<Square> = RouteCalculator.getRouteByPieceOnSquare(squareOfEnemy)[
-                    Locator.getRelative(squareOfPlayersKing!, squareOfEnemy)!]!;
-
-                /**
-                 * If there is no moves between the king and the enemy piece then
-                 * the none of the player's pieces can block the enemy piece's moves
-                 * so the game is in checkmate status. Otherwise, check the squares
-                 * between the king and the enemy piece can be blocked by the player's
-                 * pieces.
-                 */
-                if(movesOfEnemy && movesOfEnemy.length > 1){
-                    for (let moveOfThreat of movesOfEnemy)
-                    {
-                        /**
-                         * If player can block the threat then the game is in check status
-                         * so finish the function with return without changing the status.
-                         */
-                        const blockers: Square[] = BoardQueryer.isSquareThreatened(moveOfThreat, playerColor, true) as Square[];
-                        if(blockers.length > 0){
-                            for(const blocker of blockers)
-                                this.mandatoryMoves[blocker]!.push(moveOfThreat);
-                        }
-                    }
-
-                    // If the player can block the threat then the game is not in checkmate status.
-                    if (Object.keys(this.mandatoryMoves).length > 0)
-                        return;
-
-                    // If player can't block the threat then the game is in checkmate status.
-                    this.statusOfGame = checkmateEnum;
-                }else{
-                    /**
-                     * If there is no moves between the king and the enemy piece and
-                     * the enemy piece is not killable then the game is in checkmate
-                     */
-                    this.statusOfGame = checkmateEnum;
-                }
-            }
-            else if(enemySquaresOfPlayersKing.length == 0 && this.statusOfGame == GameStatus.InPlay)
+            else if(threateningSquares.length == 0 && this.statusOfGame == GameStatus.InPlay)
             {
                 /**
                  * Control Stalemate
@@ -637,6 +572,79 @@ export class ChessEngine{
                     }
                 }
                 this.statusOfGame = GameStatus.Draw;
+            }
+        }else{
+            // If the king has at least one move then add the moves to the mandatory moves.
+            this.mandatoryMoves[kingSquare!] = this.calculatedMoves[kingSquare!]![MoveType.Normal]!;
+        }
+
+        /**
+         * If the game is not in stalemate or checkmate status and king is checked then
+         * check the mandatory moves.
+         */
+        if(this.statusOfGame == checkEnum)
+        {
+            /**
+             * Find the player's pieces that can kill the enemy piece that threatens the king
+             * then add the killers to the mandatory moves. For example, if the king is threatened
+             * by the enemy queen on the square "h5" and the player has a rook on the square "h1"
+             * then the rook can kill the enemy queen and the rook is a mandatory move. So the
+             * mandatoryMoves is {h1: [h5]}.
+             */
+            const squareOfEnemy: Square = threateningSquares[0];
+            const killers: Square[] = BoardQueryer.isSquareThreatened(squareOfEnemy, playerColor, true) as Square[];
+            if(killers.length > 0){
+                for(const killer of killers)
+                    this.mandatoryMoves[killer] = [squareOfEnemy];
+            }
+
+            /**
+             * Find the moves of the enemy piece that relative to the king's square
+             * and check if the enemy piece's moves can be blocked by the player's pieces.
+             *
+             * @see For more information about relative squares, see src/Engine/Core/Utils/Locator.ts
+             */
+            let movesOfEnemy: Array<Square> = RouteCalculator.getRouteByPieceOnSquare(squareOfEnemy)[Locator.getRelative(kingSquare!, squareOfEnemy)!]!;
+
+            /**
+             * Control Checkmate(Single Check Scenario)
+             *
+             * If the king is threatened by only one piece then enemy moves can be blocked by
+             * the player's pieces.
+             */
+            if(threateningSquares.length == 1)
+            {
+                /**
+                 * If there is no moves between the king and the enemy piece then
+                 * the none of the player's pieces can block the enemy piece's moves
+                 * so the game is in checkmate status. Otherwise, check the squares
+                 * between the king and the enemy piece can be blocked by the player's
+                 * pieces.
+                 */
+                if(movesOfEnemy.length > 1)
+                {
+                    for (let moveOfThreat of movesOfEnemy)
+                    {
+                        /**
+                         * If player can block the threat then the game is in check status
+                         * so finish the function with return without changing the status.
+                         */
+                        const blockers: Square[] = BoardQueryer.isSquareThreatened(moveOfThreat, playerColor, true) as Square[];
+                        if(blockers.length > 0){
+                            for(const blocker of blockers)
+                                this.mandatoryMoves[blocker]!.push(moveOfThreat);
+                        }
+                    }
+
+                    // If the player can block the threat then the game is not in checkmate status.
+                    if (Object.keys(this.mandatoryMoves).length > 0)
+                        return;
+
+                    // If player can't block the threat then the game is in checkmate status.
+                    this.statusOfGame = checkmateEnum;
+                }
+                else
+                    this.statusOfGame = checkmateEnum;
             }
         }
 

@@ -42,13 +42,20 @@ export class MoveExtender{
          */
         const kingSquare: Square = color == Color.White ? Square.e1 : Square.e8;
 
+        // Check if the king is on its original square.
+        if(!BoardQueryer.isSquareHasPiece(kingSquare, color, [PieceType.King]))
+            return null;
+
+        // Find the chosen rook by the given color and castling type.
         const targetSquareForRook: Square = castlingType == "Short"
             ? (color == Color.White ? Square.h1 : Square.h8)
             : (color == Color.White ? Square.a1 : Square.a8);
 
+        // Check if the chosen rook is on its original square.
         const chosenRook: Piece | null = BoardQueryer.isSquareHasPiece(targetSquareForRook, color, PieceType.Rook)
             ? BoardQueryer.getPieceOnSquare(targetSquareForRook) : null;
 
+        // Find squares between king and the chosen rook.
         const betweenSquares: Array<Square> = castlingType == "Long"
             ? (color == Color.White ? [Square.b1, Square.c1, Square.d1] : [Square.b8, Square.c8, Square.d8])
             : (color == Color.White ? [Square.f1, Square.g1] : [Square.f8, Square.g8]);
