@@ -213,7 +213,7 @@ export class BoardQueryer extends Board{
     /**
      * Check if the given square is threatened by the opponent.
      *
-     * @param square Square to check
+     * @param targetSquare Square to check
      * @param by Color of the opponent
      * @param getThreatening If true, then return enemy piece's square that are threatening the square.
      * @return If getThreatening is true, Array<Square>. Otherwise, boolean.
@@ -225,7 +225,7 @@ export class BoardQueryer extends Board{
      * 4. Get knight routes and check if any of them contains any enemy piece.
      * 5. If any of the routes not contains any enemy piece, then return false.
      */
-    public static isSquareThreatened(square: Square, by: Color | null = null, getThreatening: boolean | null = null): boolean | Array<Square>
+    public static isSquareThreatened(targetSquare: Square, by: Color | null = null, getThreatening: boolean | null = null): boolean | Array<Square>
     {
         const squaresOfThreateningEnemies: Array<Square> = [];
 
@@ -235,7 +235,7 @@ export class BoardQueryer extends Board{
          *
          * @see For more information about the StateManager, please check the src/Managers/StateManager.ts
          */
-        const piece: Piece | null = this.getPieceOnSquare(square);
+        const piece: Piece | null = this.getPieceOnSquare(targetSquare);
         const enemyColor: Color = by ?? (piece ? (piece.getColor() == Color.White ? Color.Black : Color.White) : this.getColorOfOpponent());
 
         /**
@@ -247,8 +247,8 @@ export class BoardQueryer extends Board{
          * @see src/Engine/Core/Calculator/RouteCalculator.ts For more information.
          */
         const allRoutes: Route = {
-            ...RouteCalculator.getQueenRoute(square, enemyColor == Color.White ? Color.Black : Color.White),
-            ...RouteCalculator.getKnightRoute(square, enemyColor == Color.White ? Color.Black : Color.White)
+            ...RouteCalculator.getQueenRoute(targetSquare, enemyColor == Color.White ? Color.Black : Color.White),
+            ...RouteCalculator.getKnightRoute(targetSquare, enemyColor == Color.White ? Color.Black : Color.White)
         };
 
         /**

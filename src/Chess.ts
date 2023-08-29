@@ -36,7 +36,8 @@ export class Chess{
         this.chessBoard = new ChessBoard();
 
         // Check the cache and load the game(if exists).
-        this.checkAndLoadGameFromCache();
+        //this.checkAndLoadGameFromCache();
+        this.createGame("k7/8/6p1/8/3q4/1R5K/8/1R2r3 w - - 0 1");
     }
 
     /**
