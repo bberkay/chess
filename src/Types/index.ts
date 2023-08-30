@@ -120,15 +120,6 @@ export enum GameStatus{
 }
 
 /**
- * CacheLayer enum for the cache layers.
- * @see src/Managers/CacheManager.ts For more information.
- */
-export enum CacheLayer{
-    Game = "Game",
-    Theme = "Theme"
-}
-
-/**
  * LogType enum for the LOG types.
  * @see src/Managers/LogManager.ts For more information.
  */

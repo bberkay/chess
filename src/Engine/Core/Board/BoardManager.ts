@@ -53,7 +53,7 @@ export class BoardManager extends Board{
     public createPiece(color: Color, type:PieceType, square:Square): void
     {
         // Create piece on the given square.
-        BoardManager.currentBoard[square] = new PieceModel(color, type);
+        Board.currentBoard[square] = new PieceModel(color, type);
     }
 
     /**
@@ -61,8 +61,17 @@ export class BoardManager extends Board{
      */
     public movePiece(from: Square, to:Square): void
     {
-        BoardManager.currentBoard[to] = BoardQueryer.getPieceOnSquare(from)!;
-        BoardManager.currentBoard[from] = null;
+        /**
+         * If the piece isn't a pawn or the square is empty, increase half move count.
+         * Else, reset half move count.
+         * @see for more information about half move count https://en.wikipedia.org/wiki/Fifty-move_rule
+         */
+        Board.halfMoveCount = (!BoardQueryer.isSquareHasPiece(to) || BoardQueryer.getPieceOnSquare(from)?.getType() !== PieceType.Pawn)
+            ? Board.halfMoveCount + 1
+            : 0;
+
+        Board.currentBoard[to] = BoardQueryer.getPieceOnSquare(from)!;
+        Board.currentBoard[from] = null;
     }
 
     /**
@@ -70,7 +79,7 @@ export class BoardManager extends Board{
      */
     public removePiece(square: Square): void
     {
-        BoardManager.currentBoard[square] = null;
+        Board.currentBoard[square] = null;
     }
 
     /**

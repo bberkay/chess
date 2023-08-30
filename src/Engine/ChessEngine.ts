@@ -504,6 +504,16 @@ export class ChessEngine{
     private _checkStatusOfGame(): void
     {
         /**
+         * If the half move count is greater than or equal to 50 then the game is in
+         * draw status.
+         * @see For more information about half move count, see https://en.wikipedia.org/wiki/Fifty-move_rule
+         */
+        if(BoardQueryer.getHalfMoveCount() >= 50){
+            this.statusOfGame = GameStatus.Draw;
+            return;
+        }
+
+        /**
          * Get player's color, enemy's color and square of player's king.
          * Then get the id of the squares that the king is threatened by
          * the enemy pieces. For example, if the king is threatened by
@@ -535,7 +545,11 @@ export class ChessEngine{
         // Calculate the moves of the king.
         this.calculatedMoves[kingSquare!] = this.moveEngine.getMoves(kingSquare!)!;
 
-        // If the king has no moves then check the doubly check and stalemate scenarios.
+        /*************************************************************************
+         * CHECKMATE BY DOUBLE CHECK, STALEMATE AND MANDATORY MOVES OF KING
+         *
+         * If the king has no moves then check the doubly check and stalemate scenarios.
+         * ************************************************************************/
         if(this.calculatedMoves[kingSquare!]![MoveType.Normal]!.length == 0){
             if(threateningSquares.length > 1 && this.statusOfGame == checkEnum)
             {
@@ -576,17 +590,21 @@ export class ChessEngine{
         }
         else if(this.statusOfGame == checkEnum)
         {
-            /**
+            /***************************************************************************
+             * MANDATORY MOVES OF KING
+             *
              * If the king has at least one move and player's checked then
              * add the moves to the mandatory moves.
-             */
+             * *************************************************************************/
             this.mandatoryMoves[kingSquare!] = this.calculatedMoves[kingSquare!]![MoveType.Normal]!;
         }
 
-        /**
+        /**************************************************************************
+         * CHECKMATE SCENARIO AND MANDATORY MOVES OF PROTECTORS OF THE KING
+         *
          * If the game is not in stalemate or checkmate status and king is checked then
          * check the mandatory moves.
-         */
+         * *************************************************************************/
         if(this.statusOfGame == checkEnum)
         {
             /**
@@ -636,8 +654,12 @@ export class ChessEngine{
                          */
                         const blockers: Square[] = BoardQueryer.isSquareThreatened(moveOfThreat, playerColor, true) as Square[];
                         if(blockers.length > 0){
-                            for(const blocker of blockers)
+                            for(const blocker of blockers){
+                                if(!(blocker in this.mandatoryMoves))
+                                    this.mandatoryMoves[blocker] = [];
+
                                 this.mandatoryMoves[blocker]!.push(moveOfThreat);
+                            }
                         }
                     }
 
@@ -663,5 +685,13 @@ export class ChessEngine{
     public getStatus(): GameStatus
     {
         return this.statusOfGame;
+    }
+
+    /**
+     * This function returns the algebraic notation of the game.
+     */
+    public getNotation(): Array<string>
+    {
+        return BoardQueryer.getMoveHistory();
     }
 }

@@ -1,38 +1,60 @@
-import { CacheLayer } from "../Types";
-
 /**
  * This static class provides a way to store data in a layered way in local storage.
  */
-export class CacheManager {
+export class CacheManager
+{
+    // Singleton instance.
+    private static instance: CacheManager;
+
+    // Name of the layer.
+    private layer: string = "Game";
+
+    /**
+     * Constructor of the CacheManager class.
+     */
+    private constructor()
+    {}
+
+    /**
+     * Returns the singleton instance of the CacheManager class.
+     */
+    public static getInstance(): CacheManager
+    {
+        if(!CacheManager.instance)
+            CacheManager.instance = new CacheManager();
+
+        return CacheManager.instance;
+    }
+
     /**
      * Stores the data in the local storage.
      */
-    static save(layer: CacheLayer, value: any): void
+    public save(value: any): void
     {
-        localStorage.setItem(layer, JSON.stringify(value));
+        localStorage.setItem(this.layer, JSON.stringify(value));
     }
 
     /**
      * Returns the data from the local storage.
      */
-    static load(layer: CacheLayer): any | undefined
+    public load(): any | undefined
     {
-        return JSON.parse(localStorage.getItem(layer)!);
+        return JSON.parse(localStorage.getItem(this.layer)!);
     }
 
     /**
      * Checks if the layer is empty.
      */
-    static isEmpty(layer: CacheLayer): boolean
+    public isEmpty(): boolean
     {
-        return CacheManager.load(layer) === null;
+        return this.load() === null;
     }
 
     /**
      * Clear layer
      */
-    static clear(layer: CacheLayer): void
+    public clear(): void
     {
-        localStorage.setItem(layer, JSON.stringify({}));
+        localStorage.setItem(this.layer, JSON.stringify({}));
     }
 }
