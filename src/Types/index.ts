@@ -116,7 +116,8 @@ export enum GameStatus{
     WhiteVictory = "WhiteVictory",
     BlackVictory = "BlackVictory",
     Draw = "Draw",
-    InPlay = "InPlay"
+    InPlay = "InPlay",
+    NotStarted = "NotStarted"
 }
 
 /**

@@ -38,7 +38,7 @@ export class ChessEngine{
      */
     private moveEngine: MoveEngine;
     private boardManager: BoardManager;
-    private statusOfGame: GameStatus = GameStatus.InPlay;
+    private statusOfGame: GameStatus = GameStatus.NotStarted;
     private playedFrom: Square | null = null;
     private playedTo: Square | null = null;
     private moveNotation: string = "";
@@ -64,9 +64,13 @@ export class ChessEngine{
         // Create the board with the given position.
         this.boardManager.createBoard(typeof position == "string" ? Converter.convertFenToJson(position) : position);
 
-        // FIXME: En başta kontrol etmiyor.
+        // If board has white and black king then the game is started.
+        if(BoardQueryer.getPiecesWithFilter(Color.White, [PieceType.King])?.length > 0
+            && BoardQueryer.getPiecesWithFilter(Color.Black, [PieceType.King])?.length > 0)
+            this.statusOfGame = GameStatus.InPlay;
+
         // Check the status of the game.
-        // this._checkStatusOfGame();
+        this.checkStatus();
     }
 
     /**
@@ -95,7 +99,7 @@ export class ChessEngine{
          * If there is no piece on the given square or the piece's color
          * is not equal to the color of the turn, return false.
          */
-        return !!(BoardQueryer.getPieceOnSquare(select)
+        return !!(this.statusOfGame != GameStatus.NotStarted && BoardQueryer.getPieceOnSquare(select)
             && BoardQueryer.getPieceOnSquare(select)?.getColor() === BoardQueryer.getColorOfTurn()
             && (Object.keys(this.mandatoryMoves).length > 0 && select in this.mandatoryMoves || Object.keys(this.mandatoryMoves).length == 0));
     }
@@ -171,6 +175,17 @@ export class ChessEngine{
      */
     public playMove(from: Square, to: Square): void
     {
+        /**
+         * If the game is not started or the current moves is
+         * null(that means no piece's selected or the move attempted to be
+         * played is illegal) then return.
+         *
+         * @see getMoves function.
+         */
+        if(this.statusOfGame == GameStatus.NotStarted || this.currentMoves === null)
+            return;
+
+        // Set the playedFrom and playedTo properties.
         this.playedFrom = from!;
         this.playedTo = to!;
 
@@ -413,9 +428,8 @@ export class ChessEngine{
         this._checkCastling();
         this._checkEnPassant();
         this.boardManager.changeTurn();
-        this._checkStatusOfGame();
+        this.checkStatus();
         this.boardManager.addMoveToHistory(this.moveNotation);
-        console.log(this.moveNotation);
         this.moveNotation = "";
     }
 
@@ -501,8 +515,12 @@ export class ChessEngine{
      *
      * @see For more information about game status types please check the src/Types/index.ts
      */
-    private _checkStatusOfGame(): void
+    private checkStatus(): void
     {
+        // If the game is not started then return.
+        if(this.statusOfGame == GameStatus.NotStarted)
+            return;
+
         /**
          * If the half move count is greater than or equal to 50 then the game is in
          * draw status.
@@ -518,7 +536,7 @@ export class ChessEngine{
          * Then get the id of the squares that the king is threatened by
          * the enemy pieces. For example, if the king is threatened by
          * the enemy queen on the square "h5" and the enemy knight on the
-         * square "d6" then the enemySquaresOfPlayersKing is [32, 20].
+         * square "d6" then the threateningSquares is [32, 20].
          *
          * @see For more information about square ids, see src/Types/index.ts
          */
@@ -529,10 +547,12 @@ export class ChessEngine{
         const threateningSquares: Array<Square> = BoardQueryer.isSquareThreatened(
             kingSquare!, BoardQueryer.getColorOfOpponent(), true
         ) as Array<Square>;
+        console.log(playerColor, kingSquare, threateningSquares);
 
         // Find enums by the player's color.
         const checkEnum: GameStatus = playerColor == Color.White ? GameStatus.WhiteInCheck : GameStatus.BlackInCheck;
         const checkmateEnum: GameStatus = playerColor == Color.White ? GameStatus.BlackVictory : GameStatus.WhiteVictory;
+        console.log(checkEnum, checkmateEnum);
 
         /**
          * If the king is threatened then the game is in check status. But continue
@@ -541,6 +561,7 @@ export class ChessEngine{
          * @see For more information about check please check the https://en.wikipedia.org/wiki/Check_(chess)
          */
         this.statusOfGame = threateningSquares.length > 0 ? checkEnum : GameStatus.InPlay;
+        console.log(this.statusOfGame);
 
         // Calculate the moves of the king.
         this.calculatedMoves[kingSquare!] = this.moveEngine.getMoves(kingSquare!)!;

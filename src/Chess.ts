@@ -85,9 +85,8 @@ export class Chess{
         if(this.enableCaching)
             this.cacheManager!.save(position);
 
-        // FIXME: En başta kontrol etmiyor.
         // Get status from engine and show it on board.
-        // this.chessBoard.showStatus(this.chessEngine.getStatus());
+        this.chessBoard.showStatus(this.chessEngine.getStatus());
     }
 
     /**
@@ -104,7 +103,6 @@ export class Chess{
             /**
              * If the move type is not promotion, clear the board.
              * Because, we need selectedSquare(promoted pawn) to promote
-             * FIXME: Burası doPlayAction dan önce olabilir.
              */
             if(moveType == SquareClickMode.Promotion)
                 this.chessBoard.clearBoard();
