@@ -19,7 +19,8 @@
     --promotion-option-hover-color: #808080;
 
     /* Result Screen */
-    --result-screen-bg-color: #000000;
+    --result-screen-bg-color: #111111;
+    --result-screen-border-color: #2a2a2a;
     --result-screen-color: #fff;
 
     /* Effects */
@@ -225,7 +226,7 @@
 
 /* -------------- Result Message -------------- */
 #chessboard .result-message{
-    box-shadow: 0 0 10px #000;
+    box-shadow: 0 0 5px #000;
     padding-top:60px;
     background-color: var(--result-screen-bg-color);
     color: var(--result-screen-color);
@@ -238,6 +239,7 @@
     left: 50%;
     transform: translate(-50%, -50%);
     text-align: center;
+    border:1px solid var(--result-screen-border-color);
 }
 
 /* -------------- Promotion Menu -------------- */

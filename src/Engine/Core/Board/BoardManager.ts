@@ -20,6 +20,11 @@ export class BoardManager extends Board{
      */
     public createBoard(jsonNotation: JsonNotation): void
     {
+        // Reset board by setting all squares to null.
+        for(let square in Board.currentBoard){
+            Board.currentBoard[Number(square) as Square] = null;
+        }
+
         /**
          * Create board and set the current properties by the given json notation.
          * @see for more information about json notation src/Types.ts

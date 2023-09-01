@@ -73,7 +73,7 @@ export class Chess{
 
         // Convert the position to json notation if it is not json notation.
         if(typeof position === "string")
-            position = Converter.convertFenToJson(position);
+            position = Converter.fenToJson(position);
 
         // Create a new game on engine.
         this.chessEngine.createGame(position);

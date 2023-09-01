@@ -12,7 +12,6 @@ import {SquareClickMode, SquareEffect} from "../Types/Board";
 import {Converter} from "../Utils/Converter.ts";
 
 /**
- * TODO: Tüm interface tamamlandıktan sonra, açıklama güncellenecek.
  * This class provides users to create and manage a chess board(does not include any mechanic/logic).
  */
 export class ChessBoard {
@@ -61,7 +60,7 @@ export class ChessBoard {
         this.createSquares();
 
         // Create the pieces.
-        this.createPieces(typeof position == "string" ? Converter.convertFenToJson(position).board : position.board);
+        this.createPieces(typeof position == "string" ? Converter.fenToJson(position).board : position.board);
     }
 
     /**
@@ -79,6 +78,7 @@ export class ChessBoard {
             let square: HTMLDivElement = document.createElement("div");
             square.id = i.toString();
             square.className = "square";
+            square.innerHTML += i.toString(); // Show the square id on the board.
 
             /**
              * Set the color of the square. This formula create a chess board pattern on the board.
@@ -135,7 +135,7 @@ export class ChessBoard {
     /**
      * This function creates the pieces on the chess board.
      */
-    public createPieces(position:Array<{color: Color, type:PieceType, square:Square}>): void
+    private createPieces(position:Array<{color: Color, type:PieceType, square:Square}>): void
     {
         for(let piece of position)
             this.createPiece(piece.color, piece.type, piece.square);
@@ -144,7 +144,7 @@ export class ChessBoard {
     /**
      * This function creates a piece on the chess board.
      */
-    public createPiece(color: Color, type:PieceType, square:Square): void
+    private createPiece(color: Color, type:PieceType, square:Square): void
     {
         // Clear square if it is not empty.
         this.clearSquare(square);

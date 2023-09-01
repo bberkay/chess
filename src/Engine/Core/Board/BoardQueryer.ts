@@ -216,6 +216,7 @@ export class BoardQueryer extends Board{
      * @param targetSquare Square to check
      * @param by Color of the opponent
      * @param getThreatening If true, then return enemy piece's square that are threatening the square.
+     * @param calculatePawnBlocks If true, then calculate blocker pawns. Otherwise, calculate killer pawns.
      * @return If getThreatening is true, Array<Square>. Otherwise, boolean.
      *
      * Algorithm:
@@ -225,7 +226,7 @@ export class BoardQueryer extends Board{
      * 4. Get knight routes and check if any of them contains any enemy piece.
      * 5. If any of the routes not contains any enemy piece, then return false.
      */
-    public static isSquareThreatened(targetSquare: Square, by: Color | null = null, getThreatening: boolean | null = null): boolean | Array<Square>
+    public static isSquareThreatened(targetSquare: Square, by: Color | null = null, getThreatening: boolean = false, calculatePawnBlocks: boolean = false): boolean | Array<Square>
     {
         const squaresOfThreateningEnemies: Array<Square> = [];
 
@@ -283,39 +284,50 @@ export class BoardQueryer extends Board{
 
         /**
          * Now, we have to check if any pawn is threatening the given square.
-         * Why didn't we check the pawn in the previous loop? Because pawns'
-         * routes can change, according to the color of the pawn. For example,
-         * if the pawn is white, then dangerous routes are bottom left and bottom right.
-         * Otherwise, if the pawn is black, then dangerous routes are top left
-         * and top right. Also, pawn just attacks one square forward(diagonally).
-         * and pawn has a special move called en passant. So, it's easier to
-         * check the pawn in a different loop/scope.
+         * Why didn't we check the pawn in the previous loop ? Because pawns
+         * kill and block moves are different. If calculatePawnBlocks is true,
+         * then we have to check the blocker pawns. Otherwise, we have to check
+         * the killer pawns
          *
          * @see For more information about pawn please check the src/Engine/Core/MoveEngine.ts
          */
-        const pawnRoutes: Array<MoveRoute> = enemyColor == Color.White ? [MoveRoute.BottomLeft, MoveRoute.BottomRight]
-            : [MoveRoute.TopLeft, MoveRoute.TopRight];
+        const pawnRoutes: Array<MoveRoute> = calculatePawnBlocks
+            ? (enemyColor == Color.White ? [MoveRoute.Bottom] : [MoveRoute.Top])
+            : (enemyColor == Color.White ? [MoveRoute.BottomLeft, MoveRoute.BottomRight] : [MoveRoute.TopLeft, MoveRoute.TopRight]);
 
         // Loop through all pawn routes for enemy pawn threat.
-        for(const route of pawnRoutes){
-            /**
-             * Get the first square of the route. Because pawn just
-             * attacks one square forward(diagonally).
-             *
-             * Example scenario:
-             * Get first square of the bottom left route and square
-             * has a white pawn, then return true.
-             */
-            const square: Square = allRoutes[route]![0]!;
+        for (const route of pawnRoutes) {
+            if(!calculatePawnBlocks)
+            {
+                // Get the first square of the route. Because pawn just attacks one square forward(diagonally).
+                const square: Square = allRoutes[route]![0]!;
 
-            // Check if any squares at the route contain any enemy piece.
-            if(this.isSquareHasPiece(square, enemyColor, PieceType.Pawn)){
-                if(getThreatening)
-                    squaresOfThreateningEnemies.push(square);
-                else
-                    return true;
+                // Check if any squares at the route contain any enemy piece.
+                if (this.isSquareHasPiece(square, enemyColor, PieceType.Pawn)) {
+                    if (getThreatening)
+                        squaresOfThreateningEnemies.push(square);
+                    else
+                        return true;
+                }
+            }
+            else
+            {
+                // If the route is not exists, then continue.
+                if(!allRoutes[route])
+                    continue;
+
+                // Loop through all squares of the route and check if any of them has enemy pawn.
+                for(const square of allRoutes[route]!){
+                    if(this.isSquareHasPiece(square, enemyColor, PieceType.Pawn)){
+                        if(getThreatening)
+                            squaresOfThreateningEnemies.push(square);
+                        else
+                            return true;
+                    }
+                }
             }
         }
+
 
         // If getThreatening is true, then return squares of threatening enemies.
         // Otherwise, return false because if we are here, then there is no enemy threat.

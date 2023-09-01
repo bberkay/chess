@@ -166,7 +166,7 @@ export class MoveExtender{
          * information to check is en passant available for the given square).
          */
         const blockerMove: boolean = BoardQueryer.getMoveHistory().includes(
-            Converter.convertSquareIDToSquare(adjacentSquare + (color == Color.White ? -8 : 8)));
+            Converter.squareIDToSquare(adjacentSquare + (color == Color.White ? -8 : 8)));
         if(blockerMove && !BoardQueryer.isEnPassantAvailable(enPassantSquare))
             return null;
 

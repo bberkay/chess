@@ -7,10 +7,10 @@ export class Converter{
 
     /**
      * Convert piece type to piece name
-     * @example Converter.convertPieceTypeToPieceName(PieceType.King, Color.White), return "K"
-     * @example Converter.convertPieceTypeToPieceName(PieceType.Knight, Color.Black), return "n"
+     * @example Converter.pieceTypeToPieceName(PieceType.King, Color.White), return "K"
+     * @example Converter.pieceTypeToPieceName(PieceType.Knight, Color.Black), return "n"
      */
-    static convertPieceTypeToPieceName(pieceType: PieceType, color: Color): string
+    static pieceTypeToPieceName(pieceType: PieceType, color: Color): string
     {
         let pieceName: string = "";
 
@@ -40,11 +40,11 @@ export class Converter{
 
     /**
      * Convert squareID to square
-     * @example Converter.convertSquareIDToSquare(57), return "a1"
-     * @example Converter.convertSquareIDToSquare(8), return "h8"
+     * @example Converter.squareIDToSquare(57), return "a1"
+     * @example Converter.squareIDToSquare(8), return "h8"
      * @see For more information see Square Enum in src/Types.ts
      */
-    static convertSquareIDToSquare(squareID: number): string
+    static squareIDToSquare(squareID: number): string
     {
         let square: string = "";
 
@@ -61,34 +61,52 @@ export class Converter{
 
     /**
      * Convert FEN to JSON
-     * @example Converter.convertFENToJSON("8/8/8/8/8/8/P7/8 w - - 0 1")
+     * @example Converter.fenToJson("8/8/8/8/8/8/P7/8 w - - 0 1")
      * @see For more information about fen notation https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
      * @see For more information about Json notation etc. check src/Types.ts
      */
-    static convertFenToJson(fenNotation: StartPosition | string): JsonNotation
+    static fenToJson(fenNotation: StartPosition | string): JsonNotation
     {
         // Split fen notation by space
-        const splitFen = fenNotation.split(" ");
+        const splitFen: string[] = fenNotation.split(" ");
 
-        /**
-         * Find castling availability from the fen notation
-         */
-        const castlingAvailability: Record<CastlingType, boolean> = {
-            [CastlingType.WhiteLong] : splitFen[2].includes("Q"),
-            [CastlingType.WhiteShort] : splitFen[2].includes("K"),
-            [CastlingType.BlackLong] : splitFen[2].includes("q"),
-            [CastlingType.BlackShort] : splitFen[2].includes("k")
-        }
-
-        // Json notation
+        // Default Json notation
         let jsonNotation: JsonNotation = {
             board:[],
-            turn: splitFen[1] === "w" ? Color.White : Color.Black,
-            castling: castlingAvailability,
-            enPassant: splitFen[3].includes("-") ? null : Square[splitFen[3] as keyof typeof Square],
-            halfMoveClock: parseInt(splitFen[4]),
-            fullMoveNumber: parseInt(splitFen[5])
+            turn: Color.White,
+            castling: {
+                WhiteLong: false,
+                WhiteShort: false,
+                BlackLong: false,
+                BlackShort: false
+            },
+            enPassant: null,
+            halfMoveClock: 0,
+            fullMoveNumber: 1
         };
+
+        // If given fen notation has full information about game
+        if(splitFen.length >= 6)
+        {
+            // Find castling availability from the fen notation
+            const castlingAvailability: Record<CastlingType, boolean> = {
+                [CastlingType.WhiteLong] : splitFen[2].includes("Q"),
+                [CastlingType.WhiteShort] : splitFen[2].includes("K"),
+                [CastlingType.BlackLong] : splitFen[2].includes("q"),
+                [CastlingType.BlackShort] : splitFen[2].includes("k")
+            }
+
+            // Update the default json notation
+            jsonNotation = {
+                board: jsonNotation.board,
+                turn: splitFen.length >= 2 ? (splitFen[1] === "w" ? Color.White : Color.Black) : Color.White,
+                castling: castlingAvailability,
+                enPassant: splitFen.length >= 4 ? (splitFen[3].includes("-") ? null : Square[splitFen[3] as keyof typeof Square]) : null,
+                halfMoveClock: splitFen.length >= 5 ? parseInt(splitFen[4]) : 0,
+                fullMoveNumber: splitFen.length >= 6 ? parseInt(splitFen[5]) : 1
+            }
+        }
+
 
         /**
          * Type scheme (first letter of the piece type except for the knight) for convert letter to the piece type
@@ -170,7 +188,7 @@ export class Converter{
      * Convert JSON to FEN
      * @see For more information about fen notation https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
      */
-    static convertJsonToFen(jsonNotation: JsonNotation): string
+    static jsonToFen(jsonNotation: JsonNotation): string
     {
         /**
          * Is char a numeric?
@@ -222,7 +240,7 @@ export class Converter{
             let piece: {color:Color, type:PieceType, square:Square} = jsonNotation.board[Number(i)];
 
             // Convert squareID to square
-            let square: string = Converter.convertSquareIDToSquare(piece["square"]);
+            let square: string = Converter.squareIDToSquare(piece["square"]);
 
             // Type of the piece
             let type: string = typeScheme[piece["type"]];
@@ -303,9 +321,9 @@ export class Converter{
             (jsonNotation.castling.WhiteLong ? "Q" : "") +
             (jsonNotation.castling.BlackShort ? "k" : "") +
             (jsonNotation.castling.BlackLong ? "q" : "");
-        const enPassant: string =  jsonNotation.enPassant == null ? "-" : Converter.convertSquareIDToSquare(jsonNotation.enPassant);
+        const enPassant: string =  jsonNotation.enPassant == null ? "-" : Converter.squareIDToSquare(jsonNotation.enPassant);
 
         // Return fen notation as string with space between them
-        return fenNotation.join("/") + " " + turn + " " + castling + " " + enPassant + " " + jsonNotation.halfMoveClock.toString() + " " + jsonNotation.fullMoveNumber.toString();
+        return fenNotation.join("/") + " " + turn + " " + castling  + " " + enPassant + " " + jsonNotation.halfMoveClock.toString() + " " + jsonNotation.fullMoveNumber.toString();
     }
 }

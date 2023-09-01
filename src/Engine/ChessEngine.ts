@@ -62,12 +62,7 @@ export class ChessEngine{
     public createGame(position: JsonNotation | StartPosition | string = StartPosition.Standard): void
     {
         // Create the board with the given position.
-        this.boardManager.createBoard(typeof position == "string" ? Converter.convertFenToJson(position) : position);
-
-        // If board has white and black king then the game is started.
-        if(BoardQueryer.getPiecesWithFilter(Color.White, [PieceType.King])?.length > 0
-            && BoardQueryer.getPiecesWithFilter(Color.Black, [PieceType.King])?.length > 0)
-            this.statusOfGame = GameStatus.InPlay;
+        this.boardManager.createBoard(typeof position == "string" ? Converter.fenToJson(position) : position);
 
         // Check the status of the game.
         this.checkStatus();
@@ -78,7 +73,7 @@ export class ChessEngine{
      */
     public getGameAsFenNotation(): string
     {
-        return Converter.convertJsonToFen(BoardQueryer.getGame());
+        return Converter.jsonToFen(BoardQueryer.getGame());
     }
 
     /**
@@ -247,18 +242,18 @@ export class ChessEngine{
 
             // If the piece is not pawn then add the piece name to the current move.
             if(piece?.getType() != PieceType.Pawn)
-                this.moveNotation += Converter.convertPieceTypeToPieceName(piece.getType(), piece.getColor());
+                this.moveNotation += Converter.pieceTypeToPieceName(piece.getType(), piece.getColor());
 
             // If the move kill a piece then add "x" to the current move.
             if(BoardQueryer.isSquareHasPiece(to)){
                 // If the piece is pawn then add the column of the pawn to the current move.
                 if(piece?.getType() == PieceType.Pawn)
-                    this.moveNotation += Converter.convertSquareIDToSquare(from)[0];
+                    this.moveNotation += Converter.squareIDToSquare(from)[0];
                 this.moveNotation += "x";
             }
 
             // Add the target square to the current move.
-            this.moveNotation += Converter.convertSquareIDToSquare(to);
+            this.moveNotation += Converter.squareIDToSquare(to);
         }
 
         // Move the piece.
@@ -403,7 +398,7 @@ export class ChessEngine{
         this.isPromotionMenuOpen = false;
 
         // Set the current move for the move history.
-        this.moveNotation += "=" + Converter.convertPieceTypeToPieceName(selectedPromote as PieceType, playerColor);
+        this.moveNotation += "=" + Converter.pieceTypeToPieceName(selectedPromote as PieceType, playerColor);
     }
 
     /**
@@ -517,9 +512,15 @@ export class ChessEngine{
      */
     private checkStatus(): void
     {
-        // If the game is not started then return.
-        if(this.statusOfGame == GameStatus.NotStarted)
+        // If board has no black or white king then the game is not started.
+        if(BoardQueryer.getPiecesWithFilter(Color.White, [PieceType.King]).length == 0
+            || BoardQueryer.getPiecesWithFilter(Color.Black, [PieceType.King]).length == 0){
+            this.statusOfGame = GameStatus.NotStarted;
             return;
+        }
+        else{
+            this.statusOfGame = GameStatus.InPlay;
+        }
 
         /**
          * If the half move count is greater than or equal to 50 then the game is in
@@ -528,6 +529,7 @@ export class ChessEngine{
          */
         if(BoardQueryer.getHalfMoveCount() >= 50){
             this.statusOfGame = GameStatus.Draw;
+            this.moveNotation = "1/2-1/2";
             return;
         }
 
@@ -547,12 +549,10 @@ export class ChessEngine{
         const threateningSquares: Array<Square> = BoardQueryer.isSquareThreatened(
             kingSquare!, BoardQueryer.getColorOfOpponent(), true
         ) as Array<Square>;
-        console.log(playerColor, kingSquare, threateningSquares);
 
         // Find enums by the player's color.
         const checkEnum: GameStatus = playerColor == Color.White ? GameStatus.WhiteInCheck : GameStatus.BlackInCheck;
         const checkmateEnum: GameStatus = playerColor == Color.White ? GameStatus.BlackVictory : GameStatus.WhiteVictory;
-        console.log(checkEnum, checkmateEnum);
 
         /**
          * If the king is threatened then the game is in check status. But continue
@@ -561,7 +561,6 @@ export class ChessEngine{
          * @see For more information about check please check the https://en.wikipedia.org/wiki/Check_(chess)
          */
         this.statusOfGame = threateningSquares.length > 0 ? checkEnum : GameStatus.InPlay;
-        console.log(this.statusOfGame);
 
         // Calculate the moves of the king.
         this.calculatedMoves[kingSquare!] = this.moveEngine.getMoves(kingSquare!)!;
@@ -667,29 +666,34 @@ export class ChessEngine{
                  */
                 if(movesOfEnemy.length > 1)
                 {
-                    for (let moveOfThreat of movesOfEnemy)
+                    for (let move of movesOfEnemy)
                     {
+                        /**
+                         * If the move is the king's square then skip the loop.
+                         */
+                        if(move == kingSquare)
+                            continue;
+
                         /**
                          * If player can block the threat then the game is in check status
                          * so finish the function with return without changing the status.
                          */
-                        const blockers: Square[] = BoardQueryer.isSquareThreatened(moveOfThreat, playerColor, true) as Square[];
+                        const blockers: Square[] = BoardQueryer.isSquareThreatened(move, playerColor, true, true) as Square[];
                         if(blockers.length > 0){
                             for(const blocker of blockers){
                                 if(!(blocker in this.mandatoryMoves))
                                     this.mandatoryMoves[blocker] = [];
 
-                                this.mandatoryMoves[blocker]!.push(moveOfThreat);
+                                this.mandatoryMoves[blocker]!.push(move);
                             }
                         }
                     }
 
-                    // If the player can block the threat then the game is not in checkmate status.
-                    if (Object.keys(this.mandatoryMoves).length > 0)
-                        return;
-
-                    // If player can't block the threat then the game is in checkmate status.
-                    this.statusOfGame = checkmateEnum;
+                    /**
+                     * If the player can block the threat then the game is not in checkmate status.
+                     * Otherwise, the game is in checkmate status.
+                     */
+                    this.statusOfGame = Object.keys(this.mandatoryMoves).length > 0 ? checkEnum : checkmateEnum;
                 }
                 else
                     this.statusOfGame = checkmateEnum;
@@ -697,7 +701,7 @@ export class ChessEngine{
         }
 
         // Set the current status for the move history.
-        this.moveNotation += this.statusOfGame == checkmateEnum ? "#" : this.statusOfGame == checkEnum ? "+" : "";
+        this.moveNotation += this.statusOfGame == checkmateEnum ? "#" : this.statusOfGame == checkEnum ? "+" : "1/2-1/2";
     }
 
     /**
