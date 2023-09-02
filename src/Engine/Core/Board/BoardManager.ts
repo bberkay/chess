@@ -75,6 +75,7 @@ export class BoardManager extends Board{
             ? Board.halfMoveCount + 1
             : 0;
 
+        // Move piece from square to square.
         Board.currentBoard[to] = BoardQueryer.getPieceOnSquare(from)!;
         Board.currentBoard[from] = null;
     }
@@ -93,7 +94,7 @@ export class BoardManager extends Board{
     public changeTurn(): void
     {
         Board.currentTurn = BoardQueryer.getColorOfOpponent();
-        Board.moveCount += 1;
+        Board.moveCount += Board.currentTurn === Color.White ? 1 : 0;
     }
 
     /**

@@ -29,8 +29,8 @@
     --checked-color: #DF3030;
     --disabled-color: #000;
     --selected-color: #47a17338;
-    --from-color: rgba(30, 112, 70, 0.51);
-    --to-color: rgba(114, 252, 183, 0.73);
+    --from-color: rgba(33, 84, 55, 0.39);
+    --to-color: rgba(104, 183, 143, 0.44);
 
     /* White Pieces */
     --white-pawn-image: url("../images/pawn_white.png");
@@ -211,7 +211,7 @@
 
 /* Move to effect */
 #chessboard .square-effect--to{
-    box-shadow:inset 0 0 15px var(--to-color);
+    box-shadow:inset 0 0 100px var(--to-color);
 }
 
 /* Opacity for disabled pieces */

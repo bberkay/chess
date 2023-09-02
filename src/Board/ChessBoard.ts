@@ -78,6 +78,7 @@ export class ChessBoard {
             let square: HTMLDivElement = document.createElement("div");
             square.id = i.toString();
             square.className = "square";
+            // TODO: Toggle Button for square ids.
             square.innerHTML += i.toString(); // Show the square id on the board.
 
             /**

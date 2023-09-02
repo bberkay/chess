@@ -11,6 +11,9 @@ export class Extractor {
      *          Returns: [3, 4, 5, 8, 9, 10]
      */
     static extractSquares(targetObject: Route | Moves): Array<Square> {
+        if(!targetObject)
+            return [];
+
         return Object.values(targetObject).flat();
     }
 }

@@ -324,6 +324,6 @@ export class Converter{
         const enPassant: string =  jsonNotation.enPassant == null ? "-" : Converter.squareIDToSquare(jsonNotation.enPassant);
 
         // Return fen notation as string with space between them
-        return fenNotation.join("/") + " " + turn + " " + castling  + " " + enPassant + " " + jsonNotation.halfMoveClock.toString() + " " + jsonNotation.fullMoveNumber.toString();
+        return fenNotation.join("/") + " " + turn + " " + (castling == "" ? "-" : castling) + " " + enPassant + " " + jsonNotation.halfMoveClock.toString() + " " + jsonNotation.fullMoveNumber.toString();
     }
 }

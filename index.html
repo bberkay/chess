@@ -1,270 +1,65 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chess Game</title>
-    <link rel="stylesheet" href="src/css/chess.css">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    <title>Chess</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="./public/css/layout.css">
 </head>
+<body class = "dark-mode">
+    <main>
+        <div class="center">
+            <!-- Set up Chessboard -->
+            <div id="chessboard"></div>
 
-<body class = "light-mode">
-    <div class = "main">
-        <div class = "left-menu">
-            <fieldset class = "menu-buttons">
-                <legend>Games</legend>
-                <input type="hidden" id="start-game-btn" value="Start Current Game" onclick="MenuHandler.startGameWithForm()">
-                <input type="button" value="Start New Game" onclick="MenuHandler.startStandardGame()">
-                <input type="button" value="Start Empty Game" onclick="MenuHandler.startEmptyGame()">
-            </fieldset>
-            <fieldset class = "menu-buttons">
-                <legend>Positions</legend>
-                <input type="button" value="Pawn Promotion" onclick="MenuHandler.startFromPosition(StartPosition.PawnPromotion)">
-                <input type="button" value="Castling Position" onclick="MenuHandler.startFromPosition(StartPosition.Castling)">
-                <input type="button" value="En Passant Position - Right" onclick="MenuHandler.startFromPosition(StartPosition.EnPassantRight)">
-                <input type="button" value="En Passant Position - Left" onclick="MenuHandler.startFromPosition(StartPosition.EnPassantLeft)">
-                <input type="button" value="Check Position" onclick="MenuHandler.startFromPosition(StartPosition.Check)">
-                <input type="button" value="Checkmate Position" onclick="MenuHandler.startFromPosition(StartPosition.Checkmate)">
-                <input type="button" value="Stalemate Position" onclick="MenuHandler.startFromPosition(StartPosition.Stalemate)">
-            </fieldset>
-            <fieldset>
-                <legend>Create Piece</legend>
-                <fieldset>
-                    <legend>Color</legend>
-                    <label for="form-white">White</label>
-                    <input type="radio" name="form-color" id="form-white" value="White" checked>
-                    <br>
-                    <label for="form-black">Black</label>
-                    <input type="radio" name="form-color" id="form-black" value="Black">
-                </fieldset>
-                <fieldset>
-                    <legend>Piece</legend>
-                    <label for="form-king">King</label>
-                    <input type="radio" id="form-king" value="King" name = "form-piece" checked>
-                    <br>
-                    <label for="form-queen">Queen</label>
-                    <input type="radio" id="form-queen" value="Queen" name = "form-piece">
-                    <br>
-                    <label for="form-bishop">Bishop</label>
-                    <input type="radio" id="form-bishop" value="Bishop" name = "form-piece">
-                    <br>
-                    <label for="form-knight">Knight</label>
-                    <input type="radio" id="form-knight" value="Knight" name = "form-piece">
-                    <br>
-                    <label for="form-rook">Rook</label>
-                    <input type="radio" id="form-rook" value="Rook" name = "form-piece">
-                    <br>
-                    <label for="form-pawn">Pawn</label>
-                    <input type="radio" id="form-pawn" value="Pawn" name = "form-piece">
-                </fieldset>  
-                <fieldset>
-                    <legend>Square</legend>
-                    <input type="textbox" name="form-input-create" placeholder="A1-h8 or 1-64" minlength=1 maxlength=2>
-                    <br>
-                    <small id="square-error" style="color:red;"></small>
-                </fieldset>  
-                <br>
-                <input type="button" value = "Create Piece" onclick="MenuHandler.createPieceWithForm()">
-            </fieldset>
-            <fieldset>
-                <legend>Delete Piece</legend>
-                <input type="textbox" name="form-input-delete" placeholder="A1-h8 or 1-64" minlength=1 maxlength=2>
-                <br>
-                <small id="square-error" style="color:red;"></small>
-                <br>
-                <input type="button" value = "Delete Piece" onclick="MenuHandler.deletePieceWithForm()">
-            </fieldset>  
-        </div>
-        <div class = "game">
-            <div id="chessboard"></div> <!-- Create Game -->
-            <fieldset style="margin-bottom:10px">
-                <legend>Variables</legend>
-                <div class="menu-buttons-between">
-                    <div>
-                        <input type="button" value="Show Cache" onclick="MenuHandler.showCache()">
-                        <input type="button" value="Show Storage" onclick="MenuHandler.showStorage()">
-                    </div>
-                    <div>
-                        <input type="button" value="Toggle Beautify" onclick="MenuHandler.toggleBeautify()">
-                        <input type="button" value="Refresh" onclick="MenuHandler.refreshVariables()">
-                    </div>
-                </div>
-                <fieldset>
-                    <legend id="variable-title">Show</legend>
-                    <table border="true">
-                        <thead>
-                            <tr>
-                                <th>Key</th>
-                                <th>Value</th>
-                            </tr>
-                        </thead>
-                        <tbody id="variable-content">
-                            <!-- Content -->
-                        </tbody>
-                    </table>
-                </fieldset>
-            </fieldset>
-        </div>
-        <div class = "right-menu">
-            <div class="notation">
-                <fieldset>
-                    <legend>Notation</legend>
-                    <table border="true">
-                        <tr>
-                            <td>A1xE2</td>
-                            <td>A2xE2</td>
-                        </tr>
-                        <tr>
-                            <td>A1xE2</td>
-                            <td>A2xE2</td>
-                        </tr>
-                        <tr>
-                            <td>A1xE2</td>
-                            <td>A2xE2</td>
-                        </tr>
-                    </table>
-                    <fieldset class = "menu-buttons">
-                        <legend>Moves</legend>
-                        <input type="button" value="Show Previous" onclick="">
-                        <input type="button" value="Show Next" onclick="">
-                    </fieldset>
-                </fieldset>
+            <!-- Fen Notation Custom Input -->
+            <div class="fen-load-group" id = "fen-custom">
+                <button id = "use-template-fen-btn">Templates</button>
+                <input type="text" placeholder="FEN Notation">
+                <button>Load</button>
             </div>
-            <div>
-                <fieldset class = "menu-buttons">
-                    <legend>Match</legend>
-                    <input type="button" value="Propose a Takeback" onclick="">
-                    <input type="button" value="Offer Draw" onclick="">
-                    <input type="button" value="Resign" onclick="">
-                </fieldset>
-            </div>
-            <hr style="margin-top:30px;margin-bottom:30px;">
-            <div>
-                <fieldset class = "menu-buttons">
-                    <legend>Info</legend>
-                    <input type="button" value="Show Square ID" onclick="MenuHandler.toggleSquareIdList()">
-                    <input type="button" value="Show Piece ID" onclick="MenuHandler.togglePieceIdList()">
-                </fieldset>
-            </div>
-            <div>
-                <fieldset>
-                    <legend>Note</legend>
-                    <p>You may encounter some errors because it is not finished yet, and some days it may not work completely.<a href="https://github.com/bberkay/chess-engine" target="_blank"> For source code</a></p>
-                </fieldset>
-            </div>
-            <div>
-                <fieldset class = "menu-buttons">
-                    <legend>Display</legend>
-                    <input type="button" value="Toggle Mode" id="mode" onclick="toggleDisplayMode()">
-                </fieldset>
+
+            <!-- Fen Notation Template Select -->
+            <div class="fen-load-group" id = "fen-template">
+                <button id = "use-custom-fen-btn">Custom</button>
+                <select id="template-fen-select">
+                    <option value="">Bilmem ne</option>
+                </select>
+                <button>Load</button>
             </div>
         </div>
-        <div class = "right-menu-wide">
-            <fieldset id="log-container">
-                <legend>Log</legend>
-                <div class = "confirm-buttons">
-                    <input type="button" value="Clear" onclick="LogHandler.clear()">
-                </div>
-                <div id="log">
-                    <p class = "log-item">&#9679; 12:02:45 <span class="log-status">SUCCESS</span> - Lorem ipsum dolar sit amet</p>
-                    <p class = "log-item">&#9679; 12:02:45 <span class="log-status">SUCCESS</span> - Lorem ipsum dolar sit amet</p>
-                </div>
-            </fieldset>
-        </div>
-    </div>
+    </main>
 
-    <div id="hidden-elements">
-        <!-- Alert Layer -->
-        <div id="alert-layer" class="alert-layer" style="display:none"></div>
+    <!-- Initialize Chess -->
+    <script type="module">
+        // TODO: MenuController muhabbeti yapılacka.
 
-        <!-- Alert -->
-        <div id="alert" class="alert" style="display:none">
-            <strong id="alert-text">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce varius, urna ac egestas vehicula, felis ex viverra leo, id tristique orci tellus ullamcorper libero. Fusce vitae imperdiet diam, vel rutrum nulla.
-            </strong>
-            <div class="confirm-buttons">
-                <input type="button" value="OK" onclick="AlertHandler.hide();">
-            </div>
-        </div>
+        import { Chess } from './src/Chess.ts';
+        import { StartPosition } from "./src/Types";
 
-        <!-- Confirm -->
-        <div id="confirm" class="alert" style="display:none">
-            <strong id="confirm-text">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce varius, urna ac egestas vehicula, felis ex viverra leo, id tristique orci tellus ullamcorper libero. Fusce vitae imperdiet diam, vel rutrum nulla.
-            </strong>
-            <div class="confirm-buttons">
-                <input type="button" value="No" id = "confirm-cancel">
-                <input type="button" value="Yes" id="confirm-ok">
-            </div>
-        </div>
+        // Initialize Chess
+        const chess = new Chess();
 
-        <!-- Detail -->
-        <div id="detail" class="alert" style="display:none">
-            <div>
-                <h4>Detail</h4>
-                <hr>
-                <div id="detail-text-container">
-                    <strong id="detail-text">
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce varius, urna ac egestas vehicula, felis ex viverra leo, id tristique orci tellus ullamcorper libero. Fusce vitae imperdiet diam, vel rutrum nulla.
-                    </strong>
-                </div>
-            </div>
-            <div>
-                <h4>File Path</h4>
-                <hr>
-                <div>
-                    <small id="file-path"></small>
-                </div>
-                <div class="confirm-buttons">
-                    <input type="button" value="OK" onclick="AlertHandler.hide();">
-                </div>
-            </div>
-        </div>
-    </div>
+        // If there is a game in cache, load it. Otherwise, create a new game.
+        //if(!chess.checkAndLoadGameFromCache())
+        //  chess.createGame(StartPosition.Standard);
+        chess.createGame("8/k1pp4/8/8/8/8/4PP1K/8 w - - 0 1");
 
-    <!-- Import Files -->
-    <script src="src/js/Client/Global.js"></script>
-    <script src="src/js/Client/Cache.js"></script>
-    <script src="src/js/Client/Storage.js"></script>
-    <script src="src/js/Validators/MenuValidator.js"></script>
-    <script src="src/js/Validators/ParamValidator.js"></script>
-    <script src="src/js/Core/Managers/BoardManager.js"></script>
-    <script src="src/js/Core/Managers/GameManager.js"></script>
-    <script src="src/js/Core/Utils/Converter.js"></script>
-    <script src="src/js/Core/Utils/Calculator.js"></script>
-    <script src="src/js/Core/Engines/RouteEngine.js"></script>
-    <script src="src/js/Core/Engines/PathEngine.js"></script>
-    <script src="src/js/Core/Engines/MoveEngine.js"></script>
-    <script src="src/js/Handler/MenuHandler.js"></script>
-    <script src="src/js/Models/Validation.js"></script>
-    <script src="src/js/Models/Piece.js"></script>
-    <script src="src/js/Board/Board.js"></script>
-    <script src="src/js/Handler/AlertHandler.js"></script>
-    <script src="src/js/Handler/LogHandler.js"></script>
-    <script src="src/js/Chess.js"></script>
-    <script src="src/js/Handler/BoardHandler.js"></script>
-    <script>
-        // Dark Mode to not be blind at night, not important
-        var body = document.getElementsByTagName("body")[0];
-        if(Cache.has(CacheLayer.UI, "display-mode")){
-            if(Cache.get(CacheLayer.UI, "display-mode") === "dark-mode"){
-                body.classList.add("dark-mode");
-            }else{
-                body.classList.remove("dark-mode");
-            }
-        }
-
-        function toggleDisplayMode(){
-            if(body.classList.contains("dark-mode")){
-                body.classList.remove("dark-mode");
-                Cache.set(CacheLayer.UI, "display-mode", "light-mode");
-            }else{
-                body.classList.add("dark-mode");
-                Cache.set(CacheLayer.UI, "display-mode", "dark-mode");
-            }
-        }
+        // Listen player's clicks on squares.
+        document.querySelectorAll(".square").forEach(square => {
+            square.addEventListener("click", () => {
+                // Make move(with square ID and click mode)
+                chess.doAction(square.getAttribute("data-click-mode"), parseInt(square.getAttribute("id")));
+            });
+        });
     </script>
-</body>
 
+    <!-- Initialize Components -->
+    <script src="./public/js/fen-input.js"></script>
+
+</body>
 </html>

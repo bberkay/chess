@@ -25,54 +25,42 @@ main{
     }
 }
 
-main .center{
-    width:802px;
-    margin-top:7px;
+/* ------------------- Fen Components ------------------- */
+.fen-load-group{
+    display:flex;
+    margin-top:1rem;
 }
 
-main .right{
-    margin-left:30px;
-    width: 250px;
+.fen-load-group input, .fen-load-group select{
+    font-size:14px;
+    width:100%;
+    padding:15px;
+    background-color: #111;
+    color: #f5f5f5;
+    border:1px solid #2a2a2a;
 }
 
-main .left{
-    margin-right:30px;
-    width: 250px;
+.fen-load-group input:focus, .fen-load-group select:focus{
+    outline: none;
 }
 
-/* ------------------- Components ------------------- */
-fieldset{
-    margin-bottom:15px;
+.fen-load-group button{
+    padding:15px;
+    background-color: #111;
+    color: #f5f5f5;
+    border:1px solid #2a2a2a;
+    cursor: pointer;
     font-size:14px;
 }
 
-fieldset legend{
-    font-family: 'Roboto', sans-serif;
-    font-size: 16px;
+.fen-load-group button:hover{
+    background-color: #2a2a2a;
 }
 
-fieldset .bold{
-    font-weight: bold;
+.fen-load-group button:active{
+    opacity:0.7
 }
 
-fieldset .mono{
-    font-family: monospace;
-    font-size:13px;
-}
-
-fieldset input{
-    margin:2px;
-}
-
-fieldset .w-100{
-    width:100%;
-}
-
-fieldset .between{
-    display:flex;
-    justify-content: space-between;
-}
-
-fieldset table{
-    border:1px solid #000;
+#fen-template{
+    display:none; /* Default */
 }

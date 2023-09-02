@@ -170,15 +170,13 @@ export class ChessEngine{
      */
     public playMove(from: Square, to: Square): void
     {
-        /**
-         * If the game is not started or the current moves is
-         * null(that means no piece's selected or the move attempted to be
-         * played is illegal) then return.
-         *
-         * @see getMoves function.
-         */
-        if(this.statusOfGame == GameStatus.NotStarted || this.currentMoves === null)
+        // If the game is not started then return.
+        if(this.statusOfGame == GameStatus.NotStarted)
             return;
+
+        // If moves is not calculated then calculate the moves.
+        if(!this.currentMoves)
+            this.currentMoves = this.getMoves(from);
 
         // Set the playedFrom and playedTo properties.
         this.playedFrom = from!;

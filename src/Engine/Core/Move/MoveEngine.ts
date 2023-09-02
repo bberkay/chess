@@ -360,7 +360,7 @@ export class MoveEngine extends MoveExtender{
          *
          * @see for more information about relative route src/Engine/Utils/Locator.ts
          */
-        const relativeRoute: MoveRoute | null = Locator.getRelative(this.pieceSquare!, kingSquare);
+        const relativeRoute: MoveRoute | null = Locator.getRelative(kingSquare, this.pieceSquare!);
         if(!relativeRoute)
             // If dangerous route is null, then return the moves/routes without filtering.
             return moveRoute;
