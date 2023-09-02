@@ -357,7 +357,8 @@ export class ChessEngine{
         this.boardManager.removePiece(from);
 
         // If selected promote is square:
-        if(selectedPromote in Square){
+        if(selectedPromote in Square)
+        {
             /**
              * Get the piece by clicked square's(to) row.
              * If the clicked row is 8 or 1 then the selected piece
@@ -367,14 +368,16 @@ export class ChessEngine{
              * then the selected piece type is knight(this is engine simulation/
              * version of the promotion menu)
              *
-             * (4x4) ASCII representation of the promotion menu for white(S is square, Q is queen,
+             * (4x4) ASCII representation of the promotion menu for white(. is square, Q is queen,
              * R is rook, B is bishop, K is knight):
-             * S | S | Q | S - 8
-             * S | S | R | S - 7
-             * S | S | B | S - 6
-             * S | S | K | S - 5
-             * S | S | S | S - 4
-             * a - b - c - d
+             * --------------
+             * | .  .  Q  . | 8
+             * | .  .  R  . | 7
+             * | .  .  B  . | 6
+             * | .  .  K  . | 5
+             * | .  .  .  . | 4
+             * --------------
+             *   a  b  c  d
              *
              * @see For more information about promotion, see https://en.wikipedia.org/wiki/Promotion_(chess)
              * @see For more information about promotion menu, see showPromotionMenu() src/Interface/ChessBoard.ts
@@ -440,6 +443,8 @@ export class ChessEngine{
 
         // Find piece's type by the given square of the moved piece.
         const piece: Piece = BoardQueryer.getPieceOnSquare(this.playedTo as Square)!;
+        if(!piece)
+            return;
 
         /**
          * If the moved piece is king then disable the short and long castling
