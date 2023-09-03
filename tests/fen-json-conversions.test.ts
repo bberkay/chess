@@ -1,13 +1,17 @@
+/**
+ * Test file for FEN to JSON and JSON to FEN conversions.
+ */
+
 import { expect, test } from 'vitest';
 import { Converter } from '../src/Utils/Converter';
-import { Color, JsonNotation, PieceType, Square } from '../src/Types';
+import { Color, JsonNotation, PieceType, Square, StartPosition } from '../src/Types';
 
 // FEN Notations
-const fenNotations: string[] = [
-    'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1', // Standard
-    'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - - 0 1', // Standard, just board
-    '8/8/8/8/8/8/8/8 w - - 0 1', // Empty board
-    'r3k2r/8/8/1Pp5/8/8/8/R3K2R w -Qk- c6 0 2', // With castling and en passant
+const fenNotations: Array<string> = [
+    StartPosition.Standard,
+    'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', // Just board field
+    StartPosition.Empty,
+    'r3k2r/8/8/1Pp5/8/8/8/R3K2R w Kq c6 0 2', // Every field
 ];
 
 // JSON Notations

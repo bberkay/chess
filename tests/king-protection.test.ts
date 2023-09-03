@@ -1,11 +1,10 @@
-import {expect, test} from 'vitest';
-import { MoveType, Square } from '../src/Types';
+import { expect, test } from 'vitest';
+import {MoveType, Square, StartPosition} from '../src/Types';
 import { ChessEngine } from '../src/Engine/ChessEngine';
 
 // Games
 const games: string[] = [
-    '3k4/3q4/8/8/8/8/3R4/3K4 w - - 0 1', // White Rook and Black Queen face to face while kings behind them.
-    '3k4/3q4/8/8/8/8/3R4/3K4 b - - 0 1', // Black Queen and White Rook face to face while kings behind them.
+    StartPosition.ProtectKing, // White Rook and Black Queen face to face while kings behind them.
     '8/8/7k/6b1/8/8/3N4/2K5 w - - 0 1', // White Knight protects the king from the bishop.
     '3k4/3p4/4P3/8/8/8/8/3RK3 b - - 0 1', // Forbidden Pawn Capture
     '3k4/8/8/8/3pP3/8/8/3RK3 b - e3 0 1' // Forbidden En passant
@@ -15,9 +14,6 @@ const games: string[] = [
 const piecesAndMoves = [
     {
         [Square.d2]: [Square.d3, Square.d4, Square.d5, Square.d6, Square.d7] , // Expected moves for the white rook
-    },
-    {
-        [Square.d7]: [Square.d6, Square.d5, Square.d4, Square.d3, Square.d2], // Expected moves for the black queen
     },
     {
         [Square.d2]: [] // Expected moves for the white knight

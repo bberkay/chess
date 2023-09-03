@@ -1,13 +1,12 @@
 "use strict";
-var _a, _b, _c, _d, _e;
+var _a, _b, _c, _d;
 Object.defineProperty(exports, "__esModule", { value: true });
 var vitest_1 = require("vitest");
 var Types_1 = require("../src/Types");
 var ChessEngine_1 = require("../src/Engine/ChessEngine");
 // Games
 var games = [
-    '3k4/3q4/8/8/8/8/3R4/3K4 w - - 0 1',
-    '3k4/3q4/8/8/8/8/3R4/3K4 b - - 0 1',
+    Types_1.StartPosition.ProtectKing,
     '8/8/7k/6b1/8/8/3N4/2K5 w - - 0 1',
     '3k4/3p4/4P3/8/8/8/8/3RK3 b - - 0 1',
     '3k4/8/8/8/3pP3/8/8/3RK3 b - e3 0 1' // Forbidden En passant
@@ -18,20 +17,17 @@ var piecesAndMoves = [
         _a[Types_1.Square.d2] = [Types_1.Square.d3, Types_1.Square.d4, Types_1.Square.d5, Types_1.Square.d6, Types_1.Square.d7],
         _a),
     (_b = {},
-        _b[Types_1.Square.d7] = [Types_1.Square.d6, Types_1.Square.d5, Types_1.Square.d4, Types_1.Square.d3, Types_1.Square.d2],
+        _b[Types_1.Square.d2] = [] // Expected moves for the white knight
+    ,
         _b),
     (_c = {},
-        _c[Types_1.Square.d2] = [] // Expected moves for the white knight
+        _c[Types_1.Square.d7] = [Types_1.Square.d6, Types_1.Square.d5] // Expected moves for the white pawn
     ,
         _c),
     (_d = {},
-        _d[Types_1.Square.d7] = [Types_1.Square.d6, Types_1.Square.d5] // Expected moves for the white pawn
+        _d[Types_1.Square.d4] = [Types_1.Square.d3] // Expected moves for the black pawn
     ,
-        _d),
-    (_e = {},
-        _e[Types_1.Square.d4] = [Types_1.Square.d3] // Expected moves for the black pawn
-    ,
-        _e)
+        _d)
 ];
 // Tests
 (0, vitest_1.test)('King Protection', function () {

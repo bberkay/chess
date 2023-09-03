@@ -1,14 +1,17 @@
 "use strict";
+/**
+ * Test file for FEN to JSON and JSON to FEN conversions.
+ */
 Object.defineProperty(exports, "__esModule", { value: true });
 var vitest_1 = require("vitest");
 var Converter_1 = require("../src/Utils/Converter");
 var Types_1 = require("../src/Types");
 // FEN Notations
 var fenNotations = [
-    'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
-    'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - - 0 1',
-    '8/8/8/8/8/8/8/8 w - - 0 1',
-    'r3k2r/8/8/1Pp5/8/8/8/R3K2R w -Qk- c6 0 2', // With castling and en passant
+    Types_1.StartPosition.Standard,
+    'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR',
+    Types_1.StartPosition.Empty,
+    'r3k2r/8/8/1Pp5/8/8/8/R3K2R w Kq c6 0 2', // Every field
 ];
 // JSON Notations
 var jsonNotations = [
