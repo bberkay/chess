@@ -1,43 +1,62 @@
 "use strict";
-var _a, _b, _c, _d;
+/**
+ * Test for the king's protection (for example, rook must not move any
+ * square that puts the king in danger).
+ *
+ * @see For more information about vitest, check https://vitest.dev/
+ */
 Object.defineProperty(exports, "__esModule", { value: true });
 var vitest_1 = require("vitest");
 var Types_1 = require("../src/Types");
 var ChessEngine_1 = require("../src/Engine/ChessEngine");
-// Games
+/**
+ * Board with expected moves for protectors of the king.
+ */
 var games = [
-    Types_1.StartPosition.ProtectKing,
-    '8/8/7k/6b1/8/8/3N4/2K5 w - - 0 1',
-    '3k4/3p4/4P3/8/8/8/8/3RK3 b - - 0 1',
-    '3k4/8/8/8/3pP3/8/8/3RK3 b - e3 0 1' // Forbidden En passant
-];
-// Pieces and expected moves for every game.
-var piecesAndMoves = [
-    (_a = {},
-        _a[Types_1.Square.d2] = [Types_1.Square.d3, Types_1.Square.d4, Types_1.Square.d5, Types_1.Square.d6, Types_1.Square.d7],
-        _a),
-    (_b = {},
-        _b[Types_1.Square.d2] = [] // Expected moves for the white knight
-    ,
-        _b),
-    (_c = {},
-        _c[Types_1.Square.d7] = [Types_1.Square.d6, Types_1.Square.d5] // Expected moves for the white pawn
-    ,
-        _c),
-    (_d = {},
-        _d[Types_1.Square.d4] = [Types_1.Square.d3] // Expected moves for the black pawn
-    ,
-        _d)
-];
-// Tests
-(0, vitest_1.test)('King Protection', function () {
-    for (var i = 0; i < games.length; i++) {
-        var chessEngine = new ChessEngine_1.ChessEngine();
-        chessEngine.createGame(games[i]);
-        // Test every piece and its moves
-        for (var _i = 0, _a = Object.entries(piecesAndMoves[i]); _i < _a.length; _i++) {
-            var _b = _a[_i], piece = _b[0], moves = _b[1];
-            (0, vitest_1.expect)(chessEngine.getMoves(Number(piece))[Types_1.MoveType.Normal].sort()).toEqual(moves.sort());
+    {
+        title: "King Protection with Rook from Enemy Queen",
+        board: Types_1.StartPosition.ProtectKing,
+        expectation: {
+            "protectorOfKing": Types_1.Square.d2,
+            "expectedMovesOfProtector": [Types_1.Square.d3, Types_1.Square.d4, Types_1.Square.d5, Types_1.Square.d6, Types_1.Square.d7] // Expected moves for the white rook
         }
+    },
+    {
+        title: "King Protection with Knight from Enemy Bishop",
+        board: '8/8/7k/6b1/8/8/3N4/2K5 w - - 0 1',
+        expectation: {
+            "protectorOfKing": Types_1.Square.d2,
+            "expectedMovesOfProtector": [] // Expected moves for the white knight
+        }
+    },
+    {
+        title: "King Protection with Pawn from Enemy Rook",
+        board: '3k4/3p4/4P3/8/8/8/8/3RK3 b - - 0 1',
+        expectation: {
+            "protectorOfKing": Types_1.Square.d7,
+            "expectedMovesOfProtector": [Types_1.Square.d6, Types_1.Square.d5] // Expected moves for the black pawn
+        }
+    },
+    {
+        title: "King Protection with Pawn from Enemy Rook (Forbidden En Passant)",
+        board: '3k4/8/8/8/3pP3/8/8/3RK3 b - e3 0 1',
+        expectation: {
+            "protectorOfKing": Types_1.Square.d4,
+            "expectedMovesOfProtector": [Types_1.Square.d3] // Expected moves for the black pawn
+        }
+    }
+];
+(0, vitest_1.test)('King Protection Test', function () {
+    var chessEngine = new ChessEngine_1.ChessEngine();
+    for (var _i = 0, games_1 = games; _i < games_1.length; _i++) {
+        var game = games_1[_i];
+        console.log("Testing: " + game.title);
+        chessEngine.createGame(game.board);
+        // Test every piece and its moves
+        (0, vitest_1.expect)(chessEngine.getMoves(Number(game.expectation.protectorOfKing))[Types_1.MoveType.Normal].sort())
+            .toEqual(game.expectation.expectedMovesOfProtector.sort());
+        console.log("Board: " + chessEngine.getGameAsFenNotation());
+        console.log("Passed: " + game.title);
+        console.log("--------------------------------------------------");
     }
 });

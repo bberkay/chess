@@ -1,4 +1,10 @@
 "use strict";
+/**
+ * Test file for every en passant move every situation like possible,
+ * missed, forbidden, etc.
+ *
+ * @see For more information about vitest, check https://vitest.dev/
+ */
 Object.defineProperty(exports, "__esModule", { value: true });
 var vitest_1 = require("vitest");
 var Types_1 = require("../src/Types");
@@ -8,26 +14,26 @@ var ChessEngine_1 = require("../src/Engine/ChessEngine");
  */
 var possibleEnPassantTestGames = [
     {
-        "title": "En Passant Left Test",
-        "board": Types_1.StartPosition.EnPassantLeft,
-        "moves": [
+        title: "En Passant Left Test",
+        board: Types_1.StartPosition.EnPassantLeft,
+        moves: [
             { from: Types_1.Square.e2, to: Types_1.Square.e4 },
             { from: Types_1.Square.a7, to: Types_1.Square.a6 },
             { from: Types_1.Square.e4, to: Types_1.Square.e5 },
             { from: Types_1.Square.d7, to: Types_1.Square.d5 },
         ],
-        "expectation": { from: Types_1.Square.e5, to: Types_1.Square.d6 }
+        expectation: { from: Types_1.Square.e5, to: Types_1.Square.d6 }
     },
     {
-        "title": "En Passant Right Test",
-        "board": Types_1.StartPosition.EnPassantRight,
-        "moves": [
+        title: "En Passant Right Test",
+        board: Types_1.StartPosition.EnPassantRight,
+        moves: [
             { from: Types_1.Square.d2, to: Types_1.Square.d4 },
             { from: Types_1.Square.a7, to: Types_1.Square.a6 },
             { from: Types_1.Square.d4, to: Types_1.Square.d5 },
             { from: Types_1.Square.e7, to: Types_1.Square.e5 }
         ],
-        "expectation": { from: Types_1.Square.d5, to: Types_1.Square.e6 }
+        expectation: { from: Types_1.Square.d5, to: Types_1.Square.e6 }
     }
 ];
 (0, vitest_1.test)('Possible En Passant Moves', function () {
@@ -50,9 +56,9 @@ var possibleEnPassantTestGames = [
  */
 var missedEnPassantTestGames = [
     {
-        "title": "Missed En Passant Left Test",
-        "board": Types_1.StartPosition.EnPassantLeft,
-        "moves": [
+        title: "Missed En Passant Left Test",
+        board: Types_1.StartPosition.EnPassantLeft,
+        moves: [
             { from: Types_1.Square.e2, to: Types_1.Square.e4 },
             { from: Types_1.Square.a7, to: Types_1.Square.a6 },
             { from: Types_1.Square.e4, to: Types_1.Square.e5 },
@@ -60,12 +66,12 @@ var missedEnPassantTestGames = [
             { from: Types_1.Square.h2, to: Types_1.Square.h3 },
             { from: Types_1.Square.a6, to: Types_1.Square.a5 },
         ],
-        "expectation": { from: Types_1.Square.e5, to: [] }
+        expectation: { from: Types_1.Square.e5, to: [] }
     },
     {
-        "title": "Missed En Passant Right Test",
-        "board": Types_1.StartPosition.EnPassantRight,
-        "moves": [
+        title: "Missed En Passant Right Test",
+        board: Types_1.StartPosition.EnPassantRight,
+        moves: [
             { from: Types_1.Square.d2, to: Types_1.Square.d4 },
             { from: Types_1.Square.a7, to: Types_1.Square.a6 },
             { from: Types_1.Square.d4, to: Types_1.Square.d5 },
@@ -73,7 +79,7 @@ var missedEnPassantTestGames = [
             { from: Types_1.Square.h2, to: Types_1.Square.h3 },
             { from: Types_1.Square.a6, to: Types_1.Square.a5 },
         ],
-        "expectation": { from: Types_1.Square.d5, to: [] }
+        expectation: { from: Types_1.Square.d5, to: [] }
     }
 ];
 (0, vitest_1.test)('Missed En Passant Moves', function () {
@@ -96,26 +102,26 @@ var missedEnPassantTestGames = [
  */
 var forbiddenEnPassantTestGames = [
     {
-        "title": "Forbidden En Passant Left Test",
-        "board": Types_1.StartPosition.EnPassantLeft,
-        "moves": [
+        title: "Forbidden En Passant Left Test",
+        board: Types_1.StartPosition.EnPassantLeft,
+        moves: [
             { from: Types_1.Square.e2, to: Types_1.Square.e4 },
             { from: Types_1.Square.d7, to: Types_1.Square.d6 },
             { from: Types_1.Square.e4, to: Types_1.Square.e5 },
             { from: Types_1.Square.d6, to: Types_1.Square.d5 },
         ],
-        "expectation": { from: Types_1.Square.e5, to: [] }
+        expectation: { from: Types_1.Square.e5, to: [] }
     },
     {
-        "title": "Forbidden En Passant Right Test",
-        "board": Types_1.StartPosition.EnPassantRight,
-        "moves": [
+        title: "Forbidden En Passant Right Test",
+        board: Types_1.StartPosition.EnPassantRight,
+        moves: [
             { from: Types_1.Square.d2, to: Types_1.Square.d4 },
             { from: Types_1.Square.e7, to: Types_1.Square.e6 },
             { from: Types_1.Square.d4, to: Types_1.Square.d5 },
             { from: Types_1.Square.e6, to: Types_1.Square.e5 },
         ],
-        "expectation": { from: Types_1.Square.d5, to: [] }
+        expectation: { from: Types_1.Square.d5, to: [] }
     }
 ];
 (0, vitest_1.test)("Forbidden En Passant Games Because Of Enemy Pawn's Move", function () {
@@ -138,26 +144,26 @@ var forbiddenEnPassantTestGames = [
  */
 var forbiddenEnPassantGamesForKingProtectionTestGames = [
     {
-        "title": "Forbidden En Passant Left Test",
-        "board": Types_1.StartPosition.ForbiddenEnPassantLeft,
-        "moves": [
+        title: "Forbidden En Passant Left Test",
+        board: Types_1.StartPosition.ForbiddenEnPassantLeft,
+        moves: [
             { from: Types_1.Square.e2, to: Types_1.Square.e4 },
             { from: Types_1.Square.a7, to: Types_1.Square.a6 },
             { from: Types_1.Square.e4, to: Types_1.Square.e5 },
             { from: Types_1.Square.d7, to: Types_1.Square.d5 },
         ],
-        "expectation": { from: Types_1.Square.e5, to: [] }
+        expectation: { from: Types_1.Square.e5, to: [] }
     },
     {
-        "title": "Forbidden En Passant Right Test",
-        "board": Types_1.StartPosition.ForbiddenEnPassantRight,
-        "moves": [
+        title: "Forbidden En Passant Right Test",
+        board: Types_1.StartPosition.ForbiddenEnPassantRight,
+        moves: [
             { from: Types_1.Square.d2, to: Types_1.Square.d4 },
             { from: Types_1.Square.a7, to: Types_1.Square.a6 },
             { from: Types_1.Square.d4, to: Types_1.Square.d5 },
             { from: Types_1.Square.e7, to: Types_1.Square.e5 }
         ],
-        "expectation": { from: Types_1.Square.d5, to: [] }
+        expectation: { from: Types_1.Square.d5, to: [] }
     }
 ];
 (0, vitest_1.test)('Forbidden En Passant Moves Because Of King Protection', function () {

@@ -9,7 +9,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var vitest_1 = require("vitest");
 var Types_1 = require("../src/Types");
 var ChessEngine_1 = require("../src/Engine/ChessEngine");
-// Fen Notations with expected GameStatus
+/**
+ * Games with expected status after creating board.
+ */
 var games = [
     {
         title: "White Victory",

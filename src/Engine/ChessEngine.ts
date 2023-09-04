@@ -61,11 +61,30 @@ export class ChessEngine{
      */
     public createGame(position: JsonNotation | StartPosition | string = StartPosition.Standard): void
     {
+        // Clear the game.
+        this.resetGame();
+
         // Create the board with the given position.
         this.boardManager.createBoard(typeof position == "string" ? Converter.fenToJson(position) : position);
 
         // Check the status of the game.
         this.checkStatus();
+    }
+
+    /**
+     * This function turn properties to their default values.
+     */
+    private resetGame(): void
+    {
+        this.statusOfGame = GameStatus.NotStarted;
+        this.calculatedMoves = {};
+        this.playedFrom = null;
+        this.playedTo = null;
+        this.moveNotation = "";
+        this.currentMoves = null;
+        this.mandatoryMoves = {};
+        this.calculatedMoves = {};
+        this.isPromotionMenuOpen = false;
     }
 
     /**
@@ -698,8 +717,13 @@ export class ChessEngine{
                      */
                     this.statusOfGame = Object.keys(this.mandatoryMoves).length > 0 ? checkEnum : checkmateEnum;
                 }
-                else
+                else if(this.calculatedMoves[kingSquare!]![MoveType.Normal]!.length == 0) {
+                    /**
+                     * If the king has no moves and no piece can block the threat then the game is
+                     * in checkmate status.
+                     */
                     this.statusOfGame = checkmateEnum;
+                }
             }
         }
 

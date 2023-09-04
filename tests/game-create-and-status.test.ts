@@ -10,7 +10,9 @@ import { Test } from './Types';
 import { GameStatus } from '../src/Types';
 import { ChessEngine } from '../src/Engine/ChessEngine';
 
-// Fen Notations with expected GameStatus
+/**
+ * Games with expected status after creating board.
+ */
 const games: Test[] = [
     {
         title: "White Victory",

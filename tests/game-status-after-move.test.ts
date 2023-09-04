@@ -9,7 +9,10 @@ import { Test } from './Types';
 import { GameStatus, Square, StartPosition } from '../src/Types';
 import { ChessEngine } from '../src/Engine/ChessEngine';
 
-// Games with expected GameStatus and moves
+/**
+ * Games with expected GameStatus after the
+ * moves are played.
+ */
 const games: Test[] = [
     {
         title: "Check Test",
