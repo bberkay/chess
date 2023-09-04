@@ -62,10 +62,10 @@ var games = [
     for (var _i = 0, games_1 = games; _i < games_1.length; _i++) {
         var game = games_1[_i];
         console.log("Testing: " + game.title);
+        console.log("Board: " + game.board);
         chessEngine.createGame(game.board);
         (0, vitest_1.expect)(chessEngine.getStatus()).toBe(game.expectation);
-        console.log("Board After Moves: " + chessEngine.getGameAsFenNotation());
-        console.log("Passed: " + game.title);
+        console.log("Passed");
         console.log("--------------------------------------------------");
     }
 });

@@ -21,12 +21,12 @@ const game: Test = {
 
 test('King Forbidden Moves', () => {
     console.log("Testing: " + game.title);
+    console.log("Board: " + game.board);
 
     const chessEngine = new ChessEngine();
     chessEngine.createGame(game.board);
 
     expect(chessEngine.getMoves(Square.h8)![MoveType.Normal]!.sort()).toEqual(game.expectation.sort());
-    console.log("Board: " + chessEngine.getGameAsFenNotation());
-    console.log("Passed: " + game.title);
+    console.log("Passed");
     console.log("--------------------------------------------------");
 });

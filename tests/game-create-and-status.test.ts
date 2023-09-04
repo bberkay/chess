@@ -64,11 +64,11 @@ test(`Game Status on Start`, () => {
     // Test every game
     for (const game of games) {
         console.log("Testing: " + game.title);
+        console.log("Board: " + game.board);
         chessEngine.createGame(game.board);
 
         expect(chessEngine.getStatus()).toBe(game.expectation);
-        console.log("Board After Moves: " + chessEngine.getGameAsFenNotation());
-        console.log("Passed: " + game.title);
+        console.log("Passed");
         console.log("--------------------------------------------------");
     }
 });

@@ -17,32 +17,32 @@ var games = [
         title: "King Protection with Rook from Enemy Queen",
         board: Types_1.StartPosition.ProtectKing,
         expectation: {
-            "protectorOfKing": Types_1.Square.d2,
-            "expectedMovesOfProtector": [Types_1.Square.d3, Types_1.Square.d4, Types_1.Square.d5, Types_1.Square.d6, Types_1.Square.d7] // Expected moves for the white rook
+            from: Types_1.Square.d2,
+            to: [Types_1.Square.d3, Types_1.Square.d4, Types_1.Square.d5, Types_1.Square.d6, Types_1.Square.d7] // Expected moves for the white rook
         }
     },
     {
         title: "King Protection with Knight from Enemy Bishop",
         board: '8/8/7k/6b1/8/8/3N4/2K5 w - - 0 1',
         expectation: {
-            "protectorOfKing": Types_1.Square.d2,
-            "expectedMovesOfProtector": [] // Expected moves for the white knight
+            from: Types_1.Square.d2,
+            to: [] // Expected moves for the white knight
         }
     },
     {
         title: "King Protection with Pawn from Enemy Rook",
         board: '3k4/3p4/4P3/8/8/8/8/3RK3 b - - 0 1',
         expectation: {
-            "protectorOfKing": Types_1.Square.d7,
-            "expectedMovesOfProtector": [Types_1.Square.d6, Types_1.Square.d5] // Expected moves for the black pawn
+            from: Types_1.Square.d7,
+            to: [Types_1.Square.d6, Types_1.Square.d5] // Expected moves for the black pawn
         }
     },
     {
         title: "King Protection with Pawn from Enemy Rook (Forbidden En Passant)",
         board: '3k4/8/8/8/3pP3/8/8/3RK3 b - e3 0 1',
         expectation: {
-            "protectorOfKing": Types_1.Square.d4,
-            "expectedMovesOfProtector": [Types_1.Square.d3] // Expected moves for the black pawn
+            from: Types_1.Square.d4,
+            to: [Types_1.Square.d3] // Expected moves for the black pawn
         }
     }
 ];
@@ -51,12 +51,12 @@ var games = [
     for (var _i = 0, games_1 = games; _i < games_1.length; _i++) {
         var game = games_1[_i];
         console.log("Testing: " + game.title);
+        console.log("Board: " + game.board);
         chessEngine.createGame(game.board);
         // Test every piece and its moves
-        (0, vitest_1.expect)(chessEngine.getMoves(Number(game.expectation.protectorOfKing))[Types_1.MoveType.Normal].sort())
-            .toEqual(game.expectation.expectedMovesOfProtector.sort());
-        console.log("Board: " + chessEngine.getGameAsFenNotation());
-        console.log("Passed: " + game.title);
+        (0, vitest_1.expect)(chessEngine.getMoves(Number(game.expectation.from))[Types_1.MoveType.Normal].sort())
+            .toEqual(game.expectation.to.sort());
+        console.log("Passed");
         console.log("--------------------------------------------------");
     }
 });

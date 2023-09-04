@@ -162,7 +162,7 @@ var fenToJsonTest = [
         var title = _a.title, board = _a.board, expectation = _a.expectation;
         console.log("Testing: ".concat(title));
         (0, vitest_1.expect)(Converter_1.Converter.fenToJson(board)).toEqual(expectation);
-        console.log("Passed: ".concat(title));
+        console.log("Passed");
         console.log("--------------------------------------------------");
     });
 });
@@ -176,7 +176,7 @@ var fenToJsonTest = [
         var title = _a.title, board = _a.board, expectation = _a.expectation;
         console.log("Testing: ".concat(title));
         (0, vitest_1.expect)(Converter_1.Converter.jsonToFen(expectation)).toEqual(board);
-        console.log("Passed: ".concat(title));
+        console.log("Passed");
         console.log("--------------------------------------------------");
     });
 });

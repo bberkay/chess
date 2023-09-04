@@ -163,7 +163,7 @@ test('Convert FEN to JSON', () => {
     fenToJsonTest.forEach(({title, board, expectation}) => {
         console.log(`Testing: ${title}`);
         expect(Converter.fenToJson(board as string)).toEqual(expectation);
-        console.log(`Passed: ${title}`);
+        console.log(`Passed`);
         console.log("--------------------------------------------------");
     });
 });
@@ -178,7 +178,7 @@ test('Convert JSON to FEN', () => {
     fenToJsonTest.forEach(({title, board, expectation}) => {
         console.log(`Testing: ${title}`);
         expect(Converter.jsonToFen(expectation)).toEqual(board);
-        console.log(`Passed: ${title}`);
+        console.log(`Passed`);
         console.log("--------------------------------------------------");
     });
 });

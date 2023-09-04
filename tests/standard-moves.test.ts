@@ -18,53 +18,53 @@ const game: Test = {
     expectation: [
         {
             // Expected moves for the white rook on a1
-            "piece": Square.a1,
-            "expectedMoves": [Square.b1, Square.c1, Square.d1]
+            from: Square.a1, // Square of white rook
+            to: [Square.b1, Square.c1, Square.d1] // Expected moves
         },
         {
             // Expected moves for the white pawn on c2
-            "piece": Square.c2,
-            "expectedMoves": []
+            from: Square.c2,
+            to: []
         },
         {
             // Expected moves for the white knight on c3
-            "piece": Square.c3,
-            "expectedMoves": [Square.a4, Square.b5, Square.d5, Square.e4, Square.b1, Square.d1]
+            from: Square.c3,
+            to: [Square.a4, Square.b5, Square.d5, Square.e4, Square.b1, Square.d1]
         },
         {
             // Expected moves for the white queen on d3
-            "piece": Square.d3,
-            "expectedMoves": [Square.h7, Square.a6, Square.b5, Square.c4, Square.d2, Square.d1, Square.e3, Square.f3, Square.g3, Square.e4, Square.f5, Square.g6]
+            from: Square.d3,
+            to: [Square.h7, Square.a6, Square.b5, Square.c4, Square.d2, Square.d1, Square.e3, Square.f3, Square.g3, Square.e4, Square.f5, Square.g6]
         },
         {
             // Expected moves for the white pawn on d4
-            "piece": Square.d4,
-            "expectedMoves": [Square.d5]
+            from: Square.d4,
+            to: [Square.d5]
         },
         {
             // Expected moves for the white pawn on e2
-            "piece": Square.e2,
-            "expectedMoves": [Square.e3, Square.e4]
+            from: Square.e2,
+            to: [Square.e3, Square.e4]
         },
         {
             // Expected moves for the white king on g1
-            "piece": Square.g1,
-            "expectedMoves": [Square.f3]
+            from: Square.g1,
+            to: [Square.f3]
         },
         {
             // Expected moves for the white rook on h1
-            "piece": Square.h1,
-            "expectedMoves": [Square.h2]
+            from: Square.h1,
+            to: [Square.h2]
         },
         {
             // Expected moves for the white bishop on g4
-            "piece": Square.g4,
-            "expectedMoves": [Square.f5, Square.e6, Square.f3, Square.d7, Square.h5]
+            from: Square.g4,
+            to: [Square.f5, Square.e6, Square.f3, Square.d7, Square.h5]
         },
         {
             // Expected moves for the white bishop on g5
-            "piece": Square.g5,
-            "expectedMoves": [Square.h4, Square.h6, Square.f6, Square.e7, Square.f4, Square.e3, Square.d2, Square.c1]
+            from: Square.g5,
+            to: [Square.h4, Square.h6, Square.f6, Square.e7, Square.f4, Square.e3, Square.d2, Square.c1]
         }
     ]
 };
@@ -73,13 +73,14 @@ const game: Test = {
 test('Standard Moves', () => {
     const chessEngine = new ChessEngine();
     console.log("Testing: " + game.title);
+    console.log("Board: " + game.board);
     chessEngine.createGame(game.board);
 
     // Test every piece and its moves
     for(const expectation of game.expectation)
-        expect(chessEngine.getMoves(Number(expectation.piece) as Square)![MoveType.Normal]!.sort()).toEqual(expectation.expectedMoves.sort());
+        expect(chessEngine.getMoves(Number(expectation.from) as Square)![MoveType.Normal]!.sort())
+            .toEqual(expectation.to.sort());
 
-    console.log("Board: " + chessEngine.getGameAsFenNotation());
-    console.log("Passed: " + game.title);
+    console.log("Passed");
     console.log("--------------------------------------------------");
 });
