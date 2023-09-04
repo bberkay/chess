@@ -21,7 +21,7 @@ const game: Test = {
 
 test('King Forbidden Moves', () => {
     console.log("Testing: " + game.title);
-    console.log("Board: " + game.board);
+    console.log("Board:   " + game.board);
 
     const chessEngine = new ChessEngine();
     chessEngine.createGame(game.board);

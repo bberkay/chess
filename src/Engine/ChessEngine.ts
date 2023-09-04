@@ -68,7 +68,7 @@ export class ChessEngine{
         this.boardManager.createBoard(typeof position == "string" ? Converter.fenToJson(position) : position);
 
         // Check the status of the game.
-        this.checkStatus();
+        this.checkStatusOfGame();
     }
 
     /**
@@ -110,12 +110,22 @@ export class ChessEngine{
     public isSquareSelectable(select: Square): boolean
     {
         /**
-         * If there is no piece on the given square or the piece's color
-         * is not equal to the color of the turn, return false.
+         * Check if the game is not started or the game is finished or the selected
+         * square is empty or the selected piece's color is not equal to the color
+         * of the turn or the selected piece is not in the mandatory moves then return false.
+         * Otherwise, return true.
          */
-        return !!(this.statusOfGame != GameStatus.NotStarted && BoardQueryer.getPieceOnSquare(select)
+        return !!(
+            (
+                this.statusOfGame != GameStatus.NotStarted
+                && this.statusOfGame != GameStatus.WhiteVictory
+                && this.statusOfGame != GameStatus.BlackVictory
+                && this.statusOfGame != GameStatus.Draw
+            )
+            && BoardQueryer.getPieceOnSquare(select)
             && BoardQueryer.getPieceOnSquare(select)?.getColor() === BoardQueryer.getColorOfTurn()
-            && (Object.keys(this.mandatoryMoves).length > 0 && select in this.mandatoryMoves || Object.keys(this.mandatoryMoves).length == 0));
+            && (Object.keys(this.mandatoryMoves).length > 0 && select in this.mandatoryMoves || Object.keys(this.mandatoryMoves).length == 0)
+        );
     }
 
     /**
@@ -443,9 +453,47 @@ export class ChessEngine{
         this._checkCastling();
         this._checkEnPassant();
         this.boardManager.changeTurn();
-        this.checkStatus();
+        this.checkStatusOfGame();
         this.boardManager.addMoveToHistory(this.moveNotation);
+        this.checkThreefoldRepetition();
         this.moveNotation = "";
+    }
+
+    /**
+     * Check the game is finished or not by threefold repetition rule.
+     */
+    private checkThreefoldRepetition(): void
+    {
+        /**
+         * Get the notation of the game and check the notation is
+         * repeated 3 times or not. If the notation is repeated 3
+         * times then the game is in draw status.
+         */
+        const notations: string[] = this.getNotation();
+
+        // Get last 10 move from move notation.
+        const lastMoves: string[] = notations.slice(Math.max(notations.length - 10, 0));
+
+        /**
+         * If the last 6 notation is not repeated 3 times then return.
+         * For example that set game status to draw:
+         * - this.getNotation() returns ["d4", "d5", "Kd2", "kd7", "Ke1", "ke8", "Kd2", "kd7", "Ke1", "ke8", "Kd2", "kd7"]
+         * - lastNotations is ["Kd2", "kd7", "Ke1", "ke8", "Kd2", "kd7", "Ke1", "ke8", "Kd2", "kd7"]
+         *  - Simple repeat of this scenario:
+         *      - The white king moves to d2 from e1 and the black king moves to d7 from e8.
+         *      - The white king moves to e1 from d2 and the black king moves to e8 from d7. (First repetition finished)
+         *      - ...
+         *      - The white king moves to d2 from e1 and the black king moves to d7 from e8.
+         *      - The white king moves to e1 from d2 and the black king moves to e8 from d7. (Third repetition finished)
+         *  - Then this situation is repeated 3 times and the game is in draw status.
+         */
+        if(lastMoves.length != 10
+            || lastMoves[0] != lastMoves[4] || lastMoves[1] != lastMoves[5] || lastMoves[2] != lastMoves[6]
+            || lastMoves[3] != lastMoves[7] || lastMoves[4] != lastMoves[8] || lastMoves[5] != lastMoves[9])
+            return;
+
+        // If the last 6 notation is repeated 3 times then the game is in draw status.
+        this.statusOfGame = GameStatus.Draw;
     }
 
     /**
@@ -532,7 +580,7 @@ export class ChessEngine{
      *
      * @see For more information about game status types please check the src/Types/index.ts
      */
-    private checkStatus(): void
+    private checkStatusOfGame(): void
     {
         // If board has no black or white king then the game is not started.
         if(BoardQueryer.getPiecesWithFilter(Color.White, [PieceType.King]).length == 0
@@ -728,13 +776,18 @@ export class ChessEngine{
         }
 
         // Set the current status for the move history.
-        this.moveNotation += this.statusOfGame == checkmateEnum ? "#" : this.statusOfGame == checkEnum ? "+" : "1/2-1/2";
+        if (this.statusOfGame === checkmateEnum)
+            this.moveNotation += "#";
+        else if (this.statusOfGame === checkEnum)
+            this.moveNotation += "+";
+        else if (this.statusOfGame === GameStatus.Draw)
+            this.moveNotation += "1/2-1/2";
     }
 
     /**
      * This function returns the finished status of the game, doesn't calculate the game is finished or not.
      */
-    public getStatus(): GameStatus
+    public getStatusOfGame(): GameStatus
     {
         return this.statusOfGame;
     }

@@ -51,7 +51,7 @@ var games = [
     for (var _i = 0, games_1 = games; _i < games_1.length; _i++) {
         var game = games_1[_i];
         console.log("Testing: " + game.title);
-        console.log("Board: " + game.board);
+        console.log("Board:   " + game.board);
         chessEngine.createGame(game.board);
         // Test every piece and its moves
         (0, vitest_1.expect)(chessEngine.getMoves(Number(game.expectation.from))[Types_1.MoveType.Normal].sort())

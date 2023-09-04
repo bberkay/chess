@@ -86,7 +86,7 @@ export class Chess{
             this.cacheManager!.save(position);
 
         // Get status from engine and show it on board.
-        this.chessBoard.showStatus(this.chessEngine.getStatus());
+        this.chessBoard.showStatus(this.chessEngine.getStatusOfGame());
     }
 
     /**
@@ -157,7 +157,7 @@ export class Chess{
     private finishTurn(): void
     {
         // Get status from engine and show it on board.
-        this.chessBoard.showStatus(this.chessEngine.getStatus());
+        this.chessBoard.showStatus(this.chessEngine.getStatusOfGame());
 
         // Save the game to the cache as json notation.
         if(this.enableCaching)

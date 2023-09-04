@@ -53,7 +53,7 @@ test('King Protection Test', () => {
 
     for(const game of games){
         console.log("Testing: " + game.title);
-        console.log("Board: " + game.board);
+        console.log("Board:   " + game.board);
         chessEngine.createGame(game.board);
 
         // Test every piece and its moves

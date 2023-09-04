@@ -83,15 +83,17 @@ var games = [
     // Test every game
     for (var _i = 0, games_1 = games; _i < games_1.length; _i++) {
         var game = games_1[_i];
-        console.log("Testing: " + game.title);
+        console.log("Testing:       " + game.title);
         console.log("Initial Board: " + game.board);
         chessEngine.createGame(game.board);
         for (var _a = 0, _b = game.moves; _a < _b.length; _a++) {
             var move = _b[_a];
             chessEngine.playMove(move.from, move.to);
         }
-        (0, vitest_1.expect)(chessEngine.getStatus()).toBe(game.expectation);
-        console.log("Final Board: " + chessEngine.getGameAsFenNotation());
+        console.log("Notation:      " + chessEngine.getNotation());
+        console.log("Final Board:   " + chessEngine.getGameAsFenNotation());
+        // Check if the game status is the expected
+        (0, vitest_1.expect)(chessEngine.getStatusOfGame()).toBe(game.expectation);
         console.log("Passed");
         console.log("--------------------------------------------------");
     }

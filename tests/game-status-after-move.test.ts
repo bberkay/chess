@@ -85,7 +85,7 @@ test(`Game Status After Move`, () => {
 
     // Test every game
     for (const game of games) {
-        console.log("Testing: " + game.title);
+        console.log("Testing:       " + game.title);
         console.log("Initial Board: " + game.board);
         chessEngine.createGame(game.board);
 
@@ -93,8 +93,12 @@ test(`Game Status After Move`, () => {
             chessEngine.playMove(move.from, move.to);
         }
 
-        expect(chessEngine.getStatus()).toBe(game.expectation);
-        console.log("Final Board: " + chessEngine.getGameAsFenNotation());
+        console.log("Notation:      " + chessEngine.getNotation());
+        console.log("Final Board:   " + chessEngine.getGameAsFenNotation());
+
+        // Check if the game status is the expected
+        expect(chessEngine.getStatusOfGame()).toBe(game.expectation);
+
         console.log("Passed");
         console.log("--------------------------------------------------");
     }

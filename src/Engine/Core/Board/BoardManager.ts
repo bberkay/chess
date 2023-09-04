@@ -67,13 +67,13 @@ export class BoardManager extends Board{
     public movePiece(from: Square, to:Square): void
     {
         /**
-         * If the piece isn't a pawn or the square is empty, increase half move count.
-         * Else, reset half move count.
+         * If the moved piece is a pawn or capture move then set half move count to 0
+         * else increase half move count.
          * @see for more information about half move count https://en.wikipedia.org/wiki/Fifty-move_rule
          */
-        Board.halfMoveCount = (!BoardQueryer.isSquareHasPiece(to) || BoardQueryer.getPieceOnSquare(from)?.getType() !== PieceType.Pawn)
-            ? Board.halfMoveCount + 1
-            : 0;
+        Board.halfMoveCount = (BoardQueryer.isSquareHasPiece(to) || BoardQueryer.getPieceOnSquare(from)?.getType() === PieceType.Pawn)
+            ? 0
+            : Board.halfMoveCount + 1;
 
         // Move piece from square to square.
         Board.currentBoard[to] = BoardQueryer.getPieceOnSquare(from)!;

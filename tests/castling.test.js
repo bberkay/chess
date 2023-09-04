@@ -125,6 +125,8 @@ var castlingTestGames = [
                 engine.playMove(move.from, move.to);
             }
         }
+        console.log("Notation: " + engine.getNotation());
+        console.log("Final Board: " + engine.getGameAsFenNotation());
         /**
          * If the expectation is string, then we will check the board is
          * equal to the expectation. If the expectation is array, then we
@@ -138,7 +140,6 @@ var castlingTestGames = [
             // Check the castling moves of the king are equal to the expectation.
             (0, vitest_1.expect)(engine.getMoves(squareOfKing)[Types_1.MoveType.Castling]).toEqual(game.expectation);
         }
-        console.log("Final Board: " + engine.getGameAsFenNotation());
         console.log("Passed");
         console.log("--------------------------------------------------");
     }

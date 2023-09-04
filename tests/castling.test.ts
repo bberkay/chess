@@ -130,6 +130,9 @@ test('Castling Moves', () => {
             }
         }
 
+        console.log("Notation: " + engine.getNotation());
+        console.log("Final Board: " + engine.getGameAsFenNotation());
+
         /**
          * If the expectation is string, then we will check the board is
          * equal to the expectation. If the expectation is array, then we
@@ -147,7 +150,6 @@ test('Castling Moves', () => {
             expect(engine.getMoves(squareOfKing)[MoveType.Castling]).toEqual(game.expectation);
         }
 
-        console.log("Final Board: " + engine.getGameAsFenNotation());
         console.log("Passed");
         console.log("--------------------------------------------------");
     }

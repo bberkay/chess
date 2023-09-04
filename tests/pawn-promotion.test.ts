@@ -66,7 +66,7 @@ test('Promote pawn to the every promotion option', () => {
     const chessEngine = new ChessEngine();
 
     for(const game of promotionTestGames){
-        console.log("Testing: " + game.title);
+        console.log("Testing:       " + game.title);
         console.log("Initial Board: " + game.board);
         chessEngine.createGame(game.board);
 
@@ -75,9 +75,12 @@ test('Promote pawn to the every promotion option', () => {
             chessEngine.playMove(move.from, move.to);
         }
 
+        console.log("Notation:      " + chessEngine.getNotation());
+        console.log("Final Board:   " + chessEngine.getGameAsFenNotation());
+
         // Check the pawn is promoted to the current type of promotion.
         expect(chessEngine.getGameAsFenNotation()).toEqual(game.expectation!);
-        console.log("Final Board: " + chessEngine.getGameAsFenNotation());
+
         console.log("Passed");
         console.log("--------------------------------------------------");
     }

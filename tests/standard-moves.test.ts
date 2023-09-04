@@ -73,7 +73,7 @@ const game: Test = {
 test('Standard Moves', () => {
     const chessEngine = new ChessEngine();
     console.log("Testing: " + game.title);
-    console.log("Board: " + game.board);
+    console.log("Board:   " + game.board);
     chessEngine.createGame(game.board);
 
     // Test every piece and its moves

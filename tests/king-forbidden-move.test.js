@@ -19,7 +19,7 @@ var game = {
 };
 (0, vitest_1.test)('King Forbidden Moves', function () {
     console.log("Testing: " + game.title);
-    console.log("Board: " + game.board);
+    console.log("Board:   " + game.board);
     var chessEngine = new ChessEngine_1.ChessEngine();
     chessEngine.createGame(game.board);
     (0, vitest_1.expect)(chessEngine.getMoves(Types_1.Square.h8)[Types_1.MoveType.Normal].sort()).toEqual(game.expectation.sort());

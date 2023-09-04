@@ -112,13 +112,16 @@ test('En Passant Moves', () => {
     const engine = new ChessEngine();
     for(const game of enPassantTestGames)
     {
-        console.log("Testing: " + game.title);
+        console.log("Testing:       " + game.title);
         console.log("Initial Board: " + game.board);
         engine.createGame(game.board);
 
         for(const move of game.moves) {
             engine.playMove(move.from, move.to);
         }
+
+        console.log("Notation:      " + engine.getNotation());
+        console.log("Final Board:   " + engine.getGameAsFenNotation());
 
         /**
          * Check the en passant move is equal to the expectation.
@@ -128,7 +131,6 @@ test('En Passant Moves', () => {
          */
         expect(engine.getMoves(game.expectation.from)![MoveType.EnPassant]).toEqual(game.expectation.to);
 
-        console.log("Final Board: " + engine.getGameAsFenNotation());
         console.log("Passed");
         console.log("--------------------------------------------------");
     }
