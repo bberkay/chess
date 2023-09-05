@@ -32,23 +32,26 @@ const game: Test = {
     expectation: GameStatus.Draw
 }
 
+/**
+ * Test for threefold repetition.
+ */
 test('Threefold Repetition Test', () => {
-    console.log("Testing:       " + game.title);
-    console.log("Initial Board: " + game.board);
+    console.log("Testing:        " + game.title);
+    console.log("Initial Board:  " + game.board);
 
-    const chessEngine = new ChessEngine();
-    chessEngine.createGame(game.board);
+    const engine = new ChessEngine();
+    engine.createGame(game.board);
 
     // Play moves
-    for(const move of game.moves){
-        chessEngine.playMove(move.from, move.to);
+    for(const move of game.moves!){
+        engine.playMove(move.from, move.to);
     }
 
-    console.log("Notation:      " + chessEngine.getNotation());
-    console.log("Final Board:   " + chessEngine.getGameAsFenNotation());
+    console.log("Final Notation: " + engine.getNotation());
+    console.log("Final Board:    " + engine.getGameAsFenNotation());
 
     // Check if the game is drawn
-    expect(chessEngine.getStatusOfGame()).toEqual(game.expectation);
+    expect(engine.getStatusOfGame()).toEqual(game.expectation);
 
     console.log("Passed");
     console.log("--------------------------------------------------");

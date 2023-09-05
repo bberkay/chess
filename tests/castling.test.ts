@@ -117,8 +117,8 @@ test('Castling Moves', () => {
     const engine = new ChessEngine();
     for(const game of castlingTestGames)
     {
-        console.log("Testing: " + game.title);
-        console.log("Initial Board: " + game.board);
+        console.log("Testing:        " + game.title);
+        console.log("Initial Board:  " + game.board);
         engine.createGame(game.board);
 
         // Play the moves if there is any
@@ -130,8 +130,8 @@ test('Castling Moves', () => {
             }
         }
 
-        console.log("Notation: " + engine.getNotation());
-        console.log("Final Board: " + engine.getGameAsFenNotation());
+        console.log("Final Notation: " + engine.getNotation());
+        console.log("Final Board:    " + engine.getGameAsFenNotation());
 
         /**
          * If the expectation is string, then we will check the board is
@@ -144,10 +144,10 @@ test('Castling Moves', () => {
             // Get the square of white king
             const squareOfKing: Square = BoardQueryer.getSquareOfPiece(
                 BoardQueryer.getPiecesWithFilter(Color.White, [PieceType.King])[0]
-            );
+            )!;
 
             // Check the castling moves of the king are equal to the expectation.
-            expect(engine.getMoves(squareOfKing)[MoveType.Castling]).toEqual(game.expectation);
+            expect(engine.getMoves(squareOfKing)![MoveType.Castling]).toEqual(game.expectation);
         }
 
         console.log("Passed");

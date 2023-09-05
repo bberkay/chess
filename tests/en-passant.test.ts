@@ -112,16 +112,16 @@ test('En Passant Moves', () => {
     const engine = new ChessEngine();
     for(const game of enPassantTestGames)
     {
-        console.log("Testing:       " + game.title);
-        console.log("Initial Board: " + game.board);
+        console.log("Testing:        " + game.title);
+        console.log("Initial Board:  " + game.board);
         engine.createGame(game.board);
 
-        for(const move of game.moves) {
+        for(const move of game.moves!) {
             engine.playMove(move.from, move.to);
         }
 
-        console.log("Notation:      " + engine.getNotation());
-        console.log("Final Board:   " + engine.getGameAsFenNotation());
+        console.log("Final Notation: " + engine.getNotation());
+        console.log("Final Board:    " + engine.getGameAsFenNotation());
 
         /**
          * Check the en passant move is equal to the expectation.

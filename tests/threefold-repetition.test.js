@@ -30,6 +30,9 @@ var game = {
     ],
     expectation: Types_1.GameStatus.Draw
 };
+/**
+ * Test for threefold repetition.
+ */
 (0, vitest_1.test)('Threefold Repetition Test', function () {
     console.log("Testing:       " + game.title);
     console.log("Initial Board: " + game.board);

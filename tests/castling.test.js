@@ -115,8 +115,8 @@ var castlingTestGames = [
     var engine = new ChessEngine_1.ChessEngine();
     for (var _i = 0, castlingTestGames_1 = castlingTestGames; _i < castlingTestGames_1.length; _i++) {
         var game = castlingTestGames_1[_i];
-        console.log("Testing: " + game.title);
-        console.log("Initial Board: " + game.board);
+        console.log("Testing:        " + game.title);
+        console.log("Initial Board:  " + game.board);
         engine.createGame(game.board);
         // Play the moves if there is any
         if (game.moves) {
@@ -125,8 +125,8 @@ var castlingTestGames = [
                 engine.playMove(move.from, move.to);
             }
         }
-        console.log("Notation: " + engine.getNotation());
-        console.log("Final Board: " + engine.getGameAsFenNotation());
+        console.log("Final Notation: " + engine.getNotation());
+        console.log("Final Board:    " + engine.getGameAsFenNotation());
         /**
          * If the expectation is string, then we will check the board is
          * equal to the expectation. If the expectation is array, then we

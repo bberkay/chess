@@ -49,15 +49,15 @@ const games: Test[] = [
 ]
 
 test('King Protection Test', () => {
-    const chessEngine = new ChessEngine();
+    const engine = new ChessEngine();
 
     for(const game of games){
         console.log("Testing: " + game.title);
         console.log("Board:   " + game.board);
-        chessEngine.createGame(game.board);
+        engine.createGame(game.board);
 
         // Test every piece and its moves
-        expect(chessEngine.getMoves(Number(game.expectation.from) as Square)![MoveType.Normal]!.sort())
+        expect(engine.getMoves(Number(game.expectation.from) as Square)![MoveType.Normal]!.sort())
                 .toEqual(game.expectation.to.sort());
 
         console.log("Passed");

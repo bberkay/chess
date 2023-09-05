@@ -195,7 +195,7 @@ export class MoveExtender{
     /**
      * @description Check if the promotion is available for the given square.
      */
-    protected getPromotionMove(square: Square): Square | null
+    protected getPromotionMove(square: Square): Array<Square> | null
     {
         /**
          * Rules for promotion:
@@ -227,7 +227,28 @@ export class MoveExtender{
         if((color == Color.Black && row != BLACK_PROMOTION_ROW - 1) || (color == Color.White && row != WHITE_PROMOTION_ROW + 1))
             return null;
 
-        // If all rules are passed, return promotion move.
-        return square + (color == Color.White ? -8 : 8);
+        /**
+         * If all rules are passed, then find vertical move, left diagonal capture move
+         * (because pawn only go left diagonal when it is capturing) and right diagonal
+         * capture move (because pawn only go right diagonal when it is capturing).
+         */
+        const verticalMove: number = square + (color == Color.White ? -8 : 8);
+        const leftDiagonalMove: number = square + (color == Color.White ? -9 : 9);
+        const rightDiagonalMove: number = square + (color == Color.White ? -7 : 7);
+        const enemyColor: Color = color == Color.White ? Color.Black : Color.White;
+
+        let promotionMoves: Array<Square> = [
+            verticalMove
+        ];
+
+        // If there is a piece on the left diagonal square, add this square to the promotion moves.
+        if(BoardQueryer.isSquareHasPiece(leftDiagonalMove, enemyColor))
+            promotionMoves.push(leftDiagonalMove);
+
+        // If there is a piece on the right diagonal square, add this square to the promotion moves.
+        if(BoardQueryer.isSquareHasPiece(rightDiagonalMove, enemyColor))
+            promotionMoves.push(rightDiagonalMove);
+
+        return promotionMoves;
     }
 }

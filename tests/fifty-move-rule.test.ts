@@ -108,17 +108,17 @@ test('Fifty Move Rule Test', () => {
     const engine = new ChessEngine();
     for(const game of fiftyMoveRuleTestGames)
     {
-        console.log("Testing:       " + game.title);
-        console.log("Initial Board: " + game.board);
+        console.log("Testing:        " + game.title);
+        console.log("Initial Board:  " + game.board);
         engine.createGame(game.board);
 
         // Play moves
-        for (const move of game.moves) {
+        for (const move of game.moves!) {
             engine.playMove(move.from, move.to);
         }
 
-        console.log("Notation:      " + engine.getNotation());
-        console.log("Final Board:   " + engine.getGameAsFenNotation());
+        console.log("Final Notation: " + engine.getNotation());
+        console.log("Final Board:    " + engine.getGameAsFenNotation());
 
         /**
          * Check if the expectation is a number, if it is, then

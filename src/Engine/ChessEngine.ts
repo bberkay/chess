@@ -23,7 +23,7 @@ import {BoardManager} from "./Core/Board/BoardManager.ts";
 import {Converter} from "../Utils/Converter";
 import {BoardQueryer} from "./Core/Board/BoardQueryer.ts";
 import {Locator} from "./Core/Utils/Locator.ts";
-import {Piece} from "../Types/Engine";
+import {MoveRoute, Piece} from "../Types/Engine";
 import {RouteCalculator} from "./Core/Move/Calculator/RouteCalculator.ts";
 import {Extractor} from "./Core/Utils/Extractor.ts";
 
@@ -85,6 +85,7 @@ export class ChessEngine{
         this.mandatoryMoves = {};
         this.calculatedMoves = {};
         this.isPromotionMenuOpen = false;
+        this.boardManager
     }
 
     /**
@@ -174,7 +175,6 @@ export class ChessEngine{
          * Otherwise, calculate the moves with move engine and save the moves
          */
         this.currentMoves = this.calculatedMoves[square] ?? this.moveEngine.getMoves(square);
-
         /**
          * If the given square is in the mandatory moves then delete the
          * other moves of the square and return the mandatory moves.
@@ -340,7 +340,7 @@ export class ChessEngine{
      */
     private _doEnPassant(): void
     {
-        this._doNormalMove(this.playedFrom as Square, this.playedTo as Square, true);
+        this._doNormalMove(this.playedFrom as Square, this.playedTo as Square);
 
         /**
          * Get the square of the killed piece by adding 8 to
@@ -354,6 +354,9 @@ export class ChessEngine{
 
         // Remove the killed piece.
         this.boardManager.removePiece(killedPieceSquare);
+
+        // Set the current move for the move history.
+        this.moveNotation += Converter.squareIDToSquare(this.playedFrom as Square)[0] + "x" + Converter.squareIDToSquare(this.playedTo as Square);
     }
 
     /**
@@ -717,7 +720,12 @@ export class ChessEngine{
              *
              * @see For more information about relative squares, see src/Engine/Core/Utils/Locator.ts
              */
-            let movesOfEnemy: Array<Square> = RouteCalculator.getRouteByPieceOnSquare(squareOfEnemy)[Locator.getRelative(kingSquare!, squareOfEnemy)!]!;
+            const movesOfEnemy: Array<Square> = RouteCalculator.getRouteByPieceOnSquare(squareOfEnemy)[
+                BoardQueryer.getPieceOnSquare(squareOfEnemy)?.getType() == PieceType.Knight
+                    ? MoveRoute.L
+                    : Locator.getRelative(kingSquare!, squareOfEnemy)!
+            ]!;
+
 
             /**
              * Control Checkmate(Single Check Scenario)
@@ -734,9 +742,9 @@ export class ChessEngine{
                  * between the king and the enemy piece can be blocked by the player's
                  * pieces.
                  */
-                if(movesOfEnemy.length > 1)
+                if(movesOfEnemy!.length > 1)
                 {
-                    for (let move of movesOfEnemy)
+                    for (let move of movesOfEnemy!)
                     {
                         /**
                          * If the move is the king's square then skip the loop.

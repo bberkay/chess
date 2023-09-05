@@ -92,6 +92,7 @@ export enum StartPosition{
     Standard = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
     Empty = "8/8/8/8/8/8/8/8 w - - 0 1",
     Promotion = "8/8/k3P3/8/8/8/8/4K3 w - - 0 1",
+    PromotionByCapture = "3r4/8/k3P3/8/8/8/8/4K3 w - - 0 1",
     Castling = "r3k2r/8/8/4b3/4B3/8/8/R3K2R w KQkq - 0 1",
     LongCastlingCheck = "4k3/8/8/8/5b2/8/8/R3K2R w KQ - 0 1",
     ShortCastlingCheck = "4k3/8/8/2b5/8/8/8/R3K2R w KQ - 0 1",

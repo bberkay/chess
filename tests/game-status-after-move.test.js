@@ -79,21 +79,21 @@ var games = [
 // Test every game
 (0, vitest_1.test)("Game Status After Move", function () {
     // Create chess engine
-    var chessEngine = new ChessEngine_1.ChessEngine();
+    var engine = new ChessEngine_1.ChessEngine();
     // Test every game
     for (var _i = 0, games_1 = games; _i < games_1.length; _i++) {
         var game = games_1[_i];
-        console.log("Testing:       " + game.title);
-        console.log("Initial Board: " + game.board);
-        chessEngine.createGame(game.board);
+        console.log("Testing:        " + game.title);
+        console.log("Initial Board:  " + game.board);
+        engine.createGame(game.board);
         for (var _a = 0, _b = game.moves; _a < _b.length; _a++) {
             var move = _b[_a];
-            chessEngine.playMove(move.from, move.to);
+            engine.playMove(move.from, move.to);
         }
-        console.log("Notation:      " + chessEngine.getNotation());
-        console.log("Final Board:   " + chessEngine.getGameAsFenNotation());
+        console.log("Final Notation: " + engine.getNotation());
+        console.log("Final Board:    " + engine.getGameAsFenNotation());
         // Check if the game status is the expected
-        (0, vitest_1.expect)(chessEngine.getStatusOfGame()).toBe(game.expectation);
+        (0, vitest_1.expect)(engine.getStatusOfGame()).toBe(game.expectation);
         console.log("Passed");
         console.log("--------------------------------------------------");
     }

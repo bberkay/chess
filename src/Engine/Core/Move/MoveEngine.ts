@@ -186,13 +186,35 @@ export class MoveEngine extends MoveExtender{
          * @see for more information about promotion check src/Engine/Checker/MoveChecker.ts
          */
 
-        // Add promotion moves to the pawn's moves.
-        const promotion: Square | null = this.getPromotionMove(this.pieceSquare!);
-        if(promotion){
-            route[moveDirection.vertical]!.push(promotion);
+        /**
+         * Delete given move from normal moves.
+         */
+        function deleteMoveFromNormalMoves(move: Square){
+            if(moves[MoveType.Normal]!.includes(move))
+                moves[MoveType.Normal]!.splice(moves[MoveType.Normal]!.indexOf(move), 1);
+        }
 
-            // Delete square from the normal moves.
-            moves[MoveType.Normal]!.splice(moves[MoveType.Normal]!.indexOf(route[moveDirection.vertical]![0]), 1);
+        // Add promotion moves to the pawn's moves.
+        const promotionMoves: Square[] | null = this.getPromotionMove(this.pieceSquare!);
+        if(promotionMoves){
+            route[moveDirection.vertical]!.push(promotionMoves[0]);
+
+            // Delete vertical diagonal  from the normal moves.
+            deleteMoveFromNormalMoves(route[moveDirection.vertical]![0]);
+
+            // Add diagonal(capture move) promotion moves to the pawn's moves.
+            if(promotionMoves[1]){
+                route[moveDirection.leftDiagonal]!.push(promotionMoves[1]);
+
+                // Delete left diagonal move from the normal moves.
+                deleteMoveFromNormalMoves(route[moveDirection.leftDiagonal]![0]);
+            }
+            if(promotionMoves[2]){
+                route[moveDirection.rightDiagonal]!.push(promotionMoves[2]);
+
+                // Delete right diagonal move from the normal moves.
+                deleteMoveFromNormalMoves(route[moveDirection.rightDiagonal]![0]);
+            }
         }
 
         // Add filtered(for king's safety) promotion moves to the pawn's moves.

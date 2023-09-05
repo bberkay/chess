@@ -36,6 +36,8 @@ export class BoardManager extends Board{
         Board.halfMoveCount = jsonNotation.halfMoveClock;
         Board.castlingAvailability = jsonNotation.castling;
         Board.enPassantSquare = jsonNotation.enPassant;
+        Board.moveHistory = [];
+        Board.bannedEnPassantSquares = [];
     }
 
     /**

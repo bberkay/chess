@@ -110,15 +110,15 @@ var enPassantTestGames = [
     var engine = new ChessEngine_1.ChessEngine();
     for (var _i = 0, enPassantTestGames_1 = enPassantTestGames; _i < enPassantTestGames_1.length; _i++) {
         var game = enPassantTestGames_1[_i];
-        console.log("Testing:       " + game.title);
-        console.log("Initial Board: " + game.board);
+        console.log("Testing:        " + game.title);
+        console.log("Initial Board:  " + game.board);
         engine.createGame(game.board);
         for (var _a = 0, _b = game.moves; _a < _b.length; _a++) {
             var move = _b[_a];
             engine.playMove(move.from, move.to);
         }
-        console.log("Notation:      " + engine.getNotation());
-        console.log("Final Board:   " + engine.getGameAsFenNotation());
+        console.log("Final Notation: " + engine.getNotation());
+        console.log("Final Board:    " + engine.getGameAsFenNotation());
         /**
          * Check the en passant move is equal to the expectation.
          * "from: Square" means tested pawn's square.

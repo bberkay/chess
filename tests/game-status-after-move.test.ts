@@ -81,23 +81,23 @@ const games: Test[] = [
 // Test every game
 test(`Game Status After Move`, () => {
     // Create chess engine
-    const chessEngine = new ChessEngine();
+    const engine = new ChessEngine();
 
     // Test every game
     for (const game of games) {
-        console.log("Testing:       " + game.title);
-        console.log("Initial Board: " + game.board);
-        chessEngine.createGame(game.board);
+        console.log("Testing:        " + game.title);
+        console.log("Initial Board:  " + game.board);
+        engine.createGame(game.board);
 
         for (const move of game.moves!) {
-            chessEngine.playMove(move.from, move.to);
+            engine.playMove(move.from, move.to);
         }
 
-        console.log("Notation:      " + chessEngine.getNotation());
-        console.log("Final Board:   " + chessEngine.getGameAsFenNotation());
+        console.log("Final Notation: " + engine.getNotation());
+        console.log("Final Board:    " + engine.getGameAsFenNotation());
 
         // Check if the game status is the expected
-        expect(chessEngine.getStatusOfGame()).toBe(game.expectation);
+        expect(engine.getStatusOfGame()).toBe(game.expectation);
 
         console.log("Passed");
         console.log("--------------------------------------------------");
