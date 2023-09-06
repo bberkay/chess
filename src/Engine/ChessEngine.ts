@@ -456,9 +456,9 @@ export class ChessEngine{
         this._checkCastling();
         this._checkEnPassant();
         this.boardManager.changeTurn();
+        this.checkThreefoldRepetition();
         this.checkStatusOfGame();
         this.boardManager.addMoveToHistory(this.moveNotation);
-        this.checkThreefoldRepetition();
         this.moveNotation = "";
     }
 
@@ -585,15 +585,9 @@ export class ChessEngine{
      */
     private checkStatusOfGame(): void
     {
-        // If board has no black or white king then the game is not started.
-        if(BoardQueryer.getPiecesWithFilter(Color.White, [PieceType.King]).length == 0
-            || BoardQueryer.getPiecesWithFilter(Color.Black, [PieceType.King]).length == 0){
-            this.statusOfGame = GameStatus.NotStarted;
+        // If the game is not playable then return.
+        if(!this._isBoardPlayable())
             return;
-        }
-        else{
-            this.statusOfGame = GameStatus.InPlay;
-        }
 
         /**
          * If the half move count is greater than or equal to 50 then the game is in
@@ -797,6 +791,58 @@ export class ChessEngine{
             this.moveNotation += "+";
         else if (this.statusOfGame === GameStatus.Draw)
             this.moveNotation += "1/2-1/2";
+    }
+
+    /**
+     * This function check the board is playable or not.
+     */
+    private _isBoardPlayable(): boolean
+    {
+        /**
+         * Check the status of is it started or finished. Also,
+         * check pieces on the board and if there is no pieces that can
+         * finish the game then the game can't be started. If game is started then
+         * set the status of the game to draw.
+         */
+        if(this.statusOfGame == GameStatus.WhiteVictory || this.statusOfGame == GameStatus.BlackVictory
+            || this.statusOfGame == GameStatus.Draw){
+            return false;
+        }
+        else if(BoardQueryer.getPiecesWithFilter(Color.White, [PieceType.King]).length == 0
+            || BoardQueryer.getPiecesWithFilter(Color.Black, [PieceType.King]).length == 0){
+            // If board has no white and black king then the game can't be started.
+            this.statusOfGame = GameStatus.NotStarted;
+            return false;
+        }
+        else
+        {
+            /**
+             * Check the pieces on the board and:
+             * - If there is only one white king and one black king then the game is in draw status.
+             * - If there is only one white king and one black king and one white knight or bishop then the game is in draw status.
+             */
+
+            // If board has any pawn, rook or queen then the game can be finished.
+            for(const square in BoardQueryer.getBoard()){
+                const piece: Piece | null = BoardQueryer.getPieceOnSquare(Number(square) as Square);
+                if(piece && (piece.getType() == PieceType.Pawn || piece.getType() == PieceType.Rook || piece.getType() == PieceType.Queen)){
+                    this.statusOfGame = GameStatus.InPlay;
+                    return true;
+                }
+            }
+
+            // If board has no queen, rook or pawn then check the king and bishop count.
+            if(BoardQueryer.getPiecesWithFilter(BoardQueryer.getColorOfTurn(), [PieceType.Knight, PieceType.Bishop]).length > 1){
+                this.statusOfGame = GameStatus.InPlay;
+                return true;
+            }
+
+            // Otherwise, the game is in draw status.
+            if(this.statusOfGame != GameStatus.NotStarted)
+                this.statusOfGame = GameStatus.Draw;
+
+            return false;
+        }
     }
 
     /**
