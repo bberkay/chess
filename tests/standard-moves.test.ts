@@ -6,7 +6,7 @@
 
 import { expect, test } from 'vitest';
 import { Test } from './Types';
-import { MoveType, Square } from '../src/Types';
+import {Moves, MoveType, Square} from '../src/Types';
 import { ChessEngine } from '../src/Engine/ChessEngine';
 
 /**
@@ -24,7 +24,7 @@ const game: Test = {
         {
             // Expected moves for the white pawn on c2
             from: Square.c2,
-            to: []
+            to: null // No moves
         },
         {
             // Expected moves for the white knight on c3
@@ -71,15 +71,20 @@ const game: Test = {
 
 // Tests
 test('Standard Moves', () => {
-    const chessEngine = new ChessEngine();
+    const engine = new ChessEngine();
     console.log("Testing: " + game.title);
     console.log("Board:   " + game.board);
-    chessEngine.createGame(game.board);
+    engine.createGame(game.board);
 
     // Test every piece and its moves
-    for(const expectation of game.expectation)
-        expect(chessEngine.getMoves(Number(expectation.from) as Square)![MoveType.Normal]!.sort())
-            .toEqual(expectation.to.sort());
+    for(const expectation of game.expectation){
+        const moves: Moves = engine.getMoves(Number(expectation.from) as Square)!;
+
+        if(expectation.to === null)
+            expect(moves).toEqual(null);
+        else
+            expect(moves![MoveType.Normal]!.sort()).toEqual(expectation.to.sort());
+    }
 
     console.log("Passed");
     console.log("--------------------------------------------------");

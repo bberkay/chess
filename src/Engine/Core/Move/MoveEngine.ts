@@ -27,6 +27,24 @@ export class MoveEngine extends MoveExtender{
     }
 
     /**
+     * Check the given moves. If there is no move, then return null
+     * otherwise return the given moves.
+     */
+    private _hasAnyMove(moves: Moves | null): Moves | null
+    {
+        if(!moves) return null;
+
+        // Check every move type.
+        for(const moveType in moves)
+        {
+            if(moves[moveType as MoveType]!.length > 0)
+                return moves;
+        }
+
+        return null;
+    }
+
+    /**
      * Get the possible moves of the piece on the given square.
      */
     public getMoves(square: Square): Moves | null
@@ -44,17 +62,17 @@ export class MoveEngine extends MoveExtender{
          */
         switch(this.piece.getType()){
             case PieceType.Pawn:
-                return this.getPawnMoves();
+                return this._hasAnyMove(this.getPawnMoves());
             case PieceType.Knight:
-                return this.getKnightMoves();
+                return this._hasAnyMove(this.getKnightMoves());
             case PieceType.Bishop:
-                return this.getBishopMoves();
+                return this._hasAnyMove(this.getBishopMoves());
             case PieceType.Rook:
-                return this.getRookMoves();
+                return this._hasAnyMove(this.getRookMoves());
             case PieceType.Queen:
-                return this.getQueenMoves();
+                return this._hasAnyMove(this.getQueenMoves());
             case PieceType.King:
-                return this.getKingMoves();
+                return this._hasAnyMove(this.getKingMoves());
             default:
                 return null;
         }
@@ -127,7 +145,7 @@ export class MoveEngine extends MoveExtender{
             delete route[moveDirection.rightDiagonal];
 
         // Add normal moves to the pawn's moves.
-        moves[MoveType.Normal] = Extractor.extractSquares(this.doKingSafety(route)!);
+        moves[MoveType.Normal] = Extractor.extractSquares(this._doKingSafety(route)!);
 
         /**
          * Clear the pawn's routes. Because we will add en passant moves
@@ -165,7 +183,7 @@ export class MoveEngine extends MoveExtender{
             route[moveDirection.rightDiagonal]!.push(rightEnPassant);
 
         // Add filtered(for king's safety) en passant moves to the pawn's moves.
-        moves[MoveType.EnPassant] = Extractor.extractSquares(this.doKingSafety(route)!);
+        moves[MoveType.EnPassant] = Extractor.extractSquares(this._doKingSafety(route)!);
 
         /**
          * Clear the pawn's routes. Because we will add promotion moves
@@ -218,7 +236,7 @@ export class MoveEngine extends MoveExtender{
         }
 
         // Add filtered(for king's safety) promotion moves to the pawn's moves.
-        moves[MoveType.Promotion] = Extractor.extractSquares(this.doKingSafety(route)!);
+        moves[MoveType.Promotion] = Extractor.extractSquares(this._doKingSafety(route)!);
 
         // Return the moves of the pawn.
         return moves;
@@ -234,7 +252,7 @@ export class MoveEngine extends MoveExtender{
         if(!route) return null;
 
         // Filter the moves for king safety and convert the route to squares array.
-        return {[MoveType.Normal]: Extractor.extractSquares(this.doKingSafety(route)!)};
+        return {[MoveType.Normal]: Extractor.extractSquares(this._doKingSafety(route)!)};
     }
 
     /**
@@ -247,7 +265,7 @@ export class MoveEngine extends MoveExtender{
         if(!route) return null;
 
         // Filter the moves for king safety and convert the route to squares array.
-        return {[MoveType.Normal]: Extractor.extractSquares(this.doKingSafety(route)!)};
+        return {[MoveType.Normal]: Extractor.extractSquares(this._doKingSafety(route)!)};
     }
 
     /**
@@ -260,7 +278,7 @@ export class MoveEngine extends MoveExtender{
         if(!route) return null;
 
         // Filter the moves for king safety and convert the route to squares array.
-        return {[MoveType.Normal]: Extractor.extractSquares(this.doKingSafety(route)!)};
+        return {[MoveType.Normal]: Extractor.extractSquares(this._doKingSafety(route)!)};
     }
 
     /**
@@ -273,7 +291,7 @@ export class MoveEngine extends MoveExtender{
         if(!route) return null;
 
         // Filter the moves for king safety and convert the route to squares array.
-        return {[MoveType.Normal]: Extractor.extractSquares(this.doKingSafety(route)!)};
+        return {[MoveType.Normal]: Extractor.extractSquares(this._doKingSafety(route)!)};
     }
 
     /**
@@ -355,7 +373,7 @@ export class MoveEngine extends MoveExtender{
      *
      * @see src/Engine/Core/MoveEngine.ts For more information.
      */
-    private doKingSafety(moveRoute: Route): Route | null
+    private _doKingSafety(moveRoute: Route): Route | null
     {
         /**
          * Find the king and king's square and enemy's color

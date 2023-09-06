@@ -34,19 +34,19 @@ var game = {
  * Test for threefold repetition.
  */
 (0, vitest_1.test)('Threefold Repetition Test', function () {
-    console.log("Testing:       " + game.title);
-    console.log("Initial Board: " + game.board);
-    var chessEngine = new ChessEngine_1.ChessEngine();
-    chessEngine.createGame(game.board);
+    console.log("Testing:        " + game.title);
+    console.log("Initial Board:  " + game.board);
+    var engine = new ChessEngine_1.ChessEngine();
+    engine.createGame(game.board);
     // Play moves
     for (var _i = 0, _a = game.moves; _i < _a.length; _i++) {
         var move = _a[_i];
-        chessEngine.playMove(move.from, move.to);
+        engine.playMove(move.from, move.to);
     }
-    console.log("Notation:      " + chessEngine.getNotation());
-    console.log("Final Board:   " + chessEngine.getGameAsFenNotation());
+    console.log("Final Notation: " + engine.getNotation());
+    console.log("Final Board:    " + engine.getGameAsFenNotation());
     // Check if the game is drawn
-    (0, vitest_1.expect)(chessEngine.getStatusOfGame()).toEqual(game.expectation);
+    (0, vitest_1.expect)(engine.getStatusOfGame()).toEqual(game.expectation);
     console.log("Passed");
     console.log("--------------------------------------------------");
 });

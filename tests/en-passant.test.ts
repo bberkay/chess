@@ -23,7 +23,7 @@ const enPassantTestGames: Test[] = [
             {from: Square.e4, to: Square.e5},
             {from: Square.d7, to: Square.d5},
         ],
-        expectation: {from: Square.e5, to: [Square.d6]}
+        expectation: {from: Square.e5, to: [Square.d6]} // from: En Passant Pawn, to: En Passant Move
     },
     {
         title: "Possible En Passant Right Test",

@@ -7,7 +7,7 @@
 
 import { expect, test } from 'vitest';
 import { Test } from './Types';
-import { MoveType, Square, StartPosition } from '../src/Types';
+import {Moves, MoveType, Square, StartPosition} from '../src/Types';
 import { ChessEngine } from '../src/Engine/ChessEngine';
 
 /**
@@ -27,7 +27,7 @@ const games: Test[] = [
         board: '8/8/7k/6b1/8/8/3N4/2K5 w - - 0 1',
         expectation: {
             from: Square.d2, // Square of Piece(White Knight) that protect the king
-            to: [] // Expected moves for the white knight
+            to: null // Expected moves for the white knight
         }
     },
     {
@@ -56,9 +56,13 @@ test('King Protection Test', () => {
         console.log("Board:   " + game.board);
         engine.createGame(game.board);
 
-        // Test every piece and its moves
-        expect(engine.getMoves(Number(game.expectation.from) as Square)![MoveType.Normal]!.sort())
-                .toEqual(game.expectation.to.sort());
+        // Get moves for the piece that protect the king
+        const moves: Moves = engine.getMoves(Number(game.expectation.from) as Square)!;
+
+        if(game.expectation.to === null)
+            expect(moves).toEqual(null);
+        else
+            expect(moves![MoveType.Normal]!.sort()).toEqual(game.expectation.to.sort());
 
         console.log("Passed");
         console.log("--------------------------------------------------");

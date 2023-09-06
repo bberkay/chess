@@ -23,7 +23,7 @@ var game = {
         {
             // Expected moves for the white pawn on c2
             from: Types_1.Square.c2,
-            to: []
+            to: null // No moves
         },
         {
             // Expected moves for the white knight on c3
@@ -69,15 +69,18 @@ var game = {
 };
 // Tests
 (0, vitest_1.test)('Standard Moves', function () {
-    var chessEngine = new ChessEngine_1.ChessEngine();
+    var engine = new ChessEngine_1.ChessEngine();
     console.log("Testing: " + game.title);
     console.log("Board:   " + game.board);
-    chessEngine.createGame(game.board);
+    engine.createGame(game.board);
     // Test every piece and its moves
     for (var _i = 0, _a = game.expectation; _i < _a.length; _i++) {
         var expectation = _a[_i];
-        (0, vitest_1.expect)(chessEngine.getMoves(Number(expectation.from))[Types_1.MoveType.Normal].sort())
-            .toEqual(expectation.to.sort());
+        var moves = engine.getMoves(Number(expectation.from));
+        if (expectation.to === null)
+            (0, vitest_1.expect)(moves).toEqual(null);
+        else
+            (0, vitest_1.expect)(moves[Types_1.MoveType.Normal].sort()).toEqual(expectation.to.sort());
     }
     console.log("Passed");
     console.log("--------------------------------------------------");

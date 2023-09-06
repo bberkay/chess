@@ -19,7 +19,7 @@ var castlingTestGames = [
         moves: [
             { from: Types_1.Square.e1, to: Types_1.Square.h1 }
         ],
-        expectation: "r3k2r/8/8/4b3/4B3/8/8/R4RK1 b Qkq - 2 1",
+        expectation: "r3k2r/8/8/4b3/4B3/8/8/R4RK1 b Qkq - 2 1", // Expected board after castling
     },
     {
         title: 'Queen Side Castling',
@@ -32,7 +32,7 @@ var castlingTestGames = [
     {
         title: "Long Castling Forbidden Because of Enemy Bishop",
         board: Types_1.StartPosition.LongCastlingCheck,
-        expectation: [Types_1.Square.h1]
+        expectation: [Types_1.Square.h1] // Expected castling moves
     },
     {
         title: "Short Castling Forbidden Because of Enemy Bishop",
@@ -42,7 +42,7 @@ var castlingTestGames = [
     {
         title: "Both Castling Forbidden Because of Enemy Bishop",
         board: Types_1.StartPosition.BothCastlingCheck,
-        expectation: []
+        expectation: [] // Expected castling moves
     },
     {
         title: "Both Castling Forbidden Because King is in Check",

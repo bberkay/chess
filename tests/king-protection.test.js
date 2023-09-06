@@ -26,7 +26,7 @@ var games = [
         board: '8/8/7k/6b1/8/8/3N4/2K5 w - - 0 1',
         expectation: {
             from: Types_1.Square.d2,
-            to: [] // Expected moves for the white knight
+            to: null // Expected moves for the white knight
         }
     },
     {
@@ -53,9 +53,12 @@ var games = [
         console.log("Testing: " + game.title);
         console.log("Board:   " + game.board);
         engine.createGame(game.board);
-        // Test every piece and its moves
-        (0, vitest_1.expect)(engine.getMoves(Number(game.expectation.from))[Types_1.MoveType.Normal].sort())
-            .toEqual(game.expectation.to.sort());
+        // Get moves for the piece that protect the king
+        var moves = engine.getMoves(Number(game.expectation.from));
+        if (game.expectation.to === null)
+            (0, vitest_1.expect)(moves).toEqual(null);
+        else
+            (0, vitest_1.expect)(moves[Types_1.MoveType.Normal].sort()).toEqual(game.expectation.to.sort());
         console.log("Passed");
         console.log("--------------------------------------------------");
     }

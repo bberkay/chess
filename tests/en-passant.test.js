@@ -22,7 +22,7 @@ var enPassantTestGames = [
             { from: Types_1.Square.e4, to: Types_1.Square.e5 },
             { from: Types_1.Square.d7, to: Types_1.Square.d5 },
         ],
-        expectation: { from: Types_1.Square.e5, to: [Types_1.Square.d6] }
+        expectation: { from: Types_1.Square.e5, to: [Types_1.Square.d6] } // from: En Passant Pawn, to: En Passant Move
     },
     {
         title: "Possible En Passant Right Test",

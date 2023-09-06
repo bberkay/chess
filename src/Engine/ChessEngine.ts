@@ -23,9 +23,9 @@ import {BoardManager} from "./Core/Board/BoardManager.ts";
 import {Converter} from "../Utils/Converter";
 import {BoardQueryer} from "./Core/Board/BoardQueryer.ts";
 import {Locator} from "./Core/Utils/Locator.ts";
-import {MoveRoute, Piece} from "../Types/Engine";
-import {RouteCalculator} from "./Core/Move/Calculator/RouteCalculator.ts";
+import {Piece} from "../Types/Engine";
 import {Extractor} from "./Core/Utils/Extractor.ts";
+import {RouteCalculator} from "./Core/Move/Calculator/RouteCalculator.ts";
 
 
 /**
@@ -77,7 +77,6 @@ export class ChessEngine{
     private resetGame(): void
     {
         this.statusOfGame = GameStatus.NotStarted;
-        this.calculatedMoves = {};
         this.playedFrom = null;
         this.playedTo = null;
         this.moveNotation = "";
@@ -85,7 +84,6 @@ export class ChessEngine{
         this.mandatoryMoves = {};
         this.calculatedMoves = {};
         this.isPromotionMenuOpen = false;
-        this.boardManager
     }
 
     /**
@@ -110,23 +108,24 @@ export class ChessEngine{
      */
     public isSquareSelectable(select: Square): boolean
     {
-        /**
-         * Check if the game is not started or the game is finished or the selected
-         * square is empty or the selected piece's color is not equal to the color
-         * of the turn or the selected piece is not in the mandatory moves then return false.
-         * Otherwise, return true.
-         */
-        return !!(
-            (
-                this.statusOfGame != GameStatus.NotStarted
-                && this.statusOfGame != GameStatus.WhiteVictory
-                && this.statusOfGame != GameStatus.BlackVictory
-                && this.statusOfGame != GameStatus.Draw
-            )
-            && BoardQueryer.getPieceOnSquare(select)
-            && BoardQueryer.getPieceOnSquare(select)?.getColor() === BoardQueryer.getColorOfTurn()
-            && (Object.keys(this.mandatoryMoves).length > 0 && select in this.mandatoryMoves || Object.keys(this.mandatoryMoves).length == 0)
-        );
+        // If game is not start or finished then square can't be selectable.
+        if(this.statusOfGame == GameStatus.NotStarted
+            || this.statusOfGame == GameStatus.WhiteVictory
+            || this.statusOfGame == GameStatus.BlackVictory
+            || this.statusOfGame == GameStatus.Draw)
+            return false;
+
+        // If the game is started but selected square is empty or not player's piece then square can't be selectable.
+        if(!BoardQueryer.getPieceOnSquare(select) || BoardQueryer.getPieceOnSquare(select)?.getColor() != BoardQueryer.getColorOfTurn())
+            return false;
+
+        // If piece has no moves then square can't be selectable.
+        this.calculatedMoves[select] = this.calculatedMoves[select] ?? this.moveEngine.getMoves(select);
+        if(!this.calculatedMoves[select])
+            return false;
+
+        // If game has mandatory moves and selected square is not in the mandatory moves then square can't be selectable.
+        return (Object.keys(this.mandatoryMoves).length > 0 && select in this.mandatoryMoves) || Object.keys(this.mandatoryMoves).length == 0;
     }
 
     /**
@@ -175,6 +174,7 @@ export class ChessEngine{
          * Otherwise, calculate the moves with move engine and save the moves
          */
         this.currentMoves = this.calculatedMoves[square] ?? this.moveEngine.getMoves(square);
+
         /**
          * If the given square is in the mandatory moves then delete the
          * other moves of the square and return the mandatory moves.
@@ -566,7 +566,7 @@ export class ChessEngine{
             const squareOfPawn: Square = BoardQueryer.getSquareOfPiece(pawn)!;
             if(Locator.getRow(squareOfPawn) == (pawn.getColor() == Color.White ? 4 : 5)){
                 const moves: Moves = this.moveEngine.getMoves(squareOfPawn)!;
-                if(moves["EnPassant"]!.length > 0){
+                if(moves && moves["EnPassant"]!.length > 0){
                     this.boardManager.banEnPassantSquare(moves["EnPassant"]![0]);
                 }
             }
@@ -635,15 +635,20 @@ export class ChessEngine{
          */
         this.statusOfGame = threateningSquares.length > 0 ? checkEnum : GameStatus.InPlay;
 
-        // Calculate the moves of the king.
-        this.calculatedMoves[kingSquare!] = this.moveEngine.getMoves(kingSquare!)!;
+        // Calculate the moves of the king and save the moves to the calculatedMoves.
+        let movesOfKing: Moves | null = this.moveEngine.getMoves(kingSquare!)!;
+        this.calculatedMoves[kingSquare!] = movesOfKing;
+
+        // If the king has no moves then set the movesOfKing to empty array.
+        if(movesOfKing == null)
+            movesOfKing = {Normal: []};
 
         /*************************************************************************
          * CHECKMATE BY DOUBLE CHECK, STALEMATE AND MANDATORY MOVES OF KING
          *
          * If the king has no moves then check the doubly check and stalemate scenarios.
          * ************************************************************************/
-        if(this.calculatedMoves[kingSquare!]![MoveType.Normal]!.length == 0){
+        if(movesOfKing[MoveType.Normal]!.length == 0){
             if(threateningSquares.length > 1 && this.statusOfGame == checkEnum)
             {
                 /**
@@ -689,7 +694,7 @@ export class ChessEngine{
              * If the king has at least one move and player's checked then
              * add the moves to the mandatory moves.
              * *************************************************************************/
-            this.mandatoryMoves[kingSquare!] = this.calculatedMoves[kingSquare!]![MoveType.Normal]!;
+            this.mandatoryMoves[kingSquare!] = movesOfKing[MoveType.Normal]!;
         }
 
         /**************************************************************************
@@ -700,6 +705,10 @@ export class ChessEngine{
          * *************************************************************************/
         if(this.statusOfGame == checkEnum)
         {
+            // If double check then don't check the blockers/killers
+            if(threateningSquares.length > 1)
+                return;
+
             /**
              * Find the player's pieces that can kill the enemy piece that threatens the king
              * then add the killers to the mandatory moves. For example, if the king is threatened
@@ -720,11 +729,9 @@ export class ChessEngine{
              *
              * @see For more information about relative squares, see src/Engine/Core/Utils/Locator.ts
              */
-            const movesOfEnemy: Array<Square> = RouteCalculator.getRouteByPieceOnSquare(squareOfEnemy)[
-                BoardQueryer.getPieceOnSquare(squareOfEnemy)?.getType() == PieceType.Knight
-                    ? MoveRoute.L
-                    : Locator.getRelative(kingSquare!, squareOfEnemy)!
-            ]!;
+            const movesOfEnemy: Array<Square> = BoardQueryer.getPieceOnSquare(squareOfEnemy)?.getType() != PieceType.Knight
+                ? RouteCalculator.getRouteByPieceOnSquare(squareOfEnemy)[Locator.getRelative(kingSquare!, squareOfEnemy)!]!
+                : [];
 
 
             /**
@@ -773,7 +780,7 @@ export class ChessEngine{
                      */
                     this.statusOfGame = Object.keys(this.mandatoryMoves).length > 0 ? checkEnum : checkmateEnum;
                 }
-                else if(this.calculatedMoves[kingSquare!]![MoveType.Normal]!.length == 0) {
+                else if(movesOfKing[MoveType.Normal]!.length == 0) {
                     /**
                      * If the king has no moves and no piece can block the threat then the game is
                      * in checkmate status.
