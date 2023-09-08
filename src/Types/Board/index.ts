@@ -1,6 +1,5 @@
 /**
  * @description SquareEffect enum for the effects of the move/square.
- * @type {string}
  * @see src/UI/ChessBoard.ts For more information.
  */
 export enum SquareEffect{
@@ -15,7 +14,6 @@ export enum SquareEffect{
 
 /**
  * @description SquareClickMode enum for the click modes of the chess board.
- * @type {string}
  * @see src/UI/ChessBoard.ts For more information.
  */
 export enum SquareClickMode{

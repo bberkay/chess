@@ -47,7 +47,7 @@ export class CacheManager
      */
     public isEmpty(): boolean
     {
-        return this.load() === null;
+        return this.load() === null || Object.keys(this.load()).length === 0;
     }
 
     /**

@@ -7,12 +7,15 @@
  * @license MIT
  */
 
-import {JsonNotation, Square, StartPosition} from "./Types";
+import {Config, JsonNotation, Square, StartPosition} from "./Types";
 import {SquareClickMode} from "./Types/Board";
 import {ChessEngine} from "./Engine/ChessEngine";
 import {ChessBoard} from "./Board/ChessBoard";
 import {CacheManager} from "./Managers/CacheManager.ts";
 import {Converter} from "./Utils/Converter.ts";
+import {GameCreatorForm} from "./Board/GameCreatorForm.ts";
+import {LogConsole} from "./Board/LogConsole.ts";
+import {NotationTable} from "./Board/NotationTable.ts";
 
 
 /**
@@ -27,20 +30,41 @@ export class Chess{
     private chessEngine: ChessEngine;
     private chessBoard: ChessBoard;
     private cacheManager: CacheManager | null = null;
+    private readonly gameCreatorForm: GameCreatorForm | null = null;
+    private logConsole: LogConsole | null = null;
+    private notationTable: NotationTable | null = null;
     private readonly enableCaching: boolean = true;
+    private readonly showNotationTable: boolean = true;
+    private readonly showGameCreatorForm: boolean = true;
+    private readonly showLogConsole: boolean = true;
     private selectedSquare: Square | null = null;
 
     /**
      * Constructor of the Chess class.
      */
-    constructor(enableCaching: boolean = true){
+    constructor(config: Config = {enableCaching: true, showNotationTable: true, showGameCreatorForm: true, showLogConsole: true}){
         this.chessEngine = new ChessEngine();
         this.chessBoard = new ChessBoard();
-        this.enableCaching = enableCaching;
+        this.enableCaching = config.enableCaching ?? true;
+        this.showNotationTable = config.showNotationTable ?? true;
+        this.showGameCreatorForm = config.showGameCreatorForm ?? true;
+        this.showLogConsole = config.showLogConsole ?? true;
 
         // If caching is enabled, create a cache manager.
         if(this.enableCaching)
             this.cacheManager = CacheManager.getInstance();
+
+        // If notation table is enabled, create a notation table.
+        if(this.showNotationTable)
+            this.notationTable = new NotationTable(this);
+
+        // If game creator form is enabled, create a game creator form.
+        if(this.showGameCreatorForm)
+            this.gameCreatorForm = new GameCreatorForm();
+
+        // If log console is enabled, create a log console.
+        if(this.showLogConsole)
+            this.logConsole = new LogConsole(this);
     }
 
     /**
@@ -90,12 +114,40 @@ export class Chess{
     }
 
     /**
+     * Make action on the menu.
+     * @example doAction(SquareClickMode.Select, Square.a2); // Select the piece on the square a2.
+     * @example doAction(SquareClickMode.Play, Square.a3); // Play the selected piece(a2) to the square a3.
+     * @example doAction(SquareClickMode.Promote, Square.a8); // Promote the selected piece(a2) to the piece on the square a8.
+     */
+    public doActionOnMenu(operationType: string, operationValue: string): void
+    {
+        switch(operationType){
+            case "changeMode":
+                if(!this.gameCreatorForm)
+                    throw new Error("Game creator form is not enabled. Please enable it on constructor.");
+
+                this.gameCreatorForm!.changeMode(operationValue as "Custom" | "Template");
+                break;
+            case "createGame":
+                if(!this.gameCreatorForm)
+                    throw new Error("Game creator form is not enabled. Please enable it on constructor.");
+
+                // Get the fen notation from the input and create a game if it is not empty and length is less than 15.
+                let fenNotation: string = (<HTMLInputElement>document.getElementById(operationValue + "-input")).value;
+                if(fenNotation.toString().length > 15)
+                    this.createGame(fenNotation);
+
+                break;
+        }
+    }
+
+    /**
      * Make action on the game.
      * @example doAction(SquareClickMode.Select, Square.a2); // Select the piece on the square a2.
      * @example doAction(SquareClickMode.Play, Square.a3); // Play the selected piece(a2) to the square a3.
      * @example doAction(SquareClickMode.Promote, Square.a8); // Promote the selected piece(a2) to the piece on the square a8.
      */
-    public doAction(moveType: SquareClickMode, square: Square): void
+    public doActionOnBoard(moveType: SquareClickMode, square: Square): void
     {
         if([SquareClickMode.Play, SquareClickMode.Castling, SquareClickMode.Promote, SquareClickMode.Promotion, SquareClickMode.EnPassant].includes(moveType)){
             this._doPlayAction(square);

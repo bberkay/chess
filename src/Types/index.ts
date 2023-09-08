@@ -1,4 +1,15 @@
 /**
+ * Config interface for the configuration of the chess game.
+ * @see For more information, check src/Chess.ts
+ */
+export interface Config{
+    showNotationTable?: boolean;
+    showGameCreatorForm?: boolean;
+    showLogConsole?: boolean;
+    enableCaching?: boolean;
+}
+
+/**
  * Color enum for the color of the chess pieces and the players.
  * @see For more information, check src/Models/PieceModel.ts
  */
