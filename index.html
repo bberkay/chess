@@ -16,50 +16,107 @@
             <!-- Set up Chessboard -->
             <div id="chessboard"></div>
 
-            <!-- Fen Notation Custom Input -->
-            <div class="fen-load-group" id = "fen-custom">
-                <button id = "use-template-fen-btn">Templates</button>
-                <input type="text" placeholder="FEN Notation">
-                <button>Load</button>
-            </div>
-
-            <!-- Fen Notation Template Select -->
-            <div class="fen-load-group" id = "fen-template">
-                <button id = "use-custom-fen-btn">Custom</button>
-                <select id="template-fen-select">
-                    <option value="">Bilmem ne</option>
-                </select>
-                <button>Load</button>
+            <!-- Game Creator Form -->
+            <div id="game-creator-form"></div>
+        </div>
+        <div class="right">
+            <!-- Notation Table -->
+            <div class="notation-table" id = "notation-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Move</th>
+                            <th>White</th>
+                            <th>Black</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>E2</td>
+                            <td>e4</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>E2</td>
+                            <td>e4</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>E2</td>
+                            <td>e4</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>E2</td>
+                            <td>e4</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>E2</td>
+                            <td>e4</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>E2</td>
+                            <td>e4</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>E2</td>
+                            <td>e4</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>E2</td>
+                            <td>e4</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>E2</td>
+                            <td>e4</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>E2</td>
+                            <td>e4</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>E2</td>
+                            <td>e4</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>E2</td>
+                            <td>e4</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>E2</td>
+                            <td>e4</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>E2</td>
+                            <td>e4</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>E2</td>
+                            <td>e4</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </main>
 
     <!-- Initialize Chess -->
     <script type="module">
-        // TODO: MenuController muhabbeti yapılacka.
+        import { ChessPlatform } from "./src/ChessPlatform.ts";
 
-        import { Chess } from './src/Chess.ts';
-        import { StartPosition } from "./src/Types";
-
-        // Initialize Chess
-        const chess = new Chess();
-
-        // If there is a game in cache, load it. Otherwise, create a new game.
-        //if(!chess.checkAndLoadGameFromCache())
-        //  chess.createGame(StartPosition.Standard);
-        chess.createGame("8/k1pp4/8/8/8/8/4PP1K/8 w - - 0 1");
-
-        // Listen player's clicks on squares.
-        document.querySelectorAll(".square").forEach(square => {
-            square.addEventListener("click", () => {
-                // Make move(with square ID and click mode)
-                chess.doAction(square.getAttribute("data-click-mode"), parseInt(square.getAttribute("id")));
-            });
-        });
+        const chessPlatform = new ChessPlatform();
     </script>
-
-    <!-- Initialize Components -->
-    <script src="./public/js/fen-input.js"></script>
-
 </body>
 </html>
