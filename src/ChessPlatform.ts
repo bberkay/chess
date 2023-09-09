@@ -19,7 +19,7 @@ export class ChessPlatform{
 
 	// TODO: enableCaching false daha geliştirilecek.
         // If there is a game in cache, load it. Otherwise, create a new game.
-        if(enableCaching && !this.chess.checkAndLoadGameFromCache())
+        if(!enableCaching || (enableCaching && !this.chess.checkAndLoadGameFromCache()))
             this.chess.createGame();
     }
 }
