@@ -7,7 +7,7 @@
  * @license MIT
  */
 
-import {ChessConfig, JsonNotation, Square, StartPosition} from "./Types";
+import {JsonNotation, Square, StartPosition} from "./Types";
 import {ChessEngine} from "./Engine/ChessEngine";
 import {ChessBoard} from "./Board/ChessBoard";
 import {SquareClickMode} from "./Board/Types";
@@ -31,11 +31,11 @@ export class Chess{
     /**
      * Constructor of the Chess class.
      */
-    constructor(chessConfig: ChessConfig = {enableCaching: true}){
+    constructor(enableCaching: boolean = true){
         this.chessEngine = new ChessEngine();
         this.chessBoard = new ChessBoard();
         this.selectedSquare = null;
-        this.cacheManager = chessConfig.enableCaching ? CacheManager.getInstance() : null;
+        this.cacheManager = enableCaching ? CacheManager.getInstance() : null;
     }
 
     /**
@@ -156,6 +156,21 @@ export class Chess{
 
         // Save the game to the cache as json notation.
         if(this.cacheManager)
-            this.cacheManager!.save(this.chessEngine.getGameAsJsonNotation());
+            this.cacheManager!.save({...this.chessEngine.getGameAsJsonNotation(), "notation":this.getNotation()});
+    }
+
+    /**
+     * Get algebraic notation of the game
+     */
+    public getNotation(): string[]
+    {
+        /**
+         * If cache is enabled and there is a game in the cache,
+         * return the notation from the cache.
+         */
+        if(this.cacheManager && !this.cacheManager!.isEmpty() && this.cacheManager!.load()!.hasOwnProperty("notation"))
+            return this.cacheManager!.load()!.notation;
+
+        return this.chessEngine.getNotation();
     }
 }

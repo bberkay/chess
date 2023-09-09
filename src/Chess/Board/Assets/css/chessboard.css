@@ -1,4 +1,8 @@
-/* -------------- Variables -------------- */
+/**
+ * CSS codes of Chessboard.
+ * @see For more information, check file: src\Chess\Board\Chessboard.ts
+ */
+
 :root{
     /**
      * All sizes are will be calculated based on the board size.
@@ -8,10 +12,11 @@
     --board-size: 800px;
 
     /* Colors */
-    --white-square-image: url("../images/brown_dark.png");
-    --black-square-image: url("../images/brown_light.png");
-    --square-shadow-color: #000;
-    --coordinate-text-color: #f0d9b5;
+    --white-square-color: #859884;
+    --white-coordinate-color: #a2b9a1;
+    --black-square-color: #667c67;
+    --black-coordinate-color: #637263;
+    --square-shadow-color: none;
     --clicked-color: #000;
 
     /* Promotion Menu */
@@ -28,9 +33,9 @@
     --killable-color: #DF3030;
     --checked-color: #DF3030;
     --disabled-color: #000;
-    --selected-color: #47a17338;
+    --selected-color: rgba(87, 206, 146, 0.25);
     --from-color: rgba(33, 84, 55, 0.39);
-    --to-color: rgba(104, 183, 143, 0.44);
+    --to-color: rgba(33, 84, 55, 0.39);
 
     /* White Pieces */
     --white-pawn-image: url("../images/pawn_white.png");
@@ -73,19 +78,19 @@
     position: relative;
     width:calc(var(--board-size) / 8);
     height:calc(var(--board-size) / 8);
-    box-shadow: inset 0 0 1px var(--square-shadow-color);
+    box-shadow: inset 0 0 0 1px var(--square-shadow-color);
     text-align: center;
     margin:0!important;
 }
 
 /* Black squares */
 #chessboard .square--black{
-    background-image:var(--black-square-image);
+    background-color:var(--black-square-color);
 }
 
 /* White squares */
 #chessboard .square--white{
-    background-image:var(--white-square-image);
+    background-color:var(--white-square-color);
 }
 
 /* Row coordinates display styles */
@@ -94,9 +99,18 @@
     right:0;
     margin-right:5px;
     font-size:calc(var(--board-size) / 50);
-    color:var(--coordinate-text-color);
     margin-top:5px;
     font-weight: bold;
+}
+
+/* Row coordinates that on black squares */
+#chessboard .row-coordinate--black{
+    color:var(--white-coordinate-color);
+}
+
+/* Row coordinates that on white squares */
+#chessboard .row-coordinate--white{
+    color:var(--black-coordinate-color);
 }
 
 /* Column coordinates display styles */
@@ -105,9 +119,18 @@
     bottom:0;
     font-size:calc(var(--board-size) / 50);
     margin-left:8px;
-    color:var(--coordinate-text-color);
     margin-bottom:5px;
     font-weight: bold;
+}
+
+/* Column coordinates that on black squares */
+#chessboard .column-coordinate--black{
+    color:var(--white-coordinate-color);
+}
+
+/* Column coordinates that on white squares */
+#chessboard .column-coordinate--white{
+    color:var(--black-coordinate-color);
 }
 
 /* -------------- Piece Styles -------------- */

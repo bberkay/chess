@@ -20,7 +20,7 @@ export class GameCreatorForm{
     }
 
     /**
-     * This function loads the css file of the chess board.
+     * This function loads the css file of the game creator form.
      */
     private _loadCSS(): void
     {
@@ -46,14 +46,14 @@ export class GameCreatorForm{
         document.getElementById("game-creator-form")!.innerHTML =
             `
                 <div class = "game-creator-form-mode" data-game-creator-mode = "${GameCreatorOperationValue.Custom}">
-                    <button data-operation-type="${GameCreatorOperationType.ChangeMode}" data-operation-value = "${GameCreatorOperationValue.Template}">Templates</button>
+                    <div class = "border-inset"><button data-operation-type="${GameCreatorOperationType.ChangeMode}" data-operation-value = "${GameCreatorOperationValue.Template}">Templates</button></div>
                     <input type="text" placeholder="FEN Notation" data-form-input-id = "${GameCreatorOperationValue.Custom}">
-                    <button data-operation-type="${GameCreatorOperationType.CreateGame}" data-operation-value = "${GameCreatorOperationValue.Custom}">Load</button>
+                    <div class = "border-inset"><button data-operation-type="${GameCreatorOperationType.CreateGame}" data-operation-value = "${GameCreatorOperationValue.Custom}">Load</button></div>
                 </div>
                 <div class = "game-creator-form-mode" data-game-creator-mode = "${GameCreatorOperationValue.Template}">
-                    <button data-operation-type="${GameCreatorOperationType.ChangeMode}" data-operation-value = "${GameCreatorOperationValue.Custom}">Custom</button>
+                    <div class = "border-inset"><button data-operation-type="${GameCreatorOperationType.ChangeMode}" data-operation-value = "${GameCreatorOperationValue.Custom}">Custom</button></div>
                     <select data-form-input-id = "${GameCreatorOperationValue.Template}"></select>
-                    <button data-operation-type="${GameCreatorOperationType.CreateGame}" data-operation-value = "${GameCreatorOperationValue.Template}">Load</button>
+                    <div class = "border-inset"><button data-operation-type="${GameCreatorOperationType.CreateGame}" data-operation-value = "${GameCreatorOperationValue.Template}">Load</button></div>
                 </div>
             `;
 
@@ -86,7 +86,6 @@ export class GameCreatorForm{
      */
     public getValueByMode(mode: GameCreatorOperationValue): string
     {
-        console.log(mode, document.querySelector(`[data-form-input-id="${mode}"]`));
         return (document.querySelector(`[data-form-input-id="${mode}"]`) as HTMLInputElement).value;
     }
 }

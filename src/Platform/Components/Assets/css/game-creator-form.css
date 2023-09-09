@@ -1,33 +1,53 @@
-/* ------------------- Game Creator Form ------------------- */
+/**
+ * CSS codes of Game Creator form component
+ * @see For more information about this component check file: src\Platform\Components\GameCreatorForm.ts
+ */
+
+/* Default visibility of the component */
 #game-creator-form .game-creator-form-mode{
     display:none;
-    margin-top:1rem;
+    border:1px solid #2a2a2a;
 }
 
+/* Visible mode of the component */
 #game-creator-form .game-creator-form-mode.visible{
     display:flex;
 }
 
+#game-creator-form .game-creator-form-mode input{
+    border:2px solid #111;
+}
+
 #game-creator-form .game-creator-form-mode input, #game-creator-form .game-creator-form-mode select{
-    font-size:14px;
+    font-size:15px;
     width:100%;
-    padding:15px;
+    padding:10px;
     background-color: #111;
     color: #f5f5f5;
     border:1px solid #2a2a2a;
+}
+
+#game-creator-form .game-creator-form-mode input, #game-creator-form .game-creator-form-mode select{
+    border:1px solid #111;
 }
 
 #game-creator-form .game-creator-form-mode input:focus, #game-creator-form .game-creator-form-mode select:focus{
     outline: none;
 }
 
+#game-creator-form .game-creator-form-mode .border-inset{
+    border:2px solid #111;
+}
+
 #game-creator-form .game-creator-form-mode button{
-    padding:15px;
-    background-color: #111;
+    padding:10px;
+    background-color: #222;
     color: #f5f5f5;
     border:1px solid #2a2a2a;
     cursor: pointer;
-    font-size:14px;
+    font-size:15px;
+    font-weight: 500;
+    font-family: 'Roboto', sans-serif;
 }
 
 #game-creator-form .game-creator-form-mode button:hover{

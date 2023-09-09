@@ -1,12 +1,4 @@
 /**
- * ChessConfig interface for the chess configuration.
- * @see src/Chess/Chess.ts For more information.
- */
-export interface ChessConfig{
-    enableCaching?: boolean;
-}
-
-/**
  * Color enum for the color of the chess pieces and the players.
  * @see For more information, check src/Models/PieceModel.ts
  */

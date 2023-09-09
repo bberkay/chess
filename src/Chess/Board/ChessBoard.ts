@@ -78,8 +78,6 @@ export class ChessBoard {
             let square: HTMLDivElement = document.createElement("div");
             square.setAttribute("data-square-id", i.toString());
             square.className = "square";
-            // TODO: Toggle Button for square ids.
-            square.innerHTML += i.toString(); // Show the square id on the board.
 
             /**
              * Set the color of the square. This formula create a chess board pattern on the board.
@@ -93,7 +91,7 @@ export class ChessBoard {
              * Another example: finishedColor(1)-oppositeColor(2)-finishedColor(3)-oppositeColor(4)-...-finishedColor(8)-finishedColor(9)
              * -oppositeColor(10)-finishedColor-oppositeColor-...-oppositeColor(16)-oppositeColor(17)-finishedColor(18)-oppositeColor-...
              */
-            square.className += ((Math.floor((i - 1) / 8) + i) % 2 === 0) ? " square--white" : " square--black";
+            square.className += ((Math.floor((i - 1) / 8) + i) % 2 === 0) ? " square--black" : " square--white";
 
             /**
              * Set the column letters of the board. (a, b, c, d, e, f, g, h)
@@ -107,7 +105,7 @@ export class ChessBoard {
              * @see For more information about ASCII codes: https://www.ascii-code.com/
              */
             if(i > 56 && i < 65)
-                square.innerHTML += `<div class="column-coordinate">${String.fromCharCode(96 + (i % 8 || 8))}</div>`;
+                square.innerHTML += `<div class="column-coordinate ${i % 2 == 0 ? 'column-coordinate--white' : 'column-coordinate--black'}">${String.fromCharCode(96 + (i % 8 || 8))}</div>`;
 
             /**
              * Set the row numbers of the board. (1, 2, 3, 4, 5, 6, 7, 8)
@@ -120,7 +118,7 @@ export class ChessBoard {
              * number 2 in the 56th square.
              */
             if(i % 8 == 0)
-                square.innerHTML += `<div class="row-coordinate">${9 - Math.floor(i / 8)}</div>`;
+                square.innerHTML += `<div class="row-coordinate ${(i / 8) % 2 == 0 ? 'row-coordinate--white' : 'row-coordinate--black'}">${9 - Math.floor(i / 8)}</div>`;
 
             /**
              * Set the click mode of the square. Default click mode is "Clear"
