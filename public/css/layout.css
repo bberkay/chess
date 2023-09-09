@@ -24,3 +24,16 @@ main{
         width: auto;
     }
 }
+
+/* ------------------- Components ------------------- */
+#game-creator-form{
+    margin-top:0.5rem;
+}
+
+#notation-table{
+    margin-left:0.5rem;
+}
+
+#log-console{
+    margin-right:0.5rem;
+}

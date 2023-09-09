@@ -45,16 +45,16 @@ export class GameCreatorForm{
         // Create the form element.
         document.getElementById("game-creator-form")!.innerHTML =
             `
-                <div class = "game-creator-form-mode" data-game-creator-mode = "${GameCreatorOperationValue.Custom}">
-                    <div class = "border-inset"><button data-operation-type="${GameCreatorOperationType.ChangeMode}" data-operation-value = "${GameCreatorOperationValue.Template}">Templates</button></div>
-                    <input type="text" placeholder="FEN Notation" data-form-input-id = "${GameCreatorOperationValue.Custom}">
-                    <div class = "border-inset"><button data-operation-type="${GameCreatorOperationType.CreateGame}" data-operation-value = "${GameCreatorOperationValue.Custom}">Load</button></div>
-                </div>
-                <div class = "game-creator-form-mode" data-game-creator-mode = "${GameCreatorOperationValue.Template}">
-                    <div class = "border-inset"><button data-operation-type="${GameCreatorOperationType.ChangeMode}" data-operation-value = "${GameCreatorOperationValue.Custom}">Custom</button></div>
-                    <select data-form-input-id = "${GameCreatorOperationValue.Template}"></select>
-                    <div class = "border-inset"><button data-operation-type="${GameCreatorOperationType.CreateGame}" data-operation-value = "${GameCreatorOperationValue.Template}">Load</button></div>
-                </div>
+            <div class = "game-creator-form-mode" data-game-creator-mode = "${GameCreatorOperationValue.Custom}">
+                <div class = "border-inset"><button data-operation-type="${GameCreatorOperationType.ChangeMode}" data-operation-value = "${GameCreatorOperationValue.Template}">Templates</button></div>
+                <input type="text" placeholder="FEN Notation" data-form-input-id = "${GameCreatorOperationValue.Custom}">
+                <div class = "border-inset"><button data-operation-type="${GameCreatorOperationType.CreateGame}" data-operation-value = "${GameCreatorOperationValue.Custom}">Load</button></div>
+            </div>
+            <div class = "game-creator-form-mode" data-game-creator-mode = "${GameCreatorOperationValue.Template}">
+                <div class = "border-inset"><button data-operation-type="${GameCreatorOperationType.ChangeMode}" data-operation-value = "${GameCreatorOperationValue.Custom}">Custom</button></div>
+                <select data-form-input-id = "${GameCreatorOperationValue.Template}"></select>
+                <div class = "border-inset"><button data-operation-type="${GameCreatorOperationType.CreateGame}" data-operation-value = "${GameCreatorOperationValue.Template}">Load</button></div>
+            </div>
             `;
 
         // Fill the select element with options.

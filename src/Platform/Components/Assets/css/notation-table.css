@@ -7,7 +7,8 @@
     max-height:245px;
     overflow-y: scroll;
     scrollbar-width: thin;
-    scrollbar-color: #666666 #333333 !important;
+    margin-top:280px; /* 280px = (height of chess board - height of notation table) / 2 */
+    width:250px;
 }
 
 #notation-table table{

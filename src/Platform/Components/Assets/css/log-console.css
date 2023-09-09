@@ -1,0 +1,63 @@
+/**
+ * CSS codes of Log Console component
+ * @see For more information about this component check file: src\Platform\Components\LogConsole.ts
+ */
+
+#log-console{
+    border:1px solid #2a2a2a;
+    height:800px; /* 800px = height of chess board */
+    min-width:350px;
+    color: #f5f5f5;
+    font-family: monospace;
+}
+
+#log-console #log-console-body{
+    background-color:#111;
+    height:750px; /* 750px = height of log console - height of log console footer */
+    min-width:350px;
+    resize: horizontal;
+    overflow: auto;
+}
+
+#log-console #log-console-body ul{
+    margin:15px 20px 5px -20px;
+    list-style: none;
+}
+
+#log-console #log-console-footer{
+    background-color:#111;
+    display:flex;
+    width:100%;
+    border-top:1px solid #2a2a2a;
+}
+
+#log-console #log-console-footer-content{
+    background-color:#222;
+    border:1px solid #2a2a2a;
+    margin:3px;
+    padding:10px;
+    color: #f5f5f5;
+    font-size:15px;
+    font-family: 'Roboto', sans-serif;
+    width:90%;
+}
+
+#log-console #log-console-footer-btn button{
+    padding:10px;
+    background-color: #222;
+    color: #f5f5f5;
+    border:1px solid #2a2a2a;
+    cursor: pointer;
+    font-size:15px;
+    font-weight: 500;
+    font-family: 'Roboto', sans-serif;
+    margin: 3px 0 3px 3px;
+}
+
+#log-console #log-console-footer-btn button:hover{
+    background-color: #2a2a2a;
+}
+
+#log-console #log-console-footer-btn button:active{
+    opacity:0.7
+}

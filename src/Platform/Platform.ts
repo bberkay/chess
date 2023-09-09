@@ -3,6 +3,7 @@ import { Square } from "../Chess/Types";
 import { SquareClickMode } from "../Chess/Board/Types";
 import { GameCreatorForm } from "./Components/GameCreatorForm";
 import { NotationTable } from "./Components/NotationTable";
+import { LogConsole } from "./Components/LogConsole";
 import { GameCreatorOperationType, GameCreatorOperationValue } from "./Types";
 
 export class Platform{
@@ -10,7 +11,7 @@ export class Platform{
     private readonly chess: Chess;
     private readonly gameCreatorForm: GameCreatorForm | null;
     private readonly notationTable: NotationTable | null;
-    //private readonly logConsole: LogConsole | null;
+    private readonly logConsole: LogConsole | null;
 
     /**
      * Constructor of the Platform class.
@@ -19,7 +20,7 @@ export class Platform{
         this.chess = chess;
         this.gameCreatorForm = document.getElementById("game-creator-form") ? new GameCreatorForm() : null;
         this.notationTable = document.getElementById("notation-table") ? new NotationTable() : null;
-        //this.logConsole = platformConfig.createLogConsole ? new LogConsole() : null;
+        this.logConsole = document.getElementById("log-console") ? new LogConsole() : null;
 
         // Initialize the listeners when the dom is loaded.
         document.addEventListener("DOMContentLoaded", () => {
@@ -66,6 +67,11 @@ export class Platform{
      */
     private initListeners(): void
     {
+        // TODO: Log console için iki listener a da implemente et.
+        // TODO: Ancak implementasyon başlamadan önce chess de log tutmaya başla ardından da platform da.
+        // TODO: En son burada da log yazdırılacak.
+        // TODO: Log nerelerde tutulacak düşünülecek. Örneğin board da log tutulacak mı? Tabi önce dokümantasonu da kontrol et.
+
         /**
          * Listen actions/clicks of player on chess board.
          * This is for the chess in src\Chess\Chess.ts.
