@@ -17,8 +17,9 @@ export class ChessPlatform{
         this.chess = new Chess(enableCaching);
         this.platform = new Platform(this.chess);
 
+	// TODO: enableCaching false daha geliştirilecek.
         // If there is a game in cache, load it. Otherwise, create a new game.
-        if(!this.chess.checkAndLoadGameFromCache())
+        if(enableCaching && !this.chess.checkAndLoadGameFromCache())
             this.chess.createGame();
     }
 }
