@@ -1,0 +1,59 @@
+/**
+ * CSS codes of Game Creator component
+ * @see For more information about this component check file: src\Platform\Components\GameCreator.ts
+ */
+
+/* Default visibility of the component */
+#game-creator .game-creator-mode{
+    display:none;
+    border:1px solid #2a2a2a;
+}
+
+/* Visible mode of the component */
+#game-creator .game-creator-mode.visible{
+    display:flex;
+}
+
+#game-creator .game-creator-mode input{
+    border:2px solid #111;
+}
+
+#game-creator .game-creator-mode input, #game-creator .game-creator-mode select{
+    font-size:15px;
+    width:100%;
+    padding:10px;
+    background-color: #111;
+    color: #f5f5f5;
+    border:1px solid #2a2a2a;
+}
+
+#game-creator .game-creator-mode input, #game-creator .game-creator-mode select{
+    border:1px solid #111;
+}
+
+#game-creator .game-creator-mode input:focus, #game-creator .game-creator-mode select:focus{
+    outline: none;
+}
+
+#game-creator .game-creator-mode .border-inset{
+    border:2px solid #111;
+}
+
+#game-creator .game-creator-mode button{
+    padding:10px;
+    background-color: #222;
+    color: #f5f5f5;
+    border:1px solid #2a2a2a;
+    cursor: pointer;
+    font-size:15px;
+    font-weight: 500;
+    font-family: 'Roboto', sans-serif;
+}
+
+#game-creator .game-creator-mode button:hover{
+    background-color: #2a2a2a;
+}
+
+#game-creator .game-creator-mode button:active{
+    opacity:0.7
+}

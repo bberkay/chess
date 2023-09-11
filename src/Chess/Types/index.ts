@@ -126,15 +126,3 @@ export enum GameStatus{
     InPlay = "InPlay",
     NotStarted = "NotStarted"
 }
-
-/**
- * LogType enum for the LOG types.
- * @see src/Managers/LogManager.ts For more information.
- */
-export enum LogType{
-    Info = "Info",
-    Warning = "Warning",
-    Error = "Error"
-}
-
-

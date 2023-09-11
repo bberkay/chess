@@ -11,12 +11,14 @@ import {JsonNotation, Square, StartPosition} from "./Types";
 import {ChessEngine} from "./Engine/ChessEngine";
 import {ChessBoard} from "./Board/ChessBoard";
 import {SquareClickMode} from "./Board/Types";
-import {CacheManager} from "./Managers/CacheManager.ts";
+import {Cacher} from "./Services/Cacher.ts";
 import {Converter} from "./Utils/Converter.ts";
+import {Logger, Source} from "./Services/Logger.ts";
 
 /**
  * This class provides users to a playable chess game on the web by connecting ChessEngine and ChessBoard. Also,
- * it uses CacheManager which provides users to save the game to the cache and load the game from the cache.
+ * it uses Cacher which provides users to save the game to the cache and load the game from the cache and Logger
+ * which provides users to log the game.
  */
 export class Chess{
 
@@ -25,17 +27,19 @@ export class Chess{
      */
     private chessEngine: ChessEngine;
     private chessBoard: ChessBoard;
-    private readonly cacheManager: CacheManager | null;
     private selectedSquare: Square | null;
+    private readonly isCachingEnabled: boolean = true;
 
     /**
      * Constructor of the Chess class.
      */
     constructor(enableCaching: boolean = true){
-        this.chessEngine = new ChessEngine();
+        Logger.start();
+        Logger.save("Chess created with ChessEngine and ChessBoard", "constructor", Source.Chess);
         this.chessBoard = new ChessBoard();
+        this.chessEngine = new ChessEngine();
         this.selectedSquare = null;
-        this.cacheManager = enableCaching ? CacheManager.getInstance() : null;
+        this.isCachingEnabled = enableCaching;
     }
 
     /**
@@ -45,14 +49,17 @@ export class Chess{
      */
     public checkAndLoadGameFromCache(): boolean
     {
-        if(!this.cacheManager)
+        if(!this.isCachingEnabled)
             throw new Error("Cache is not enabled. Please enable it on constructor.");
 
         // If there is a game in the cache, load it.
-        if(!this.cacheManager!.isEmpty()){
-            this.createGame(this.cacheManager!.load()!);
+        if(!Cacher.isEmpty()){
+            Logger.save("Game loaded from cache.", "checkAndLoadGameFromCache", Source.Chess);
+            this.createGame(Cacher.load());
             return true;
         }
+
+        Logger.save("There is no game in the cache.", "checkAndLoadGameFromCache", Source.Chess);
         return false;
     }
 
@@ -62,23 +69,35 @@ export class Chess{
      */
     public createGame(position: JsonNotation | StartPosition | string = StartPosition.Standard): void
     {
+        // Clear the log before creating a new game.
+        Logger.clear();
+
+        // Create a new log for the new game.
+        Logger.start();
+
         // Clear the game from the cache before creating a new game.
-        if(this.cacheManager)
-            this.cacheManager!.clear();
+        if(this.isCachingEnabled){
+            Cacher.clear();
+            Logger.save("Cache cleared.", "createGame", Source.Chess);
+        }
 
         // Convert the position to json notation if it is not json notation.
-        if(typeof position === "string")
+        if(typeof position === "string"){
             position = Converter.fenToJson(position);
-
-        // Create a new game on engine.
-        this.chessEngine.createGame(position);
+            Logger.save("Position converted to json notation.", "createGame", Source.Chess);
+        }
 
         // Create a new game on board.
         this.chessBoard.createGame(position);
 
+        // Create a new game on engine.
+        this.chessEngine.createGame(position);
+
         // Save the game to the cache as json notation.
-        if(this.cacheManager)
-            this.cacheManager!.save(position);
+        if(this.isCachingEnabled){
+            Cacher.save(position);
+            Logger.save("Game saved to cache.", "createGame", Source.Chess);
+        }
 
         // Get status from engine and show it on board.
         this.chessBoard.showStatus(this.chessEngine.getStatusOfGame());
@@ -92,6 +111,7 @@ export class Chess{
      */
     public doActionOnBoard(moveType: SquareClickMode, square: Square): void
     {
+        Logger.start();
         if([SquareClickMode.Play, SquareClickMode.Castling, SquareClickMode.Promote, SquareClickMode.Promotion, SquareClickMode.EnPassant].includes(moveType)){
             this._doPlayAction(square);
 
@@ -155,8 +175,10 @@ export class Chess{
         this.chessBoard.showStatus(this.chessEngine.getStatusOfGame());
 
         // Save the game to the cache as json notation.
-        if(this.cacheManager)
-            this.cacheManager!.save({...this.chessEngine.getGameAsJsonNotation(), "notation":this.getNotation()});
+        if(this.isCachingEnabled){
+            Cacher.save({...this.chessEngine.getGameAsJsonNotation(), "notation":this.getNotation()});
+            Logger.save("Game saved to cache with notation", "finishTurn", Source.Chess);
+        }
     }
 
     /**
@@ -168,9 +190,19 @@ export class Chess{
          * If cache is enabled and there is a game in the cache,
          * return the notation from the cache.
          */
-        if(this.cacheManager && !this.cacheManager!.isEmpty() && this.cacheManager!.load()!.hasOwnProperty("notation"))
-            return this.cacheManager!.load()!.notation;
+        if(this.isCachingEnabled && !Cacher.isEmpty() && Cacher.load()!.hasOwnProperty("notation")){
+            Logger.save("Notation loaded from cache.", "getNotation", Source.Chess);
+            return Cacher.load()!.notation;
+        }
 
         return this.chessEngine.getNotation();
+    }
+
+    /**
+     * Get log of the game
+     */
+    public getLogs(): Array<{source: string, message: string}[]>
+    {
+        return Logger.get();
     }
 }

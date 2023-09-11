@@ -10,6 +10,7 @@
 import {Color, GameStatus, JsonNotation, Moves, MoveType, PieceType, Square, StartPosition} from "../Types";
 import {SquareClickMode, SquareEffect} from "./Types";
 import {Converter} from "../Utils/Converter.ts";
+import {Logger, Source} from "../Services/Logger.ts";
 
 /**
  * This class provides users to create and manage a chess board(does not include any mechanic/logic).
@@ -22,14 +23,29 @@ export class ChessBoard {
      */
     private lockedSquaresModes: Array<SquareClickMode> = [];
     private colorOfPlayer: Color | null = null;
+    private readonly isStandalone: boolean;
 
     /**
      * Constructor of the class which load css file of
      * the chess board.
      */
-    constructor(){
+    constructor(isStandalone: boolean = false){
+        this.isStandalone = isStandalone;
+
         // Load css file of the chess board.
         this._loadCSS();
+
+        /**
+         * If the ChessBoard is standalone then clear the logs and start the logger.
+         * Then create a game with the standard position.
+         */
+        if(this.isStandalone){
+            Logger.clear();
+            Logger.start();
+            this.createGame();
+        }
+
+        Logger.save("ChessBoard created and CSS loaded." + (this.isStandalone ? " as standalone" : ""), "constructor", Source.ChessBoard);
     }
 
     /**
@@ -56,11 +72,16 @@ export class ChessBoard {
      */
     public createGame(position: JsonNotation | StartPosition | string = StartPosition.Standard): void
     {
+        if(this.isStandalone)
+            Logger.start();
+
         // Create squares in the board.
         this.createSquares();
+        Logger.save("Squares created on ChessBoard.", "createGame", Source.ChessBoard);
 
         // Create the pieces.
         this.createPieces(typeof position == "string" ? Converter.fenToJson(position).board : position.board);
+        Logger.save("Pieces created on ChessBoard by given position.", "createGame", Source.ChessBoard);
     }
 
     /**
@@ -192,12 +213,14 @@ export class ChessBoard {
 
         // Add selected effect to the selected square.
         this.setSquareEffect(selectedSquare, SquareEffect.Selected);
+        Logger.save(`Selected square[${selectedSquare}] found on DOM and Selected effect added.`, "highlightSelect", Source.ChessBoard);
 
         /**
          * Set the click mode "Clear" to the square because
          * we want to clear the square when it is clicked again.
          */
         this.setSquareClickMode(selectedSquare, SquareClickMode.Clear);
+        Logger.save(`Selected square's[${selectedSquare}] click mode set to clear.`, "highlightSelect", Source.ChessBoard);
     }
 
     /**
@@ -205,6 +228,9 @@ export class ChessBoard {
      */
     public highlightMoves(moves: Moves): void
     {
+        if(this.isStandalone)
+            Logger.start();
+
         for(let moveType in moves){
             // If the move type is null or undefined then skip the loop.
             if(!moves[moveType as MoveType])
@@ -233,6 +259,8 @@ export class ChessBoard {
                 this.setSquareClickMode(move, clickMode);
             }
         }
+
+        Logger.save("Possible moves highlighted on board.", "highlightMoves", Source.ChessBoard);
     }
 
     /**
@@ -242,6 +270,7 @@ export class ChessBoard {
     {
         // Remove the from and to effects of enemy player before the player's move.
         this.removeEffectFromAllSquares([SquareEffect.From, SquareEffect.To, SquareEffect.Checked]);
+        Logger.save(`From[${from}], To[${from}] and Checked Square's(if exits) effects are cleaned.`, "playMove", Source.ChessBoard);
 
         // Get the source and target square elements.
         const fromSquare: HTMLDivElement = document.querySelector(`[data-square-id="${from.toString()}"]`) as HTMLDivElement;
@@ -250,6 +279,7 @@ export class ChessBoard {
         // Add effects to the From and To squares
         this.setSquareEffect(fromSquare, SquareEffect.From);
         this.setSquareEffect(toSquare, SquareEffect.To);
+        Logger.save(`Moved From and Moved To effects given the From[${from}] and To[${from}] squares.`, "playMove", Source.ChessBoard);
 
         // Get the move type by to square's click mode attribute.
         const moveType: SquareClickMode = toSquare.getAttribute("data-click-mode") as SquareClickMode;
@@ -268,8 +298,10 @@ export class ChessBoard {
                 break;
             default:
                 this._doNormalMove(fromSquare, toSquare);
+                Logger.save(`Piece moved to target square[${toSquare.id}] on board`, "playMove", Source.ChessBoard);
                 break;
         }
+
     }
 
     /**
@@ -286,8 +318,8 @@ export class ChessBoard {
          * @see For more information about castling, see https://en.wikipedia.org/wiki/Castling
          * @see For more information about square ids, see src/Types/index.ts
          */
-        const castlingType: "Long" | "Short" = parseInt(fromSquare.id) - parseInt(toSquare.id) > 3
-            ? "Long" : "Short";
+        const castlingType: "Long" | "Short" = parseInt(fromSquare.id) - parseInt(toSquare.id) > 3 ? "Long" : "Short";
+        Logger.save(`Castling type determined[${castlingType}] on board`, "playMove", Source.ChessBoard);
 
         /**
          * If the castling is long then the king's new square is
@@ -300,6 +332,7 @@ export class ChessBoard {
             fromSquare,
             document.querySelector(`[data-square-id="${kingNewSquare.toString()}"]`) as HTMLDivElement
         );
+        Logger.save(`King moved to target square[${kingNewSquare}] by determined castling type[${castlingType}] on board`, "playMove", Source.ChessBoard);
 
         /**
          * If the castling is long then the rook's current square
@@ -318,6 +351,7 @@ export class ChessBoard {
             document.querySelector(`[data-square-id="${rook.toString()}"]`) as HTMLDivElement,
             document.querySelector(`[data-square-id="${rookNewSquare.toString()}"]`) as HTMLDivElement
         );
+        Logger.save(`Rook moved to target square[${rookNewSquare}] by determined castling type[${castlingType}] on board`, "playMove", Source.ChessBoard);
     }
 
     /**
@@ -326,6 +360,7 @@ export class ChessBoard {
     private _doEnPassant(fromSquare:HTMLDivElement, toSquare:HTMLDivElement): void
     {
         this._doNormalMove(fromSquare, toSquare);
+        Logger.save(`Piece moved to target square[${toSquare.id}] on board`, "playMove", Source.ChessBoard);
 
         /**
          * Get the square of the killed piece by adding 8 to
@@ -339,6 +374,7 @@ export class ChessBoard {
 
         // Remove the killed piece.
         this.clearSquare(killedPieceSquare);
+        Logger.save(`Captured piece by en passant move is found on square[${killedPieceSquare}] and removed on board`, "playMove", Source.ChessBoard);
     }
 
     /**
@@ -347,6 +383,8 @@ export class ChessBoard {
     private _doPromotion(fromSquare:HTMLDivElement, toSquare:HTMLDivElement): void
     {
         this._doNormalMove(fromSquare, toSquare);
+        Logger.save(`Piece moved to target square[${toSquare.id}] on board`, "playMove", Source.ChessBoard);
+
         this._showPromotions(toSquare.querySelector(".piece") as HTMLDivElement);
     }
 
@@ -361,11 +399,9 @@ export class ChessBoard {
         const pieceType: PieceType = selectedOption.getAttribute("data-piece") as PieceType;
 
         // Create the piece first row if the piece is white otherwise create the piece last row.
-        this.createPiece(
-            color,
-            pieceType,
-            Number(promoteSquare.id) + (color == Color.White ? -8 : +8) as Square
-        );
+        const targetSquare: Square = Number(promoteSquare.id) + (color == Color.White ? -8 : +8) as Square;
+        this.createPiece(color, pieceType, targetSquare);
+        Logger.save(`Piece[${color} ${pieceType}] created on square[${targetSquare}] on board`, "playMove", Source.ChessBoard);
 
         this._closePromotions();
     }
@@ -392,15 +428,17 @@ export class ChessBoard {
 
         for(let i = 0; i <= 63; i++){
             // Get ID of the square.
-            let id = parseInt(squares[i].id);
+            let id = parseInt(squares[i].getAttribute("data-square-id") as string);
 
             /**
              * If the square id is not equal to i + 1 then set the square id to i + 1.
              * This scenario can happen when the player change square is id in DOM with devtools.
              * So, we need to fix the square id's.
              */
-            if (id !== i + 1)
+            if (id !== i + 1){
+                Logger.save(`ID of square's fixed from[${id}] to [${(i+1).toString()}] on board`, "clearBoard", Source.ChessBoard);
                 squares[i].setAttribute("data-square-id", (i+1).toString());
+            }
 
             /**
              * Remove the effects of the square(except check and move effects,
@@ -426,6 +464,8 @@ export class ChessBoard {
             else // If the square does not have a piece
                 this.setSquareClickMode(squares[i] as HTMLDivElement, SquareClickMode.Clear);
         }
+
+        Logger.save("Playable, Killable, Selected effects are cleaned and Square Click Modes changes to Clear and Select(if square has piece)", "clearBoard", Source.ChessBoard);
     }
 
     /**
@@ -489,7 +529,8 @@ export class ChessBoard {
     {
         const color: Color = checkedStatus == GameStatus.WhiteInCheck ? Color.White : Color.Black;
         const king: HTMLDivElement = document.querySelector(`.piece[data-piece="${PieceType.King}"][data-color="${color}"]`) as HTMLDivElement;
-        this.setSquareEffect(king.parentElement as HTMLDivElement, SquareEffect.Checked);
+        this.setSquareEffect(king.parentElement as HTMLDivElement, SquareEffect.Checked)
+        Logger.save(`King's square[${king.parentElement!.id}] found on DOM and Checked effect added`, "_showCheck", Source.ChessBoard);
     }
 
     /**
@@ -499,6 +540,7 @@ export class ChessBoard {
     {
         this.lockBoard(false);
         this._showMessage(`${wonStatus == GameStatus.WhiteVictory ? "White" : "Black"} won!`);
+        Logger.save(`Board locked and Checkmate message[${wonStatus}] showed on board.`, "_showCheckmateMessage", Source.ChessBoard);
     }
 
     /**
@@ -508,6 +550,7 @@ export class ChessBoard {
     {
         this.lockBoard(false);
         this._showMessage("Draw!");
+        Logger.save(`Board locked and Draw message showed on board.`, "_showStalemateMessage", Source.ChessBoard);
     }
 
     /**
@@ -537,9 +580,11 @@ export class ChessBoard {
          * move pieces while choosing promotion piece.
          */
         this.lockBoard();
+        Logger.save("Board locked for promotion screen", "_showPromotions", Source.ChessBoard);
 
         // Hide the promoted pawn.
         promotedPawn.remove();
+        Logger.save(`Promoted Pawn is removed from square[${square}] on board`, "_showPromotions", Source.ChessBoard);
 
         // Create promotion options. (Queen, Rook, Bishop, Knight)
         const PROMOTION_TYPES: Array<string> = [PieceType.Queen, PieceType.Rook, PieceType.Bishop, PieceType.Knight];
@@ -571,7 +616,9 @@ export class ChessBoard {
             // Set click mode and remove disabled effect.
             this.removeSquareEffect(targetSquare, SquareEffect.Disabled);
             this.setSquareClickMode(targetSquare, SquareClickMode.Promote);
+            Logger.save("Promote options are created, disabled effect removed and click modes set to promote", "_showPromotions", Source.ChessBoard);
         }
+        Logger.save("Promotion screen showed on board.", "_showPromotions", Source.ChessBoard);
     }
 
     /**
@@ -585,12 +632,14 @@ export class ChessBoard {
         // Remove promotion options.
         for(let i = 0; i < 3; i++)
             promotionOptions[i].remove();
+        Logger.save("Promotion screen closed.", "_closePromotions", Source.ChessBoard);
 
         /**
          * Enable the board. If the player choose a promotion piece then
          * allow player to interact with the board.
          */
         this.unlockBoard();
+        Logger.save("Board unlocked after promotion screen closed.", "_closePromotions", Source.ChessBoard);
     }
 
     /**
@@ -664,5 +713,16 @@ export class ChessBoard {
         // Remove the given effect from all squares.
         for(let i = 0; i <= 63; i++)
             this.removeSquareEffect(squares[i], effects);
+    }
+
+    /**
+     * This function returns the logs of the game on engine.
+     */
+    public getLogs(): Array<{source: string, message: string}[]>
+    {
+        if(!this.isStandalone)
+            throw new Error("This function can only be used on standalone mode");
+
+        return Logger.get();
     }
 }

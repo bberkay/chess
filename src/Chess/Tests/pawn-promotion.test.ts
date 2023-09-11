@@ -63,7 +63,7 @@ const promotionTestGames: Test[] = [
 
 // Test for promotion move.
 test('Promote pawn to the every promotion option', () => {
-    const engine = new ChessEngine();
+    const engine = new ChessEngine(true);
 
     for(const game of promotionTestGames){
         console.log("Testing:        " + game.title);

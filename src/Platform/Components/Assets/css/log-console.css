@@ -4,24 +4,42 @@
  */
 
 #log-console{
+    background-color:#111;
     border:1px solid #2a2a2a;
     height:800px; /* 800px = height of chess board */
-    min-width:350px;
+    width:400px;
+    min-width:400px;
+    max-width:750px;
     color: #f5f5f5;
     font-family: monospace;
+    resize: horizontal;
+    overflow: hidden;
 }
 
 #log-console #log-console-body{
-    background-color:#111;
     height:750px; /* 750px = height of log console - height of log console footer */
-    min-width:350px;
-    resize: horizontal;
-    overflow: auto;
+    width:auto;
+    overflow-y: scroll;
 }
 
 #log-console #log-console-body ul{
     margin:15px 20px 5px -20px;
     list-style: none;
+}
+
+#log-console #log-console-body ul li{
+    cursor: pointer;
+    transition: 0.1s;
+    margin: 7px 0;
+}
+
+#log-console #log-console-body ul li span{
+    font-family: monospace;
+    font-weight: bold;
+}
+
+#log-console #log-console-body ul li span:hover{
+    text-decoration: underline;
 }
 
 #log-console #log-console-footer{
@@ -37,9 +55,10 @@
     margin:3px;
     padding:10px;
     color: #f5f5f5;
-    font-size:15px;
-    font-family: 'Roboto', sans-serif;
     width:90%;
+    font-size:12px;
+    font-family: monospace;
+    overflow-x: scroll;
 }
 
 #log-console #log-console-footer-btn button{

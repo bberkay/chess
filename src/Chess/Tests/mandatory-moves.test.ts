@@ -82,7 +82,7 @@ const mandatoryMovesTests: Test[] = [
  * Test file for move notation by playing a random game
  */
 test('Mandatory Moves Test', () => {
-    const engine = new ChessEngine();
+    const engine = new ChessEngine(true);
 
     for(const game of mandatoryMovesTests) {
         console.log("Testing:        " + game.title);

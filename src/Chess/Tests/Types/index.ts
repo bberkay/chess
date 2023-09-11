@@ -1,4 +1,4 @@
-import { Square } from "../../src/Types";
+import { Square } from "../../Types";
 
 /**
  * Test item type for the tests.

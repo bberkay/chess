@@ -1,19 +1,20 @@
 /**
- * GameCreatorOperationType enum for the types of operations that can be
- * done in the game creator.
- * @see src/Platform/Components/GameCreatorForm.ts For more information.
+ * MenuOperationType enum for the types of operations that can be
+ * done in the menu.
+ * @see src/Platform/Platform.ts
  */
-export enum GameCreatorOperationType{
-    CreateGame = "CreateGame",
-    ChangeMode = "ChangeMode"
+export enum MenuOperationType{
+    GameCreatorCreate = "GameCreatorCreateGame",
+    GameCreatorChangeMode = "GameCreatorChangeMode",
+    LogConsoleClear = "LogConsoleClear",
 }
 
 /**
- * GameCreatorOperationValue enum for the values of operations that can be
- * done in the game creator.
- * @see src/Platform/Components/GameCreatorForm.ts For more information.
+ * MenuOperationValue enum for the values of operations that can be
+ * done in the menu.
+ * @see src/Platform/Platform.ts
  */
-export enum GameCreatorOperationValue{
-    Custom = "Custom",
-    Template = "Template"
+export enum MenuOperationValue{
+    GameCreatorCustom = "GameCreatorCustom",
+    GameCreatorTemplate = "GameCreatorTemplate"
 }

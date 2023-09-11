@@ -105,7 +105,7 @@ const fiftyMoveRuleTestGames: Test[] = [
 
 // Convert FEN to JSON
 test('Fifty Move Rule Test', () => {
-    const engine = new ChessEngine();
+    const engine = new ChessEngine(true);
     for(const game of fiftyMoveRuleTestGames)
     {
         console.log("Testing:        " + game.title);

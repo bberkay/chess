@@ -109,7 +109,7 @@ const enPassantTestGames: Test[] = [
 ];
 
 test('En Passant Moves', () => {
-    const engine = new ChessEngine();
+    const engine = new ChessEngine(true);
     for(const game of enPassantTestGames)
     {
         console.log("Testing:        " + game.title);

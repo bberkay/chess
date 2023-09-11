@@ -1,3 +1,5 @@
+import { MenuOperationType } from "../Types";
+
 /**
  * This class provide a menu to show the logs.
  */
@@ -47,12 +49,46 @@ export class LogConsole{
             </div>
             <div id="log-console-footer">
                 <div id="log-console-footer-btn">
-                    <button>Clear</button>
+                    <button data-operation-type="${MenuOperationType.LogConsoleClear}">Clear</button>
                 </div>
                 <div id="log-console-footer-content">
                     <span id = "log-file"></span>
                 </div>
             </div>
             `;
+    }
+
+    /**
+     * This function adds a log to the log console.
+     */
+    public show(logs: Array<{source: string, message: string}[]>): void
+    {
+        // Find the log list element and the last logs in the logs array.
+        let logListElement: HTMLElement = document.getElementById("log-list")!;
+        const lastLogs: Array<{source: string, message: string}> = logs[logs.length - 1];
+
+        // Add the log to the log list.
+        for(const log of lastLogs) {
+            const source: string = log.source.includes("Engine") ? "Engine | " : (log.source.includes("Board") ? "Board &nbsp;| " : `Chess &nbsp;| `);
+            logListElement!.innerHTML +=
+                `
+                <li onmouseover="document.getElementById('log-file').innerHTML = '${log.source}'">
+                    &#x2022 <strong style="text-transform: uppercase">${source}</strong><span>${log.message}</span>
+                </li>
+                `;
+        }
+        logListElement!.innerHTML += "<hr>";
+    }
+
+    /**
+     * This function clears the log console.
+     */
+    public clear(): void
+    {
+        // Clear the log list.
+        document.getElementById("log-list")!.innerHTML = "";
+
+        // Clear the log file.
+        document.getElementById("log-file")!.innerHTML = "";
     }
 }

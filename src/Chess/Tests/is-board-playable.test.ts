@@ -87,7 +87,7 @@ const games: Test[] = [
 // Test Playable/Unplayable Boards
 test(`Is Board Playable`, () => {
     // Create chess engine
-    const chessEngine = new ChessEngine();
+    const chessEngine = new ChessEngine(true);
 
     // Test every game
     for (const game of games) {
