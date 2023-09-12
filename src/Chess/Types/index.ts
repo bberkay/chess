@@ -83,6 +83,7 @@ export interface JsonNotation{
     halfMoveClock: number | 0;
     fullMoveNumber: number | 0;
     moveHistory?: string[]; // Algebraic notation
+    scores?: Record<Color, {score: number, pieces: PieceType[]}>;
 }
 
 /**

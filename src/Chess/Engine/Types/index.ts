@@ -7,6 +7,7 @@ import { Color, PieceType, Square } from "../../Types";
 export interface Piece {
     getColor(): Color;
     getType(): PieceType;
+    getScore(): number;
 }
 
 /**

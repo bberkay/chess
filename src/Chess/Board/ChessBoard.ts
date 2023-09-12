@@ -40,8 +40,7 @@ export class ChessBoard {
          * Then create a game with the standard position.
          */
         if(this.isStandalone){
-            Logger.clear();
-            Logger.start();
+            Logger.start(true);
             this.createGame();
         }
 
@@ -298,7 +297,7 @@ export class ChessBoard {
                 break;
             default:
                 this._doNormalMove(fromSquare, toSquare);
-                Logger.save(`Piece moved to target square[${toSquare.id}] on board`, "playMove", Source.ChessBoard);
+                Logger.save(`Piece moved to target square[${toSquare.getAttribute("data-square-id")!}] on board`, "playMove", Source.ChessBoard);
                 break;
         }
 
@@ -309,6 +308,9 @@ export class ChessBoard {
      */
     private _doCastling(fromSquare:HTMLDivElement, toSquare:HTMLDivElement): void
     {
+        const fromSquareId: number = parseInt(fromSquare.getAttribute("data-square-id")!);
+        const toSquareId: number = parseInt(toSquare.getAttribute("data-square-id")!);
+
         /**
          * Get the castling type by measuring the distance between
          * the fromSquare(king) and toSquare(rook). If the distance
@@ -318,7 +320,7 @@ export class ChessBoard {
          * @see For more information about castling, see https://en.wikipedia.org/wiki/Castling
          * @see For more information about square ids, see src/Types/index.ts
          */
-        const castlingType: "Long" | "Short" = parseInt(fromSquare.id) - parseInt(toSquare.id) > 3 ? "Long" : "Short";
+        const castlingType: "Long" | "Short" = fromSquareId - toSquareId > 3 ? "Long" : "Short";
         Logger.save(`Castling type determined[${castlingType}] on board`, "playMove", Source.ChessBoard);
 
         /**
@@ -326,7 +328,7 @@ export class ChessBoard {
          * 2 squares left of the fromSquare otherwise 2 squares
          * right of the fromSquare.
          */
-        const kingNewSquare: number = castlingType == "Long" ? parseInt(fromSquare.id) - 2 : parseInt(fromSquare.id) + 2;
+        const kingNewSquare: number = castlingType == "Long" ? fromSquareId - 2 : fromSquareId + 2;
 
         this._doNormalMove(
             fromSquare,
@@ -344,7 +346,7 @@ export class ChessBoard {
          * is "e1" then the rook's current square is "a1" and rook's new square
          * is "d1".
          */
-        const rook: number = castlingType == "Long" ? parseInt(fromSquare.id) - 4 : parseInt(fromSquare.id) + 3;
+        const rook: number = castlingType == "Long" ? fromSquareId - 4 : fromSquareId + 3;
         const rookNewSquare: number = castlingType == "Long" ? kingNewSquare + 1 : kingNewSquare - 1;
 
         this._doNormalMove(
@@ -360,7 +362,7 @@ export class ChessBoard {
     private _doEnPassant(fromSquare:HTMLDivElement, toSquare:HTMLDivElement): void
     {
         this._doNormalMove(fromSquare, toSquare);
-        Logger.save(`Piece moved to target square[${toSquare.id}] on board`, "playMove", Source.ChessBoard);
+        Logger.save(`Piece moved to target square[${toSquare.getAttribute("data-square-id")!}] on board`, "playMove", Source.ChessBoard);
 
         /**
          * Get the square of the killed piece by adding 8 to
@@ -370,7 +372,7 @@ export class ChessBoard {
          * @see For more information about en passant, see https://en.wikipedia.org/wiki/En_passant
          * @see For more information about the square ids, see src/Types/index.ts
          */
-        const killedPieceSquare = parseInt(toSquare.id) + (toSquare.querySelector(".piece")!.getAttribute("data-color") === Color.White ? 8 : -8);
+        const killedPieceSquare = parseInt(toSquare.getAttribute("data-square-id")!) + (toSquare.querySelector(".piece")!.getAttribute("data-color") === Color.White ? 8 : -8);
 
         // Remove the killed piece.
         this.clearSquare(killedPieceSquare);
@@ -383,7 +385,7 @@ export class ChessBoard {
     private _doPromotion(fromSquare:HTMLDivElement, toSquare:HTMLDivElement): void
     {
         this._doNormalMove(fromSquare, toSquare);
-        Logger.save(`Piece moved to target square[${toSquare.id}] on board`, "playMove", Source.ChessBoard);
+        Logger.save(`Piece moved to target square[${toSquare.getAttribute("data-square-id")!}] on board`, "playMove", Source.ChessBoard);
 
         this._showPromotions(toSquare.querySelector(".piece") as HTMLDivElement);
     }
@@ -399,7 +401,7 @@ export class ChessBoard {
         const pieceType: PieceType = selectedOption.getAttribute("data-piece") as PieceType;
 
         // Create the piece first row if the piece is white otherwise create the piece last row.
-        const targetSquare: Square = Number(promoteSquare.id) + (color == Color.White ? -8 : +8) as Square;
+        const targetSquare: Square = Number(promoteSquare.getAttribute("data-square-id")!) + (color == Color.White ? -8 : +8) as Square;
         this.createPiece(color, pieceType, targetSquare);
         Logger.save(`Piece[${color} ${pieceType}] created on square[${targetSquare}] on board`, "playMove", Source.ChessBoard);
 
@@ -412,7 +414,7 @@ export class ChessBoard {
     private _doNormalMove(fromSquare:HTMLDivElement, toSquare:HTMLDivElement): void
     {
         // Clear the target square.
-        this.clearSquare(parseInt(toSquare.id));
+        this.clearSquare(parseInt(toSquare.getAttribute("data-square-id")!));
 
         // Move piece from the source square(from) to the target square(to).
         toSquare.appendChild(fromSquare.querySelector(".piece")!);
@@ -530,7 +532,7 @@ export class ChessBoard {
         const color: Color = checkedStatus == GameStatus.WhiteInCheck ? Color.White : Color.Black;
         const king: HTMLDivElement = document.querySelector(`.piece[data-piece="${PieceType.King}"][data-color="${color}"]`) as HTMLDivElement;
         this.setSquareEffect(king.parentElement as HTMLDivElement, SquareEffect.Checked)
-        Logger.save(`King's square[${king.parentElement!.id}] found on DOM and Checked effect added`, "_showCheck", Source.ChessBoard);
+        Logger.save(`King's square[${king.parentElement!.getAttribute("data-square-id")!}] found on DOM and Checked effect added`, "_showCheck", Source.ChessBoard);
     }
 
     /**
@@ -573,7 +575,7 @@ export class ChessBoard {
     private _showPromotions(promotedPawn: HTMLDivElement): void
     {
         // Get the square of the promoted pawn.
-        const square: Square = parseInt(promotedPawn.parentElement!.id) as Square;
+        const square: Square = parseInt(promotedPawn.parentElement!.getAttribute("data-square-id")!) as Square;
 
         /**
          * Disable the board. We don't want to allow player to

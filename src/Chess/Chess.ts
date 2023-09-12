@@ -7,7 +7,7 @@
  * @license MIT
  */
 
-import {JsonNotation, Square, StartPosition} from "./Types";
+import {Color, JsonNotation, PieceType, Square, StartPosition} from "./Types";
 import {ChessEngine} from "./Engine/ChessEngine";
 import {ChessBoard} from "./Board/ChessBoard";
 import {SquareClickMode} from "./Board/Types";
@@ -69,11 +69,8 @@ export class Chess{
      */
     public createGame(position: JsonNotation | StartPosition | string = StartPosition.Standard): void
     {
-        // Clear the log before creating a new game.
-        Logger.clear();
-
         // Create a new log for the new game.
-        Logger.start();
+        Logger.start(true);
 
         // Clear the game from the cache before creating a new game.
         if(this.isCachingEnabled){
@@ -176,7 +173,7 @@ export class Chess{
 
         // Save the game to the cache as json notation.
         if(this.isCachingEnabled){
-            Cacher.save({...this.chessEngine.getGameAsJsonNotation(), "moveHistory":this.getNotation()});
+            Cacher.save(this.chessEngine.getGameAsJsonNotation());
             Logger.save("Game saved to cache with notation", "finishTurn", Source.Chess);
         }
     }
@@ -187,6 +184,14 @@ export class Chess{
     public getNotation(): string[]
     {
         return this.chessEngine.getNotation();
+    }
+
+    /**
+     * Get scores of the game
+     */
+    public getScores(): Record<Color, {score: number, pieces: PieceType[]}>
+    {
+        return this.chessEngine.getScores();
     }
 
     /**

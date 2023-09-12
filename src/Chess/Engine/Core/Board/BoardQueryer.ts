@@ -33,6 +33,8 @@ export class BoardQueryer extends Board{
             enPassant: BoardQueryer.getEnPassantSquare(),
             halfMoveClock: BoardQueryer.getHalfMoveCount(),
             fullMoveNumber: BoardQueryer.getMoveCount(),
+            moveHistory: BoardQueryer.getMoveHistory(),
+            scores: BoardQueryer.getScores()
         }
     }
 
@@ -98,6 +100,14 @@ export class BoardQueryer extends Board{
     public static getMoveHistory(): string[]
     {
         return Board.moveHistory;
+    }
+
+    /**
+     * Get scores
+     */
+    public static getScores(): Record<Color, {score: number, pieces: PieceType[]}>
+    {
+        return Board.scores;
     }
 
     /**

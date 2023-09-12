@@ -2,7 +2,7 @@ import { Chess } from "../Chess/Chess";
 import { Square } from "../Chess/Types";
 import { SquareClickMode } from "../Chess/Board/Types";
 import { GameCreator } from "./Components/GameCreator.ts";
-import { NotationTable } from "./Components/NotationTable";
+import { NotationMenu } from "./Components/NotationMenu.ts";
 import { LogConsole } from "./Components/LogConsole";
 import { MenuOperationType, MenuOperationValue } from "./Types";
 
@@ -10,7 +10,7 @@ export class Platform{
 
     private readonly chess: Chess;
     private readonly gameCreator: GameCreator | null;
-    private readonly notationTable: NotationTable | null;
+    private readonly notationMenu: NotationMenu | null;
     private readonly logConsole: LogConsole | null;
 
     /**
@@ -19,20 +19,16 @@ export class Platform{
     constructor(chess: Chess) {
         this.chess = chess;
         this.gameCreator = document.getElementById("game-creator") ? new GameCreator() : null;
-        this.notationTable = document.getElementById("notation-table") ? new NotationTable() : null;
+        this.notationMenu = document.getElementById("notation-menu") ? new NotationMenu() : null;
         this.logConsole = document.getElementById("log-console") ? new LogConsole() : null;
 
         // Initialize the listeners when the dom is loaded.
         document.addEventListener("DOMContentLoaded", () => {
             this.initListeners();
 
-            // Update the notation table.
-            if(this.notationTable !== null)
-                this.notationTable.set(this.chess.getNotation());
-
-            // Update the log console.
-            if(this.logConsole !== null)
-                this.logConsole.show(this.chess.getLogs());
+            // Update the notation table and log console.
+            this.updateNotationTable(true);
+            this.updateLogConsole();
         });
     }
 
@@ -54,13 +50,9 @@ export class Platform{
                     parseInt(square.getAttribute("data-square-id")!) as Square
                 );
 
-                // Update the notation table.
-                if(this.notationTable !== null)
-                    this.notationTable.add(this.chess.getNotation());
-
-                // Update the log console.
-                if(this.logConsole !== null)
-                    this.logConsole.show(this.chess.getLogs());
+                // Update the notation table and log console.
+                this.updateNotationTable();
+                this.updateLogConsole();
             });
         });
 
@@ -76,9 +68,9 @@ export class Platform{
                     menuItem.getAttribute("data-operation-value") as MenuOperationValue
                 );
 
-                // Update the log console.
-                if(this.logConsole !== null && menuItem.getAttribute("data-operation-type") !== MenuOperationType.LogConsoleClear)
-                    this.logConsole.show(this.chess.getLogs());
+                // Update the log console if the operation is not clear log console.
+                if(menuItem.getAttribute("data-operation-type") !== MenuOperationType.LogConsoleClear)
+                    this.updateLogConsole();
             });
         });
     }
@@ -124,10 +116,10 @@ export class Platform{
      */
     private clearNotationTable(): void
     {
-        if(this.notationTable === null)
+        if(this.notationMenu === null)
             throw new Error("Notation table is not initialized.");
 
-        this.notationTable!.clear();
+        this.notationMenu!.clear();
     }
 
     /**
@@ -140,4 +132,33 @@ export class Platform{
 
         this.logConsole!.clear();
     }
+
+    /**
+     * This function updates the notation table.
+     */
+    private updateNotationTable(isInitOperation: boolean = false): void
+    {
+        if(this.notationMenu === null)
+            throw new Error("Notation table is not initialized.");
+
+        if(isInitOperation)
+            this.notationMenu!.addNotations(this.chess.getNotation());
+        else
+            this.notationMenu!.addNotation(this.chess.getNotation());
+
+        // Show the score of the players on the top and bottom of the table.
+        this.notationMenu!.showScore(this.chess.getScores());
+    }
+
+    /**
+     * This function updates the log console.
+     */
+    private updateLogConsole(): void
+    {
+        if(this.logConsole === null)
+            throw new Error("Log console is not initialized.");
+
+        this.logConsole!.show(this.chess.getLogs());
+    }
+
 }

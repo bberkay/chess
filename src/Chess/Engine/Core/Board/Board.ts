@@ -1,4 +1,4 @@
-import { Square, Color, CastlingType } from "../../../Types";
+import {Square, Color, CastlingType, PieceType} from "../../../Types";
 import { Piece } from "../../Types";
 
 /**
@@ -29,6 +29,10 @@ export class Board {
         [CastlingType.BlackLong]: true,
         [CastlingType.BlackShort]: true
     };
+    protected static scores: Record<Color, {score: number, pieces: PieceType[]}> = {
+        [Color.White]: {score: 0, pieces: []},
+        [Color.Black]: {score: 0, pieces: []}
+    }
     protected static moveHistory: string[] = [];
     protected static bannedEnPassantSquares: Square[] = [];
 }

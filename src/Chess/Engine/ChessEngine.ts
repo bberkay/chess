@@ -62,8 +62,7 @@ export class ChessEngine{
          * Then create a game with the standard position.
          */
         if(this.isStandalone){
-            Logger.clear();
-            Logger.start();
+            Logger.start(true);
             this.createGame();
         }
 
@@ -990,6 +989,14 @@ export class ChessEngine{
     {
         Logger.save("Notation loaded from BoardQueryer.", "getNotation", Source.ChessEngine);
         return BoardQueryer.getMoveHistory();
+    }
+
+    /**
+     * This function returns the scores of the players.
+     */
+    public getScores(): Record<Color, {score: number, pieces: PieceType[]}>
+    {
+        return BoardQueryer.getScores();
     }
 
     /**

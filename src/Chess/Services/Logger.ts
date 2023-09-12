@@ -41,8 +41,11 @@ export class Logger{
     /**
      * Create empty log array for taken action.
      */
-    public static start(): void
+    public static start(withCleaning: boolean = false): void
     {
+        if(withCleaning)
+            Logger.clear();
+
         Logger.logs.push([]);
     }
 

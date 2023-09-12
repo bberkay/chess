@@ -69,15 +69,18 @@ export class LogConsole{
 
         // Add the log to the log list.
         for(const log of lastLogs) {
-            const source: string = log.source.includes("Engine") ? "Engine | " : (log.source.includes("Board") ? "Board &nbsp;| " : `Chess &nbsp;| `);
+            const source: string = log.source.includes("Engine") ? "Engine" : (log.source.includes("Board") ? "Board" : "Chess");
             logListElement!.innerHTML +=
                 `
                 <li onmouseover="document.getElementById('log-file').innerHTML = '${log.source}'">
-                    &#x2022 <strong style="text-transform: uppercase">${source}</strong><span>${log.message}</span>
+                    &#x2022 <strong style="text-transform: uppercase">[${source}] </strong><span>${log.message}</span>
                 </li>
                 `;
         }
         logListElement!.innerHTML += "<hr>";
+
+        // Scroll to the bottom of the log list.
+        document.getElementById("log-console-body")!.scrollTop = logListElement!.scrollHeight;
     }
 
     /**

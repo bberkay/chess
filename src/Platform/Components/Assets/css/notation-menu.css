@@ -46,3 +46,13 @@
 #notation-table table tr:nth-child(odd){
     background-color: #222;
 }
+
+/**
+ * Scores section on the top and bottom of notation table
+ */
+#notation-menu .score-table{
+    font-size:15px;
+    font-weight:bold;
+    margin:10px 0;
+    width:250px;
+}

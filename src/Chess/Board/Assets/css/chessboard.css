@@ -34,8 +34,8 @@
     --checked-color: #DF3030;
     --disabled-color: #000;
     --selected-color: rgba(87, 206, 146, 0.25);
-    --from-color: rgba(33, 84, 55, 0.39);
-    --to-color: rgba(33, 84, 55, 0.39);
+    --from-color: rgba(69, 201, 255, 0.39);
+    --to-color: rgba(69, 201, 255, 0.39);
 
     /* White Pieces */
     --white-pawn-image: url("../images/pawn_white.png");
