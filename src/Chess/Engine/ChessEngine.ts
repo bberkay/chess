@@ -19,26 +19,25 @@ import {
     StartPosition
 } from "../Types";
 import {Piece} from "./Types";
-import {MoveEngine} from "./Core/Move/MoveEngine";
-import {BoardManager} from "./Core/Board/BoardManager.ts";
+import {MoveEngine} from "./Move/MoveEngine.ts";
+import {BoardManager} from "./Board/BoardManager.ts";
 import {Converter} from "../Utils/Converter";
-import {BoardQueryer} from "./Core/Board/BoardQueryer.ts";
-import {Locator} from "./Core/Utils/Locator.ts";
-import {Extractor} from "./Core/Utils/Extractor.ts";
-import {RouteCalculator} from "./Core/Move/Calculator/RouteCalculator.ts";
+import {BoardQueryer} from "./Board/BoardQueryer.ts";
+import {Locator} from "./Move/Utils/Locator.ts";
+import {Extractor} from "./Move/Utils/Extractor.ts";
+import {RouteCalculator} from "./Move/Calculator/RouteCalculator.ts";
 import {Logger, Source} from "../Services/Logger.ts";
 
 
 /**
  * This class provides users to create and manage a game(does not include board or other ui elements).
  */
-export class ChessEngine{
+export class ChessEngine extends BoardManager {
 
     /**
      * Properties of the ChessEngine class.
      */
     private moveEngine: MoveEngine;
-    private boardManager: BoardManager;
     private statusOfGame: GameStatus = GameStatus.NotStarted;
     private playedFrom: Square | null = null;
     private playedTo: Square | null = null;
@@ -53,8 +52,8 @@ export class ChessEngine{
      * Constructor of the ChessEngine class.
      */
     constructor(isStandalone: boolean = false){
+        super();
         this.moveEngine = new MoveEngine();
-        this.boardManager = new BoardManager();
         this.isStandalone = isStandalone;
 
         /**
@@ -86,7 +85,7 @@ export class ChessEngine{
          * convert it to json notation, also store the fen notation of the given position).
          */
         const fenNotationOfGivenPosition: string = typeof position == "string" ? position : Converter.jsonToFen(position);
-        this.boardManager.createBoard(typeof position == "string" ? Converter.fenToJson(position) : position);
+        this.createBoard(typeof position == "string" ? Converter.fenToJson(position) : position);
         Logger.save("Game created on ChessEngine by given position", "createGame", Source.ChessEngine);
 
         // Check the status of the game if board is different from the standard position.
@@ -348,7 +347,7 @@ export class ChessEngine{
         }
 
         // Move the piece.
-        this.boardManager.movePiece(from, to);
+        this.movePiece(from, to);
     }
 
     /**
@@ -396,7 +395,7 @@ export class ChessEngine{
         Logger.save(`Rook moved to target square[${rookNewSquare}] by determined castling type[${castlingType}] on engine`, "playMove", Source.ChessEngine);
 
         // Change castling availability.
-        this.boardManager.changeCastlingAvailability((BoardQueryer.getColorOfTurn() + castlingType) as CastlingType, false);
+        this.changeCastlingAvailability((BoardQueryer.getColorOfTurn() + castlingType) as CastlingType, false);
         Logger.save(`Castling[${castlingType}] is disabled because castling is played`, "playMove", Source.ChessEngine);
 
         // Set the current move for the move history.
@@ -422,7 +421,7 @@ export class ChessEngine{
         const killedPieceSquare = Number(this.playedTo) + (BoardQueryer.getPieceOnSquare(this.playedTo as Square)?.getColor() == Color.White ? 8 : -8);
 
         // Remove the killed piece.
-        this.boardManager.removePiece(killedPieceSquare);
+        this.removePiece(killedPieceSquare);
         Logger.save(`Captured piece by en passant move is found on square[${killedPieceSquare}] and removed on engine`, "playMove", Source.ChessEngine);
 
         // Set the current move for the move history.
@@ -457,7 +456,7 @@ export class ChessEngine{
     private _doPromote(from: Square, selectedPromote: Square | PieceType.Queen | PieceType.Rook | PieceType.Bishop | PieceType.Knight): void
     {
         // Remove the pawn
-        this.boardManager.removePiece(from);
+        this.removePiece(from);
         Logger.save(`Promoted Pawn is removed from square[${from}] on engine`, "playMove", Source.ChessEngine);
 
         // If selected promote is square:
@@ -497,8 +496,9 @@ export class ChessEngine{
         // Get the player's color.
         const playerColor: Color = BoardQueryer.getColorOfTurn();
 
-        // Create the new piece.
-        this.boardManager.createPiece(playerColor, selectedPromote as PieceType, from);
+        // Create the new piece and increase the score of the player.
+        this.createPiece(playerColor, selectedPromote as PieceType, from);
+        this.updateScores(from);
         Logger.save(`Piece[${playerColor} ${selectedPromote}] created on square[${from}] on engine`, "playMove", Source.ChessEngine);
 
         // Finish the promotion.
@@ -532,10 +532,10 @@ export class ChessEngine{
         this.currentMoves = null;
         this._checkCastling();
         this._checkEnPassant();
-        this.boardManager.changeTurn();
+        this.changeTurn();
         Logger.save("Turn is changed.", "finishTurn", Source.ChessEngine);
         this.checkStatusOfGame();
-        this.boardManager.addMoveToHistory(this.moveNotation);
+        this.addMoveToHistory(this.moveNotation);
         this.checkThreefoldRepetition();
         Logger.save(`Notation[${this.moveNotation}] of current move add to move history`, "finishTurn", Source.ChessEngine);
         this.moveNotation = "";
@@ -612,12 +612,12 @@ export class ChessEngine{
          * @see For more information about square ids, see src/Chess/Types/index.ts
          */
         if(piece.getType() == PieceType.King){
-            this.boardManager.changeCastlingAvailability((piece.getColor() + "Long") as CastlingType, false);
-            this.boardManager.changeCastlingAvailability((piece.getColor() + "Short") as CastlingType, false);
+            this.changeCastlingAvailability((piece.getColor() + "Long") as CastlingType, false);
+            this.changeCastlingAvailability((piece.getColor() + "Short") as CastlingType, false);
             Logger.save(`[${piece.getColor()}] Long and Short castling is disabled because king has moved`, "checkCastling", Source.ChessEngine);
         }else if(piece.getType() == PieceType.Rook){
             const rookType: "Long" | "Short" = Number(this.playedTo) % 8 == 0 ? "Short" : "Long";
-            this.boardManager.changeCastlingAvailability((piece.getColor() + rookType) as CastlingType, false);
+            this.changeCastlingAvailability((piece.getColor() + rookType) as CastlingType, false);
             Logger.save(`[${piece.getColor()}] Castling[${rookType}] is disabled because rook has moved`, "checkCastling", Source.ChessEngine);
         }
         Logger.save("Castling Check is finished", "checkCastling", Source.ChessEngine);
@@ -642,7 +642,7 @@ export class ChessEngine{
         if(piece && piece.getType() == PieceType.Pawn){
             if(Locator.getRow(Number(this.playedFrom)) == (piece.getColor() == Color.White ? 6 : 3)){
                 const moveOfEnemyPawn: number = piece.getColor() == Color.White ? Number(this.playedTo) + 8 : Number(this.playedTo) - 8;
-                this.boardManager.banEnPassantSquare(moveOfEnemyPawn);
+                this.banEnPassantSquare(moveOfEnemyPawn);
                 Logger.save(`En passant square[${moveOfEnemyPawn}] is banned because target pawn has moved 1 square forward`, "checkEnPassant", Source.ChessEngine);
             }
         }
@@ -660,7 +660,7 @@ export class ChessEngine{
             if(Locator.getRow(squareOfPawn) == (pawn.getColor() == Color.White ? 4 : 5)){
                 const moves: Moves = this.moveEngine.getMoves(squareOfPawn)!;
                 if(moves && moves["EnPassant"]!.length > 0){
-                    this.boardManager.banEnPassantSquare(moves["EnPassant"]![0]);
+                    this.banEnPassantSquare(moves["EnPassant"]![0]);
                     Logger.save(`En passant square[${moves["EnPassant"]![0]}] is banned because pawn has en passant move that not played valid turn`, "checkEnPassant", Source.ChessEngine);
                 }
             }

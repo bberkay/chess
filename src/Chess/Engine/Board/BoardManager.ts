@@ -1,8 +1,8 @@
-import {Board} from "./Board";
-import {CastlingType, Color, JsonNotation, PieceType, Square} from "../../../Types";
+import {Board} from "./Board.ts";
+import {CastlingType, Color, JsonNotation, PieceType, Square} from "../../Types";
 import {BoardQueryer} from "./BoardQueryer.ts";
-import {PieceModel} from "../../Models/PieceModel";
-import {Piece} from "../../Types";
+import {PieceModel} from "../Models/PieceModel.ts";
+import {Piece} from "../Types";
 
 /**
  * This class provides the board management of the game.
@@ -19,7 +19,7 @@ export class BoardManager extends Board{
     /**
      * This function creates a new board with the given json notation.
      */
-    public createBoard(jsonNotation: JsonNotation): void
+    protected createBoard(jsonNotation: JsonNotation): void
     {
         // Reset board by setting all squares to null.
         for(let square in Board.currentBoard){
@@ -48,7 +48,7 @@ export class BoardManager extends Board{
      * {"color":Color.White, "type":PieceType.Pawn, "square":Square.b2}]); This will create two
      * white pawns on a2 and b2.
      */
-    public createPieces(pieces:Array<{color: Color, type:PieceType, square:Square}>): void
+    protected createPieces(pieces:Array<{color: Color, type:PieceType, square:Square}>): void
     {
         for(let piece of pieces){
             this.createPiece(piece.color, piece.type, piece.square);
@@ -59,7 +59,7 @@ export class BoardManager extends Board{
      * This function creates a piece with the given color, type and square.
      * @example createPiece(Color.White, PieceType.Pawn, Square.a2); This will create a white pawn on a2.
      */
-    public createPiece(color: Color, type:PieceType, square:Square): void
+    protected createPiece(color: Color, type:PieceType, square:Square): void
     {
         // Create piece on the given square.
         Board.currentBoard[square] = new PieceModel(color, type);
@@ -68,49 +68,12 @@ export class BoardManager extends Board{
     /**
      * Add piece to square
      */
-    public movePiece(from: Square, to:Square): void
+    protected movePiece(from: Square, to:Square): void
     {
         // Check if the square has a piece and get the piece.
         const fromPiece: Piece | null = BoardQueryer.getPieceOnSquare(from)!;
         const toPiece: Piece | null = BoardQueryer.getPieceOnSquare(to);
-
-        /**
-         * Find the score of the piece if the move is a capture move, add the score to the
-         * current player's score. Also, calculate the pieces of the player by checking the
-         * enemy player's pieces.
-         *
-         * @see for more information about piece scores https://en.wikipedia.org/wiki/Chess_piece_relative_value
-         */
-        function calculateScoreOfMove(){
-            if(toPiece)
-            {
-                const enemyColor: Color = Board.currentTurn == Color.White ? Color.Black : Color.White;
-
-                /**
-                 * Increase the score of the current player and decrease the score of the enemy
-                 * player by the score of the piece. For example, if white captures a black pawn
-                 * then increase the score of the white player by 1 and decrease the score of the
-                 * black player by 1. Also, if move is a promote move then decrease the score of
-                 * promoted pawn from the current player's score(increase will automatically
-                 * happen because the promoted piece's score will be toPiece.getScore()).
-                 */
-                Board.scores[Board.currentTurn].score += toPiece.getScore() - (toPiece.getColor() === Board.currentTurn ? 1 : 0);
-                Board.scores[enemyColor].score -= toPiece.getScore();
-
-                /**
-                 * Add captured piece to the current player's pieces if the piece is not in the
-                 * enemy player's pieces else remove the piece from the enemy player's pieces.
-                 * For example, if white captures a black pawn and the black player has 2 pawns
-                 * then remove one of the pawns from the black player's pieces. If the black
-                 * player has no pawn then add the pawn to the white player's pieces.
-                 */
-                const enemyPlayersPieces: Array<PieceType> = Board.scores[enemyColor].pieces;
-                if(enemyPlayersPieces.includes(toPiece.getType()))
-                    enemyPlayersPieces.splice(enemyPlayersPieces.indexOf(toPiece.getType()), 1);
-                else
-                    Board.scores[Board.currentTurn].pieces.push(toPiece.getType());
-            }
-        }
+        console.log(fromPiece, toPiece);
 
         /**
          * If the moved piece is a pawn or capture move then set half move count to 0
@@ -119,8 +82,9 @@ export class BoardManager extends Board{
          */
         Board.halfMoveCount = toPiece || fromPiece.getType() === PieceType.Pawn ? 0 : Board.halfMoveCount + 1;
 
-        // Calculate score of the move.
-        calculateScoreOfMove();
+        // Calculate score of the move if the move is a capture move.
+        if(toPiece)
+            this.updateScores(to);
 
         // Move piece from square to square.
         Board.currentBoard[to] = fromPiece;
@@ -130,7 +94,7 @@ export class BoardManager extends Board{
     /**
      * Remove piece from square
      */
-    public removePiece(square: Square): void
+    protected removePiece(square: Square): void
     {
         Board.currentBoard[square] = null;
     }
@@ -138,16 +102,53 @@ export class BoardManager extends Board{
     /**
      * Change turn(change current player's color to enemy color)
      */
-    public changeTurn(): void
+    protected changeTurn(): void
     {
         Board.currentTurn = BoardQueryer.getColorOfOpponent();
         Board.moveCount += Board.currentTurn === Color.White ? 1 : 0;
     }
 
     /**
+     * Find the score of the piece if the move is a capture move, add the score to the
+     * current player's score. Also, calculate the pieces of the player by checking the
+     * enemy player's pieces.
+     *
+     * @see for more information about piece scores https://en.wikipedia.org/wiki/Chess_piece_relative_value
+     */
+    protected updateScores(captureMove: Square): void
+    {
+        const enemyColor: Color = Board.currentTurn == Color.White ? Color.Black : Color.White;
+        const capturedPiece: Piece = BoardQueryer.getPieceOnSquare(captureMove)!;
+
+        /**
+         * Increase the score of the current player and decrease the score of the enemy
+         * player by the score of the piece. For example, if white captures a black pawn
+         * then increase the score of the white player by 1 and decrease the score of the
+         * black player by 1. Also, if move is a promote move then decrease the score of
+         * promoted pawn from the current player's score(increase will automatically
+         * happen because the promoted piece's score will be toPiece.getScore()).
+         */
+        Board.scores[Board.currentTurn].score += capturedPiece.getScore() - (capturedPiece.getColor() === Board.currentTurn ? 1 : 0);
+        Board.scores[enemyColor].score -= capturedPiece.getScore();
+
+        /**
+         * Add captured piece to the current player's pieces if the piece is not in the
+         * enemy player's pieces else remove the piece from the enemy player's pieces.
+         * For example, if white captures a black pawn and the black player has 2 pawns
+         * then remove one of the pawns from the black player's pieces. If the black
+         * player has no pawn then add the pawn to the white player's pieces.
+         */
+        const enemyPlayersPieces: Array<PieceType> = Board.scores[enemyColor].pieces;
+        if(enemyPlayersPieces.includes(capturedPiece.getType()))
+            enemyPlayersPieces.splice(enemyPlayersPieces.indexOf(capturedPiece.getType()), 1);
+        else
+            Board.scores[Board.currentTurn].pieces.push(capturedPiece.getType());
+    }
+
+    /**
      * Add move to history
      */
-    public addMoveToHistory(move: string): void
+    protected addMoveToHistory(move: string): void
     {
         Board.moveHistory.push(move);
     }
@@ -155,7 +156,7 @@ export class BoardManager extends Board{
     /**
      * Change castling availability
      */
-    public changeCastlingAvailability(castlingType: CastlingType, value: boolean): void
+    protected changeCastlingAvailability(castlingType: CastlingType, value: boolean): void
     {
         Board.castlingAvailability[castlingType] = value;
     }
@@ -163,7 +164,7 @@ export class BoardManager extends Board{
     /**
      * Ban en passant square
      */
-    public banEnPassantSquare(square: Square): void
+    protected banEnPassantSquare(square: Square): void
     {
         Board.bannedEnPassantSquares.push(square);
     }

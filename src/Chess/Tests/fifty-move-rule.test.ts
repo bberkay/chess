@@ -8,7 +8,7 @@ import { expect, test } from 'vitest';
 import { Test } from './Types';
 import { ChessEngine } from '../Engine/ChessEngine';
 import { GameStatus, Square } from "../Types";
-import { BoardQueryer } from "../Engine/Core/Board/BoardQueryer";
+import { BoardQueryer } from "../Engine/Board/BoardQueryer";
 
 /**
  * Test the fifty-move rule (50 moves without a capture

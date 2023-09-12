@@ -1,21 +1,21 @@
-import {CastlingType, Color, EnPassantDirection, PieceType, Square} from "../../../../Types";
-import {Piece} from "../../../Types";
+import {CastlingType, Color, EnPassantDirection, PieceType, Square} from "../../../Types";
+import {Piece} from "../../Types";
 import {BoardQueryer} from "../../Board/BoardQueryer.ts";
-import {Locator} from "../../Utils/Locator.ts";
-import {Converter} from "../../../../Utils/Converter.ts";
+import {Locator} from "../Utils/Locator.ts";
+import {Converter} from "../../../Utils/Converter.ts";
 
 /**
  * This class is responsible for checking if the specific move is available like
  * castling and en passant. Also, the methods are separated by the direction or
  * type because of the get one direction or type of move(check move engine).
  *
- * @see src/Chess/Engine/Core/Move/MoveEngine.ts
+ * @see src/Chess/Engine/Move/MoveEngine.ts
  */
 export class MoveExtender{
 
     /**
      * @description Check if the castling is available for the given king, rook and squares between king and rook.
-     * @see src/Chess/Engine/Core/Move/Extender/MoveExtender.ts For more information.
+     * @see src/Chess/Engine/Move/Extender/MoveExtender.ts For more information.
      */
     private calculateCastlingMove(color: Color, castlingType: "Long" | "Short"): Square | null
     {
@@ -63,7 +63,7 @@ export class MoveExtender{
          * Check first and second rules, if the king or the long rook
          * hasn't moved previously or if the king is not in check.
          *
-         * @see for more information about dangerous squares src/Chess/Engine/Core/Board/BoardQueryer.ts
+         * @see for more information about dangerous squares src/Chess/Engine/Board/BoardQueryer.ts
          */
         if(!chosenRook || !BoardQueryer.isCastlingAvailable((color + castlingType) as CastlingType) || BoardQueryer.isSquareThreatened(kingSquare))
             return null;
@@ -84,7 +84,7 @@ export class MoveExtender{
 
     /**
      * @description Check if the long castling is available for the given color.
-     * @see src/Chess/Engine/Core/Move/Extender/MoveExtender.ts For more information.
+     * @see src/Chess/Engine/Move/Extender/MoveExtender.ts For more information.
      */
     protected getLongCastlingMove(color: Color): Square | null
     {
@@ -93,7 +93,7 @@ export class MoveExtender{
 
     /**
      * @description Check if the short castling is available for the given color.
-     * @see src/Chess/Engine/Core/Move/Extender/MoveExtender.ts For more information.
+     * @see src/Chess/Engine/Move/Extender/MoveExtender.ts For more information.
      */
     protected getShortCastlingMove(color: Color): Square | null
     {
@@ -102,7 +102,7 @@ export class MoveExtender{
 
     /**
      * @description Check if the en passant is available for the given square and direction.
-     * @see src/Chess/Engine/Core/Move/Extender/MoveExtender.ts For more information.
+     * @see src/Chess/Engine/Move/Extender/MoveExtender.ts For more information.
      */
     private calculateEnPassantMove(square: Square, direction: EnPassantDirection): Square | null
     {
@@ -175,7 +175,7 @@ export class MoveExtender{
 
     /**
      * @description Check if the left en passant is available for the given square.
-     * @see src/Chess/Engine/Core/Move/Extender/MoveExtender.ts For more information.
+     * @see src/Chess/Engine/Move/Extender/MoveExtender.ts For more information.
      */
     protected getLeftEnPassantMove(square: Square): Square | null
     {
@@ -184,7 +184,7 @@ export class MoveExtender{
 
     /**
      * @description Check if the right en passant is available for the given square.
-     * @see src/Chess/Engine/Core/Move/Extender/MoveExtender.ts For more information.
+     * @see src/Chess/Engine/Move/Extender/MoveExtender.ts For more information.
      */
     protected getRightEnPassantMove(square: Square): Square | null
     {
@@ -221,7 +221,7 @@ export class MoveExtender{
          * 7th row, return null. If black pawn is not on the 2nd row,
          * return null.
          *
-         * @see for more information about row calculation src/Manager/Locator.ts
+         * @see for more information about row calculation src/Chess/Engine/Move/Utils/Locator.ts
          */
         if((color == Color.Black && row != BLACK_PROMOTION_ROW - 1) || (color == Color.White && row != WHITE_PROMOTION_ROW + 1))
             return null;

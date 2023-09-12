@@ -151,6 +151,7 @@ export class Platform{
             this.notationMenu!.addNotation(this.chess.getNotation());
 
         // Show the score of the players on the top and bottom of the table.
+        console.log(this.chess.getScores());
         this.notationMenu!.showScore(this.chess.getScores());
     }
 

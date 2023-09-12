@@ -8,7 +8,7 @@ import { expect, test } from 'vitest';
 import { Test } from './Types';
 import { Color, MoveType, PieceType, Square, StartPosition } from '../Types';
 import { ChessEngine } from '../Engine/ChessEngine';
-import { BoardQueryer } from "../Engine/Core/Board/BoardQueryer";
+import { BoardQueryer } from "../Engine/Board/BoardQueryer";
 
 /**
  * All Castling Tests For every situation.

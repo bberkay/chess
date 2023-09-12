@@ -28,6 +28,7 @@ export class Chess{
     private chessEngine: ChessEngine;
     private chessBoard: ChessBoard;
     private selectedSquare: Square | null;
+    private isPromotionScreenOpen: boolean = false;
     private readonly isCachingEnabled: boolean = true;
 
     /**
@@ -109,7 +110,14 @@ export class Chess{
     public doActionOnBoard(moveType: SquareClickMode, square: Square): void
     {
         Logger.start();
-        if([SquareClickMode.Play, SquareClickMode.Castling, SquareClickMode.Promote, SquareClickMode.Promotion, SquareClickMode.EnPassant].includes(moveType)){
+
+        // Find the move type and do the action.
+        if([SquareClickMode.Play, SquareClickMode.Castling, SquareClickMode.Promote, SquareClickMode.Promotion, SquareClickMode.EnPassant].includes(moveType))
+        {
+            // Do not allow to cache the game when the promotion screen is open.
+            this.isPromotionScreenOpen = moveType == SquareClickMode.Promotion;
+
+            // Play the move on engine and board.
             this._doPlayAction(square);
 
             /**
@@ -176,7 +184,7 @@ export class Chess{
         this.chessBoard.showStatus(this.chessEngine.getStatusOfGame());
 
         // Save the game to the cache as json notation.
-        if(this.isCachingEnabled){
+        if(this.isCachingEnabled && !this.isPromotionScreenOpen){
             Cacher.save(this.chessEngine.getGameAsJsonNotation());
             Logger.save("Game saved to cache with notation", "finishTurn", Source.Chess);
         }

@@ -1,8 +1,8 @@
-import {Color, PieceType, Square} from "../../../../Types";
-import {MoveRoute, Piece, Route} from "../../../Types";
-import {DirectionCalculator} from "./DirectionCalculator";
-import {Extractor} from "../../Utils/Extractor";
-import {BoardQueryer} from "../../Board/BoardQueryer";
+import {Color, PieceType, Square} from "../../../Types";
+import {MoveRoute, Piece, Route} from "../../Types";
+import {DirectionCalculator} from "./DirectionCalculator.ts";
+import {Extractor} from "../Utils/Extractor.ts";
+import {BoardQueryer} from "../../Board/BoardQueryer.ts";
 
 /**
  * This class calculates the route of the given piece.
@@ -51,13 +51,12 @@ export class RouteCalculator{
     /**
      * This function returns pawn route scheme(2 horizontal and 1 diagonal for each direction).
      * For more information, please check the class description.
-     * @See src/Chess/Engine/Core/Move/Calculator/RouteCalculator.ts
+     * @See src/Chess/Engine/Move/Calculator/RouteCalculator.ts
      */
     public static getPawnRoute(square: Square, color: Color | null = null): Route
     {
         /**
-         * Find player's color by given square. If square has no piece,
-         * then use StateManager.
+         * Find player's color by given square.
          */
         color = color ?? BoardQueryer.getColorBySquare(square) ?? BoardQueryer.getColorOfTurn();
 
@@ -71,7 +70,7 @@ export class RouteCalculator{
     /**
      * This function returns the horizontal squares of the given square.
      * For more information, please check the class description.
-     * @See src/Chess/Engine/Core/Move/Calculator/RouteCalculator.ts
+     * @See src/Chess/Engine/Move/Calculator/RouteCalculator.ts
      */
     public static getKnightRoute(square: Square, color: Color | null = null): Route
     {
@@ -132,13 +131,12 @@ export class RouteCalculator{
     /**
      * This function returns bishop route scheme(diagonal).
      * For more information, please check the class description.
-     * @See src/Chess/Engine/Core/Move/Calculator/RouteCalculator.ts
+     * @See src/Chess/Engine/Move/Calculator/RouteCalculator.ts
      */
     public static getBishopRoute(square: Square, color: Color | null = null): Route
     {
         /**
-         * Get the diagonal squares with color of square. If square has no piece,
-         * then use StateManager.
+         * Get the diagonal squares with color of square
          */
         return DirectionCalculator.getDiagonalSquares(square, color ?? BoardQueryer.getColorBySquare(square) ?? BoardQueryer.getColorOfTurn());
     }
@@ -146,7 +144,7 @@ export class RouteCalculator{
     /**
      * This function returns rook route scheme(horizontal and vertical).
      * For more information, please check the class description.
-     * @See src/Chess/Engine/Core/Move/Calculator/RouteCalculator.ts
+     * @See src/Chess/Engine/Move/Calculator/RouteCalculator.ts
      */
     public static getRookRoute(square: Square, color: Color | null = null): Route
     {
@@ -166,7 +164,7 @@ export class RouteCalculator{
     /**
      * This function returns the rook and bishop route scheme(horizontal, vertical and diagonal).
      * For more information, please check the class description.
-     * @See src/Chess/Engine/Core/Move/Calculator/RouteCalculator.ts
+     * @See src/Chess/Engine/Move/Calculator/RouteCalculator.ts
      */
     public static getQueenRoute(square: Square, color: Color | null = null): Route
     {
@@ -187,7 +185,7 @@ export class RouteCalculator{
     /**
      * This function returns the horizontal squares of the given square.
      * For more information, please check the class description.
-     * @See src/Chess/Engine/Core/Move/Calculator/RouteCalculator.ts
+     * @See src/Chess/Engine/Move/Calculator/RouteCalculator.ts
      */
     public static getKingRoute(square: Square, color: Color | null = null): Route
     {

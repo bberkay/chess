@@ -1,9 +1,9 @@
-import {Color, Moves, MoveType, PieceType, Square} from "../../../Types";
-import {MoveRoute, Piece, Route} from "../../Types";
+import {Color, Moves, MoveType, PieceType, Square} from "../../Types";
+import {MoveRoute, Piece, Route} from "../Types";
 import {BoardQueryer} from "../Board/BoardQueryer.ts";
-import {Locator} from "../Utils/Locator.ts";
+import {Locator} from "./Utils/Locator.ts";
 import {RouteCalculator} from "./Calculator/RouteCalculator.ts";
-import {Extractor} from "../Utils/Extractor.ts";
+import {Extractor} from "./Utils/Extractor.ts";
 import {MoveExtender} from "./Extender/MoveExtender.ts";
 
 /**
@@ -398,7 +398,7 @@ export class MoveEngine extends MoveExtender{
          * For find the dangerous route, get relative route of the piece and king.
          * Relative route is the route between piece and king.
          *
-         * @see for more information about relative route src/Chess/Engine/Core/Utils/Locator.ts
+         * @see for more information about relative route src/Chess/Engine/Move/Utils/Locator.ts
          */
         const relativeRoute: MoveRoute | null = Locator.getRelative(kingSquare, this.pieceSquare!);
         if(!relativeRoute)
@@ -408,7 +408,7 @@ export class MoveEngine extends MoveExtender{
         /**
          * For find the dangerous route, get opposite route of relative route.
          *
-         * @see for more information about opposite route src/Chess/Engine/Core/Utils/Locator.ts
+         * @see for more information about opposite route src/Chess/Engine/Move/Utils/Locator.ts
          */
         dangerousRoute = Locator.getOpposite(relativeRoute);
 

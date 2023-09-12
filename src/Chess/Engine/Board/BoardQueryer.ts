@@ -1,6 +1,6 @@
-import { Board } from "./Board";
-import { Square, Color, PieceType, CastlingType, JsonNotation } from "../../../Types";
-import { Piece, Route, MoveRoute } from "../../Types";
+import { Board } from "./Board.ts";
+import { Square, Color, PieceType, CastlingType, JsonNotation } from "../../Types";
+import { Piece, Route, MoveRoute } from "../Types";
 import { RouteCalculator } from "../Move/Calculator/RouteCalculator.ts";
 
 

@@ -1,5 +1,5 @@
-import {Square, Color, CastlingType, PieceType} from "../../../Types";
-import { Piece } from "../../Types";
+import {Square, Color, CastlingType, PieceType} from "../../Types";
+import { Piece } from "../Types";
 
 /**
  * This class is used for the store the board.
