@@ -6,6 +6,10 @@ import { NotationMenu } from "./Components/NotationMenu.ts";
 import { LogConsole } from "./Components/LogConsole";
 import { MenuOperationType, MenuOperationValue } from "./Types";
 
+/**
+ * This class is the main class of the chess platform menu.
+ * It provides the components of the menu and connections between the chess and menu.
+ */
 export class Platform{
 
     private readonly chess: Chess;

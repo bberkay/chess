@@ -51,7 +51,7 @@ export class RouteCalculator{
     /**
      * This function returns pawn route scheme(2 horizontal and 1 diagonal for each direction).
      * For more information, please check the class description.
-     * @See src/Engine/Core/RouteCalculator.ts
+     * @See src/Chess/Engine/Core/Move/Calculator/RouteCalculator.ts
      */
     public static getPawnRoute(square: Square, color: Color | null = null): Route
     {
@@ -71,7 +71,7 @@ export class RouteCalculator{
     /**
      * This function returns the horizontal squares of the given square.
      * For more information, please check the class description.
-     * @See src/Engine/Core/RouteCalculator.ts
+     * @See src/Chess/Engine/Core/Move/Calculator/RouteCalculator.ts
      */
     public static getKnightRoute(square: Square, color: Color | null = null): Route
     {
@@ -132,7 +132,7 @@ export class RouteCalculator{
     /**
      * This function returns bishop route scheme(diagonal).
      * For more information, please check the class description.
-     * @See src/Engine/Core/RouteCalculator.ts
+     * @See src/Chess/Engine/Core/Move/Calculator/RouteCalculator.ts
      */
     public static getBishopRoute(square: Square, color: Color | null = null): Route
     {
@@ -146,7 +146,7 @@ export class RouteCalculator{
     /**
      * This function returns rook route scheme(horizontal and vertical).
      * For more information, please check the class description.
-     * @See src/Engine/Core/RouteCalculator.ts
+     * @See src/Chess/Engine/Core/Move/Calculator/RouteCalculator.ts
      */
     public static getRookRoute(square: Square, color: Color | null = null): Route
     {
@@ -166,7 +166,7 @@ export class RouteCalculator{
     /**
      * This function returns the rook and bishop route scheme(horizontal, vertical and diagonal).
      * For more information, please check the class description.
-     * @See src/Engine/Core/RouteCalculator.ts
+     * @See src/Chess/Engine/Core/Move/Calculator/RouteCalculator.ts
      */
     public static getQueenRoute(square: Square, color: Color | null = null): Route
     {
@@ -187,7 +187,7 @@ export class RouteCalculator{
     /**
      * This function returns the horizontal squares of the given square.
      * For more information, please check the class description.
-     * @See src/Engine/Core/RouteCalculator.ts
+     * @See src/Chess/Engine/Core/Move/Calculator/RouteCalculator.ts
      */
     public static getKingRoute(square: Square, color: Color | null = null): Route
     {

@@ -168,8 +168,8 @@ export class MoveEngine extends MoveExtender{
          * pawn, add the left bottom square(current square id + 7) and right
          * bottom square(current square id + 9) to the pawn's moves.
          *
-         * @see for more information about square id check Square enum in src/Types.ts
-         * @see for more information about en passant check src/Engine/Checker/MoveChecker.ts
+         * @see for more information about square id check Square enum in src/Chess/Types/index.ts
+         * @see for more information about en passant check src/Chess/Engine/Move/Extender/MoveExtender.ts
          */
 
         // Add left en passant move to the pawn's moves.
@@ -200,8 +200,8 @@ export class MoveEngine extends MoveExtender{
          * moves. Also, if the pawn is black and is on the second row,
          * then add the bottom square(current square id - 8) to the pawn's moves.
          *
-         * @see for more information about square id check Square enum in src/Types.ts
-         * @see for more information about promotion check src/Engine/Checker/MoveChecker.ts
+         * @see for more information about square id check Square enum in src/Chess/Types/index.ts
+         * @see for more information about promotion check src/Chess/Engine/Move/Extender/MoveExtender.ts
          */
 
         /**
@@ -323,7 +323,7 @@ export class MoveEngine extends MoveExtender{
          * add Square.a8 to king's left route and Square.h8 to king's
          * right route.
          *
-         * @see for more information src/Engine/Checker/MoveChecker.ts
+         * @see for more information src/Chess/Engine/Move/Extender/MoveExtender.ts
          */
 
         /**
@@ -371,7 +371,7 @@ export class MoveEngine extends MoveExtender{
      * @return if Array<Square> is given, then return Array<Square>. If Path is given, then
      * return Path.
      *
-     * @see src/Engine/Core/MoveEngine.ts For more information.
+     * @see src/Chess/Engine/Move/Extender/MoveExtender.ts For more information.
      */
     private _doKingSafety(moveRoute: Route): Route | null
     {
@@ -398,7 +398,7 @@ export class MoveEngine extends MoveExtender{
          * For find the dangerous route, get relative route of the piece and king.
          * Relative route is the route between piece and king.
          *
-         * @see for more information about relative route src/Engine/Utils/Locator.ts
+         * @see for more information about relative route src/Chess/Engine/Core/Utils/Locator.ts
          */
         const relativeRoute: MoveRoute | null = Locator.getRelative(kingSquare, this.pieceSquare!);
         if(!relativeRoute)
@@ -408,7 +408,7 @@ export class MoveEngine extends MoveExtender{
         /**
          * For find the dangerous route, get opposite route of relative route.
          *
-         * @see for more information about opposite route src/Engine/Utils/Locator.ts
+         * @see for more information about opposite route src/Chess/Engine/Core/Utils/Locator.ts
          */
         dangerousRoute = Locator.getOpposite(relativeRoute);
 

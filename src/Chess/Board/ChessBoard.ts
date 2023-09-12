@@ -249,7 +249,7 @@ export class ChessBoard {
 
                 /**
                  * Set the click mode by move type.
-                 * @see For more information about click modes, see SquareClickMode enum in src/Types/Board/index.ts
+                 * @see For more information about click modes, see SquareClickMode enum in src/Chess/Board/Types/index.ts
                  */
                 const clickMode: SquareClickMode = (moveType == MoveType.Castling ? SquareClickMode.Castling : null)
                     || (moveType == MoveType.EnPassant ? SquareClickMode.EnPassant : null)
@@ -318,7 +318,7 @@ export class ChessBoard {
          * it is a short castling.
          *
          * @see For more information about castling, see https://en.wikipedia.org/wiki/Castling
-         * @see For more information about square ids, see src/Types/index.ts
+         * @see For more information about square ids, see src/Chess/Types/index.ts
          */
         const castlingType: "Long" | "Short" = fromSquareId - toSquareId > 3 ? "Long" : "Short";
         Logger.save(`Castling type determined[${castlingType}] on board`, "playMove", Source.ChessBoard);
@@ -370,7 +370,7 @@ export class ChessBoard {
          * 8 if the piece is black. Because the killed piece is
          * always in the back of the target square.
          * @see For more information about en passant, see https://en.wikipedia.org/wiki/En_passant
-         * @see For more information about the square ids, see src/Types/index.ts
+         * @see For more information about the square ids, see src/Chess/Types/index.ts
          */
         const killedPieceSquare = parseInt(toSquare.getAttribute("data-square-id")!) + (toSquare.querySelector(".piece")!.getAttribute("data-color") === Color.White ? 8 : -8);
 
@@ -401,7 +401,7 @@ export class ChessBoard {
         const pieceType: PieceType = selectedOption.getAttribute("data-piece") as PieceType;
 
         // Create the piece first row if the piece is white otherwise create the piece last row.
-        const targetSquare: Square = Number(promoteSquare.getAttribute("data-square-id")!) + (color == Color.White ? -8 : +8) as Square;
+        const targetSquare: Square = Number(promoteSquare.getAttribute("data-square-id")!) as Square;
         this.createPiece(color, pieceType, targetSquare);
         Logger.save(`Piece[${color} ${pieceType}] created on square[${targetSquare}] on board`, "playMove", Source.ChessBoard);
 

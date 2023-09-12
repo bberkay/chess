@@ -1,11 +1,12 @@
 import { Board } from "./Board";
-import {Square, Color, PieceType, CastlingType, JsonNotation} from "../../../Types";
+import { Square, Color, PieceType, CastlingType, JsonNotation } from "../../../Types";
 import { Piece, Route, MoveRoute } from "../../Types";
 import { RouteCalculator } from "../Move/Calculator/RouteCalculator.ts";
 
 
 /**
- * TODO: Add description
+ * This class provides the traversing and querying of the board.
+ * Like, get all pieces, get piece on square, get square of piece, etc.
  */
 export class BoardQueryer extends Board{
 
@@ -16,7 +17,7 @@ export class BoardQueryer extends Board{
     {
         /**
          * Get all pieces on the board and convert them to JsonNotation.
-         * @see For more information about JsonNotation, please check the src/Types/index.ts
+         * @see For more information about JsonNotation, please check the src/Chess/Types/index.ts
          */
         const pieces: Array<{color: Color, type:PieceType, square:Square}> = [];
         for(let square in this.getBoard()){
@@ -240,12 +241,7 @@ export class BoardQueryer extends Board{
     {
         const squaresOfThreateningEnemies: Array<Square> = [];
 
-        /**
-         * Get the color of enemy player with the piece on the given square.
-         * If square has no piece, then use StateManager.
-         *
-         * @see For more information about the StateManager, please check the src/Managers/StateManager.ts
-         */
+        // Get the color of enemy player with the piece on the given square.
         const piece: Piece | null = this.getPieceOnSquare(targetSquare);
         const enemyColor: Color = by ?? (piece ? (piece.getColor() == Color.White ? Color.Black : Color.White) : this.getColorOfOpponent());
 
@@ -255,7 +251,7 @@ export class BoardQueryer extends Board{
          * So, we can get all dangerous squares with queen and knight
          * routes.
          *
-         * @see src/Engine/Core/Calculator/RouteCalculator.ts For more information.
+         * @see src/Chess/Engine/Core/Move/Calculator/RouteCalculator.ts For more information.
          */
         const allRoutes: Route = {
             ...RouteCalculator.getQueenRoute(targetSquare, enemyColor == Color.White ? Color.Black : Color.White),
@@ -267,7 +263,7 @@ export class BoardQueryer extends Board{
          * For example, if diagonal route contains any bishop or queen, then return true.
          * If horizontal route contains rook or queen, then return true, ..., etc.
          *
-         * @see src/Engine/Core/Calculator/RouteCalculator.ts For more information.
+         * @see src/Chess/Engine/Core/Move/Calculator/RouteCalculator.ts For more information.
          */
         const diagonalRoutes: Array<MoveRoute> = [MoveRoute.TopLeft, MoveRoute.TopRight, MoveRoute.BottomLeft, MoveRoute.BottomRight];
 
@@ -299,7 +295,7 @@ export class BoardQueryer extends Board{
          * then we have to check the blocker pawns. Otherwise, we have to check
          * the killer pawns
          *
-         * @see For more information about pawn please check the src/Engine/Core/MoveEngine.ts
+         * @see For more information about pawn please check the src/Chess/Engine/Core/Move/MoveEngine.ts
          */
         const pawnRoutes: Array<MoveRoute> = calculatePawnBlocks
             ? (enemyColor == Color.White ? [MoveRoute.Bottom] : [MoveRoute.Top])

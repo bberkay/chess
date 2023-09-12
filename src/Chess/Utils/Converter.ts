@@ -42,7 +42,7 @@ export class Converter{
      * Convert squareID to square
      * @example Converter.squareIDToSquare(57), return "a1"
      * @example Converter.squareIDToSquare(8), return "h8"
-     * @see For more information see Square Enum in src/Types.ts
+     * @see For more information see Square Enum in src/Chess/Types/index.ts
      */
     static squareIDToSquare(squareID: number): string
     {
@@ -63,7 +63,7 @@ export class Converter{
      * Convert FEN to JSON
      * @example Converter.fenToJson("8/8/8/8/8/8/P7/8 w - - 0 1")
      * @see For more information about fen notation https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
-     * @see For more information about Json notation etc. check src/Types.ts
+     * @see For more information about Json notation etc. check src/Chess/Types/index.ts
      */
     static fenToJson(fenNotation: StartPosition | string): JsonNotation
     {
@@ -163,7 +163,7 @@ export class Converter{
                      * Add 1 to column counter for change squareID to square(means set next square)
                      * and find current column by column counter, for example if columnCounter is 52(d2)
                      * then do 53(e2) by add 1 to columnCounter.
-                     * @see For more information see Square Enum in src/Types.ts
+                     * @see For more information see Square Enum in src/Chess/Types/index.ts
                      */
                     columnCounter += 1;
                     jsonColumn = String.fromCharCode(64 + columnCounter).toString().toLowerCase();

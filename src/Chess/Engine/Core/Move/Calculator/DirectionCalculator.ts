@@ -30,7 +30,7 @@ export class DirectionCalculator {
     /**
      * This function returns the diagonal squares of the given square.
      * For more information, please check the class description.
-     * @See src/Engine/Core/PathCalculator.ts
+     * @See src/Chess/Engine/Core/Move/Calculator/DirectionCalculator.ts
      */
     public static getDiagonalSquares(square: Square, safeColor: Color | null, distanceLimit: number | null = null, pieceSensitivity: boolean = true): Route
     {
@@ -51,7 +51,7 @@ export class DirectionCalculator {
     /**
      * This function returns the horizontal squares of the given square.
      * For more information, please check the class description.
-     * @See src/Engine/Core/PathCalculator.ts
+     * @See src/Chess/Engine/Core/Move/Calculator/DirectionCalculator.ts
      */
     public static getHorizontalSquares(square: Square, safeColor: Color | null, distanceLimit: number | null = null, pieceSensitivity: boolean = true): Route
     {
@@ -70,7 +70,7 @@ export class DirectionCalculator {
     /**
      * This function returns the vertical squares of the given square.
      * For more information, please check the class description.
-     * @See src/Engine/Core/PathCalculator.ts
+     * @See src/Chess/Engine/Core/Move/Calculator/DirectionCalculator.ts
      */
     public static getVerticalSquares(square: Square, safeColor: Color | null, distanceLimit: number | null = null, pieceSensitivity: boolean = true): Route
     {
@@ -89,7 +89,7 @@ export class DirectionCalculator {
     /**
      * Traverse in the given path(by given starter square and step for direction) and return the squares.
      * For more information, please check the class description.
-     * @See src/Engine/Core/PathCalculator.ts
+     * @See src/Chess/Engine/Core/Move/Calculator/DirectionCalculator.ts
      */
     private static traversePath(square: Square, step: number, distanceLimit: number | null, pieceSensitivity: boolean, safeColor: Color | null): Array<Square>
     {

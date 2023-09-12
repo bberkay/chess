@@ -28,7 +28,7 @@ export class BoardManager extends Board{
 
         /**
          * Create board and set the current properties by the given json notation.
-         * @see for more information about json notation src/Types.ts
+         * @see for more information about json notation src/Chess/Types/index.ts
          * @see for more information about fen notation https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
          */
         this.createPieces(jsonNotation.board);
@@ -82,19 +82,19 @@ export class BoardManager extends Board{
          * @see for more information about piece scores https://en.wikipedia.org/wiki/Chess_piece_relative_value
          */
         function calculateScoreOfMove(){
-            if(toPiece && toPiece.getColor() !== Board.currentTurn)
+            if(toPiece)
             {
-                // FIXME: Promote da hesaplanmalı.
-
                 const enemyColor: Color = Board.currentTurn == Color.White ? Color.Black : Color.White;
 
                 /**
                  * Increase the score of the current player and decrease the score of the enemy
                  * player by the score of the piece. For example, if white captures a black pawn
                  * then increase the score of the white player by 1 and decrease the score of the
-                 * black player by 1.
+                 * black player by 1. Also, if move is a promote move then decrease the score of
+                 * promoted pawn from the current player's score(increase will automatically
+                 * happen because the promoted piece's score will be toPiece.getScore()).
                  */
-                Board.scores[Board.currentTurn].score += toPiece.getScore();
+                Board.scores[Board.currentTurn].score += toPiece.getScore() - (toPiece.getColor() === Board.currentTurn ? 1 : 0);
                 Board.scores[enemyColor].score -= toPiece.getScore();
 
                 /**

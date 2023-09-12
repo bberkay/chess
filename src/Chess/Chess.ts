@@ -45,7 +45,7 @@ export class Chess{
     /**
      * This function checks the cache and loads the game from the cache if there is a game in the cache.
      * @returns Returns true if there is a game in the cache, otherwise returns false.
-     * @see For more information about cache management check src/Managers/CacheManager.ts
+     * @see For more information about cache management check src/Chess/Services/Cacher.ts
      */
     public checkAndLoadGameFromCache(): boolean
     {
@@ -65,7 +65,7 @@ export class Chess{
 
     /**
      * This function creates a new game with the given position(fen notation, json notation or StartPosition enum).
-     * @see For more information about StartPosition enum check src/types.ts
+     * @see For more information about StartPosition enum check src/Chess/Types/index.ts
      */
     public createGame(position: JsonNotation | StartPosition | string = StartPosition.Standard): void
     {
@@ -113,13 +113,17 @@ export class Chess{
             this._doPlayAction(square);
 
             /**
-             * If the move type is not promotion, clear the board.
-             * Because, we need selectedSquare(promoted pawn) to promote
+             * If the move type is not promotion, clear the board
+             * and set selected square to promotion piece square.
+             * @see For more information about promote check _doPromote() in src/Chess/Engine/ChessEngine.ts
              */
-            if(moveType == SquareClickMode.Promotion)
+            if(moveType == SquareClickMode.Promotion){
+                this.selectedSquare = this.selectedSquare! % 8 == 0 ? this.selectedSquare! + 8 : this.selectedSquare! - 8;
                 this.chessBoard.clearBoard();
-            else
+            }
+            else{
                 this._doClearAction();
+            }
         }
         else if(moveType === SquareClickMode.Select)
             this._doSelectAction(square);

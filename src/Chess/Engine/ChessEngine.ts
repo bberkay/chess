@@ -71,7 +71,7 @@ export class ChessEngine{
 
     /**
      * This function creates a new game with the given position(fen notation, json notation or StartPosition enum).
-     * @see For more information about StartPosition enum check src/types.ts
+     * @see For more information about StartPosition enum check src/Chess/Types/index.ts
      */
     public createGame(position: JsonNotation | StartPosition | string = StartPosition.Standard): void
     {
@@ -272,7 +272,7 @@ export class ChessEngine{
 
         // Set the playedFrom and playedTo properties.
         this.playedFrom = from!;
-        this.playedTo = to!;
+        this.playedTo = to!
 
         // Do the move.
         if(this.isPromotionMenuOpen){
@@ -363,7 +363,7 @@ export class ChessEngine{
          * castling.
          *
          * @see For more information about castling, see https://en.wikipedia.org/wiki/Castling
-         * @see For more information about square ids, see src/Types/index.ts
+         * @see For more information about square ids, see src/Chess/Types/index.ts
          */
         const castlingType: "Long" | "Short" = Number(this.playedFrom) - Number(this.playedTo) > 3
             ? "Long" : "Short";
@@ -417,7 +417,7 @@ export class ChessEngine{
          * 8 if the piece is black. Because the killed piece is
          * always in the back of the target square.
          * @see For more information about en passant, see https://en.wikipedia.org/wiki/En_passant
-         * @see For more information about the square ids, see src/Types/index.ts
+         * @see For more information about the square ids, see src/Chess/Types/index.ts
          */
         const killedPieceSquare = Number(this.playedTo) + (BoardQueryer.getPieceOnSquare(this.playedTo as Square)?.getColor() == Color.White ? 8 : -8);
 
@@ -456,7 +456,7 @@ export class ChessEngine{
      */
     private _doPromote(from: Square, selectedPromote: Square | PieceType.Queen | PieceType.Rook | PieceType.Bishop | PieceType.Knight): void
     {
-        // Remove the pawn.
+        // Remove the pawn
         this.boardManager.removePiece(from);
         Logger.save(`Promoted Pawn is removed from square[${from}] on engine`, "playMove", Source.ChessEngine);
 
@@ -484,7 +484,7 @@ export class ChessEngine{
              *   a  b  c  d
              *
              * @see For more information about promotion, see https://en.wikipedia.org/wiki/Promotion_(chess)
-             * @see For more information about promotion menu, see showPromotionMenu() src/Interface/ChessBoard.ts
+             * @see For more information about promotion menu, see showPromotionMenu() src/Chess/Board/ChessBoard.ts
              */
             const clickedRow: number = Locator.getRow(selectedPromote as Square);
             selectedPromote = (([8, 1].includes(clickedRow) ? PieceType.Queen : null)
@@ -588,7 +588,7 @@ export class ChessEngine{
      * Check castling moves after each turn. If player move the king or rook
      * then disable the castling.
      *
-     * @see castling move calculation: src/Engine/Core/Move/Checker/MoveChecker.ts
+     * @see castling move calculation: src/Chess/Engine/Core/Move/Extender/MovesExtender.ts
      * @see castling rules: https://en.wikipedia.org/wiki/Castling
      */
     private _checkCastling(): void
@@ -609,7 +609,7 @@ export class ChessEngine{
          * short or long castling for the color of the rook by the square of
          * the moved rook.
          *
-         * @see For more information about square ids, see src/Types/index.ts
+         * @see For more information about square ids, see src/Chess/Types/index.ts
          */
         if(piece.getType() == PieceType.King){
             this.boardManager.changeCastlingAvailability((piece.getColor() + "Long") as CastlingType, false);
@@ -627,7 +627,7 @@ export class ChessEngine{
      * Check en passant moves. If there is an en passant move not played
      * then remove it. Because, en passant moves are only valid for one turn.
      *
-     * @see For more information about en passant, see src/Engine/Core/Move/Checker/MoveChecker.ts
+     * @see For more information about en passant, see src/Chess/Engine/Core/Move/Extender/MovesExtender.ts
      * @see For more information about en passant, see https://en.wikipedia.org/wiki/En_passant
      */
     private _checkEnPassant(): void
@@ -676,7 +676,7 @@ export class ChessEngine{
      * 2- Checkmate
      * 3- Stalemate
      *
-     * @see For more information about game status types please check the src/Types/index.ts
+     * @see For more information about game status types please check the src/Chess/Types/index.ts
      */
     private checkStatusOfGame(): void
     {
@@ -705,7 +705,7 @@ export class ChessEngine{
          * the enemy queen on the square "h5" and the enemy knight on the
          * square "d6" then the threateningSquares is [32, 20].
          *
-         * @see For more information about square ids, see src/Types/index.ts
+         * @see For more information about square ids, see src/Chess/Types/index.ts
          */
         const playerColor: Color = BoardQueryer.getColorOfTurn();
         const kingSquare: Square | null = BoardQueryer.getSquareOfPiece(
@@ -836,7 +836,7 @@ export class ChessEngine{
              * Find the moves of the enemy piece that relative to the king's square
              * and check if the enemy piece's moves can be blocked by the player's pieces.
              *
-             * @see For more information about relative squares, see src/Engine/Core/Utils/Locator.ts
+             * @see For more information about relative squares, see src/Chess/Engine/Core/Utils/Locator.ts
              */
             const movesOfEnemy: Array<Square> = BoardQueryer.getPieceOnSquare(squareOfEnemy)?.getType() != PieceType.Knight
                 ? RouteCalculator.getRouteByPieceOnSquare(squareOfEnemy)[Locator.getRelative(kingSquare!, squareOfEnemy)!]!
@@ -987,7 +987,6 @@ export class ChessEngine{
      */
     public getNotation(): Array<string>
     {
-        Logger.save("Notation loaded from BoardQueryer.", "getNotation", Source.ChessEngine);
         return BoardQueryer.getMoveHistory();
     }
 
