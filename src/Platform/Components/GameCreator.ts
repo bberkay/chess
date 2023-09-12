@@ -75,7 +75,7 @@ export class GameCreator {
      */
     public changeMode(mode: MenuOperationValue): void
     {
-        document.querySelector(`[data-game-creator-mode="${mode.toString()}"]`)!.classList.toggle("visible");
+        document.querySelector(`[data-game-creator-mode="${mode.toString()}"]`)!.classList.add("visible");
         document.querySelector(`[data-game-creator-mode="${mode === MenuOperationValue.GameCreatorCustom 
             ? MenuOperationValue.GameCreatorTemplate 
             : MenuOperationValue.GameCreatorCustom}"]`)!.classList.remove("visible");

@@ -96,6 +96,7 @@ export class ChessEngine{
             this.checkStatusOfGame();
         }else{
             Logger.save("Game status will not be checked because board is the standard position", "createGame", Source.ChessEngine);
+            this.statusOfGame = GameStatus.InPlay;
         }
     }
 
@@ -518,12 +519,14 @@ export class ChessEngine{
          * Order of the functions is important.
          *
          * Example scenario for White:
-         * 1- Control en passant moves for White(because, if White not play en passant move in one turn then remove the move)
-         * 2- Control castling moves for White(because, if White move the king or rook then disable the castling)
-         * 3- Change the turn(White -> Black)
-         * 4- Check the game is finished or not for Black
-         * 5- Add the White player's move to the history
-         * 6- Clear the current move
+         * 1- Clear properties of the ChessEngine except moveNotation
+         * 2- Control en passant moves for White(because, if White not play en passant move in one turn then remove the move)
+         * 3- Control castling moves for White(because, if White move the king or rook then disable the castling)
+         * 4- Change the turn(White -> Black)
+         * 5- Check the game is finished or not for Black
+         * 6- Add move to move history
+         * 7- Check the threefold repetition rule
+         * 8- Clear current move notation
          */
         this.mandatoryMoves = {};
         this.calculatedMoves = {};
@@ -532,9 +535,9 @@ export class ChessEngine{
         this._checkEnPassant();
         this.boardManager.changeTurn();
         Logger.save("Turn is changed.", "finishTurn", Source.ChessEngine);
-        this.checkThreefoldRepetition();
         this.checkStatusOfGame();
         this.boardManager.addMoveToHistory(this.moveNotation);
+        this.checkThreefoldRepetition();
         Logger.save(`Notation[${this.moveNotation}] of current move add to move history`, "finishTurn", Source.ChessEngine);
         this.moveNotation = "";
         Logger.save("Turn finish operation is finished.", "finishTurn", Source.ChessEngine);
@@ -551,9 +554,11 @@ export class ChessEngine{
          * times then the game is in draw status.
          */
         const notations: string[] = this.getNotation();
+        if(notations.length < 10)
+            return;
 
         // Get last 10 move from move notation.
-        const lastMoves: string[] = notations.slice(Math.max(notations.length - 10, 0));
+        const lastMoves: string[] = notations.slice(-10);
 
         /**
          * If the last 6 notation is not repeated 3 times then return.

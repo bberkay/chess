@@ -37,42 +37,6 @@ export class Platform{
     }
 
     /**
-     * This function makes an operation on menu.
-     */
-    public doActionOnMenu(operationType: MenuOperationType, operationValue: MenuOperationValue): void
-    {
-        switch(operationType){
-            case MenuOperationType.GameCreatorCreate:
-                if(this.gameCreator === null)
-                    throw new Error("Game creator form is not initialized.");
-
-                // Create a new game with input value by given operation value.
-                this.chess.createGame(this.gameCreator.getValueByMode(operationValue));
-
-                /**
-                 * Initialize the listeners again because when the board changes on the dom tree,
-                 * the listeners are removed.
-                 */
-                this.initListeners();
-                break;
-            case MenuOperationType.GameCreatorChangeMode:
-                if(this.gameCreator === null)
-                    throw new Error("Game creator form is not initialized.");
-
-                // Change mode of game creator form.
-                this.gameCreator.changeMode(operationValue);
-                break;
-            case MenuOperationType.LogConsoleClear:
-                if(this.logConsole === null)
-                    throw new Error("Log console is not initialized.");
-
-                // Clear the log console.
-                this.logConsole.clear();
-                break;
-        }
-    }
-
-    /**
      * This function initializes the listeners for user's
      * actions on platform.
      */
@@ -117,5 +81,63 @@ export class Platform{
                     this.logConsole.show(this.chess.getLogs());
             });
         });
+    }
+
+    /**
+     * This function makes an operation on menu.
+     */
+    public doActionOnMenu(operationType: MenuOperationType, operationValue: MenuOperationValue): void
+    {
+        switch(operationType){
+            case MenuOperationType.GameCreatorCreate:
+                if(this.gameCreator === null)
+                    throw new Error("Game creator form is not initialized.");
+
+                // Clear components.
+                this.clearNotationTable();
+                this.clearLogConsole();
+
+                // Create a new game with input value by given operation value.
+                this.chess.createGame(this.gameCreator.getValueByMode(operationValue));
+
+                /**
+                 * Initialize the listeners again because when the board changes on the dom tree,
+                 * the listeners are removed.
+                 */
+                this.initListeners();
+                break;
+            case MenuOperationType.GameCreatorChangeMode:
+                if(this.gameCreator === null)
+                    throw new Error("Game creator form is not initialized.");
+
+                // Change mode of game creator form.
+                this.gameCreator.changeMode(operationValue);
+                break;
+            case MenuOperationType.LogConsoleClear:
+                this.clearLogConsole();
+                break;
+        }
+    }
+
+    /**
+     * This function clears the notation table.
+     */
+    private clearNotationTable(): void
+    {
+        if(this.notationTable === null)
+            throw new Error("Notation table is not initialized.");
+
+        this.notationTable!.clear();
+    }
+
+    /**
+     * This function clears the log console.
+     */
+    private clearLogConsole(): void
+    {
+        if(this.logConsole === null)
+            throw new Error("Log console is not initialized.");
+
+        this.logConsole!.clear();
     }
 }

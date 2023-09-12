@@ -176,7 +176,7 @@ export class Chess{
 
         // Save the game to the cache as json notation.
         if(this.isCachingEnabled){
-            Cacher.save({...this.chessEngine.getGameAsJsonNotation(), "notation":this.getNotation()});
+            Cacher.save({...this.chessEngine.getGameAsJsonNotation(), "moveHistory":this.getNotation()});
             Logger.save("Game saved to cache with notation", "finishTurn", Source.Chess);
         }
     }
@@ -186,15 +186,6 @@ export class Chess{
      */
     public getNotation(): string[]
     {
-        /**
-         * If cache is enabled and there is a game in the cache,
-         * return the notation from the cache.
-         */
-        if(this.isCachingEnabled && !Cacher.isEmpty() && Cacher.load()!.hasOwnProperty("notation")){
-            Logger.save("Notation loaded from cache.", "getNotation", Source.Chess);
-            return Cacher.load()!.notation;
-        }
-
         return this.chessEngine.getNotation();
     }
 

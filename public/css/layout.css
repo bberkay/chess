@@ -17,8 +17,7 @@ main{
     display:flex;
     width:100%;
     justify-content: center;
-    margin-right: 5%;
-}
+    margin-right: 5%;}
 
 @media screen and (max-width: 1400px) {
     main{
