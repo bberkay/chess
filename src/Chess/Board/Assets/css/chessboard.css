@@ -65,7 +65,7 @@
     border:1px solid black;
     display:flex;
     flex-wrap: wrap;
-    cursor: pointer;
+    cursor: pointer!important;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -moz-user-select: none;

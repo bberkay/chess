@@ -118,7 +118,8 @@ export class NotationMenu {
         }
 
         // Scroll to the bottom of the table.
-        notations.parentElement!.scrollTop = notations.parentElement!.scrollHeight;
+        const notationTable: HTMLElement = document.getElementById("notation-table")!;
+        notationTable.scrollTop = notationTable.scrollHeight;
 
         // Set the last notation.
         this.lastNotation = notation[notation.length - 1];

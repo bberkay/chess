@@ -195,6 +195,26 @@ export class Chess{
         this.selectedSquare = square;
         this.chessBoard.highlightSelect(square);
         this.chessBoard.highlightMoves(this.chessEngine.getMoves(square)!);
+
+        /**
+         * Listen the drop event on the squares to make a move. Why this
+         * listener is not initialized on chessboard? Because we need
+         * run the doActionOnBoard() function when the user drop the
+         * piece on the square.
+         *
+         * Note: If chessboard created as standalone this listener
+         * will be initialized in highlightMoves() function.
+         * @see check highlightMoves() in src/Chess/Board/ChessBoard.ts
+         */
+        document.querySelectorAll("[data-square-id]").forEach(square => {
+            (<HTMLDivElement>square).addEventListener("drop", (event: DragEvent) => {
+                event.preventDefault();
+                this.doActionOnBoard(
+                    square.getAttribute("data-click-mode") as SquareClickMode,
+                    Number(square.getAttribute("data-square-id")) as Square
+                );
+            });
+        });
     }
 
     /**

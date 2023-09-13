@@ -173,7 +173,7 @@ export class ChessEngine extends BoardManager {
      * if the given move is not in the currentMoves, it returns false.
      * Otherwise, it returns the move type.
      */
-    private findMoveType(): MoveType | null
+    private checkAndFindMoveType(): MoveType | null
     {
         /**
          * If currentMoves is null, then return false. Because,
@@ -287,7 +287,7 @@ export class ChessEngine extends BoardManager {
         }
         else{
             // Check if the given move is valid.
-            const move: MoveType | null = this.findMoveType();
+            const move: MoveType | null = this.checkAndFindMoveType();
             if(!move)
                 return;
 

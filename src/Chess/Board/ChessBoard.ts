@@ -24,6 +24,7 @@ export class ChessBoard {
     private lockedSquaresModes: Array<SquareClickMode> = [];
     private colorOfPlayer: Color | null = null;
     private readonly isStandalone: boolean;
+    private draggedPiece: EventTarget | null = null;
 
     /**
      * Constructor of the class which load css file of
@@ -166,7 +167,7 @@ export class ChessBoard {
     private createPiece(color: Color, type:PieceType, square:Square): void
     {
         // Clear square if it is not empty.
-        this.clearSquare(square);
+        this.removePiece(square);
 
         // Create the piece element and set the class name.
         let piece: HTMLDivElement = document.createElement("div");
@@ -189,7 +190,7 @@ export class ChessBoard {
     /**
      * This function removes the piece from the chess board.
      */
-    private clearSquare(square:Square): void
+    private removePiece(square:Square): void
     {
         // Remove the piece element if it exists.
         const squareElement = document.querySelector(`[data-square-id="${square.toString()}"]`);
@@ -204,11 +205,14 @@ export class ChessBoard {
         // Clear/Restore the board its default state before selecting the square.
         this.clearBoard();
 
-        // Get the selected square by its id.
+        // Get the selected square by its id and set the ondragover attribute.
         const selectedSquare: HTMLDivElement = document.querySelector(`[data-square-id="${squareID.toString()}"]`) as HTMLDivElement;
 
-        // Get the color of player(if exists).
-        this.colorOfPlayer = selectedSquare.querySelector(".piece")?.getAttribute("data-color") as Color;
+        // Get the color of player(if exists) and set the piece draggable.
+        const selectedPiece = selectedSquare.querySelector(".piece")!;
+        this.colorOfPlayer = selectedPiece.getAttribute("data-color") as Color;
+        selectedPiece.setAttribute("draggable", "true");
+        selectedPiece.addEventListener("dragstart", (event) => { this.draggedPiece = event.target; });
 
         // Add selected effect to the selected square.
         this.setSquareEffect(selectedSquare, SquareEffect.Selected);
@@ -224,27 +228,41 @@ export class ChessBoard {
 
     /**
      * This function shows the possible moves of the given piece on the chess board.
+     * @param {Moves|null} moves - Possible moves of the piece, null for is standalone version and
+     * all squares will be highlighted.
      */
-    public highlightMoves(moves: Moves): void
+    public highlightMoves(moves: Moves | null = null): void
     {
-        if(this.isStandalone)
+        if(this.isStandalone){
             Logger.start();
+            // Add all squares to the moves object, because we want to highlight all squares.
+            if(moves == null)
+                moves![MoveType.Normal] = Array.from({ length: 64 }, (_, index) => index + 1) as Array<Square>;
+        }
 
+        // If board is not standalone and moves is null then return.
+        if(moves == null)
+            return;
+
+        // Loop through the move types.
         for(let moveType in moves){
             // If the move type is null or undefined then skip the loop.
             if(!moves[moveType as MoveType])
                 continue;
 
             // Loop through the moves of the move type.
-            for(let move of moves[moveType as MoveType]!){
+            for(let move of moves[moveType as MoveType]!)
+            {
                 /**
                  * If the move square has a piece then set the square
-                 * effect "Killable" otherwise set "Playable".
+                 * effect "Killable" otherwise set "Playable". Also,
+                 * if the board is standalone then don't set the effect
                  */
-                let squareContent = document.querySelector(`[data-square-id="${move.toString()}"]`)?.lastElementChild;
+                const square = document.querySelector(`[data-square-id="${move.toString()}"]`) as HTMLDivElement;
+                const squareContent = square.lastElementChild;
                 if(squareContent && squareContent.className.includes("piece") && squareContent.getAttribute("data-color") !== this.colorOfPlayer)
                     this.setSquareEffect(move, SquareEffect.Killable);
-                else
+                else if(!this.isStandalone)
                     this.setSquareEffect(move, SquareEffect.Playable);
 
                 /**
@@ -255,7 +273,24 @@ export class ChessBoard {
                     || (moveType == MoveType.EnPassant ? SquareClickMode.EnPassant : null)
                     || (moveType == MoveType.Promotion ? SquareClickMode.Promotion : null) || SquareClickMode.Play;
 
+                // Set the click mode to the square.
                 this.setSquareClickMode(move, clickMode);
+
+                /**
+                 * Add dragover event to the square. If board is standalone then add drop event too
+                 * otherwise drop event will be added in Chess.ts because board and engine will be
+                 * used together in Chess.ts.
+                 */
+                square.addEventListener("dragover", (event: DragEvent) => { event.preventDefault(); });
+                if(this.isStandalone) {
+                    square.addEventListener("drop", (event: DragEvent) => {
+                        event.preventDefault();
+                        this.playMove(
+                            parseInt(((this.draggedPiece! as HTMLElement).parentElement as HTMLDivElement).getAttribute("data-square-id")!),
+                            parseInt(square.getAttribute("data-square-id")!)
+                        );
+                    });
+                }
             }
         }
 
@@ -375,7 +410,7 @@ export class ChessBoard {
         const killedPieceSquare = parseInt(toSquare.getAttribute("data-square-id")!) + (toSquare.querySelector(".piece")!.getAttribute("data-color") === Color.White ? 8 : -8);
 
         // Remove the killed piece.
-        this.clearSquare(killedPieceSquare);
+        this.removePiece(killedPieceSquare);
         Logger.save(`Captured piece by en passant move is found on square[${killedPieceSquare}] and removed on board`, "playMove", Source.ChessBoard);
     }
 
@@ -414,7 +449,7 @@ export class ChessBoard {
     private _doNormalMove(fromSquare:HTMLDivElement, toSquare:HTMLDivElement): void
     {
         // Clear the target square.
-        this.clearSquare(parseInt(toSquare.getAttribute("data-square-id")!));
+        this.removePiece(parseInt(toSquare.getAttribute("data-square-id")!));
 
         // Move piece from the source square(from) to the target square(to).
         toSquare.appendChild(fromSquare.querySelector(".piece")!);
@@ -460,6 +495,7 @@ export class ChessBoard {
              */
             const squareClassName = squares[i].lastElementChild?.className;
             if (squareClassName?.includes("piece")){
+                squares[i].lastElementChild?.setAttribute("draggable", "false");
                 if(!squareClassName?.includes("promotion-option"))
                     this.setSquareClickMode(squares[i] as HTMLDivElement, SquareClickMode.Select);
             }
