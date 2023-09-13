@@ -124,11 +124,9 @@ export class BoardManager extends Board{
          * Increase the score of the current player and decrease the score of the enemy
          * player by the score of the piece. For example, if white captures a black pawn
          * then increase the score of the white player by 1 and decrease the score of the
-         * black player by 1. Also, if move is a promote move then decrease the score of
-         * promoted pawn from the current player's score(increase will automatically
-         * happen because the promoted piece's score will be toPiece.getScore()).
+         * black player by 1.
          */
-        Board.scores[Board.currentTurn].score += capturedPiece.getScore() - (capturedPiece.getColor() === Board.currentTurn ? 1 : 0);
+        Board.scores[Board.currentTurn].score += capturedPiece.getScore();
         Board.scores[enemyColor].score -= capturedPiece.getScore();
 
         /**

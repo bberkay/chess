@@ -14,7 +14,7 @@ export class ChessPlatform{
      * Constructor of the ChessPlatform class.
      */
     constructor(enableCaching: boolean = true) {
-        this.chess = new Chess(enableCaching);
+        this.chess = new Chess(enableCaching, false);
         this.platform = new Platform(this.chess);
 
         // If there is a game in cache, load it. Otherwise, create a new game.

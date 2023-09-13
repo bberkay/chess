@@ -30,17 +30,46 @@ export class Chess{
     private selectedSquare: Square | null;
     private isPromotionScreenOpen: boolean = false;
     private readonly isCachingEnabled: boolean = true;
+    private readonly initListener: boolean = true;
 
     /**
      * Constructor of the Chess class.
      */
-    constructor(enableCaching: boolean = true){
+    constructor(enableCaching: boolean = true, initListener: boolean = true){
         Logger.start();
         Logger.save("Chess created with ChessEngine and ChessBoard", "constructor", Source.Chess);
         this.chessBoard = new ChessBoard();
         this.chessEngine = new ChessEngine();
         this.selectedSquare = null;
         this.isCachingEnabled = enableCaching;
+        this.initListener = initListener;
+
+        /**
+         * Initialize the listener when the dom is loaded if chess is not
+         * created by the platform.
+         */
+        if(this.initListener){
+            document.addEventListener("DOMContentLoaded", () => {
+                this.initActionListener();
+            });
+        }
+    }
+
+    /**
+     * This function initializes the listener for user's
+     * actions on chessboard to make a move on engine and board.
+     */
+    private initActionListener(): void
+    {
+        document.querySelectorAll("[data-square-id]").forEach(square => {
+            square.addEventListener("click", () => {
+                // Make move(with square ID and click mode)
+                this.doActionOnBoard(
+                    square.getAttribute("data-click-mode") as SquareClickMode,
+                    parseInt(square.getAttribute("data-square-id")!) as Square
+                );
+            });
+        });
     }
 
     /**
@@ -70,6 +99,10 @@ export class Chess{
      */
     public createGame(position: JsonNotation | StartPosition | string = StartPosition.Standard): void
     {
+        // Initialize the listener
+        if(this.initListener)
+            this.initActionListener();
+
         // Create a new log for the new game.
         Logger.start(true);
 
