@@ -16,6 +16,7 @@
     overflow: hidden;
 }
 
+/* Body */
 #log-console #log-console-body{
     height:750px; /* 750px = height of log console - height of log console footer */
     width:auto;
@@ -38,10 +39,53 @@
     font-weight: bold;
 }
 
-#log-console #log-console-body ul li span:hover{
+#log-console #log-console-body ul li span:hover, #log-console #log-console-body ul li span:hover div.tooltip{
     text-decoration: underline;
 }
 
+/* Tooltip */
+#log-console #log-console-body .tooltip{
+    position: relative;
+    display: inline-block;
+    border-bottom: 2px dotted #fff;
+}
+
+#log-console #log-console-body .tooltip-text{
+    visibility: hidden;
+    min-width: 80px;
+    max-width: 450px;
+    background-color: #555;
+    color: #fff;
+    padding: 5px 5px;
+    position: absolute;
+    z-index: 1;
+    top: 140%;
+    left: 50%;
+    margin-left: -40px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-style:normal;
+    white-space: pre;
+    text-decoration: none!important;
+}
+
+#log-console #log-console-body .tooltip-text::after{
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    right: 50%;
+    margin-right: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent transparent #555 transparent;
+}
+
+#log-console #log-console-body .tooltip:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Footer */
 #log-console #log-console-footer{
     background-color:#111;
     display:flex;

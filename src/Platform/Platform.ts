@@ -1,3 +1,13 @@
+/**
+ * @module Platform
+ * @description TODO Module description
+ * @version 1.0.0
+ * @author Berkay Kaya
+ * @url https://github.com/bberkay/chess-platform
+ * @license MIT
+ */
+
+
 import { Chess } from "../Chess/Chess";
 import { Square } from "../Chess/Types";
 import { SquareClickMode } from "../Chess/Board/Types";

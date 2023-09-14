@@ -14,11 +14,12 @@
     display:flex;
 }
 
-#game-creator .game-creator-mode input{
+/* Form */
+#game-creator input{
     border:2px solid #111;
 }
 
-#game-creator .game-creator-mode input, #game-creator .game-creator-mode select{
+#game-creator input, #game-creator select{
     font-size:15px;
     width:100%;
     padding:10px;
@@ -27,19 +28,20 @@
     border:1px solid #2a2a2a;
 }
 
-#game-creator .game-creator-mode input, #game-creator .game-creator-mode select{
+#game-creator input, #game-creator select{
     border:1px solid #111;
 }
 
-#game-creator .game-creator-mode input:focus, #game-creator .game-creator-mode select:focus{
+#game-creator input:focus, #game-creator select:focus{
     outline: none;
 }
 
-#game-creator .game-creator-mode .border-inset{
+#game-creator .border-inset{
     border:2px solid #111;
 }
 
-#game-creator .game-creator-mode button{
+/* Button */
+#game-creator button{
     padding:10px;
     background-color: #222;
     color: #f5f5f5;
@@ -50,10 +52,10 @@
     font-family: 'Roboto', sans-serif;
 }
 
-#game-creator .game-creator-mode button:hover{
+#game-creator button:hover{
     background-color: #2a2a2a;
 }
 
-#game-creator .game-creator-mode button:active{
+#game-creator button:active{
     opacity:0.7
 }

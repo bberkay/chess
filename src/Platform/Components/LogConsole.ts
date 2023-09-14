@@ -4,6 +4,9 @@ import { MenuOperationType } from "../Types";
  * This class provide a menu to show the logs.
  */
 export class LogConsole{
+
+    private currentLogCount: number = 0;
+
     /**
      * Constructor of the LogConsole class.
      */
@@ -59,13 +62,53 @@ export class LogConsole{
     }
 
     /**
+     * Convert the values between "[]" in log message to tooltips.
+     *
+     * For example:
+     * Log: Enums[WhiteInCheck, BlackVictory] are found by player's color[White].
+     * Return: <span class = "variable-tooltip" data-tooltip-value="[WhiteInCheck, BlackVictory]>Enums</span>
+     * are found by player's <span class = "variable-tooltip" data-tooltip-value="[White]">color</span>
+     */
+    private _convertValuesToTooltips(log: string): string
+    {
+        const words: string[] = log.split(" ");
+        for(let i = 0; i < words.length; i++){
+            const originalWord: string = words[i];
+
+            /**
+             * When we split the log message with " " character, the values between "[]" will be split.
+             * So we need to merge the split values. For example, if the log message is:
+             * Enums[WhiteInCheck, BlackVictory] are found by player's color[White].
+             * The words array will be:
+             * ["Enums[WhiteInCheck,", "BlackVictory]", "are", "found", "by", "player's", "color[White]."]
+             * So we need to merge "Enums[WhiteInCheck," and "BlackVictory]" to "Enums[WhiteInCheck, BlackVictory]".
+             * And we need to remove the "BlackVictory]" from the array.
+             */
+            if(words[i].includes("[") && !words[i].includes("]")){
+                words[i] += " " + words[i + 1];
+                log = log.replace(words[i + 1], "");
+            }
+
+            // Convert the values between "[]" to tooltips.
+            if(words[i].includes("[") && words[i].includes("]")){
+                words[i] = words[i].replace(words[i].slice(0, words[i].indexOf("[") + 1), "");
+                words[i] = words[i].slice(0, words[i].lastIndexOf("]"));
+                const tooltipVariable: string = `<span class = "tooltip-text"><pre>${words[i]}</pre></span>`;
+                log = log.replace(originalWord, `<span class = 'tooltip'>${originalWord.replace(`[${words[i]}]`, "")} ${tooltipVariable}</span>`);
+            }
+        }
+
+        return log;
+    }
+
+    /**
      * This function adds a log to the log console.
      */
-    public show(logs: Array<{source: string, message: string}[]>): void
+    public show(logs: Array<{source: string, message: string}>): void
     {
         // Find the log list element and the last logs in the logs array.
         let logListElement: HTMLElement = document.getElementById("log-list")!;
-        const lastLogs: Array<{source: string, message: string}> = logs[logs.length - 1];
+        const lastLogs: Array<{source: string, message: string}> = logs.slice(this.currentLogCount);
 
         // Add the log to the log list.
         for(const log of lastLogs) {
@@ -73,14 +116,19 @@ export class LogConsole{
             logListElement!.innerHTML +=
                 `
                 <li onmouseover="document.getElementById('log-file').innerHTML = '${log.source}'">
-                    &#x2022 <strong style="text-transform: uppercase">[${source}] </strong><span>${log.message}</span>
+                    &#x2022 <strong style="text-transform: uppercase">[${source}] </strong><span>${this._convertValuesToTooltips(log.message)}</span>
                 </li>
                 `;
         }
+
+        // Add a horizontal line to the log list for separating the logs.
         logListElement!.innerHTML += "<hr>";
 
         // Scroll to the bottom of the log list.
         document.getElementById("log-console-body")!.scrollTop = logListElement!.scrollHeight;
+
+        // Update the log count.
+        this.currentLogCount += lastLogs.length;
     }
 
     /**

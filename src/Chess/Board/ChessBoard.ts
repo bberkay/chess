@@ -3,7 +3,7 @@
  * @description This module provides users to create and manage a chess board(does not include any mechanic/logic).
  * @version 1.0.0
  * @author Berkay Kaya
- * @url https://github.com/bberkay/chess
+ * @url https://github.com/bberkay/chess-platform
  * @license MIT
  */
 
@@ -17,13 +17,13 @@ import {Logger, Source} from "../Services/Logger.ts";
  */
 export class ChessBoard {
 
-    /**
-     * Store locked squares click modes
-     * to restore them after unlock the board.
-     */
-    private lockedSquaresModes: Array<SquareClickMode> = [];
     private colorOfPlayer: Color | null = null;
     private readonly isStandalone: boolean;
+
+    // Store locked squares click modes to restore them after unlock the board.
+    private lockedSquaresModes: Array<SquareClickMode> = [];
+
+    // For drag and drop
     private draggedPiece: EventTarget | null = null;
 
     /**
@@ -36,14 +36,9 @@ export class ChessBoard {
         // Load css file of the chess board.
         this._loadCSS();
 
-        /**
-         * If the ChessBoard is standalone then clear the logs and start the logger.
-         * Then create a game with the standard position.
-         */
-        if(this.isStandalone){
-            Logger.start(true);
+        // If the ChessBoard is standalone then create a game with the standard position.
+        if(this.isStandalone)
             this.createGame();
-        }
 
         Logger.save("ChessBoard created and CSS loaded." + (this.isStandalone ? " as standalone" : ""), "constructor", Source.ChessBoard);
     }
@@ -73,7 +68,7 @@ export class ChessBoard {
     public createGame(position: JsonNotation | StartPosition | string = StartPosition.Standard): void
     {
         if(this.isStandalone)
-            Logger.start();
+            Logger.clear();
 
         // Create squares in the board.
         this.createSquares();
@@ -81,7 +76,10 @@ export class ChessBoard {
 
         // Create the pieces.
         this.createPieces(typeof position == "string" ? Converter.fenToJson(position).board : position.board);
-        Logger.save("Pieces created on ChessBoard by given position.", "createGame", Source.ChessBoard);
+        Logger.save("Pieces created on ChessBoard.", "createGame", Source.ChessBoard);
+
+        if(this.isStandalone)
+            Logger.save(`Game created on ChessBoard`, "createGame", Source.ChessBoard);
     }
 
     /**
@@ -216,14 +214,14 @@ export class ChessBoard {
 
         // Add selected effect to the selected square.
         this.setSquareEffect(selectedSquare, SquareEffect.Selected);
-        Logger.save(`Selected square[${selectedSquare}] found on DOM and Selected effect added.`, "highlightSelect", Source.ChessBoard);
+        Logger.save(`Selected square[${squareID}] found on DOM and Selected effect added.`, "highlightSelect", Source.ChessBoard);
 
         /**
          * Set the click mode "Clear" to the square because
          * we want to clear the square when it is clicked again.
          */
         this.setSquareClickMode(selectedSquare, SquareClickMode.Clear);
-        Logger.save(`Selected square's[${selectedSquare}] click mode set to clear.`, "highlightSelect", Source.ChessBoard);
+        Logger.save(`Selected square's[${squareID}] click mode set to clear.`, "highlightSelect", Source.ChessBoard);
     }
 
     /**
@@ -234,7 +232,6 @@ export class ChessBoard {
     public highlightMoves(moves: Moves | null = null): void
     {
         if(this.isStandalone){
-            Logger.start();
             // Add all squares to the moves object, because we want to highlight all squares.
             if(moves == null)
                 moves![MoveType.Normal] = Array.from({ length: 64 }, (_, index) => index + 1) as Array<Square>;
@@ -294,7 +291,7 @@ export class ChessBoard {
             }
         }
 
-        Logger.save("Possible moves highlighted on board.", "highlightMoves", Source.ChessBoard);
+        Logger.save(`Possible moves[${JSON.stringify(moves)}] highlighted on board.`, "highlightMoves", Source.ChessBoard);
     }
 
     /**
@@ -438,7 +435,7 @@ export class ChessBoard {
         // Create the piece first row if the piece is white otherwise create the piece last row.
         const targetSquare: Square = Number(promoteSquare.getAttribute("data-square-id")!) as Square;
         this.createPiece(color, pieceType, targetSquare);
-        Logger.save(`Piece[${color} ${pieceType}] created on square[${targetSquare}] on board`, "playMove", Source.ChessBoard);
+        Logger.save(`Player's[${color}] Piece[${pieceType}] created on square[${targetSquare}] on board`, "playMove", Source.ChessBoard);
 
         this._closePromotions();
     }
@@ -450,6 +447,7 @@ export class ChessBoard {
     {
         // Clear the target square.
         this.removePiece(parseInt(toSquare.getAttribute("data-square-id")!));
+        Logger.save(`Target square[${toSquare.getAttribute("data-square-id")!}] removed on board`, "playMove", Source.ChessBoard);
 
         // Move piece from the source square(from) to the target square(to).
         toSquare.appendChild(fromSquare.querySelector(".piece")!);
@@ -473,8 +471,8 @@ export class ChessBoard {
              * So, we need to fix the square id's.
              */
             if (id !== i + 1){
-                Logger.save(`ID of square's fixed from[${id}] to [${(i+1).toString()}] on board`, "clearBoard", Source.ChessBoard);
                 squares[i].setAttribute("data-square-id", (i+1).toString());
+                Logger.save(`ID of square's fixed from[${id}] to [${(i+1).toString()}] on board`, "clearBoard", Source.ChessBoard);
             }
 
             /**
@@ -756,7 +754,7 @@ export class ChessBoard {
     /**
      * This function returns the logs of the game on engine.
      */
-    public getLogs(): Array<{source: string, message: string}[]>
+    public getLogs(): Array<{source: string, message: string}>
     {
         if(!this.isStandalone)
             throw new Error("This function can only be used on standalone mode");

@@ -1,3 +1,12 @@
+/**
+ * @module ChessPlatform
+ * @description TODO Module description
+ * @version 1.0.0
+ * @author Berkay Kaya
+ * @url https://github.com/bberkay/chess-platform
+ * @license MIT
+ */
+
 import { Chess } from './Chess/Chess.ts';
 import { Platform } from "./Platform/Platform.ts";
 

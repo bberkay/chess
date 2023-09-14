@@ -3,7 +3,7 @@
  * @description This module provides users to a playable chess game on the web by connecting ChessEngine and ChessBoard with CacheManager.
  * @version 1.0.0
  * @author Berkay Kaya
- * @url https://github.com/bberkay/chess
+ * @url https://github.com/bberkay/chess-platform
  * @license MIT
  */
 
@@ -36,8 +36,6 @@ export class Chess{
      * Constructor of the Chess class.
      */
     constructor(enableCaching: boolean = true, initListener: boolean = true){
-        Logger.start();
-        Logger.save("Chess created with ChessEngine and ChessBoard", "constructor", Source.Chess);
         this.chessBoard = new ChessBoard();
         this.chessEngine = new ChessEngine();
         this.selectedSquare = null;
@@ -52,6 +50,8 @@ export class Chess{
             document.addEventListener("DOMContentLoaded", () => {
                 this.initActionListener();
             });
+
+            Logger.save("Action listener initialized on constructor", "constructor", Source.Chess);
         }
     }
 
@@ -70,6 +70,7 @@ export class Chess{
                 );
             });
         });
+        Logger.save("Action listener initialized.", "initActionListener", Source.Chess);
     }
 
     /**
@@ -84,12 +85,12 @@ export class Chess{
 
         // If there is a game in the cache, load it.
         if(!Cacher.isEmpty()){
-            Logger.save("Game loaded from cache.", "checkAndLoadGameFromCache", Source.Chess);
             this.createGame(Cacher.load());
+            Logger.save("Game loaded from cache.", "checkAndLoadGameFromCache", Source.Chess);
             return true;
         }
 
-        Logger.save("There is no game in the cache.", "checkAndLoadGameFromCache", Source.Chess);
+        Logger.save("No games found in cache", "checkAndLoadGameFromCache", Source.Chess);
         return false;
     }
 
@@ -99,35 +100,36 @@ export class Chess{
      */
     public createGame(position: JsonNotation | StartPosition | string = StartPosition.Standard): void
     {
+        Logger.clear();
+
         // Initialize the listener
         if(this.initListener)
             this.initActionListener();
 
-        // Create a new log for the new game.
-        Logger.start(true);
-
         // Clear the game from the cache before creating a new game.
         if(this.isCachingEnabled){
             Cacher.clear();
-            Logger.save("Cache cleared.", "createGame", Source.Chess);
+            Logger.save("Cache cleared before creating a new game", "createGame", Source.Chess);
         }
 
         // Convert the position to json notation if it is not json notation.
         if(typeof position === "string"){
             position = Converter.fenToJson(position);
-            Logger.save("Position converted to json notation.", "createGame", Source.Chess);
+            Logger.save(`Given position converted to json notation[${JSON.stringify(position)}].`, "createGame", Source.Chess);
         }
 
         // Create a new game on board.
         this.chessBoard.createGame(position);
+        Logger.save(`Game successfully created on Chessboard`, "createGame", Source.Chess);
 
         // Create a new game on engine.
         this.chessEngine.createGame(position);
+        Logger.save(`Game successfully created on ChessEngine`, "createGame", Source.Chess);
 
         // Save the game to the cache as json notation.
         if(this.isCachingEnabled){
             Cacher.save(position);
-            Logger.save("Game saved to cache.", "createGame", Source.Chess);
+            Logger.save(`Game saved to cache as json notation[${JSON.stringify(position)}]`, "createGame", Source.Chess);
         }
 
         // Get status from engine and show it on board.
@@ -142,8 +144,6 @@ export class Chess{
      */
     public doActionOnBoard(moveType: SquareClickMode, square: Square): void
     {
-        Logger.start();
-
         // Find the move type and do the action.
         if([SquareClickMode.Play, SquareClickMode.Castling, SquareClickMode.Promote, SquareClickMode.Promotion, SquareClickMode.EnPassant].includes(moveType))
         {
@@ -239,7 +239,7 @@ export class Chess{
         // Save the game to the cache as json notation.
         if(this.isCachingEnabled && !this.isPromotionScreenOpen){
             Cacher.save(this.chessEngine.getGameAsJsonNotation());
-            Logger.save("Game saved to cache with notation", "finishTurn", Source.Chess);
+            Logger.save("Game updated in cache after move", "finishTurn", Source.Chess);
         }
     }
 
@@ -262,7 +262,7 @@ export class Chess{
     /**
      * Get log of the game
      */
-    public getLogs(): Array<{source: string, message: string}[]>
+    public getLogs(): Array<{source: string, message: string}>
     {
         return Logger.get();
     }

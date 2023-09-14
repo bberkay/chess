@@ -56,16 +56,9 @@ export class ChessEngine extends BoardManager {
         this.moveEngine = new MoveEngine();
         this.isStandalone = isStandalone;
 
-        /**
-         * If the ChessEngine is standalone then clear the logs and start the logger.
-         * Then create a game with the standard position.
-         */
-        if(this.isStandalone){
-            Logger.start(true);
+        // If engine is standalone then create a game with the standard position.
+        if(this.isStandalone)
             this.createGame();
-        }
-
-        Logger.save("ChessEngine created with MoveEngine and BoardManager" + (this.isStandalone ? " as standalone" : ""), "constructor", Source.ChessEngine);
     }
 
     /**
@@ -75,7 +68,7 @@ export class ChessEngine extends BoardManager {
     public createGame(position: JsonNotation | StartPosition | string = StartPosition.Standard): void
     {
         if(this.isStandalone)
-            Logger.start();
+            Logger.clear();
 
         // Clear the game.
         this.resetGame();
@@ -86,7 +79,9 @@ export class ChessEngine extends BoardManager {
          */
         const fenNotationOfGivenPosition: string = typeof position == "string" ? position : Converter.jsonToFen(position);
         this.createBoard(typeof position == "string" ? Converter.fenToJson(position) : position);
-        Logger.save("Game created on ChessEngine by given position", "createGame", Source.ChessEngine);
+
+        if(this.isStandalone)
+            Logger.save(`Game created on ChessEngine`, "createGame", Source.ChessEngine);
 
         // Check the status of the game if board is different from the standard position.
         if(fenNotationOfGivenPosition != StartPosition.Standard){
@@ -163,7 +158,7 @@ export class ChessEngine extends BoardManager {
             return true;
         }
         else{
-            Logger.save(`Square[${select}] is not selectable because game has mandatory moves[${this.mandatoryMoves}} and selected square is not in the mandatory moves`, "isSquareSelectable", Source.ChessEngine);
+            Logger.save(`Square[${select}] is not selectable because game has mandatory moves[${JSON.stringify(this.mandatoryMoves)}} and selected square is not in the mandatory moves`, "isSquareSelectable", Source.ChessEngine);
             return false;
         }
     }
@@ -201,7 +196,7 @@ export class ChessEngine extends BoardManager {
         }
 
         // If the given move is not in the currentMoves, return null.
-        Logger.save(`Move type is not found because the given move[${this.playedTo}] is not in the current moves[${this.currentMoves}]`, "findMoveType", Source.ChessEngine);
+        Logger.save(`Move type is not found because the given move[${this.playedTo}] is not in the current moves[${JSON.stringify(this.currentMoves)}]`, "findMoveType", Source.ChessEngine);
         return null;
     }
 
@@ -210,9 +205,6 @@ export class ChessEngine extends BoardManager {
      */
     public getMoves(square: Square): Moves | null
     {
-        if(this.isStandalone)
-            Logger.start();
-
         if(!this.isSquareSelectable(square)){
             Logger.save(`Moves of the square is not found because square[${square}] is not selectable`, "getMoves", Source.ChessEngine);
             return null;
@@ -225,7 +217,7 @@ export class ChessEngine extends BoardManager {
          */
         this.currentMoves = this.calculatedMoves[square] ?? this.moveEngine.getMoves(square);
         Logger.save(this.calculatedMoves.hasOwnProperty(square)
-            ? `Moves of the square[${square}] is found from calculated moves[${Object.keys(this.calculatedMoves)}]`
+            ? `Moves of the square[${square}] is found from calculated moves[${JSON.stringify(this.calculatedMoves)}]`
             : `Moves of the square[${square}] is calculated by move engine`, "getMoves", Source.ChessEngine);
 
         /**
@@ -238,12 +230,12 @@ export class ChessEngine extends BoardManager {
                     return this.mandatoryMoves[square]!.includes(move);
                 });
             }
-            Logger.save("Mandatory moves are found and other moves are deleted from moves of the square", "getMoves", Source.ChessEngine);
+            Logger.save(`Mandatory moves[${JSON.stringify(this.mandatoryMoves)}}] are found and other moves are deleted from moves of the square`, "getMoves", Source.ChessEngine);
         }
 
         // Save the moves to the calculatedMoves.
         this.calculatedMoves[square] = this.currentMoves;
-        Logger.save("Moves of the square is saved to calculated moves(or updated)", "getMoves", Source.ChessEngine);
+        Logger.save(`Moves of the square is saved to calculated moves(or updated)[${JSON.stringify(this.calculatedMoves)}]`, "getMoves", Source.ChessEngine);
 
         // Return the moves.
         Logger.save("Calculation of moves of the square is finished", "getMoves", Source.ChessEngine);
@@ -499,7 +491,7 @@ export class ChessEngine extends BoardManager {
         // Create the new piece and increase the score of the player.
         this.createPiece(playerColor, selectedPromote as PieceType, from);
         this.updateScores(from);
-        Logger.save(`Piece[${playerColor} ${selectedPromote}] created on square[${from}] on engine`, "playMove", Source.ChessEngine);
+        Logger.save(`Player's[${playerColor}] Piece[${selectedPromote}] created on square[${from}] on engine`, "playMove", Source.ChessEngine);
 
         // Finish the promotion.
         this.isPromotionMenuOpen = false;
@@ -537,7 +529,7 @@ export class ChessEngine extends BoardManager {
         this.checkStatusOfGame();
         this.addMoveToHistory(this.moveNotation);
         this.checkThreefoldRepetition();
-        Logger.save(`Notation[${this.moveNotation}] of current move add to move history`, "finishTurn", Source.ChessEngine);
+        Logger.save(`Notation[${JSON.stringify(this.moveNotation)}] of current move add to move history`, "finishTurn", Source.ChessEngine);
         this.moveNotation = "";
         Logger.save("Turn finish operation is finished.", "finishTurn", Source.ChessEngine);
     }
@@ -714,12 +706,12 @@ export class ChessEngine extends BoardManager {
         const threateningSquares: Array<Square> = BoardQueryer.isSquareThreatened(
             kingSquare!, BoardQueryer.getColorOfOpponent(), true
         ) as Array<Square>;
-        Logger.save(`Threatening squares[${threateningSquares}] are found by king's square[${kingSquare}]`, "checkStatusOfGame", Source.ChessEngine);
+        Logger.save(`Threatening squares[${JSON.stringify(threateningSquares)}] are found by king's square[${kingSquare}]`, "checkStatusOfGame", Source.ChessEngine);
 
         // Find enums by the player's color.
         const checkEnum: GameStatus = playerColor == Color.White ? GameStatus.WhiteInCheck : GameStatus.BlackInCheck;
         const checkmateEnum: GameStatus = playerColor == Color.White ? GameStatus.BlackVictory : GameStatus.WhiteVictory;
-        Logger.save(`Enums[${checkEnum}, ${checkmateEnum}] are found by player's color[${playerColor}]`, "checkStatusOfGame", Source.ChessEngine);
+        Logger.save(`Check[${checkEnum}] and Checkmate[${checkmateEnum}] enums are found by player's color[${playerColor}]`, "checkStatusOfGame", Source.ChessEngine);
 
         /**
          * If the king is threatened then the game is in check status. But continue
@@ -828,7 +820,7 @@ export class ChessEngine extends BoardManager {
                     this.mandatoryMoves[killer] = [squareOfEnemy];
             }
             Logger.save(killers.length > 0
-                ? `Game status is check and threat can be killed by player's piece[${killers}] so killers are added to mandatory moves.`
+                ? `Game status is check and threat can be killed by player's piece[${JSON.stringify(killers)}] so killers are added to mandatory moves[${JSON.stringify(this.mandatoryMoves)}].`
                 : `Game status is check and there is nothing to add mandatory moves because none of the player's pieces can kill threat of king.`, "checkStatusOfGame", Source.ChessEngine);
 
 
@@ -841,7 +833,7 @@ export class ChessEngine extends BoardManager {
             const movesOfEnemy: Array<Square> = BoardQueryer.getPieceOnSquare(squareOfEnemy)?.getType() != PieceType.Knight
                 ? RouteCalculator.getRouteByPieceOnSquare(squareOfEnemy)[Locator.getRelative(kingSquare!, squareOfEnemy)!]!
                 : [];
-            Logger.save(`Moves of the enemy piece[${squareOfEnemy}] are found by relative square of the king[${kingSquare}].`, "checkStatusOfGame", Source.ChessEngine);
+            Logger.save(`Moves of the enemy piece[${JSON.stringify(squareOfEnemy)}] are found by relative square of the king[${kingSquare}].`, "checkStatusOfGame", Source.ChessEngine);
 
             /**
              * Control Checkmate(Single Check Scenario)
@@ -880,7 +872,7 @@ export class ChessEngine extends BoardManager {
 
                                 this.mandatoryMoves[blocker]!.push(move);
                             }
-                            Logger.save(`Game status is check and threat can be blocked by player's piece[${blockers}] so blockers are added to mandatory moves.`, "checkStatusOfGame", Source.ChessEngine);
+                            Logger.save(`Game status is check and threat can be blocked by player's piece[${JSON.stringify(blockers)}] so blockers are added to mandatory moves[${JSON.stringify(this.mandatoryMoves)}].`, "checkStatusOfGame", Source.ChessEngine);
                         }
                     }
 
@@ -1001,7 +993,7 @@ export class ChessEngine extends BoardManager {
     /**
      * This function returns the logs of the game on engine.
      */
-    public getLogs(): Array<{source: string, message: string}[]>
+    public getLogs(): Array<{source: string, message: string}>
     {
         if(!this.isStandalone)
             throw new Error("This function can only be used on standalone mode");
