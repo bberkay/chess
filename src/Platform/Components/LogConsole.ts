@@ -62,6 +62,31 @@ export class LogConsole{
     }
 
     /**
+     * This function initializes the listeners.
+     */
+    private initListeners(): void
+    {
+        const squares: NodeListOf<HTMLElement> = document.querySelectorAll(".square");
+
+        // Show square ids when the tooltip is hovered.
+        document.querySelectorAll(".tooltip").forEach((element: HTMLElement) => {
+            // Show square ids on squares
+            element.addEventListener("mouseover", () => {
+                squares.forEach((square: HTMLElement) => {
+                    square.innerHTML += `<div class = "square-id">${square.getAttribute("data-square-id")}</div>`;
+                });
+            });
+
+            // Hide square ids
+            element.addEventListener("mouseout", () => {
+                document.querySelectorAll(".square-id").forEach((element: HTMLElement) => {
+                    element.remove();
+                });
+            });
+        });
+    }
+
+    /**
      * Convert the values between "[]" in log message to tooltips.
      *
      * For example:
@@ -93,8 +118,8 @@ export class LogConsole{
             if(words[i].includes("[") && words[i].includes("]")){
                 words[i] = words[i].replace(words[i].slice(0, words[i].indexOf("[") + 1), "");
                 words[i] = words[i].slice(0, words[i].lastIndexOf("]"));
-                const tooltipVariable: string = `<span class = "tooltip-text"><pre>${words[i]}</pre></span>`;
-                log = log.replace(originalWord, `<span class = 'tooltip'>${originalWord.replace(`[${words[i]}]`, "")} ${tooltipVariable}</span>`);
+                const tooltipVariable: string = `<div class = "tooltip-text"><pre>${JSON.stringify(JSON.parse(words[i]), undefined, 2)}</pre><i></i></div>`;
+                log = log.replace(originalWord, `<div class = 'tooltip'>${originalWord.replace(`[${words[i]}]`, "")} ${tooltipVariable}</div>`);
             }
         }
 
@@ -129,6 +154,9 @@ export class LogConsole{
 
         // Update the log count.
         this.currentLogCount += lastLogs.length;
+
+        // Initialize the listeners when the dom is loaded.
+        this.initListeners();
     }
 
     /**

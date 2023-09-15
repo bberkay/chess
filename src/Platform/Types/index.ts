@@ -7,6 +7,7 @@ export enum MenuOperationType{
     GameCreatorCreate = "GameCreatorCreateGame",
     GameCreatorChangeMode = "GameCreatorChangeMode",
     LogConsoleClear = "LogConsoleClear",
+    ToggleSquareIds = "ToggleSquareIds"
 }
 
 /**

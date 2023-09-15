@@ -47,42 +47,52 @@
 #log-console #log-console-body .tooltip{
     position: relative;
     display: inline-block;
-    border-bottom: 2px dotted #fff;
+    font-style:italic;
+    border-bottom:1px dotted #fff;
 }
 
 #log-console #log-console-body .tooltip-text{
-    visibility: hidden;
-    min-width: 80px;
-    max-width: 450px;
-    background-color: #555;
-    color: #fff;
-    padding: 5px 5px;
-    position: absolute;
-    z-index: 1;
-    top: 140%;
-    left: 50%;
-    margin-left: -40px;
-    opacity: 0;
-    transition: opacity 0.3s;
+    top:20px;
+    left:50%;
+    transform:translate(-50%, 0);
+    padding:10px 20px;
+    color:#fff;
+    background-color:#222;
+    font-weight:normal;
+    font-size:13px;
+    position:absolute;
+    z-index:99999999;
+    box-sizing:border-box;
+    border:1px solid #2a2a2a;
+    display:none;
     font-style:normal;
     white-space: pre;
     text-decoration: none!important;
 }
 
-#log-console #log-console-body .tooltip-text::after{
-    content: "";
-    position: absolute;
-    bottom: 100%;
-    right: 50%;
-    margin-right: -5px;
-    border-width: 5px;
-    border-style: solid;
-    border-color: transparent transparent #555 transparent;
+#log-console #log-console-body .tooltip:hover .tooltip-text{
+    display:block;
 }
 
-#log-console #log-console-body .tooltip:hover .tooltip-text {
-    visibility: visible;
-    opacity: 1;
+#log-console #log-console-body .tooltip .tooltip-text i {
+    position:absolute;
+    bottom:100%;
+    left:50%;
+    margin-left:-12px;
+    width:24px;
+    height:12px;
+    overflow:hidden;
+}
+
+#log-console #log-console-body .tooltip .tooltip-text i::after {
+    content:'';
+    position:absolute;
+    width:12px;
+    height:12px;
+    left:50%;
+    transform:translate(-50%,50%) rotate(45deg);
+    background-color:#222;
+    border:1px solid #2a2a2a;
 }
 
 /* Footer */
@@ -123,4 +133,23 @@
 
 #log-console #log-console-footer-btn button:active{
     opacity:0.7
+}
+
+/* Show Square ids on chess board. */
+#chessboard .square{
+    position:relative;
+}
+
+#chessboard .square-id{
+    position:absolute;
+    right:0;
+    bottom:0;
+    padding:5px;
+    min-width:13px;
+    background-color: rgba(0, 0, 0, 0.68);
+    color:#fff;
+    text-align:center;
+    margin:7px;
+    font-size:12px;
+    font-family: monospace;
 }
