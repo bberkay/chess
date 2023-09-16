@@ -301,7 +301,7 @@ export class ChessBoard {
     {
         // Remove the from and to effects of enemy player before the player's move.
         this.removeEffectFromAllSquares([SquareEffect.From, SquareEffect.To, SquareEffect.Checked]);
-        Logger.save(`From[${from}], To[${from}] and Checked Square's(if exits) effects are cleaned.`, "playMove", Source.ChessBoard);
+        Logger.save(`From[${from}], To[${to}] and Checked Square's(if exits) effects are cleaned.`, "playMove", Source.ChessBoard);
 
         // Get the source and target square elements.
         const fromSquare: HTMLDivElement = document.querySelector(`[data-square-id="${from.toString()}"]`) as HTMLDivElement;
@@ -443,22 +443,35 @@ export class ChessBoard {
     /**
      * Do the normal move(move piece to another square) on the chess board.
      */
-    private _doNormalMove(fromSquare:HTMLDivElement, toSquare:HTMLDivElement): void
+    private _doNormalMove(fromSquare:HTMLDivElement, toSquare:HTMLDivElement, withAnimation: boolean = true): void
     {
         // Clear the target square.
         this.removePiece(parseInt(toSquare.getAttribute("data-square-id")!));
         Logger.save(`Target square[${toSquare.getAttribute("data-square-id")!}] removed on board`, "playMove", Source.ChessBoard);
 
-        // Move piece from the source square(from) to the target square(to).
+        // Move piece from the source square(from) to the target square(to) with animation.
         const piece: HTMLDivElement = fromSquare.querySelector(".piece") as HTMLDivElement;
+        if(!withAnimation){
+            toSquare.appendChild(piece);
+            return;
+        }
 
-        // Move with animation
-        piece.style.transition = "all 0.3s";
-        piece.style.transform = `translate(${toSquare.offsetLeft - fromSquare.offsetLeft}px, ${toSquare.offsetTop - fromSquare.offsetTop}px)`;
-
-
-
-        // toSquare.appendChild(piece);
+        // Animate the move.
+        const pieceRect: DOMRect = piece.getBoundingClientRect();
+        document.body.appendChild(piece);
+        piece.style.top = `${pieceRect.top}px`;
+        piece.style.left = `${pieceRect.left}px`;
+        piece.style.animation = "move 0.3s ease-in-out forwards";
+        piece.style.setProperty("--move-from-left", `${pieceRect.left}px`);
+        piece.style.setProperty("--move-from-top", `${pieceRect.top - 10}px`);
+        piece.style.setProperty("--move-to-left", `${toSquare.getBoundingClientRect().left + 10}px`);
+        piece.style.setProperty("--move-to-top", `${toSquare.getBoundingClientRect().top}px`);
+        piece.addEventListener("animationend", () => {
+            toSquare.appendChild(piece);
+            piece.style.animation = "";
+            piece.style.top = "";
+            piece.style.left = "";
+        });
     }
 
     /**

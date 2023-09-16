@@ -133,15 +133,15 @@ export class ChessEngine extends BoardManager {
      */
     public isSquareSelectable(select: Square): boolean
     {
-        // If game is not start or finished then square can't be selectable.
-        if(!this.isBoardPlayable()){
-            Logger.save(`Square[${select}] is not selectable because board is not playable`, "isSquareSelectable", Source.ChessEngine);
-            return false;
-        }
-
         // If the game is started but selected square is empty or not player's piece then square can't be selectable.
         if(!BoardQueryer.getPieceOnSquare(select) || BoardQueryer.getPieceOnSquare(select)?.getColor() != BoardQueryer.getColorOfTurn()){
             Logger.save(`Square[${select}]  is not selectable because selected square is empty or not player's piece`, "isSquareSelectable", Source.ChessEngine);
+            return false;
+        }
+
+        // If game is not start or finished then square can't be selectable.
+        if(!this.isBoardPlayable()){
+            Logger.save(`Square[${select}] is not selectable because board is not playable`, "isSquareSelectable", Source.ChessEngine);
             return false;
         }
 
@@ -795,7 +795,7 @@ export class ChessEngine extends BoardManager {
                         if (moves.length > 0) {
                             // If the piece has at least one move then the game is not in stalemate status.
                             this.statusOfGame = GameStatus.InPlay;
-                            Logger.save("Stalemate is not satisfied because king has no moves but any other pieces have moves", "checkStatusOfGame", Source.ChessEngine);
+                            Logger.save("Doubly Check and Stalemate is not satisfied.", "checkStatusOfGame", Source.ChessEngine);
                             return;
                         }
                     }

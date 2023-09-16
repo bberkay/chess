@@ -136,10 +136,6 @@
 }
 
 /* Show Square ids on chess board. */
-#chessboard .square{
-    position:relative;
-}
-
 #chessboard .square-id{
     position:absolute;
     right:0;
