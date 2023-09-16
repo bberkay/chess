@@ -143,6 +143,9 @@
     margin: 10px auto 0;
     width:calc(var(--board-size) / 10);
     height:calc(var(--board-size) / 10);
+    position: absolute;
+    left:10%;
+    z-index:99;
 }
 
 /* White pieces */

@@ -69,7 +69,7 @@ export class LogConsole{
         const squares: NodeListOf<HTMLElement> = document.querySelectorAll(".square");
 
         // Show square ids when the tooltip is hovered.
-        document.querySelectorAll(".tooltip").forEach((element: HTMLElement) => {
+        document.querySelectorAll(".tooltip").forEach((element) => {
             // Show square ids on squares
             element.addEventListener("mouseover", () => {
                 squares.forEach((square: HTMLElement) => {
@@ -79,7 +79,7 @@ export class LogConsole{
 
             // Hide square ids
             element.addEventListener("mouseout", () => {
-                document.querySelectorAll(".square-id").forEach((element: HTMLElement) => {
+                document.querySelectorAll(".square-id").forEach((element) => {
                     element.remove();
                 });
             });
@@ -96,6 +96,20 @@ export class LogConsole{
      */
     private _convertValuesToTooltips(log: string): string
     {
+        /**
+         * This function parses and stringifies the value, if
+         * value is string it returns the value without parsing.
+         */
+        function parseAndStringify(value: string): string
+        {
+            try{
+                value = JSON.parse(value);
+            }catch{}
+
+            return JSON.stringify(value, undefined, 2);
+        }
+
+        // Get the words in the log message.
         const words: string[] = log.split(" ");
         for(let i = 0; i < words.length; i++){
             const originalWord: string = words[i];
@@ -118,7 +132,7 @@ export class LogConsole{
             if(words[i].includes("[") && words[i].includes("]")){
                 words[i] = words[i].replace(words[i].slice(0, words[i].indexOf("[") + 1), "");
                 words[i] = words[i].slice(0, words[i].lastIndexOf("]"));
-                const tooltipVariable: string = `<div class = "tooltip-text"><pre>${JSON.stringify(JSON.parse(words[i]), undefined, 2)}</pre><i></i></div>`;
+                const tooltipVariable: string = `<div class = "tooltip-text"><pre>${parseAndStringify(words[i])}</pre><i></i></div>`;
                 log = log.replace(originalWord, `<div class = 'tooltip'>${originalWord.replace(`[${words[i]}]`, "")} ${tooltipVariable}</div>`);
             }
         }

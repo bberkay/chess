@@ -450,7 +450,15 @@ export class ChessBoard {
         Logger.save(`Target square[${toSquare.getAttribute("data-square-id")!}] removed on board`, "playMove", Source.ChessBoard);
 
         // Move piece from the source square(from) to the target square(to).
-        toSquare.appendChild(fromSquare.querySelector(".piece")!);
+        const piece: HTMLDivElement = fromSquare.querySelector(".piece") as HTMLDivElement;
+
+        // Move with animation
+        piece.style.transition = "all 0.3s";
+        piece.style.transform = `translate(${toSquare.offsetLeft - fromSquare.offsetLeft}px, ${toSquare.offsetTop - fromSquare.offsetTop}px)`;
+
+
+
+        // toSquare.appendChild(piece);
     }
 
     /**
