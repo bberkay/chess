@@ -34,8 +34,8 @@ const game: Test = {
         {from: Square.c1, to: Square.f4},
         {from: Square.e8, to: Square.h8}, // King side castling
         {from: Square.b1, to: Square.c3},
-        {from: Square.e5, to: Square.f3},
-        {from: Square.g2, to: Square.f3}, // White in check
+        {from: Square.e5, to: Square.f3}, // White in check
+        {from: Square.g2, to: Square.f3},
         {from: Square.e7, to: Square.e6},
         {from: Square.d1, to: Square.d4},
         {from: Square.g7, to: Square.h8},
@@ -56,12 +56,21 @@ const game: Test = {
         {from: Square.h4, to: Square.h5},
         {from: Square.g2, to: Square.h1}, // Promotion move
         {from: Square.h1, to: Square.h1}, // Promote black pawn to black queen
+        {from: Square.d4, to: Square.c5},
+        {from: Square.d8, to: Square.b6},
+        {from: Square.c5, to: Square.d6},
+        {from: Square.c8, to: Square.b7},
+        {from: Square.d6, to: Square.c5},
+        {from: Square.a8, to: Square.c8},
+        {from: Square.c5, to: Square.d4},
+        {from: Square.b6, to: Square.a6},
         {from: Square.e5, to: Square.g7}, // White Victory
     ],
     expectation: [
         "e4", "nc6", "e5", "nxe5", "d4", "nh6", "d5", "c5", "dxc6", "bxc6", "Bc4", "g6", "Nf3", "bg7", "Bf4",
         "O-O", "Nc3", "nxf3+", "gxf3", "e6", "Qd4", "bh8", "O-O-O", "re8", "Be3", "g5", "Qe5", "bf6", "Bd4",
-        "be7", "f4", "g4", "f5", "g3", "h4", "g2", "h5", "gxh1=q", "Qg7#" // Expected moves in algebraic notation
+        "be7", "f4", "g4", "f5", "g3", "h4", "g2", "h5", "gxh1=q", "Bc5", "qb6", "Bd6", "bb7", "Bc5", "rac8",
+        "Bd4", "qa6", "Qg7#" // Expected moves in algebraic notation
     ]
 }
 

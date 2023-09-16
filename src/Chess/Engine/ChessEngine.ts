@@ -315,7 +315,8 @@ export class ChessEngine extends BoardManager {
      */
     private _doNormalMove(from: Square, to: Square, saveToHistory:boolean = false): void
     {
-        if(saveToHistory){
+        if(saveToHistory)
+        {
             /**
              * Set the current move for the move history.
              * @see For more information about history, see https://en.wikipedia.org/wiki/Algebraic_notation_(chess)
@@ -332,6 +333,29 @@ export class ChessEngine extends BoardManager {
                 if(piece?.getType() == PieceType.Pawn)
                     this.moveNotation += Converter.squareIDToSquare(from)[0];
                 this.moveNotation += "x";
+            }
+
+            /**
+             * Check if there is another piece that can move to the target square with the same type
+             * and color then add the column of the piece to the current move. For example, from is
+             * knight on d3 and to is e5 normally the current move is "Ne5" but if there is another
+             * knight that can go to e5 then the current move is "Nde5" for distinguish the pieces.
+             *
+             * Note: Bishop, pawn and king can't be distinguished because they can't move to the same square.
+             */
+            if([PieceType.Rook, PieceType.Knight, PieceType.Queen].includes(piece!.getType())){
+                const sameTypePieces: Array<Piece> = BoardQueryer.getPiecesWithFilter(piece?.getColor(), [piece?.getType()]);
+                if(sameTypePieces.length > 1){
+                    for(const pieceItem of sameTypePieces){
+                        const squareOfPiece: Square = BoardQueryer.getSquareOfPiece(pieceItem)!;
+
+                        if ((this.calculatedMoves[squareOfPiece]?.[MoveType.Normal]?.includes(to) || this.moveEngine.getMoves(squareOfPiece)?.[MoveType.Normal]?.includes(to))
+                            && from != squareOfPiece) {
+                            this.moveNotation += Converter.squareIDToSquare(from)[0];
+                            break;
+                        }
+                    }
+                }
             }
 
             // Add the target square to the current move.

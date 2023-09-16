@@ -73,7 +73,6 @@ export class BoardManager extends Board{
         // Check if the square has a piece and get the piece.
         const fromPiece: Piece | null = BoardQueryer.getPieceOnSquare(from)!;
         const toPiece: Piece | null = BoardQueryer.getPieceOnSquare(to);
-        console.log(fromPiece, toPiece);
 
         /**
          * If the moved piece is a pawn or capture move then set half move count to 0
