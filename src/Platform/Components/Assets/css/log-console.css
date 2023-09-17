@@ -23,6 +23,7 @@
     overflow-y: scroll;
 }
 
+/* Log */
 #log-console #log-console-body ul{
     margin:15px 20px 5px -20px;
     list-style: none;

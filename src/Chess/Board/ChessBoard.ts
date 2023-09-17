@@ -278,7 +278,7 @@ export class ChessBoard {
                  * otherwise drop event will be added in Chess.ts because board and engine will be
                  * used together in Chess.ts.
                  */
-                square.addEventListener("dragover", (event: DragEvent) => { event.preventDefault(); });
+                square.addEventListener("dragover", (event: DragEvent) => { event.preventDefault();  });
                 if(this.isStandalone) {
                     square.addEventListener("drop", (event: DragEvent) => {
                         event.preventDefault();
