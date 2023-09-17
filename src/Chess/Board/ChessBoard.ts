@@ -56,7 +56,7 @@ export class ChessBoard {
         let link: HTMLLinkElement = document.createElement("link");
         link.id = "chessboard-css";
         link.rel = "stylesheet";
-        link.href = "./src/Chess/Board/assets/css/chessboard.css";
+        link.href = 'src/Chess/Board/Assets/css/chessboard.css';
 
         // Add the link element to the head of the document.
         document.head.appendChild(link);
