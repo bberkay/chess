@@ -68,7 +68,7 @@ export class Converter{
     static fenToJson(fenNotation: StartPosition | string): JsonNotation
     {
         if(fenNotation.length == 0) throw new Error("Fen notation cannot be empty");
-        else if(fenNotation.length > 71) throw new Error("Fen notation is too long");
+        else if(fenNotation.length > 100) throw new Error("Fen notation is too long");
         else if(fenNotation.length < 8) throw new Error("Fen notation is too short");
 
         // Split fen notation by space
