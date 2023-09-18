@@ -178,6 +178,9 @@ export class LogConsole{
      */
     public clear(): void
     {
+        // Clear the log count.
+        this.currentLogCount = 0;
+
         // Clear the log list.
         document.getElementById("log-list")!.innerHTML = "";
 
