@@ -32,7 +32,7 @@ export class GameCreator {
         let link: HTMLLinkElement = document.createElement("link");
         link.id = "game-creator-css";
         link.rel = "stylesheet";
-        link.href = "./src/Platform/Components/assets/css/game-creator.css";
+        link.href = "./src/Platform/Components/Assets/css/game-creator.css";
 
         // Add the link element to the head of the document.
         document.head.appendChild(link);
