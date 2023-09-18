@@ -35,7 +35,7 @@ export class NotationMenu {
         let link: HTMLLinkElement = document.createElement("link");
         link.id = "notation-menu-css";
         link.rel = "stylesheet";
-        link.href = "./src/Platform/Components/assets/css/notation-menu.css";
+        link.href = "./src/Platform/Components/Assets/css/notation-menu.css";
 
         // Add the link element to the head of the document.
         document.head.appendChild(link);
