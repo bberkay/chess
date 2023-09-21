@@ -2,13 +2,13 @@
 <p><a href = "https://chess-platform.onrender.com/">Live Demo</a> (The site may open slowly because I deployed the project to a free render account)</p>
 <h3>Table of Contents</h3>
 <ol>
-    <li><a href = "#">Introduction</a></li>
-    <li><a href = "#">Features</a></li>
-    <li><a href = "#">Architecture</a></li>
-    <li><a href = "#">Installation</a></li>
-    <li><a href = "#">Usage</a></li>
-    <li><a href = "#">Testing</a></li>
-    <li><a href = "#">Future Plans</a></li>
+    <li><a href = "https://github.com/bberkay/chess-platform/blob/main/README.md#introduction">Introduction</a></li>
+    <li><a href = "https://github.com/bberkay/chess-platform/blob/main/README.md#features">Features</a></li>
+    <li><a href = "https://github.com/bberkay/chess-platform/blob/main/README.md#architecture">Architecture</a></li>
+    <li><a href = "https://github.com/bberkay/chess-platform/blob/main/README.md#installation">Installation</a></li>
+    <li><a href = "https://github.com/bberkay/chess-platform/blob/main/README.md#usage">Usage</a></li>
+    <li><a href = "https://github.com/bberkay/chess-platform/blob/main/README.md#testing">Testing</a></li>
+    <li><a href = "https://github.com/bberkay/chess-platform/blob/main/README.md#future-plans">Future Plans</a></li>
 </ol>
 <h3>Introduction</h3>
 <p>Chess Platform is a project that I developed as a system design work. This project is 
