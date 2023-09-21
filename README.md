@@ -78,7 +78,33 @@ and uses Node.js for the backend. The project is tested with <a href = "https://
 </ul>
 
 ```mermaid
+classDiagram
 
+class ChessPlatform {
+    chess : Chess
+    platform: Platform
+}
+
+class Chess {
+    - chessEngine : ChessEngine
+    - chessBoard : ChessBoard
+}
+
+class ChessEngine {
+    move(source : Square, destination : Square)
+    isCheckmate() : Boolean
+    isStalemate() : Boolean
+}
+
+class ChessBoard {
+    makeMove(source : Square, destination : Square)
+    getPiece(square : Square) : Piece
+    isSquareAttacked(square : Square) : Boolean
+}
+
+ChessPlatform --> Chess
+Chess --> ChessEngine
+Chess --> ChessBoard
 ```
 
 <h3>Installation</h3>
