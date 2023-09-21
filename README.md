@@ -14,10 +14,9 @@
 <p>Chess Platform is a project that I developed as a system design work. This project is 
 not designed by using chess programming techniques(0x88, bitboards, etc.). But all the
 rules of chess are implemented in this project. The project consists of three parts:
-Chess Platform, Platform, and Chess. Chess Platform provides connection of Platform and
-Chess. Platform provides some components like notation table, score section, game creator,
-and log console. Chess provides the engine and board and can be used without
-Platform. Also, ChessBoard and ChessEngine can be used as standalone.</p>
+Chess Platform, Platform, and Chess. More detailed information about these parts can be
+found in the <a href = "https://github.com/bberkay/chess-platform/tree/main#architecture">Architecture</a> section. The project is written in TypeScript
+and uses Node.js for the backend. The project is tested with <a href = "https://vitest.dev/">Vitest</a>.
 <h3>Features</h3>
 <ul>
     <li>by <a href = "https://github.com/bberkay/chess-platform/tree/main/src">ChessPlatform</a>
@@ -54,36 +53,45 @@ Platform. Also, ChessBoard and ChessEngine can be used as standalone.</p>
 <p>In this section, I will explain the project's architecture without going into too much detail as much as possible. As I mentioned in the introduction, the project currently consists of two main parts and the third part that provides connection between main parts and manages the app.</p>
 <ul>
     <li>
-        <strong>Chess Platform</strong><br/>
-        The part that provides connection between Platform and Chess. Creates Chess instance and provides it to Platform instance. So, platform components can use chess instance and provides a start point for the project by creating chess and platform instances.
+        <strong><a href = "https://github.com/bberkay/chess-platform/blob/main/src/ChessPlatform.ts">Chess Platform</a></strong><br/>
+        The part that provides connection between Platform and Chess. Creates Chess instance and provides it to Platform instance. So, chess methods can be used by platform's components. And by connecting Platform and Chess, it provides the start point for the project.
     </li><br/>
     <li>
-        <strong>Chess</strong><br/>
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusamus corporis dolor esse nihil nobis possimus quae quibusdam, reprehenderit sed? Adipisci assumenda autem consequatur cupiditate deleniti dolores eaque fugiat fugit repellat.
+        <strong><a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Chess.ts">Chess</a></strong><br/>
+        Chess provides a playable game on web by using ChessEngine and ChessBoard instances. Also, has a Cache system for save the game and log system for save the details of every action.  
         <br/>
         <ul>
             <li>
-                <strong>Chess Engine</strong><br/>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Amet assumenda debitis dolor.
+                <strong><a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Engine/ChessEngine.ts">ChessEngine</a></strong><br/>
+                ChessEngine provides the mechanism of the game. All the rules of chess are implemented in this class and can be used as standalone or directly by Chess class for playable game by connecting with ChessBoard.   
             </li>
             <li>
-                <strong>Chess Board</strong><br/>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Amet assumenda debitis dolor.
+                <strong><a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Board/ChessBoard.ts">ChessBoard</a></strong><br/>
+                ChessBoard provides the interactive chessboard that players can make actions but doesn't have any mechanism. ChessBoard can be used as standalone or directly by Chess class for playable game by connecting with ChessEngine. Also, both board and pieces can be visualized from <a href = "https://github.com/bberkay/chess-platform/tree/main/src/Chess/Board/Assets">assets.</a>
             </li>
         </ul>
     </li><br>
     <li>
-        <strong>Platform</strong><br/>
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusamus corporis dolor esse nihil nobis possimus quae quibusdam, reprehenderit sed? Adipisci assumenda autem consequatur cupiditate deleniti dolores eaque fugiat fugit repellat.
+        <strong><a href = "https://github.com/bberkay/chess-platform/blob/main/src/Platform/Platform.ts">Platform</a></strong><br/>
+        Platform provides some UI components by using chess instance that connected by Chess Platform. Currently, Platform has four components: Notation Table that shows every played move of players as algebraic notation, Score Section(comes with notation table) that shows score of every player, Game Creator that provide 2 different create form(used with fen notation) for users, and Log Console that shows the log of every action of players on UI by using chess instance's log system. 
     </li>
 </ul>
 
 ```mermaid
-graph TD;
-    A-->B;
-    A-->C;
-    B-->D;
-    C-->D;
+graph LR
+subgraph Chess Platform
+    subgraph Chess
+        subgraph Engine
+            ChessEngine
+        end
+        subgraph Board
+            ChessBoard
+        end
+    end
+    Chess
+    Platform
+end
+Chess Platform --> Platform
 ```
 
 <h3>Installation</h3>
