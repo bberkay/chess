@@ -1,9 +1,10 @@
-import {Color, PieceType} from "../../Chess/Types";
+import { Color, PieceType } from "../../Chess/Types";
+import { Component } from "./Component.ts";
 
 /**
  * This class provide a table to show the notation.
  */
-export class NotationMenu {
+export class NotationMenu extends Component{
 
     private lastNotation: string;
     private lastScore: Record<Color, number>;
@@ -12,41 +13,20 @@ export class NotationMenu {
      * Constructor of the LogConsole class.
      */
     constructor() {
+        super();
         this.lastNotation = "";
         this.lastScore = {[Color.White]: 0, [Color.Black]: 0};
 
-        // Load css file of the chess board.
-        this._loadCSS();
-
         // Create the table.
-        this.createTable();
+        this.render();
     }
 
     /**
-     * This function loads the css file of the notation table.
+     * This function render the notation table.
      */
-    private _loadCSS(): void
+    public render(): void
     {
-        // Check if the css file is already loaded.
-        if(document.getElementById("notation-table-css"))
-            return;
-
-        // Create the link element and set the attributes.
-        let link: HTMLLinkElement = document.createElement("link");
-        link.id = "notation-menu-css";
-        link.rel = "stylesheet";
-        link.href = "./src/Platform/Components/Assets/css/notation-menu.css";
-
-        // Add the link element to the head of the document.
-        document.head.appendChild(link);
-    }
-
-    /**
-     * This function creates the table.
-     */
-    private createTable(){
-        document.getElementById("notation-menu")!.innerHTML =
-            `
+        this.loadHTML("notation-menu", `
                 <div class = "score-table" id = "black-player-pieces"></div>
                 <div id = "notation-table">
                     <table>
@@ -61,7 +41,8 @@ export class NotationMenu {
                     </table>
                 </div>
                 <div class = "score-table" id = "white-player-pieces"></div>
-            `;
+        `);
+        this.loadCSS("notation-menu.css");
     }
 
     /**
@@ -69,7 +50,7 @@ export class NotationMenu {
      */
     public clear(): void
     {
-        this.createTable();
+        document.getElementById("notations")!.innerHTML = "";
         this.lastNotation = "";
         this.lastScore = {[Color.White]: 0, [Color.Black]: 0};
     }
@@ -77,7 +58,7 @@ export class NotationMenu {
     /**
      * This function sets the table by given notation.
      */
-    public addNotations(notation: Array<string>): void
+    public load(notation: Array<string>): void
     {
         this.clear();
 
@@ -87,9 +68,18 @@ export class NotationMenu {
     }
 
     /**
+     * Update the notation table.
+     */
+    public update(notation: Array<string>, scores: Record<Color, {score: number, pieces: PieceType[]}>): void
+    {
+        this.updateScore(scores);
+        this.addNotation(notation);
+    }
+
+    /**
      * This function adds a row/notation to the table.
      */
-    public addNotation(notation: Array<string>): void
+    private addNotation(notation: Array<string>): void
     {
         // Check if the notation is already added.
         if(this.lastNotation == notation[notation.length - 1] || notation.length < 1)
@@ -128,7 +118,7 @@ export class NotationMenu {
     /**
      * This function shows the score of the players top and bottom of the table.
      */
-    public showScore(scores: Record<Color, {score: number, pieces: PieceType[]}>): void
+    private updateScore(scores: Record<Color, {score: number, pieces: PieceType[]}>): void
     {
         if(this.lastScore.White == scores.White.score && this.lastScore.Black == scores.Black.score)
             return;

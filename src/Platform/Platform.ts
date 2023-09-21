@@ -33,9 +33,9 @@ export class Platform{
      */
     constructor(chess: Chess) {
         this.chess = chess;
-        this.gameCreator = document.getElementById("game-creator") ? new GameCreator() : null;
-        this.notationMenu = document.getElementById("notation-menu") ? new NotationMenu() : null;
-        this.logConsole = document.getElementById("log-console") ? new LogConsole() : null;
+        this.gameCreator = new GameCreator();
+        this.notationMenu = new NotationMenu();
+        this.logConsole = new LogConsole();
         this.operationValue = null;
 
         // Initialize the listeners when the dom is loaded.
@@ -43,8 +43,8 @@ export class Platform{
             this.initListeners();
 
             // Update the notation table and log console.
-            this.updateNotationTable(true);
-            this.updateLogConsole();
+            this.notationMenu!.load(this.chess.getNotation());
+            this.logConsole!.show(this.chess.getLogs());
         });
     }
 
@@ -67,8 +67,8 @@ export class Platform{
                 );
 
                 // Update the notation table and log console.
-                this.updateNotationTable();
-                this.updateLogConsole();
+                this.notationMenu!.update(this.chess.getNotation(), this.chess.getScores());
+                this.logConsole!.show(this.chess.getLogs());
             });
         });
 
@@ -100,10 +100,10 @@ export class Platform{
                 this.createGameWithGameCreator();
                 break;
             case MenuOperationType.GameCreatorChangeMode:
-                this.changeGameCreatorMode();
+                this.gameCreator!.changeMode(this.operationValue!);
                 break;
             case MenuOperationType.LogConsoleClear:
-                this.clearLogConsole();
+                this.logConsole!.clear();
                 break;
         }
     }
@@ -113,82 +113,17 @@ export class Platform{
      */
     private createGameWithGameCreator(): void
     {
-        if(this.gameCreator === null)
-            throw new Error("Game creator form is not initialized.");
-
         // Clear components.
-        this.clearNotationTable();
-        this.clearLogConsole();
+        this.notationMenu!.clear();
+        this.logConsole!.clear();
 
         // Create a new game with input value by given operation value.
-        this.chess.createGame(this.gameCreator.getValueByMode(this.operationValue!));
+        this.chess.createGame(this.gameCreator!.getValueByMode(this.operationValue!));
 
         /**
          * Initialize the listeners again because when the board changes on the dom tree,
          * the listeners are removed.
          */
         this.initListeners();
-    }
-
-    /**
-     * This function changes the mode of game creator form.
-     */
-    private changeGameCreatorMode(): void
-    {
-        if(this.gameCreator === null)
-            throw new Error("Game creator form is not initialized.");
-
-        // Change mode of game creator form.
-        this.gameCreator.changeMode(this.operationValue!);
-    }
-
-    /**
-     * This function updates the notation table.
-     */
-    private updateNotationTable(isInitOperation: boolean = false): void
-    {
-        if(this.notationMenu === null)
-            throw new Error("Notation table is not initialized.");
-
-        if(isInitOperation)
-            this.notationMenu!.addNotations(this.chess.getNotation());
-        else
-            this.notationMenu!.addNotation(this.chess.getNotation());
-
-        // Show the score of the players on the top and bottom of the table.
-        this.notationMenu!.showScore(this.chess.getScores());
-    }
-
-    /**
-     * This function updates the log console.
-     */
-    private updateLogConsole(): void
-    {
-        if(this.logConsole === null)
-            throw new Error("Log console is not initialized.");
-
-        this.logConsole!.show(this.chess.getLogs());
-    }
-
-    /**
-     * This function clears the notation table.
-     */
-    private clearNotationTable(): void
-    {
-        if(this.notationMenu === null)
-            throw new Error("Notation table is not initialized.");
-
-        this.notationMenu!.clear();
-    }
-
-    /**
-     * This function clears the log console.
-     */
-    private clearLogConsole(): void
-    {
-        if(this.logConsole === null)
-            throw new Error("Log console is not initialized.");
-
-        this.logConsole!.clear();
     }
 }
