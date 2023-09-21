@@ -1,4 +1,4 @@
-<h1>Chess Platform</h1>
+<h1 align = "center">Chess Platform</h1>
 <p><a href = "https://chess-platform.onrender.com/">Live Demo</a> (The site may open slowly because I deployed the project to a free render account)</p>
 <h3>Table of Contents</h3>
 <ol>
