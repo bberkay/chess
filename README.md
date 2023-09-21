@@ -79,32 +79,46 @@ and uses Node.js for the backend. The project is tested with <a href = "https://
 
 ```mermaid
 classDiagram
+  class ChessPlatform {
+    - chess: Chess
+    - platform: Platform
+    + constructor()
+  }
+  class Chess {
+    - chessBoard: ChessBoard
+    - chessEngine: ChessEngine
+    + constructor()
+  }
+  class ChessEngine {
+    + constructor()
+  }
+  class ChessBoard {
+    + constructor()
+  }
+  class Platform {
+    - notationTable: NotationTable
+    - gameCreator: GameCreator
+    - logConsole: LogConsole
+    + constructor()
+  }
+  class NotationTable {
+    + constructor()
+  }
+  class GameCreator {
+    + constructor()
+  }
+  class LogConsole {
+    + constructor()
+  }
 
-class ChessPlatform {
-    chess : Chess
-    platform: Platform
-}
+  ChessPlatform --> Chess : Depends on
+  ChessPlatform --> Platform : Depends on
+  Chess --> ChessBoard : Depends on
+  Chess --> ChessEngine : Depends on
+  Platform --> NotationTable : Uses
+  Platform --> GameCreator : Uses 
+  Platform --> LogConsole : Uses
 
-class Chess {
-    - chessEngine : ChessEngine
-    - chessBoard : ChessBoard
-}
-
-class ChessEngine {
-    move(source : Square, destination : Square)
-    isCheckmate() : Boolean
-    isStalemate() : Boolean
-}
-
-class ChessBoard {
-    makeMove(source : Square, destination : Square)
-    getPiece(square : Square) : Piece
-    isSquareAttacked(square : Square) : Boolean
-}
-
-ChessPlatform --> Chess
-Chess --> ChessEngine
-Chess --> ChessBoard
 ```
 
 <h3>Installation</h3>
