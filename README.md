@@ -50,37 +50,31 @@ Platform. Also, ChessBoard and ChessEngine can be used as standalone.</p>
     </li>   
 </ul>
 <h3>Architecture</h3>
-<i>Technologies: HTML, CSS, JS, TypeScript, Node, Vite, Vitest</i>
+<small><i>Technologies: HTML, CSS, JS, TypeScript, Node, Vite, Vitest</i></small>
 <p>In this section, I will explain the project's architecture without going into too much detail as much as possible. As I mentioned in the introduction, the project currently consists of two main parts and the third part that provides connection between main parts and manages the app.</p>
 <ul>
     <li>
-        <strong>Chess Platform</strong>
-        <br/>
-        <p>The part that provides connection between Platform and Chess. Creates Chess instance and provides it to Platform instance. So, platform components can use chess instance and provides a start point for the project by creating chess and platform instances.</p>
-    </li>
-    <br/>
+        <strong>Chess Platform</strong><br/>
+        The part that provides connection between Platform and Chess. Creates Chess instance and provides it to Platform instance. So, platform components can use chess instance and provides a start point for the project by creating chess and platform instances.
+    </li><br/>
     <li>
-        <strong>Chess</strong>
+        <strong>Chess</strong><br/>
+        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusamus corporis dolor esse nihil nobis possimus quae quibusdam, reprehenderit sed? Adipisci assumenda autem consequatur cupiditate deleniti dolores eaque fugiat fugit repellat.
         <br/>
-        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusamus corporis dolor esse nihil nobis possimus quae quibusdam, reprehenderit sed? Adipisci assumenda autem consequatur cupiditate deleniti dolores eaque fugiat fugit repellat.</p>
         <ul>
             <li>
-                <strong>Chess Engine</strong>
-                <br/>
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Amet assumenda debitis dolor.</p>
+                <strong>Chess Engine</strong><br/>
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Amet assumenda debitis dolor.
             </li>
             <li>
-                <strong>Chess Board</strong>
-                <br/>
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Amet assumenda debitis dolor.</p>
+                <strong>Chess Board</strong><br/>
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Amet assumenda debitis dolor.
             </li>
         </ul>
-    </li>
-    <br/>
+    </li><br>
     <li>
-        <strong>Platform</strong>
-        <br/>
-        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusamus corporis dolor esse nihil nobis possimus quae quibusdam, reprehenderit sed? Adipisci assumenda autem consequatur cupiditate deleniti dolores eaque fugiat fugit repellat.</p>
+        <strong>Platform</strong><br/>
+        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusamus corporis dolor esse nihil nobis possimus quae quibusdam, reprehenderit sed? Adipisci assumenda autem consequatur cupiditate deleniti dolores eaque fugiat fugit repellat.
     </li>
 </ul>
 
