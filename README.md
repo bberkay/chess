@@ -49,7 +49,7 @@ and uses Node.js for the backend. The project is tested with <a href = "https://
     </li>   
 </ul>
 <h3>Architecture</h3>
-<small><i>Technologies: HTML, CSS, JS, TypeScript, Node, Vite, Vitest</i></small>
+<h5><i>Technologies: HTML, CSS, JS, TypeScript, Node, Vite, Vitest</i></h5>
 <p>In this section, I will explain the project's architecture without going into too much detail as much as possible. As I mentioned in the introduction, the project currently consists of two main parts and the third part that provides connection between main parts and manages the app.</p>
 <ul>
     <li>
@@ -78,20 +78,7 @@ and uses Node.js for the backend. The project is tested with <a href = "https://
 </ul>
 
 ```mermaid
-graph LR
-subgraph Chess Platform
-    subgraph Chess
-        subgraph Engine
-            ChessEngine
-        end
-        subgraph Board
-            ChessBoard
-        end
-    end
-    Chess
-    Platform
-end
-Chess Platform --> Platform
+
 ```
 
 <h3>Installation</h3>
@@ -213,4 +200,4 @@ You can run all the tests with the following command.</p>
 <h3>Future Plans</h3>
 <p>My first plan is to switch from Node.js to <a href = "https://bun.sh/">Bun</a>. Multiplayer support, which will be controlled by ChessPlatform, is also one of my main goals. Along with multiplayer support, options such as proposing a takeback, offering a draw, resigning from a match, and viewing possibility of previous moves from the notation table will need to be developed. I also have some smaller plans on my list, such as <a href = "https://en.wikipedia.org/wiki/Portable_Game_Notation">PGN</a> support in chess and table marking in the chessboard.</p>
 <hr>
-<h5>Contact: <a href="mailto:berkaykayaforbusiness@outlook.com">berkaykayaforbusiness@outlook.com</a></h5> 
+<h5 align="center"><a href="mailto:berkaykayaforbusiness@outlook.com">berkaykayaforbusiness@outlook.com</a></h5> 
