@@ -23,7 +23,7 @@ test('King Forbidden Moves', () => {
     console.log("Testing: " + game.title);
     console.log("Board:   " + game.board);
 
-    const engine = new ChessEngine(true);
+    const engine = new ChessEngine();
     engine.createGame(game.board);
 
     expect(engine.getMoves(Square.h8)![MoveType.Normal]!.sort()).toEqual(game.expectation.sort());

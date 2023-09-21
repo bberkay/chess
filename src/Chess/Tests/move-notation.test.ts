@@ -78,7 +78,7 @@ const game: Test = {
  * Test file for move notation by playing a random game
  */
 test('Algebraic Notation Test', () => {
-    const engine = new ChessEngine(true);
+    const engine = new ChessEngine();
 
     console.log("Testing:        " + game.title);
     console.log("Initial Board:  " + game.board);

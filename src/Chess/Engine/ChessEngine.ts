@@ -2,8 +2,8 @@
  * @module ChessEngine
  * @description This module provides users to create and manage a chess game(does not include board or other ui components).
  * @version 1.0.0
- * @author Berkay Kaya
- * @url https://github.com/bberkay/chess
+ * @author Berkay Kaya <berkaykayaforbusiness@outlook.com> (https://bberkay.github.io)
+ * @url https://github.com/bberkay/chess-platform
  * @license MIT
  */
 
@@ -51,7 +51,7 @@ export class ChessEngine extends BoardManager {
     /**
      * Constructor of the ChessEngine class.
      */
-    constructor(isStandalone: boolean = false){
+    constructor(isStandalone: boolean = true){
         super();
         this.moveEngine = new MoveEngine();
         this.isStandalone = isStandalone;

@@ -81,7 +81,7 @@ const games: Test[] = [
 // Test every game
 test(`Game Status After Move`, () => {
     // Create chess engine
-    const engine = new ChessEngine(true);
+    const engine = new ChessEngine();
 
     // Test every game
     for (const game of games) {

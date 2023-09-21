@@ -2,7 +2,7 @@
  * @module ChessPlatform
  * @description This class is the main class of the chess platform. It provides the connections between the chess, menu and other systems.
  * @version 1.0.0
- * @author Berkay Kaya
+ * @author Berkay Kaya <berkaykayaforbusiness@outlook.com> (https://bberkay.github.io)
  * @url https://github.com/bberkay/chess-platform
  * @license MIT
  */
@@ -25,9 +25,5 @@ export class ChessPlatform{
     constructor(enableCaching: boolean = true) {
         this.chess = new Chess(enableCaching, false);
         this.platform = new Platform(this.chess);
-
-        // If there is a game in cache, load it. Otherwise, create a new game.
-        if(!this.chess.checkAndLoadGameFromCache())
-            this.chess.createGame();
     }
 }

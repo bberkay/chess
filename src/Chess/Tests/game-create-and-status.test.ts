@@ -59,7 +59,7 @@ const games: Test[] = [
 // Test every status of the game
 test(`Game Status on Start`, () => {
     // Create chess engine
-    const chessEngine = new ChessEngine(true);
+    const chessEngine = new ChessEngine();
 
     // Test every game
     for (const game of games) {

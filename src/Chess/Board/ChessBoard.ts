@@ -2,7 +2,7 @@
  * @module ChessBoard
  * @description This module provides users to create and manage a chess board(does not include any mechanic/logic).
  * @version 1.0.0
- * @author Berkay Kaya
+ * @author Berkay Kaya <berkaykayaforbusiness@outlook.com> (https://bberkay.github.io)
  * @url https://github.com/bberkay/chess-platform
  * @license MIT
  */
@@ -30,7 +30,7 @@ export class ChessBoard {
      * Constructor of the class which load css file of
      * the chess board.
      */
-    constructor(isStandalone: boolean = false){
+    constructor(isStandalone: boolean = true){
         this.isStandalone = isStandalone;
 
         // Load css file of the chess board.

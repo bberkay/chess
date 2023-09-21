@@ -39,7 +39,7 @@ test('Threefold Repetition Test', () => {
     console.log("Testing:        " + game.title);
     console.log("Initial Board:  " + game.board);
 
-    const engine = new ChessEngine(true);
+    const engine = new ChessEngine();
     engine.createGame(game.board);
 
     // Play moves

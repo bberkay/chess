@@ -49,7 +49,7 @@ const games: Test[] = [
 ]
 
 test('King Protection Test', () => {
-    const engine = new ChessEngine(true);
+    const engine = new ChessEngine();
 
     for(const game of games){
         console.log("Testing: " + game.title);

@@ -1,8 +1,8 @@
 /**
  * @module Platform
- * @description TODO Module description
+ * @description This class is the main class of the chess platform menu. It provides the components of the menu and connections between the chess and menu.
  * @version 1.0.0
- * @author Berkay Kaya
+ * @author Berkay Kaya <berkaykayaforbusiness@outlook.com> (https://bberkay.github.io)
  * @url https://github.com/bberkay/chess-platform
  * @license MIT
  */

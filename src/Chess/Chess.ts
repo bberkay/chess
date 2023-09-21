@@ -2,7 +2,7 @@
  * @module Chess
  * @description This module provides users to a playable chess game on the web by connecting ChessEngine and ChessBoard with CacheManager.
  * @version 1.0.0
- * @author Berkay Kaya
+ * @author Berkay Kaya <berkaykayaforbusiness@outlook.com> (https://bberkay.github.io)
  * @url https://github.com/bberkay/chess-platform
  * @license MIT
  */
@@ -36,11 +36,15 @@ export class Chess{
      * Constructor of the Chess class.
      */
     constructor(enableCaching: boolean = true, initListener: boolean = true){
-        this.chessBoard = new ChessBoard();
-        this.chessEngine = new ChessEngine();
+        this.chessBoard = new ChessBoard(false);
+        this.chessEngine = new ChessEngine(false);
         this.selectedSquare = null;
         this.isCachingEnabled = enableCaching;
         this.initListener = initListener;
+
+        // If there is a game in cache, load it. Otherwise, create a new game.
+        if(!this.checkAndLoadGameFromCache())
+            this.createGame();
 
         /**
          * Initialize the listener when the dom is loaded if chess is not

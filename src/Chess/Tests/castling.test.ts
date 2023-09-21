@@ -114,7 +114,7 @@ const castlingTestGames: Test[] = [
 
 // Test for every castling move.
 test('Castling Moves', () => {
-    const engine = new ChessEngine(true);
+    const engine = new ChessEngine();
     for(const game of castlingTestGames)
     {
         console.log("Testing:        " + game.title);

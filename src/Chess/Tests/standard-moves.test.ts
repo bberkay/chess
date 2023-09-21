@@ -71,7 +71,7 @@ const game: Test = {
 
 // Tests
 test('Standard Moves', () => {
-    const engine = new ChessEngine(true);
+    const engine = new ChessEngine();
     console.log("Testing: " + game.title);
     console.log("Board:   " + game.board);
     engine.createGame(game.board);
