@@ -9,7 +9,7 @@
 
 
 import { Chess } from "../Chess/Chess";
-import { Square } from "../Chess/Types";
+import {GameStatus, Square} from "../Chess/Types";
 import { SquareClickMode } from "../Chess/Board/Types";
 import { GameCreator } from "./Components/GameCreator.ts";
 import { NotationMenu } from "./Components/NotationMenu.ts";
@@ -27,6 +27,7 @@ export class Platform{
     private readonly notationMenu: NotationMenu | null;
     private readonly logConsole: LogConsole | null;
     private operationValue: MenuOperationValue | null;
+    private isGameContinued: boolean;
 
     /**
      * Constructor of the Platform class.
@@ -37,6 +38,7 @@ export class Platform{
         this.notationMenu = new NotationMenu();
         this.logConsole = new LogConsole();
         this.operationValue = null;
+        this.isGameContinued = true;
 
         // Initialize the listeners when the dom is loaded.
         document.addEventListener("DOMContentLoaded", () => {
@@ -66,9 +68,14 @@ export class Platform{
                     parseInt(square.getAttribute("data-square-id")!) as Square
                 );
 
-                // Update the notation table and log console.
-                this.notationMenu!.update(this.chess.getNotation(), this.chess.getScores());
-                this.logConsole!.show(this.chess.getLogs());
+                if(!this.isGameContinued){
+                    // Update the notation table and log console.
+                    this.notationMenu!.update(this.chess.getNotation(), this.chess.getScores());
+                    this.logConsole!.show(this.chess.getLogs());
+                }
+
+                if(!this.isGameContinued && [GameStatus.WhiteVictory, GameStatus.BlackVictory, GameStatus.Draw].includes(this.chess.getStatus()))
+                    this.isGameContinued = false;
             });
         });
 
@@ -119,6 +126,7 @@ export class Platform{
 
         // Create a new game with input value by given operation value.
         this.chess.createGame(this.gameCreator!.getValueByMode(this.operationValue!));
+        this.isGameContinued = true;
 
         /**
          * Initialize the listeners again because when the board changes on the dom tree,

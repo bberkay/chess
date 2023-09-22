@@ -973,7 +973,8 @@ export class ChessEngine extends BoardManager {
             }
 
             // If board has no queen, rook or pawn then check the king and bishop count.
-            if(BoardQueryer.getPiecesWithFilter(BoardQueryer.getColorOfTurn(), [PieceType.Knight, PieceType.Bishop]).length > 1){
+            if(BoardQueryer.getPiecesWithFilter(Color.White, [PieceType.Knight, PieceType.Bishop]).length > 1
+                || BoardQueryer.getPiecesWithFilter(Color.Black, [PieceType.Knight, PieceType.Bishop]).length > 1){
                 this.statusOfGame = GameStatus.InPlay;
                 Logger.save(`Board has more than one knight and/or bishop so it can be playable.`, "isBoardPlayable", Source.ChessEngine);
                 return true;
@@ -985,7 +986,6 @@ export class ChessEngine extends BoardManager {
                 this.statusOfGame = GameStatus.Draw;
             }
 
-            Logger.save(`Board is not playable because game not started(king/kings missing).`, "isBoardPlayable", Source.ChessEngine);
             return false;
         }
     }

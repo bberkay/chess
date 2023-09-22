@@ -7,7 +7,7 @@
  * @license MIT
  */
 
-import {Color, JsonNotation, PieceType, Square, StartPosition} from "./Types";
+import {Color, GameStatus, JsonNotation, PieceType, Square, StartPosition} from "./Types";
 import {ChessEngine} from "./Engine/ChessEngine";
 import {ChessBoard} from "./Board/ChessBoard";
 import {SquareClickMode} from "./Board/Types";
@@ -269,5 +269,13 @@ export class Chess{
     public getLogs(): Array<{source: string, message: string}>
     {
         return Logger.get();
+    }
+
+    /**
+     * Get the status of the game
+     */
+    public getStatus(): GameStatus
+    {
+        return this.chessEngine.getStatusOfGame();
     }
 }

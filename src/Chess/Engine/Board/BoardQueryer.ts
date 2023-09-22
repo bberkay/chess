@@ -1,7 +1,7 @@
-import { Board } from "./Board.ts";
-import { Square, Color, PieceType, CastlingType, JsonNotation } from "../../Types";
-import { Piece, Route, MoveRoute } from "../Types";
-import { RouteCalculator } from "../Move/Calculator/RouteCalculator.ts";
+import {Board} from "./Board.ts";
+import {CastlingType, Color, JsonNotation, PieceType, Square} from "../../Types";
+import {MoveRoute, Piece, Route} from "../Types";
+import {RouteCalculator} from "../Move/Calculator/RouteCalculator.ts";
 
 
 /**
@@ -285,6 +285,14 @@ export class BoardQueryer extends Board{
                     else
                         return true;
                 }
+            }
+
+            // Check the king threat, king threat is calculated differently because king can only move one square.
+            if(this.isSquareHasPiece(allRoutes[route as MoveRoute]![0]!, enemyColor, PieceType.King)){
+                if(getThreatening)
+                    squaresOfThreateningEnemies.push(allRoutes[route as MoveRoute]![0]!);
+                else
+                    return true;
             }
         }
 

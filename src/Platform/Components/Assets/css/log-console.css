@@ -149,4 +149,5 @@
     margin:7px;
     font-size:12px;
     font-family: monospace;
+    z-index:999;
 }
