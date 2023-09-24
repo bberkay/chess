@@ -27,7 +27,7 @@ export class Platform{
     private readonly notationMenu: NotationMenu | null;
     private readonly logConsole: LogConsole | null;
     private operationValue: MenuOperationValue | null;
-    private isGameContinued: boolean;
+    private isGameFinished: boolean;
 
     /**
      * Constructor of the Platform class.
@@ -38,7 +38,7 @@ export class Platform{
         this.notationMenu = new NotationMenu();
         this.logConsole = new LogConsole();
         this.operationValue = null;
-        this.isGameContinued = true;
+        this.isGameFinished = false;
 
         // Initialize the listeners when the dom is loaded.
         document.addEventListener("DOMContentLoaded", () => {
@@ -68,14 +68,14 @@ export class Platform{
                     parseInt(square.getAttribute("data-square-id")!) as Square
                 );
 
-                if(!this.isGameContinued){
+                if(!this.isGameFinished){
                     // Update the notation table and log console.
                     this.notationMenu!.update(this.chess.getNotation(), this.chess.getScores());
                     this.logConsole!.show(this.chess.getLogs());
                 }
 
-                if(!this.isGameContinued && [GameStatus.WhiteVictory, GameStatus.BlackVictory, GameStatus.Draw].includes(this.chess.getStatus()))
-                    this.isGameContinued = false;
+                if(!this.isGameFinished && [GameStatus.WhiteVictory, GameStatus.BlackVictory, GameStatus.Draw].includes(this.chess.getStatus()))
+                    this.isGameFinished = true;
             });
         });
 
@@ -126,7 +126,7 @@ export class Platform{
 
         // Create a new game with input value by given operation value.
         this.chess.createGame(this.gameCreator!.getValueByMode(this.operationValue!));
-        this.isGameContinued = true;
+        this.isGameFinished = false;
 
         /**
          * Initialize the listeners again because when the board changes on the dom tree,
