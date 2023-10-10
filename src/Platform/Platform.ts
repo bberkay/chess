@@ -61,7 +61,7 @@ export class Platform{
          * This is for the chess in src\Chess\Chess.ts.
          */
         document.querySelectorAll("[data-square-id]").forEach(square => {
-            square.addEventListener("click", () => {
+            square.addEventListener("mousedown", () => {
                 // Make move(with square ID and click mode)
                 this.chess.doActionOnBoard(
                     square.getAttribute("data-click-mode") as SquareClickMode,
