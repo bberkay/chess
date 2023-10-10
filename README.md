@@ -111,13 +111,13 @@ classDiagram
     + constructor()
   }
 
-  ChessPlatform --> Chess : Depends on
-  ChessPlatform --> Platform : Depends on
-  Chess --> ChessBoard : Depends on
-  Chess --> ChessEngine : Depends on
-  Platform --> NotationTable : Uses
-  Platform --> GameCreator : Uses 
-  Platform --> LogConsole : Uses
+  ChessPlatform *-- Chess
+  ChessPlatform *-- Platform
+  Chess o-- ChessBoard
+  Chess o-- ChessEngine
+  Platform o-- NotationTable
+  Platform o-- GameCreator
+  Platform o-- LogConsole
 
 ```
 
