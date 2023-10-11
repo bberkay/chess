@@ -111,13 +111,13 @@ classDiagram
     + constructor()
   }
 
-  ChessPlatform *-- Chess
-  ChessPlatform *-- Platform
-  Chess o-- ChessBoard
-  Chess o-- ChessEngine
-  Platform o-- NotationTable
-  Platform o-- GameCreator
-  Platform o-- LogConsole
+  ChessPlatform "0..1" *-- "1" Chess
+  ChessPlatform "0..1" *-- "1" Platform
+  Chess "0..1" o-- "1" ChessBoard
+  Chess "0..1" o-- "1" ChessEngine
+  Platform "1" o-- "0..1" NotationTable
+  Platform "1" o-- "0..1" GameCreator
+  Platform "1" o-- "0..1" LogConsole
 
 ```
 
