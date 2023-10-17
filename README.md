@@ -96,6 +96,7 @@ classDiagram
     + constructor()
   }
   class Platform {
+    - chess: Chess
     - notationTable: NotationTable
     - gameCreator: GameCreator
     - logConsole: LogConsole
@@ -111,13 +112,13 @@ classDiagram
     + constructor()
   }
 
-  ChessPlatform "0..1" *-- "1" Chess
-  ChessPlatform "0..1" *-- "1" Platform
-  Chess "0..1" o-- "1" ChessBoard
-  Chess "0..1" o-- "1" ChessEngine
-  Platform "1" o-- "0..1" NotationTable
-  Platform "1" o-- "0..1" GameCreator
-  Platform "1" o-- "0..1" LogConsole
+  ChessPlatform --> Chess
+  ChessPlatform --> Platform
+  Chess --> ChessBoard
+  Chess --> ChessEngine
+  Platform --> NotationTable
+  Platform --> GameCreator
+  Platform --> LogConsole
 
 ```
 
