@@ -547,8 +547,8 @@ export class ChessEngine extends BoardManager {
          */
         this.mandatoryMoves = {};
         this.calculatedMoves = {};
-        this.calculatedBoardPlayableStatus = null;
         this.currentMoves = null;
+        this.calculatedBoardPlayableStatus = null;
         this._checkCastling();
         this._checkEnPassant();
         this.changeTurn();
