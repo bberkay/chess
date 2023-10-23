@@ -9,7 +9,7 @@
 
 
 import { Chess } from "../Chess/Chess";
-import {GameStatus, Square} from "../Chess/Types";
+import { GameStatus, Square } from "../Chess/Types";
 import { SquareClickMode } from "../Chess/Board/Types";
 import { GameCreator } from "./Components/GameCreator.ts";
 import { NotationMenu } from "./Components/NotationMenu.ts";
@@ -110,9 +110,18 @@ export class Platform{
                 this.gameCreator!.changeMode(this.operationValue!);
                 break;
             case MenuOperationType.LogConsoleClear:
-                this.logConsole!.clear();
+                this.clearLogConsole();
                 break;
         }
+    }
+
+    /**
+     * This function clears the log console and logs of the chess.
+     */
+    private clearLogConsole(): void
+    {
+        this.chess!.clearLogs();
+        this.logConsole!.clear();
     }
 
     /**

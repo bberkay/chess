@@ -272,6 +272,14 @@ export class Chess{
     }
 
     /**
+     * Clear the logs of the game
+     */
+    public clearLogs(): void
+    {
+        Logger.clear();
+    }
+
+    /**
      * Get the status of the game
      */
     public getStatus(): GameStatus
