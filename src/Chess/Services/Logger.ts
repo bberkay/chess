@@ -39,9 +39,6 @@ export class Logger{
      */
     public static clear(): void
     {
-        for(const log of Logger.logs){
-            if(!log.source.includes("constructor") && !log.source.includes("checkAndLoadGameFromCache"))
-                Logger.logs.splice(Logger.logs.indexOf(log), 1);
-        }
+        Logger.logs = [];
     }
 }

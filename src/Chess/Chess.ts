@@ -119,7 +119,7 @@ export class Chess{
         // Convert the position to json notation if it is not json notation.
         if(typeof position === "string"){
             position = Converter.fenToJson(position);
-            Logger.save(`Given position converted to json notation[${JSON.stringify(position)}].`, "createGame", Source.Chess);
+            Logger.save(`Given position converted to json notation.`, "createGame", Source.Chess);
         }
 
         // Create a new game on board.
@@ -248,6 +248,7 @@ export class Chess{
      */
     public getLogs(): Array<{source: string, message: string}>
     {
+        console.log(Logger.get());
         return Logger.get();
     }
 

@@ -46,6 +46,7 @@ export class ChessEngine extends BoardManager {
     private mandatoryMoves: {[key in Square]?: Square[]} = {};
     private calculatedMoves: {[key in Square]?: Moves | null} = {};
     private isPromotionMenuOpen: boolean = false;
+    private calculatedBoardPlayableStatus: boolean | null = null;
     private readonly isStandalone: boolean = false;
 
     /**
@@ -106,6 +107,7 @@ export class ChessEngine extends BoardManager {
         this.mandatoryMoves = {};
         this.calculatedMoves = {};
         this.isPromotionMenuOpen = false;
+        this.calculatedBoardPlayableStatus = null;
         Logger.save("Game properties set to default on ChessEngine", "resetGame", Source.ChessEngine);
     }
 
@@ -205,7 +207,7 @@ export class ChessEngine extends BoardManager {
      */
     public getMoves(square: Square): Moves | null
     {
-        if(!this.isSquareSelectable(square)){
+        if(this.isStandalone && !this.isSquareSelectable(square)){
             Logger.save(`Moves of the square is not found because square[${square}] is not selectable`, "getMoves", Source.ChessEngine);
             return null;
         }
@@ -545,6 +547,7 @@ export class ChessEngine extends BoardManager {
          */
         this.mandatoryMoves = {};
         this.calculatedMoves = {};
+        this.calculatedBoardPlayableStatus = null;
         this.currentMoves = null;
         this._checkCastling();
         this._checkEnPassant();
@@ -936,8 +939,14 @@ export class ChessEngine extends BoardManager {
      */
     private isBoardPlayable(): boolean
     {
+        // If the board playable status is calculated before then return the calculated status.
+        if(this.calculatedBoardPlayableStatus){
+            Logger.save(`Board playable status[${this.calculatedBoardPlayableStatus}] is already calculated.`, "isBoardPlayable", Source.ChessEngine);
+            return this.calculatedBoardPlayableStatus;
+        }
+
         /**
-         * Check the status of is it started or finished. Also,
+         * Check the status is it started or finished. Also,
          * check pieces on the board and if there is no pieces that can
          * finish the game then the game can't be started. If game is started then
          * set the status of the game to draw.
@@ -951,6 +960,7 @@ export class ChessEngine extends BoardManager {
             || BoardQueryer.getPiecesWithFilter(Color.Black, [PieceType.King]).length == 0){
             // If board has no white and black king then the game can't be started.
             this.statusOfGame = GameStatus.NotStarted;
+            this.calculatedBoardPlayableStatus = false;
             Logger.save(`Board is not playable because game not started(king/kings missing)`, "isBoardPlayable", Source.ChessEngine);
             return false;
         }
@@ -967,6 +977,7 @@ export class ChessEngine extends BoardManager {
                 const piece: Piece | null = BoardQueryer.getPieceOnSquare(Number(square) as Square);
                 if(piece && (piece.getType() == PieceType.Pawn || piece.getType() == PieceType.Rook || piece.getType() == PieceType.Queen)){
                     this.statusOfGame = GameStatus.InPlay;
+                    this.calculatedBoardPlayableStatus = true;
                     Logger.save(`Board has pawn/rook/queen so it can be playable.`, "isBoardPlayable", Source.ChessEngine);
                     return true;
                 }
@@ -976,14 +987,16 @@ export class ChessEngine extends BoardManager {
             if(BoardQueryer.getPiecesWithFilter(Color.White, [PieceType.Knight, PieceType.Bishop]).length > 1
                 || BoardQueryer.getPiecesWithFilter(Color.Black, [PieceType.Knight, PieceType.Bishop]).length > 1){
                 this.statusOfGame = GameStatus.InPlay;
+                this.calculatedBoardPlayableStatus = true;
                 Logger.save(`Board has more than one knight and/or bishop so it can be playable.`, "isBoardPlayable", Source.ChessEngine);
                 return true;
             }
 
             // Otherwise, the game is in draw status.
             if(this.statusOfGame != GameStatus.NotStarted){
-                Logger.save(`Board is in draw status because game is not finished or board can't be finished because of pieces.`, "isBoardPlayable", Source.ChessEngine);
                 this.statusOfGame = GameStatus.Draw;
+                this.calculatedBoardPlayableStatus = false;
+                Logger.save(`Board is in draw status because game is not finished or board can't be finished because of pieces.`, "isBoardPlayable", Source.ChessEngine);
             }
 
             return false;
