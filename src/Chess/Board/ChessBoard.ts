@@ -23,9 +23,6 @@ export class ChessBoard {
     // Store locked squares click modes to restore them after unlock the board.
     private lockedSquaresModes: Array<SquareClickMode> = [];
 
-    // For drag and drop
-    private draggedPiece: EventTarget | null = null;
-
     /**
      * Constructor of the class which load css file of
      * the chess board.
@@ -206,11 +203,9 @@ export class ChessBoard {
         // Get the selected square by its id and set the ondragover attribute.
         const selectedSquare: HTMLDivElement = document.querySelector(`[data-square-id="${squareID.toString()}"]`) as HTMLDivElement;
 
-        // Get the color of player(if exists) and set the piece draggable.
+        // Get the color of player(if exists) and set the selected piece.
         const selectedPiece = selectedSquare.querySelector(".piece")!;
         this.colorOfPlayer = selectedPiece.getAttribute("data-color") as Color;
-        selectedPiece.setAttribute("draggable", "true");
-        selectedPiece.addEventListener("dragstart", (event) => { this.draggedPiece = event.target; });
 
         // Add selected effect to the selected square.
         this.setSquareEffect(selectedSquare, SquareEffect.Selected);
@@ -272,22 +267,6 @@ export class ChessBoard {
 
                 // Set the click mode to the square.
                 this.setSquareClickMode(move, clickMode);
-
-                /**
-                 * Add dragover event to the square. If board is standalone then add drop event too
-                 * otherwise drop event will be added in Chess.ts because board and engine will be
-                 * used together in Chess.ts.
-                 */
-                square.addEventListener("dragover", (event: DragEvent) => { event.preventDefault();  });
-                if(this.isStandalone) {
-                    square.addEventListener("drop", (event: DragEvent) => {
-                        event.preventDefault();
-                        this.playMove(
-                            parseInt(((this.draggedPiece! as HTMLElement).parentElement as HTMLDivElement).getAttribute("data-square-id")!),
-                            parseInt(square.getAttribute("data-square-id")!)
-                        );
-                    });
-                }
             }
         }
 
