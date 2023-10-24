@@ -295,20 +295,19 @@ export class ChessBoard {
         const moveType: SquareClickMode = toSquare.getAttribute("data-click-mode") as SquareClickMode;
         switch(moveType){
             case SquareClickMode.Castling:
-                this._doCastling(fromSquare, toSquare);
+                this._doCastling(fromSquare, toSquare).then();
                 break;
             case SquareClickMode.EnPassant:
-                this._doEnPassant(fromSquare, toSquare);
+                this._doEnPassant(fromSquare, toSquare).then();
                 break;
             case SquareClickMode.Promotion:
-                this._doPromotion(fromSquare, toSquare);
+                this._doPromotion(fromSquare, toSquare).then();
                 break;
             case SquareClickMode.Promote:
-                this._doPromote(fromSquare, toSquare);
+                this._doPromote(fromSquare, toSquare)
                 break;
             default:
-                this._doNormalMove(fromSquare, toSquare);
-                Logger.save(`Piece moved to target square[${toSquare.getAttribute("data-square-id")!}] on board`, "playMove", Source.ChessBoard);
+                this._doNormalMove(fromSquare, toSquare).then();
                 break;
         }
 
@@ -317,7 +316,7 @@ export class ChessBoard {
     /**
      * Do the castling move on the chess board.
      */
-    private _doCastling(fromSquare:HTMLDivElement, toSquare:HTMLDivElement): void
+    private async _doCastling(fromSquare:HTMLDivElement, toSquare:HTMLDivElement): Promise<void>
     {
         const fromSquareId: number = parseInt(fromSquare.getAttribute("data-square-id")!);
         const toSquareId: number = parseInt(toSquare.getAttribute("data-square-id")!);
@@ -341,10 +340,10 @@ export class ChessBoard {
          */
         const kingNewSquare: number = castlingType == "Long" ? fromSquareId - 2 : fromSquareId + 2;
 
-        this._doNormalMove(
+        await this._doNormalMove(
             fromSquare,
             document.querySelector(`[data-square-id="${kingNewSquare.toString()}"]`) as HTMLDivElement
-        );
+        )
         Logger.save(`King moved to target square[${kingNewSquare}] by determined castling type[${castlingType}] on board`, "playMove", Source.ChessBoard);
 
         /**
@@ -360,7 +359,7 @@ export class ChessBoard {
         const rook: number = castlingType == "Long" ? fromSquareId - 4 : fromSquareId + 3;
         const rookNewSquare: number = castlingType == "Long" ? kingNewSquare + 1 : kingNewSquare - 1;
 
-        this._doNormalMove(
+        await this._doNormalMove(
             document.querySelector(`[data-square-id="${rook.toString()}"]`) as HTMLDivElement,
             document.querySelector(`[data-square-id="${rookNewSquare.toString()}"]`) as HTMLDivElement
         );
@@ -370,9 +369,9 @@ export class ChessBoard {
     /**
      * Do the en passant move on the chess board.
      */
-    private _doEnPassant(fromSquare:HTMLDivElement, toSquare:HTMLDivElement): void
+    private async _doEnPassant(fromSquare:HTMLDivElement, toSquare:HTMLDivElement): Promise<void>
     {
-        this._doNormalMove(fromSquare, toSquare);
+        await this._doNormalMove(fromSquare, toSquare);
         Logger.save(`Piece moved to target square[${toSquare.getAttribute("data-square-id")!}] on board`, "playMove", Source.ChessBoard);
 
         /**
@@ -393,12 +392,13 @@ export class ChessBoard {
     /**
      * Do the promotion move on the chess board.
      */
-    private _doPromotion(fromSquare:HTMLDivElement, toSquare:HTMLDivElement): void
+    private async _doPromotion(fromSquare:HTMLDivElement, toSquare:HTMLDivElement): Promise<void>
     {
-        this._doNormalMove(fromSquare, toSquare);
+        await this._doNormalMove(fromSquare, toSquare);
         Logger.save(`Piece moved to target square[${toSquare.getAttribute("data-square-id")!}] on board`, "playMove", Source.ChessBoard);
 
-        this._showPromotions(toSquare.querySelector(".piece") as HTMLDivElement);
+        // After the move open the promotion options.
+        this._showPromotions(toSquare);
     }
 
     /**
@@ -420,36 +420,40 @@ export class ChessBoard {
     }
 
     /**
-     * Do the normal move(move piece to another square) on the chess board.
+     * Do the normal move(move piece to another square) with animation on the chess board.
      */
-    private _doNormalMove(fromSquare:HTMLDivElement, toSquare:HTMLDivElement, withAnimation: boolean = true): void
+    private async _doNormalMove(fromSquare:HTMLDivElement, toSquare:HTMLDivElement, withAnimation: boolean = true): Promise<void>
     {
-        // Clear the target square.
-        this.removePiece(parseInt(toSquare.getAttribute("data-square-id")!));
-        Logger.save(`Target square[${toSquare.getAttribute("data-square-id")!}] removed on board`, "playMove", Source.ChessBoard);
+        return new Promise((resolve) => {
+            // Clear the target square.
+            this.removePiece(parseInt(toSquare.getAttribute("data-square-id")!));
+            Logger.save(`Target square[${toSquare.getAttribute("data-square-id")!}] removed on board`, "playMove", Source.ChessBoard);
 
-        // Move piece from the source square(from) to the target square(to) with animation.
-        const piece: HTMLDivElement = fromSquare.querySelector(".piece") as HTMLDivElement;
-        if(!withAnimation){
-            toSquare.appendChild(piece);
-            return;
-        }
+            // Move piece from the source square(from) to the target square(to) with animation.
+            const piece: HTMLDivElement = fromSquare.querySelector(".piece") as HTMLDivElement;
+            if (!withAnimation) {
+                toSquare.appendChild(piece);
+                resolve();
+                return;
+            }
 
-        // Animate the move.
-        const pieceRect: DOMRect = piece.getBoundingClientRect();
-        document.body.appendChild(piece);
-        piece.style.top = `${pieceRect.top}px`;
-        piece.style.left = `${pieceRect.left}px`;
-        piece.style.animation = "move 0.3s ease-in-out forwards";
-        piece.style.setProperty("--move-from-left", `${pieceRect.left}px`);
-        piece.style.setProperty("--move-from-top", `${pieceRect.top - 10}px`);
-        piece.style.setProperty("--move-to-left", `${toSquare.getBoundingClientRect().left + 10}px`);
-        piece.style.setProperty("--move-to-top", `${toSquare.getBoundingClientRect().top}px`);
-        piece.addEventListener("animationend", () => {
-            toSquare.appendChild(piece);
-            piece.style.animation = "";
-            piece.style.top = "";
-            piece.style.left = "";
+            // Animate the move.
+            const pieceRect: DOMRect = piece.getBoundingClientRect();
+            document.body.appendChild(piece);
+            piece.style.top = `${pieceRect.top}px`;
+            piece.style.left = `${pieceRect.left}px`;
+            piece.style.animation = "move 0.3s ease-in-out forwards";
+            piece.style.setProperty("--move-from-left", `${pieceRect.left}px`);
+            piece.style.setProperty("--move-from-top", `${pieceRect.top - 10}px`);
+            piece.style.setProperty("--move-to-left", `${toSquare.getBoundingClientRect().left + 10}px`);
+            piece.style.setProperty("--move-to-top", `${toSquare.getBoundingClientRect().top}px`);
+            piece.addEventListener("animationend", () => {
+                toSquare.appendChild(piece);
+                piece.style.animation = "";
+                piece.style.top = "";
+                piece.style.left = "";
+                resolve();
+            });
         });
     }
 
@@ -605,10 +609,14 @@ export class ChessBoard {
     /**
      * Show promotion menu.
      */
-    private _showPromotions(promotedPawn: HTMLDivElement): void
+    private _showPromotions(promotionSquare: HTMLDivElement): void
     {
         // Get the square of the promoted pawn.
-        const square: Square = parseInt(promotedPawn.parentElement!.getAttribute("data-square-id")!) as Square;
+        const square: Square = parseInt(promotionSquare.getAttribute("data-square-id")!) as Square;
+
+        // Remove the promoted pawn from the board.
+        this.removePiece(square);
+        Logger.save(`Promoted Pawn is removed from square[${square}] on board`, "_showPromotions", Source.ChessBoard);
 
         /**
          * Disable the board. We don't want to allow player to
@@ -616,10 +624,6 @@ export class ChessBoard {
          */
         this.lockBoard();
         Logger.save("Board locked for promotion screen", "_showPromotions", Source.ChessBoard);
-
-        // Hide the promoted pawn.
-        promotedPawn.remove();
-        Logger.save(`Promoted Pawn is removed from square[${square}] on board`, "_showPromotions", Source.ChessBoard);
 
         // Create promotion options. (Queen, Rook, Bishop, Knight)
         const PROMOTION_TYPES: Array<string> = [PieceType.Queen, PieceType.Rook, PieceType.Bishop, PieceType.Knight];
@@ -635,7 +639,7 @@ export class ChessBoard {
             promotionOption.setAttribute("data-piece", PROMOTION_TYPES[i]);
 
             // Set color of promotion option to the color of promoted pawn.
-            promotionOption.setAttribute("data-color", promotedPawn.getAttribute("data-color") as string);
+            promotionOption.setAttribute("data-color", square < 9 ? Color.White : Color.Black);
 
             /**
              * Set position.
@@ -651,7 +655,7 @@ export class ChessBoard {
             // Set click mode and remove disabled effect.
             this.removeSquareEffect(targetSquare, SquareEffect.Disabled);
             this.setSquareClickMode(targetSquare, SquareClickMode.Promote);
-            Logger.save("Promote options are created, disabled effect removed and click modes set to promote", "_showPromotions", Source.ChessBoard);
+            Logger.save("Promote options are created, disabled effect added and click modes set to promote", "_showPromotions", Source.ChessBoard);
         }
         Logger.save("Promotion screen showed on board.", "_showPromotions", Source.ChessBoard);
     }
