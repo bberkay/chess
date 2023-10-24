@@ -377,13 +377,13 @@ export class ChessBoard {
 
         /**
          * Get the square of the killed piece by adding 8 to
-         * the target square if the piece is white or subtracting
-         * 8 if the piece is black. Because the killed piece is
-         * always in the back of the target square.
+         * the target square. If toSquare is in the 3rd row
+         * then toSquare has white pawn add 8 otherwise toSquare
+         * has black pawn subtract 8.
          * @see For more information about en passant, see https://en.wikipedia.org/wiki/En_passant
          * @see For more information about the square ids, see src/Chess/Types/index.ts
          */
-        const killedPieceSquare = parseInt(toSquare.getAttribute("data-square-id")!) + (toSquare.querySelector(".piece")!.getAttribute("data-color") === Color.White ? 8 : -8);
+        const killedPieceSquare = parseInt(toSquare.getAttribute("data-square-id")!) + (Math.ceil(parseInt(toSquare.getAttribute("data-square-id")!) / 8) == 3 ? 8 : -8);
 
         // Remove the killed piece.
         this.removePiece(killedPieceSquare);
@@ -493,7 +493,6 @@ export class ChessBoard {
              */
             const squareClassName = squares[i].lastElementChild?.className;
             if (squareClassName?.includes("piece")){
-                squares[i].lastElementChild?.setAttribute("draggable", "false");
                 if(!squareClassName?.includes("promotion-option"))
                     this.setSquareClickMode(squares[i] as HTMLDivElement, SquareClickMode.Select);
             }

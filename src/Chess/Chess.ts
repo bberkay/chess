@@ -248,7 +248,6 @@ export class Chess{
      */
     public getLogs(): Array<{source: string, message: string}>
     {
-        console.log(Logger.get());
         return Logger.get();
     }
 
