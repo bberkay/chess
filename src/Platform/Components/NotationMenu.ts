@@ -51,6 +51,8 @@ export class NotationMenu extends Component{
     public clear(): void
     {
         document.getElementById("notations")!.innerHTML = "";
+        document.getElementById("black-player-pieces")!.innerHTML = "";
+        document.getElementById("white-player-pieces")!.innerHTML = "";
         this.lastNotation = "";
         this.lastScore = {[Color.White]: 0, [Color.Black]: 0};
     }
