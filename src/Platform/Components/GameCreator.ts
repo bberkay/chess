@@ -67,6 +67,7 @@ export class GameCreator extends Component{
      */
     public getValueByMode(mode: MenuOperationValue): string
     {
+
         return (document.querySelector(`[data-form-input-id="${mode}"]`) as HTMLInputElement).value;
     }
 
