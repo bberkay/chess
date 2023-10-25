@@ -228,6 +228,7 @@ export class BoardQueryer extends Board{
      * @param by Color of the opponent
      * @param getThreatening If true, then return enemy piece's square that are threatening the square.
      * @param calculatePawnBlocks If true, then calculate blocker pawns. Otherwise, calculate killer pawns.
+     * @param ignorePlayersPieces If true, then ignore player's pieces while calculating the routes.
      * @return If getThreatening is true, Array<Square>. Otherwise, boolean.
      *
      * Algorithm:
@@ -237,7 +238,7 @@ export class BoardQueryer extends Board{
      * 4. Get knight routes and check if any of them contains any enemy piece.
      * 5. If any of the routes not contains any enemy piece, then return false.
      */
-    public static isSquareThreatened(targetSquare: Square, by: Color | null = null, getThreatening: boolean = false, calculatePawnBlocks: boolean = false): boolean | Array<Square>
+    public static isSquareThreatened(targetSquare: Square, by: Color | null = null, getThreatening: boolean = false, calculatePawnBlocks: boolean = false, ignorePlayersPieces: boolean = false): boolean | Array<Square>
     {
         const squaresOfThreateningEnemies: Array<Square> = [];
 
@@ -246,17 +247,19 @@ export class BoardQueryer extends Board{
         const enemyColor: Color = by ?? (piece ? (piece.getColor() == Color.White ? Color.Black : Color.White) : this.getColorOfOpponent());
 
         /**
-         * Get all routes of the opponent pieces.
-         * Queen already contains all pieces' routes except knight.
-         * So, we can get all dangerous squares with queen and knight
-         * routes.
+         * Get all routes like queen, rook, bishop, knight except pawn.
+         * If ignorePlayersPieces is true, then get all routes without calculating
+         * player's pieces. For example, if the target square is e4 and white bishop
+         * is on d3, allRoutes is top right will empty because of the bishop. But if
+         * ignorePlayersPieces is true, then allRoutes will be whole diagonal top right.
          *
          * @see src/Chess/Engine/Core/Move/Calculator/RouteCalculator.ts For more information.
          */
-        const allRoutes: Route = {
-            ...RouteCalculator.getQueenRoute(targetSquare, enemyColor == Color.White ? Color.Black : Color.White),
-            ...RouteCalculator.getKnightRoute(targetSquare, enemyColor == Color.White ? Color.Black : Color.White)
-        };
+        let allRoutes: Route;
+        if(ignorePlayersPieces)
+            allRoutes = RouteCalculator.getAllRoutes(targetSquare, Color.White, null, false);
+        else
+            allRoutes = RouteCalculator.getAllRoutes(targetSquare, enemyColor == Color.White ? Color.Black : Color.White);
 
         /**
          * Traverse all routes and check if the route contains any dangerous enemy piece.

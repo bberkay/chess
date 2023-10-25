@@ -202,4 +202,21 @@ export class RouteCalculator{
             ...DirectionCalculator.getDiagonalSquares(square, color, 1)
         };
     }
+
+    /**
+     * This function returns the horizontal, vertical and diagonal squares
+     * of the given square.
+     * For more information, please check the class description.
+     * @See src/Chess/Engine/Move/Calculator/RouteCalculator.ts
+     */
+    public static getAllRoutes(square: Square, color: Color, distanceLimit: number | null = null, pieceSensitivity: boolean = true): Route
+    {
+        return {
+            ...DirectionCalculator.getHorizontalSquares(square, color, distanceLimit, pieceSensitivity),
+            ...DirectionCalculator.getVerticalSquares(square, color, distanceLimit, pieceSensitivity),
+            ...DirectionCalculator.getDiagonalSquares(square, color, distanceLimit, pieceSensitivity),
+            ...RouteCalculator.getKnightRoute(square, color)
+        }
+    }
+
 }

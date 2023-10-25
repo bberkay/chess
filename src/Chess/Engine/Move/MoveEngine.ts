@@ -312,7 +312,7 @@ export class MoveEngine extends MoveExtender{
         // Remove the moves that threatens the king then convert the route to squares array.
         for(const square of Extractor.extractSquares(route))
         {
-            if(!BoardQueryer.isSquareThreatened(square, color == Color.White ? Color.Black : Color.White))
+            if(!BoardQueryer.isSquareThreatened(square, color == Color.White ? Color.Black : Color.White, false, false, true))
                 moves[MoveType.Normal]!.push(square);
         }
 
@@ -348,7 +348,6 @@ export class MoveEngine extends MoveExtender{
 
         // Get castling moves of the king. Also, castling doesn't need king safety filter because it is already filtered.
         moves[MoveType.Castling] = Extractor.extractSquares(route);
-
         return moves;
     }
 
