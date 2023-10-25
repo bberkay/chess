@@ -72,6 +72,13 @@ export class Platform{
                     // Update the notation table and log console.
                     this.notationMenu!.update(this.chess.getNotation(), this.chess.getScores());
                     this.logConsole!.show(this.chess.getLogs());
+
+                    /**
+                     * If the log count is greater than 130, clear the log console.
+                     * This is for preventing the log console from slowing down the browser.
+                     */
+                    if(this.logConsole!.getLogCount() > 130)
+                        this.clearLogConsole();
                 }
 
                 if(!this.isGameFinished && [GameStatus.WhiteVictory, GameStatus.BlackVictory, GameStatus.Draw].includes(this.chess.getStatus()))

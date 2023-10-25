@@ -128,13 +128,6 @@ export class LogConsole extends Component{
      */
     public show(logs: Array<{source: string, message: string}>): void
     {
-        /**
-         * If the log count is greater than 150, clear the log console.
-         * This is for preventing the log console from slowing down the browser.
-         */
-        if(this.currentLogCount > 150)
-            this.clear();
-
         // Find the log list element and the last logs in the logs array.
         let logListElement: HTMLElement = document.getElementById("log-list")!;
         const lastLogs: Array<{source: string, message: string}> = logs.slice(this.currentLogCount);
@@ -161,6 +154,11 @@ export class LogConsole extends Component{
 
         // Initialize the listeners when the dom is loaded.
         this.initListeners();
+    }
+
+    public getLogCount(): number
+    {
+        return this.currentLogCount;
     }
 
     /**
