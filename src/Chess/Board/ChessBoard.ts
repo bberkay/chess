@@ -330,7 +330,7 @@ export class ChessBoard {
                 this._doPromotion(fromSquare, toSquare).then();
                 break;
             case SquareClickMode.Promote:
-                this._doPromote(fromSquare, toSquare)
+                this._doPromote(toSquare);
                 break;
             default:
                 this._doNormalMove(fromSquare, toSquare).then();
@@ -435,20 +435,28 @@ export class ChessBoard {
     /**
      * Do the promote move on the chess board.
      */
-    private _doPromote(promoteSquare:HTMLDivElement, selectedSquare:HTMLDivElement): void
+    private _doPromote(selectedSquare:HTMLDivElement): void
     {
         // Find selected option and create the piece.
         const selectedOption: HTMLDivElement = selectedSquare.lastElementChild as HTMLDivElement;
         const color: Color = selectedOption.getAttribute("data-color") as Color;
         const pieceType: PieceType = selectedOption.getAttribute("data-piece") as PieceType;
 
-        // Create the piece first row if the piece is white otherwise create the piece last row.
-        const targetSquare: Square = Number(promoteSquare.getAttribute("data-square-id")!) as Square;
-        this.createPiece(color, pieceType, targetSquare);
+        /**
+         * Create the piece first row if the piece is white otherwise create the piece last row
+         * by finding the first row of the square. For example, if the square is "a7" then the
+         * first row of the square is "a8". If the square is "h2" then the first row of the square
+         * is "h1".
+         */
+        let firstRowOfSquare: string | Square = Converter.squareIDToSquare(parseInt(selectedSquare.getAttribute("data-square-id")!));
+        firstRowOfSquare = Converter.squareToSquareID(firstRowOfSquare.replace(firstRowOfSquare.slice(-1), (color == Color.White ? "8" : "1")));
+        this.createPiece(color, pieceType, firstRowOfSquare);
         this._closePromotions();
 
+        // Set effects to the square.
+        this.setSquareEffect(firstRowOfSquare, SquareEffect.To);
         this.playSound(SoundEffect.Promote);
-        Logger.save(`Player's[${color}] Piece[${pieceType}] created on square[${targetSquare}] on board`, "playMove", Source.ChessBoard);
+        Logger.save(`Player's[${color}] Piece[${pieceType}] created on square[${firstRowOfSquare}] on board`, "playMove", Source.ChessBoard);
     }
 
     /**
@@ -689,7 +697,6 @@ export class ChessBoard {
             // Set click mode and remove disabled effect.
             this.removeSquareEffect(targetSquare, SquareEffect.Disabled);
             this.setSquareClickMode(targetSquare, SquareClickMode.Promote);
-            Logger.save("Promote options are created, disabled effect added and click modes set to promote", "_showPromotions", Source.ChessBoard);
         }
         Logger.save("Promotion screen showed on board.", "_showPromotions", Source.ChessBoard);
     }
@@ -705,6 +712,7 @@ export class ChessBoard {
         // Remove promotion options.
         for(let i = 0; i < 3; i++)
             promotionOptions[i].remove();
+
         Logger.save("Promotion screen closed.", "_closePromotions", Source.ChessBoard);
 
         /**

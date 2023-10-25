@@ -162,13 +162,11 @@ export class Chess{
              * and set selected square to promotion piece square.
              * @see For more information about promote check _doPromote() in src/Chess/Engine/ChessEngine.ts
              */
-            if(moveType == SquareClickMode.Promotion){
-                this.selectedSquare = this.selectedSquare! % 8 == 0 ? this.selectedSquare! + 8 : this.selectedSquare! - 8;
+            if(moveType == SquareClickMode.Promotion)
                 this.chessBoard.clearBoard();
-            }
-            else{
+            else
                 this._doClearAction();
-            }
+
         }
         else if(moveType === SquareClickMode.Select)
             this._doSelectAction(square);

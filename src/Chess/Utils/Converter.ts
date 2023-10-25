@@ -39,6 +39,25 @@ export class Converter{
     }
 
     /**
+     * Convert square to squareID
+     * @example Converter.squareToSquareID("a1"), return 57
+     * @example Converter.squareToSquareID("h8"), return 8
+     * @see For more information see Square Enum in src/Chess/Types/index.ts
+     */
+    static squareToSquareID(square: string): number
+    {
+        let squareID: number = 0;
+
+        const file: number = square.charCodeAt(0) - 96;
+        const rank: number = parseInt(square.charAt(1));
+
+        // 8 - rank because the rank starts from 8
+        squareID = (8 - rank) * 8 + file;
+
+        return squareID;
+    }
+
+    /**
      * Convert squareID to square
      * @example Converter.squareIDToSquare(57), return "a1"
      * @example Converter.squareIDToSquare(8), return "h8"

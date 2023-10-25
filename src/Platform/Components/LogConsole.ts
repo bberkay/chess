@@ -136,26 +136,29 @@ export class LogConsole extends Component{
         for(const log of lastLogs) {
             const source: string = log.source.includes("Engine") ? "Engine" : (log.source.includes("Board") ? "Board" : "Chess");
             logListElement!.innerHTML +=
-                `
-                <li onmouseover="document.getElementById('log-file').innerHTML = '${log.source}'">
-                    &#x2022 <strong style="text-transform: uppercase">[${source}] </strong><span>${this._convertValuesToTooltips(log.message)}</span>
-                </li>
-                `;
+                `<li onmouseover="document.getElementById('log-file').innerHTML = '${log.source}'">
+                       &#x2022 <strong style="text-transform: uppercase">[${source}] </strong><span>${this._convertValuesToTooltips(log.message)}</span>
+                </li>`;
         }
 
-        // Add a horizontal line to the log list for separating the logs.
-        logListElement!.innerHTML += "<hr>";
+        if(lastLogs.length != 0){
+            // Add a horizontal line to the log list for separating the logs.
+            logListElement!.innerHTML += "<hr>";
 
-        // Scroll to the bottom of the log list.
-        document.getElementById("log-console-body")!.scrollTop = logListElement!.scrollHeight;
+            // Scroll to the bottom of the log list.
+            document.getElementById("log-console-body")!.scrollTop = logListElement!.scrollHeight;
 
-        // Update the log count.
-        this.currentLogCount += lastLogs.length;
+            // Update the log count.
+            this.currentLogCount += lastLogs.length;
+        }
 
         // Initialize the listeners when the dom is loaded.
         this.initListeners();
     }
 
+    /**
+     * This function returns the log count.
+     */
     public getLogCount(): number
     {
         return this.currentLogCount;
