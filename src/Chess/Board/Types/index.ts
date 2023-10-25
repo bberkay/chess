@@ -26,3 +26,18 @@ export enum SquareClickMode{
     Castling = "Castling",
     EnPassant = "EnPassant"
 }
+
+/**
+ * @description SoundEffect enum for the sound effects of the chess board.
+ * @see src/Chess/Board/ChessBoard.ts For more information.
+ */
+export enum SoundEffect{
+    Start = "Start",
+    WhiteMove = "WhiteMove",
+    BlackMove = "BlackMove",
+    Capture = "Capture",
+    Castle = "Castle",
+    Check = "Check",
+    Promote = "Promote",
+    End = "End",
+}

@@ -8,7 +8,7 @@
  */
 
 import {Color, GameStatus, JsonNotation, Moves, MoveType, PieceType, Square, StartPosition} from "../Types";
-import {SquareClickMode, SquareEffect} from "./Types";
+import {SoundEffect, SquareClickMode, SquareEffect} from "./Types";
 import {Converter} from "../Utils/Converter.ts";
 import {Logger, Source} from "../Services/Logger.ts";
 
@@ -17,6 +17,16 @@ import {Logger, Source} from "../Services/Logger.ts";
  */
 export class ChessBoard {
 
+    private sounds: {[key in SoundEffect]: HTMLAudioElement} = {
+        Start: new Audio("src/Chess/Board/Assets/sounds/game-start.mp3"),
+        WhiteMove: new Audio("src/Chess/Board/Assets/sounds/move-self.mp3"),
+        BlackMove: new Audio("src/Chess/Board/Assets/sounds/move-opponent.mp3"),
+        Capture: new Audio("src/Chess/Board/Assets/sounds/capture.mp3"),
+        Castle: new Audio("src/Chess/Board/Assets/sounds/castle.mp3"),
+        Check: new Audio("src/Chess/Board/Assets/sounds/move-check.mp3"),
+        Promote: new Audio("src/Chess/Board/Assets/sounds/promote.mp3"),
+        End: new Audio("src/Chess/Board/Assets/sounds/game-end.mp3"),
+    };
     private colorOfPlayer: Color | null = null;
     private readonly isStandalone: boolean;
 
@@ -32,6 +42,9 @@ export class ChessBoard {
 
         // Load css file of the chess board.
         this._loadCSS();
+
+        // Load sounds files of the chess board.
+        this._loadSounds();
 
         // If the ChessBoard is standalone then create a game with the standard position.
         if(this.isStandalone)
@@ -60,6 +73,16 @@ export class ChessBoard {
     }
 
     /**
+     * This function loads the sounds files of the chess board.
+     */
+    private _loadSounds(): void
+    {
+        for(const sound of Object.values(this.sounds)){
+            document.body.appendChild(sound);
+        }
+    }
+
+    /**
      * This function creates a chess board with the given position(fen notation or json notation).
      */
     public createGame(position: JsonNotation | StartPosition | string = StartPosition.Standard): void
@@ -77,6 +100,9 @@ export class ChessBoard {
 
         if(this.isStandalone)
             Logger.save(`Game created on ChessBoard`, "createGame", Source.ChessBoard);
+
+        // Play the game start sound.
+        this.playSound(SoundEffect.Start);
     }
 
     /**
@@ -308,6 +334,7 @@ export class ChessBoard {
                 break;
             default:
                 this._doNormalMove(fromSquare, toSquare).then();
+                this.playSound(this.colorOfPlayer == Color.White ? SoundEffect.WhiteMove : SoundEffect.BlackMove);
                 break;
         }
 
@@ -363,6 +390,8 @@ export class ChessBoard {
             document.querySelector(`[data-square-id="${rook.toString()}"]`) as HTMLDivElement,
             document.querySelector(`[data-square-id="${rookNewSquare.toString()}"]`) as HTMLDivElement
         );
+
+        this.playSound(SoundEffect.Castle);
         Logger.save(`Rook moved to target square[${rookNewSquare}] by determined castling type[${castlingType}] on board`, "playMove", Source.ChessBoard);
     }
 
@@ -386,6 +415,8 @@ export class ChessBoard {
 
         // Remove the killed piece.
         this.removePiece(killedPieceSquare);
+
+        this.playSound(SoundEffect.Capture);
         Logger.save(`Captured piece by en passant move is found on square[${killedPieceSquare}] and removed on board`, "playMove", Source.ChessBoard);
     }
 
@@ -414,9 +445,10 @@ export class ChessBoard {
         // Create the piece first row if the piece is white otherwise create the piece last row.
         const targetSquare: Square = Number(promoteSquare.getAttribute("data-square-id")!) as Square;
         this.createPiece(color, pieceType, targetSquare);
-        Logger.save(`Player's[${color}] Piece[${pieceType}] created on square[${targetSquare}] on board`, "playMove", Source.ChessBoard);
-
         this._closePromotions();
+
+        this.playSound(SoundEffect.Promote);
+        Logger.save(`Player's[${color}] Piece[${pieceType}] created on square[${targetSquare}] on board`, "playMove", Source.ChessBoard);
     }
 
     /**
@@ -568,7 +600,8 @@ export class ChessBoard {
     {
         const color: Color = checkedStatus == GameStatus.WhiteInCheck ? Color.White : Color.Black;
         const king: HTMLDivElement = document.querySelector(`.piece[data-piece="${PieceType.King}"][data-color="${color}"]`) as HTMLDivElement;
-        this.setSquareEffect(king.parentElement as HTMLDivElement, SquareEffect.Checked)
+        this.setSquareEffect(king.parentElement as HTMLDivElement, SquareEffect.Checked);
+        this.playSound(SoundEffect.Check);
         Logger.save(`King's square[${king.parentElement!.getAttribute("data-square-id")!}] found on DOM and Checked effect added`, "_showCheck", Source.ChessBoard);
     }
 
@@ -604,6 +637,7 @@ export class ChessBoard {
 
         // Add the message to the board.
         document.getElementById("chessboard")?.appendChild(messageElement);
+        this.playSound(SoundEffect.End);
     }
 
     /**
@@ -752,6 +786,14 @@ export class ChessBoard {
         // Remove the given effect from all squares.
         for(let i = 0; i <= 63; i++)
             this.removeSquareEffect(squares[i], effects);
+    }
+
+    /**
+     * This function plays the given sound.
+     */
+    private playSound(name: SoundEffect): void
+    {
+        this.sounds[name].play().then();
     }
 
     /**
