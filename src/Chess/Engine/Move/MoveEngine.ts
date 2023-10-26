@@ -302,17 +302,38 @@ export class MoveEngine extends MoveExtender{
         let moves: Moves = {[MoveType.Normal]: [], [MoveType.Castling]: []};
 
         // Get the king's route.
-        let route = RouteCalculator.getKingRoute(this.pieceSquare!);
+        let route: Route = RouteCalculator.getKingRoute(this.pieceSquare!);
         if(!route) return null;
 
         // Find the king's color
         const color: Color = BoardQueryer.getPieceOnSquare(this.pieceSquare!)!.getColor();
 
-        // Remove the moves for prevent the king to move to the threatened squares.
+        /**
+         * Remove squares that are threatened by the enemy pieces so that
+         * the king can't move to the threatened squares. For example,
+         * if the king is on f3 and enemy's bishop is on e6, then remove
+         * g4 from the king's route because g4 is threatened by the enemy's
+         * bishop currently.
+         */
         for(const square of Extractor.extractSquares(route))
         {
-            if(!BoardQueryer.isSquareThreatened(square, color == Color.White ? Color.Black : Color.White, false, false, true))
+            if(!BoardQueryer.isSquareThreatened(square, color == Color.White ? Color.Black : Color.White))
                 moves[MoveType.Normal]!.push(square);
+        }
+
+        /**
+         * Remove squares that are can threaten after the king's move so that
+         * the king can't move to the squares that can be threatened after the
+         * king's move. For example, king is on f3 and enemy's bishop is on d5.
+         * Currently, g2 isn't threatened by the enemy's bishop. But king can't
+         * move to the g2 because after the king's move, g2 will be threatened
+         * by the enemy's bishop again. This code block prevents this situation.
+         */
+        const enemies: boolean | Square[] = BoardQueryer.isSquareThreatened(this.pieceSquare!, color == Color.White ? Color.Black : Color.White, true);
+        for(const enemy of enemies as Square[]){
+            const dangerousRoute: MoveRoute | null = Locator.getRelative(this.pieceSquare!, enemy);
+            if(dangerousRoute && moves[MoveType.Normal] && route.hasOwnProperty(dangerousRoute))
+                moves[MoveType.Normal].splice(moves[MoveType.Normal].indexOf(route[dangerousRoute]![0]), 1);
         }
 
         /**
@@ -427,7 +448,7 @@ export class MoveEngine extends MoveExtender{
          * dangerous pieces by dangerous route in all routes. Then, remove the
          * routes that doesn't protect the king from the dangerous pieces.
          */
-        const allRoutes: Route = RouteCalculator.getQueenRoute(this.pieceSquare!);
+        const allRoutes: Route = RouteCalculator.getAllRoutes(this.pieceSquare!);
         for(const square of allRoutes[dangerousRoute]!){
             // If route has any dangerous piece, then(next step)
             if(BoardQueryer.isSquareHasPiece(square, enemyColor, dangerousPieces)){

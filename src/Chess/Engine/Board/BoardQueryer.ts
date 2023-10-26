@@ -228,7 +228,6 @@ export class BoardQueryer extends Board{
      * @param by Color of the opponent
      * @param getThreatening If true, then return enemy piece's square that are threatening the square.
      * @param calculatePawnBlocks If true, then calculate blocker pawns. Otherwise, calculate killer pawns.
-     * @param ignorePlayersPieces If true, then ignore player's pieces while calculating the routes.
      * @return If getThreatening is true, Array<Square>. Otherwise, boolean.
      *
      * Algorithm:
@@ -238,7 +237,7 @@ export class BoardQueryer extends Board{
      * 4. Get knight routes and check if any of them contains any enemy piece.
      * 5. If any of the routes not contains any enemy piece, then return false.
      */
-    public static isSquareThreatened(targetSquare: Square, by: Color | null = null, getThreatening: boolean = false, calculatePawnBlocks: boolean = false, ignorePlayersPieces: boolean = false): boolean | Array<Square>
+    public static isSquareThreatened(targetSquare: Square, by: Color | null = null, getThreatening: boolean = false, calculatePawnBlocks: boolean = false): boolean | Array<Square>
     {
         const squaresOfThreateningEnemies: Array<Square> = [];
 
@@ -255,11 +254,7 @@ export class BoardQueryer extends Board{
          *
          * @see src/Chess/Engine/Core/Move/Calculator/RouteCalculator.ts For more information.
          */
-        let allRoutes: Route;
-        if(ignorePlayersPieces)
-            allRoutes = RouteCalculator.getAllRoutes(targetSquare, Color.White, null, false);
-        else
-            allRoutes = RouteCalculator.getAllRoutes(targetSquare, enemyColor == Color.White ? Color.Black : Color.White);
+        const allRoutes: Route = RouteCalculator.getAllRoutes(targetSquare, enemyColor == Color.White ? Color.Black : Color.White);
 
         /**
          * Traverse all routes and check if the route contains any dangerous enemy piece.

@@ -787,7 +787,6 @@ export class ChessEngine extends BoardManager {
         // Calculate the moves of the king and save the moves to the calculatedMoves.
         let movesOfKing: Moves | null = this.moveEngine.getMoves(kingSquare!)!;
         this.calculatedMoves[kingSquare!] = movesOfKing;
-        console.log(this.calculatedMoves[kingSquare!]);
         Logger.save(`Moves of the king[${kingSquare}] are calculated and saved to calculated moves`, "checkStatusOfGame", Source.ChessEngine);
 
         // If the king has no moves then set the movesOfKing to empty array.

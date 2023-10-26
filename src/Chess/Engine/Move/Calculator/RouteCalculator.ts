@@ -76,7 +76,7 @@ export class RouteCalculator{
     {
         /**
          * Find player's color by given square. If square has no piece,
-         * then use StateManager.
+         * then use BoardQueryer.
          */
         color = color ?? BoardQueryer.getColorBySquare(square) ?? BoardQueryer.getColorOfTurn();
 
@@ -150,7 +150,7 @@ export class RouteCalculator{
     {
         /**
          * Find player's color by given square. If square has no piece,
-         * then use StateManager.
+         * then use BoardQueryer.
          */
         color = color ?? BoardQueryer.getColorBySquare(square) ?? BoardQueryer.getColorOfTurn();
 
@@ -170,7 +170,7 @@ export class RouteCalculator{
     {
         /**
          * Find player's color by given square. If square has no piece,
-         * then use StateManager.
+         * then use BoardQueryer.
          */
         color = color ?? BoardQueryer.getColorBySquare(square) ?? BoardQueryer.getColorOfTurn();
 
@@ -191,7 +191,7 @@ export class RouteCalculator{
     {
         /**
          * Find player's color by given square. If square has no piece,
-         * then use StateManager.
+         * then use BoardQueryer.
          */
         color = color ?? BoardQueryer.getColorBySquare(square) ?? BoardQueryer.getColorOfTurn();
 
@@ -209,8 +209,14 @@ export class RouteCalculator{
      * For more information, please check the class description.
      * @See src/Chess/Engine/Move/Calculator/RouteCalculator.ts
      */
-    public static getAllRoutes(square: Square, color: Color, distanceLimit: number | null = null, pieceSensitivity: boolean = true): Route
+    public static getAllRoutes(square: Square, color: Color | null = null, distanceLimit: number | null = null, pieceSensitivity: boolean = true): Route
     {
+        /**
+         * Find player's color by given square. If square has no piece,
+         * then use BoardQueryer.
+         */
+        color = color ?? BoardQueryer.getColorBySquare(square) ?? BoardQueryer.getColorOfTurn();
+        
         return {
             ...DirectionCalculator.getHorizontalSquares(square, color, distanceLimit, pieceSensitivity),
             ...DirectionCalculator.getVerticalSquares(square, color, distanceLimit, pieceSensitivity),
