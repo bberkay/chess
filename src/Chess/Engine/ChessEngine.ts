@@ -130,6 +130,75 @@ export class ChessEngine extends BoardManager {
     }
 
     /**
+     * This function check the board is playable or not.
+     */
+    private isBoardPlayable(): boolean
+    {
+        // If the board playable status is calculated before then return the calculated status.
+        if(this.calculatedBoardPlayableStatus){
+            Logger.save(`Board playable status[${this.calculatedBoardPlayableStatus}] is already calculated.`, "isBoardPlayable", Source.ChessEngine);
+            return this.calculatedBoardPlayableStatus;
+        }
+
+        /**
+         * Check the status is it started or finished. Also,
+         * check pieces on the board and if there is no pieces that can
+         * finish the game then the game can't be started. If game is started then
+         * set the status of the game to draw.
+         */
+        if(this.statusOfGame == GameStatus.WhiteVictory || this.statusOfGame == GameStatus.BlackVictory
+            || this.statusOfGame == GameStatus.Draw){
+            Logger.save(`Board is not playable because game finished[${this.statusOfGame}]`, "isBoardPlayable", Source.ChessEngine);
+            return false;
+        }
+        else if(BoardQueryer.getPiecesWithFilter(Color.White, [PieceType.King]).length == 0
+            || BoardQueryer.getPiecesWithFilter(Color.Black, [PieceType.King]).length == 0){
+            // If board has no white and black king then the game can't be started.
+            this.statusOfGame = GameStatus.NotStarted;
+            this.calculatedBoardPlayableStatus = false;
+            Logger.save(`Board is not playable because game not started(king/kings missing)`, "isBoardPlayable", Source.ChessEngine);
+            return false;
+        }
+        else
+        {
+            /**
+             * Check the pieces on the board and:
+             * - If there is only one white king and one black king then the game is in draw status.
+             * - If there is only one white king and one black king and one white knight or bishop then the game is in draw status.
+             */
+
+            // If board has any pawn, rook or queen then the game can be finished.
+            for(const square in BoardQueryer.getBoard()){
+                const piece: Piece | null = BoardQueryer.getPieceOnSquare(Number(square) as Square);
+                if(piece && (piece.getType() == PieceType.Pawn || piece.getType() == PieceType.Rook || piece.getType() == PieceType.Queen)){
+                    this.statusOfGame = GameStatus.InPlay;
+                    this.calculatedBoardPlayableStatus = true;
+                    Logger.save(`Board has pawn/rook/queen so it can be playable.`, "isBoardPlayable", Source.ChessEngine);
+                    return true;
+                }
+            }
+
+            // If board has no queen, rook or pawn then check the king and bishop count.
+            if(BoardQueryer.getPiecesWithFilter(Color.White, [PieceType.Knight, PieceType.Bishop]).length > 1
+                || BoardQueryer.getPiecesWithFilter(Color.Black, [PieceType.Knight, PieceType.Bishop]).length > 1){
+                this.statusOfGame = GameStatus.InPlay;
+                this.calculatedBoardPlayableStatus = true;
+                Logger.save(`Board has more than one knight and/or bishop so it can be playable.`, "isBoardPlayable", Source.ChessEngine);
+                return true;
+            }
+
+            // Otherwise, the game is in draw status.
+            if(this.statusOfGame != GameStatus.NotStarted){
+                this.statusOfGame = GameStatus.Draw;
+                this.calculatedBoardPlayableStatus = false;
+                Logger.save(`Board is in draw status because game is not finished or board can't be finished because of pieces.`, "isBoardPlayable", Source.ChessEngine);
+            }
+
+            return false;
+        }
+    }
+
+    /**
      * This function check the select is legal or not by checking the piece's color
      * and the color of the turn.
      */
@@ -528,40 +597,6 @@ export class ChessEngine extends BoardManager {
     }
 
     /**
-     * End the turn with some controls and check the game is finished or not.
-     */
-    private finishTurn(): void
-    {
-        /**
-         * Order of the functions is important.
-         *
-         * Example scenario for White:
-         * 1- Clear properties of the ChessEngine except moveNotation
-         * 2- Control en passant moves for White(because, if White not play en passant move in one turn then remove the move)
-         * 3- Control castling moves for White(because, if White move the king or rook then disable the castling)
-         * 4- Change the turn(White -> Black)
-         * 5- Check the game is finished or not for Black
-         * 6- Add move to move history
-         * 7- Check the threefold repetition rule
-         * 8- Clear current move notation
-         */
-        this.mandatoryMoves = {};
-        this.calculatedMoves = {};
-        this.currentMoves = null;
-        this.calculatedBoardPlayableStatus = null;
-        this._checkCastling();
-        this._checkEnPassant();
-        this.changeTurn();
-        Logger.save("Turn is changed.", "finishTurn", Source.ChessEngine);
-        this.checkStatusOfGame();
-        this.checkThreefoldRepetition();
-        this.saveMoveNotation(this.moveNotation);
-        Logger.save(`Notation[${JSON.stringify(this.moveNotation)}] of current move add to move history`, "finishTurn", Source.ChessEngine);
-        this.moveNotation = "";
-        Logger.save("Turn finish operation is finished.", "finishTurn", Source.ChessEngine);
-    }
-
-    /**
      * Check castling moves after each turn. If player move the king or rook
      * then disable the castling.
      *
@@ -936,72 +971,37 @@ export class ChessEngine extends BoardManager {
     }
 
     /**
-     * This function check the board is playable or not.
+     * End the turn with some controls and check the game is finished or not.
      */
-    private isBoardPlayable(): boolean
+    private finishTurn(): void
     {
-        // If the board playable status is calculated before then return the calculated status.
-        if(this.calculatedBoardPlayableStatus){
-            Logger.save(`Board playable status[${this.calculatedBoardPlayableStatus}] is already calculated.`, "isBoardPlayable", Source.ChessEngine);
-            return this.calculatedBoardPlayableStatus;
-        }
-
         /**
-         * Check the status is it started or finished. Also,
-         * check pieces on the board and if there is no pieces that can
-         * finish the game then the game can't be started. If game is started then
-         * set the status of the game to draw.
+         * Order of the functions is important.
+         *
+         * Example scenario for White:
+         * 1- Clear properties of the ChessEngine except moveNotation
+         * 2- Control en passant moves for White(because, if White not play en passant move in one turn then remove the move)
+         * 3- Control castling moves for White(because, if White move the king or rook then disable the castling)
+         * 4- Change the turn(White -> Black)
+         * 5- Check the game is finished or not for Black
+         * 6- Add move to move history
+         * 7- Check the threefold repetition rule
+         * 8- Clear current move notation
          */
-        if(this.statusOfGame == GameStatus.WhiteVictory || this.statusOfGame == GameStatus.BlackVictory
-            || this.statusOfGame == GameStatus.Draw){
-            Logger.save(`Board is not playable because game finished[${this.statusOfGame}]`, "isBoardPlayable", Source.ChessEngine);
-            return false;
-        }
-        else if(BoardQueryer.getPiecesWithFilter(Color.White, [PieceType.King]).length == 0
-            || BoardQueryer.getPiecesWithFilter(Color.Black, [PieceType.King]).length == 0){
-            // If board has no white and black king then the game can't be started.
-            this.statusOfGame = GameStatus.NotStarted;
-            this.calculatedBoardPlayableStatus = false;
-            Logger.save(`Board is not playable because game not started(king/kings missing)`, "isBoardPlayable", Source.ChessEngine);
-            return false;
-        }
-        else
-        {
-            /**
-             * Check the pieces on the board and:
-             * - If there is only one white king and one black king then the game is in draw status.
-             * - If there is only one white king and one black king and one white knight or bishop then the game is in draw status.
-             */
-
-            // If board has any pawn, rook or queen then the game can be finished.
-            for(const square in BoardQueryer.getBoard()){
-                const piece: Piece | null = BoardQueryer.getPieceOnSquare(Number(square) as Square);
-                if(piece && (piece.getType() == PieceType.Pawn || piece.getType() == PieceType.Rook || piece.getType() == PieceType.Queen)){
-                    this.statusOfGame = GameStatus.InPlay;
-                    this.calculatedBoardPlayableStatus = true;
-                    Logger.save(`Board has pawn/rook/queen so it can be playable.`, "isBoardPlayable", Source.ChessEngine);
-                    return true;
-                }
-            }
-
-            // If board has no queen, rook or pawn then check the king and bishop count.
-            if(BoardQueryer.getPiecesWithFilter(Color.White, [PieceType.Knight, PieceType.Bishop]).length > 1
-                || BoardQueryer.getPiecesWithFilter(Color.Black, [PieceType.Knight, PieceType.Bishop]).length > 1){
-                this.statusOfGame = GameStatus.InPlay;
-                this.calculatedBoardPlayableStatus = true;
-                Logger.save(`Board has more than one knight and/or bishop so it can be playable.`, "isBoardPlayable", Source.ChessEngine);
-                return true;
-            }
-
-            // Otherwise, the game is in draw status.
-            if(this.statusOfGame != GameStatus.NotStarted){
-                this.statusOfGame = GameStatus.Draw;
-                this.calculatedBoardPlayableStatus = false;
-                Logger.save(`Board is in draw status because game is not finished or board can't be finished because of pieces.`, "isBoardPlayable", Source.ChessEngine);
-            }
-
-            return false;
-        }
+        this.mandatoryMoves = {};
+        this.calculatedMoves = {};
+        this.currentMoves = null;
+        this.calculatedBoardPlayableStatus = null;
+        this._checkCastling();
+        this._checkEnPassant();
+        this.changeTurn();
+        Logger.save("Turn is changed.", "finishTurn", Source.ChessEngine);
+        this.checkThreefoldRepetition();
+        this.checkStatusOfGame();
+        this.saveMoveNotation(this.moveNotation);
+        Logger.save(`Notation[${JSON.stringify(this.moveNotation)}] of current move add to move history`, "finishTurn", Source.ChessEngine);
+        this.moveNotation = "";
+        Logger.save("Turn finish operation is finished.", "finishTurn", Source.ChessEngine);
     }
 
     /**
