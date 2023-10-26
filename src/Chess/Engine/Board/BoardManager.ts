@@ -145,9 +145,9 @@ export class BoardManager extends Board{
     /**
      * Add move to history
      */
-    protected addMoveToHistory(move: string): void
+    protected saveMoveNotation(moveNotation: string): void
     {
-        Board.moveHistory.push(move);
+        Board.moveHistory.push(moveNotation);
     }
 
     /**

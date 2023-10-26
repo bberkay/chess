@@ -554,53 +554,11 @@ export class ChessEngine extends BoardManager {
         this.changeTurn();
         Logger.save("Turn is changed.", "finishTurn", Source.ChessEngine);
         this.checkStatusOfGame();
-        this.addMoveToHistory(this.moveNotation);
         this.checkThreefoldRepetition();
+        this.saveMoveNotation(this.moveNotation);
         Logger.save(`Notation[${JSON.stringify(this.moveNotation)}] of current move add to move history`, "finishTurn", Source.ChessEngine);
         this.moveNotation = "";
         Logger.save("Turn finish operation is finished.", "finishTurn", Source.ChessEngine);
-    }
-
-    /**
-     * Check the game is finished or not by threefold repetition rule.
-     */
-    private checkThreefoldRepetition(): void
-    {
-        /**
-         * Get the notation of the game and check the notation is
-         * repeated 3 times or not. If the notation is repeated 3
-         * times then the game is in draw status.
-         */
-        const notations: string[] = this.getNotation();
-        if(notations.length < 10)
-            return;
-
-        // Get last 10 move from move notation.
-        const lastMoves: string[] = notations.slice(-10);
-
-        /**
-         * If the last 6 notation is not repeated 3 times then return.
-         * For example that set game status to draw:
-         * - this.getNotation() returns ["d4", "d5", "Kd2", "kd7", "Ke1", "ke8", "Kd2", "kd7", "Ke1", "ke8", "Kd2", "kd7"]
-         * - lastNotations is ["Kd2", "kd7", "Ke1", "ke8", "Kd2", "kd7", "Ke1", "ke8", "Kd2", "kd7"]
-         *  - Simple repeat of this scenario:
-         *      - The white king moves to d2 from e1 and the black king moves to d7 from e8.
-         *      - The white king moves to e1 from d2 and the black king moves to e8 from d7. (First repetition finished)
-         *      - ...
-         *      - The white king moves to d2 from e1 and the black king moves to d7 from e8.
-         *      - The white king moves to e1 from d2 and the black king moves to e8 from d7. (Third repetition finished)
-         *  - Then this situation is repeated 3 times and the game is in draw status.
-         */
-        if(lastMoves.length != 10
-            || lastMoves[0] != lastMoves[4] || lastMoves[1] != lastMoves[5] || lastMoves[2] != lastMoves[6]
-            || lastMoves[3] != lastMoves[7] || lastMoves[4] != lastMoves[8] || lastMoves[5] != lastMoves[9]){
-            Logger.save("Threefold repetition rule is not satisfied", "checkThreefoldRepetition", Source.ChessEngine);
-            return;
-        }
-
-        // If the last 6 notation is repeated 3 times then the game is in draw status.
-        this.statusOfGame = GameStatus.Draw;
-        Logger.save("Game status set to draw by threefold repetition rule", "checkThreefoldRepetition", Source.ChessEngine);
     }
 
     /**
@@ -685,6 +643,49 @@ export class ChessEngine extends BoardManager {
             }
         }
         Logger.save("En passant Check is finished", "checkEnPassant", Source.ChessEngine);
+    }
+
+    /**
+     * Check the game is finished or not by threefold repetition rule.
+     */
+    private checkThreefoldRepetition(): void
+    {
+        /**
+         * Get the notation of the game and check the notation is
+         * repeated 3 times or not. If the notation is repeated 3
+         * times then the game is in draw status.
+         */
+        const notations: string[] = this.getNotation();
+        if(notations.length < 10)
+            return;
+
+        // Get last 10 move from move notation.
+        const lastMoves: string[] = notations.slice(-10);
+
+        /**
+         * If the last 6 notation is not repeated 3 times then return.
+         * For example that set game status to draw:
+         * - this.getNotation() returns ["d4", "d5", "Kd2", "kd7", "Ke1", "ke8", "Kd2", "kd7", "Ke1", "ke8", "Kd2", "kd7"]
+         * - lastNotations is ["Kd2", "kd7", "Ke1", "ke8", "Kd2", "kd7", "Ke1", "ke8", "Kd2", "kd7"]
+         *  - Simple repeat of this scenario:
+         *      - The white king moves to d2 from e1 and the black king moves to d7 from e8.
+         *      - The white king moves to e1 from d2 and the black king moves to e8 from d7. (First repetition finished)
+         *      - ...
+         *      - The white king moves to d2 from e1 and the black king moves to d7 from e8.
+         *      - The white king moves to e1 from d2 and the black king moves to e8 from d7. (Third repetition finished)
+         *  - Then this situation is repeated 3 times and the game is in draw status.
+         */
+        if(lastMoves.length != 10
+            || lastMoves[0] != lastMoves[4] || lastMoves[1] != lastMoves[5] || lastMoves[2] != lastMoves[6]
+            || lastMoves[3] != lastMoves[7] || lastMoves[4] != lastMoves[8] || lastMoves[5] != lastMoves[9]){
+            Logger.save("Threefold repetition rule is not satisfied", "checkThreefoldRepetition", Source.ChessEngine);
+            return;
+        }
+
+        // If the last 6 notation is repeated 3 times then the game is in draw status.
+        this.statusOfGame = GameStatus.Draw;
+        this.moveNotation = "1/2-1/2";
+        Logger.save("Game status set to draw by threefold repetition rule", "checkThreefoldRepetition", Source.ChessEngine);
     }
 
     /**
