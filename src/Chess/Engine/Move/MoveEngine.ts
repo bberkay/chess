@@ -99,7 +99,7 @@ export class MoveEngine extends MoveExtender{
          * @see for more information about pawn moves https://en.wikipedia.org/wiki/Pawn_(chess)
          **************************************************************************/
 
-        // Find the pawn's color and enemy's color by the given square.
+            // Find the pawn's color and enemy's color by the given square.
         const color: Color = this.piece!.getColor();
         const enemyColor: Color = color === Color.White ? Color.Black : Color.White;
 
@@ -172,7 +172,7 @@ export class MoveEngine extends MoveExtender{
          * @see for more information about en passant check src/Chess/Engine/Move/Extender/MoveExtender.ts
          */
 
-        // Add left en passant move to the pawn's moves.
+            // Add left en passant move to the pawn's moves.
         const leftEnPassant: Square | null = this.getLeftEnPassantMove(this.pieceSquare!);
         if(leftEnPassant)
             route[moveDirection.leftDiagonal]!.push(leftEnPassant);
@@ -299,7 +299,6 @@ export class MoveEngine extends MoveExtender{
      */
     private getKingMoves(): Moves | null
     {
-        // Initialize the moves.
         let moves: Moves = {[MoveType.Normal]: [], [MoveType.Castling]: []};
 
         // Get the king's route.
@@ -309,7 +308,7 @@ export class MoveEngine extends MoveExtender{
         // Find the king's color
         const color: Color = BoardQueryer.getPieceOnSquare(this.pieceSquare!)!.getColor();
 
-        // Remove the moves that threatens the king then convert the route to squares array.
+        // Remove the moves for prevent the king to move to the threatened squares.
         for(const square of Extractor.extractSquares(route))
         {
             if(!BoardQueryer.isSquareThreatened(square, color == Color.White ? Color.Black : Color.White, false, false, true))
@@ -348,6 +347,7 @@ export class MoveEngine extends MoveExtender{
 
         // Get castling moves of the king. Also, castling doesn't need king safety filter because it is already filtered.
         moves[MoveType.Castling] = Extractor.extractSquares(route);
+
         return moves;
     }
 
