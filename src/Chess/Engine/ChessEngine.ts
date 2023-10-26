@@ -787,6 +787,7 @@ export class ChessEngine extends BoardManager {
         // Calculate the moves of the king and save the moves to the calculatedMoves.
         let movesOfKing: Moves | null = this.moveEngine.getMoves(kingSquare!)!;
         this.calculatedMoves[kingSquare!] = movesOfKing;
+        console.log(this.calculatedMoves[kingSquare!]);
         Logger.save(`Moves of the king[${kingSquare}] are calculated and saved to calculated moves`, "checkStatusOfGame", Source.ChessEngine);
 
         // If the king has no moves then set the movesOfKing to empty array.
@@ -841,6 +842,7 @@ export class ChessEngine extends BoardManager {
                 }
                 this.statusOfGame = GameStatus.Draw;
                 Logger.save("Game status set to draw because king and any other pieces have no moves(stalemate)", "checkStatusOfGame", Source.ChessEngine);
+
             }
         }
         else if(this.statusOfGame == checkEnum)
@@ -930,6 +932,10 @@ export class ChessEngine extends BoardManager {
                         const blockers: Square[] = BoardQueryer.isSquareThreatened(move, playerColor, true, true) as Square[];
                         if(blockers.length > 0){
                             for(const blocker of blockers){
+                                // If the blocker is king then skip the loop.
+                                if(BoardQueryer.getPieceOnSquare(blocker)!.getType() == PieceType.King)
+                                    continue;
+
                                 if(!(blocker in this.mandatoryMoves))
                                     this.mandatoryMoves[blocker] = [];
 
