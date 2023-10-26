@@ -47,8 +47,10 @@ export class ChessBoard {
         this._loadSounds();
 
         // If the ChessBoard is standalone then create a game with the standard position.
-        if(this.isStandalone)
+        if(this.isStandalone){
             this.createGame();
+            // TODO: Special listener for standalone version.
+        }
 
         Logger.save("ChessBoard created and CSS loaded." + (this.isStandalone ? " as standalone" : ""), "constructor", Source.ChessBoard);
     }

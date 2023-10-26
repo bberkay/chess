@@ -143,11 +143,5 @@ export class Platform{
         // Create a new game with input value by given operation value.
         this.chess.createGame(this.gameCreator!.getValueByMode(this.operationValue!));
         this.isGameFinished = false;
-
-        /**
-         * Initialize the listeners again because when the board changes on the dom tree,
-         * the listeners are removed.
-         */
-        this.initListeners();
     }
 }
