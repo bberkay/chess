@@ -980,13 +980,12 @@ export class ChessEngine extends BoardManager {
          *
          * Example scenario for White:
          * 1- Clear properties of the ChessEngine except moveNotation
-         * 2- Control en passant moves for White(because, if White not play en passant move in one turn then remove the move)
-         * 3- Control castling moves for White(because, if White move the king or rook then disable the castling)
+         * 2- Control castling moves for White(because, if White move the king or rook then disable the castling)
+         * 3- Control en passant moves for White(because, if White not play en passant move in one turn then remove the move)
          * 4- Change the turn(White -> Black)
-         * 5- Check the game is finished or not for Black
-         * 6- Add move to move history
-         * 7- Check the threefold repetition rule
-         * 8- Clear current move notation
+         * 5- Check the threefold repetition rule
+         * 6- Check the game is finished or not for Black
+         * 7- Set move notation of white player's move then clear the moveNotation for black player's turn.
          */
         this.mandatoryMoves = {};
         this.calculatedMoves = {};
