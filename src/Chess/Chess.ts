@@ -30,40 +30,26 @@ export class Chess{
     private selectedSquare: Square | null;
     private isPromotionScreenOpen: boolean = false;
     private readonly isCachingEnabled: boolean = true;
-    private readonly initListener: boolean = true;
 
     /**
      * Constructor of the Chess class.
      */
-    constructor(enableCaching: boolean = true, initListener: boolean = true){
+    constructor(enableCaching: boolean = true){
         this.chessBoard = new ChessBoard(false);
         this.chessEngine = new ChessEngine(false);
         this.selectedSquare = null;
         this.isCachingEnabled = enableCaching;
-        this.initListener = initListener;
 
         // If there is a game in cache, load it. Otherwise, create a new game.
         if(!this.checkAndLoadGameFromCache())
             this.createGame();
-
-        /**
-         * Initialize the listener when the dom is loaded if chess is not
-         * created by the platform.
-         */
-        if(this.initListener){
-            document.addEventListener("DOMContentLoaded", () => {
-                this.initActionListener();
-            });
-
-            Logger.save("Action listener initialized on constructor", "constructor", Source.Chess);
-        }
     }
 
     /**
      * This function initializes the listener for user's
      * actions on chessboard to make a move on engine and board.
      */
-    private initActionListener(): void
+    private initListenerForMoves(): void
     {
         document.querySelectorAll("[data-square-id]").forEach(square => {
             square.addEventListener("mousedown", () => {
@@ -74,7 +60,8 @@ export class Chess{
                 );
             });
         });
-        Logger.save("Action listener initialized.", "initActionListener", Source.Chess);
+
+        Logger.save("Moves listener initialized", "initListenerForMoves", Source.Chess);
     }
 
     /**
@@ -106,10 +93,6 @@ export class Chess{
     {
         Logger.clear();
 
-        // Initialize the listener
-        if(this.initListener)
-            this.initActionListener();
-
         // Clear the game from the cache before creating a new game.
         if(this.isCachingEnabled){
             Cacher.clear();
@@ -138,6 +121,9 @@ export class Chess{
 
         // Get status from engine and show it on board.
         this.chessBoard.showStatus(this.chessEngine.getStatusOfGame());
+
+        // Initialize the listener for moves because the game is created from scratch and the listener is not initialized.
+        this.initListenerForMoves();
     }
 
     /**
@@ -163,7 +149,7 @@ export class Chess{
              * @see For more information about promote check _doPromote() in src/Chess/Engine/ChessEngine.ts
              */
             if(moveType == SquareClickMode.Promotion)
-                this.chessBoard.clearBoard();
+                this.chessBoard.refreshBoard();
             else
                 this._doClearAction();
 
@@ -180,7 +166,7 @@ export class Chess{
     private _doClearAction(): void
     {
         this.selectedSquare = null;
-        this.chessBoard.clearBoard();
+        this.chessBoard.refreshBoard();
     }
 
     /**

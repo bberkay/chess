@@ -9,8 +9,7 @@
 
 
 import { Chess } from "../Chess/Chess";
-import { GameStatus, Square } from "../Chess/Types";
-import { SquareClickMode } from "../Chess/Board/Types";
+import { GameStatus } from "../Chess/Types";
 import { GameCreator } from "./Components/GameCreator.ts";
 import { NotationMenu } from "./Components/NotationMenu.ts";
 import { LogConsole } from "./Components/LogConsole";
@@ -42,7 +41,8 @@ export class Platform{
 
         // Initialize the listeners when the dom is loaded.
         document.addEventListener("DOMContentLoaded", () => {
-            this.initListeners();
+            this.initListenerForUpdates();
+            this.initListenerForOperations();
 
             // Update the notation table and log console.
             this.notationMenu!.load(this.chess.getNotation());
@@ -51,23 +51,14 @@ export class Platform{
     }
 
     /**
-     * This function initializes the listeners for user's
-     * actions on platform.
+     * Listen actions/clicks of player on chess board
+     * for update the notation table and log console.
      */
-    private initListeners(): void
+    private initListenerForUpdates(): void
     {
-        /**
-         * Listen actions/clicks of player on chess board.
-         * This is for the chess in src\Chess\Chess.ts.
-         */
         document.querySelectorAll("[data-square-id]").forEach(square => {
             square.addEventListener("mousedown", () => {
-                // Make move(with square ID and click mode)
-                this.chess.doActionOnBoard(
-                    square.getAttribute("data-click-mode") as SquareClickMode,
-                    parseInt(square.getAttribute("data-square-id")!) as Square
-                );
-
+                // If game isn't finished then update the platform components.
                 if(!this.isGameFinished){
                     // Update the notation table and log console.
                     this.notationMenu!.update(this.chess.getNotation(), this.chess.getScores());
@@ -85,11 +76,14 @@ export class Platform{
                     this.isGameFinished = true;
             });
         });
+    }
 
-        /**
-         * Listen actions/clicks of user on menu on platform.
-         * This is for the platform in src\Platform\Platform.ts.
-         */
+    /**
+     * Listen actions/clicks of user on menu on platform
+     * like game creator and log console clear.
+     */
+    private initListenerForOperations(): void
+    {
         document.querySelectorAll("[data-operation-type]").forEach(menuItem => {
             menuItem.addEventListener("click", () => {
                 // Make operation(from menu)
@@ -143,5 +137,8 @@ export class Platform{
         // Create a new game with input value by given operation value.
         this.chess.createGame(this.gameCreator!.getValueByMode(this.operationValue!));
         this.isGameFinished = false;
+
+        // Initialize the listener for updates.
+        this.initListenerForUpdates();
     }
 }

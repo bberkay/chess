@@ -17,6 +17,7 @@ import {Logger, Source} from "../Services/Logger.ts";
  */
 export class ChessBoard {
 
+    private readonly isStandalone: boolean;
     private sounds: {[key in SoundEffect]: HTMLAudioElement} = {
         Start: new Audio("src/Chess/Board/Assets/sounds/game-start.mp3"),
         WhiteMove: new Audio("src/Chess/Board/Assets/sounds/move-self.mp3"),
@@ -27,11 +28,15 @@ export class ChessBoard {
         Promote: new Audio("src/Chess/Board/Assets/sounds/promote.mp3"),
         End: new Audio("src/Chess/Board/Assets/sounds/game-end.mp3"),
     };
+
+    // This is used for preventing parameter complexity.
     private colorOfPlayer: Color | null = null;
-    private readonly isStandalone: boolean;
 
     // Store locked squares click modes to restore them after unlock the board.
     private lockedSquaresModes: Array<SquareClickMode> = [];
+
+    // This is used with standalone version for move piece without chess/chess engine.
+    private lastClickedSquare: Square | null = null;
 
     /**
      * Constructor of the class which load css file of
@@ -47,10 +52,8 @@ export class ChessBoard {
         this._loadSounds();
 
         // If the ChessBoard is standalone then create a game with the standard position.
-        if(this.isStandalone){
+        if(this.isStandalone)
             this.createGame();
-            // TODO: Special listener for standalone version.
-        }
 
         Logger.save("ChessBoard created and CSS loaded." + (this.isStandalone ? " as standalone" : ""), "constructor", Source.ChessBoard);
     }
@@ -85,32 +88,32 @@ export class ChessBoard {
     }
 
     /**
-     * This function creates a chess board with the given position(fen notation or json notation).
+     * This function initializes the listeners for user's
+     * actions on chessboard to make a move on board.
      */
-    public createGame(position: JsonNotation | StartPosition | string = StartPosition.Standard): void
+    private initStandaloneListener(): void
     {
-        if(this.isStandalone)
-            Logger.clear();
-
-        // Create squares in the board.
-        this.createSquares();
-        Logger.save("Squares created on ChessBoard.", "createGame", Source.ChessBoard);
-
-        // Create the pieces.
-        this.createPieces(typeof position == "string" ? Converter.fenToJson(position).board : position.board);
-        Logger.save("Pieces created on ChessBoard.", "createGame", Source.ChessBoard);
-
-        if(this.isStandalone)
-            Logger.save(`Game created on ChessBoard`, "createGame", Source.ChessBoard);
-
-        // Play the game start sound.
-        this.playSound(SoundEffect.Start);
+        document.querySelectorAll("[data-square-id]").forEach(square => {
+            square.addEventListener("mousedown", () => {
+                if(square.lastElementChild && square.lastElementChild.className.includes("piece")){
+                    // If the square has a piece then select the square.
+                    this.lastClickedSquare = parseInt(square.getAttribute("data-square-id")!);
+                    this.highlightSelect(this.lastClickedSquare);
+                }
+                else if(this.lastClickedSquare){
+                    // If the square is empty then play the move if the last clicked square is not null.
+                    this.playMove(this.lastClickedSquare, parseInt(square.getAttribute("data-square-id")!));
+                    this.lastClickedSquare = null;
+                }
+            });
+        });
+        Logger.save("Standalone listener initialized.", "initStandaloneListener", Source.ChessBoard);
     }
 
     /**
      * This function creates the background of the chess board in #chessboard div
      */
-    private createSquares(): void
+    private createBoard(): void
     {
         // Find the chess board element and clear it.
         let board: HTMLDivElement = document.getElementById("chessboard") as HTMLDivElement;
@@ -173,6 +176,33 @@ export class ChessBoard {
             // Add the square to the board.
             board.appendChild(square);
         }
+
+        // If the board is standalone then initialize the listeners.
+        if(this.isStandalone)
+            this.initStandaloneListener();
+    }
+
+    /**
+     * This function creates a chess board with the given position(fen notation or json notation).
+     */
+    public createGame(position: JsonNotation | StartPosition | string = StartPosition.Standard): void
+    {
+        if(this.isStandalone)
+            Logger.clear();
+
+        // Create squares on the chess board.
+        this.createBoard();
+        Logger.save("Chessboard created.", "createGame", Source.ChessBoard);
+
+        // Create the pieces.
+        this.createPieces(typeof position == "string" ? Converter.fenToJson(position).board : position.board);
+        Logger.save("Pieces created on ChessBoard.", "createGame", Source.ChessBoard);
+
+        if(this.isStandalone)
+            Logger.save(`Game created on ChessBoard`, "createGame", Source.ChessBoard);
+
+        // Play the game start sound.
+        this.playSound(SoundEffect.Start);
     }
 
     /**
@@ -226,7 +256,7 @@ export class ChessBoard {
     public highlightSelect(squareID: Square): void
     {
         // Clear/Restore the board its default state before selecting the square.
-        this.clearBoard();
+        this.refreshBoard();
 
         // Get the selected square by its id and set the ondragover attribute.
         const selectedSquare: HTMLDivElement = document.querySelector(`[data-square-id="${squareID.toString()}"]`) as HTMLDivElement;
@@ -502,7 +532,7 @@ export class ChessBoard {
     /**
      * This function removes the effects from board.
      */
-    public clearBoard(): void
+    public refreshBoard(): void
     {
         // Get all squares on the board.
         let squares: NodeListOf<Element> = document.querySelectorAll(".square");
@@ -518,7 +548,7 @@ export class ChessBoard {
              */
             if (id !== i + 1){
                 squares[i].setAttribute("data-square-id", (i+1).toString());
-                Logger.save(`ID of square's fixed from[${id}] to [${(i+1).toString()}] on board`, "clearBoard", Source.ChessBoard);
+                Logger.save(`ID of square's fixed from[${id}] to [${(i+1).toString()}] on board`, "refreshBoard", Source.ChessBoard);
             }
 
             /**
@@ -546,7 +576,7 @@ export class ChessBoard {
                 this.setSquareClickMode(squares[i] as HTMLDivElement, SquareClickMode.Clear);
         }
 
-        Logger.save("Playable, Killable, Selected effects are cleaned and Square Click Modes changes to Clear and Select(if square has piece)", "clearBoard", Source.ChessBoard);
+        Logger.save("Playable, Killable, Selected effects are cleaned and Square Click Modes changes to Clear and Select(if square has piece)", "refreshBoard", Source.ChessBoard);
     }
 
     /**

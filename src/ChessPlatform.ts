@@ -23,7 +23,7 @@ export class ChessPlatform{
      * Constructor of the ChessPlatform class.
      */
     constructor(enableCaching: boolean = true) {
-        this.chess = new Chess(enableCaching, false);
+        this.chess = new Chess(enableCaching);
         this.platform = new Platform(this.chess);
     }
 }
