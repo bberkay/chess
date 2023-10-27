@@ -18,6 +18,7 @@ export class LogConsole extends Component{
         this.renderComponent();
         document.addEventListener("DOMContentLoaded", () => {
             this.initListener();
+            this.print(this.chess.getLogs());
         });
     }
 
@@ -156,9 +157,17 @@ export class LogConsole extends Component{
     }
 
     /**
+     * This function returns the log count.
+     */
+    private getLogCount(): number
+    {
+        return this.logCounter;
+    }
+
+    /**
      * This function adds a log to the log console.
      */
-    public printLogs(logs: Array<{source: string, message: string}>): void
+    public print(logs: Array<{source: string, message: string}>): void
     {
         /**
          * If the log count is greater than 130, clear the log console.
@@ -192,14 +201,6 @@ export class LogConsole extends Component{
 
         // Initialize the listeners when the dom is loaded.
         this.initListenerForTooltips();
-    }
-
-    /**
-     * This function returns the log count.
-     */
-    public getLogCount(): number
-    {
-        return this.logCounter;
     }
 
     /**

@@ -20,6 +20,7 @@ export class NotationMenu extends Component{
         this.renderComponent();
         document.addEventListener("DOMContentLoaded", () => {
             this.initListener();
+            this.update(this.chess.getNotation(), this.chess.getScores());
         });
     }
 
