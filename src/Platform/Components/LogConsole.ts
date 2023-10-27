@@ -1,27 +1,59 @@
-import { MenuOperationType } from "../Types";
+import { Chess } from "../../Chess/Chess.ts";
+import { MenuOperationType, MenuOperationValue } from "../Types";
 import { Component } from "./Component";
 
 /**
  * This class provide a menu to show the logs.
  */
 export class LogConsole extends Component{
-
-    private currentLogCount: number = 0;
+    protected readonly chess: Chess;
+    private logCounter: number = 0;
 
     /**
      * Constructor of the LogConsole class.
      */
-    constructor() {
+    constructor(chess: Chess) {
         super();
+        this.chess = chess;
+        this.renderComponent();
+        document.addEventListener("DOMContentLoaded", () => {
+            this.initListener();
+        });
+    }
 
-        // Load the html and css files.
-        this.render();
+    /**
+     * Listen actions/clicks of user on log console
+     */
+    protected initListener(): void
+    {
+        document.querySelectorAll("#log-console [data-operation-type]").forEach(menuItem => {
+            menuItem.addEventListener("click", () => {
+                // Make operation(from menu)
+                this.handleOperation(
+                    menuItem.getAttribute("data-operation-type") as MenuOperationType,
+                    menuItem.getAttribute("data-operation-value") as MenuOperationValue
+                );
+            });
+        });
+    }
+
+    /**
+     * This function makes an operation on menu.
+     */
+    protected handleOperation(operationType: MenuOperationType, operationValue: MenuOperationValue): void
+    {
+        // Do operation by given operation type.
+        switch(operationType){
+            case MenuOperationType.LogConsoleClear:
+                this.clear();
+                break;
+        }
     }
 
     /**
      * This function renders the log console.
      */
-    public render(): void
+    protected renderComponent(): void
     {
         this.loadHTML("log-console", `
             <div id="log-console-body">
@@ -40,14 +72,14 @@ export class LogConsole extends Component{
 
         // Initialize the listeners when the dom is loaded.
         document.addEventListener("DOMContentLoaded", () => {
-            this.initListeners();
+            this.initListener();
         });
     }
 
     /**
      * This function initializes the listeners.
      */
-    private initListeners(): void
+    private initListenerForTooltips(): void
     {
         const squares: NodeListOf<HTMLElement> = document.querySelectorAll(".square");
 
@@ -77,7 +109,7 @@ export class LogConsole extends Component{
      * Return: <span class = "variable-tooltip" data-tooltip-value="[WhiteInCheck, BlackVictory]>Enums</span>
      * are found by player's <span class = "variable-tooltip" data-tooltip-value="[White]">color</span>
      */
-    private _convertValuesToTooltips(log: string): string
+    private _createTooltip(log: string): string
     {
         /**
          * This function parses and stringifies the value, if
@@ -126,18 +158,24 @@ export class LogConsole extends Component{
     /**
      * This function adds a log to the log console.
      */
-    public show(logs: Array<{source: string, message: string}>): void
+    public printLogs(logs: Array<{source: string, message: string}>): void
     {
+        /**
+         * If the log count is greater than 130, clear the log console.
+         * This is for preventing the log console from slowing down the browser.
+         */
+        if(this.getLogCount() > 130)
+            this.clear();
+
         // Find the log list element and the last logs in the logs array.
         let logListElement: HTMLElement = document.getElementById("log-list")!;
-        const lastLogs: Array<{source: string, message: string}> = logs.slice(this.currentLogCount);
+        const lastLogs: Array<{source: string, message: string}> = logs.slice(this.logCounter);
 
         // Add the log to the log list.
         for(const log of lastLogs) {
-            const source: string = log.source.includes("Engine") ? "Engine" : (log.source.includes("Board") ? "Board" : "Chess");
             logListElement!.innerHTML +=
                 `<li onmouseover="document.getElementById('log-file').innerHTML = '${log.source}'">
-                       &#x2022 <strong style="text-transform: uppercase">[${source}] </strong><span>${this._convertValuesToTooltips(log.message)}</span>
+                       &#x2022 <strong style="text-transform: uppercase">[${log.source}] </strong><span>${this._createTooltip(log.message)}</span>
                 </li>`;
         }
 
@@ -149,11 +187,11 @@ export class LogConsole extends Component{
             document.getElementById("log-console-body")!.scrollTop = logListElement!.scrollHeight;
 
             // Update the log count.
-            this.currentLogCount += lastLogs.length;
+            this.logCounter += lastLogs.length;
         }
 
         // Initialize the listeners when the dom is loaded.
-        this.initListeners();
+        this.initListenerForTooltips();
     }
 
     /**
@@ -161,7 +199,7 @@ export class LogConsole extends Component{
      */
     public getLogCount(): number
     {
-        return this.currentLogCount;
+        return this.logCounter;
     }
 
     /**
@@ -169,8 +207,11 @@ export class LogConsole extends Component{
      */
     public clear(): void
     {
+        // Clear the logs of the chess.
+        this.chess.clearLogs();
+
         // Clear the log count.
-        this.currentLogCount = 0;
+        this.logCounter = 0;
 
         // Clear the log list.
         document.getElementById("log-list")!.innerHTML = "";

@@ -1,4 +1,15 @@
 /**
+ * PlatformConfig interface for the configuration components
+ * of the platform.
+ * @see src/Platform/Platform.ts
+ */
+export type PlatformConfig = {
+    enableNotationMenu: boolean,
+    enableLogConsole: boolean,
+    enableGameCreator: boolean
+}
+
+/**
  * MenuOperationType enum for the types of operations that can be
  * done in the menu.
  * @see src/Platform/Platform.ts
@@ -6,8 +17,7 @@
 export enum MenuOperationType{
     GameCreatorCreate = "GameCreatorCreateGame",
     GameCreatorChangeMode = "GameCreatorChangeMode",
-    LogConsoleClear = "LogConsoleClear",
-    ToggleSquareIds = "ToggleSquareIds"
+    LogConsoleClear = "LogConsoleClear"
 }
 
 /**

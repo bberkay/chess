@@ -9,6 +9,7 @@
 
 import { Chess } from './Chess/Chess.ts';
 import { Platform } from "./Platform/Platform.ts";
+import { PlatformConfig } from "./Platform/Types";
 
 /**
  * This class is the main class of the chess platform.
@@ -22,8 +23,12 @@ export class ChessPlatform{
     /**
      * Constructor of the ChessPlatform class.
      */
-    constructor(enableCaching: boolean = true) {
+    constructor(enableCaching: boolean = true, platformConfig: PlatformConfig | null = null) {
         this.chess = new Chess(enableCaching);
-        this.platform = new Platform(this.chess);
+        this.platform = new Platform(this.chess, platformConfig === null ? {
+            enableNotationMenu: true,
+            enableLogConsole: true,
+            enableGameCreator: true
+        } : platformConfig);
     }
 }

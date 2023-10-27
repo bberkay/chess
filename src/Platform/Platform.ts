@@ -13,7 +13,7 @@ import { GameStatus } from "../Chess/Types";
 import { GameCreator } from "./Components/GameCreator.ts";
 import { NotationMenu } from "./Components/NotationMenu.ts";
 import { LogConsole } from "./Components/LogConsole";
-import { MenuOperationType, MenuOperationValue } from "./Types";
+import { PlatformConfig, MenuOperationType, MenuOperationValue } from "./Types";
 
 /**
  * This class is the main class of the chess platform menu.
@@ -25,19 +25,17 @@ export class Platform{
     private readonly gameCreator: GameCreator | null;
     private readonly notationMenu: NotationMenu | null;
     private readonly logConsole: LogConsole | null;
-    private operationValue: MenuOperationValue | null;
     private isGameFinished: boolean;
 
     /**
      * Constructor of the Platform class.
      */
-    constructor(chess: Chess) {
+    constructor(chess: Chess, platformConfig: PlatformConfig) {
         this.chess = chess;
-        this.gameCreator = new GameCreator();
-        this.notationMenu = new NotationMenu();
-        this.logConsole = new LogConsole();
-        this.operationValue = null;
         this.isGameFinished = false;
+        this.gameCreator = platformConfig.enableGameCreator ? new GameCreator(this.chess) : null;
+        this.notationMenu = platformConfig.enableNotationMenu ? new NotationMenu(this.chess) : null;
+        this.logConsole = platformConfig ? new LogConsole(this.chess) : null;
 
         // Initialize the listeners when the dom is loaded.
         document.addEventListener("DOMContentLoaded", () => {
@@ -63,13 +61,6 @@ export class Platform{
                     // Update the notation table and log console.
                     this.notationMenu!.update(this.chess.getNotation(), this.chess.getScores());
                     this.logConsole!.show(this.chess.getLogs());
-
-                    /**
-                     * If the log count is greater than 130, clear the log console.
-                     * This is for preventing the log console from slowing down the browser.
-                     */
-                    if(this.logConsole!.getLogCount() > 130)
-                        this.clearLogConsole();
                 }
 
                 if(!this.isGameFinished && [GameStatus.WhiteVictory, GameStatus.BlackVictory, GameStatus.Draw].includes(this.chess.getStatus()))
@@ -117,15 +108,6 @@ export class Platform{
     }
 
     /**
-     * This function clears the log console and logs of the chess.
-     */
-    private clearLogConsole(): void
-    {
-        this.chess!.clearLogs();
-        this.logConsole!.clear();
-    }
-
-    /**
      * This function create a new game with the game creator
      */
     private createGameWithGameCreator(): void
@@ -135,7 +117,7 @@ export class Platform{
         this.logConsole!.clear();
 
         // Create a new game with input value by given operation value.
-        this.chess.createGame(this.gameCreator!.getValueByMode(this.operationValue!));
+        this.gameCreator?.createGame(this.chess);
         this.isGameFinished = false;
 
         // Initialize the listener for updates.

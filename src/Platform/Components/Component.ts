@@ -1,9 +1,14 @@
+import { Chess } from "../../Chess/Chess";
+import { MenuOperationType, MenuOperationValue } from "../Types";
+
 /**
  * Component abstract class. All components must inherit from this class.
  */
 export abstract class Component{
-    abstract render(): void;
-    abstract clear(): void;
+    protected abstract readonly chess: Chess;
+    protected abstract renderComponent(): void;
+    protected abstract initListener(): void;
+    protected abstract handleOperation(operationType: MenuOperationType, operationValue: MenuOperationValue): void;
 
     /**
      * This function loads the css file of the component.

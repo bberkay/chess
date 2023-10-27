@@ -1,30 +1,59 @@
 import { Color, PieceType } from "../../Chess/Types";
 import { Component } from "./Component.ts";
+import { Chess} from "../../Chess/Chess.ts";
+import { MenuOperationType, MenuOperationValue } from "../Types";
 
 /**
  * This class provide a table to show the notation.
  */
 export class NotationMenu extends Component{
-
-    private lastNotation: string;
-    private lastScore: Record<Color, number>;
+    protected readonly chess: Chess;
+    private lastNotation: string = "";
+    private lastScore: Record<Color, number> = {[Color.White]: 0, [Color.Black]: 0};
 
     /**
      * Constructor of the LogConsole class.
      */
-    constructor() {
+    constructor(chess: Chess) {
         super();
-        this.lastNotation = "";
-        this.lastScore = {[Color.White]: 0, [Color.Black]: 0};
+        this.chess = chess;
+        this.renderComponent();
+        document.addEventListener("DOMContentLoaded", () => {
+            this.initListener();
+        });
+    }
 
-        // Create the table.
-        this.render();
+    /**
+     * Listen actions/clicks of user on log console
+     */
+    protected initListener(): void
+    {
+        document.querySelectorAll("#notation-menu [data-operation-type]").forEach(menuItem => {
+            menuItem.addEventListener("click", () => {
+                // Make operation(from menu)
+                this.handleOperation(
+                    menuItem.getAttribute("data-operation-type") as MenuOperationType,
+                    menuItem.getAttribute("data-operation-value") as MenuOperationValue
+                );
+            });
+        });
+    }
+
+    /**
+     * This function makes an operation on menu.
+     */
+    protected handleOperation(operationType: MenuOperationType, operationValue: MenuOperationValue): void
+    {
+        // Do operation by given operation type.
+        switch(operationType){
+            // Some operations are not implemented yet.
+        }
     }
 
     /**
      * This function render the notation table.
      */
-    public render(): void
+    protected renderComponent(): void
     {
         this.loadHTML("notation-menu", `
                 <div class = "score-table" id = "black-player-pieces"></div>
@@ -43,39 +72,6 @@ export class NotationMenu extends Component{
                 <div class = "score-table" id = "white-player-pieces"></div>
         `);
         this.loadCSS("notation-menu.css");
-    }
-
-    /**
-     * This function clears the table.
-     */
-    public clear(): void
-    {
-        document.getElementById("notations")!.innerHTML = "";
-        document.getElementById("black-player-pieces")!.innerHTML = "";
-        document.getElementById("white-player-pieces")!.innerHTML = "";
-        this.lastNotation = "";
-        this.lastScore = {[Color.White]: 0, [Color.Black]: 0};
-    }
-
-    /**
-     * This function sets the table by given notation.
-     */
-    public load(notation: Array<string>): void
-    {
-        this.clear();
-
-        for(let i = 0; i < notation.length; i++){
-            this.addNotation(notation.slice(0, i + 1));
-        }
-    }
-
-    /**
-     * Update the notation table.
-     */
-    public update(notation: Array<string>, scores: Record<Color, {score: number, pieces: PieceType[]}>): void
-    {
-        this.updateScore(scores);
-        this.addNotation(notation);
     }
 
     /**
@@ -120,7 +116,7 @@ export class NotationMenu extends Component{
     /**
      * This function shows the score of the players top and bottom of the table.
      */
-    private updateScore(scores: Record<Color, {score: number, pieces: PieceType[]}>): void
+    private setScore(scores: Record<Color, {score: number, pieces: PieceType[]}>): void
     {
         if(this.lastScore.White == scores.White.score && this.lastScore.Black == scores.Black.score)
             return;
@@ -155,4 +151,26 @@ export class NotationMenu extends Component{
         // Set the last score.
         this.lastScore = {[Color.White]: whiteScore, [Color.Black]: blackScore};
     }
+
+    /**
+     * Update the notation table.
+     */
+    public update(notation: Array<string>, scores: Record<Color, {score: number, pieces: PieceType[]}>): void
+    {
+        this.setScore(scores);
+        this.addNotation(notation);
+    }
+
+    /**
+     * This function clears the table.
+     */
+    public clear(): void
+    {
+        document.getElementById("notations")!.innerHTML = "";
+        document.getElementById("black-player-pieces")!.innerHTML = "";
+        document.getElementById("white-player-pieces")!.innerHTML = "";
+        this.lastNotation = "";
+        this.lastScore = {[Color.White]: 0, [Color.Black]: 0};
+    }
+
 }
