@@ -182,9 +182,10 @@ export class LogConsole extends Component{
 
         // Add the log to the log list.
         for(const log of lastLogs) {
+            const source = log.source.replace(".ts", "").split("/").pop();
             logListElement!.innerHTML +=
                 `<li onmouseover="document.getElementById('log-file').innerHTML = '${log.source}'">
-                       &#x2022 <strong style="text-transform: uppercase">[${log.source}] </strong><span>${this._createTooltip(log.message)}</span>
+                       &#x2022 <strong>[${source}] </strong><span>${this._createTooltip(log.message)}</span>
                 </li>`;
         }
 
