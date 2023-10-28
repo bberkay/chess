@@ -11,7 +11,7 @@ import { Chess } from "../Chess/Chess";
 import { GameCreator } from "./Components/GameCreator.ts";
 import { NotationMenu } from "./Components/NotationMenu.ts";
 import { LogConsole } from "./Components/LogConsole";
-import { PlatformConfig } from "./Types";
+import { MenuOperationType, PlatformConfig } from "./Types";
 
 /**
  * This class is the main class of the chess platform menu.
@@ -35,7 +35,8 @@ export class Platform{
 
         // Initialize the listeners when the dom is loaded.
         document.addEventListener("DOMContentLoaded", () => {
-            this.initListener();
+            this.initBoardListener();
+            this.initComponentListener();
         });
     }
 
@@ -43,13 +44,30 @@ export class Platform{
      * Listen actions/clicks of user on menu squares for
      * updating the notation menu, log console etc.
      */
-    private initListener(): void
+    private initBoardListener(): void
     {
         document.querySelectorAll("[data-square-id]").forEach(square => {
             square.addEventListener("mousedown", () => {
                 // Update notation menu and log console every time when user click a square.
                 this.notationMenu!.update(this.chess.getNotation(), this.chess.getScores());
                 this.logConsole!.print(this.chess.getLogs());
+            });
+        });
+    }
+
+    /**
+     * Listen actions/clicks of user on menu components for
+     * updating the chess board, notation menu, log console etc.
+     */
+    private initComponentListener(): void
+    {
+        document.querySelectorAll("[data-operation-type]").forEach(square => {
+            square.addEventListener("click", () => {
+                if(square.getAttribute("data-operation-type") === MenuOperationType.GameCreatorCreate){
+                    this.notationMenu!.clear();
+                    this.logConsole!.clear();
+                    this.initBoardListener();
+                }
             });
         });
     }

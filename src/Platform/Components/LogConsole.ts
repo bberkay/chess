@@ -173,7 +173,7 @@ export class LogConsole extends Component{
          * If the log count is greater than 130, clear the log console.
          * This is for preventing the log console from slowing down the browser.
          */
-        if(this.getLogCount() > 130)
+        if(this.getLogCount() > 100)
             this.clear();
 
         // Find the log list element and the last logs in the logs array.
