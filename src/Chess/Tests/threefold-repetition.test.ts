@@ -51,7 +51,7 @@ test('Threefold Repetition Test', () => {
     console.log("Final Board:    " + engine.getGameAsFenNotation());
 
     // Check if the game is drawn
-    expect(engine.getStatusOfGame()).toEqual(game.expectation);
+    expect(engine.getGameStatus()).toEqual(game.expectation);
 
     console.log("Passed");
     console.log("--------------------------------------------------");

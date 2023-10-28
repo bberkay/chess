@@ -15,7 +15,7 @@ export class MoveExtender{
 
     /**
      * @description Check if the castling is available for the given king, rook and squares between king and rook.
-     * @see src/Chess/Engine/Move/Extender/MoveExtender.ts For more information.
+     * @see src/Chess/Engine/Move/Helper/MoveExtender.ts For more information.
      */
     private calculateCastlingMove(color: Color, castlingType: "Long" | "Short"): Square | null
     {
@@ -84,25 +84,25 @@ export class MoveExtender{
 
     /**
      * @description Check if the long castling is available for the given color.
-     * @see src/Chess/Engine/Move/Extender/MoveExtender.ts For more information.
+     * @see src/Chess/Engine/Move/Helper/MoveExtender.ts For more information.
      */
-    protected getLongCastlingMove(color: Color): Square | null
+    public getLongCastlingMove(color: Color): Square | null
     {
         return this.calculateCastlingMove(color, "Long");
     }
 
     /**
      * @description Check if the short castling is available for the given color.
-     * @see src/Chess/Engine/Move/Extender/MoveExtender.ts For more information.
+     * @see src/Chess/Engine/Move/Helper/MoveExtender.ts For more information.
      */
-    protected getShortCastlingMove(color: Color): Square | null
+    public getShortCastlingMove(color: Color): Square | null
     {
         return this.calculateCastlingMove(color, "Short");
     }
 
     /**
      * @description Check if the en passant is available for the given square and direction.
-     * @see src/Chess/Engine/Move/Extender/MoveExtender.ts For more information.
+     * @see src/Chess/Engine/Move/Helper/MoveExtender.ts For more information.
      */
     private calculateEnPassantMove(square: Square, direction: EnPassantDirection): Square | null
     {
@@ -175,18 +175,18 @@ export class MoveExtender{
 
     /**
      * @description Check if the left en passant is available for the given square.
-     * @see src/Chess/Engine/Move/Extender/MoveExtender.ts For more information.
+     * @see src/Chess/Engine/Move/Helper/MoveExtender.ts For more information.
      */
-    protected getLeftEnPassantMove(square: Square): Square | null
+    public getLeftEnPassantMove(square: Square): Square | null
     {
         return this.calculateEnPassantMove(square, EnPassantDirection.Left);
     }
 
     /**
      * @description Check if the right en passant is available for the given square.
-     * @see src/Chess/Engine/Move/Extender/MoveExtender.ts For more information.
+     * @see src/Chess/Engine/Move/Helper/MoveExtender.ts For more information.
      */
-    protected getRightEnPassantMove(square: Square): Square | null
+    public getRightEnPassantMove(square: Square): Square | null
     {
         return this.calculateEnPassantMove(square, EnPassantDirection.Right);
     }
@@ -194,7 +194,7 @@ export class MoveExtender{
     /**
      * @description Check if the promotion is available for the given square.
      */
-    protected getPromotionMove(square: Square): Array<Square> | null
+    public getPromotionMove(square: Square): Array<Square> | null
     {
         /**
          * Rules for promotion:

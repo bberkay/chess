@@ -120,7 +120,7 @@ export class Chess{
         }
 
         // Get status from engine and show it on board.
-        this.chessBoard.showStatus(this.chessEngine.getStatusOfGame());
+        this.chessBoard.showStatus(this.chessEngine.getGameStatus());
 
         // Initialize the listener for moves because the game is created from scratch and the listener is not initialized.
         this.initListenerForMoves();
@@ -202,7 +202,7 @@ export class Chess{
     private finishTurn(): void
     {
         // Get status from engine and show it on board.
-        this.chessBoard.showStatus(this.chessEngine.getStatusOfGame());
+        this.chessBoard.showStatus(this.chessEngine.getGameStatus());
 
         // Save the game to the cache as json notation.
         if(this.isCachingEnabled && !this.isPromotionScreenOpen){
@@ -248,6 +248,6 @@ export class Chess{
      */
     public getStatus(): GameStatus
     {
-        return this.chessEngine.getStatusOfGame();
+        return this.chessEngine.getGameStatus();
     }
 }

@@ -97,7 +97,7 @@ test(`Game Status After Move`, () => {
         console.log("Final Board:    " + engine.getGameAsFenNotation());
 
         // Check if the game status is the expected
-        expect(engine.getStatusOfGame()).toBe(game.expectation);
+        expect(engine.getGameStatus()).toBe(game.expectation);
 
         console.log("Passed");
         console.log("--------------------------------------------------");

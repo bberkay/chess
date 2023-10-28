@@ -1,5 +1,5 @@
 import {Board} from "./Board.ts";
-import {CastlingType, Color, JsonNotation, PieceType, Square} from "../../Types";
+import {CastlingType, Color, JsonNotation, PieceType, Square, GameStatus} from "../../Types";
 import {MoveRoute, Piece, Route} from "../Types";
 import {RouteCalculator} from "../Move/Calculator/RouteCalculator.ts";
 
@@ -35,7 +35,8 @@ export class BoardQueryer extends Board{
             halfMoveClock: BoardQueryer.getHalfMoveCount(),
             fullMoveNumber: BoardQueryer.getMoveCount(),
             moveHistory: BoardQueryer.getMoveHistory(),
-            scores: BoardQueryer.getScores()
+            scores: BoardQueryer.getScores(),
+            gameStatus: BoardQueryer.getGameStatus()
         }
     }
 
@@ -109,6 +110,14 @@ export class BoardQueryer extends Board{
     public static getScores(): Record<Color, {score: number, pieces: PieceType[]}>
     {
         return Board.scores;
+    }
+
+    /**
+     * Get game status
+     */
+    public static getGameStatus(): GameStatus
+    {
+        return Board.gameStatus;
     }
 
     /**

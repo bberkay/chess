@@ -84,6 +84,7 @@ export interface JsonNotation{
     fullMoveNumber: number | 0;
     moveHistory?: string[]; // Algebraic notation
     scores?: Record<Color, {score: number, pieces: PieceType[]}>;
+    gameStatus?: GameStatus;
 }
 
 /**

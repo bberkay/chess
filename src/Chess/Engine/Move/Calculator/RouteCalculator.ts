@@ -21,10 +21,10 @@ import {BoardQueryer} from "../../Board/BoardQueryer.ts";
 export class RouteCalculator{
 
     /**
-     * This function returns the route of the given piece.
+     * This function returns the route of the piece on given square.
      * For more information, please check the class description.
      */
-    public static getRouteByPieceOnSquare(square: Square, color: Color | null = null): Route
+    public static getRouteBySquare(square: Square, color: Color | null = null): Route
     {
         const piece: Piece | null = BoardQueryer.getPieceOnSquare(square);
         if(!piece)

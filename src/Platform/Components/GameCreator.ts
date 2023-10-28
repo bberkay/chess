@@ -113,6 +113,13 @@ export class GameCreator extends Component{
     public createGame(operationValue: MenuOperationValue): void
     {
         this.chess.createGame(this.getValueByMode(operationValue));
+
+        // Create invisible div that includes the logs of the game for the first time when game is created.
+        const response: HTMLDivElement = document.createElement("div");
+        response.id = "game-creator-response";
+        response.innerHTML = JSON.stringify(this.chess.getLogs());
+        response.style.visibility = "hidden";
+        document.body.appendChild(response);
     }
 
     /**

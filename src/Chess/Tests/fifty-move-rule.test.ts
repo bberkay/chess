@@ -128,7 +128,7 @@ test('Fifty Move Rule Test', () => {
         if(typeof game.expectation === "number")
             expect(BoardQueryer.getHalfMoveCount()).toBe(game.expectation);
         else
-            expect(engine.getStatusOfGame()).toBe(game.expectation);
+            expect(engine.getGameStatus()).toBe(game.expectation);
 
         console.log("Passed");
         console.log("--------------------------------------------------");

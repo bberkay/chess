@@ -1,5 +1,5 @@
 import {Board} from "./Board.ts";
-import {CastlingType, Color, JsonNotation, PieceType, Square} from "../../Types";
+import {CastlingType, Color, JsonNotation, PieceType, Square, GameStatus} from "../../Types";
 import {BoardQueryer} from "./BoardQueryer.ts";
 import {PieceModel} from "../Models/PieceModel.ts";
 import {Piece} from "../Types";
@@ -40,6 +40,7 @@ export class BoardManager extends Board{
         Board.moveHistory = jsonNotation.moveHistory ?? [];
         Board.scores = jsonNotation.scores ?? {[Color.White]: {score: 0, pieces: []}, [Color.Black]: {score: 0, pieces: []}};
         Board.bannedEnPassantSquares = [];
+        Board.gameStatus = jsonNotation.gameStatus ?? Board.gameStatus;
     }
 
     /**
@@ -164,5 +165,13 @@ export class BoardManager extends Board{
     protected banEnPassantSquare(square: Square): void
     {
         Board.bannedEnPassantSquares.push(square);
+    }
+
+    /**
+     * Set game status
+     */
+    protected setGameStatus(gameStatus: GameStatus): void
+    {
+        Board.gameStatus = gameStatus;
     }
 }

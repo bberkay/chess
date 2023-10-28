@@ -63,12 +63,38 @@ export class Platform{
     {
         document.querySelectorAll("[data-operation-type]").forEach(square => {
             square.addEventListener("click", () => {
-                if(square.getAttribute("data-operation-type") === MenuOperationType.GameCreatorCreate){
-                    this.notationMenu!.clear();
-                    this.logConsole!.clear();
-                    this.initBoardListener();
+                switch(square.getAttribute("data-operation-type")){
+                    case MenuOperationType.GameCreatorCreate:
+                        this.updateComponentsForNewGame();
+                        break;
+                    default:
+                        break;
                 }
             });
+        });
+    }
+
+    /**
+     * Update the components of the menu for new game, for example
+     * clear the notation menu and print the logs of the game on log
+     * console after the game is completely created.
+     */
+    private updateComponentsForNewGame(): void
+    {
+        this.notationMenu!.clear();
+        this.logConsole!.clear();
+        this.initBoardListener();
+
+        // Wait until game creator response is ready.
+        const interval = setInterval(() => {
+            const gameCreatorResponse = document.querySelector("#game-creator-response");
+            if(gameCreatorResponse){
+                clearInterval(interval);
+
+                // Print the logs of the game on log console after the game is completely created.
+                this.logConsole?.print(JSON.parse(gameCreatorResponse!.innerHTML));
+                gameCreatorResponse.remove();
+            }
         });
     }
 }

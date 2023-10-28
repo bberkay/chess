@@ -1,4 +1,4 @@
-import {Square, Color, CastlingType, PieceType} from "../../Types";
+import { Square, Color, CastlingType, PieceType, GameStatus } from "../../Types";
 import { Piece } from "../Types";
 
 /**
@@ -35,4 +35,5 @@ export class Board {
     }
     protected static moveHistory: string[] = [];
     protected static bannedEnPassantSquares: Square[] = [];
+    protected static gameStatus: GameStatus = GameStatus.NotStarted;
 }

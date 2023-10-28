@@ -4,51 +4,53 @@ import {BoardQueryer} from "../Board/BoardQueryer.ts";
 import {Locator} from "./Utils/Locator.ts";
 import {RouteCalculator} from "./Calculator/RouteCalculator.ts";
 import {Extractor} from "./Utils/Extractor.ts";
-import {MoveExtender} from "./Extender/MoveExtender.ts";
+import {MoveExtender} from "./Helper/MoveExtender.ts";
+import {MoveFilterer} from "./Helper/MoveFilterer.ts";
 
 /**
  * This class calculates the possible moves of the pieces.
  */
-export class MoveEngine extends MoveExtender{
+export class MoveEngine{
 
     /**
      * Properties of the MoveEngine class.
      */
-    private piece: Piece | null;
-    private pieceSquare: Square | null;
+    private readonly moveFilterer: MoveFilterer;
+    private readonly moveExtender: MoveExtender;
+    private piece: Piece | null = null;
+    private pieceSquare: Square | null = null;
 
     /**
      * Constructor of the MoveEngine class.
      */
     constructor() {
-        super();
-        this.piece = null;
-        this.pieceSquare = null;
+        this.moveFilterer = new MoveFilterer();
+        this.moveExtender = new MoveExtender();
     }
-
-    /**
-     * Check the given moves. If there is no move, then return null
-     * otherwise return the given moves.
-     */
-    private _hasAnyMove(moves: Moves | null): Moves | null
-    {
-        if(!moves) return null;
-
-        // Check every move type.
-        for(const moveType in moves)
-        {
-            if(moves[moveType as MoveType]!.length > 0)
-                return moves;
-        }
-
-        return null;
-    }
-
+    
     /**
      * Get the possible moves of the piece on the given square.
      */
     public getMoves(square: Square): Moves | null
     {
+        /**
+         * Check the given moves. If there is no move, then return null
+         * otherwise return the given moves.
+         */
+        function hasAnyMove(moves: Moves | null): Moves | null
+        {
+            if(!moves) return null;
+
+            // Check every move type.
+            for(const moveType in moves)
+            {
+                if(moves[moveType as MoveType]!.length > 0)
+                    return moves;
+            }
+
+            return null;
+        }
+        
         // Get the piece on the given square.
         this.piece = BoardQueryer.getPieceOnSquare(square);
         this.pieceSquare = square;
@@ -62,17 +64,17 @@ export class MoveEngine extends MoveExtender{
          */
         switch(this.piece.getType()){
             case PieceType.Pawn:
-                return this._hasAnyMove(this.getPawnMoves());
+                return hasAnyMove(this.getPawnMoves());
             case PieceType.Knight:
-                return this._hasAnyMove(this.getKnightMoves());
+                return hasAnyMove(this.getKnightMoves());
             case PieceType.Bishop:
-                return this._hasAnyMove(this.getBishopMoves());
+                return hasAnyMove(this.getBishopMoves());
             case PieceType.Rook:
-                return this._hasAnyMove(this.getRookMoves());
+                return hasAnyMove(this.getRookMoves());
             case PieceType.Queen:
-                return this._hasAnyMove(this.getQueenMoves());
+                return hasAnyMove(this.getQueenMoves());
             case PieceType.King:
-                return this._hasAnyMove(this.getKingMoves());
+                return hasAnyMove(this.getKingMoves());
             default:
                 return null;
         }
@@ -145,7 +147,7 @@ export class MoveEngine extends MoveExtender{
             delete route[moveDirection.rightDiagonal];
 
         // Add normal moves to the pawn's moves.
-        moves[MoveType.Normal] = Extractor.extractSquares(this._doKingSafety(route)!);
+        moves[MoveType.Normal] = Extractor.extractSquares(this.moveFilterer.filterForKingSafety(this.pieceSquare!, this.piece!.getColor(), route)!);
 
         /**
          * Clear the pawn's routes. Because we will add en passant moves
@@ -169,21 +171,21 @@ export class MoveEngine extends MoveExtender{
          * bottom square(current square id + 9) to the pawn's moves.
          *
          * @see for more information about square id check Square enum in src/Chess/Types/index.ts
-         * @see for more information about en passant check src/Chess/Engine/Move/Extender/MoveExtender.ts
+         * @see for more information about en passant check src/Chess/Engine/Move/Helper/MoveExtender.ts
          */
 
             // Add left en passant move to the pawn's moves.
-        const leftEnPassant: Square | null = this.getLeftEnPassantMove(this.pieceSquare!);
+        const leftEnPassant: Square | null = this.moveExtender.getLeftEnPassantMove(this.pieceSquare!);
         if(leftEnPassant)
             route[moveDirection.leftDiagonal]!.push(leftEnPassant);
 
         // Add right en passant move to the pawn's moves.
-        const rightEnPassant: Square | null = this.getRightEnPassantMove(this.pieceSquare!);
+        const rightEnPassant: Square | null = this.moveExtender.getRightEnPassantMove(this.pieceSquare!);
         if(rightEnPassant)
             route[moveDirection.rightDiagonal]!.push(rightEnPassant);
 
         // Add filtered(for king's safety) en passant moves to the pawn's moves.
-        moves[MoveType.EnPassant] = Extractor.extractSquares(this._doKingSafety(route)!);
+        moves[MoveType.EnPassant] = Extractor.extractSquares(this.moveFilterer.filterForKingSafety(this.pieceSquare!, this.piece!.getColor(), route)!);
 
         /**
          * Clear the pawn's routes. Because we will add promotion moves
@@ -201,7 +203,7 @@ export class MoveEngine extends MoveExtender{
          * then add the bottom square(current square id - 8) to the pawn's moves.
          *
          * @see for more information about square id check Square enum in src/Chess/Types/index.ts
-         * @see for more information about promotion check src/Chess/Engine/Move/Extender/MoveExtender.ts
+         * @see for more information about promotion check src/Chess/Engine/Move/Helper/MoveExtender.ts
          */
 
         /**
@@ -213,7 +215,7 @@ export class MoveEngine extends MoveExtender{
         }
 
         // Add promotion moves to the pawn's moves.
-        const promotionMoves: Square[] | null = this.getPromotionMove(this.pieceSquare!);
+        const promotionMoves: Square[] | null = this.moveExtender.getPromotionMove(this.pieceSquare!);
         if(promotionMoves){
             route[moveDirection.vertical]!.push(promotionMoves[0]);
 
@@ -236,7 +238,7 @@ export class MoveEngine extends MoveExtender{
         }
 
         // Add filtered(for king's safety) promotion moves to the pawn's moves.
-        moves[MoveType.Promotion] = Extractor.extractSquares(this._doKingSafety(route)!);
+        moves[MoveType.Promotion] = Extractor.extractSquares(this.moveFilterer.filterForKingSafety(this.pieceSquare!, this.piece!.getColor(), route)!);
 
         // Return the moves of the pawn.
         return moves;
@@ -252,7 +254,7 @@ export class MoveEngine extends MoveExtender{
         if(!route) return null;
 
         // Filter the moves for king safety and convert the route to squares array.
-        return {[MoveType.Normal]: Extractor.extractSquares(this._doKingSafety(route)!)};
+        return {[MoveType.Normal]: Extractor.extractSquares(this.moveFilterer.filterForKingSafety(this.pieceSquare!, this.piece!.getColor(), route))};
     }
 
     /**
@@ -265,7 +267,7 @@ export class MoveEngine extends MoveExtender{
         if(!route) return null;
 
         // Filter the moves for king safety and convert the route to squares array.
-        return {[MoveType.Normal]: Extractor.extractSquares(this._doKingSafety(route)!)};
+        return {[MoveType.Normal]: Extractor.extractSquares(this.moveFilterer.filterForKingSafety(this.pieceSquare!, this.piece!.getColor(), route))};
     }
 
     /**
@@ -278,7 +280,7 @@ export class MoveEngine extends MoveExtender{
         if(!route) return null;
 
         // Filter the moves for king safety and convert the route to squares array.
-        return {[MoveType.Normal]: Extractor.extractSquares(this._doKingSafety(route)!)};
+        return {[MoveType.Normal]: Extractor.extractSquares(this.moveFilterer.filterForKingSafety(this.pieceSquare!, this.piece!.getColor(), route))};
     }
 
     /**
@@ -291,7 +293,7 @@ export class MoveEngine extends MoveExtender{
         if(!route) return null;
 
         // Filter the moves for king safety and convert the route to squares array.
-        return {[MoveType.Normal]: Extractor.extractSquares(this._doKingSafety(route)!)};
+        return {[MoveType.Normal]: Extractor.extractSquares(this.moveFilterer.filterForKingSafety(this.pieceSquare!, this.piece!.getColor(), route))};
     }
 
     /**
@@ -343,7 +345,7 @@ export class MoveEngine extends MoveExtender{
          * add Square.a8 to king's left route and Square.h8 to king's
          * right route.
          *
-         * @see for more information src/Chess/Engine/Move/Extender/MoveExtender.ts
+         * @see for more information src/Chess/Engine/Move/Helper/MoveExtender.ts
          */
 
         /**
@@ -357,12 +359,12 @@ export class MoveEngine extends MoveExtender{
         for(let path in route) route[path as MoveRoute] = [];
 
         // Add long castling move to the king's moves.
-        const longCastling: Square | null = this.getLongCastlingMove(color);
+        const longCastling: Square | null = this.moveExtender.getLongCastlingMove(color);
         if(longCastling)
             route[MoveRoute.Left]!.push(longCastling);
 
         // Add short castling move to the king's moves.
-        const shortCastling: Square | null = this.getShortCastlingMove(color);
+        const shortCastling: Square | null = this.moveExtender.getShortCastlingMove(color);
         if(shortCastling)
             route[MoveRoute.Right]!.push(shortCastling);
 
@@ -370,114 +372,6 @@ export class MoveEngine extends MoveExtender{
         moves[MoveType.Castling] = Extractor.extractSquares(route);
 
         return moves;
-    }
-
-    /**
-     * Filter the moves of piece by the king's safety. For example,
-     * if the king is in check, then remove the moves that
-     * doesn't protect the king.
-     *
-     * Algorithm:
-     * 1. Find the king's square and enemy's color by the given piece color.
-     * 2. Get all the routes of the piece(diagonal, horizontal and vertical). Because
-     * the king can protect by only these routes(piece can't protect king from knight
-     * or pawn. Also, it can only protect from one piece at the same time).
-     * 2. Find pairs of routes. For example, if route is top, then route's pair is bottom.
-     * 3. Find the dangerous route for the king. For example, if the king is in bottom left
-     * of the piece, then the dangerous route is top right.
-     * 4. If the dangerous route has dangerous piece(example: bishop and queen for bottom left,
-     * top right, etc.) then remove the moves/routes that doesn't protect the king.
-     *
-     * @return if Array<Square> is given, then return Array<Square>. If Path is given, then
-     * return Path.
-     *
-     * @see src/Chess/Engine/Move/Extender/MoveExtender.ts For more information.
-     */
-    private _doKingSafety(moveRoute: Route): Route | null
-    {
-        /**
-         * Find the king and king's square and enemy's color
-         * by the given piece color.
-         */
-        const king: Piece | null = BoardQueryer.getPiecesWithFilter(this.piece!.getColor(), [PieceType.King])[0];
-        if(!king) return moveRoute;
-
-        // Square of the king and enemy's color.
-        const kingSquare: Square = BoardQueryer.getSquareOfPiece(king)!;
-        const enemyColor: Color = this.piece!.getColor() == Color.White ? Color.Black : Color.White;
-
-        /**
-         * Find the dangerous route for the king. For example,
-         * if the king is in bottom left of the piece, then
-         * the dangerous route is top right(because piece can
-         * only protect king from one route at the same time).
-         */
-        let dangerousRoute: MoveRoute;
-
-        /**
-         * For find the dangerous route, get relative route of the piece and king.
-         * Relative route is the route between piece and king.
-         *
-         * @see for more information about relative route src/Chess/Engine/Move/Utils/Locator.ts
-         */
-        const relativeRoute: MoveRoute | null = Locator.getRelative(kingSquare, this.pieceSquare!);
-        if(!relativeRoute)
-            // If dangerous route is null, then return the moves/routes without filtering.
-            return moveRoute;
-
-        /**
-         * For find the dangerous route, get opposite route of relative route.
-         *
-         * @see for more information about opposite route src/Chess/Engine/Move/Utils/Locator.ts
-         */
-        dangerousRoute = Locator.getOpposite(relativeRoute);
-
-        /**
-         * Find the dangerous piece types by the dangerous route. For example,
-         * if the dangerous route is top left, then dangerous piece types are
-         * bishop and queen. If the dangerous route is top, then dangerous piece
-         * types are rook and queen.
-         */
-        const dangerousPieces: Array<PieceType> = [MoveRoute.TopLeft, MoveRoute.TopRight, MoveRoute.BottomLeft, MoveRoute.BottomRight].includes(dangerousRoute)
-            ? [PieceType.Bishop, PieceType.Queen]
-            : [PieceType.Rook, PieceType.Queen];
-
-        /**
-         * Traverse the all routes(getQueenRoute() method returns all routes like
-         * diagonal, horizontal and vertical routes) of the piece and find the
-         * dangerous pieces by dangerous route in all routes. Then, remove the
-         * routes that doesn't protect the king from the dangerous pieces.
-         */
-        const allRoutes: Route = RouteCalculator.getAllRoutes(this.pieceSquare!);
-        for(const square of allRoutes[dangerousRoute]!){
-            // If route has any dangerous piece, then(next step)
-            if(BoardQueryer.isSquareHasPiece(square, enemyColor, dangerousPieces)){
-                /**
-                 * If moveRoute has MoveRoute.L, then it means that we are in
-                 * getKnightMoves() method. In this case, knight can't
-                 * attack while protecting the king. So, we can return
-                 * null.
-                 */
-                if(moveRoute[MoveRoute.L])
-                    return null;
-
-                /**
-                 * Remove the moves/routes that doesn't protect the king.
-                 * For example, moveRoutes has top and bottom routes. If
-                 * player's king is in top left of the piece, and enemy's
-                 * queen is in bottom right of the piece, then remove
-                 * top and bottom routes from the moveRoutes.
-                 */
-                for (const route in moveRoute) {
-                    if(route != dangerousRoute && route != relativeRoute)
-                        delete moveRoute[route as MoveRoute];
-                }
-                break;
-            }
-        }
-
-        // Return the filtered moves/routes.
-        return moveRoute;
     }
 }
 
