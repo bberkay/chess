@@ -778,6 +778,8 @@ export class ChessEngine extends BoardManager {
             }
             else
             {
+                let isAnyMoveFound: boolean = false;
+
                 /**
                  * Control Stalemate and Checkmate
                  *
@@ -798,9 +800,9 @@ export class ChessEngine extends BoardManager {
                     if (moves.length > 0)
                     {
                         // If piece has at least one move then the game is in play status.
-                        this.setGameStatus(GameStatus.InPlay);
                         Logger.save("Doubly Check and Stalemate is not satisfied.", "checkGameStatus", Source.ChessEngine);
-                        return;
+                        isAnyMoveFound = true;
+                        break;
                     }
                 }
 
@@ -812,7 +814,7 @@ export class ChessEngine extends BoardManager {
                     this.setGameStatus(GameStatus.Draw);
                     Logger.save("Game status set to draw because king and any other pieces have no moves(stalemate)", "checkGameStatus", Source.ChessEngine);
                 }
-                else {
+                else if(!isAnyMoveFound) {
                     this.setGameStatus(checkmateEnum);
                     Logger.save("Game status is set to checkmate because king has no moves and threat can't be blocked or killed by player's pieces.", "checkGameStatus", Source.ChessEngine);
                 }
