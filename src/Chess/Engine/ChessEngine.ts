@@ -707,7 +707,7 @@ export class ChessEngine extends BoardManager {
         if(BoardQueryer.getHalfMoveCount() >= 50){
             this.setGameStatus(GameStatus.Draw);
             this.moveNotation = "1/2-1/2";
-            Logger.save("Game status set to draw by half move count", "checkStatusOfGame", Source.ChessEngine);
+            Logger.save("Game status set to draw by half move count", "checkFiftyMoveRule", Source.ChessEngine);
             return;
         }
     }
@@ -721,7 +721,7 @@ export class ChessEngine extends BoardManager {
     {
         // If the game is not playable then return.
         if(!this.isBoardPlayable()){
-            Logger.save("Game status is not checked because board is not playable so check is unnecessary", "checkStatusOfGame", Source.ChessEngine);
+            Logger.save("Game status is not checked because board is not playable so check is unnecessary", "checkGameStatus", Source.ChessEngine);
             return;
         }
 
@@ -736,11 +736,11 @@ export class ChessEngine extends BoardManager {
          */
         const kingSquare: Square | null = BoardQueryer.getSquareOfPiece(BoardQueryer.getPiecesWithFilter(BoardQueryer.getColorOfTurn(), [PieceType.King])[0]!);
         const threateningSquares: Square[] = BoardQueryer.isSquareThreatened(kingSquare!, BoardQueryer.getColorOfOpponent(), true) as Square[];
-        Logger.save(`Threatening squares[${JSON.stringify(threateningSquares)}] are found by king's square[${kingSquare}]`, "checkStatusOfGame", Source.ChessEngine);
+        Logger.save(`Threatening squares[${JSON.stringify(threateningSquares)}] are found by king's square[${kingSquare}]`, "checkGameStatus", Source.ChessEngine);
 
         const checkEnum: GameStatus = BoardQueryer.getColorOfTurn() == Color.White ? GameStatus.WhiteInCheck : GameStatus.BlackInCheck;
         const checkmateEnum: GameStatus = BoardQueryer.getColorOfTurn() == Color.White ? GameStatus.BlackVictory : GameStatus.WhiteVictory;
-        Logger.save(`Check[${checkEnum}] and Checkmate[${checkmateEnum}] enums are found by player's color[${BoardQueryer.getColorOfTurn()}]`, "checkStatusOfGame", Source.ChessEngine);
+        Logger.save(`Check[${checkEnum}] and Checkmate[${checkmateEnum}] enums are found by player's color[${BoardQueryer.getColorOfTurn()}]`, "checkGameStatus", Source.ChessEngine);
 
         /**
          * If the king is threatened then the game is in check status. If game
@@ -755,8 +755,9 @@ export class ChessEngine extends BoardManager {
 
         // Calculate the moves of the king and save the moves to the calculatedMoves.
         let movesOfKing: Moves | null = this.moveEngine.getMoves(kingSquare!)!;
-        this.calculatedMoves[kingSquare!] = movesOfKing ? movesOfKing : {Normal: []};
-        Logger.save(`Moves of the king[${kingSquare}] are calculated and saved to calculated moves`, "checkStatusOfGame", Source.ChessEngine);
+        movesOfKing = movesOfKing ?? {Normal: []};
+        this.calculatedMoves[kingSquare!] = movesOfKing;
+        Logger.save(`Moves of the king[${kingSquare}] are calculated and saved to calculated moves`, "checkGameStatus", Source.ChessEngine);
 
         // Check the checkmate and stalemate status.
         if(movesOfKing[MoveType.Normal]!.length == 0)
@@ -773,7 +774,7 @@ export class ChessEngine extends BoardManager {
                  * @see For more information about check mate please check the https://en.wikipedia.org/wiki/Checkmate
                  */
                 this.setGameStatus(checkmateEnum);
-                Logger.save("Game status set to checkmate because king has no moves and threatened by more than one piece(double check)", "checkStatusOfGame", Source.ChessEngine);
+                Logger.save("Game status set to checkmate because king has no moves and threatened by more than one piece(double check)", "checkGameStatus", Source.ChessEngine);
             }
             else
             {
@@ -798,23 +799,22 @@ export class ChessEngine extends BoardManager {
                     {
                         // If piece has at least one move then the game is in play status.
                         this.setGameStatus(GameStatus.InPlay);
-                        Logger.save("Doubly Check and Stalemate is not satisfied.", "checkStatusOfGame", Source.ChessEngine);
+                        Logger.save("Doubly Check and Stalemate is not satisfied.", "checkGameStatus", Source.ChessEngine);
+                        return;
                     }
-                    else
-                    {
-                        /**
-                         * If the piece has no moves and game is in check status then the game is in checkmate status,
-                         * if game is not in check status then the game is in stalemate status.
-                         */
-                        if(BoardQueryer.getGameStatus() != checkEnum) {
-                            this.setGameStatus(GameStatus.Draw);
-                            Logger.save("Game status set to draw because king and any other pieces have no moves(stalemate)", "checkStatusOfGame", Source.ChessEngine);
-                        }
-                        else {
-                            this.setGameStatus(checkmateEnum);
-                            Logger.save("Game status is set to checkmate because king has no moves and threat can't be blocked or killed by player's pieces.", "checkStatusOfGame", Source.ChessEngine);
-                        }
-                    }
+                }
+
+                /**
+                 * If the piece has no moves and game is in check status then the game is in checkmate status,
+                 * if game is not in check status then the game is in stalemate status.
+                 */
+                if(BoardQueryer.getGameStatus() != checkEnum) {
+                    this.setGameStatus(GameStatus.Draw);
+                    Logger.save("Game status set to draw because king and any other pieces have no moves(stalemate)", "checkGameStatus", Source.ChessEngine);
+                }
+                else {
+                    this.setGameStatus(checkmateEnum);
+                    Logger.save("Game status is set to checkmate because king has no moves and threat can't be blocked or killed by player's pieces.", "checkGameStatus", Source.ChessEngine);
                 }
             }
         }
