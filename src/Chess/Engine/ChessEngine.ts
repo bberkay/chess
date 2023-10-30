@@ -40,8 +40,7 @@ export class ChessEngine extends BoardManager {
     private playedFrom: Square | null = null;
     private playedTo: Square | null = null;
     private moveNotation: string = "";
-    private currentMoves: Moves | null = null;
-    private calculatedMoves: {[key in Square]?: Moves | null} = {};
+    private currentMoves: {[key in Square]?: Moves | null} = {};
     private isPromotionMenuOpen: boolean = false;
     private isBoardPlayableStatus: boolean | null = null;
     private readonly isStandalone: boolean = false;
@@ -117,8 +116,7 @@ export class ChessEngine extends BoardManager {
         this.playedFrom = null;
         this.playedTo = null;
         this.moveNotation = "";
-        this.currentMoves = null;
-        this.calculatedMoves = {};
+        this.currentMoves = {};
         this.isPromotionMenuOpen = false;
         this.isBoardPlayableStatus = null;
         this.setGameStatus(GameStatus.NotStarted);
@@ -213,8 +211,8 @@ export class ChessEngine extends BoardManager {
         }
 
         // If piece has no moves then square can't be selectable.
-        this.calculatedMoves[select] = this.calculatedMoves[select] ?? this.moveEngine.getMoves(select);
-        if(!this.calculatedMoves[select]){
+        this.currentMoves[select] = this.currentMoves[select] ?? this.moveEngine.getMoves(select);
+        if(!this.currentMoves[select]){
             Logger.save(`Square[${select}] is not selectable because piece has no moves`, "isSquareSelectable", Source.ChessEngine);
             return false;
         }
@@ -227,26 +225,26 @@ export class ChessEngine extends BoardManager {
      * if the given move is not in the currentMoves, it returns false.
      * Otherwise, it returns the move type.
      */
-    private checkAndFindMoveType(): MoveType | null
+    private checkAndFindMoveType(square: Square): MoveType | null
     {
         /**
          * If currentMoves is null, then return false. Because,
          * there is no moves for the given square.
          * @see getMoves function.
          */
-        if(this.currentMoves === null){
+        if(!this.currentMoves.hasOwnProperty(square)){
             Logger.save("Move type is not found because there is no selected square", "findMoveType", Source.ChessEngine);
             return null;
         }
 
         // Find the given move in the currentMoves.
-        for(const moveType in this.currentMoves){
+        for(const moveType in this.currentMoves[square]){
             // If the move type is null or undefined then skip the loop.
-            if(!this.currentMoves[moveType as MoveType])
+            if(!this.currentMoves[square]?.[moveType as MoveType])
                 continue;
 
             // Loop through the moves of the move type.
-            for(let move of this.currentMoves[moveType as MoveType]!){
+            for(let move of this.currentMoves[square]?.[moveType as MoveType]!){
                 if(move === this.playedTo){
                     Logger.save(`Move type[${moveType}] is found`, "findMoveType", Source.ChessEngine);
                     return moveType as MoveType;
@@ -255,7 +253,7 @@ export class ChessEngine extends BoardManager {
         }
 
         // If the given move is not in the currentMoves, return null.
-        Logger.save(`Move type is not found because the given move[${this.playedTo}] is not in the current moves[${JSON.stringify(this.currentMoves)}]`, "findMoveType", Source.ChessEngine);
+        Logger.save(`Move type is not found because the given move[${this.playedTo}] is not in the current moves[${JSON.stringify(this.currentMoves[square])}]`, "findMoveType", Source.ChessEngine);
         return null;
     }
 
@@ -274,18 +272,17 @@ export class ChessEngine extends BoardManager {
          * is already calculated then get the moves from the calculatedMoves.
          * Otherwise, calculate the moves with move engine and save the moves
          */
-        this.currentMoves = this.calculatedMoves[square] ?? this.moveEngine.getMoves(square);
-        Logger.save(this.calculatedMoves.hasOwnProperty(square)
-            ? `Moves of the square[${square}] is found from calculated moves[${JSON.stringify(this.calculatedMoves)}]`
+        this.currentMoves[square] = this.currentMoves[square] ?? this.moveEngine.getMoves(square);
+        Logger.save(this.currentMoves.hasOwnProperty(square)
+            ? `Moves of the square[${square}] is found from calculated moves[${JSON.stringify(this.currentMoves)}]`
             : `Moves of the square[${square}] is calculated by move engine`, "getMoves", Source.ChessEngine);
 
         // Save the moves to the calculatedMoves.
-        this.calculatedMoves[square] = this.currentMoves;
-        Logger.save(`Moves of the square is saved to calculated moves(or updated)[${JSON.stringify(this.calculatedMoves)}]`, "getMoves", Source.ChessEngine);
+        Logger.save(`Moves of the square is saved to calculated moves(or updated)[${JSON.stringify(this.currentMoves)}]`, "getMoves", Source.ChessEngine);
 
         // Return the moves.
         Logger.save("Calculation of moves of the square is finished", "getMoves", Source.ChessEngine);
-        return this.currentMoves;
+        return this.currentMoves[square]!;
     }
 
     /**
@@ -300,9 +297,9 @@ export class ChessEngine extends BoardManager {
         }
 
         // If moves is not calculated then calculate the moves.
-        if(!this.currentMoves){
+        if(!this.currentMoves.hasOwnProperty(from)){
             Logger.save("Moves of the square is not calculated so calculate the moves", "playMove", Source.ChessEngine);
-            this.currentMoves = this.getMoves(from);
+            this.currentMoves[from] = this.getMoves(from);
         }else{
             Logger.save("Moves of the square is already calculated", "playMove", Source.ChessEngine);
         }
@@ -325,7 +322,7 @@ export class ChessEngine extends BoardManager {
         }
         else{
             // Check if the given move is valid.
-            const move: MoveType | null = this.checkAndFindMoveType();
+            const move: MoveType | null = this.checkAndFindMoveType(from);
             if(!move)
                 return;
 
@@ -395,7 +392,7 @@ export class ChessEngine extends BoardManager {
                     for(const pieceItem of sameTypePieces){
                         const squareOfPiece: Square = BoardQueryer.getSquareOfPiece(pieceItem)!;
 
-                        if ((this.calculatedMoves[squareOfPiece]?.[MoveType.Normal]?.includes(to) || this.moveEngine.getMoves(squareOfPiece)?.[MoveType.Normal]?.includes(to))
+                        if ((this.currentMoves[squareOfPiece]?.[MoveType.Normal]?.includes(to) || this.moveEngine.getMoves(squareOfPiece)?.[MoveType.Normal]?.includes(to))
                             && from != squareOfPiece) {
                             this.moveNotation += Converter.squareIDToSquare(from)[0];
                             break;
@@ -756,7 +753,7 @@ export class ChessEngine extends BoardManager {
         // Calculate the moves of the king and save the moves to the calculatedMoves.
         let movesOfKing: Moves | null = this.moveEngine.getMoves(kingSquare!)!;
         movesOfKing = movesOfKing ?? {Normal: []};
-        this.calculatedMoves[kingSquare!] = movesOfKing;
+        this.currentMoves[kingSquare!] = movesOfKing;
         Logger.save(`Moves of the king[${kingSquare}] are calculated and saved to calculated moves`, "checkGameStatus", Source.ChessEngine);
 
         // Check the checkmate and stalemate status.
@@ -793,8 +790,8 @@ export class ChessEngine extends BoardManager {
 
                     // Calculate the moves of the piece and get squares of the moves. Also save the moves to the calculatedMoves
                     const square: Square = BoardQueryer.getSquareOfPiece(piece)!;
-                    this.calculatedMoves[square] = this.moveEngine.getMoves(square);
-                    const moves: Square[] = Extractor.extractSquares(this.calculatedMoves[square]!);
+                    this.currentMoves[square] = this.moveEngine.getMoves(square);
+                    const moves: Square[] = Extractor.extractSquares(this.currentMoves[square]!);
 
                     // Set the game status by length of the moves.
                     if (moves.length > 0)
@@ -810,13 +807,15 @@ export class ChessEngine extends BoardManager {
                  * If the piece has no moves and game is in check status then the game is in checkmate status,
                  * if game is not in check status then the game is in stalemate status.
                  */
-                if(BoardQueryer.getGameStatus() != checkEnum) {
-                    this.setGameStatus(GameStatus.Draw);
-                    Logger.save("Game status set to draw because king and any other pieces have no moves(stalemate)", "checkGameStatus", Source.ChessEngine);
-                }
-                else if(!isAnyMoveFound) {
-                    this.setGameStatus(checkmateEnum);
-                    Logger.save("Game status is set to checkmate because king has no moves and threat can't be blocked or killed by player's pieces.", "checkGameStatus", Source.ChessEngine);
+                if(!isAnyMoveFound){
+                    if(BoardQueryer.getGameStatus() != checkEnum){
+                        this.setGameStatus(GameStatus.Draw);
+                        Logger.save("Game status set to draw because king and any other pieces have no moves(stalemate)", "checkGameStatus", Source.ChessEngine);
+                    }
+                    else{
+                        this.setGameStatus(checkmateEnum);
+                        Logger.save("Game status is set to checkmate because king has no moves and threat can't be blocked or killed by player's pieces.", "checkGameStatus", Source.ChessEngine);
+                    }
                 }
             }
         }
@@ -847,8 +846,7 @@ export class ChessEngine extends BoardManager {
          * 6- Check the game is finished or not for Black
          * 7- Set move notation of white player's move then clear the moveNotation for black player's turn.
          */
-        this.calculatedMoves = {};
-        this.currentMoves = null;
+        this.currentMoves = {};
         this.isBoardPlayableStatus = null;
         this.checkCastling();
         this.checkEnPassant();
