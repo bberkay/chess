@@ -31,6 +31,49 @@ export class MoveFilterer{
     }
 
     /**
+     * Remove the moves of the piece that doesn't protect the king.
+     * For example, if the king is in check, then remove the moves
+     * that doesn't block or capture the enemy/threat.
+     */
+    private removeUnsacrificeMoves(pieceColor: Color, moveRoute: Route): Route | null
+    {
+        if(!moveRoute)
+            return null;
+
+        // Get the threats of the king.
+        this.threatsOfKing = this._findThreatsOfKing(pieceColor);
+
+        // If king threatened by multiple enemies then king can't protect so mandatory moves calculation is unnecessary.
+        if(this.threatsOfKing.length > 1)
+            return null;
+        else if(this.threatsOfKing.length < 1)
+            return moveRoute;
+
+        // If threat is knight then return null directly because knight can't be blocked.
+        if(BoardQueryer.getPieceOnSquare(this.threatsOfKing[0])!.getType() == PieceType.Knight)
+            return null;
+
+        // Find the route that threat the player's king.
+        const squareOfKing: Square = BoardQueryer.getSquareOfPiece(BoardQueryer.getPiecesWithFilter(pieceColor, [PieceType.King])[0] as Piece) as Square;
+        const dangerousRouteOfThreat: Square[] = RouteCalculator.getRouteBySquare(this.threatsOfKing[0])[Locator.getRelative(squareOfKing!, this.threatsOfKing[0])!]!;
+
+        // If there is no block between king and enemy then also there will be no block so return null.
+        if(dangerousRouteOfThreat.length < 1)
+            return null;
+
+        // Delete the moves that doesn't block or capture the enemy/threat.
+        for(const route in moveRoute){
+            for(const square of moveRoute[<MoveRoute>route]!){
+                if(!dangerousRouteOfThreat.includes(square) && square != this.threatsOfKing[0]){
+                    delete moveRoute[<MoveRoute>route]![moveRoute[<MoveRoute>route]!.indexOf(square)];
+                }
+            }
+        }
+
+        return moveRoute;
+    }
+
+    /**
      * Remove the moves of piece for the king's safety. For example,
      * if player's king behind of the piece and enemy's queen is in
      * front of the piece, then remove horizontal and diagonal routes
@@ -124,49 +167,6 @@ export class MoveFilterer{
     }
 
     /**
-     * Remove the moves of the piece that doesn't protect the king.
-     * For example, if the king is in check, then remove the moves
-     * that doesn't block or capture the enemy/threat.
-     */
-    private removeUnsacrificeMoves(pieceColor: Color, moveRoute: Route): Route | null
-    {
-        if(!moveRoute)
-            return null;
-
-        // Get the threats of the king.
-        this.threatsOfKing = this._findThreatsOfKing(pieceColor);
-
-        // If king threatened by multiple enemies then king can't protect so mandatory moves calculation is unnecessary.
-        if(this.threatsOfKing.length > 1)
-            return null;
-        else if(this.threatsOfKing.length < 1)
-            return moveRoute;
-
-        // If threat is knight then return null directly because knight can't be blocked.
-        if(BoardQueryer.getPieceOnSquare(this.threatsOfKing[0])!.getType() == PieceType.Knight)
-            return null;
-
-        // Find the route that threat the player's king.
-        const squareOfKing: Square = BoardQueryer.getSquareOfPiece(BoardQueryer.getPiecesWithFilter(pieceColor, [PieceType.King])[0] as Piece) as Square;
-        const dangerousRouteOfThreat: Square[] = RouteCalculator.getRouteBySquare(this.threatsOfKing[0])[Locator.getRelative(squareOfKing!, this.threatsOfKing[0])!]!;
-
-        // If there is no block between king and enemy then also there will be no block so return null.
-        if(dangerousRouteOfThreat.length < 1)
-            return null;
-
-        // Delete the moves that doesn't block or capture the enemy/threat.
-        for(const route in moveRoute){
-            for(const square of moveRoute[<MoveRoute>route]!){
-                if(!dangerousRouteOfThreat.includes(square) || square != this.threatsOfKing[0]){
-                    delete moveRoute[<MoveRoute>route]![moveRoute[<MoveRoute>route]!.indexOf(square)];
-                }
-            }
-        }
-
-        return moveRoute;
-    }
-
-    /**
      * Find the threats of the king and return them. Also,
      * function will store the threats of the king in the
      * threatsOfKing property for unnecessary calculation.
@@ -176,12 +176,12 @@ export class MoveFilterer{
     private _findThreatsOfKing(kingColor: Color): Square[]
     {
         // If game is not in check status then there is no threat to the king.
-        if(BoardQueryer.getGameStatus() != GameStatus.BlackInCheck || BoardQueryer.getGameStatus() != GameStatus.WhiteInCheck)
+        if(BoardQueryer.getGameStatus() != GameStatus.BlackInCheck && BoardQueryer.getGameStatus() != GameStatus.WhiteInCheck)
             return [];
 
         // If threats of king is already calculated and no move is made then after calculation, return the threats of king.
-        if(BoardQueryer.getMoveCount() == this.lastCalculatedMoveCount)
-            return this.threatsOfKing;
+        /*if(BoardQueryer.getMoveCount() == this.lastCalculatedMoveCount)
+            return this.threatsOfKing;*/
 
         // Find the enemies that threat the king.
         const squareOfKing: Square = BoardQueryer.getSquareOfPiece(BoardQueryer.getPiecesWithFilter(kingColor, [PieceType.King])[0] as Piece) as Square;
