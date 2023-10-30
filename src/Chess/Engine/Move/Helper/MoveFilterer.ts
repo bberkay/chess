@@ -179,13 +179,8 @@ export class MoveFilterer{
         if(BoardQueryer.getGameStatus() != GameStatus.BlackInCheck && BoardQueryer.getGameStatus() != GameStatus.WhiteInCheck)
             return [];
 
-        // If threats of king is already calculated and no move is made then after calculation, return the threats of king.
-        /*if(BoardQueryer.getMoveCount() == this.lastCalculatedMoveCount)
-            return this.threatsOfKing;*/
-
         // Find the enemies that threat the king.
         const squareOfKing: Square = BoardQueryer.getSquareOfPiece(BoardQueryer.getPiecesWithFilter(kingColor, [PieceType.King])[0] as Piece) as Square;
-        // TODO: Pawnlarla ilgili bir problem var ise calculatePawnBlock = true yapılabilir.
         this.threatsOfKing = BoardQueryer.isSquareThreatened(squareOfKing, kingColor == Color.White ? Color.Black : Color.White, true) as Square[];
 
         // Update the last calculated move count.
