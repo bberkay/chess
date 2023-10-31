@@ -30,29 +30,23 @@ export class MoveExtender{
          */
 
         /**
-         * Find the king, the chosen rook and squares between king
-         * and rook by the given color.
+         * Find the king, the chosen rook, squares between king
+         * and rook and icons of the king and the rook by the given color
          *
-         * For find chosen rook and squares between king and rook:
+         * For find chosen rook and squares between king and rook see the example below:
          * Color: white, castling type: long, king: e1, chosen rook: a1, between squares: b1, c1, d1
-         * Color: white, castling type: short, king: e1, chosen rook: h1, between squares: f1, g1
-         * Color: black, castling type: long, king: e8, chosen rook: a8, between squares: b8, c8, d8
          * Color: black, castling type: short, king: e8, chosen rook: h8, between squares: f8, g8
+         *
+         * @see for more information icon of the piece https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
          */
         const kingSquare: Square = color == Color.White ? Square.e1 : Square.e8;
+        const kingIcon: string = color == Color.White ? "K" : "k";
+        const rookIcon: string = color == Color.White ? "R" : "r";
 
-        // Check if the king is on its original square.
-        if(!BoardQueryer.isSquareHasPiece(kingSquare, color, [PieceType.King]))
-            return null;
-
-        // Find the chosen rook by the given color and castling type.
-        const targetSquareForRook: Square = castlingType == "Short"
-            ? (color == Color.White ? Square.h1 : Square.h8)
-            : (color == Color.White ? Square.a1 : Square.a8);
-
-        // Check if the chosen rook is on its original square.
-        const chosenRook: Piece | null = BoardQueryer.isSquareHasPiece(targetSquareForRook, color, PieceType.Rook)
-            ? BoardQueryer.getPieceOnSquare(targetSquareForRook) : null;
+        // Check first rule and third rule, if king is not on its original square or king is in check, return null.
+        if(!BoardQueryer.isSquareHasPiece(kingSquare, color, [PieceType.King])
+            || BoardQueryer.getMoveHistory()[BoardQueryer.getMoveHistory().length - 1].includes("+")
+        ) return null;
 
         // Find squares between king and the chosen rook.
         const betweenSquares: Array<Square> = castlingType == "Long"
@@ -60,26 +54,29 @@ export class MoveExtender{
             : (color == Color.White ? [Square.f1, Square.g1] : [Square.f8, Square.g8]);
 
         /**
-         * Check first and second rules, if the king or the long rook
-         * hasn't moved previously or if the king is not in check.
-         *
-         * @see for more information about dangerous squares src/Chess/Engine/Board/BoardQueryer.ts
+         * If there is a move history that includes king, castling or rook
+         * icon, return null. This check is for the second rule.
          */
-        if(!chosenRook || !BoardQueryer.isCastlingAvailable((color + castlingType) as CastlingType) || BoardQueryer.isSquareThreatened(kingSquare))
-            return null;
+        for(const notation of BoardQueryer.getMoveHistory()){
+            // Check the second rule, if king or the chosen rook has not moved previously.
+            if(notation.includes(kingIcon)
+                || notation.includes("O-O")
+                || notation.includes("O-O-O")
+                || (notation.includes(rookIcon + "a") && castlingType == "Long") // Vertical moves of the rook.
+                || (notation.includes(rookIcon + "h") && castlingType == "Short")  // Same as above.
+            ) return null;
 
-        /**
-         * Check third rule, if there are no pieces or dangerous squares
-         * between king and the long rook.
-         */
-        for(let square of betweenSquares!){
-            // If there is a piece or a dangerous square between king and the long rook, return false.
-            if(BoardQueryer.getPieceOnSquare(square) || BoardQueryer.isSquareThreatened(square))
-                return null;
+            // Check the fourth rule, if there are no pieces or dangerous squares between king and the chosen rook.
+            for(const square of betweenSquares){
+                if(notation.includes(rookIcon + Converter.squareIDToSquare(square)) // Also, horizontal moves of the rook.
+                    || BoardQueryer.getPieceOnSquare(square) // If there is a piece on the square.
+                    || BoardQueryer.isSquareThreatened(square) // If there is threatened square.
+                ) return null;
+            }
         }
 
         // If all rules are passed, return castling move.
-        return targetSquareForRook;
+        return castlingType == "Short" ? (color == Color.White ? Square.h1 : Square.h8) : (color == Color.White ? Square.a1 : Square.a8);
     }
 
     /**
@@ -116,7 +113,7 @@ export class MoveExtender{
          * @see for more information about en passant https://en.wikipedia.org/wiki/En_passant
          */
 
-            // Find the pawn by the given square.
+        // Find the pawn by the given square.
         const pawn: Piece = BoardQueryer.getPieceOnSquare(square)!;
 
         // Find fifth rank for black and white pawns.

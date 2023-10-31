@@ -225,6 +225,30 @@ export class Chess{
     }
 
     /**
+     * Get the status of the game
+     */
+    public getStatus(): GameStatus
+    {
+        return this.chessEngine.getGameStatus();
+    }
+
+    /**
+     * Get the game as fen notation
+     */
+    public getGameAsFenNotation(): string
+    {
+        return this.chessEngine.getGameAsFenNotation();
+    }
+
+    /**
+     * Get the game as json notation
+     */
+    public getGameAsJsonNotation(): JsonNotation
+    {
+        return this.chessEngine.getGameAsJsonNotation();
+    }
+
+    /**
      * Get log of the game
      */
     public getLogs(): Array<{source: string, message: string}>
@@ -238,13 +262,5 @@ export class Chess{
     public clearLogs(): void
     {
         Logger.clear();
-    }
-
-    /**
-     * Get the status of the game
-     */
-    public getStatus(): GameStatus
-    {
-        return this.chessEngine.getGameStatus();
     }
 }

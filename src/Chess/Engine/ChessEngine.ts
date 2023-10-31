@@ -473,45 +473,6 @@ export class ChessEngine extends BoardManager {
     }
 
     /**
-     * Check castling moves after each turn. If player move the king or rook
-     * then disable the castling.
-     *
-     * @see castling move calculation: src/Chess/Engine/Core/Move/Helper/MovesExtender.ts
-     * @see castling rules: https://en.wikipedia.org/wiki/Castling
-     */
-    private checkCastling(): void
-    {
-        if(this.moveNotation == "O-O" || this.moveNotation == "O-O-O"){
-            Logger.save("Castling Check is unnecessary because move is already castling", "checkCastling", Source.ChessEngine);
-            return;
-        }
-
-        // Find piece's type by the given square of the moved piece.
-        const piece: Piece = BoardQueryer.getPieceOnSquare(this.playedTo as Square)!;
-        if(!piece)
-            return;
-
-        /**
-         * If the moved piece is king then disable the short and long castling
-         * for the color of the king. If the piece is rook then disable the
-         * short or long castling for the color of the rook by the square of
-         * the moved rook.
-         *
-         * @see For more information about square ids, see src/Chess/Types/index.ts
-         */
-        if(piece.getType() == PieceType.King){
-            this.changeCastlingAvailability((piece.getColor() + "Long") as CastlingType, false);
-            this.changeCastlingAvailability((piece.getColor() + "Short") as CastlingType, false);
-            Logger.save(`[${piece.getColor()}] Long and Short castling is disabled because king has moved`, "checkCastling", Source.ChessEngine);
-        }else if(piece.getType() == PieceType.Rook){
-            const rookType: "Long" | "Short" = Number(this.playedTo) % 8 == 0 ? "Short" : "Long";
-            this.changeCastlingAvailability((piece.getColor() + rookType) as CastlingType, false);
-            Logger.save(`[${piece.getColor()}] Castling[${rookType}] is disabled because rook has moved`, "checkCastling", Source.ChessEngine);
-        }
-        Logger.save("Castling Check is finished", "checkCastling", Source.ChessEngine);
-    }
-
-    /**
      * Check en passant moves. If there is an en passant move not played
      * then remove it. Because, en passant moves are only valid for one turn.
      *
@@ -754,7 +715,6 @@ export class ChessEngine extends BoardManager {
          * 7- Set move notation of white player's move then clear the moveNotation for black player's turn.
          */
         this.currentMoves = {};
-        this.checkCastling();
         this.checkEnPassant();
         this.changeTurn();
         Logger.save("Turn is changed.", "finishTurn", Source.ChessEngine);
