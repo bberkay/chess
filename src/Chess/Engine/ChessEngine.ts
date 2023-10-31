@@ -124,75 +124,6 @@ export class ChessEngine extends BoardManager {
     }
 
     /**
-     * This function check the board is playable or not.
-     */
-    private isBoardPlayable(): boolean
-    {
-        // If the board playable status is calculated before then return the calculated status.
-        if(this.isBoardPlayableStatus != null){
-            Logger.save(`Board playable status[${this.isBoardPlayableStatus}] is already calculated.`, "isBoardPlayable", Source.ChessEngine);
-            return this.isBoardPlayableStatus;
-        }
-
-        /**
-         * Check the status is it started or finished. Also,
-         * check pieces on the board and if there is no pieces that can
-         * finish the game then the game can't be started. If game is started then
-         * set the status of the game to draw.
-         */
-        if(BoardQueryer.getGameStatus() == GameStatus.WhiteVictory || BoardQueryer.getGameStatus() == GameStatus.BlackVictory
-            || BoardQueryer.getGameStatus() == GameStatus.Draw){
-            Logger.save(`Board is not playable because game finished[${BoardQueryer.getGameStatus()}]`, "isBoardPlayable", Source.ChessEngine);
-            return false;
-        }
-        else if(BoardQueryer.getPiecesWithFilter(Color.White, [PieceType.King]).length == 0
-            || BoardQueryer.getPiecesWithFilter(Color.Black, [PieceType.King]).length == 0){
-            // If board has no white and black king then the game can't be started.
-            this.setGameStatus(GameStatus.NotStarted);
-            this.isBoardPlayableStatus = false;
-            Logger.save(`Board is not playable because game not started(king/kings missing)`, "isBoardPlayable", Source.ChessEngine);
-            return false;
-        }
-        else
-        {
-            /**
-             * Check the pieces on the board and:
-             * - If there is only one white king and one black king then the game is in draw status.
-             * - If there is only one white king and one black king and one white knight or bishop then the game is in draw status.
-             */
-
-            // If board has any pawn, rook or queen then the game can be finished.
-            for(const square in BoardQueryer.getBoard()){
-                const piece: Piece | null = BoardQueryer.getPieceOnSquare(Number(square) as Square);
-                if(piece && (piece.getType() == PieceType.Pawn || piece.getType() == PieceType.Rook || piece.getType() == PieceType.Queen)){
-                    this.setGameStatus(GameStatus.InPlay);
-                    this.isBoardPlayableStatus = true;
-                    Logger.save(`Board has pawn/rook/queen so it can be playable.`, "isBoardPlayable", Source.ChessEngine);
-                    return true;
-                }
-            }
-
-            // If board has no queen, rook or pawn then check the king and bishop count.
-            if(BoardQueryer.getPiecesWithFilter(Color.White, [PieceType.Knight, PieceType.Bishop]).length > 1
-                || BoardQueryer.getPiecesWithFilter(Color.Black, [PieceType.Knight, PieceType.Bishop]).length > 1){
-                this.setGameStatus(GameStatus.InPlay);
-                this.isBoardPlayableStatus = true;
-                Logger.save(`Board has more than one knight and/or bishop so it can be playable.`, "isBoardPlayable", Source.ChessEngine);
-                return true;
-            }
-
-            // Otherwise, the game is in draw status.
-            if(BoardQueryer.getGameStatus() != GameStatus.NotStarted){
-                this.setGameStatus(GameStatus.Draw);
-                this.isBoardPlayableStatus = false;
-                Logger.save(`Board is in draw status because game is not finished or board can't be finished because of pieces.`, "isBoardPlayable", Source.ChessEngine);
-            }
-
-            return false;
-        }
-    }
-
-    /**
      * This function check the select is legal or not by checking the piece's color
      * and the color of the turn.
      */
@@ -205,7 +136,7 @@ export class ChessEngine extends BoardManager {
         }
 
         // If game is not start or finished then square can't be selectable.
-        if(!this.isBoardPlayable()){
+        if(!BoardQueryer.isBoardPlayable()){
             Logger.save(`Square[${select}] is not selectable because board is not playable`, "isSquareSelectable", Source.ChessEngine);
             return false;
         }
@@ -717,7 +648,7 @@ export class ChessEngine extends BoardManager {
     private checkGameStatus(): void
     {
         // If the game is not playable then return.
-        if(!this.isBoardPlayable()){
+        if(!BoardQueryer.isBoardPlayable()){
             Logger.save("Game status is not checked because board is not playable so check is unnecessary", "checkGameStatus", Source.ChessEngine);
             return;
         }

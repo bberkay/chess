@@ -1,5 +1,5 @@
 import {Board} from "./Board.ts";
-import {CastlingType, Color, JsonNotation, PieceType, Square, GameStatus} from "../../Types";
+import {CastlingType, Color, GameStatus, JsonNotation, PieceType, Square} from "../../Types";
 import {MoveRoute, Piece, Route} from "../Types";
 import {RouteCalculator} from "../Move/Calculator/RouteCalculator.ts";
 
@@ -228,6 +228,45 @@ export class BoardQueryer extends Board{
         ));
 
 
+    }
+
+    /**
+     * This function check the board is playable or not.
+     */
+    public static isBoardPlayable(): boolean
+    {
+        /**
+         * Check the status is it started or finished. Also,
+         * check pieces on the board and if there is no pieces that can
+         * finish the game then the game can't be started. If game is started then
+         * set the status of the game to draw.
+         */
+        if(
+            this.getGameStatus() == GameStatus.WhiteVictory
+            || this.getGameStatus() == GameStatus.BlackVictory
+            || this.getGameStatus() == GameStatus.Draw
+            || this.getPiecesWithFilter(Color.White, [PieceType.King]).length == 0
+            || this.getPiecesWithFilter(Color.Black, [PieceType.King]).length == 0
+        ) return false;
+        else
+        {
+            /**
+             * Check the pieces on the board and:
+             * - If there is only one white king and one black king then the game is in draw status.
+             * - If there is only one white king and one black king and one white knight or bishop then the game is in draw status.
+             */
+
+            // If board has any pawn, rook or queen then the game can be finished.
+            for(const square in this.getBoard()){
+                const piece: Piece | null = this.getPieceOnSquare(Number(square) as Square);
+                if(piece && (piece.getType() == PieceType.Pawn || piece.getType() == PieceType.Rook || piece.getType() == PieceType.Queen))
+                    return true;
+            }
+
+            // If board has no queen, rook or pawn then check the king and bishop count.
+            return BoardQueryer.getPiecesWithFilter(Color.White, [PieceType.Knight, PieceType.Bishop]).length > 1
+                || BoardQueryer.getPiecesWithFilter(Color.Black, [PieceType.Knight, PieceType.Bishop]).length > 1;
+        }
     }
 
     /**
