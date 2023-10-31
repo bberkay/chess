@@ -231,6 +231,15 @@ export class BoardQueryer extends Board{
     }
 
     /**
+     * This function check the select is legal or not by checking the piece's color
+     * and the color of the turn.
+     */
+    public static isSquareSelectable(select: Square): boolean
+    {
+        return !(!this.getPieceOnSquare(select) || this.getPieceOnSquare(select)?.getColor() != this.getColorOfTurn());
+    }
+
+    /**
      * This function check the board is playable or not.
      */
     public static isBoardPlayable(): boolean

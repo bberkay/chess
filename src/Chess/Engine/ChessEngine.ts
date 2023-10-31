@@ -42,7 +42,7 @@ export class ChessEngine extends BoardManager {
     private moveNotation: string = "";
     private currentMoves: {[key in Square]?: Moves | null} = {};
     private isPromotionMenuOpen: boolean = false;
-    private isBoardPlayableStatus: boolean | null = null;
+    private isBoardPlayable: boolean = false;
     private readonly isStandalone: boolean = false;
 
     /**
@@ -118,38 +118,11 @@ export class ChessEngine extends BoardManager {
         this.moveNotation = "";
         this.currentMoves = {};
         this.isPromotionMenuOpen = false;
-        this.isBoardPlayableStatus = null;
+        this.isBoardPlayable = false;
         this.setGameStatus(GameStatus.NotStarted);
         Logger.save("Game properties set to default on ChessEngine", "resetGame", Source.ChessEngine);
     }
 
-    /**
-     * This function check the select is legal or not by checking the piece's color
-     * and the color of the turn.
-     */
-    public isSquareSelectable(select: Square): boolean
-    {
-        // If the game is started but selected square is empty or not player's piece then square can't be selectable.
-        if(!BoardQueryer.getPieceOnSquare(select) || BoardQueryer.getPieceOnSquare(select)?.getColor() != BoardQueryer.getColorOfTurn()){
-            Logger.save(`Square[${select}]  is not selectable because selected square is empty or not player's piece`, "isSquareSelectable", Source.ChessEngine);
-            return false;
-        }
-
-        // If game is not start or finished then square can't be selectable.
-        if(!BoardQueryer.isBoardPlayable()){
-            Logger.save(`Square[${select}] is not selectable because board is not playable`, "isSquareSelectable", Source.ChessEngine);
-            return false;
-        }
-
-        // If piece has no moves then square can't be selectable.
-        this.currentMoves[select] = this.currentMoves[select] ?? this.moveEngine.getMoves(select);
-        if(!this.currentMoves[select]){
-            Logger.save(`Square[${select}] is not selectable because piece has no moves`, "isSquareSelectable", Source.ChessEngine);
-            return false;
-        }
-
-        return true;
-    }
 
     /**
      * This function checks and find the given move. For example,
@@ -193,8 +166,8 @@ export class ChessEngine extends BoardManager {
      */
     public getMoves(square: Square): Moves | null
     {
-        if(this.isStandalone && !this.isSquareSelectable(square)){
-            Logger.save(`Moves of the square is not found because square[${square}] is not selectable`, "getMoves", Source.ChessEngine);
+        if(!BoardQueryer.isSquareSelectable(square) || !this.isBoardPlayable){
+            Logger.save(`Moves of the square is not found because square[${square}] is not selectable or board is not playable`, "getMoves", Source.ChessEngine);
             return null;
         }
 
@@ -650,7 +623,10 @@ export class ChessEngine extends BoardManager {
         // If the game is not playable then return.
         if(!BoardQueryer.isBoardPlayable()){
             Logger.save("Game status is not checked because board is not playable so check is unnecessary", "checkGameStatus", Source.ChessEngine);
+            this.isBoardPlayable = false;
             return;
+        }else{
+            this.isBoardPlayable = true;
         }
 
         /**
@@ -778,7 +754,6 @@ export class ChessEngine extends BoardManager {
          * 7- Set move notation of white player's move then clear the moveNotation for black player's turn.
          */
         this.currentMoves = {};
-        this.isBoardPlayableStatus = null;
         this.checkCastling();
         this.checkEnPassant();
         this.changeTurn();

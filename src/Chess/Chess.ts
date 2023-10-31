@@ -176,9 +176,6 @@ export class Chess{
      */
     private _doSelectAction(square: Square): void
     {
-        if(!this.chessEngine.isSquareSelectable(square))
-            return;
-
         // Get the possible moves of the selected square and highlight them on chessBoard.
         this.selectedSquare = square;
         this.chessBoard.highlightSelect(square);
