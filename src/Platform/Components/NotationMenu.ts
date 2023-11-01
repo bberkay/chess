@@ -84,7 +84,7 @@ export class NotationMenu extends Component{
         if(this.lastNotation == notation[notation.length - 1] || notation.length < 1)
             return;
 
-        // Find the color of the notation.
+        // Find the color of the last notation.
         let color: string = notation.length % 2 == 0 ? Color.Black : Color.White;
 
         /**
@@ -158,6 +158,8 @@ export class NotationMenu extends Component{
      */
     public update(notation: Array<string>, scores: Record<Color, {score: number, pieces: PieceType[]}>): void
     {
+        console.log("Notation: " + notation);
+        console.log("Scores: " + JSON.stringify(scores));
         this.setScore(scores);
         this.addNotation(notation);
     }
