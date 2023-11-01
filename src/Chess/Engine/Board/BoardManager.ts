@@ -39,7 +39,6 @@ export class BoardManager extends Board{
         Board.enPassantSquare = jsonNotation.enPassant;
         Board.moveHistory = jsonNotation.moveHistory ?? [];
         Board.scores = jsonNotation.scores ?? {[Color.White]: {score: 0, pieces: []}, [Color.Black]: {score: 0, pieces: []}};
-        Board.bannedEnPassantSquares = [];
         Board.gameStatus = jsonNotation.gameStatus ?? Board.gameStatus;
     }
 
@@ -149,22 +148,6 @@ export class BoardManager extends Board{
     protected saveMoveNotation(moveNotation: string): void
     {
         Board.moveHistory.push(moveNotation);
-    }
-
-    /**
-     * Change castling availability
-     */
-    protected changeCastlingAvailability(castlingType: CastlingType, value: boolean): void
-    {
-        Board.castlingAvailability[castlingType] = value;
-    }
-
-    /**
-     * Ban en passant square
-     */
-    protected banEnPassantSquare(square: Square): void
-    {
-        Board.bannedEnPassantSquares.push(square);
     }
 
     /**

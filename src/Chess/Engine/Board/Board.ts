@@ -34,6 +34,5 @@ export class Board {
         [Color.Black]: {score: 0, pieces: []}
     }
     protected static moveHistory: string[] = [];
-    protected static bannedEnPassantSquares: Square[] = [];
     protected static gameStatus: GameStatus = GameStatus.NotStarted;
 }

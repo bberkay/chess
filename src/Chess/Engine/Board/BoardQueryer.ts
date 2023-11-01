@@ -121,30 +121,6 @@ export class BoardQueryer extends Board{
     }
 
     /**
-     * Is en passant available for given square?
-     */
-    public static isEnPassantAvailable(square: Square): boolean
-    {
-        return Board.enPassantSquare === square;
-    }
-
-    /**
-     * Is castling available for given castling type?
-     */
-    public static isCastlingAvailable(castlingType: CastlingType): boolean
-    {
-        return Board.castlingAvailability[castlingType];
-    }
-
-    /**
-     * Is en passant banned for given square?
-     */
-    public static isEnPassantBanned(square: Square): boolean
-    {
-        return Board.bannedEnPassantSquares.includes(square);
-    }
-
-    /**
      * Get piece with the given square.
      */
     public static getPieceOnSquare(square: Square): Piece | null

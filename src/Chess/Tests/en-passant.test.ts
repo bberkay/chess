@@ -105,6 +105,12 @@ const enPassantTestGames: Test[] = [
             {from: Square.e7, to: Square.e5}
         ],
         expectation: {from: Square.d5, to: []}
+    },
+    {
+        title: "En Passant With Fen Notation Informed",
+        board: "rnbqkb1r/ppp1pppp/5n2/2Pp4/8/8/PP1PPPPP/RNBQKBNR w KQkq d6 0 3",
+        moves: [],
+        expectation: {from: Square.c5, to: [Square.d6]}
     }
 ];
 

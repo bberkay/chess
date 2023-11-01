@@ -337,9 +337,8 @@ export class ChessEngine extends BoardManager {
          * right of the "from".
          */
         const kingNewSquare: number = castlingType == "Long" ? Number(this.playedFrom) - 2 : Number(this.playedFrom) + 2;
-
         this._doNormalMove(this.playedFrom as Square, kingNewSquare as Square);
-        Logger.save(`King moved to target square[${kingNewSquare}] by determined castling type[${castlingType}] on engine`, "playMove", Source.ChessEngine);
+        Logger.save(`King moved to target square[${kingNewSquare}] on engine`, "playMove", Source.ChessEngine);
 
         /**
          * If the castling is long then the rook's current square
@@ -355,11 +354,7 @@ export class ChessEngine extends BoardManager {
         const rookNewSquare: number = castlingType == "Long" ? kingNewSquare + 1 : kingNewSquare - 1;
 
         this._doNormalMove(rook, rookNewSquare as Square);
-        Logger.save(`Rook moved to target square[${rookNewSquare}] by determined castling type[${castlingType}] on engine`, "playMove", Source.ChessEngine);
-
-        // Change castling availability.
-        this.changeCastlingAvailability((BoardQueryer.getColorOfTurn() + castlingType) as CastlingType, false);
-        Logger.save(`Castling[${castlingType}] is disabled because castling is played`, "playMove", Source.ChessEngine);
+        Logger.save(`Rook moved to target square and castling[${castlingType}] is done`, "playMove", Source.ChessEngine);
 
         // Set the current move for the move history.
         this.moveNotation += castlingType == "Short" ? "O-O" : "O-O-O";
@@ -470,51 +465,6 @@ export class ChessEngine extends BoardManager {
 
         // Set the current move for the move history.
         this.moveNotation += "=" + Converter.pieceTypeToPieceName(selectedPromote as PieceType, playerColor);
-    }
-
-    /**
-     * Check en passant moves. If there is an en passant move not played
-     * then remove it. Because, en passant moves are only valid for one turn.
-     *
-     * @see For more information about en passant, see src/Chess/Engine/Core/Move/Helper/MovesExtender.ts
-     * @see For more information about en passant, see https://en.wikipedia.org/wiki/En_passant
-     */
-    private checkEnPassant(): void
-    {
-        /**
-         * Find the piece by the given square of the moved piece.
-         * If the piece is pawn and move 1 square forward then ban the
-         * en passant square. Because, en passant moves are only valid
-         * if the enemy pawn move 2 square forward.
-         */
-        const piece: Piece = BoardQueryer.getPieceOnSquare(this.playedTo as Square)!;
-        if(piece && piece.getType() == PieceType.Pawn){
-            if(Locator.getRow(Number(this.playedFrom)) == (piece.getColor() == Color.White ? 6 : 3)){
-                const moveOfEnemyPawn: number = piece.getColor() == Color.White ? Number(this.playedTo) + 8 : Number(this.playedTo) - 8;
-                this.banEnPassantSquare(moveOfEnemyPawn);
-                Logger.save(`En passant square[${moveOfEnemyPawn}] is banned because target pawn has moved 1 square forward`, "checkEnPassant", Source.ChessEngine);
-            }
-        }
-
-        // Find player's pawns.
-        const pawns: Array<Piece> = BoardQueryer.getPiecesWithFilter(BoardQueryer.getColorOfTurn(), [PieceType.Pawn])!;
-        for(const pawn of pawns){
-            /**
-             * If the pawn is white and on 5th row or is black and on 4th row
-             * and the pawn has at least one en passant move then ban the
-             * en passant square. Because, en passant moves are only valid
-             * for one turn.
-             */
-            const squareOfPawn: Square = BoardQueryer.getSquareOfPiece(pawn)!;
-            if(Locator.getRow(squareOfPawn) == (pawn.getColor() == Color.White ? 4 : 5)){
-                const moves: Moves = this.moveEngine.getMoves(squareOfPawn)!;
-                if(moves && moves["EnPassant"]!.length > 0){
-                    this.banEnPassantSquare(moves["EnPassant"]![0]);
-                    Logger.save(`En passant square[${moves["EnPassant"]![0]}] is banned because pawn has en passant move that not played valid turn`, "checkEnPassant", Source.ChessEngine);
-                }
-            }
-        }
-        Logger.save("En passant Check is finished", "checkEnPassant", Source.ChessEngine);
     }
 
     /**
@@ -715,7 +665,6 @@ export class ChessEngine extends BoardManager {
          * 7- Set move notation of white player's move then clear the moveNotation for black player's turn.
          */
         this.currentMoves = {};
-        this.checkEnPassant();
         this.changeTurn();
         Logger.save("Turn is changed.", "finishTurn", Source.ChessEngine);
         this.checkThreefoldRepetition();
