@@ -105,6 +105,14 @@ export class BoardManager extends Board{
     }
 
     /**
+     * Set en passant square
+     */
+    protected setEnPassant(square: Square): void
+    {
+        Board.enPassant = square;
+    }
+
+    /**
      * Change castling availability
      */
     protected disableCastling(castlingType: CastlingType): void

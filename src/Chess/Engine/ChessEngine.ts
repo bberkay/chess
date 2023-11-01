@@ -73,6 +73,9 @@ export class ChessEngine extends BoardManager {
 
         if(this.isStandalone)
             Logger.save(`Game created on ChessEngine`, "createGame", Source.ChessEngine);
+
+        // Check status of board after creating the game.
+        this.checkGameStatus();
     }
 
     /**
@@ -472,12 +475,11 @@ export class ChessEngine extends BoardManager {
         this.currentMoves = {};
         this.isBoardPlayable = false;
         this.changeTurn();
-        Logger.save("Turn is changed.", "finishTurn", Source.ChessEngine);
         this.checkGameStatus();
-        this.updateFenNotation();
         this.saveMoveNotation(this.moveNotation);
-        Logger.save(`Notation[${JSON.stringify(this.moveNotation)}] of current move add to move history.`, "finishTurn", Source.ChessEngine);
+        this.updateFenNotation();
         this.moveNotation = "";
+        Logger.save(`Turn[${BoardQueryer.getColorOfTurn()}] is finished and board is ready for the next turn`, "finishTurn", Source.ChessEngine);
     }
 
     /**
@@ -686,8 +688,60 @@ export class ChessEngine extends BoardManager {
      */
     private updateFenNotation(): void
     {
-
+        // Update castling and en passant section of the fen notation.
+        this._updateEnPassantOnFen();
+        this._updateCastlingOnFen();
         Logger.save("Fen notation of the game is updated", "updateFenNotation", Source.ChessEngine);
+    }
+
+    /**
+     * Get possible en passant moves of enemy and
+     * add/update them in the fen notation.
+     */
+    private _updateEnPassantOnFen(): void
+    {
+        if(this.getNotation().length < 2)
+            return;
+
+        // Get the last two moves and check the last move is pawn move or not.
+        const lastTwoMove: Square[] = this.getNotation().slice(-2).map(move => Converter.squareToSquareID(move));
+        const lastPlayerMove: Square = lastTwoMove[0];
+        if(
+            BoardQueryer.getPieceOnSquare(lastPlayerMove)?.getType() != PieceType.Pawn // Last move is not pawn move.
+            || BoardQueryer.getPieceOnSquare(lastTwoMove[1])?.getType() != PieceType.Pawn // Last move of the opponent is not pawn move.
+            || Locator.getRow(lastPlayerMove) != (BoardQueryer.getColorOfTurn() == Color.White ? 4 : 5) // Move of pawn is not on the fifth row.
+        ) return;
+
+
+
+        /**
+         * Last player's move could be calculated in the current moves at
+         * the checkGameStatus function and this function is called after
+         * the checkGameStatus function so check the last player's move
+         * is in the current moves or not.
+         */
+        if(this.currentMoves.hasOwnProperty(lastPlayerMove) && this.currentMoves[lastPlayerMove]![MoveType.EnPassant] && this.currentMoves[lastPlayerMove]![MoveType.EnPassant]!.length > 0){
+            this.setEnPassant(this.currentMoves[lastPlayerMove]![MoveType.EnPassant]![0]!);
+            Logger.save(`En passant move[${this.currentMoves[lastPlayerMove]![MoveType.EnPassant]![0]!}] is found and set on fen notation`, "updateEnPassantOnFen", Source.ChessEngine);
+            return;
+        }
+
+        // If the last player's move is not in the current moves then calculate the moves of the last player's move.
+        const lastPlayerMoves: Moves = this.moveEngine.getMoves(lastPlayerMove)!;
+        if(lastPlayerMoves.hasOwnProperty(MoveType.EnPassant) && lastPlayerMoves[MoveType.EnPassant]!.length > 0){
+            this.setEnPassant(lastPlayerMoves[MoveType.EnPassant]![0]!);
+            Logger.save(`En passant move[${lastPlayerMoves[MoveType.EnPassant]![0]!}] is calculated and set on fen notation`, "updateEnPassantOnFen", Source.ChessEngine);
+            return;
+        }
+    }
+
+    /**
+     * Check the castling status and add/update them
+     * in the fen notation.
+     */
+    private _updateCastlingOnFen(): void
+    {
+
     }
 
     /**
