@@ -22,8 +22,8 @@ export class Board {
     protected static currentTurn: Color = Color.White;
     protected static moveCount: number = 0;
     protected static halfMoveCount: number = 0;
-    protected static enPassantSquare: Square | null = null;
-    protected static castlingAvailability: Record<CastlingType, boolean> = {
+    protected static enPassant: Square | null = null;
+    protected static castling: Record<CastlingType, boolean> = {
         [CastlingType.WhiteLong]: true,
         [CastlingType.WhiteShort]: true,
         [CastlingType.BlackLong]: true,

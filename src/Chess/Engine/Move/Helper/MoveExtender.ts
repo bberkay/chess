@@ -42,10 +42,10 @@ export class MoveExtender{
         if(!BoardQueryer.isSquareHasPiece(kingSquare, color, [PieceType.King])
             || (BoardQueryer.getMoveHistory().length > 0 && BoardQueryer.getMoveHistory()[BoardQueryer.getMoveHistory().length - 1].includes("+"))
             || (BoardQueryer.getMoveHistory().length == 0 && !(
-                (chosenRookSquare == Square.a8 && BoardQueryer.getGame().castling.BlackLong)
-                || (chosenRookSquare == Square.h8 && BoardQueryer.getGame().castling.BlackShort)
-                || (chosenRookSquare == Square.a1 && BoardQueryer.getGame().castling.WhiteLong)
-                || (chosenRookSquare == Square.h1 && BoardQueryer.getGame().castling.WhiteShort)
+                (chosenRookSquare == Square.a8 && BoardQueryer.getCastling().BlackLong)
+                || (chosenRookSquare == Square.h8 && BoardQueryer.getCastling().BlackShort)
+                || (chosenRookSquare == Square.a1 && BoardQueryer.getCastling().WhiteLong)
+                || (chosenRookSquare == Square.h1 && BoardQueryer.getCastling().WhiteShort)
             ))
         ) return null;
 

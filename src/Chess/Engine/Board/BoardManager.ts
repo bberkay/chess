@@ -35,8 +35,8 @@ export class BoardManager extends Board{
         Board.currentTurn = jsonNotation.turn;
         Board.moveCount = jsonNotation.fullMoveNumber;
         Board.halfMoveCount = jsonNotation.halfMoveClock;
-        Board.castlingAvailability = jsonNotation.castling;
-        Board.enPassantSquare = jsonNotation.enPassant;
+        Board.castling = jsonNotation.castling;
+        Board.enPassant = jsonNotation.enPassant;
         Board.moveHistory = jsonNotation.moveHistory ?? [];
         Board.scores = jsonNotation.scores ?? {[Color.White]: {score: 0, pieces: []}, [Color.Black]: {score: 0, pieces: []}};
         Board.gameStatus = jsonNotation.gameStatus ?? Board.gameStatus;
@@ -76,10 +76,16 @@ export class BoardManager extends Board{
 
         /**
          * If the moved piece is a pawn or capture move then set half move count to 0
-         * else increase half move count.
+         * else increase half move count. Also, if the moved piece is a king and the
+         * move is a castling move then set half move count to 0 because when the
+         * castling move is done in _doCastling function, function will use this
+         * function twice and this will increase the half move count by 2.
          * @see for more information about half move count https://en.wikipedia.org/wiki/Fifty-move_rule
          */
-        Board.halfMoveCount = toPiece || fromPiece.getType() === PieceType.Pawn ? 0 : Board.halfMoveCount + 1;
+        if(fromPiece.getType() == PieceType.King && Math.abs(from - to) == 2)
+            Board.halfMoveCount = 0;
+        else
+            Board.halfMoveCount = toPiece || fromPiece.getType() === PieceType.Pawn ? 0 : Board.halfMoveCount + 1;
 
         // Calculate score of the move if the move is a capture move.
         if(toPiece)
@@ -96,6 +102,14 @@ export class BoardManager extends Board{
     protected removePiece(square: Square): void
     {
         Board.currentBoard[square] = null;
+    }
+
+    /**
+     * Change castling availability
+     */
+    protected disableCastling(castlingType: CastlingType): void
+    {
+        Board.castling[castlingType] = false;
     }
 
     /**

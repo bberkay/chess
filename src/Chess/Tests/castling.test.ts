@@ -20,7 +20,7 @@ const castlingTestGames: Test[] = [
         moves: [
             {from: Square.e1, to: Square.h1}
         ],
-        expectation: "r3k2r/8/8/4b3/4B3/8/8/R4RK1 b Qkq - 2 1", // Expected board after castling
+        expectation: "r3k2r/8/8/4b3/4B3/8/8/R4RK1 b kq - 1 1", // Expected board after castling
     },
     {
         title: 'Queen Side Castling',
@@ -28,7 +28,7 @@ const castlingTestGames: Test[] = [
         moves: [
             {from: Square.e1, to: Square.a1}
         ],
-        expectation: "r3k2r/8/8/4b3/4B3/8/8/2KR3R b Kkq - 2 1",
+        expectation: "r3k2r/8/8/4b3/4B3/8/8/2KR3R b kq - 1 1",
     },
     {
         title: "Long Castling Forbidden Because of Enemy Bishop",
@@ -127,6 +127,7 @@ test('Castling Moves', () => {
             for(const move of game.moves)
             {
                 engine.playMove(move.from, move.to);
+                console.log(engine.getLogs());
             }
         }
 

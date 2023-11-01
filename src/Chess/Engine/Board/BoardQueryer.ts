@@ -30,8 +30,8 @@ export class BoardQueryer extends Board{
         return {
             board: pieces,
             turn: BoardQueryer.getColorOfTurn(),
-            castling: BoardQueryer.getCastlingAvailability(),
-            enPassant: BoardQueryer.getEnPassantSquare(),
+            castling: BoardQueryer.getCastling(),
+            enPassant: BoardQueryer.getEnPassant(),
             halfMoveClock: BoardQueryer.getHalfMoveCount(),
             fullMoveNumber: BoardQueryer.getMoveCount(),
             moveHistory: BoardQueryer.getMoveHistory(),
@@ -75,17 +75,17 @@ export class BoardQueryer extends Board{
     /**
      * Get en passant square
      */
-    public static getEnPassantSquare(): Square | null
+    public static getEnPassant(): Square | null
     {
-        return Board.enPassantSquare;
+        return Board.enPassant;
     }
 
     /**
      * Get castling availability
      */
-    public static getCastlingAvailability(): Record<CastlingType, boolean>
+    public static getCastling(): Record<CastlingType, boolean>
     {
-        return Board.castlingAvailability;
+        return Board.castling;
     }
 
     /**

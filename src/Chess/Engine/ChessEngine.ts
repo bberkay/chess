@@ -8,6 +8,7 @@
  */
 
 import {
+    CastlingType,
     Color,
     GameStatus,
     JsonNotation,
@@ -73,14 +74,14 @@ export class ChessEngine extends BoardManager {
          * Create the board with the given position(if the given position is not string then
          * convert it to json notation, also store the fen notation of the given position).
          */
-        const fenNotationOfGivenPosition: string = typeof position == "string" ? position : Converter.jsonToFen(position);
+        const fenNotation: string = typeof position == "string" ? position : Converter.jsonToFen(position);
         this.createBoard(typeof position == "string" ? Converter.fenToJson(position) : position);
 
         if(this.isStandalone)
             Logger.save(`Game created on ChessEngine`, "createGame", Source.ChessEngine);
 
         // Check the status of the game if board is different from the standard position.
-        if(fenNotationOfGivenPosition != StartPosition.Standard){
+        if(fenNotation != StartPosition.Standard){
             Logger.save("Game status will be checked because board is different from the standard position", "createGame", Source.ChessEngine);
             this.checkGameStatus();
         }else{
@@ -351,9 +352,12 @@ export class ChessEngine extends BoardManager {
          */
         const rook: number = castlingType == "Long" ? Number(this.playedFrom) - 4 : Number(this.playedFrom) + 3;
         const rookNewSquare: number = castlingType == "Long" ? kingNewSquare + 1 : kingNewSquare - 1;
-
         this._doNormalMove(rook, rookNewSquare as Square);
-        Logger.save(`Rook moved to target square and castling[${castlingType}] is done`, "playMove", Source.ChessEngine);
+
+        // Disable the castling.
+        this.disableCastling((BoardQueryer.getColorOfTurn() + "Short") as CastlingType);
+        this.disableCastling((BoardQueryer.getColorOfTurn() + "Long") as CastlingType);
+        Logger.save(`Rook moved to target square and castling[${castlingType}] move is saved.`, "playMove", Source.ChessEngine);
 
         // Set the current move for the move history.
         this.moveNotation += castlingType == "Short" ? "O-O" : "O-O-O";
@@ -475,28 +479,25 @@ export class ChessEngine extends BoardManager {
     {
         // If the game is not playable then return.
         if(!BoardQueryer.isBoardPlayable()){
-            Logger.save("Game status is not checked because board is not playable so check is unnecessary", "checkGameStatus", Source.ChessEngine);
+            Logger.save("Game status is not checked because board is not playable so check is unnecessary.", "checkGameStatus", Source.ChessEngine);
             this.isBoardPlayable = false;
+            this.setGameStatus(GameStatus.NotStarted);
             return;
-        }else{
+        }
+        else{
+            Logger.save("Game status set to InPlay because board is playable.", "checkGameStatus", Source.ChessEngine);
             this.isBoardPlayable = true;
+            this.setGameStatus(GameStatus.InPlay);
         }
 
-        // Check threefold repetition rule and fifty move rule.
+
+        // Before the checking checkmate and stalemate status, check the draw status for prevent unnecessary calculations.
         this._checkThreefoldRepetition();
         this._checkFiftyMoveRule();
         if(BoardQueryer.getGameStatus() != GameStatus.InPlay) // FIXME: This can be dangerous if any problem occurs check this.
             return;
 
-        /**
-         * Get player's color, enemy's color and square of player's king.
-         * Then get the id of the squares that the king is threatened by
-         * the enemy pieces. For example, if the king is threatened by
-         * the enemy queen on the square "h5" and the enemy knight on the
-         * square "d6" then the threateningSquares is [32, 20].
-         *
-         * @see For more information about square ids, see src/Chess/Types/index.ts
-         */
+        // Get necessary information for check the game status.
         const kingSquare: Square | null = BoardQueryer.getSquareOfPiece(BoardQueryer.getPiecesWithFilter(BoardQueryer.getColorOfTurn(), [PieceType.King])[0]!);
         const threateningSquares: Square[] = BoardQueryer.isSquareThreatened(kingSquare!, BoardQueryer.getColorOfOpponent(), true) as Square[];
         Logger.save(`Threatening squares[${JSON.stringify(threateningSquares)}] are found by king's square[${kingSquare}]`, "checkGameStatus", Source.ChessEngine);
@@ -554,15 +555,14 @@ export class ChessEngine extends BoardManager {
                     if(piece.getType() == PieceType.King)
                         continue;
 
-                    // Calculate the moves of the piece and get squares of the moves. Also save the moves to the calculatedMoves
+                    // Calculate the moves of the piece and get squares of the moves. Also save the moves to the currentMoves for prevent unnecessary calculations.
                     const square: Square = BoardQueryer.getSquareOfPiece(piece)!;
                     this.currentMoves[square] = this.moveEngine.getMoves(square);
                     const moves: Square[] = Extractor.extractSquares(this.currentMoves[square]!);
 
-                    // Set the game status by length of the moves.
+                    // If piece has at least one move then the game is in play status.
                     if (moves.length > 0)
                     {
-                        // If piece has at least one move then the game is in play status.
                         Logger.save("Doubly Check and Stalemate is not satisfied.", "checkGameStatus", Source.ChessEngine);
                         isAnyMoveFound = true;
                         break;
@@ -571,7 +571,7 @@ export class ChessEngine extends BoardManager {
 
                 /**
                  * If the piece has no moves and game is in check status then the game is in checkmate status,
-                 * if game is not in check status then the game is in stalemate status.
+                 * if game is not in check status but no moves found then the game is in stalemate status.
                  */
                 if(!isAnyMoveFound){
                     if(BoardQueryer.getGameStatus() != checkEnum){
@@ -594,6 +594,7 @@ export class ChessEngine extends BoardManager {
         else if (BoardQueryer.getGameStatus() === GameStatus.Draw)
             this.moveNotation += "1/2-1/2";
     }
+
     /**
      * Check the game is finished or not by threefold repetition rule.
      */
