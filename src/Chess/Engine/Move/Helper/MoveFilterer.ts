@@ -49,22 +49,23 @@ export class MoveFilterer{
         else if(this.threatsOfKing.length < 1)
             return moveRoute;
 
-        // If threat is knight then return null directly because knight can't be blocked.
-        if(BoardQueryer.getPieceOnSquare(this.threatsOfKing[0])!.getType() == PieceType.Knight)
-            return null;
-
         // Find the route that threat the player's king.
         const squareOfKing: Square = BoardQueryer.getSquareOfPiece(BoardQueryer.getPiecesWithFilter(pieceColor, [PieceType.King])[0] as Piece) as Square;
-        const dangerousRouteOfThreat: Square[] = RouteCalculator.getRouteBySquare(this.threatsOfKing[0])[Locator.getRelative(squareOfKing!, this.threatsOfKing[0])!]!;
+        const isEnemyKnight: boolean = BoardQueryer.getPieceOnSquare(this.threatsOfKing[0])!.getType() == PieceType.Knight;
 
-        // If there is no block between king and enemy then also there will be no block so return null.
-        if(dangerousRouteOfThreat.length < 1)
+        // If enemy is knight then don't calculate the dangerous route because knight can't be blocked.
+        const dangerousRouteOfThreat: Square[] = !isEnemyKnight
+            ? RouteCalculator.getRouteBySquare(this.threatsOfKing[0])[Locator.getRelative(squareOfKing!, this.threatsOfKing[0])!]!
+            : [];
+
+        // If there is no square between king and enemy then also there will be no block so return null.
+        if(!isEnemyKnight && dangerousRouteOfThreat.length < 1)
             return null;
 
         // Delete the moves that doesn't block or capture the enemy/threat.
         for(const route in moveRoute){
             for(const square of moveRoute[<MoveRoute>route]!){
-                if(!dangerousRouteOfThreat.includes(square) && square != this.threatsOfKing[0]){
+                if((isEnemyKnight || !dangerousRouteOfThreat.includes(square)) && square != this.threatsOfKing[0]){
                     delete moveRoute[<MoveRoute>route]![moveRoute[<MoveRoute>route]!.indexOf(square)];
                 }
             }

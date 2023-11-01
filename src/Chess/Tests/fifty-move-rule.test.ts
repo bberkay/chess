@@ -7,7 +7,7 @@
 import { expect, test } from 'vitest';
 import { Test } from './Types';
 import { ChessEngine } from '../Engine/ChessEngine';
-import { GameStatus, Square } from "../Types";
+import {GameStatus, Square, StartPosition} from "../Types";
 import { BoardQueryer } from "../Engine/Board/BoardQueryer";
 
 /**
@@ -38,9 +38,9 @@ const fiftyMoveRuleTestGames: Test[] = [
     },
     {
         title: 'Fifty-move rule completed',
-        board: '3k4/1r6/8/5n2/8/6N1/1P6/4K3 w - - 0 1',
+        board: StartPosition.Standard,
         moves: [
-            {from: Square.g3, to: Square.e4},
+            {from: Square.d2, to: Square.d4},
             {from: Square.f5, to: Square.g7},
             {from: Square.e4, to: Square.g3},
             {from: Square.g7, to: Square.f5},

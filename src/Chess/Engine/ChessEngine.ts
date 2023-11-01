@@ -181,9 +181,9 @@ export class ChessEngine extends BoardManager {
      */
     public playMove(from: Square, to: Square): void
     {
-        // If the game is not started then return.
-        if(BoardQueryer.getGameStatus() == GameStatus.NotStarted){
-            Logger.save("Move is not played because game is not started", "playMove", Source.ChessEngine);
+        // If the game is not started or game is finished then return.
+        if([GameStatus.NotStarted, GameStatus.Draw, GameStatus.WhiteVictory, GameStatus.BlackVictory].includes(BoardQueryer.getGameStatus())){
+            Logger.save("Move is not played because game is not started or game is finished.", "playMove", Source.ChessEngine);
             return;
         }
 
@@ -511,7 +511,7 @@ export class ChessEngine extends BoardManager {
         }
         else {
             Logger.save("Game status is not checked because board is not playable so checkGameStatus calculation is unnecessary.", "checkGameStatus", Source.ChessEngine);
-            this.setGameStatus(GameStatus.NotStarted);
+            this.setGameStatus(BoardQueryer.getGameStatus() != GameStatus.NotStarted ? GameStatus.Draw : GameStatus.NotStarted);
             return;
         }
 
