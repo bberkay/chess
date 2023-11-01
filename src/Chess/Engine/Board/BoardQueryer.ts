@@ -36,7 +36,7 @@ export class BoardQueryer extends Board{
             fullMoveNumber: BoardQueryer.getMoveCount(),
             moveHistory: BoardQueryer.getMoveHistory(),
             scores: BoardQueryer.getScores(),
-            gameStatus: BoardQueryer.getGameStatus()
+            gameStatus: BoardQueryer.getBoardStatus()
         }
     }
 
@@ -115,7 +115,7 @@ export class BoardQueryer extends Board{
     /**
      * Get game status
      */
-    public static getGameStatus(): GameStatus
+    public static getBoardStatus(): GameStatus
     {
         return Board.gameStatus;
     }
@@ -225,9 +225,9 @@ export class BoardQueryer extends Board{
          * set the status of the game to draw.
          */
         if(
-            this.getGameStatus() == GameStatus.WhiteVictory
-            || this.getGameStatus() == GameStatus.BlackVictory
-            || this.getGameStatus() == GameStatus.Draw
+            this.getBoardStatus() == GameStatus.WhiteVictory
+            || this.getBoardStatus() == GameStatus.BlackVictory
+            || this.getBoardStatus() == GameStatus.Draw
             || this.getPiecesWithFilter(Color.White, [PieceType.King]).length == 0
             || this.getPiecesWithFilter(Color.Black, [PieceType.King]).length == 0
         ) return false;

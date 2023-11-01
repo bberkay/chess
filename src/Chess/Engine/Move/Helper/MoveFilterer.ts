@@ -177,7 +177,7 @@ export class MoveFilterer{
     private _findThreatsOfKing(kingColor: Color): Square[]
     {
         // If game is not in check status then there is no threat to the king.
-        if(BoardQueryer.getGameStatus() != GameStatus.BlackInCheck && BoardQueryer.getGameStatus() != GameStatus.WhiteInCheck)
+        if(BoardQueryer.getBoardStatus() != GameStatus.BlackInCheck && BoardQueryer.getBoardStatus() != GameStatus.WhiteInCheck)
             return [];
 
         // Find the enemies that threat the king.

@@ -107,7 +107,7 @@ export class BoardManager extends Board{
     /**
      * Set en passant square
      */
-    protected setEnPassant(square: Square): void
+    protected setEnPassant(square: Square | null): void
     {
         Board.enPassant = square;
     }

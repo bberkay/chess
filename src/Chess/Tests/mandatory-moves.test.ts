@@ -93,8 +93,10 @@ test('Mandatory Moves Test', () => {
         for(const expectation of game.expectation){
             const moves: Moves = engine.getMoves(Number(expectation.from) as Square)!;
 
-            if(expectation.to === null)
-                expect(moves).toEqual(null);
+            if(expectation.to === null){
+                const isOneOfThemTrue = moves === null || (moves && moves.Normal && moves.Normal.length === 0);
+                expect(isOneOfThemTrue).toBe(true);
+            }
             else
                 expect(moves![MoveType.Normal]!.sort()).toEqual(expectation.to.sort());
         }

@@ -153,8 +153,8 @@ export class ChessEngine extends BoardManager {
      */
     public getMoves(square: Square): Moves | null
     {
-        if(!BoardQueryer.isSquareSelectable(square) || !this.isBoardPlayable){
-            Logger.save(`Moves of the square is not found because square[${square}] is not selectable or board is not playable`, "getMoves", Source.ChessEngine);
+        if(!this.isBoardPlayable || !BoardQueryer.isSquareSelectable(square)){
+            Logger.save(`Moves of the square is not found because ${!this.isBoardPlayable ? `board is not playable` : ` square[${square}] is not selectable`}`, "getMoves", Source.ChessEngine);
             return null;
         }
 
@@ -182,7 +182,7 @@ export class ChessEngine extends BoardManager {
     public playMove(from: Square, to: Square): void
     {
         // If the game is not started or game is finished then return.
-        if([GameStatus.NotStarted, GameStatus.Draw, GameStatus.WhiteVictory, GameStatus.BlackVictory].includes(BoardQueryer.getGameStatus())){
+        if([GameStatus.NotStarted, GameStatus.Draw, GameStatus.WhiteVictory, GameStatus.BlackVictory].includes(BoardQueryer.getBoardStatus())){
             Logger.save("Move is not played because game is not started or game is finished.", "playMove", Source.ChessEngine);
             return;
         }
@@ -497,6 +497,7 @@ export class ChessEngine extends BoardManager {
         {
             Logger.save("Game status will not be checked because board is the standard position.", "checkGameStatus", Source.ChessEngine);
             this.setGameStatus(GameStatus.InPlay);
+            this.isBoardPlayable = true;
             return;
         }
 
@@ -507,11 +508,12 @@ export class ChessEngine extends BoardManager {
         this.isBoardPlayable = BoardQueryer.isBoardPlayable();
         if(this.isBoardPlayable){
             Logger.save("Game status set to InPlay because board is playable.", "checkGameStatus", Source.ChessEngine);
-            this.setGameStatus(GameStatus.InPlay);
+            this.setGameStatus(BoardQueryer.getBoardStatus() != GameStatus.NotStarted ? BoardQueryer.getBoardStatus() : GameStatus.InPlay);
         }
         else {
             Logger.save("Game status is not checked because board is not playable so checkGameStatus calculation is unnecessary.", "checkGameStatus", Source.ChessEngine);
-            this.setGameStatus(BoardQueryer.getGameStatus() != GameStatus.NotStarted ? GameStatus.Draw : GameStatus.NotStarted);
+            this.setGameStatus(BoardQueryer.getBoardStatus() != GameStatus.NotStarted ? GameStatus.Draw : GameStatus.NotStarted);
+            this.isBoardPlayable = false;
             return;
         }
 
@@ -522,7 +524,7 @@ export class ChessEngine extends BoardManager {
          */
         this._checkThreefoldRepetition();
         this._checkFiftyMoveRule();
-        if(BoardQueryer.getGameStatus() != GameStatus.InPlay)
+        if(BoardQueryer.getBoardStatus() != GameStatus.InPlay)
             return;
 
         /**
@@ -557,7 +559,7 @@ export class ChessEngine extends BoardManager {
         // Check the checkmate and stalemate status.
         if(movesOfKing[MoveType.Normal]!.length == 0)
         {
-            if(threateningSquares.length > 1 && BoardQueryer.getGameStatus() == checkEnum)
+            if(threateningSquares.length > 1 && BoardQueryer.getBoardStatus() == checkEnum)
             {
                 /**
                  * Control Checkmate by Double Check
@@ -605,7 +607,7 @@ export class ChessEngine extends BoardManager {
                  * if game is not in check status but no moves found then the game is in stalemate status.
                  */
                 if(!isAnyMoveFound){
-                    if(BoardQueryer.getGameStatus() != checkEnum){
+                    if(BoardQueryer.getBoardStatus() != checkEnum){
                         this.setGameStatus(GameStatus.Draw);
                         Logger.save("Game status set to draw because king and any other pieces have no moves(stalemate)", "checkGameStatus", Source.ChessEngine);
                     }
@@ -618,11 +620,11 @@ export class ChessEngine extends BoardManager {
         }
 
         // Set the current status for the move history.
-        if (BoardQueryer.getGameStatus() === checkmateEnum)
+        if (BoardQueryer.getBoardStatus() === checkmateEnum)
             this.moveNotation += "#";
-        else if (BoardQueryer.getGameStatus() === checkEnum)
+        else if (BoardQueryer.getBoardStatus() === checkEnum)
             this.moveNotation += "+";
-        else if (BoardQueryer.getGameStatus() === GameStatus.Draw)
+        else if (BoardQueryer.getBoardStatus() === GameStatus.Draw)
             this.moveNotation += "1/2-1/2";
     }
 
@@ -635,31 +637,14 @@ export class ChessEngine extends BoardManager {
          * Get the notation of the game and check the notation is
          * repeated 3 times or not. If the notation is repeated 3
          * times then the game is in draw status.
+         *
+         * @see For more information about threefold repetition rule, see https://en.wikipedia.org/wiki/Threefold_repetition
          */
-        const notations: string[] = this.getNotation();
-        if(notations.length < 10)
-            return;
+        const notation: Array<string> = BoardQueryer.getMoveHistory();
+        const lastNotation: string = notation.slice(-1)[0]!;
 
-        // Get last 10 move from move notation.
-        const lastMoves: string[] = notations.slice(-10);
-
-        /**
-         * If the last 6 notation is not repeated 3 times then return.
-         * For example that set game status to draw:
-         * - this.getNotation() returns ["d4", "d5", "Kd2", "kd7", "Ke1", "ke8", "Kd2", "kd7", "Ke1", "ke8", "Kd2", "kd7"]
-         * - lastNotations is ["Kd2", "kd7", "Ke1", "ke8", "Kd2", "kd7", "Ke1", "ke8", "Kd2", "kd7"]
-         *  - Simple repeat of this scenario:
-         *      - The white king moves to d2 from e1 and the black king moves to d7 from e8.
-         *      - The white king moves to e1 from d2 and the black king moves to e8 from d7. (First repetition finished)
-         *      - ...
-         *      - The white king moves to d2 from e1 and the black king moves to d7 from e8.
-         *      - The white king moves to e1 from d2 and the black king moves to e8 from d7. (Third repetition finished)
-         *  - Then this situation is repeated 3 times and the game is in draw status.
-         */
-        if(lastMoves.length != 10
-            || lastMoves[0] != lastMoves[4] || lastMoves[1] != lastMoves[5] || lastMoves[2] != lastMoves[6]
-            || lastMoves[3] != lastMoves[7] || lastMoves[4] != lastMoves[8] || lastMoves[5] != lastMoves[9]){
-            Logger.save("Threefold repetition rule is not satisfied", "checkThreefoldRepetition", Source.ChessEngine);
+        if(notation.filter(notationItem => notationItem == lastNotation).length < 3){
+            Logger.save("Game status is not checked because threefold repetition rule is not satisfied.", "checkThreefoldRepetition", Source.ChessEngine);
             return;
         }
 
@@ -710,9 +695,11 @@ export class ChessEngine extends BoardManager {
             BoardQueryer.getPieceOnSquare(lastPlayerMove)?.getType() != PieceType.Pawn // Last move is not pawn move.
             || BoardQueryer.getPieceOnSquare(lastTwoMove[1])?.getType() != PieceType.Pawn // Last move of the opponent is not pawn move.
             || Locator.getRow(lastPlayerMove) != (BoardQueryer.getColorOfTurn() == Color.White ? 4 : 5) // Move of pawn is not on the fifth row.
-        ) return;
-
-
+        ){
+            this.setEnPassant(null);
+            Logger.save("En passant move is not found", "updateEnPassantOnFen", Source.ChessEngine);
+            return;
+        }
 
         /**
          * Last player's move could be calculated in the current moves at
@@ -740,7 +727,7 @@ export class ChessEngine extends BoardManager {
      */
     public getGameStatus(): GameStatus
     {
-        return BoardQueryer.getGameStatus();
+        return BoardQueryer.getBoardStatus();
     }
 
     /**
