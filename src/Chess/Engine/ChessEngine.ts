@@ -688,9 +688,9 @@ export class ChessEngine extends BoardManager {
      */
     private updateFenNotation(): void
     {
-        // Update castling and en passant section of the fen notation.
+        // Update en passant section of the fen notation.
         this._updateEnPassantOnFen();
-        this._updateCastlingOnFen();
+        // this._updateCastlingOnFen(); This is already done when the castling move is played.
         Logger.save("Fen notation of the game is updated", "updateFenNotation", Source.ChessEngine);
     }
 
@@ -733,15 +733,6 @@ export class ChessEngine extends BoardManager {
             Logger.save(`En passant move[${lastPlayerMoves[MoveType.EnPassant]![0]!}] is calculated and set on fen notation`, "updateEnPassantOnFen", Source.ChessEngine);
             return;
         }
-    }
-
-    /**
-     * Check the castling status and add/update them
-     * in the fen notation.
-     */
-    private _updateCastlingOnFen(): void
-    {
-
     }
 
     /**
