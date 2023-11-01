@@ -524,7 +524,7 @@ export class ChessEngine extends BoardManager {
          */
         this._checkThreefoldRepetition();
         this._checkFiftyMoveRule();
-        if(BoardQueryer.getBoardStatus() != GameStatus.InPlay)
+        if(![GameStatus.InPlay, GameStatus.BlackInCheck, GameStatus.WhiteInCheck].includes(BoardQueryer.getBoardStatus()))
             return;
 
         /**
