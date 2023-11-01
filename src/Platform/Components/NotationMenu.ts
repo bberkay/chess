@@ -78,32 +78,48 @@ export class NotationMenu extends Component{
     /**
      * This function adds a row/notation to the table.
      */
-    private addNotation(notation: Array<string>): void
+    private addNotation(notations: Array<string>): void
     {
-        // Check if the notation is already added.
-        if(this.lastNotation == notation[notation.length - 1] || notation.length < 1)
-            return;
-
-        // Find the color of the last notation.
-        let color: string = notation.length % 2 == 0 ? Color.Black : Color.White;
-
         /**
          * If notation is white then create new notation row/tr and add as td,
          * otherwise add the notation to the last row as td.
          */
-        const notations: HTMLElement = document.getElementById("notations")!;
+        const notationMenu: HTMLElement = document.getElementById("notations")!;
 
-        if(color == Color.White){
-            notations.innerHTML +=
-                `
-                    <tr>
-                        <td>${notation.length / 2 + 0.5}</td>
-                        <td>${notation[notation.length - 1]}</td>
-                        <td></td>
-                    </tr>
-                `;
-        }else{
-            notations.lastElementChild!.lastElementChild!.innerHTML = notation[notation.length - 1];
+        // If the notation is empty then add the first notation.
+        if(notationMenu.innerHTML == "")
+        {
+            for(let i = 0; i < notations.length; i += 1){
+                if(i % 2 == 0){
+                    notationMenu.innerHTML +=
+                        `
+                        <tr>
+                            <td>${(i / 2) + 1}</td>
+                            <td>${notations[i]}</td>
+                        </tr>
+                    `;
+                }else{
+                    notationMenu.lastElementChild!.innerHTML += "<td>" + notations[i] + "</td>";
+                }
+            }
+        }
+        else
+        {
+            // Add the notation to the last row and also check if the notation is not repeated.
+            const lastNotation: string = notations[notations.length - 1];
+            const lastRow: HTMLElement = notationMenu.lastElementChild as HTMLElement;
+
+            if(lastNotation == this.lastNotation)
+                return;
+
+            /**
+             * If notation length is even then move is black, so add the notation to the
+             * last row as td, otherwise create new row and add the notation as td.
+             */
+            if(notations.length % 2 == 0)
+                lastRow.innerHTML += `<td>${lastNotation}</td>`;
+            else
+                lastRow.insertAdjacentHTML("afterend", `<tr><td>${Math.ceil(notations.length / 2)}</td><td>${lastNotation}</td></tr>`);
         }
 
         // Scroll to the bottom of the table.
@@ -111,7 +127,7 @@ export class NotationMenu extends Component{
         notationTable.scrollTop = notationTable.scrollHeight;
 
         // Set the last notation.
-        this.lastNotation = notation[notation.length - 1];
+        this.lastNotation = notations[notations.length - 1];
     }
 
     /**
@@ -158,8 +174,6 @@ export class NotationMenu extends Component{
      */
     public update(notation: Array<string>, scores: Record<Color, {score: number, pieces: PieceType[]}>): void
     {
-        console.log("Notation: " + notation);
-        console.log("Scores: " + JSON.stringify(scores));
         this.setScore(scores);
         this.addNotation(notation);
     }
