@@ -111,6 +111,17 @@ const enPassantTestGames: Test[] = [
         board: "rnbqkb1r/ppp1pppp/5n2/2Pp4/8/8/PP1PPPPP/RNBQKBNR w KQkq d6 0 3",
         moves: [],
         expectation: {from: Square.c5, to: [Square.d6]}
+    },
+    {
+        title: "Fen Notation Update When En Passant Possible",
+        board: StartPosition.EnPassantLeft,
+        moves: [
+            {from: Square.e2, to: Square.e4},
+            {from: Square.a7, to: Square.a6},
+            {from: Square.e4, to: Square.e5},
+            {from: Square.d7, to: Square.d5},
+        ],
+        expectation: "8/2p5/k7/3pP3/8/8/5P1K/8 w - d6 0 3"
     }
 ];
 
@@ -135,7 +146,10 @@ test('En Passant Moves', () => {
          * "to: []" means there is no en passant move.
          * "to: [Square]" means there is en passant move.
          */
-        expect(engine.getMoves(game.expectation.from)![MoveType.EnPassant]).toEqual(game.expectation.to);
+        if(typeof game.expectation === "string")
+            expect(engine.getGameAsFenNotation()).toEqual(game.expectation);
+        else
+            expect(engine.getMoves(game.expectation.from)![MoveType.EnPassant]).toEqual(game.expectation.to);
 
         console.log("Passed");
         console.log("--------------------------------------------------");

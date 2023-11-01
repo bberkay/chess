@@ -67,27 +67,12 @@ export class ChessEngine extends BoardManager {
         if(this.isStandalone)
             Logger.clear();
 
-        // Clear the game.
-        this.resetGame();
-
-        /**
-         * Create the board with the given position(if the given position is not string then
-         * convert it to json notation, also store the fen notation of the given position).
-         */
-        const fenNotation: string = typeof position == "string" ? position : Converter.jsonToFen(position);
-        this.createBoard(typeof position == "string" ? Converter.fenToJson(position) : position);
+        // Reset properties and create a new game.
+        this.clearProperties();
+        this.createBoard(typeof position !== "string" ? position : Converter.fenToJson(position));
 
         if(this.isStandalone)
             Logger.save(`Game created on ChessEngine`, "createGame", Source.ChessEngine);
-
-        // Check the status of the game if board is different from the standard position.
-        if(fenNotation != StartPosition.Standard){
-            Logger.save("Game status will be checked because board is different from the standard position", "createGame", Source.ChessEngine);
-            this.checkGameStatus();
-        }else{
-            Logger.save("Game status will not be checked because board is the standard position", "createGame", Source.ChessEngine);
-            this.setGameStatus(GameStatus.InPlay);
-        }
     }
 
     /**
@@ -111,7 +96,7 @@ export class ChessEngine extends BoardManager {
     /**
      * This function turn properties to their default values.
      */
-    private resetGame(): void
+    private clearProperties(): void
     {
         this.playedFrom = null;
         this.playedTo = null;
@@ -122,7 +107,6 @@ export class ChessEngine extends BoardManager {
         this.setGameStatus(GameStatus.NotStarted);
         Logger.save("Game properties set to default on ChessEngine", "resetGame", Source.ChessEngine);
     }
-
 
     /**
      * This function checks and find the given move. For example,
@@ -471,33 +455,78 @@ export class ChessEngine extends BoardManager {
     }
 
     /**
+     * End the turn with some controls and check the game is finished or not.
+     */
+    private finishTurn(): void
+    {
+        /**
+         * Order of the functions is important.
+         *
+         * Example scenario for White:
+         * 1- Clear current moves and board playable status for the next turn.
+         * 2- Change the turn(White -> Black)
+         * 3- Check the game is finished or not for Black
+         * 4- Set move notation of white player's move.
+         * 5- Clear the moveNotation for black player's turn.
+         */
+        this.currentMoves = {};
+        this.isBoardPlayable = false;
+        this.changeTurn();
+        Logger.save("Turn is changed.", "finishTurn", Source.ChessEngine);
+        this.checkGameStatus();
+        this.updateFenNotation();
+        this.saveMoveNotation(this.moveNotation);
+        Logger.save(`Notation[${JSON.stringify(this.moveNotation)}] of current move add to move history.`, "finishTurn", Source.ChessEngine);
+        this.moveNotation = "";
+    }
+
+    /**
      * This function calculate the game is finished or not and set the status of the game.
      *
      * @see For more information about game status types please check the src/Chess/Types/index.ts
      */
     private checkGameStatus(): void
     {
-        // If the game is not playable then return.
-        if(!BoardQueryer.isBoardPlayable()){
-            Logger.save("Game status is not checked because board is not playable so check is unnecessary.", "checkGameStatus", Source.ChessEngine);
-            this.isBoardPlayable = false;
+        /**
+         * First, check the board is on the standard position because if the board is on the
+         * standard position then continue is unnecessary.
+         */
+        if(Converter.jsonToFen(BoardQueryer.getGame()) == StartPosition.Standard)
+        {
+            Logger.save("Game status will not be checked because board is the standard position.", "checkGameStatus", Source.ChessEngine);
+            this.setGameStatus(GameStatus.InPlay);
+            return;
+        }
+
+        /**
+         * If board is not on the standard position then check the board is playable or not.
+         * If the board is not ready to play then continue is unnecessary.
+         */
+        this.isBoardPlayable = BoardQueryer.isBoardPlayable();
+        if(this.isBoardPlayable){
+            Logger.save("Game status set to InPlay because board is playable.", "checkGameStatus", Source.ChessEngine);
+            this.setGameStatus(GameStatus.InPlay);
+        }
+        else {
+            Logger.save("Game status is not checked because board is not playable so checkGameStatus calculation is unnecessary.", "checkGameStatus", Source.ChessEngine);
             this.setGameStatus(GameStatus.NotStarted);
             return;
         }
-        else{
-            Logger.save("Game status set to InPlay because board is playable.", "checkGameStatus", Source.ChessEngine);
-            this.isBoardPlayable = true;
-            this.setGameStatus(GameStatus.InPlay);
-        }
 
-
-        // Before the checking checkmate and stalemate status, check the draw status for prevent unnecessary calculations.
+        /**
+         * Before the checking checkmate and stalemate status, check the threefold repetition and fifty
+         * move rule and if any of them is satisfied then the game will be in draw status so continue is
+         * unnecessary.
+         */
         this._checkThreefoldRepetition();
         this._checkFiftyMoveRule();
-        if(BoardQueryer.getGameStatus() != GameStatus.InPlay) // FIXME: This can be dangerous if any problem occurs check this.
+        if(BoardQueryer.getGameStatus() != GameStatus.InPlay)
             return;
 
-        // Get necessary information for check the game status.
+        /**
+         * Start the continue to check, checkmate, stalemate and check status by
+         * finding necessary squares and enums.
+         */
         const kingSquare: Square | null = BoardQueryer.getSquareOfPiece(BoardQueryer.getPiecesWithFilter(BoardQueryer.getColorOfTurn(), [PieceType.King])[0]!);
         const threateningSquares: Square[] = BoardQueryer.isSquareThreatened(kingSquare!, BoardQueryer.getColorOfOpponent(), true) as Square[];
         Logger.save(`Threatening squares[${JSON.stringify(threateningSquares)}] are found by king's square[${kingSquare}]`, "checkGameStatus", Source.ChessEngine);
@@ -653,28 +682,12 @@ export class ChessEngine extends BoardManager {
     }
 
     /**
-     * End the turn with some controls and check the game is finished or not.
+     * Update the fen notation of the game.
      */
-    private finishTurn(): void
+    private updateFenNotation(): void
     {
-        /**
-         * Order of the functions is important.
-         *
-         * Example scenario for White:
-         * 1- Clear current moves and board playable status for the next turn.
-         * 2- Change the turn(White -> Black)
-         * 3- Check the game is finished or not for Black
-         * 4- Set move notation of white player's move.
-         * 5- Clear the moveNotation for black player's turn.
-         */
-        this.currentMoves = {};
-        this.isBoardPlayable = false;
-        this.changeTurn();
-        Logger.save("Turn is changed.", "finishTurn", Source.ChessEngine);
-        this.checkGameStatus();
-        this.saveMoveNotation(this.moveNotation);
-        Logger.save(`Notation[${JSON.stringify(this.moveNotation)}] of current move add to move history`, "finishTurn", Source.ChessEngine);
-        this.moveNotation = "";
+
+        Logger.save("Fen notation of the game is updated", "updateFenNotation", Source.ChessEngine);
     }
 
     /**

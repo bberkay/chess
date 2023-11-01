@@ -202,8 +202,6 @@ export class BoardQueryer extends Board{
             ||
             (!Array.isArray(specificTypes) && squareContent.getType() != specificTypes)
         ));
-
-
     }
 
     /**
