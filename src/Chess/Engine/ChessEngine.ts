@@ -8,7 +8,6 @@
  */
 
 import {
-    CastlingType,
     Color,
     GameStatus,
     JsonNotation,
@@ -468,63 +467,6 @@ export class ChessEngine extends BoardManager {
     }
 
     /**
-     * Check the game is finished or not by threefold repetition rule.
-     */
-    private checkThreefoldRepetition(): void
-    {
-        /**
-         * Get the notation of the game and check the notation is
-         * repeated 3 times or not. If the notation is repeated 3
-         * times then the game is in draw status.
-         */
-        const notations: string[] = this.getNotation();
-        if(notations.length < 10)
-            return;
-
-        // Get last 10 move from move notation.
-        const lastMoves: string[] = notations.slice(-10);
-
-        /**
-         * If the last 6 notation is not repeated 3 times then return.
-         * For example that set game status to draw:
-         * - this.getNotation() returns ["d4", "d5", "Kd2", "kd7", "Ke1", "ke8", "Kd2", "kd7", "Ke1", "ke8", "Kd2", "kd7"]
-         * - lastNotations is ["Kd2", "kd7", "Ke1", "ke8", "Kd2", "kd7", "Ke1", "ke8", "Kd2", "kd7"]
-         *  - Simple repeat of this scenario:
-         *      - The white king moves to d2 from e1 and the black king moves to d7 from e8.
-         *      - The white king moves to e1 from d2 and the black king moves to e8 from d7. (First repetition finished)
-         *      - ...
-         *      - The white king moves to d2 from e1 and the black king moves to d7 from e8.
-         *      - The white king moves to e1 from d2 and the black king moves to e8 from d7. (Third repetition finished)
-         *  - Then this situation is repeated 3 times and the game is in draw status.
-         */
-        if(lastMoves.length != 10
-            || lastMoves[0] != lastMoves[4] || lastMoves[1] != lastMoves[5] || lastMoves[2] != lastMoves[6]
-            || lastMoves[3] != lastMoves[7] || lastMoves[4] != lastMoves[8] || lastMoves[5] != lastMoves[9]){
-            Logger.save("Threefold repetition rule is not satisfied", "checkThreefoldRepetition", Source.ChessEngine);
-            return;
-        }
-
-        // If the last 6 notation is repeated 3 times then the game is in draw status.
-        this.setGameStatus(GameStatus.Draw);
-        this.moveNotation = "1/2-1/2";
-        Logger.save("Game status set to draw by threefold repetition rule", "checkThreefoldRepetition", Source.ChessEngine);
-    }
-
-    /**
-     * Check the game is finished or not by fifty move rule.
-     * @see For more information about half move count, see https://en.wikipedia.org/wiki/Fifty-move_rule
-     */
-    private checkFiftyMoveRule(): void
-    {
-        if(BoardQueryer.getHalfMoveCount() >= 50){
-            this.setGameStatus(GameStatus.Draw);
-            this.moveNotation = "1/2-1/2";
-            Logger.save("Game status set to draw by half move count", "checkFiftyMoveRule", Source.ChessEngine);
-            return;
-        }
-    }
-
-    /**
      * This function calculate the game is finished or not and set the status of the game.
      *
      * @see For more information about game status types please check the src/Chess/Types/index.ts
@@ -539,6 +481,12 @@ export class ChessEngine extends BoardManager {
         }else{
             this.isBoardPlayable = true;
         }
+
+        // Check threefold repetition rule and fifty move rule.
+        this._checkThreefoldRepetition();
+        this._checkFiftyMoveRule();
+        if(BoardQueryer.getGameStatus() != GameStatus.InPlay) // FIXME: This can be dangerous if any problem occurs check this.
+            return;
 
         /**
          * Get player's color, enemy's color and square of player's king.
@@ -646,6 +594,62 @@ export class ChessEngine extends BoardManager {
         else if (BoardQueryer.getGameStatus() === GameStatus.Draw)
             this.moveNotation += "1/2-1/2";
     }
+    /**
+     * Check the game is finished or not by threefold repetition rule.
+     */
+    private _checkThreefoldRepetition(): void
+    {
+        /**
+         * Get the notation of the game and check the notation is
+         * repeated 3 times or not. If the notation is repeated 3
+         * times then the game is in draw status.
+         */
+        const notations: string[] = this.getNotation();
+        if(notations.length < 10)
+            return;
+
+        // Get last 10 move from move notation.
+        const lastMoves: string[] = notations.slice(-10);
+
+        /**
+         * If the last 6 notation is not repeated 3 times then return.
+         * For example that set game status to draw:
+         * - this.getNotation() returns ["d4", "d5", "Kd2", "kd7", "Ke1", "ke8", "Kd2", "kd7", "Ke1", "ke8", "Kd2", "kd7"]
+         * - lastNotations is ["Kd2", "kd7", "Ke1", "ke8", "Kd2", "kd7", "Ke1", "ke8", "Kd2", "kd7"]
+         *  - Simple repeat of this scenario:
+         *      - The white king moves to d2 from e1 and the black king moves to d7 from e8.
+         *      - The white king moves to e1 from d2 and the black king moves to e8 from d7. (First repetition finished)
+         *      - ...
+         *      - The white king moves to d2 from e1 and the black king moves to d7 from e8.
+         *      - The white king moves to e1 from d2 and the black king moves to e8 from d7. (Third repetition finished)
+         *  - Then this situation is repeated 3 times and the game is in draw status.
+         */
+        if(lastMoves.length != 10
+            || lastMoves[0] != lastMoves[4] || lastMoves[1] != lastMoves[5] || lastMoves[2] != lastMoves[6]
+            || lastMoves[3] != lastMoves[7] || lastMoves[4] != lastMoves[8] || lastMoves[5] != lastMoves[9]){
+            Logger.save("Threefold repetition rule is not satisfied", "checkThreefoldRepetition", Source.ChessEngine);
+            return;
+        }
+
+        // If the last 6 notation is repeated 3 times then the game is in draw status.
+        this.setGameStatus(GameStatus.Draw);
+        this.moveNotation = "1/2-1/2";
+        Logger.save("Game status set to draw by threefold repetition rule", "checkThreefoldRepetition", Source.ChessEngine);
+    }
+
+    /**
+     * Check the game is finished or not by fifty move rule.
+     * @see For more information about half move count, see https://en.wikipedia.org/wiki/Fifty-move_rule
+     */
+    private _checkFiftyMoveRule(): void
+    {
+        if(BoardQueryer.getHalfMoveCount() >= 50){
+            this.setGameStatus(GameStatus.Draw);
+            this.moveNotation = "1/2-1/2";
+            Logger.save("Game status set to draw by half move count", "checkFiftyMoveRule", Source.ChessEngine);
+            return;
+        }
+    }
 
     /**
      * End the turn with some controls and check the game is finished or not.
@@ -656,24 +660,20 @@ export class ChessEngine extends BoardManager {
          * Order of the functions is important.
          *
          * Example scenario for White:
-         * 1- Clear properties of the ChessEngine except moveNotation
-         * 2- Control castling moves for White(because, if White move the king or rook then disable the castling)
-         * 3- Control en passant moves for White(because, if White not play en passant move in one turn then remove the move)
-         * 4- Change the turn(White -> Black)
-         * 5- Check the threefold repetition and fifty move rule
-         * 6- Check the game is finished or not for Black
-         * 7- Set move notation of white player's move then clear the moveNotation for black player's turn.
+         * 1- Clear current moves and board playable status for the next turn.
+         * 2- Change the turn(White -> Black)
+         * 3- Check the game is finished or not for Black
+         * 4- Set move notation of white player's move.
+         * 5- Clear the moveNotation for black player's turn.
          */
         this.currentMoves = {};
+        this.isBoardPlayable = false;
         this.changeTurn();
         Logger.save("Turn is changed.", "finishTurn", Source.ChessEngine);
-        this.checkThreefoldRepetition();
-        this.checkFiftyMoveRule();
         this.checkGameStatus();
         this.saveMoveNotation(this.moveNotation);
         Logger.save(`Notation[${JSON.stringify(this.moveNotation)}] of current move add to move history`, "finishTurn", Source.ChessEngine);
         this.moveNotation = "";
-        Logger.save("Turn finish operation is finished.", "finishTurn", Source.ChessEngine);
     }
 
     /**
