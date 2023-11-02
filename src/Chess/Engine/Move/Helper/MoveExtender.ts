@@ -29,6 +29,10 @@ export class MoveExtender{
          * @see for more information about castling https://en.wikipedia.org/wiki/Castling
          */
 
+        if(color == Color.White && ((castlingType == "Long" && !BoardQueryer.getCastling().WhiteLong) || (castlingType == "Short" && !BoardQueryer.getCastling().WhiteShort))
+            || color == Color.Black && ((castlingType == "Long" && !BoardQueryer.getCastling().BlackLong) || (castlingType == "Short" && !BoardQueryer.getCastling().BlackShort))
+        ) return null;
+
         /**
          * Find needed squares and icons for checking rules.
          * @see for more information icon of the piece https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
@@ -57,8 +61,6 @@ export class MoveExtender{
         // Check second rule.
         for(const notation of BoardQueryer.getMoveHistory()){
             if(notation.includes(kingIcon)
-                || notation.includes("O-O")
-                || notation.includes("O-O-O")
                 || (notation.includes(rookIcon + "a") && castlingType == "Long") // Vertical moves of the rook.
                 || (notation.includes(rookIcon + "h") && castlingType == "Short")  // Same as above.
             ) return null;
