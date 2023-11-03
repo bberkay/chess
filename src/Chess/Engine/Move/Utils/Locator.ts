@@ -58,17 +58,24 @@ export class Locator{
      */
     static getRelative(relative: Square, relativeTo: Square): MoveRoute | null
     {
+        const relativeRoute = relativeTo > relative
+            ? {Vertical: MoveRoute.Top, Horizontal: MoveRoute.Left, LeftDiagonal: MoveRoute.TopLeft, RightDiagonal: MoveRoute.TopRight}
+            : {Vertical: MoveRoute.Bottom, Horizontal: MoveRoute.Right, LeftDiagonal: MoveRoute.BottomRight, RightDiagonal: MoveRoute.BottomLeft};
+
+        // If relative and relativeTo are in the same row then get horizontal route and return it.
+        if(Locator.getRow(relative) == Locator.getRow(relativeTo))
+            return relativeRoute.Horizontal;
+
+        // If relative and relativeTo are in the same column then get vertical route and return it.
+        if(Locator.getColumn(relative) == Locator.getColumn(relativeTo))
+            return relativeRoute.Vertical;
+
         /**
-         * Algorithm:
-         * 1. If distance between relative and relativeTo is multiple of 8, then
-         * the relative is in top or bottom of the relativeTo(we can find is top
-         * or bottom by simply comparing the squares of the relative and relativeTo).
-         * 2. If distance between relative and relativeTo is multiple of 9, then
+         * Algorithm to find diagonal route:
+         * 1. If distance between relative and relativeTo is multiple of 9, then
          * the relative is in top right or bottom left of the piece.
-         * 3. If distance between relative and relativeTo is multiple of 7, then
+         * 2. If distance between relative and relativeTo is multiple of 7, then
          * the relative is in top left or bottom right of the piece.
-         * 4. If distance between relative and relativeTo is smaller than 8, then
-         * the relative is in right or left of the piece.
          *
          * The ASCII table of the formula(P is any piece):
          * -9 -8 -7
@@ -82,22 +89,15 @@ export class Locator{
          *
          * @see For more information about square numbers, check square enum in src/Types.ts
          */
-        let relativeRoute: MoveRoute | null = null;
+        if(Locator.getColumn(relative) - Locator.getRow(relative) == Locator.getColumn(relativeTo) - Locator.getRow(relativeTo))
+        {
+            const distance: number = Math.abs(relativeTo! - relative);
+            if(distance % 9 == 0)
+                return relativeRoute.LeftDiagonal; // Top Left to Bottom Right
+            else if(distance % 7 == 0)
+                return relativeRoute.RightDiagonal; // Top Right to Bottom Left
+        }
 
-        // Distance between relative and relativeTo squares.
-        const distance: number = Math.abs(relativeTo! - relative);
-
-        // Now calculate the relative route with the distance and formula.
-        if(distance % 8 == 0)
-            relativeRoute = relativeTo! > relative ? MoveRoute.Top : MoveRoute.Bottom;
-        else if(distance % 9 == 0)
-            relativeRoute = relativeTo! > relative ? MoveRoute.TopLeft : MoveRoute.BottomRight;
-        else if(distance % 7 == 0)
-            relativeRoute = relativeTo! > relative ? MoveRoute.TopRight : MoveRoute.BottomLeft;
-        else if(distance < 8 && Locator.getRow(relative) == Locator.getRow(relativeTo))
-            relativeRoute = relativeTo! > relative ? MoveRoute.Left : MoveRoute.Right;
-
-        // Return the relative route if it's null or not.
-        return relativeRoute;
+        return null;
     }
 }

@@ -514,10 +514,11 @@ export class ChessEngine extends BoardManager {
             Logger.save("Game status set to InPlay because board is playable.", "checkGameStatus", Source.ChessEngine);
             this.setGameStatus(BoardQueryer.getBoardStatus() != GameStatus.NotStarted ? BoardQueryer.getBoardStatus() : GameStatus.InPlay);
         }
-        else {
-            Logger.save("Game status is not checked because board is not playable so checkGameStatus calculation is unnecessary.", "checkGameStatus", Source.ChessEngine);
+        else{
+            Logger.save(`Game status is not checked because board is not playable ${BoardQueryer.getBoardStatus() != GameStatus.NotStarted ? `anymore` : ``} so checkGameStatus calculation is unnecessary.`, "checkGameStatus", Source.ChessEngine);
             this.setGameStatus(BoardQueryer.getBoardStatus() != GameStatus.NotStarted ? GameStatus.Draw : GameStatus.NotStarted);
             this.isBoardPlayable = false;
+            this.moveNotation = BoardQueryer.getBoardStatus() != GameStatus.NotStarted ? "1/2-1/2" : "";
             return;
         }
 
@@ -640,7 +641,7 @@ export class ChessEngine extends BoardManager {
         else if (BoardQueryer.getBoardStatus() === checkEnum)
             this.moveNotation += "+";
         else if (BoardQueryer.getBoardStatus() === GameStatus.Draw)
-            this.moveNotation += "1/2-1/2";
+            this.moveNotation = "1/2-1/2";
 
 
         // FIXME: For test
@@ -661,10 +662,8 @@ export class ChessEngine extends BoardManager {
          * @see For more information about threefold repetition rule, see https://en.wikipedia.org/wiki/Threefold_repetition
          */
         const notation: Array<string> = BoardQueryer.getMoveHistory();
-        const lastNotation: string = notation.slice(-1)[0]!;
-
-        if(notation.filter(notationItem => notationItem == lastNotation).length < 3){
-            Logger.save("Game status is not checked because threefold repetition rule is not satisfied.", "checkThreefoldRepetition", Source.ChessEngine);
+        if(notation.filter(notationItem => notationItem == this.moveNotation).length < 3){
+            Logger.save("Threefold repetition rule is not satisfied.", "checkThreefoldRepetition", Source.ChessEngine);
             return;
         }
 
