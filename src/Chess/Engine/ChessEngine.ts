@@ -18,7 +18,7 @@ import {
     Square,
     StartPosition
 } from "../Types";
-import {Piece} from "./Types";
+import {NotationSymbol, Piece} from "./Types";
 import {MoveEngine} from "./Move/MoveEngine.ts";
 import {BoardManager} from "./Board/BoardManager.ts";
 import {Converter} from "../Utils/Converter";
@@ -269,7 +269,7 @@ export class ChessEngine extends BoardManager {
                 // If the piece is pawn then add the column of the pawn to the current move.
                 if(piece?.getType() == PieceType.Pawn)
                     this.moveNotation += Converter.squareIDToSquare(from)[0];
-                this.moveNotation += "x";
+                this.moveNotation += NotationSymbol.Capture;
             }
 
             /**
@@ -350,7 +350,7 @@ export class ChessEngine extends BoardManager {
         Logger.save(`Rook moved to target square and castling[${castlingType}] move is saved.`, "playMove", Source.ChessEngine);
 
         // Set the current move for the move history.
-        this.moveNotation += castlingType == "Short" ? "O-O" : "O-O-O";
+        this.moveNotation += castlingType == "Short" ? NotationSymbol.ShortCastling : NotationSymbol.LongCastling;
     }
 
     /**
@@ -376,7 +376,7 @@ export class ChessEngine extends BoardManager {
         Logger.save(`Captured piece by en passant move is found on square[${killedPieceSquare}] and removed on engine`, "playMove", Source.ChessEngine);
 
         // Set the current move for the move history.
-        this.moveNotation += Converter.squareIDToSquare(this.playedFrom as Square)[0] + "x" + Converter.squareIDToSquare(this.playedTo as Square);
+        this.moveNotation += Converter.squareIDToSquare(this.playedFrom as Square)[0] + NotationSymbol.Capture + Converter.squareIDToSquare(this.playedTo as Square);
     }
 
     /**
@@ -457,7 +457,7 @@ export class ChessEngine extends BoardManager {
         Logger.save("Promotion is finished on engine", "playMove", Source.ChessEngine);
 
         // Set the current move for the move history.
-        this.moveNotation += "=" + Converter.pieceTypeToPieceName(selectedPromote as PieceType, playerColor);
+        this.moveNotation += NotationSymbol.Promotion + Converter.pieceTypeToPieceName(selectedPromote as PieceType, playerColor);
     }
 
     /**
@@ -518,7 +518,7 @@ export class ChessEngine extends BoardManager {
             Logger.save(`Game status is not checked because board is not playable ${BoardQueryer.getBoardStatus() != GameStatus.NotStarted ? `anymore` : ``} so checkGameStatus calculation is unnecessary.`, "checkGameStatus", Source.ChessEngine);
             this.setGameStatus(BoardQueryer.getBoardStatus() != GameStatus.NotStarted ? GameStatus.Draw : GameStatus.NotStarted);
             this.isBoardPlayable = false;
-            this.moveNotation = BoardQueryer.getBoardStatus() != GameStatus.NotStarted ? "1/2-1/2" : "";
+            this.moveNotation = BoardQueryer.getBoardStatus() != GameStatus.NotStarted ? NotationSymbol.Draw : "";
             return;
         }
 
@@ -527,8 +527,8 @@ export class ChessEngine extends BoardManager {
          * move rule and if any of them is satisfied then the game will be in draw status so continue is
          * unnecessary.
          */
-        this._checkThreefoldRepetition();
         this._checkFiftyMoveRule();
+        this._checkThreefoldRepetition();
 
         // FIXME: For test
         String.prototype.replaceAll = function(search, replacement) {
@@ -637,11 +637,11 @@ export class ChessEngine extends BoardManager {
 
         // Set the current status for the move history.
         if (BoardQueryer.getBoardStatus() === checkmateEnum)
-            this.moveNotation += "#";
+            this.moveNotation += NotationSymbol.Checkmate;
         else if (BoardQueryer.getBoardStatus() === checkEnum)
-            this.moveNotation += "+";
+            this.moveNotation += NotationSymbol.Check;
         else if (BoardQueryer.getBoardStatus() === GameStatus.Draw)
-            this.moveNotation = "1/2-1/2";
+            this.moveNotation = NotationSymbol.Draw;
 
 
         // FIXME: For test
@@ -661,15 +661,17 @@ export class ChessEngine extends BoardManager {
          *
          * @see For more information about threefold repetition rule, see https://en.wikipedia.org/wiki/Threefold_repetition
          */
-        const notation: Array<string> = BoardQueryer.getMoveHistory();
+
+        // Get last 10 moves of the game, also include the current move.
+        const notation: Array<string> = BoardQueryer.getMoveHistory().slice(-9).concat(this.moveNotation);
         if(notation.filter(notationItem => notationItem == this.moveNotation).length < 3){
             Logger.save("Threefold repetition rule is not satisfied.", "checkThreefoldRepetition", Source.ChessEngine);
             return;
         }
 
-        // If the last 6 notation is repeated 3 times then the game is in draw status.
+        // When the threefold repetition rule is satisfied then set the game status to draw.
         this.setGameStatus(GameStatus.Draw);
-        this.moveNotation = "1/2-1/2";
+        this.moveNotation = NotationSymbol.Draw;
         Logger.save("Game status set to draw by threefold repetition rule", "checkThreefoldRepetition", Source.ChessEngine);
     }
 
@@ -681,7 +683,7 @@ export class ChessEngine extends BoardManager {
     {
         if(BoardQueryer.getHalfMoveCount() >= 50){
             this.setGameStatus(GameStatus.Draw);
-            this.moveNotation = "1/2-1/2";
+            this.moveNotation = NotationSymbol.Draw;
             Logger.save("Game status set to draw by half move count", "checkFiftyMoveRule", Source.ChessEngine);
             return;
         }

@@ -41,3 +41,17 @@ export enum MoveRoute{
     Bottom = "Bottom",
     L = "L"
 }
+
+/**
+ * @description NotationSymbol enum for the notation symbols.
+ * @see src/Engine/ChessEngine For more information.
+ */
+export enum NotationSymbol{
+    Capture = "x",
+    Check = "+",
+    Checkmate = "#",
+    Promotion = "=",
+    Draw = "1/2-1/2",
+    ShortCastling = "O-O",
+    LongCastling = "O-O-O",
+}
