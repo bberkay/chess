@@ -332,15 +332,21 @@ export class MoveEngine{
          * by the enemy's bishop again. This code block prevents this situation.
          */
         const enemies: boolean | Square[] = BoardQueryer.isSquareThreatened(this.pieceSquare!, color == Color.White ? Color.Black : Color.White, true);
-        for(const enemySquare of enemies as Square[])
-        {
-            if(BoardQueryer.getPieceOnSquare(enemySquare)!.getType() == PieceType.Knight)
-                continue;
+        if(moves[MoveType.Normal]!.length > 0 && enemies){
+            for(const enemySquare of enemies as Square[])
+            {
+                if(BoardQueryer.getPieceOnSquare(enemySquare)!.getType() == PieceType.Knight)
+                    continue;
 
-            const dangerousRoute: MoveRoute | null = Locator.getRelative(this.pieceSquare!, enemySquare);
-            if(dangerousRoute && moves[MoveType.Normal]!.length > 0 && route.hasOwnProperty(dangerousRoute) && route[dangerousRoute]!.length > 0)
-                moves[MoveType.Normal]!.splice(moves[MoveType.Normal]!.indexOf(route[dangerousRoute]![0]), 1);
+                const dangerousRoute: MoveRoute | null = Locator.getRelative(this.pieceSquare!, enemySquare);
+                if(!dangerousRoute) continue;
+
+                const dangerousMoveIndex: number = moves[MoveType.Normal]!.indexOf(route[dangerousRoute!]![0]);
+                if(dangerousRoute && route.hasOwnProperty(dangerousRoute) && route[dangerousRoute]!.length > 0 && dangerousMoveIndex != -1)
+                    moves[MoveType.Normal]!.splice(dangerousMoveIndex, 1);
+            }
         }
+
 
         /**
          * Add castling moves to the king's moves. For example,
