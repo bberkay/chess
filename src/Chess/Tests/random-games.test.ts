@@ -30,6 +30,18 @@ const games: Test[] = [
         board: StartPosition.Standard,
         moves: [{from:53,to:37},{from:13,to:29},{from:54,to:38},{from:2,to:19},{from:38,to:30},{from:14,to:22},{from:55,to:39},{from:7,to:13},{from:56,to:40},{from:15,to:23},{from:63,to:46},{from:23,to:30},{from:39,to:30},{from:6,to:24},{from:62,to:35},{from:12,to:20},{from:52,to:44},{from:9,to:17},{from:59,to:24},{from:10,to:26},{from:46,to:29},{from:20,to:29},{from:60,to:32},{from:5,to:12},{from:35,to:21},{from:12,to:20},{from:21,to:3},{from:4,to:3},{from:51,to:35},{from:26,to:35},{from:44,to:35},{from:19,to:36},{from:24,to:15},{from:13,to:30},{from:32,to:30},{from:36,to:30},{from:37,to:30},{from:8,to:7},{from:15,to:22},{from:3,to:30},{from:64,to:62},{from:30,to:51},{from:58,to:52},{from:7,to:55},{from:57,to:60},{from:51,to:50},{from:22,to:31},{from:1,to:7},{from:62,to:22},{from:20,to:27},{from:22,to:17},{from:29,to:37},{from:52,to:37},{from:27,to:35},{from:17,to:19},{from:35,to:34},{from:19,to:11}],
         expectation: GameStatus.BlackVictory
+    },
+    {
+        title: "Game 4",
+        board: StartPosition.Standard,
+        moves: [{from:53,to:37},{from:13,to:29},{from:63,to:46},{from:2,to:19},{from:52,to:36},{from:29,to:36},{from:46,to:36},{from:19,to:36},{from:60,to:36},{from:7,to:22},{from:37,to:29},{from:4,to:13},{from:59,to:38},{from:13,to:34},{from:58,to:43},{from:34,to:36},{from:29,to:22},{from:36,to:38},{from:43,to:28},{from:38,to:29},{from:62,to:53},{from:29,to:28},{from:22,to:15},{from:6,to:15},{from:57,to:60},{from:28,to:55},{from:61,to:52},{from:15,to:24},{from:52,to:43},{from:55,to:19},{from:43,to:44},{from:12,to:20},{from:64,to:63},{from:3,to:30},{from:44,to:36}],
+        expectation: GameStatus.BlackVictory
+    },
+    {
+        title: "Game 5",
+        board: StartPosition.Standard,
+        moves: [{ from: 53, to: 37 },{ from: 13, to: 29 },{ from: 63, to: 46 },{ from: 7, to: 22 },{ from: 52, to: 44 },{ from: 6, to: 27 },{ from: 58, to: 52 },{ from: 12, to: 20 },{ from: 52, to: 35 },{ from: 2, to: 19 },{ from: 51, to: 43 },{ from: 3, to: 39 },{ from: 50, to: 34 },{ from: 27, to: 18 },{ from: 35, to: 18 },{ from: 9, to: 18 },{ from: 62, to: 53 },{ from: 19, to: 13 },{ from: 56, to: 48 },{ from: 11, to: 27 },{ from: 48, to: 39 },{ from: 22, to: 39 },{ from:34, to: 27 },{ from: 39, to: 22 },{ from: 27, to: 20 },{ from: 4, to: 20 },{ from: 59, to: 50 }, { from: 18, to: 26 }, { from: 43, to: 35 },{ from: 26, to: 35 }, { from: 50, to: 29 }, { from: 20, to: 34 }, { from: 60, to: 52 }, { from: 34, to: 52 }, { from: 46, to: 52 }, { from: 22, to: 12 }, { from: 52, to: 35 }, { from: 12, to: 29 }, { from: 35, to: 29 }, { from: 5, to: 8 },{ from: 29, to: 12 }, { from: 6, to: 5 }, { from: 53, to: 32 }, { from: 13, to: 23 }, { from: 32, to: 23 }, { from: 14, to: 23 }, { from: 61, to: 57 }, { from: 1, to: 49 }, { from: 54, to: 46 }, { from: 5, to: 3 }, { from: 59, to: 58 }, { from: 3, to: 51 }, { from: 55, to: 39 }, { from: 51, to: 50 }, { from: 58, to: 59 }, { from: 50, to: 51 }, { from: 59, to: 58 }, { from: 49, to: 50 }, { from: 58, to: 57 },{ from: 50, to: 49 },{ from: 57, to: 58 },{ from: 49, to: 50 }],
+        expectation: GameStatus.Draw
     }
 ]
 

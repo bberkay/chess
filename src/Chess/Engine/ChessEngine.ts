@@ -528,6 +528,17 @@ export class ChessEngine extends BoardManager {
          */
         this._checkThreefoldRepetition();
         this._checkFiftyMoveRule();
+
+        // FIXME: For test
+        String.prototype.replaceAll = function(search, replacement) {
+            var target = this;
+            return target.replace(new RegExp(search, 'g'), replacement);
+        };
+
+        // FIXME: For test
+        if([GameStatus.Draw].includes(BoardQueryer.getBoardStatus()))
+            console.log(JSON.stringify(this.forTest).replaceAll('"from"', "from").replaceAll('"to"', "to"));
+
         if(![GameStatus.InPlay, GameStatus.BlackInCheck, GameStatus.WhiteInCheck].includes(BoardQueryer.getBoardStatus()))
             return;
 
@@ -631,15 +642,10 @@ export class ChessEngine extends BoardManager {
         else if (BoardQueryer.getBoardStatus() === GameStatus.Draw)
             this.moveNotation += "1/2-1/2";
 
-        // FIXME: For test
-        String.prototype.replaceAll = function(search, replacement) {
-            var target = this;
-            return target.replace(new RegExp(search, 'g'), replacement);
-        };
 
         // FIXME: For test
         if([checkmateEnum, GameStatus.Draw].includes(BoardQueryer.getBoardStatus()))
-            console.log(JSON.stringify(this.forTest).replaceAll('"from"', "from").replaceAll('"to"', "to")); 
+            console.log(JSON.stringify(this.forTest).replaceAll('"from"', "from").replaceAll('"to"', "to"));
     }
 
     /**
