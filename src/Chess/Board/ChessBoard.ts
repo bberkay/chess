@@ -419,7 +419,9 @@ export class ChessBoard {
 
         await this._doNormalMove(
             document.querySelector(`[data-square-id="${rook.toString()}"]`) as HTMLDivElement,
-            document.querySelector(`[data-square-id="${rookNewSquare.toString()}"]`) as HTMLDivElement
+            document.querySelector(`[data-square-id="${rookNewSquare.toString()}"]`) as HTMLDivElement,
+            true,
+            false
         );
 
         this.playSound(SoundEffect.Castle);
@@ -493,14 +495,16 @@ export class ChessBoard {
     /**
      * Do the normal move(move piece to another square) with animation on the chess board.
      */
-    private async _doNormalMove(fromSquare:HTMLDivElement, toSquare:HTMLDivElement, withAnimation: boolean = true): Promise<void>
+    private async _doNormalMove(fromSquare:HTMLDivElement, toSquare:HTMLDivElement, withAnimation: boolean = true, playMoveSound: boolean = true): Promise<void>
     {
         return new Promise((resolve) => {
             // Play the capture sound if the target square has a piece otherwise play the move sound.
-            if(toSquare.lastElementChild && toSquare.lastElementChild.className.includes("piece"))
-                this.playSound(SoundEffect.Capture);
-            else
-                this.playSound(this.colorOfPlayer == Color.White ? SoundEffect.WhiteMove : SoundEffect.BlackMove);
+            if(playMoveSound){
+                if(toSquare.lastElementChild && toSquare.lastElementChild.className.includes("piece"))
+                    this.playSound(SoundEffect.Capture);
+                else
+                    this.playSound(this.colorOfPlayer == Color.White ? SoundEffect.WhiteMove : SoundEffect.BlackMove);
+            }
 
             // Remove piece after the sound played.
             this.removePiece(parseInt(toSquare.getAttribute("data-square-id")!));
