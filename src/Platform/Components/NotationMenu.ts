@@ -8,7 +8,7 @@ import { MenuOperationType, MenuOperationValue } from "../Types";
  */
 export class NotationMenu extends Component{
     protected readonly chess: Chess;
-    private lastNotation: string = "";
+    private moveCount: number = 0;
     private lastScore: Record<Color, number> = {[Color.White]: 0, [Color.Black]: 0};
 
     /**
@@ -109,9 +109,6 @@ export class NotationMenu extends Component{
             const lastNotation: string = notations[notations.length - 1];
             const lastRow: HTMLElement = notationMenu.lastElementChild as HTMLElement;
 
-            if(lastNotation == this.lastNotation)
-                return;
-
             /**
              * If notation length is even then move is black, so add the notation to the
              * last row as td, otherwise create new row and add the notation as td.
@@ -126,8 +123,8 @@ export class NotationMenu extends Component{
         const notationTable: HTMLElement = document.getElementById("notation-table")!;
         notationTable.scrollTop = notationTable.scrollHeight;
 
-        // Set the last notation.
-        this.lastNotation = notations[notations.length - 1];
+        // Set the move count.
+        this.moveCount = notations.length;
     }
 
     /**
@@ -174,6 +171,9 @@ export class NotationMenu extends Component{
      */
     public update(notation: Array<string>, scores: Record<Color, {score: number, pieces: PieceType[]}>): void
     {
+        if(this.chess.getNotation().length == this.moveCount)
+            return;
+
         this.setScore(scores);
         this.addNotation(notation);
     }
@@ -186,7 +186,7 @@ export class NotationMenu extends Component{
         document.getElementById("notations")!.innerHTML = "";
         document.getElementById("black-player-pieces")!.innerHTML = "";
         document.getElementById("white-player-pieces")!.innerHTML = "";
-        this.lastNotation = "";
+        this.moveCount = 0;
         this.lastScore = {[Color.White]: 0, [Color.Black]: 0};
     }
 

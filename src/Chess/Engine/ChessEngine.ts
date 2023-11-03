@@ -43,6 +43,7 @@ export class ChessEngine extends BoardManager {
     private currentMoves: {[key in Square]?: Moves | null} = {};
     private isPromotionMenuOpen: boolean = false;
     private isBoardPlayable: boolean = false;
+    private forTest: Array<{from: Square, to: Square}> = []; // FIXME: For test
     private readonly isStandalone: boolean = false;
 
     /**
@@ -101,6 +102,7 @@ export class ChessEngine extends BoardManager {
      */
     private clearProperties(): void
     {
+        this.forTest = []; // FIXME: For test
         this.playedFrom = null;
         this.playedTo = null;
         this.moveNotation = "";
@@ -478,6 +480,7 @@ export class ChessEngine extends BoardManager {
         this.checkGameStatus();
         this.saveMoveNotation(this.moveNotation);
         this.updateFenNotation();
+        this.forTest.push({from: this.playedFrom, to: this.playedTo}); // FIXME: For test
         this.moveNotation = "";
         Logger.save(`Turn[${BoardQueryer.getColorOfTurn()}] is finished and board is ready for the next turn`, "finishTurn", Source.ChessEngine);
     }
@@ -626,6 +629,16 @@ export class ChessEngine extends BoardManager {
             this.moveNotation += "+";
         else if (BoardQueryer.getBoardStatus() === GameStatus.Draw)
             this.moveNotation += "1/2-1/2";
+
+        // FIXME: For test
+        String.prototype.replaceAll = function(search, replacement) {
+            var target = this;
+            return target.replace(new RegExp(search, 'g'), replacement);
+        };
+
+        // FIXME: For test
+        if([checkmateEnum, GameStatus.Draw].includes(BoardQueryer.getBoardStatus()))
+            console.log(JSON.stringify(this.forTest).replaceAll('"from"', "from").replaceAll('"to"', "to")); 
     }
 
     /**

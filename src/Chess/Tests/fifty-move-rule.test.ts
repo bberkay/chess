@@ -7,7 +7,7 @@
 import { expect, test } from 'vitest';
 import { Test } from './Types';
 import { ChessEngine } from '../Engine/ChessEngine';
-import {GameStatus, Square, StartPosition} from "../Types";
+import { GameStatus, Square, StartPosition } from "../Types";
 import { BoardQueryer } from "../Engine/Board/BoardQueryer";
 
 /**
@@ -37,67 +37,10 @@ const fiftyMoveRuleTestGames: Test[] = [
         expectation: 3 // Expected half move clock.
     },
     {
-        title: 'Fifty-move rule completed',
+        // https://www.chessgames.com/perl/chessgame?gid=1972221
+        title: 'Fifty-move rule complete / Daniil Yuffa vs Luke McShane, World Cup (2019), Khanty-Mansiysk RUS, rd 2, Sep-13',
         board: StartPosition.Standard,
         moves: [
-            {from: Square.d2, to: Square.d4},
-            {from: Square.f5, to: Square.g7},
-            {from: Square.e4, to: Square.g3},
-            {from: Square.g7, to: Square.f5},
-            {from: Square.g3, to: Square.e4},
-            {from: Square.f5, to: Square.g7},
-            {from: Square.e4, to: Square.g3},
-            {from: Square.g7, to: Square.f5},
-            {from: Square.g3, to: Square.e4},
-            {from: Square.f5, to: Square.g7},
-            {from: Square.e4, to: Square.g3},
-            {from: Square.g7, to: Square.f5},
-            {from: Square.g3, to: Square.e4},
-            {from: Square.f5, to: Square.g7},
-            {from: Square.e4, to: Square.g3},
-            {from: Square.g7, to: Square.f5},
-            {from: Square.g3, to: Square.e4},
-            {from: Square.f5, to: Square.g7},
-            {from: Square.e4, to: Square.g3},
-            {from: Square.g7, to: Square.f5},
-            {from: Square.g3, to: Square.e4},
-            {from: Square.f5, to: Square.g7},
-            {from: Square.e4, to: Square.g3},
-            {from: Square.g7, to: Square.f5},
-            {from: Square.g3, to: Square.e4},
-            {from: Square.f5, to: Square.g7},
-            {from: Square.e4, to: Square.g3},
-            {from: Square.g7, to: Square.f5},
-            {from: Square.g3, to: Square.e4},
-            {from: Square.f5, to: Square.g7},
-            {from: Square.e4, to: Square.g3},
-            {from: Square.g7, to: Square.f5},
-            {from: Square.g3, to: Square.e4},
-            {from: Square.f5, to: Square.g7},
-            {from: Square.e4, to: Square.g3},
-            {from: Square.g7, to: Square.f5},
-            {from: Square.g3, to: Square.e4},
-            {from: Square.f5, to: Square.g7},
-            {from: Square.e4, to: Square.g3},
-            {from: Square.g7, to: Square.f5},
-            {from: Square.g3, to: Square.e4},
-            {from: Square.f5, to: Square.g7},
-            {from: Square.e4, to: Square.g3},
-            {from: Square.g7, to: Square.f5},
-            {from: Square.g3, to: Square.e4},
-            {from: Square.f5, to: Square.g7},
-            {from: Square.e4, to: Square.g3},
-            {from: Square.g7, to: Square.f5},
-            {from: Square.e4, to: Square.g3},
-            {from: Square.g7, to: Square.f5},
-            {from: Square.e4, to: Square.g3},
-            {from: Square.g7, to: Square.f5},
-            {from: Square.g3, to: Square.e4},
-            {from: Square.f5, to: Square.g7},
-            {from: Square.e4, to: Square.g3},
-            {from: Square.g7, to: Square.f5},
-            {from: Square.e4, to: Square.g3},
-            {from: Square.g7, to: Square.f5}, // 50 moves without a capture or pawn move.
         ],
         expectation: GameStatus.Draw
     }
