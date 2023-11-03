@@ -189,5 +189,4 @@ export class NotationMenu extends Component{
         this.moveCount = 0;
         this.lastScore = {[Color.White]: 0, [Color.Black]: 0};
     }
-
 }

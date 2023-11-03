@@ -366,7 +366,6 @@ export class ChessBoard {
                 break;
             default:
                 this._doNormalMove(fromSquare, toSquare).then();
-                this.playSound(this.colorOfPlayer == Color.White ? SoundEffect.WhiteMove : SoundEffect.BlackMove);
                 break;
         }
 
@@ -497,7 +496,13 @@ export class ChessBoard {
     private async _doNormalMove(fromSquare:HTMLDivElement, toSquare:HTMLDivElement, withAnimation: boolean = true): Promise<void>
     {
         return new Promise((resolve) => {
-            // Clear the target square.
+            // Play the capture sound if the target square has a piece otherwise play the move sound.
+            if(toSquare.lastElementChild && toSquare.lastElementChild.className.includes("piece"))
+                this.playSound(SoundEffect.Capture);
+            else
+                this.playSound(this.colorOfPlayer == Color.White ? SoundEffect.WhiteMove : SoundEffect.BlackMove);
+
+            // Remove piece after the sound played.
             this.removePiece(parseInt(toSquare.getAttribute("data-square-id")!));
             Logger.save(`Target square[${toSquare.getAttribute("data-square-id")!}] removed on board`, "playMove", Source.ChessBoard);
 
