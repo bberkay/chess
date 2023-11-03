@@ -101,7 +101,7 @@ export class MoveEngine{
          * @see for more information about pawn moves https://en.wikipedia.org/wiki/Pawn_(chess)
          **************************************************************************/
 
-            // Find the pawn's color and enemy's color by the given square.
+        // Find the pawn's color and enemy's color by the given square.
         const color: Color = this.piece!.getColor();
         const enemyColor: Color = color === Color.White ? Color.Black : Color.White;
 
@@ -125,11 +125,8 @@ export class MoveEngine{
         }
 
         /**
-         * Filter second square of the vertical route by the pawn's color and row.
-         *
-         * If pawn is white and is not on the seventh row
-         * or if pawn is black and is not on the second row,
-         * then remove the second square of the vertical route.
+         * Filter second square(first move of pawn) of the vertical route by
+         * the checking the pawn's color and position(row).
          */
         if(Locator.getRow(this.pieceSquare!) != (color == Color.White ? 7 : 2))
             route[moveDirection.vertical]!.splice(1, 1);
@@ -174,7 +171,7 @@ export class MoveEngine{
          * @see for more information about en passant check src/Chess/Engine/Move/Helper/MoveExtender.ts
          */
 
-            // Add left en passant move to the pawn's moves.
+        // Add left en passant move to the pawn's moves.
         const leftEnPassant: Square | null = this.moveExtender.getLeftEnPassantMove(this.pieceSquare!);
         if(leftEnPassant)
             route[moveDirection.leftDiagonal]!.push(leftEnPassant);
