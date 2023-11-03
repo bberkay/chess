@@ -332,8 +332,12 @@ export class MoveEngine{
          * by the enemy's bishop again. This code block prevents this situation.
          */
         const enemies: boolean | Square[] = BoardQueryer.isSquareThreatened(this.pieceSquare!, color == Color.White ? Color.Black : Color.White, true);
-        for(const enemy of enemies as Square[]){
-            const dangerousRoute: MoveRoute | null = Locator.getRelative(this.pieceSquare!, enemy);
+        for(const enemySquare of enemies as Square[])
+        {
+            if(BoardQueryer.getPieceOnSquare(enemySquare)!.getType() == PieceType.Knight)
+                continue;
+
+            const dangerousRoute: MoveRoute | null = Locator.getRelative(this.pieceSquare!, enemySquare);
             if(dangerousRoute && moves[MoveType.Normal]!.length > 0 && route.hasOwnProperty(dangerousRoute) && route[dangerousRoute]!.length > 0)
                 moves[MoveType.Normal]!.splice(moves[MoveType.Normal]!.indexOf(route[dangerousRoute]![0]), 1);
         }

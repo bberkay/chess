@@ -14,12 +14,6 @@ export class MoveFilterer{
     private threatsOfKing: Square[] = [];
 
     /**
-     * For threats of king calculation.
-     * @see _findThreatsOfKing() method.
-     */
-    private lastCalculatedMoveCount: number = 0;
-
-    /**
      * Filter the moves of the piece for the king's safety.
      */
     public filterForKingSafety(pieceSquare: Square, pieceColor: Color, moveRoute: Route): Route | null
@@ -183,9 +177,6 @@ export class MoveFilterer{
         // Find the enemies that threat the king.
         const squareOfKing: Square = BoardQueryer.getSquareOfPiece(BoardQueryer.getPiecesWithFilter(kingColor, [PieceType.King])[0] as Piece) as Square;
         this.threatsOfKing = BoardQueryer.isSquareThreatened(squareOfKing, kingColor == Color.White ? Color.Black : Color.White, true) as Square[];
-
-        // Update the last calculated move count.
-        this.lastCalculatedMoveCount = BoardQueryer.getMoveCount();
 
         // Return the threats of king.
         return this.threatsOfKing;

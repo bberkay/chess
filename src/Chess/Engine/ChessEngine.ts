@@ -557,7 +557,7 @@ export class ChessEngine extends BoardManager {
         let movesOfKing: Moves | null = this.moveEngine.getMoves(kingSquare!)!;
         movesOfKing = movesOfKing ?? {Normal: []};
         this.currentMoves[kingSquare!] = movesOfKing;
-        Logger.save(`Moves of the king[${kingSquare}] are calculated and saved to calculated moves`, "checkGameStatus", Source.ChessEngine);
+        Logger.save(`Moves of the king[${kingSquare}] are calculated and saved to calculated moves[${movesOfKing}]`, "checkGameStatus", Source.ChessEngine);
 
         // Check the checkmate and stalemate status.
         if(movesOfKing[MoveType.Normal]!.length == 0)
