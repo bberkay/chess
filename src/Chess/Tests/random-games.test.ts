@@ -28,8 +28,8 @@ const games: Test[] = [
     {
         title: "Game 3",
         board: StartPosition.Standard,
-        moves: [],
-        expectation: GameStatus.WhiteVictory
+        moves: [{from:53,to:37},{from:13,to:29},{from:54,to:38},{from:2,to:19},{from:38,to:30},{from:14,to:22},{from:55,to:39},{from:7,to:13},{from:56,to:40},{from:15,to:23},{from:63,to:46},{from:23,to:30},{from:39,to:30},{from:6,to:24},{from:62,to:35},{from:12,to:20},{from:52,to:44},{from:9,to:17},{from:59,to:24},{from:10,to:26},{from:46,to:29},{from:20,to:29},{from:60,to:32},{from:5,to:12},{from:35,to:21},{from:12,to:20},{from:21,to:3},{from:4,to:3},{from:51,to:35},{from:26,to:35},{from:44,to:35},{from:19,to:36},{from:24,to:15},{from:13,to:30},{from:32,to:30},{from:36,to:30},{from:37,to:30},{from:8,to:7},{from:15,to:22},{from:3,to:30},{from:64,to:62},{from:30,to:51},{from:58,to:52},{from:7,to:55},{from:57,to:60},{from:51,to:50},{from:22,to:31},{from:1,to:7},{from:62,to:22},{from:20,to:27},{from:22,to:17},{from:29,to:37},{from:52,to:37},{from:27,to:35},{from:17,to:19},{from:35,to:34},{from:19,to:11}],
+        expectation: GameStatus.BlackVictory
     }
 ]
 
