@@ -100,4 +100,43 @@ export class Locator{
 
         return null;
     }
+
+    /**
+     * Get the next square of the given square list and route.
+     * @example getNext([Square.e4, Square.e5, Square.e6], MoveRoute.Top), return Square.e7
+     * @example getNext([Square.e4, Square.e5, Square.e6], MoveRoute.Bottom), return Square.e3
+     * @example getNext([], MoveRoute.Top, Square.e3), return Square.e4
+     * @example getNext([], MoveRoute.Bottom, Square.e3), return Square.e2
+     */
+    static getNext(squares: Square[], route: MoveRoute, startSquare: Square | null = null): Square
+    {
+        if(squares.length == 0 && !startSquare)
+            throw new Error("Squares and startSquare cannot be empty at the same time.");
+
+        // If squares is empty, the define the start square as the last square of the given squares.
+        console.log(squares, route, startSquare);
+        let lastSquare: Square = squares.length == 0 ? startSquare! : squares[squares.length - 1];
+
+        // Get the next square of the given route.
+        switch (route) {
+            case MoveRoute.Top:
+                return lastSquare - 8;
+            case MoveRoute.TopRight:
+                return lastSquare - 7;
+            case MoveRoute.Right:
+                return lastSquare + 1;
+            case MoveRoute.BottomRight:
+                return lastSquare + 9;
+            case MoveRoute.Bottom:
+                return lastSquare + 8;
+            case MoveRoute.BottomLeft:
+                return lastSquare + 7;
+            case MoveRoute.Left:
+                return lastSquare - 1;
+            case MoveRoute.TopLeft:
+                return lastSquare - 9;
+        }
+
+        throw new Error("Invalid route.");
+    }
 }
