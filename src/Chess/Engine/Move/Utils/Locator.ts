@@ -114,7 +114,6 @@ export class Locator{
             throw new Error("Squares and startSquare cannot be empty at the same time.");
 
         // If squares is empty, the define the start square as the last square of the given squares.
-        console.log(squares, route, startSquare);
         let lastSquare: Square = squares.length == 0 ? startSquare! : squares[squares.length - 1];
 
         // Get the next square of the given route.

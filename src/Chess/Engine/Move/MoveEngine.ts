@@ -321,9 +321,7 @@ export class MoveEngine{
         }
 
         /**
-         * Remove squares that are can threaten after the king's move so that
-         * the king can't move to the squares that can be threatened after the
-         * king's move. For example, king is on f3 and enemy's bishop is on d5.
+         * Example: King is on f3 and enemy's bishop is on d5.
          * Currently, g2 isn't threatened by the enemy's bishop. But king can't
          * move to the g2 because after the king's move, g2 will be threatened
          * by the enemy's bishop again. This code block prevents this situation.

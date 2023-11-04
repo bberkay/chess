@@ -316,7 +316,7 @@ export class BoardQueryer extends Board{
             }
 
             // Check the king threat, king threat is calculated differently because king can only move one square.
-            if(this.isSquareHasPiece(allRoutes[route as MoveRoute]![0]!, enemyColor, PieceType.King)){
+            if(route != MoveRoute.L && this.isSquareHasPiece(allRoutes[route as MoveRoute]![0]!, enemyColor, PieceType.King)){
                 if(getThreatening)
                     squaresOfThreateningEnemies.push(allRoutes[route as MoveRoute]![0]!);
                 else
