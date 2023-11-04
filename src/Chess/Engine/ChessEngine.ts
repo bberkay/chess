@@ -43,7 +43,6 @@ export class ChessEngine extends BoardManager {
     private currentMoves: {[key in Square]?: Moves | null} = {};
     private isPromotionMenuOpen: boolean = false;
     private isBoardPlayable: boolean = false;
-    private forTest: Array<{from: Square, to: Square}> = []; // FIXME: For test
     private readonly isStandalone: boolean = false;
 
     /**
@@ -102,7 +101,6 @@ export class ChessEngine extends BoardManager {
      */
     private clearProperties(): void
     {
-        this.forTest = []; // FIXME: For test
         this.playedFrom = null;
         this.playedTo = null;
         this.moveNotation = "";
@@ -233,7 +231,6 @@ export class ChessEngine extends BoardManager {
                 case MoveType.Normal:
                     this._doNormalMove(from, to, true);
                     Logger.save(`Piece moved to target square[${to}] on engine`, "playMove", Source.ChessEngine);
-                    console.log(this.forTest);
                     break;
             }
         }
@@ -481,7 +478,6 @@ export class ChessEngine extends BoardManager {
         this.checkGameStatus();
         this.saveMoveNotation(this.moveNotation);
         this.updateFenNotation();
-        this.forTest.push({from: this.playedFrom, to: this.playedTo}); // FIXME: For test
         this.moveNotation = "";
         Logger.save(`Turn[${BoardQueryer.getColorOfTurn()}] is finished and board is ready for the next turn`, "finishTurn", Source.ChessEngine);
     }
@@ -529,17 +525,6 @@ export class ChessEngine extends BoardManager {
          */
         this._checkFiftyMoveRule();
         this._checkThreefoldRepetition();
-
-        // FIXME: For test
-        String.prototype.replaceAll = function(search, replacement) {
-            var target = this;
-            return target.replace(new RegExp(search, 'g'), replacement);
-        };
-
-        // FIXME: For test
-        if([GameStatus.Draw].includes(BoardQueryer.getBoardStatus()))
-            console.log(JSON.stringify(this.forTest).replaceAll('"from"', "from").replaceAll('"to"', "to"));
-
         if(![GameStatus.InPlay, GameStatus.BlackInCheck, GameStatus.WhiteInCheck].includes(BoardQueryer.getBoardStatus()))
             return;
 
@@ -642,11 +627,6 @@ export class ChessEngine extends BoardManager {
             this.moveNotation += NotationSymbol.Check;
         else if (BoardQueryer.getBoardStatus() === GameStatus.Draw)
             this.moveNotation = NotationSymbol.Draw;
-
-
-        // FIXME: For test
-        if([checkmateEnum, GameStatus.Draw].includes(BoardQueryer.getBoardStatus()))
-            console.log(JSON.stringify(this.forTest).replaceAll('"from"', "from").replaceAll('"to"', "to"));
     }
 
     /**
@@ -661,18 +641,16 @@ export class ChessEngine extends BoardManager {
          *
          * @see For more information about threefold repetition rule, see https://en.wikipedia.org/wiki/Threefold_repetition
          */
-
-        // Get last 10 moves of the game, also include the current move.
-        const notation: Array<string> = BoardQueryer.getMoveHistory().slice(-9).concat(this.moveNotation);
-        if(notation.filter(notationItem => notationItem == this.moveNotation).length < 3){
-            Logger.save("Threefold repetition rule is not satisfied.", "checkThreefoldRepetition", Source.ChessEngine);
-            return;
+        const notation: Array<string> = BoardQueryer.getMoveHistory().slice(-11);
+        if(notation.filter(notationItem => notationItem == notation[0]).length > 2 || notation.concat(this.moveNotation).filter(notationItem => notationItem == this.moveNotation).length > 2)
+        {
+            // When the threefold repetition rule is satisfied then set the game status to draw.
+            this.setGameStatus(GameStatus.Draw);
+            this.moveNotation = NotationSymbol.Draw;
+            Logger.save("Game status set to draw by threefold repetition rule", "checkThreefoldRepetition", Source.ChessEngine);
         }
 
-        // When the threefold repetition rule is satisfied then set the game status to draw.
-        this.setGameStatus(GameStatus.Draw);
-        this.moveNotation = NotationSymbol.Draw;
-        Logger.save("Game status set to draw by threefold repetition rule", "checkThreefoldRepetition", Source.ChessEngine);
+        Logger.save("Threefold repetition rule is not satisfied.", "checkThreefoldRepetition", Source.ChessEngine);
     }
 
     /**
