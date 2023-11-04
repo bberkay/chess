@@ -709,7 +709,7 @@ export class ChessEngine extends BoardManager {
      */
     private _checkFiftyMoveRule(): void
     {
-        if(BoardQueryer.getHalfMoveCount() >= 50){
+        if(BoardQueryer.getHalfMoveCount() > 100){
             this.setGameStatus(GameStatus.Draw);
             this.moveNotation = NotationSymbol.Draw;
             Logger.save("Game status set to draw by half move count", "checkFiftyMoveRule", Source.ChessEngine);
