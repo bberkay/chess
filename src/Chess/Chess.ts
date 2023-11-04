@@ -30,6 +30,7 @@ export class Chess{
     private selectedSquare: Square | null;
     private isPromotionScreenOpen: boolean = false;
     private readonly isCachingEnabled: boolean = true;
+    private moves: string = "";
 
     /**
      * Constructor of the Chess class.
@@ -188,6 +189,7 @@ export class Chess{
      */
     private _doPlayAction(square: Square): void
     {
+        this.moves += "{from: " + this.selectedSquare + ", to: " + square + "},";
         this.chessEngine.playMove(this.selectedSquare!, square);
         this.chessBoard.playMove(this.selectedSquare!, square);
         this.finishTurn();
@@ -200,6 +202,8 @@ export class Chess{
     {
         // Get status from engine and show it on board.
         this.chessBoard.showStatus(this.chessEngine.getGameStatus());
+        if([GameStatus.Draw, GameStatus.BlackVictory, GameStatus.WhiteVictory].includes(this.chessEngine.getGameStatus()) || this.chessEngine.getNotation().length % 25 == 0)
+            console.log(this.moves);
 
         // Save the game to the cache as json notation.
         if(this.isCachingEnabled && !this.isPromotionScreenOpen){
