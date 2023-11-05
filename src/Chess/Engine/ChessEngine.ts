@@ -472,14 +472,17 @@ export class ChessEngine extends BoardManager {
          * 2- Change the turn(White -> Black)
          * 3- Check the game is finished or not for Black
          * 4- Set move notation of white player's move.
+         * 4.1- Check en passant move for update the fen notation.
+         *      - This function must be called after the saveMoveNotation function because moveEngine calculate en passant
+         *      move by checking the last two moves with BoardQueyer.
          * 5- Clear the moveNotation for black player's turn.
          */
         this.currentMoves = {};
         this.isBoardPlayable = false;
         this.changeTurn();
-        this.checkEnPassant();
         this.checkGameStatus();
         this.saveMoveNotation(this.moveNotation);
+        this.checkEnPassant();
         this.moveNotation = "";
         Logger.save(`Turn[${BoardQueryer.getColorOfTurn()}] is finished and board is ready for the next turn`, "finishTurn", Source.ChessEngine);
     }
@@ -490,19 +493,19 @@ export class ChessEngine extends BoardManager {
      */
     private checkEnPassant(): void
     {
-        if(this.getNotation().concat(this.moveNotation).length < 2)
+        if(this.getNotation().length < 2)
             return;
 
         // Get the last two moves and check the last move is pawn move or not.
-        const lastTwoMove: Square[] = this.getNotation().concat(this.moveNotation).slice(-2).map(move => Converter.squareToSquareID(move));
+        const lastTwoMove: Square[] = this.getNotation().slice(-2).map(move => Converter.squareToSquareID(move));
         const lastPlayerMove: Square = lastTwoMove[0];
         if(
-            BoardQueryer.getPieceOnSquare(lastPlayerMove)?.getType() != PieceType.Pawn // Last move is not pawn move.
-            || BoardQueryer.getPieceOnSquare(lastTwoMove[1])?.getType() != PieceType.Pawn // Last move of the opponent is not pawn move.
-            || Locator.getRow(lastPlayerMove) != (BoardQueryer.getColorOfTurn() == Color.White ? 4 : 5) // Move of pawn is not on the fifth row.
+            BoardQueryer.getPieceOnSquare(lastPlayerMove)?.getType() != PieceType.Pawn
+            || BoardQueryer.getPieceOnSquare(lastTwoMove[1])?.getType() != PieceType.Pawn
+            || Locator.getRow(lastPlayerMove) != (BoardQueryer.getColorOfTurn() == Color.White ? 4 : 5) // fifth row
         ){
             this.setEnPassant(null);
-            Logger.save("En passant move is not found", "updateEnPassantOnFen", Source.ChessEngine);
+            Logger.save("En passant move is not found", "checkEnPassant", Source.ChessEngine);
             return;
         }
 
@@ -520,7 +523,6 @@ export class ChessEngine extends BoardManager {
 
         // If the last player's move is not in the current moves then calculate the moves of the last player's move.
         const lastPlayerMoves: Moves = this.moveEngine.getMoves(lastPlayerMove)!;
-        this.currentMoves[lastPlayerMove] = lastPlayerMoves;
         if(lastPlayerMoves.hasOwnProperty(MoveType.EnPassant) && lastPlayerMoves[MoveType.EnPassant]!.length > 0){
             this.setEnPassant(lastPlayerMoves[MoveType.EnPassant]![0]!);
             Logger.save(`En passant move[${lastPlayerMoves[MoveType.EnPassant]![0]!}] is calculated and set on fen notation`, "updateEnPassantOnFen", Source.ChessEngine);

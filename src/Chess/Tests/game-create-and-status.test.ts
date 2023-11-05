@@ -41,7 +41,7 @@ const games: Test[] = [
     },
     {
         title: "50 Move Rule",
-        board: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - - 50 1",
+        board: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - - 102 101",
         expectation: GameStatus.Draw
     },
     {

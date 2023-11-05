@@ -89,7 +89,7 @@ export class Locator{
          *
          * @see For more information about square numbers, check square enum in src/Types.ts
          */
-        if(Locator.getColumn(relative) - Locator.getRow(relative) == Locator.getColumn(relativeTo) - Locator.getRow(relativeTo))
+        if(Math.abs(Locator.getColumn(relative) - Locator.getRow(relative)) == Math.abs(Locator.getColumn(relativeTo) - Locator.getRow(relativeTo)))
         {
             const distance: number = Math.abs(relativeTo! - relative);
             if(distance % 9 == 0)

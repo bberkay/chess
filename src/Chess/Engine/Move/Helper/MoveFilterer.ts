@@ -53,7 +53,7 @@ export class MoveFilterer{
             : [];
 
         // If there is no square between king and enemy then also there will be no block so return null.
-        if(!isEnemyKnight && dangerousRouteOfThreat.length < 1)
+        if(!isEnemyKnight && !dangerousRouteOfThreat || dangerousRouteOfThreat.length < 1)
             return null;
 
         // Delete the moves that doesn't block or capture the enemy/threat.
