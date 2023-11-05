@@ -102,7 +102,8 @@ export class ChessEngine extends BoardManager {
      */
     public getGameAsASCII(): string
     {
-
+        Logger.save("Game returned as ascii notation", "getGameAsASCII", Source.ChessEngine);
+        return Converter.jsonToASCII(BoardQueryer.getGame());
     }
 
     /**

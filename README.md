@@ -411,7 +411,7 @@ chessEngine.playMove(Square.e2, Square.e4);
         </tr>
     </tbody>
 </table>
-<br>
+
 <h3>Testing</h3>
 <p>Chess Platform is tested with <a href = "https://vitest.dev/">Vitest</a>. Tests consist mostly of engine tests like move calculation, move validation, checkmate, stalemate, etc. Also, there are some tests for converting operations like fen notation to <a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Types/index.ts#L78">json notation</a>.
 You can run all the tests with the following command.</p>
