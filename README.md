@@ -80,8 +80,8 @@ and uses Node.js for the backend. Also, tested with <a href = "https://vitest.de
 ```mermaid
 classDiagram
   class ChessPlatform {
-    - chess: Chess
-    - platform: Platform
+    + chess: Chess
+    + platform: Platform
     + constructor()
   }
   class Chess {
