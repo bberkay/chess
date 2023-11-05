@@ -79,8 +79,8 @@ found in the <a href = "https://github.com/bberkay/chess-platform/tree/main#arch
 ```mermaid
 classDiagram
   class ChessPlatform {
-    + chess: Chess
-    + platform: Platform
+    + readonly chess: Chess
+    - readonly platform: Platform
     + constructor()
   }
   class Chess {
@@ -162,17 +162,29 @@ classDiagram
         <!-- Initiate Chess Platform -->
         <script>
             import { ChessPlatform } from "./src/ChessPlatform";
+            import { StartPosition } from "./src/Chess/Types";
 
             /**
              * If there is a game in cache, then platform 
              * will load it. Otherwise, platform will create 
              * a new standard game.
              */
-            const chessPlatform = new ChessPlatform();
+            const enableCaching = true; // default
+            const platformConfig = { 
+                enableGameCreator: true, 
+                enableNotationMenu: true,
+                enableLogConsole: true
+            }; // default
+            
+            const chessPlatform = new ChessPlatform(enableCaching, platformConfig);
+             
+            // Also, chess methods can be used from chessPlatform.
+            chessPlatform.chess.createGame(StartPosition.Standard);
         </script>
     </body>
 </html>
 ```
+<p>Also, this is current usage in <a href = "https://github.com/bberkay/chess-platform/blob/main/index.html">index.html</a> of the <a href = "https://github.com/bberkay/chess-platform#chess-platform">Live Demo</a>.</p>
 
 <h4>Chess(without Platform)</h4>
 
@@ -193,11 +205,61 @@ classDiagram
              * will load it. Otherwise, chess will 
              * create a new standard game.
              */
-            const chess = new Chess();
+            const enableCaching = true; // default
+            const chess = new Chess(enableCaching);
         </script>
     </body>
 </html>
 ```
+
+<h3>Method List of Chess</h3>
+<p>Most (but not all) of the public classes you can use within the Chess class.</p>
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>File</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Chess.ts#L92">See</a></td>
+            <td>createGame(position)</td>
+            <td>Create a new game with the given position using <i>ChessEngine</i> and <i>ChessBoard</i></td>
+        </tr>
+        <tr>
+            <td><a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Chess.ts#L238">See</a></td>
+            <td>getGameAsFenNotation()</td>
+            <td>Get the fen notation of the current game as string</td>
+        </tr>
+        <tr>
+            <td><a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Chess.ts#L246">See</a></td>
+            <td>getGameAsJsonNotation()</td>
+            <td>Get the <a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Types/index.ts#L78">json notation</a> of the current game</td>
+        </tr>
+        <tr>
+            <td><a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Chess.ts#L214">See</a></td>
+            <td>getNotation()</td>
+            <td>Get the algebraic notation of the current game</td>
+        </tr>
+        <tr>
+            <td><a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Chess.ts#L230">See</a></td>
+            <td>getScores()</td>
+            <td>Get the scores of the current game as an object</td>
+        </tr>
+        <tr>
+            <td><a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Chess.ts#L254">See</a></td>
+            <td>getLogs()</td>
+            <td>Get the logs of the current game as an array</td>
+        </tr>
+        <tr>
+            <td><a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Chess.ts#L262">See</a></td>
+            <td>clearLogs()</td>
+            <td>Clear the logs of the current game</td>
+        </tr>
+    </tbody>
+</table>
 
 <h4>ChessBoard(Standalone)</h4>
 
@@ -212,13 +274,65 @@ classDiagram
         <!-- Initiate Chessboard as Standalone -->
         <script>
             import { ChessBoard } from "./src/Chess/Board/ChessBoard";
-
+            import { Square } from "./src/Chess/Types";
+            
             // Standard game will be created in constructor.
-            const chessBoard = new ChessBoard();
+            const chessBoard = new ChessBoard()
+            
+            // Play on board(without engine)
+            chessBoard.playMove(Square.e2, Square.e4);
         </script>
     </body>
 </html>
 ```
+<h3>Method List of ChessBoard</h3>
+<p>Most (but not all) of the public classes you can use within the ChessBoard class.</p>
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>File</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Board/ChessBoard.ts#L188">See</a></td>
+            <td>createGame(position)</td>
+            <td>Create a new game with the given position(just board no mechanics).</td>
+        </tr>
+        <tr>
+            <td><a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Board/ChessBoard.ts#L256">See</a></td>
+            <td>highlightSelect(square)</td>
+            <td>Highlight the selected square on the board.</td>
+        </tr>
+        <tr>
+            <td><a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Board/ChessBoard.ts#L285">See</a></td>
+            <td>highlightMoves(moves)</td>
+            <td>Highlight the given moves/squares on the board.</td>
+        </tr>
+        <tr>
+            <td><a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Board/ChessBoard.ts#L337">See</a></td>
+            <td>playMove(from, to)</td>
+            <td>Move the piece from the given square to the given square on the board.</td>
+        </tr>
+        <tr>
+            <td><a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Board/ChessBoard.ts#L544">See</a></td>
+            <td>refreshBoard()</td>
+            <td>Remove highlights, effects and refresh square ids and classes.</td>
+        </tr>
+        <tr>
+            <td><a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Board/ChessBoard.ts#L635">See</a></td>
+            <td>showStatus(status)</td>
+            <td>Show the given status(<a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Types/index.ts#L123">Game Status</a>) on the board as popup.</td>
+        </tr>
+        <tr>
+            <td><a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Board/ChessBoard.ts#L851">See</a></td>
+            <td>getLogs()</td>
+            <td>Get the logs of the all operations that made on the board as an array.</td>
+        </tr>
+    </tbody>
+</table>
 
 <h4>ChessEngine(Standalone)</h4>
 
@@ -234,7 +348,64 @@ const chessEngine = new ChessEngine();
 chessEngine.playMove(Square.e2, Square.e4);
 ```
 
-<p>For another example, see <a href = "https://github.com/bberkay/chess-platform/blob/main/index.html">index.html</a> of the <a href = "https://github.com/bberkay/chess-platform#chess-platform">Live Demo</a>.</p>
+<h3>Method List of ChessEngine</h3>
+<p>Most (but not all) of the public classes you can use within the ChessEngine class.</p>
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>File</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Engine/ChessEngine.ts#L188">See</a></td>
+            <td>createGame(position)</td>
+            <td>Create a new game with the given position(on terminal/console).</td>
+        </tr>
+       <tr>
+            <td><a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Engine/ChessEngine.ts#L85">See</a></td>
+            <td>getGameAsFenNotation()</td>
+            <td>Get the fen notation of the current game as string</td>
+        </tr>
+        <tr>
+            <td><a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Engine/ChessEngine.ts#L94">See</a></td>
+            <td>getGameAsJsonNotation()</td>
+            <td>Get the <a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Types/index.ts#L78">json notation</a> of the current game</td>
+        </tr>
+        <tr>
+            <td><a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Engine/ChessEngine.ts#L156">See</a></td>
+            <td>getMoves(square)</td>
+            <td>Get moves of the piece on the given square as <a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Types/index.ts#L73">Moves</a>.</td>
+        </tr>
+        <tr>
+            <td><a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Engine/ChessEngine.ts#L184">See</a></td>
+            <td>playMove(from, to)</td>
+            <td>Move the piece from the given square to the given square on the engine.</td>
+        </tr>
+        <tr>
+            <td><a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Engine/ChessEngine.ts#L725">See</a></td>
+            <td>getGameStatus()</td>
+            <td>Get current status of game as <a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Types/index.ts#L123">Game Status</a></td>
+        </tr>
+        <tr>
+            <td><a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Engine/ChessEngine.ts#L733">See</a></td>
+            <td>getNotation()</td>
+            <td>Get the algebraic notation of the current game</td>
+        </tr>
+        <tr>
+            <td><a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Engine/ChessEngine.ts#L741">See</a></td>
+            <td>getScores()</td>
+            <td>Get the scores of the current game as an object</td>
+        </tr>
+        <tr>
+            <td><a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Engine/ChessEngine.ts#L749">See</a></td>
+            <td>getLogs()</td>
+            <td>Get the logs of the current game as an array</td>
+        </tr>
+    </tbody>
+</table>
 
 <h3>Testing</h3>
 <p>Chess Platform is tested with <a href = "https://vitest.dev/">Vitest</a>. Tests consist mostly of engine tests like move calculation, move validation, checkmate, stalemate, etc. Also, there are some tests for converting operations like fen notation to <a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Types/index.ts#L78">json notation</a>.

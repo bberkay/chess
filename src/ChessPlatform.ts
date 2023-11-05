@@ -18,7 +18,7 @@ import { PlatformConfig } from "./Platform/Types";
 export class ChessPlatform{
 
     public readonly chess: Chess;
-    public readonly platform: Platform;
+    private readonly platform: Platform;
 
     /**
      * Constructor of the ChessPlatform class.
