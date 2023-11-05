@@ -212,7 +212,7 @@ classDiagram
 </html>
 ```
 
-<h3>Method List of Chess</h3>
+<h4>Method List of Chess</h4>
 <p>Most (but not all) of the public classes you can use within the Chess class.</p>
 <table>
     <thead>
@@ -285,7 +285,7 @@ classDiagram
     </body>
 </html>
 ```
-<h3>Method List of ChessBoard</h3>
+<h4>Method List of ChessBoard</h4>
 <p>Most (but not all) of the public classes you can use within the ChessBoard class.</p>
 <table>
     <thead>
@@ -348,7 +348,7 @@ const chessEngine = new ChessEngine();
 chessEngine.playMove(Square.e2, Square.e4);
 ```
 
-<h3>Method List of ChessEngine</h3>
+<h4>Method List of ChessEngine</h4>
 <p>Most (but not all) of the public classes you can use within the ChessEngine class.</p>
 <table>
     <thead>
@@ -373,6 +373,11 @@ chessEngine.playMove(Square.e2, Square.e4);
             <td><a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Engine/ChessEngine.ts#L94">See</a></td>
             <td>getGameAsJsonNotation()</td>
             <td>Get the <a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Types/index.ts#L78">json notation</a> of the current game</td>
+        </tr>
+        <tr>
+            <td><a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Engine/ChessEngine.ts#L103">See</a></td>
+            <td>getGameAsASCII()</td>
+            <td>Get the ASCII representation of the current game</td>
         </tr>
         <tr>
             <td><a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Engine/ChessEngine.ts#L156">See</a></td>

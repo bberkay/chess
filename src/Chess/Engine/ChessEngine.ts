@@ -98,6 +98,14 @@ export class ChessEngine extends BoardManager {
     }
 
     /**
+     * This function returns the current game as ascii notation.
+     */
+    public getGameAsASCII(): string
+    {
+
+    }
+
+    /**
      * This function turn properties to their default values.
      */
     private clearProperties(): void
