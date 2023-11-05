@@ -3,6 +3,7 @@ import {MoveRoute, Piece, Route} from "../../Types";
 import {BoardQueryer} from "../../Board/BoardQueryer.ts";
 import {Locator} from "../Utils/Locator.ts";
 import {RouteCalculator} from "../Calculator/RouteCalculator.ts";
+import {Extractor} from "../Utils/Extractor.ts";
 
 /**
  * This class is responsible for filtering the moves of the
@@ -47,21 +48,30 @@ export class MoveFilterer{
         const squareOfKing: Square = BoardQueryer.getSquareOfPiece(BoardQueryer.getPiecesWithFilter(pieceColor, [PieceType.King])[0] as Piece) as Square;
         const isEnemyKnight: boolean = BoardQueryer.getPieceOnSquare(this.threatsOfKing[0])!.getType() == PieceType.Knight;
 
-        // If enemy is knight then don't calculate the dangerous route because knight can't be blocked.
-        const dangerousRouteOfThreat: Square[] = !isEnemyKnight
-            ? RouteCalculator.getRouteBySquare(this.threatsOfKing[0])[Locator.getRelative(squareOfKing!, this.threatsOfKing[0])!]!
-            : [];
+        /**
+         * If enemy is knight then check if the piece can capture the knight, if it is then return the only capture move.
+         * If piece can't capture the knight then return null because knight can't be blocked.
+         */
+        if(isEnemyKnight){
+            for(const route in moveRoute){
+                moveRoute[<MoveRoute>route] = !moveRoute[<MoveRoute>route]!.includes(this.threatsOfKing[0]) ? [] : [this.threatsOfKing[0]];
+            }
 
-        // If there is no square between king and enemy then also there will be no block so return null.
-        if(!isEnemyKnight && !dangerousRouteOfThreat || dangerousRouteOfThreat.length < 1)
+            return moveRoute;
+        }
+
+        // If enemy is not knight then find the dangerous route of the threat because it can be blocked.
+        const dangerousRouteOfThreat: Square[] = RouteCalculator.getRouteBySquare(this.threatsOfKing[0])[Locator.getRelative(squareOfKing!, this.threatsOfKing[0])!]!
+
+        // If there is no square between king and enemy then there will be no block so return null.
+        if(!dangerousRouteOfThreat || dangerousRouteOfThreat.length < 1)
             return null;
 
         // Delete the moves that doesn't block or capture the enemy/threat.
         for(const route in moveRoute){
             for(const square of moveRoute[<MoveRoute>route]!){
-                if((isEnemyKnight || !dangerousRouteOfThreat.includes(square)) && square != this.threatsOfKing[0]){
+                if(!dangerousRouteOfThreat.includes(square) && square != this.threatsOfKing[0])
                     delete moveRoute[<MoveRoute>route]![moveRoute[<MoveRoute>route]!.indexOf(square)];
-                }
             }
         }
 
