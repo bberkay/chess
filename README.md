@@ -15,8 +15,7 @@
 not designed by using chess programming techniques(0x88, bitboards, etc.). But all the
 rules of chess are implemented in this project. The project consists of three parts:
 Chess Platform, Platform, and Chess. More detailed information about these parts can be
-found in the <a href = "https://github.com/bberkay/chess-platform/tree/main#architecture">Architecture</a> section. The project is written in TypeScript
-and uses Node.js for the backend. Also, tested with <a href = "https://vitest.dev/">Vitest</a>.
+found in the <a href = "https://github.com/bberkay/chess-platform/tree/main#architecture">Architecture</a> section. The project is written entirely in TypeScript and tested with <a href = "https://vitest.dev/">Vitest</a>.
 <h3>Features</h3>
 <ul>
     <li>by <a href = "https://github.com/bberkay/chess-platform/tree/main/src">ChessPlatform</a>
