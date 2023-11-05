@@ -3,7 +3,6 @@ import {MoveRoute, Piece, Route} from "../../Types";
 import {BoardQueryer} from "../../Board/BoardQueryer.ts";
 import {Locator} from "../Utils/Locator.ts";
 import {RouteCalculator} from "../Calculator/RouteCalculator.ts";
-import {Extractor} from "../Utils/Extractor.ts";
 
 /**
  * This class is responsible for filtering the moves of the
