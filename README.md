@@ -95,29 +95,32 @@ classDiagram
     + constructor()
   }
   class Platform {
-    - chess: Chess
+    - readonly chess: Chess
     - notationTable: NotationTable
     - gameCreator: GameCreator
     - logConsole: LogConsole
     + constructor()
   }
   class NotationTable {
+    - readonly chess: Chess 
     + constructor()
   }
   class GameCreator {
+    - readonly chess: Chess
     + constructor()
   }
   class LogConsole {
+    - readonly chess: Chess
     + constructor()
   }
 
-  ChessPlatform --> Chess
-  ChessPlatform --> Platform
-  Chess --> ChessBoard
-  Chess --> ChessEngine
-  Platform --> NotationTable
-  Platform --> GameCreator
-  Platform --> LogConsole
+  ChessPlatform *-- Chess
+  ChessPlatform *-- Platform
+  Chess "0..1" o-- "1" ChessBoard
+  Chess "0..1" o-- "1" ChessEngine
+  Platform "1" *-- "0..1" NotationTable
+  Platform "1" *-- "0..1" GameCreator
+  Platform "1" *-- "0..1" LogConsole
 
 ```
 
