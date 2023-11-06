@@ -211,8 +211,8 @@ classDiagram
 <table>
     <thead>
         <tr>
-            <th>Name</th>
             <th>File</th>
+            <th>Name</th>
             <th>Description</th>
         </tr>
     </thead>
@@ -284,8 +284,8 @@ classDiagram
 <table>
     <thead>
         <tr>
-            <th>Name</th>
             <th>File</th>
+            <th>Name</th>
             <th>Description</th>
         </tr>
     </thead>
@@ -347,8 +347,8 @@ chessEngine.playMove(Square.e2, Square.e4);
 <table>
     <thead>
         <tr>
-            <th>Name</th>
             <th>File</th>
+            <th>Name</th>
             <th>Description</th>
         </tr>
     </thead>
