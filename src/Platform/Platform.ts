@@ -11,7 +11,7 @@ import { Chess } from "../Chess/Chess";
 import { GameCreator } from "./Components/GameCreator.ts";
 import { NotationMenu } from "./Components/NotationMenu.ts";
 import { LogConsole } from "./Components/LogConsole";
-import { MenuOperationType, PlatformConfig } from "./Types";
+import { MenuOperationType } from "./Types";
 
 /**
  * This class is the main class of the chess platform menu.
@@ -27,11 +27,11 @@ export class Platform{
     /**
      * Constructor of the Platform class.
      */
-    constructor(chess: Chess, platformConfig: PlatformConfig) {
+    constructor(chess: Chess) {
         this.chess = chess;
-        this.gameCreator = platformConfig.enableGameCreator ? new GameCreator(this.chess) : null;
-        this.notationMenu = platformConfig.enableNotationMenu ? new NotationMenu(this.chess) : null;
-        this.logConsole = platformConfig ? new LogConsole(this.chess) : null;
+        this.gameCreator = document.querySelector("#game-creator") ? new GameCreator(this.chess) : null;
+        this.notationMenu = document.querySelector("#notation-menu") ? new NotationMenu(this.chess) : null;
+        this.logConsole = document.querySelector("#notation-menu") ? new LogConsole(this.chess) : null;
 
         // Initialize the listeners when the dom is loaded.
         document.addEventListener("DOMContentLoaded", () => {

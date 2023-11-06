@@ -170,13 +170,7 @@ classDiagram
              * a new standard game.
              */
             const enableCaching = true; // default
-            const platformConfig = { 
-                enableGameCreator: true, 
-                enableNotationMenu: true,
-                enableLogConsole: true
-            }; // default
-            
-            const chessPlatform = new ChessPlatform(enableCaching, platformConfig);
+            const chessPlatform = new ChessPlatform(enableCaching); // same as new const chessPlatform = new ChessPlatform();
              
             // Also, chess methods can be used from chessPlatform.
             chessPlatform.chess.createGame(StartPosition.Standard);
@@ -206,7 +200,7 @@ classDiagram
              * create a new standard game.
              */
             const enableCaching = true; // default
-            const chess = new Chess(enableCaching);
+            const chess = new Chess(enableCaching); // same as new const chess = new Chess();
         </script>
     </body>
 </html>
