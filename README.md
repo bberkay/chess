@@ -296,24 +296,9 @@ classDiagram
             <td>Create a new game with the given position(just board no mechanics).</td>
         </tr>
         <tr>
-            <td><a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Board/ChessBoard.ts#L256">See</a></td>
-            <td>highlightSelect(square)</td>
-            <td>Highlight the selected square on the board.</td>
-        </tr>
-        <tr>
             <td><a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Board/ChessBoard.ts#L285">See</a></td>
             <td>highlightMoves(moves)</td>
             <td>Highlight the given moves/squares on the board.</td>
-        </tr>
-        <tr>
-            <td><a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Board/ChessBoard.ts#L337">See</a></td>
-            <td>playMove(from, to)</td>
-            <td>Move the piece from the given square to the given square on the board.</td>
-        </tr>
-        <tr>
-            <td><a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Board/ChessBoard.ts#L544">See</a></td>
-            <td>refreshBoard()</td>
-            <td>Remove highlights, effects and refresh square ids and classes.</td>
         </tr>
         <tr>
             <td><a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Board/ChessBoard.ts#L635">See</a></td>
