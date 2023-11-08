@@ -207,7 +207,7 @@ classDiagram
 ```
 
 <h4>Method List of Chess</h4>
-<p>Most (but not all) of the public classes you can use within the Chess class.</p>
+<p>Most (but not all) of the public methods you can use within the Chess class.</p>
 <table>
     <thead>
         <tr>
@@ -280,7 +280,7 @@ classDiagram
 </html>
 ```
 <h4>Method List of ChessBoard</h4>
-<p>Most (but not all) of the public classes you can use within the ChessBoard class.</p>
+<p>Most (but not all) of the public methods you can use within the ChessBoard class.</p>
 <table>
     <thead>
         <tr>
@@ -328,7 +328,7 @@ chessEngine.playMove(Square.e2, Square.e4);
 ```
 
 <h4>Method List of ChessEngine</h4>
-<p>Most (but not all) of the public classes you can use within the ChessEngine class.</p>
+<p>Most (but not all) of the public methods you can use within the ChessEngine class.</p>
 <table>
     <thead>
         <tr>
