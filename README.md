@@ -127,7 +127,7 @@ classDiagram
 <h3>Installation</h3>
 <ol>
     <li>
-        Clone the repository or download the zip file from <a href = "https://github.com/bberkay/chess-platform/archive/refs/heads/main.zip">here.</a>
+        Clone the repository.
         <br/>
         <code>git clone https://github.com/bberkay/chess-platform.git</code>
     </li>
