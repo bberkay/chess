@@ -17,7 +17,7 @@ rules of chess are implemented in this project. The project consists of three pa
 Chess Platform, Platform, and Chess. More detailed information about these parts can be
 found in the <a href = "https://github.com/bberkay/chess-platform/tree/main#architecture">Architecture</a> section. The project is written entirely in TypeScript and tested with <a href = "https://vitest.dev/">Vitest</a>.
 <p></p>
-<img src = "https://lh3.googleusercontent.com/u/0/drive-viewer/AK7aPaCEorIfRvJvvzKCRkSL9bUA-si6KYEv4nbvg-737-9-E7aB6oOD8TZbzirOptCcsiaOvrcVLCB3yO5m-nYWzQ6rBxIDbw=w1920-h991">
+<img src = "https://i.ibb.co/yn0Zk6h/chess-platform-introduction-image.png">
 <h3>Features</h3>
 <ul>
     <li>by <a href = "https://github.com/bberkay/chess-platform/tree/main/src">ChessPlatform</a>
