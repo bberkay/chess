@@ -15,7 +15,7 @@
 not designed by using chess programming techniques(0x88, bitboards, etc.). But all the
 rules of chess are implemented in this project. The project consists of three parts:
 Chess Platform, Platform, and Chess. More detailed information about these parts can be
-found in the <a href = "https://github.com/bberkay/chess-platform/tree/main#architecture">Architecture</a> section. The project is written entirely in TypeScript and tested with <a href = "https://vitest.dev/">Vitest</a>.
+found in the <a href = "#architecture">Architecture</a> section. The project is written entirely in TypeScript and tested with <i>Vitest</i>.
 <p></p>
 <img src = "https://i.ibb.co/yn0Zk6h/chess-platform-introduction-image.png">
 <h3>Features</h3>
@@ -180,7 +180,7 @@ classDiagram
     </body>
 </html>
 ```
-<p>Also, this is current usage in <a href = "https://github.com/bberkay/chess-platform/blob/main/index.html">index.html</a> of the <a href = "https://github.com/bberkay/chess-platform#chess-platform">Live Demo</a>.</p>
+<p>Also, this is current usage in <a href = "https://github.com/bberkay/chess-platform/blob/main/index.html">index.html</a> of the <a href = "#chess-platform">Live Demo</a>.</p>
 
 <h4>Chess(without Platform)</h4>
 
@@ -394,10 +394,10 @@ chessEngine.playMove(Square.e2, Square.e4);
 </table>
 
 <h3>Testing</h3>
-<p>Chess Platform is tested with <a href = "https://vitest.dev/">Vitest</a>. Tests consist mostly of engine tests like move calculation, move validation, checkmate, stalemate, etc. Also, there are some tests for converting operations like fen notation to <a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Types/index.ts#L78">json notation</a>.
+<p>Chess Platform is tested with <i>Vitest</i>. Tests consist mostly of engine tests like move calculation, move validation, checkmate, stalemate, etc. Also, there are some tests for converting operations like fen notation to <a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Types/index.ts#L78">json notation</a>.
 You can run all the tests with the following command.</p>
 <code>npm run test</code>
 <h3>Future Plans</h3>
-<p>My first plan is to switch from Node.js to <a href = "https://bun.sh/">Bun</a>. Multiplayer support, which will be controlled by ChessPlatform, is also one of my main goals. Along with multiplayer support, options such as proposing a takeback, offering a draw, resigning from a match, and viewing possibility of previous moves from the notation table will need to be developed. I also have some smaller plans on my list, such as <a href = "https://en.wikipedia.org/wiki/Portable_Game_Notation">PGN</a> support in chess and table marking in the chessboard.</p>
+<p>My first plan is to switch from Node.js to <i>Bun</i>. Multiplayer support, which will be controlled by ChessPlatform, is also one of my main goals. Along with multiplayer support, options such as proposing a takeback, offering a draw, resigning from a match, and viewing possibility of previous moves from the notation table will need to be developed. I also have some smaller plans on my list, such as <a href = "https://en.wikipedia.org/wiki/Portable_Game_Notation">PGN</a> support in chess and table marking in the chessboard.</p>
 <hr>
 <h5 align="center"><a href="mailto:berkaykayaforbusiness@outlook.com">berkaykayaforbusiness@outlook.com</a></h5> 
