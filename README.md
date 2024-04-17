@@ -16,7 +16,7 @@ not designed by using chess programming techniques(0x88, bitboards, etc.). But a
 rules of chess are implemented in this project. The project consists of three parts:
 Chess Platform, Platform, and Chess. More detailed information about these parts can be
 found in the <a href = "#architecture">Architecture</a> section. The project is written entirely in TypeScript and tested with <i>Vitest</i>.
-<p></p>
+</p>
 <img src = "https://i.ibb.co/yn0Zk6h/chess-platform-introduction-image.png">
 <h3>Features</h3>
 <ul>
