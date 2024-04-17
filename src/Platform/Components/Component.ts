@@ -34,7 +34,7 @@ export abstract class Component{
         let link: HTMLLinkElement = document.createElement("link");
         link.id = fileId;
         link.rel = "stylesheet";
-        link.href = `./src/Platform/Components/Assets/css/${filename}`;
+        link.href = `./public/css/components/${filename}`;
 
         // Add the link element to the head of the document.
         document.head.appendChild(link);

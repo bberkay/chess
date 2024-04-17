@@ -19,14 +19,14 @@ export class ChessBoard {
 
     private readonly isStandalone: boolean;
     private sounds: {[key in SoundEffect]: HTMLAudioElement} = {
-        Start: new Audio("src/Chess/Board/Assets/sounds/game-start.mp3"),
-        WhiteMove: new Audio("src/Chess/Board/Assets/sounds/move-self.mp3"),
-        BlackMove: new Audio("src/Chess/Board/Assets/sounds/move-opponent.mp3"),
-        Capture: new Audio("src/Chess/Board/Assets/sounds/capture.mp3"),
-        Castle: new Audio("src/Chess/Board/Assets/sounds/castle.mp3"),
-        Check: new Audio("src/Chess/Board/Assets/sounds/move-check.mp3"),
-        Promote: new Audio("src/Chess/Board/Assets/sounds/promote.mp3"),
-        End: new Audio("src/Chess/Board/Assets/sounds/game-end.mp3"),
+        Start: new Audio("./public/sounds/game-start.mp3"),
+        WhiteMove: new Audio("./public/sounds/move-self.mp3"),
+        BlackMove: new Audio("./public/sounds/move-opponent.mp3"),
+        Capture: new Audio("./public/sounds/capture.mp3"),
+        Castle: new Audio("./public/sounds/castle.mp3"),
+        Check: new Audio("./public/sounds/move-check.mp3"),
+        Promote: new Audio("./public/sounds/promote.mp3"),
+        End: new Audio("./public/sounds/game-end.mp3"),
     };
 
     // This is used for preventing parameter complexity.
@@ -71,7 +71,7 @@ export class ChessBoard {
         let link: HTMLLinkElement = document.createElement("link");
         link.id = "chessboard-css";
         link.rel = "stylesheet";
-        link.href = 'src/Chess/Board/Assets/css/chessboard.css';
+        link.href = './public/css/chessboard.css';
 
         // Add the link element to the head of the document.
         document.head.appendChild(link);
