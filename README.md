@@ -1,5 +1,5 @@
 <h1 align = "center">Chess Platform</h1>
-<p><a href = "https://chess-platform.onrender.com/">Live Demo</a> (The site may open slowly because I deployed the project to a free render account)</p>
+<p><a href = "https://chess-platform.vercel.app/">Live Demo</a> (The site may open slowly because I deployed the project to a free vercel account)</p>
 <h3>Table of Contents</h3>
 <ol>
     <li><a href = "#introduction">Introduction</a></li>
@@ -29,7 +29,7 @@ found in the <a href = "#architecture">Architecture</a> section. The project is 
         <ul>
             <li><b>General Rules:</b> Check, Checkmate, Stalemate.</li>
             <li><b>Other Rules:</b> <a href = "https://en.wikipedia.org/wiki/Threefold_repetition">Threefold repetition</a>, <a href = "https://en.wikipedia.org/wiki/Fifty-move_rule">Fifty-move rule</a>.</li>
-            <li><b>Board:</b> Includes animations and sounds for moves. Also, easily customizable from <a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Board/Assets/css/chessboard.css">css</a>.</li>
+            <li><b>Board:</b> Includes animations and sounds for moves. Also, easily customizable from <a href = "https://github.com/bberkay/chess-platform/blob/main/public/css/chessboard.css">css</a>.</li>
             <li><b>Move Calculation</b>: Calculation and validation of every piece.</li>
             <li><b>Special Moves:</b> <a href = "https://en.wikipedia.org/wiki/Castling">Castling</a>, <a href = "https://en.wikipedia.org/wiki/Promotion_(chess)">Promotion</a>, <a href = "https://en.wikipedia.org/wiki/En_passant">En Passant</a>.</li>
             <li><b>Score Calculation:</b> For more information check <a href = "https://en.wikipedia.org/wiki/Chess_piece_relative_value">this.</a></li>
