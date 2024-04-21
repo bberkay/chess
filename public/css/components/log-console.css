@@ -3,13 +3,17 @@
  * @see For more information about this component check file: src\Platform\Components\LogConsole.ts
  */
 
+:root{
+    --log-console-width: 400px;
+}
+
 #log-console{
     background-color:#111;
     border:1px solid #2a2a2a;
-    height:800px; /* 800px = height of chess board */
-    width:400px;
-    min-width:400px;
-    max-width:750px;
+    height: calc(var(--board-size) + 55px); /* 55px: 50px for footer(clear button and path input) and 5px for padding */
+    width: var(--log-console-width);
+    min-width: var(--log-console-width);
+    max-width: calc(var(--board-size) - 50px);
     color: #f5f5f5;
     font-family: monospace;
     resize: horizontal;
@@ -18,7 +22,7 @@
 
 /* Body */
 #log-console #log-console-body{
-    height:750px; /* 750px = height of log console - height of log console footer */
+    height: calc(var(--board-size) + 7px); /* 7px: 2px for border and 5px for padding */
     width:auto;
     overflow-y: scroll;
 }
@@ -110,10 +114,11 @@
     margin:3px;
     padding:10px;
     color: #f5f5f5;
-    width:90%;
+    width:100%;
     font-size:12px;
     font-family: monospace;
-    overflow-x: scroll;
+    overflow-x: auto;
+    text-wrap:nowrap;
 }
 
 #log-console #log-console-footer-btn button{
@@ -150,4 +155,14 @@
     font-size:12px;
     font-family: monospace;
     z-index:999;
+}
+
+/* ------------------- Responsive ------------------- */
+@media screen and (max-width: 1000px) {
+    #log-console{
+        width: 100%;
+        min-width: 0;
+        max-width: var(--board-size);
+        height: auto;
+    }
 }

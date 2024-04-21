@@ -46,9 +46,35 @@ main{
 }
 
 #notation-menu{
-    margin-left:0.5rem;
+    margin-left: 0.5rem;
+    margin-top: calc((var(--board-size) - var(--notation-table-height)) / 2);
 }
 
 #log-console{
     margin-right:0.5rem;
+}
+
+/* ------------------- Responsive ------------------- */
+@media screen and (max-width: 1000px) {
+    main{
+        flex-direction: column;
+        width: 100%;
+    }
+
+    #game-creator{
+        margin-top: 0;
+        margin-bottom: 0.5rem;
+    }
+
+    #notation-menu{
+        margin-left: 0;
+        margin-top: 0;
+    }
+
+    /* Reorder for mobile */
+    main .center { order:1; display:flex; flex-direction: column; }
+    main .center #chessboard { order: 2 }
+    main .center #game-creator { order: 1 }
+    main .right { order:2 }
+    main .left { order:3 }
 }

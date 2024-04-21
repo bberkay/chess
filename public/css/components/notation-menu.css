@@ -2,16 +2,16 @@
  * CSS codes of Notation Table component
  * @see For more information about this component check file: src\Platform\Components\NotationTable.ts
  */
-
-#notation-menu{
-    margin-top:280px; /* 280px = (height of chess board - height of notation table) / 2 */
+:root{
+    --notation-table-height: 240px;
+    --notation-table-width: 250px;
 }
 
 #notation-table{
-    max-height:240px;
+    max-height: var(--notation-table-height);
     overflow-y: scroll;
     scrollbar-width: thin;
-    width:250px;
+    width: var(--notation-table-width);
 }
 
 #notation-table table{
@@ -57,5 +57,12 @@
     font-size:15px;
     font-weight:bold;
     margin:10px 0;
-    width:250px;
+    width:100%;
+}
+
+/* ------------------- Responsive ------------------- */
+@media screen and (max-width: 1000px) {
+    #notation-table{
+        width:100%;
+    }
 }

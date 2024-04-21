@@ -60,6 +60,13 @@
     --move-to-top: 0;
 }
 
+/* ------------------- Responsive ------------------- */
+@media screen and (max-width: 1000px) {
+    :root{
+        --board-size: calc(100vw - 1.1rem);
+    }
+}
+
 /* -------------- Board Styles -------------- */
 
 /* Chessboard container styles */
@@ -104,9 +111,9 @@
 #chessboard .row-coordinate{
     position:absolute;
     right:0;
-    margin-right:5px;
+    margin-right:0.4vw;
     font-size:calc(var(--board-size) / 50);
-    margin-top:5px;
+    margin-top:0.3vw;
     font-weight: bold;
 }
 
@@ -125,8 +132,8 @@
     position:absolute;
     bottom:0;
     font-size:calc(var(--board-size) / 50);
-    margin-left:8px;
-    margin-bottom:5px;
+    margin-left:0.4vw;
+    margin-bottom:0.2vw;
     font-weight: bold;
 }
 
@@ -147,12 +154,13 @@
     background-position: center;
     background-size:cover;
     background-repeat: no-repeat;
-    margin: 10px auto 0;
-    width:calc(var(--board-size) / 10);
+    width:calc(var(--board-size) / 9);
     height:calc(var(--board-size) / 10);
     position: absolute;
-    left:10%;
     z-index:99;
+    top:50%;
+    left:50%;
+    transform: translate(-50%, -50%);
 }
 
 /* White pieces */
