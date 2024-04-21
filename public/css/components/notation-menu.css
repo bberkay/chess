@@ -8,47 +8,49 @@
 }
 
 #notation-table{
-    max-height: var(--notation-table-height);
-    overflow-y: scroll;
-    scrollbar-width: thin;
     width: var(--notation-table-width);
-}
-
-#notation-table table{
-    width:100%;
     font-size:15px;
     background-color: #111;
     color: #f5f5f5;
     border:1px solid #2a2a2a;
 }
 
-#notation-table table thead{
-    background-color: #222;
+#notation-table tbody{
+    max-height: var(--notation-table-height);
+    overflow-y: scroll;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    width:100%;
+    height: var(--notation-table-height);
+    display:block;
 }
 
-#notation-table table tr th{
-    padding:10px;
+#notation-table tr{
+    display:table;
+    table-layout: fixed;
+    width:100%;
+}
+
+#notation-table tr th{
+    padding:7px 5px;
     background-color: #222;
     border:1px solid #2a2a2a;
-    position: sticky;
-    top:3px;
-    z-index: 2;
 }
 
-#notation-table table tr td{
+#notation-table tr td{
     text-align: center;
     padding:5px;
 }
 
-/* Move Column will be shorter then Black and White Column */
-#notation-table table tr th:first-of-type{
-    padding-left:0;
-    padding-right:0;
+#notation-table tr:nth-child(odd) td{
+    background-color: #222;
+    border:1px solid #2a2a2a;
 }
 
-#notation-table table tr:nth-child(odd){
-    background-color: #222;
-}
+/* Make first column narrower than others */
+#notation-table tr th:nth-child(1), #notation-table tr td:nth-child(1) { width: 20% }
+#notation-table tr th:nth-child(2), #notation-table tr th:nth-child(3) { width: 40% }
+#notation-table tr td:nth-child(2), #notation-table tr td:nth-child(3) { width: 40% }
 
 /**
  * Scores section on the top and bottom of notation table

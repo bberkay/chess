@@ -58,18 +58,16 @@ export class NotationMenu extends Component{
     {
         this.loadHTML("notation-menu", `
                 <div class = "score-table" id = "black-player-pieces"></div>
-                <div id = "notation-table">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Move</th>
-                                <th>White</th>
-                                <th>Black</th>
-                            </tr>
-                        </thead>
-                        <tbody id = "notations"></tbody>
-                    </table>
-                </div>
+                <table id = "notation-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>White</th>
+                            <th>Black</th>
+                        </tr>
+                    </thead>
+                    <tbody id = "notations"></tbody>
+                </table>
                 <div class = "score-table" id = "white-player-pieces"></div>
         `);
         this.loadCSS("notation-menu.css");
@@ -96,10 +94,11 @@ export class NotationMenu extends Component{
                         <tr>
                             <td>${(i / 2) + 1}</td>
                             <td>${notations[i]}</td>
+                            <td></td>
                         </tr>
                     `;
                 }else{
-                    notationMenu.lastElementChild!.innerHTML += "<td>" + notations[i] + "</td>";
+                    notationMenu.lastElementChild!.innerHTML = notationMenu.lastElementChild!.innerHTML.replace("<td></td>", "<td>" + notations[i] + "</td>");
                 }
             }
         }
@@ -114,13 +113,13 @@ export class NotationMenu extends Component{
              * last row as td, otherwise create new row and add the notation as td.
              */
             if(notations.length % 2 == 0)
-                lastRow.innerHTML += `<td>${lastNotation}</td>`;
+                lastRow.innerHTML = lastRow.innerHTML.replace(`<td></td>`, `<td>${lastNotation}</td>`);
             else
-                lastRow.insertAdjacentHTML("afterend", `<tr><td>${Math.ceil(notations.length / 2)}</td><td>${lastNotation}</td></tr>`);
+                lastRow.insertAdjacentHTML("afterend", `<tr><td>${Math.ceil(notations.length / 2)}</td><td>${lastNotation}</td><td></td></tr>`);
         }
 
         // Scroll to the bottom of the table.
-        const notationTable: HTMLElement = document.getElementById("notation-table")!;
+        const notationTable: HTMLElement = document.querySelector("#notation-table tbody")!;
         notationTable.scrollTop = notationTable.scrollHeight;
 
         // Set the move count.
