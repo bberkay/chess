@@ -84,7 +84,7 @@ export class ChessEngine extends BoardManager {
      */
     public getGameAsFenNotation(): string
     {
-        Logger.save("Game returned as json notation then converted to fen notation", "getGameAsFenNotation", Source.ChessEngine);
+        Logger.save("Game returned as fen notation(converted from json notation)", "getGameAsFenNotation", Source.ChessEngine);
         return Converter.jsonToFen(BoardQueryer.getGame());
     }
 

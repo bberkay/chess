@@ -61,7 +61,7 @@ export class GameCreator extends Component{
         this.loadHTML("game-creator", `
             <div class = "game-creator-mode" data-game-creator-mode = "${MenuOperationValue.GameCreatorCustom}">
                 <div class = "border-inset"><button data-operation-type="${MenuOperationType.GameCreatorChangeMode}" data-operation-value = "${MenuOperationValue.GameCreatorTemplate}">Templates</button></div>
-                <input type="text" placeholder="FEN Notation" data-form-input-id = "${MenuOperationValue.GameCreatorCustom}">
+                <input type="text" placeholder="FEN Notation" data-form-input-id = "${MenuOperationValue.GameCreatorCustom}" value = "${this.chess.getGameAsFenNotation()}">
                 <div class = "border-inset"><button data-operation-type="${MenuOperationType.GameCreatorCreate}" data-operation-value = "${MenuOperationValue.GameCreatorCustom}">Load</button></div>
             </div>
             <div class = "game-creator-mode" data-game-creator-mode = "${MenuOperationValue.GameCreatorTemplate}">
@@ -120,6 +120,14 @@ export class GameCreator extends Component{
         response.innerHTML = JSON.stringify(this.chess.getLogs());
         response.style.visibility = "hidden";
         document.body.appendChild(response);
+    }
+
+    /**
+     * This function shows the FEN notation on the form.
+     */
+    public show(fenNotation: string): void
+    {
+        (document.querySelector(`[data-form-input-id="${MenuOperationValue.GameCreatorCustom}"]`) as HTMLInputElement).value = fenNotation;
     }
 
     /**

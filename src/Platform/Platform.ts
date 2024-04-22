@@ -48,9 +48,10 @@ export class Platform{
     {
         document.querySelectorAll("[data-square-id]").forEach(square => {
             square.addEventListener("mousedown", () => {
-                // Update notation menu and log console every time when user click a square.
-                this.notationMenu!.update(this.chess.getNotation(), this.chess.getScores());
-                this.logConsole!.print(this.chess.getLogs());
+                // Update components every time a square is clicked.
+                this.notationMenu?.update(this.chess.getNotation(), this.chess.getScores());
+                this.logConsole?.print(this.chess.getLogs());
+                this.gameCreator?.show(this.chess.getGameAsFenNotation());
             });
         });
     }
@@ -81,8 +82,9 @@ export class Platform{
      */
     private updateComponentsForNewGame(): void
     {
-        this.notationMenu!.clear();
-        this.logConsole!.clear();
+        this.notationMenu?.clear();
+        this.logConsole?.clear();
+        this.gameCreator?.clear();
         this.initBoardListener();
 
         // Wait until game creator response is ready.

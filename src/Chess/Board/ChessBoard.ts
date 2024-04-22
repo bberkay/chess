@@ -523,16 +523,19 @@ export class ChessBoard {
             document.body.appendChild(piece);
             piece.style.top = `${pieceRect.top}px`;
             piece.style.left = `${pieceRect.left}px`;
-            piece.style.animation = "move 0.3s ease-in-out forwards";
+            piece.style.transform = "none";
+            piece.style.animation = "move 5s ease-in-out forwards";
             piece.style.setProperty("--move-from-left", `${pieceRect.left}px`);
-            piece.style.setProperty("--move-from-top", `${pieceRect.top - 10}px`);
-            piece.style.setProperty("--move-to-left", `${toSquare.getBoundingClientRect().left + 10}px`);
-            piece.style.setProperty("--move-to-top", `${toSquare.getBoundingClientRect().top}px`);
+            piece.style.setProperty("--move-from-top", `${pieceRect.top}px`);
+            piece.style.setProperty("--move-to-left", `calc(${toSquare.getBoundingClientRect().left}px)`);
+            piece.style.setProperty("--move-to-top", `calc(${toSquare.getBoundingClientRect().top}px)`);
+            console.log(pieceRect.left, pieceRect.top, toSquare.getBoundingClientRect().left, toSquare.getBoundingClientRect().top);
             piece.addEventListener("animationend", () => {
                 toSquare.appendChild(piece);
                 piece.style.animation = "";
                 piece.style.top = "";
                 piece.style.left = "";
+                piece.style.transform = "";
                 resolve();
             });
         });
