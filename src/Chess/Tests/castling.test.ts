@@ -127,7 +127,6 @@ test('Castling Moves', () => {
             for(const move of game.moves)
             {
                 engine.playMove(move.from, move.to);
-                console.log(engine.getLogs());
             }
         }
 

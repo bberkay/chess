@@ -20,10 +20,10 @@ const games: Test[] = [
         expectation: GameStatus.Draw
     },
     {
-        // https://www.chessgames.com/perl/chessgame?gid=1106921&comp=1
-        title: "Robert James Fischer vs Tigran V Petrosian, (1971), Buenos Aires ARG, rd 3, Oct-07 ",
+        // https://www.chessgames.com/perl/chessgame?gid=2694350
+        title: "Ian Nepomniachtchi vs Hikaru Nakamura, World Championship Candidates (2024), Toronto CAN, rd 13, Apr-20",
         board: StartPosition.Standard,
-        moves: [{from:53,to:37},{from:13,to:21},{from:52,to:36},{from:12,to:28},{from:58,to:43},{from:7,to:22},{from:59,to:31},{from:28,to:37},{from:43,to:37},{from:6,to:13},{from:31,to:22},{from:15,to:22},{from:55,to:47},{from:22,to:30},{from:37,to:43},{from:13,to:22},{from:63,to:53},{from:2,to:19},{from:36,to:28},{from:21,to:28},{from:43,to:28},{from:22,to:50},{from:62,to:55},{from:5,to:8},{from:61,to:64},{from:50,to:8},{from:53,to:38},{from:19,to:29},{from:60,to:32},{from:29,to:23},{from:57,to:60},{from:11,to:19},{from:28,to:45},{from:4,to:22},{from:63,to:64},{from:8,to:15},{from:55,to:48},{from:23,to:13},{from:60,to:44},{from:3,to:21},{from:62,to:60},{from:15,to:24},{from:44,to:36},{from:24,to:38},{from:36,to:38},{from:1,to:4},{from:60,to:4},{from:6,to:4},{from:48,to:30},{from:13,to:30},{from:45,to:30},{from:4,to:28},{from:47,to:39},{from:21,to:30},{from:39,to:30},{from:16,to:24},{from:56,to:48},{from:7,to:16},{from:32,to:53},{from:22,to:29},{from:53,to:32},{from:29,to:22},{from:32,to:53},{from:28,to:29},{from:53,to:44},{from:29, to:28}, {from:44, to:53}],
+        moves: [{from: 53, to: 37},{from: 13, to: 29},{from: 63, to: 46},{from: 2, to: 19},{from: 62, to: 26},{from: 9, to: 17},{from: 26, to: 33},{from: 6, to: 27},{from: 61, to: 64},{from: 7, to: 13},{from: 51, to: 43},{from: 13, to: 23},{from: 52, to: 36},{from: 27, to: 9},{from: 59, to: 31},{from: 14, to: 22},{from: 31, to: 45},{from: 5, to: 8},{from: 58, to: 52},{from: 7, to: 8},{from: 62, to: 61},{from: 29, to: 36},{from: 46, to: 36},{from: 19, to: 36},{from: 45, to: 36},{from: 43, to: 36},{from: 12, to: 28},{from: 37, to: 28},{from: 4, to: 28},{from: 52, to: 37},{from: 28, to: 4},{from: 33, to: 51},{from: 22, to: 30},{from: 37, to: 27},{from: 10, to: 18},{from: 27, to: 44},{from: 3, to: 10},{from: 44, to: 29},{from: 4, to: 31},{from: 36, to: 28},{from: 1, to: 4},{from: 51, to: 42},{from: 11, to: 27},{from: 29, to: 46},{from: 31, to: 32},{from: 46, to: 29},{from: 32, to: 31},{from: 29, to: 46},{from: 31, to: 32},{from: 46, to: 29},{from: 32, to: 31}],
         expectation: GameStatus.Draw,
     }
 ];

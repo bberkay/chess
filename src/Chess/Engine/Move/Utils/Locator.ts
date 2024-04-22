@@ -54,7 +54,6 @@ export class Locator{
      * @example getRelative(Square.e4, Square.c6), return MoveRoute.TopLeft
      * @example getRelative(Square.e4, Square.e6), return MoveRoute.Top
      *
-     * @see for more information, check src/Engine/Utils/Locator.ts
      */
     static getRelative(relative: Square, relativeTo: Square): MoveRoute | null
     {
@@ -89,16 +88,8 @@ export class Locator{
          *
          * @see For more information about square numbers, check square enum in src/Types.ts
          */
-        if(Math.abs(Locator.getColumn(relative) - Locator.getRow(relative)) == Math.abs(Locator.getColumn(relativeTo) - Locator.getRow(relativeTo)))
-        {
-            const distance: number = Math.abs(relativeTo! - relative);
-            if(distance % 9 == 0)
-                return relativeRoute.LeftDiagonal; // Top Left to Bottom Right
-            else if(distance % 7 == 0)
-                return relativeRoute.RightDiagonal; // Top Right to Bottom Left
-        }
-
-        return null;
+        const distance: number = Math.abs(relative - relativeTo);
+        return distance % 7 == 0 ? relativeRoute.RightDiagonal : distance % 9 == 0 ? relativeRoute.LeftDiagonal : null;
     }
 
     /**

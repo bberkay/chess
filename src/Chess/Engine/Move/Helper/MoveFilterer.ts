@@ -36,7 +36,7 @@ export class MoveFilterer{
 
         // Get the threats of the king.
         this.threatsOfKing = this._findThreatsOfKing(pieceColor);
-
+        
         // If king threatened by multiple enemies then king can't protect so mandatory moves calculation is unnecessary.
         if(this.threatsOfKing.length > 1)
             return null;
@@ -60,8 +60,8 @@ export class MoveFilterer{
         }
 
         // If enemy is not knight then find the dangerous route of the threat because it can be blocked.
-        const dangerousRouteOfThreat: Square[] = RouteCalculator.getRouteBySquare(this.threatsOfKing[0])[Locator.getRelative(squareOfKing!, this.threatsOfKing[0])!]!
-
+        const dangerousRouteOfThreat: Square[] = RouteCalculator.getRouteBySquare(this.threatsOfKing[0])[Locator.getRelative(squareOfKing, this.threatsOfKing[0])!]!
+     
         // If there is no square between king and enemy then there will be no block so return null.
         if(!dangerousRouteOfThreat || dangerousRouteOfThreat.length < 1)
             return null;
