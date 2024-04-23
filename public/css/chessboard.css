@@ -158,9 +158,8 @@
     height:calc(var(--board-size) / 10);
     position: absolute;
     z-index:99;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
+    left:5%;
+    top:10%;
 }
 
 /* White pieces */

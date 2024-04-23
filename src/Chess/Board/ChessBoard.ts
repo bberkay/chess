@@ -520,21 +520,21 @@ export class ChessBoard {
 
             // Animate the move.
             let pieceRect: DOMRect = piece.getBoundingClientRect();
+            const marginLeft: number = Math.abs(piece.parentElement!.getBoundingClientRect().left - pieceRect.left);
+            const marginTop: number = Math.abs(piece.parentElement!.getBoundingClientRect().top - pieceRect.top);
             document.body.appendChild(piece);
             piece.style.top = `${pieceRect.top}px`;
             piece.style.left = `${pieceRect.left}px`;
             piece.style.animation = "move 0.3s ease-in-out forwards";
-            piece.style.setProperty("transform", "translate(0, 0)");
             piece.style.setProperty("--move-from-left", `${pieceRect.left}px`);
             piece.style.setProperty("--move-from-top", `${pieceRect.top}px`);
-            piece.style.setProperty("--move-to-left", `${toSquare.getBoundingClientRect().left}px`);
-            piece.style.setProperty("--move-to-top", `${toSquare.getBoundingClientRect().top}px`);
+            piece.style.setProperty("--move-to-left", `calc(${marginLeft}px + ${toSquare.getBoundingClientRect().left}px)`);
+            piece.style.setProperty("--move-to-top", `calc(${marginTop}px + ${toSquare.getBoundingClientRect().top}px)`);
             piece.addEventListener("animationend", () => {
                 toSquare.appendChild(piece);
                 piece.style.animation = "";
                 piece.style.top = "";
                 piece.style.left = "";
-                piece.style.transform = "";
                 resolve();
             });
         });
