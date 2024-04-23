@@ -1,14 +1,22 @@
-/* ------------------- Body ------------------- */
+/* ------------------- Themes ------------------- */
 body{
-    background-color: #f5f5f5;
-    color: #141414;
-    font-family: 'Roboto', sans-serif;
-    display: flex;
+    --bg-color: #f5f5f5;
 }
 
 body.dark-mode{
-    background-color: #141414;
-    color: #f5f5f5;
+    --bg-color: #141414;
+    --bg-color--light: #222;
+    --bg-color--dark: #111;
+    --text-color: #f5f5f5;
+    --border-color: #2a2a2a;
+}
+
+/* ------------------- Body ------------------- */
+body{
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Roboto', sans-serif;
+    display: flex;
 }
 
 /* Scroll */

@@ -120,7 +120,7 @@
 
 #log-console #log-console-body .tooltip-container--top{
     top: auto;
-    bottom: 100%;
+    bottom: calc(100% + 5px);
 }
 
 /* ------------------- Footer ------------------- */
