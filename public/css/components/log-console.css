@@ -65,6 +65,11 @@
     display:none;
 }
 
+#log-console #log-console-body .tooltip-toggle:hover{
+    background-color: rgba(102, 102, 102, 0.7);
+    /*background-color: rgba(0, 0, 255, 0.75);*/
+}
+
 #log-console #log-console-body .tooltip-toggle:hover .tooltip-container{
     display:block;
 }
@@ -95,6 +100,7 @@
 
 #log-console #log-console-body .tooltip-container--top{
     top: auto;
+    bottom: 100%;
 }
 
 /* ------------------- Footer ------------------- */

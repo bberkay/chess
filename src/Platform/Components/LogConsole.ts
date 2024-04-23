@@ -78,31 +78,6 @@ export class LogConsole extends Component{
     }
 
     /**
-     * This function initializes the listeners.
-     */
-    private initListenerForTooltips(): void
-    {
-        const squares: NodeListOf<HTMLElement> = document.querySelectorAll(".square");
-
-        // Show square ids when the tooltip is hovered.
-        document.querySelectorAll(".tooltip").forEach((element) => {
-            // Show square ids on squares
-            element.addEventListener("mouseover", () => {
-                squares.forEach((square: HTMLElement) => {
-                    square.innerHTML += `<div class = "square-id">${square.getAttribute("data-square-id")}</div>`;
-                });
-            });
-
-            // Hide square ids
-            element.addEventListener("mouseout", () => {
-                document.querySelectorAll(".square-id").forEach((element) => {
-                    element.remove();
-                });
-            });
-        });
-    }
-
-    /**
      * Convert the values between "[]" in log message to tooltips.
      *
      * For example:
@@ -125,34 +100,8 @@ export class LogConsole extends Component{
             return JSON.stringify(value, undefined, 2);
         }
 
-        /**
-         * This function calculates the opening location of the tooltip.
-         * If the tooltip is out of the log list, this function returns
-         * the location where the tooltip should be opened like ["top", "right"]
-         * or ["bottom", "left"] etc.
-         */
-        function calculateOpeningLocation(tooltip: HTMLElement): string[]
-        {
-            let openingLocation = [];
-            const logListRect: DOMRect = document.getElementById("log-list")!.getBoundingClientRect();
-            const tooltipRect: DOMRect = tooltip.getBoundingClientRect();
-
-            // Is the tooltip out of the log list?
-            if(tooltipRect.bottom <= logListRect.bottom && tooltipRect.top >= logListRect.top) return [];
-
-            // Vertical location of the tooltip
-            if (tooltipRect.top > Math.abs(logListRect.top + logListRect.height ) / 2) openingLocation.push("bottom");
-            else openingLocation.push("top");
-
-            // Horizontal location of the tooltip
-            if (tooltipRect.left > Math.abs(logListRect.left + logListRect.width) / 2) openingLocation.push("right");
-            else openingLocation.push("left");
-
-            return openingLocation;
-        }
-
         // Find the log list element and the last logs in the logs array.
-        let logListElement: HTMLElement = document.getElementById("log-list")!;
+        const logListElement: HTMLElement = document.getElementById("log-list")!;
         for(const log of logs){
             // Get the words in the log message.
             const words: string[] = log.message.split(" ");
@@ -178,31 +127,89 @@ export class LogConsole extends Component{
                     words[i] = words[i].replace(words[i].slice(0, words[i].indexOf("[") + 1), "");
                     words[i] = words[i].slice(0, words[i].lastIndexOf("]"));
                     const tooltipVariable: string = `<div class = "tooltip-container"><div class = "tooltip-text"><pre>${parseAndStringify(words[i])}</pre></div></div>`;
-                    log.message = log.message.replace(originalWord, `<div class = 'tooltip-toggle'>${originalWord.replace(`[${words[i]}]`, "")} ${tooltipVariable}</div>`);
+                    log.message = log.message.replace(
+                        originalWord, 
+                        `<div class = 'tooltip-toggle'>${originalWord.replace(`[${words[i]}]`, "")} ${tooltipVariable}</div>`
+                    );
                 }
             }
          
             // Add log to the log list.
             const logElement = document.createElement("li");
-            logElement.innerHTML = `&#x2022 <strong>[${log.source.replace(".ts", "").split("/").pop()}] </strong><span>${log.message}</span>`;
-            logElement.addEventListener("mouseover", () => { document.getElementById("log-file")!.innerHTML = log.source });
+            logElement.innerHTML = `&#x2022 <strong data-log-source="${log.source}">[${log.source.replace(".ts", "").split("/").pop()}] </strong><span>${log.message}</span>`;
             logListElement.appendChild(logElement);
-
-            // Change the location of the tooltip if it is out of the log list.
-            logElement.querySelectorAll(".tooltip-toggle")?.forEach((element) => {
-                let locations: string[] = calculateOpeningLocation((element as HTMLElement));
-                if(locations.length == 0) return;
-                locations.forEach((location) => { element.querySelector(".tooltip-container")!.classList.add(`tooltip-container--${location}`) });
-            });
         }
-
 
         // Scroll to the bottom of the log list.
         logListElement!.innerHTML += "<hr>";
         document.getElementById("log-console-body")!.scrollTop = logListElement!.scrollHeight;
-                
-        // Add event listeners for tooltips.
-        this.initListenerForTooltips();
+    }
+
+    /**
+     * This function adds event listeners to the log messages.
+     * Why this function separated from the _createLogMessages function?
+     * Since the tooltip toggles are created dynamically, we need to add event listeners
+     * to the tooltip toggles after the tooltip toggles are created.
+     */
+    private _createLogMessagesEventListeners(): void
+    {
+        /**
+         * This function calculates the opening location of the tooltip.
+         * If the tooltip is out of the log list, this function returns
+         * the location where the tooltip should be opened like ["top", "right"]
+         * or ["bottom", "left"] etc.
+         */
+        function calculateOpeningLocation(tooltip_toggle: HTMLElement): string[]
+        {
+            let openingLocation = [];
+            const logBodyRect: DOMRect = document.getElementById("log-console-body")!.getBoundingClientRect();
+            const tooltipRect: DOMRect = (tooltip_toggle.querySelector(".tooltip-text") as HTMLElement).getBoundingClientRect();
+
+            // Vertical location of the tooltip
+            if (tooltipRect.bottom >= logBodyRect.bottom) openingLocation.push("top");
+            else openingLocation.push("bottom");
+
+            // Horizontal location of the tooltip
+            if (tooltipRect.left <= logBodyRect.left) openingLocation.push("right");
+            else if (tooltipRect.right >= logBodyRect.right) openingLocation.push("left");
+            else openingLocation.push("center");
+
+            return openingLocation;
+        }
+
+        // Add event listeners to the tooltip toggles.
+        const squares: NodeListOf<HTMLElement> = document.querySelectorAll(".square");
+        document.querySelectorAll(".tooltip-toggle").forEach((tooltip_toggle) => {
+            // square ids and tooltip location added when the mouse is over the tooltip.
+            tooltip_toggle.addEventListener("mouseover", () => {
+                squares.forEach((square: HTMLElement) => { 
+                    square.innerHTML += `<div class = "square-id">${square.getAttribute("data-square-id")}</div>` 
+                });            
+
+                const openingLocation: string[] = calculateOpeningLocation((tooltip_toggle as HTMLElement));
+                if(openingLocation.length == 0) return;
+                tooltip_toggle.querySelector(".tooltip-container")!.classList.add(
+                    `tooltip-container--${openingLocation[0]}`, 
+                    `tooltip-container--${openingLocation[1]}`
+                );
+            });
+            
+            // removed
+            tooltip_toggle.addEventListener("mouseout", () => {
+                document.querySelectorAll(".square-id").forEach((element) => { element.remove() });
+                tooltip_toggle.querySelector(".tooltip-container")!.classList.remove(
+                    "tooltip-container--top", "tooltip-container--bottom", "tooltip-container--left", "tooltip-container--right", "tooltip-container--center"
+                );
+            });
+        });
+       
+        // Add event listeners to the log sources.
+        const logSourceAddressBar: HTMLElement = document.getElementById("log-file")!;
+        document.querySelectorAll("[data-log-source]").forEach((logSource) => {
+            logSource.parentElement!.addEventListener("mouseover", () => { 
+                logSourceAddressBar.innerHTML = logSource.getAttribute("data-log-source")! 
+            });
+        });
     }
 
     /**
@@ -230,6 +237,7 @@ export class LogConsole extends Component{
 
         // Print the logs to the log console.
         this._createLogMessages(lastLogs);
+        this._createLogMessagesEventListeners();
 
         // Update the log count.
         this.logCounter += lastLogs.length;
