@@ -20,6 +20,16 @@
     overflow: hidden;
 }
 
+/* ------------------- Responsive ------------------- */
+@media screen and (max-width: 1000px) {
+    #log-console{
+        width: 100%;
+        min-width: 0;
+        max-width: var(--board-size);
+        height: auto;
+    }
+}
+
 /* Body */
 #log-console #log-console-body{
     height: calc(var(--board-size) + 7px); /* 7px: 2px for border and 5px for padding */
@@ -67,7 +77,6 @@
 
 #log-console #log-console-body .tooltip-toggle:hover{
     background-color: rgba(102, 102, 102, 0.7);
-    /*background-color: rgba(0, 0, 255, 0.75);*/
 }
 
 #log-console #log-console-body .tooltip-toggle:hover .tooltip-container{
@@ -89,6 +98,17 @@
     overflow-y: auto;
     margin-top: 5px;
     position: relative;
+}
+
+/* Responsive */
+@media screen and (max-width: 1000px) {
+    #log-console #log-console-body .tooltip-text{
+        max-height: calc(var(--board-size) / 1.5);
+    }
+}
+
+#log-console #log-console-body .tooltip-text span:hover{
+    text-decoration: none;
 }
 
 /* Opening locations of tooltip */
@@ -158,14 +178,4 @@
     font-size:12px;
     font-family: monospace;
     z-index:999;
-}
-
-/* ------------------- Responsive ------------------- */
-@media screen and (max-width: 1000px) {
-    #log-console{
-        width: 100%;
-        min-width: 0;
-        max-width: var(--board-size);
-        height: auto;
-    }
 }
