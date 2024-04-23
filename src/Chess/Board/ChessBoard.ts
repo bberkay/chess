@@ -523,8 +523,8 @@ export class ChessBoard {
             document.body.appendChild(piece);
             piece.style.top = `${pieceRect.top}px`;
             piece.style.left = `${pieceRect.left}px`;
-            piece.style.setProperty("transform", "translate(0, 0)");
             piece.style.animation = "move 0.3s ease-in-out forwards";
+            piece.style.setProperty("transform", "translate(0, 0)");
             piece.style.setProperty("--move-from-left", `${pieceRect.left}px`);
             piece.style.setProperty("--move-from-top", `${pieceRect.top}px`);
             piece.style.setProperty("--move-to-left", `${toSquare.getBoundingClientRect().left}px`);

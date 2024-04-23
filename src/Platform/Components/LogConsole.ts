@@ -110,7 +110,7 @@ export class LogConsole extends Component{
      * Return: <span class = "variable-tooltip" data-tooltip-value="[WhiteInCheck, BlackVictory]>Enums</span>
      * are found by player's <span class = "variable-tooltip" data-tooltip-value="[White]">color</span>
      */
-    private _createTooltip(log: string): string
+    private _createLogMessages(logs: Array<{source: string, message: string}>): void
     {
         /**
          * This function parses and stringifies the value, if
@@ -125,35 +125,84 @@ export class LogConsole extends Component{
             return JSON.stringify(value, undefined, 2);
         }
 
-        // Get the words in the log message.
-        const words: string[] = log.split(" ");
-        for(let i = 0; i < words.length; i++){
-            const originalWord: string = words[i];
+        /**
+         * This function calculates the opening location of the tooltip.
+         * If the tooltip is out of the log list, this function returns
+         * the location where the tooltip should be opened like ["top", "right"]
+         * or ["bottom", "left"] etc.
+         */
+        function calculateOpeningLocation(tooltip: HTMLElement): string[]
+        {
+            let openingLocation = [];
+            const logListRect: DOMRect = document.getElementById("log-list")!.getBoundingClientRect();
+            const tooltipRect: DOMRect = tooltip.getBoundingClientRect();
 
-            /**
-             * When we split the log message with " " character, the values between "[]" will be split.
-             * So we need to merge the split values. For example, if the log message is:
-             * Enums[WhiteInCheck, BlackVictory] are found by player's color[White].
-             * The words array will be:
-             * ["Enums[WhiteInCheck,", "BlackVictory]", "are", "found", "by", "player's", "color[White]."]
-             * So we need to merge "Enums[WhiteInCheck," and "BlackVictory]" to "Enums[WhiteInCheck, BlackVictory]".
-             * And we need to remove the "BlackVictory]" from the array.
-             */
-            if(words[i].includes("[") && !words[i].includes("]")){
-                words[i] += " " + words[i + 1];
-                log = log.replace(words[i + 1], "");
-            }
+            // Is the tooltip out of the log list?
+            if(tooltipRect.bottom <= logListRect.bottom && tooltipRect.top >= logListRect.top) return [];
 
-            // Convert the values between "[]" to tooltips.
-            if(words[i].includes("[") && words[i].includes("]")){
-                words[i] = words[i].replace(words[i].slice(0, words[i].indexOf("[") + 1), "");
-                words[i] = words[i].slice(0, words[i].lastIndexOf("]"));
-                const tooltipVariable: string = `<div class = "tooltip-text"><pre>${parseAndStringify(words[i])}</pre><i></i></div>`;
-                log = log.replace(originalWord, `<div class = 'tooltip'>${originalWord.replace(`[${words[i]}]`, "")} ${tooltipVariable}</div>`);
-            }
+            // Vertical location of the tooltip
+            if (tooltipRect.top > Math.abs(logListRect.top + logListRect.height ) / 2) openingLocation.push("bottom");
+            else openingLocation.push("top");
+
+            // Horizontal location of the tooltip
+            if (tooltipRect.left > Math.abs(logListRect.left + logListRect.width) / 2) openingLocation.push("right");
+            else openingLocation.push("left");
+
+            return openingLocation;
         }
 
-        return log;
+        // Find the log list element and the last logs in the logs array.
+        let logListElement: HTMLElement = document.getElementById("log-list")!;
+        for(const log of logs){
+            // Get the words in the log message.
+            const words: string[] = log.message.split(" ");
+            for(let i = 0; i < words.length; i++){
+                const originalWord: string = words[i];
+
+                /**
+                 * When we split the log message with " " character, the values between "[]" will be split.
+                 * So we need to merge the split values. For example, if the log message is:
+                 * Enums[WhiteInCheck, BlackVictory] are found by player's color[White].
+                 * The words array will be:
+                 * ["Enums[WhiteInCheck,", "BlackVictory]", "are", "found", "by", "player's", "color[White]."]
+                 * So we need to merge "Enums[WhiteInCheck," and "BlackVictory]" to "Enums[WhiteInCheck, BlackVictory]".
+                 * And we need to remove the "BlackVictory]" from the array.
+                 */
+                if(words[i].includes("[") && !words[i].includes("]")){
+                    words[i] += " " + words[i + 1];
+                    log.message = log.message.replace(words[i + 1], "");
+                }
+
+                // Convert the values between "[]" to tooltips.
+                if(words[i].includes("[") && words[i].includes("]")){
+                    words[i] = words[i].replace(words[i].slice(0, words[i].indexOf("[") + 1), "");
+                    words[i] = words[i].slice(0, words[i].lastIndexOf("]"));
+                    const tooltipVariable: string = `<div class = "tooltip-container"><div class = "tooltip-text"><pre>${parseAndStringify(words[i])}</pre></div></div>`;
+                    log.message = log.message.replace(originalWord, `<div class = 'tooltip-toggle'>${originalWord.replace(`[${words[i]}]`, "")} ${tooltipVariable}</div>`);
+                }
+            }
+         
+            // Add log to the log list.
+            const logElement = document.createElement("li");
+            logElement.innerHTML = `&#x2022 <strong>[${log.source.replace(".ts", "").split("/").pop()}] </strong><span>${log.message}</span>`;
+            logElement.addEventListener("mouseover", () => { document.getElementById("log-file")!.innerHTML = log.source });
+            logListElement.appendChild(logElement);
+
+            // Change the location of the tooltip if it is out of the log list.
+            logElement.querySelectorAll(".tooltip-toggle")?.forEach((element) => {
+                let locations: string[] = calculateOpeningLocation((element as HTMLElement));
+                if(locations.length == 0) return;
+                locations.forEach((location) => { element.querySelector(".tooltip-container")!.classList.add(`tooltip-container--${location}`) });
+            });
+        }
+
+
+        // Scroll to the bottom of the log list.
+        logListElement!.innerHTML += "<hr>";
+        document.getElementById("log-console-body")!.scrollTop = logListElement!.scrollHeight;
+                
+        // Add event listeners for tooltips.
+        this.initListenerForTooltips();
     }
 
     /**
@@ -176,32 +225,14 @@ export class LogConsole extends Component{
         if(this.getLogCount() > 75)
             this.clear();
 
-        // Find the log list element and the last logs in the logs array.
-        let logListElement: HTMLElement = document.getElementById("log-list")!;
         const lastLogs: Array<{source: string, message: string}> = logs.slice(this.logCounter);
+        if(lastLogs.length == 0) return;
 
-        // Add the log to the log list.
-        for(const log of lastLogs) {
-            const source = log.source.replace(".ts", "").split("/").pop();
-            logListElement!.innerHTML +=
-                `<li onmouseover="document.getElementById('log-file').innerHTML = '${log.source}'">
-                       &#x2022 <strong>[${source}] </strong><span>${this._createTooltip(log.message)}</span>
-                </li>`;
-        }
+        // Print the logs to the log console.
+        this._createLogMessages(lastLogs);
 
-        if(lastLogs.length != 0){
-            // Add a horizontal line to the log list for separating the logs.
-            logListElement!.innerHTML += "<hr>";
-
-            // Scroll to the bottom of the log list.
-            document.getElementById("log-console-body")!.scrollTop = logListElement!.scrollHeight;
-
-            // Update the log count.
-            this.logCounter += lastLogs.length;
-        }
-
-        // Initialize the listeners when the dom is loaded.
-        this.initListenerForTooltips();
+        // Update the log count.
+        this.logCounter += lastLogs.length;
     }
 
     /**
