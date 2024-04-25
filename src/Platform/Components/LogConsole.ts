@@ -166,12 +166,12 @@ export class LogConsole extends Component{
             const tooltipRect: DOMRect = (tooltip_toggle.querySelector(".tooltip-text") as HTMLElement).getBoundingClientRect();
 
             // Vertical location of the tooltip
-            if (tooltipRect.bottom >= logBodyRect.bottom) openingLocation.push("top");
+            if (tooltipRect.bottom > logBodyRect.bottom) openingLocation.push("top");
             else openingLocation.push("bottom");
 
             // Horizontal location of the tooltip
-            if (tooltipRect.left <= logBodyRect.left) openingLocation.push("right");
-            else if (tooltipRect.right >= logBodyRect.right) openingLocation.push("left");
+            if (tooltipRect.left < logBodyRect.left) openingLocation.push("right");
+            else if (tooltipRect.right > logBodyRect.right) openingLocation.push("left");
             else openingLocation.push("center");
 
             return openingLocation;
