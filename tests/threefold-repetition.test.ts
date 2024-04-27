@@ -5,14 +5,14 @@
  */
 
 import { expect, test } from 'vitest';
-import { Test } from './Types';
-import { GameStatus, Square, StartPosition } from '../Types';
-import { ChessEngine } from '../Engine/ChessEngine';
+import { TestGame } from './types';
+import { GameStatus, StartPosition } from '@Chess/Types';
+import { ChessEngine } from '@Chess/Engine/ChessEngine';
 
 /**
  * Board with expected repetition moves.
  */
-const games: Test[] = [
+const games: TestGame[] = [
     {
         title: "Threefold repetition test",
         board: StartPosition.Standard,

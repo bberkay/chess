@@ -6,12 +6,12 @@
  */
 
 import { expect, test } from 'vitest';
-import { Test } from './Types';
-import {Moves, MoveType, Square} from '../Types';
-import { ChessEngine } from '../Engine/ChessEngine';
+import { TestGame } from './types';
+import { Moves, MoveType, Square } from '@Chess/Types';
+import { ChessEngine } from '@Chess/Engine/ChessEngine';
 
 
-const mandatoryMovesTests: Test[] = [
+const mandatoryMovesTests: TestGame[] = [
     {
         title: "White King must move because threat can't be captured",
         board: "7K/5R2/6n1/8/8/8/8/4k3 w - - 0 1",

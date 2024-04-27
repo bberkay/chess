@@ -6,14 +6,14 @@
  */
 
 import { expect, test } from 'vitest';
-import { Test } from './Types';
-import { MoveType, Square, StartPosition } from '../Types';
-import { ChessEngine } from '../Engine/ChessEngine';
+import { TestGame } from './types';
+import { MoveType, Square, StartPosition } from '@Chess/Types';
+import { ChessEngine } from '@Chess/Engine/ChessEngine';
 
 /**
  * Board with expected moves for the king on h8.
  */
-const game: Test = {
+const game: TestGame = {
     title: "Forbidden Moves Test For King on h8",
     board: StartPosition.KingForbiddenMove,
     expectation: [Square.g8]

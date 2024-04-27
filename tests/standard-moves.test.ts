@@ -5,14 +5,14 @@
  */
 
 import { expect, test } from 'vitest';
-import { Test } from './Types';
-import {Moves, MoveType, Square} from '../Types';
-import { ChessEngine } from '../Engine/ChessEngine';
+import { TestGame } from './types';
+import { Moves, MoveType, Square } from '@Chess/Types';
+import { ChessEngine } from '@Chess/Engine/ChessEngine';
 
 /**
  * Random game with expected moves for some piece.
  */
-const game: Test = {
+const game: TestGame = {
     title: "Standard Moves",
     board: 'rnbqkbnr/pppppppp/8/6B1/3P2B1/2NQ3P/PPP1PPP1/R3K1NR w KQkq - 0 1',
     expectation: [

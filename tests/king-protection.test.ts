@@ -6,14 +6,14 @@
  */
 
 import { expect, test } from 'vitest';
-import { Test } from './Types';
-import {Moves, MoveType, Square, StartPosition} from '../Types';
-import { ChessEngine } from '../Engine/ChessEngine';
+import { TestGame } from './types';
+import { Moves, MoveType, Square, StartPosition } from '@Chess/Types';
+import { ChessEngine } from '@Chess/Engine/ChessEngine';
 
 /**
  * Board with expected moves for protectors of the king.
  */
-const games: Test[] = [
+const games: TestGame[] = [
     {
         title: "King Protection with Rook from Enemy Queen",
         board: StartPosition.ProtectKing,

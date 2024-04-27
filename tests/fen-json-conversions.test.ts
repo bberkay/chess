@@ -5,14 +5,14 @@
  */
 
 import { expect, test } from 'vitest';
-import { Test } from './Types';
-import { Converter } from '../Utils/Converter';
-import { Color, PieceType, Square, StartPosition } from '../Types';
+import { TestGame } from './types';
+import { Converter } from '@Chess/Utils/Converter';
+import { Color, PieceType, Square, StartPosition } from '@Chess/Types';
 
 /**
  * FEN Notation tests with expected JSON notation.
  */
-const fenToJsonTest: Test[] = [
+const fenToJsonTest: TestGame[] = [
     {
         title: "Standard Position",
         board: StartPosition.Standard,

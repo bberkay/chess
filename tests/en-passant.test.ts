@@ -6,14 +6,14 @@
  */
 
 import { expect, test } from 'vitest';
-import { Test } from './Types';
-import { MoveType, Square, StartPosition } from '../Types';
-import { ChessEngine } from '../Engine/ChessEngine';
+import { TestGame } from './types';
+import { MoveType, Square, StartPosition } from '@Chess/Types';
+import { ChessEngine } from '@Chess/Engine/ChessEngine';
 
 /**
  * Every En Passant Test Games
  */
-const enPassantTestGames: Test[] = [
+const enPassantTestGames: TestGame[] = [
     {
         title: "Possible En Passant Left Test",
         board: StartPosition.EnPassantLeft,

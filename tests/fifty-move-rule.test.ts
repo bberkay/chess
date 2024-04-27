@@ -5,16 +5,16 @@
  */
 
 import { expect, test } from 'vitest';
-import { Test } from './Types';
-import { ChessEngine } from '../Engine/ChessEngine';
-import { GameStatus, Square, StartPosition } from "../Types";
-import { BoardQueryer } from "../Engine/Board/BoardQueryer";
+import { TestGame } from './types';
+import { ChessEngine } from '@Chess/Engine/ChessEngine';
+import { GameStatus, Square, StartPosition } from "@Chess/Types";
+import { BoardQueryer } from "@Chess/Engine/Board/BoardQueryer";
 
 /**
  * Test the fifty-move rule (50 moves without a capture
  * or a pawn move is a draw)
  */
-const fiftyMoveRuleTestGames: Test[] = [
+const fiftyMoveRuleTestGames: TestGame[] = [
     {
         title: "Fifty-move rule is reset by capture/pawn move",
         board: '3k4/1r6/8/5n2/8/6N1/1P6/4K3 w - - 0 1',

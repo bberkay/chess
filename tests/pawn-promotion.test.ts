@@ -5,16 +5,16 @@
  */
 
 import { expect, test } from 'vitest';
-import { Test } from './Types';
-import { Square, StartPosition } from '../Types';
-import { ChessEngine } from '../Engine/ChessEngine';
+import { TestGame } from './types';
+import { Square, StartPosition } from '@Chess/Types';
+import { ChessEngine } from '@Chess/Engine/ChessEngine';
 
 
 /**
  * Random game with that contains promotion move
  * for one white pawn.
  */
-const promotionTestGames: Test[] = [
+const promotionTestGames: TestGame[] = [
     {
         title: "Promote Pawn To Queen on e8",
         board: StartPosition.Promotion,

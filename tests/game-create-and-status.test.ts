@@ -6,14 +6,14 @@
  */
 
 import { expect, test } from 'vitest';
-import { Test } from './Types';
-import { GameStatus } from '../Types';
-import { ChessEngine } from '../Engine/ChessEngine';
+import { TestGame } from './types';
+import { GameStatus } from '@Chess/Types';
+import { ChessEngine } from '@Chess/Engine/ChessEngine';
 
 /**
  * Games with expected status after creating board.
  */
-const games: Test[] = [
+const games: TestGame[] = [
     {
         title: "White Victory",
         board: "rnbqkbnr/pppppQpp/8/8/2B5/8/PPPPPPPP/RNB1K1NR b KQkq - 0 1",

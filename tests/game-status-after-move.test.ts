@@ -5,15 +5,15 @@
  */
 
 import { expect, test } from 'vitest';
-import { Test } from './Types';
-import { GameStatus, Square, StartPosition } from '../Types';
-import { ChessEngine } from '../Engine/ChessEngine';
+import { TestGame } from './types';
+import { GameStatus, Square, StartPosition } from '@Chess/Types';
+import { ChessEngine } from '@Chess/Engine/ChessEngine';
 
 /**
  * Games with expected GameStatus after the
  * moves are played.
  */
-const games: Test[] = [
+const games: TestGame[] = [
     {
         title: "Check Test",
         board: StartPosition.Check,

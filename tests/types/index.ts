@@ -1,9 +1,9 @@
-import { Square } from "../../Types";
+import { Square } from "@Chess/Types";
 
 /**
- * Test item type for the tests.
+ * Board with moves and expectation
  */
-export interface Test{
+export interface TestGame{
     title: string;
     board: string;
     moves?: Array<{from: Square, to: Square}>;

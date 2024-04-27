@@ -5,15 +5,15 @@
  */
 
 import { expect, test } from 'vitest';
-import { Test } from './Types';
-import { Color, MoveType, PieceType, Square, StartPosition } from '../Types';
-import { ChessEngine } from '../Engine/ChessEngine';
-import { BoardQueryer } from "../Engine/Board/BoardQueryer";
+import { TestGame } from './types';
+import { Color, MoveType, PieceType, Square, StartPosition } from '@Chess/Types';
+import { ChessEngine } from '@Chess/Engine/ChessEngine';
+import { BoardQueryer } from "@Chess/Engine/Board/BoardQueryer";
 
 /**
  * All Castling Tests For every situation.
  */
-const castlingTestGames: Test[] = [
+const castlingTestGames: TestGame[] = [
     {
         title: 'King Side Castling',
         board: StartPosition.Castling,
