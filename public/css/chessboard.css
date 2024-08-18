@@ -67,9 +67,7 @@
     }
 }
 
-/* -------------- Board Styles -------------- */
-
-/* Chessboard container styles */
+/* -------------- Chessboard -------------- */
 #chessboard {
     width: var(--board-size);
     height: var(--board-size);
@@ -88,68 +86,85 @@
     position:relative;
 }
 
-/* Individual square styles */
-#chessboard .square{
-    position: relative;
-    width:calc(var(--board-size) / 8);
-    height:calc(var(--board-size) / 8);
-    box-shadow: inset 0 0 0 1px var(--square-shadow-color);
-    text-align: center;
-    margin:0!important;
+/* -------------- Promotion Menu -------------- */
+#chessboard {
+    & .promotion-option{
+        z-index:999!important;
+        position:inherit;
+        background-color: var(--promotion-option-color);
+        border-radius: 50%;
+        margin-left:0;
+
+        &:hover{
+            background-color: var(--promotion-option-hover-color);
+        }
+    }
 }
 
-/* Black squares */
-#chessboard .square--black{
-    background-color:var(--black-square-color);
-}
+/* -------------- Board Styles -------------- */
+#chessboard {
+    /* Individual square styles */
+    & .square{
+        position: relative;
+        width:calc(var(--board-size) / 8);
+        height:calc(var(--board-size) / 8);
+        box-shadow: inset 0 0 0 1px var(--square-shadow-color);
+        text-align: center;
+        margin:0!important;
+    }
 
-/* White squares */
-#chessboard .square--white{
-    background-color:var(--white-square-color);
-}
+    /* Black squares */
+    & .square--black{
+        background-color:var(--black-square-color);
+    }
 
-/* Row coordinates display styles */
-#chessboard .row-coordinate{
-    position:absolute;
-    right:0;
-    margin-right:0.4vw;
-    font-size:calc(var(--board-size) / 50);
-    margin-top:0.3vw;
-    font-weight: bold;
-}
+    /* White squares */
+    & .square--white{
+        background-color:var(--white-square-color);
+    }
 
-/* Row coordinates that on black squares */
-#chessboard .row-coordinate--black{
-    color:var(--white-coordinate-color);
-}
+    /* Row coordinates display styles */
+    & .row-coordinate{
+        position:absolute;
+        right:0;
+        margin-right:0.4vw;
+        font-size:calc(var(--board-size) / 50);
+        margin-top:0.3vw;
+        font-weight: bold;
+    }
 
-/* Row coordinates that on white squares */
-#chessboard .row-coordinate--white{
-    color:var(--black-coordinate-color);
-}
+    /* Row coordinates that on black squares */
+    & .row-coordinate--black{
+        color:var(--white-coordinate-color);
+    }
 
-/* Column coordinates display styles */
-#chessboard .column-coordinate{
-    position:absolute;
-    bottom:0;
-    font-size:calc(var(--board-size) / 50);
-    margin-left:0.4vw;
-    margin-bottom:0.2vw;
-    font-weight: bold;
-}
+    /* Row coordinates that on white squares */
+    & .row-coordinate--white{
+        color:var(--black-coordinate-color);
+    }
 
-/* Column coordinates that on black squares */
-#chessboard .column-coordinate--black{
-    color:var(--white-coordinate-color);
-}
+    /* Column coordinates display styles */
+    & .column-coordinate{
+        position:absolute;
+        bottom:0;
+        font-size:calc(var(--board-size) / 50);
+        margin-left:0.4vw;
+        margin-bottom:0.2vw;
+        font-weight: bold;
+    }
 
-/* Column coordinates that on white squares */
-#chessboard .column-coordinate--white{
-    color:var(--black-coordinate-color);
+    /* Column coordinates that on black squares */
+    & .column-coordinate--black{
+        color:var(--white-coordinate-color);
+    }
+
+    /* Column coordinates that on white squares */
+    & .column-coordinate--white{
+        color:var(--black-coordinate-color);
+    }
 }
 
 /* -------------- Piece Styles -------------- */
-
 /* Generic piece style */
 .piece{
     background-position: center;
@@ -161,6 +176,18 @@
     z-index:99;
     left:5%;
     top:10%;
+}
+
+/* Animation for piece movement, don't change this */
+@keyframes move{
+    0% {
+        left:var(--move-from-left);
+        top:var(--move-from-top);
+    }
+    100% {
+        left:var(--move-to-left);
+        top:var(--move-to-top);
+    }
 }
 
 /* White pieces */
@@ -213,72 +240,61 @@
     background-image:var(--black-pawn-image);
 }
 
-/* Animation for piece movement */
-@keyframes move{
-    0% {
-        left:var(--move-from-left);
-        top:var(--move-from-top);
-    }
-    100% {
-        left:var(--move-to-left);
-        top:var(--move-to-top);
-    }
-}
-
 /* -------------- Effects Styles -------------- */
+#chessboard {
+    /* Clicked square effect */
+    & .square-effect--clicked{
+        box-shadow:inset 0 0 15px var(--clicked-color)!important;
+    }
 
-/* Clicked square effect */
-#chessboard .square-effect--clicked{
-    box-shadow:inset 0 0 15px var(--clicked-color)!important;
-}
+    /* Playable square effect */
+    & .square-effect--playable{
+        box-shadow:inset 0 0 15px var(--playable-color)!important;
+    }
 
-/* Playable square effect */
-#chessboard .square-effect--playable{
-    box-shadow:inset 0 0 15px var(--playable-color)!important;
-}
+    /* Killable square effect */
+    & .square-effect--killable{
+        box-shadow:inset 0 0 15px var(--killable-color)!important;
+    }
 
-/* Killable square effect */
-#chessboard .square-effect--killable{
-    box-shadow:inset 0 0 15px var(--killable-color)!important;
-}
+    /* Checked square effect */
+    & .square-effect--checked{
+        box-shadow:inset 0 0 15px var(--checked-color)!important;
+    }
 
-/* Checked square effect */
-#chessboard .square-effect--checked{
-    box-shadow:inset 0 0 15px var(--checked-color)!important;
-}
+    /* Selected square effect */
+    & .square-effect--selected{
+        box-shadow:inset 0 0 100px var(--selected-color)!important;
+    }
 
-/* Selected square effect */
-#chessboard .square-effect--selected{
-    box-shadow:inset 0 0 100px var(--selected-color)!important;
-}
+    /* Disabled square effect */
+    & .square-effect--disabled{
+        box-shadow:inset 0 0 100px var(--disabled-color)!important;
+    }
 
-/* Disabled square effect */
-#chessboard .square-effect--disabled{
-    box-shadow:inset 0 0 100px var(--disabled-color)!important;
-}
+    /* Move from effect */
+    & .square-effect--from{
+        box-shadow:inset 0 0 100px var(--from-color);
+    }
 
-/* Move from effect */
-#chessboard .square-effect--from{
-    box-shadow:inset 0 0 100px var(--from-color);
-}
+    /* Move to effect */
+    & .square-effect--to{
+        box-shadow:inset 0 0 100px var(--to-color);
+    }
 
-/* Move to effect */
-#chessboard .square-effect--to{
-    box-shadow:inset 0 0 100px var(--to-color);
-}
+    /* Opacity for disabled pieces */
+    & .square-effect--disabled div.piece{
+        opacity: 0.4;
+    }
 
-/* Opacity for disabled pieces */
-#chessboard .square-effect--disabled div.piece{
-    opacity: 0.4;
-}
-
-/* Opacity for disabled elements other than pieces */
-#chessboard .square-effect--disabled span{
-    opacity: 0.2;
+    /* Opacity for disabled elements other than pieces */
+    & .square-effect--disabled span{
+        opacity: 0.2;
+    }
 }
 
 /* -------------- Result Message -------------- */
-#chessboard .result-message{
+.result-message{
     box-shadow: 0 0 5px #000;
     padding-top:60px;
     background-color: var(--result-screen-bg-color);
@@ -294,17 +310,4 @@
     text-align: center;
     border:1px solid var(--result-screen-border-color);
     z-index:9999!important;
-}
-
-/* -------------- Promotion Menu -------------- */
-#chessboard .promotion-option{
-    z-index:999!important;
-    position:inherit;
-    background-color: var(--promotion-option-color);
-    border-radius: 50%;
-    margin-left:0;
-}
-
-#chessboard .promotion-option:hover{
-    background-color: var(--promotion-option-hover-color);
 }

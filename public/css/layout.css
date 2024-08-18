@@ -55,7 +55,7 @@ main{
 
 #notation-menu{
     margin-left: 0.5rem;
-    margin-top: calc((var(--board-size) - var(--notation-table-height)) / 2);
+    margin-top: calc((var(--board-size) - var(--notation-table-height)) / 2.5);
 }
 
 #log-console{

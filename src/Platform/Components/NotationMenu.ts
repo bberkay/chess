@@ -57,6 +57,7 @@ export class NotationMenu extends Component{
     protected renderComponent(): void
     {
         this.loadHTML("notation-menu", `
+                <div class="turn-indicator" id="black-turn-indicator"><span></span><span>Black's turn</span></div>
                 <div class = "score-table" id = "black-player-pieces"></div>
                 <table id = "notation-table">
                     <thead>
@@ -69,6 +70,7 @@ export class NotationMenu extends Component{
                     <tbody id = "notations"></tbody>
                 </table>
                 <div class = "score-table" id = "white-player-pieces"></div>
+                <div class="turn-indicator" id="white-turn-indicator"><span></span><span>White's turn</span></div>
         `);
         this.loadCSS("notation-menu.css");
     }
@@ -165,6 +167,14 @@ export class NotationMenu extends Component{
         this.lastScore = {[Color.White]: whiteScore, [Color.Black]: blackScore};
     }
 
+    private changeIndicator(): void
+    {
+        const current_player_color = this.chess.getNotation().length % 2 == 0 ? 'white' : 'black';
+        const previous_player_color = current_player_color == 'white' ? 'black' : 'white';
+        document.getElementById(`${previous_player_color}-turn-indicator`)!.classList.remove("visible");
+        document.getElementById(`${current_player_color}-turn-indicator`)!.classList.add("visible");
+    }
+
     /**
      * Update the notation table.
      */
@@ -175,6 +185,7 @@ export class NotationMenu extends Component{
 
         this.setScore(scores);
         this.addNotation(notation);
+        this.changeIndicator();
     }
 
     /**

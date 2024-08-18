@@ -13,38 +13,38 @@
     background-color: #111;
     color: #f5f5f5;
     border:1px solid #2a2a2a;
-}
 
-#notation-table tbody{
-    max-height: var(--notation-table-height);
-    overflow-y: scroll;
-    overflow-x: hidden;
-    scrollbar-width: thin;
-    width:100%;
-    height: var(--notation-table-height);
-    display:block;
-}
+    & tbody{
+        max-height: var(--notation-table-height);
+        overflow-y: scroll;
+        overflow-x: hidden;
+        scrollbar-width: thin;
+        width:100%;
+        height: var(--notation-table-height);
+        display:block;
+    }
 
-#notation-table tr{
-    display:table;
-    table-layout: fixed;
-    width:100%;
-}
+    & tr{
+        display:table;
+        table-layout: fixed;
+        width:100%;
 
-#notation-table tr th{
-    padding:7px 5px;
-    background-color: #222;
-    border:1px solid #2a2a2a;
-}
+        & th{
+            padding:7px 5px;
+            background-color: #222;
+            border:1px solid #2a2a2a;
+        }
 
-#notation-table tr td{
-    text-align: center;
-    padding:5px;
-}
+        & td{
+            text-align: center;
+            padding:5px;
+        }
 
-#notation-table tr:nth-child(odd) td{
-    background-color: #222;
-    border:1px solid #2a2a2a;
+        &:nth-child(odd) td{
+            background-color: #222;
+            border:1px solid #2a2a2a;
+        }
+    }
 }
 
 /* Make first column narrower than others */
@@ -60,6 +60,40 @@
     font-weight:bold;
     margin:10px 0;
     width:100%;
+    margin-left: 2px;
+}
+
+#notation-menu .turn-indicator{
+    opacity: 0;
+    display: flex;
+
+    & span:first-child{
+        width: 1rem;
+        height: 1rem;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 6px;
+    }
+
+    &#white-turn-indicator{
+        padding-top: 5px;
+
+        & span:first-child{
+            background-color: var(--white-square-color);
+        }
+    }
+
+    &#black-turn-indicator{
+        padding-bottom: 5px;
+
+        & span:first-child{
+            background-color: var(--black-square-color);
+        }
+    }
+
+    &.visible{
+        opacity: 1;
+    }
 }
 
 /* ------------------- Responsive ------------------- */
