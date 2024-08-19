@@ -51,7 +51,7 @@ export class NotationMenu extends Component{
                 </div>
                 <!-- A new menu might be added here for draw, resign etc. options. -->
                 <div class="score-table" id="white-player-pieces"></div>
-                <div class="turn-indicator" id="white-turn-indicator"><span></span><span>White's turn</span></div>
+                <div class="turn-indicator visible" id="white-turn-indicator"><span></span><span>White's turn</span></div>
         `);
         this.loadCSS("notation-menu.css");
     }
@@ -175,8 +175,10 @@ export class NotationMenu extends Component{
     public clear(): void
     {
         document.getElementById("notations")!.innerHTML = "";
-        document.getElementById("black-player-pieces")!.innerHTML = "";
         document.getElementById("white-player-pieces")!.innerHTML = "";
+        document.getElementById("black-player-pieces")!.innerHTML = "";
+        document.getElementById("white-turn-indicator")!.classList.add("visible");
+        document.getElementById("black-turn-indicator")!.classList.remove("visible");
         this.moveCount = 0;
         this.lastScore = {[Color.White]: 0, [Color.Black]: 0};
     }

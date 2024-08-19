@@ -28,14 +28,8 @@ export class ChessBoard {
         Promote: new Audio("./sounds/promote.mp3"),
         End: new Audio("./sounds/game-end.mp3"),
     };
-
-    // This is used for preventing parameter complexity.
     private colorOfPlayer: Color | null = null;
-
-    // Store locked squares click modes to restore them after unlock the board.
     private lockedSquaresModes: Array<SquareClickMode> = [];
-
-    // This is used with standalone version for move piece without chess/chess engine.
     private lastClickedSquare: Square | null = null;
 
     /**
@@ -613,11 +607,11 @@ export class ChessBoard {
         rowSquare!.textContent = String(9 - parseInt(rowSquare!.textContent as string));
       }
 
-      const startsWithA = document.querySelector(`.square[data-square-id="57"] .column-coordinate`)!.textContent == "a";
+      const isFlipped = document.querySelector(`.square[data-square-id="57"] .column-coordinate`)!.textContent == "h";
       for (let i = 1; i <= 8; i++){
         document.querySelector(
           `.square[data-square-id="${56 + i}"] .column-coordinate`
-        )!.textContent = String.fromCharCode(startsWithA ? 105 - i : 96 + i);
+        )!.textContent = String.fromCharCode(isFlipped ? 96 + i : 105 - i);
       }
     }
 
