@@ -1,6 +1,6 @@
 import {Color, EnPassantDirection, PieceType, Square} from "../../../Types";
 import {Piece} from "../../Types";
-import {BoardQueryer} from "../../Board/BoardQueryer.ts";
+import {BoardQuerier} from "../../Board/BoardQuerier.ts";
 import {Locator} from "../Utils/Locator.ts";
 import {Converter} from "../../../Utils/Converter.ts";
 
@@ -29,8 +29,8 @@ export class MoveExtender{
          * @see for more information about castling https://en.wikipedia.org/wiki/Castling
          */
 
-        if(color == Color.White && ((castlingType == "Long" && !BoardQueryer.getCastling().WhiteLong) || (castlingType == "Short" && !BoardQueryer.getCastling().WhiteShort))
-            || color == Color.Black && ((castlingType == "Long" && !BoardQueryer.getCastling().BlackLong) || (castlingType == "Short" && !BoardQueryer.getCastling().BlackShort))
+        if(color == Color.White && ((castlingType == "Long" && !BoardQuerier.getCastling().WhiteLong) || (castlingType == "Short" && !BoardQuerier.getCastling().WhiteShort))
+            || color == Color.Black && ((castlingType == "Long" && !BoardQuerier.getCastling().BlackLong) || (castlingType == "Short" && !BoardQuerier.getCastling().BlackShort))
         ) return null;
 
         /**
@@ -43,13 +43,13 @@ export class MoveExtender{
         const rookIcon: string = color == Color.White ? "R" : "r";
 
         // Check first rule and third rule. Also, check the fen notation for castling availability when the game is loaded from fen notation.
-        if(!BoardQueryer.isSquareHasPiece(kingSquare, color, [PieceType.King])
-            || (BoardQueryer.getMoveHistory().length > 0 && BoardQueryer.getMoveHistory()[BoardQueryer.getMoveHistory().length - 1].includes("+"))
-            || (BoardQueryer.getMoveHistory().length == 0 && !(
-                (chosenRookSquare == Square.a8 && BoardQueryer.getCastling().BlackLong)
-                || (chosenRookSquare == Square.h8 && BoardQueryer.getCastling().BlackShort)
-                || (chosenRookSquare == Square.a1 && BoardQueryer.getCastling().WhiteLong)
-                || (chosenRookSquare == Square.h1 && BoardQueryer.getCastling().WhiteShort)
+        if(!BoardQuerier.isSquareHasPiece(kingSquare, color, [PieceType.King])
+            || (BoardQuerier.getMoveHistory().length > 0 && BoardQuerier.getMoveHistory()[BoardQuerier.getMoveHistory().length - 1].includes("+"))
+            || (BoardQuerier.getMoveHistory().length == 0 && !(
+                (chosenRookSquare == Square.a8 && BoardQuerier.getCastling().BlackLong)
+                || (chosenRookSquare == Square.h8 && BoardQuerier.getCastling().BlackShort)
+                || (chosenRookSquare == Square.a1 && BoardQuerier.getCastling().WhiteLong)
+                || (chosenRookSquare == Square.h1 && BoardQuerier.getCastling().WhiteShort)
             ))
         ) return null;
 
@@ -59,7 +59,7 @@ export class MoveExtender{
             : (color == Color.White ? [Square.f1, Square.g1] : [Square.f8, Square.g8]);
 
         // Check second rule.
-        for(const notation of BoardQueryer.getMoveHistory()){
+        for(const notation of BoardQuerier.getMoveHistory()){
             if(notation.includes(kingIcon)
                 || (notation.includes(rookIcon + "a") && castlingType == "Long") // Vertical moves of the rook.
                 || (notation.includes(rookIcon + "h") && castlingType == "Short")  // Same as above.
@@ -73,12 +73,12 @@ export class MoveExtender{
         }
 
         // Check third rule.
-        if(BoardQueryer.isSquareThreatened(kingSquare))
+        if(BoardQuerier.isSquareThreatened(kingSquare))
             return null;
 
         // Check fourth rule.
         for(const square of betweenSquares){
-            if(BoardQueryer.getPieceOnSquare(square) || BoardQueryer.isSquareThreatened(square))
+            if(BoardQuerier.getPieceOnSquare(square) || BoardQuerier.isSquareThreatened(square))
                 return null;
         }
 
@@ -120,7 +120,7 @@ export class MoveExtender{
          * @see for more information about en passant https://en.wikipedia.org/wiki/En_passant
          */
 
-        const pawn: Piece | null = BoardQueryer.getPieceOnSquare(square);
+        const pawn: Piece | null = BoardQuerier.getPieceOnSquare(square);
         if(!pawn || pawn.getType() != PieceType.Pawn) return null;
 
         // Find needed information for checking rules.
@@ -139,19 +139,19 @@ export class MoveExtender{
          * the move history. If it is not found in the move history, it means
          * that the enemy pawn moved two squares, or it is not moved yet.
          */
-        const isEnemyPawnMovedTwoSquares: boolean = !BoardQueryer.getMoveHistory().includes(
+        const isEnemyPawnMovedTwoSquares: boolean = !BoardQuerier.getMoveHistory().includes(
             Converter.squareIDToSquare((enemyPawn) + (color == Color.White ? -8 : 8))
         );
 
         // Check fen notation for en passant availability when the game is loaded from fen notation.
-        if(BoardQueryer.getMoveHistory().length == 0 && BoardQueryer.getGame().enPassant == enPassantMove)
+        if(BoardQuerier.getMoveHistory().length == 0 && BoardQuerier.getGame().enPassant == enPassantMove)
             return enPassantMove;
 
         // Check all rules.
         if(pawnRow != enPassantRow // First rule.
-            || !BoardQueryer.isSquareHasPiece(enemyPawn, color == Color.White ? Color.Black : Color.White, [PieceType.Pawn]) // Second rule.
-            || BoardQueryer.getMoveHistory()[BoardQueryer.getMoveHistory().length - 2] != Converter.squareIDToSquare(square) // Fourth rule.
-            || !(BoardQueryer.getPieceOnSquare(enemyPawn) && isEnemyPawnMovedTwoSquares) // Third rule.
+            || !BoardQuerier.isSquareHasPiece(enemyPawn, color == Color.White ? Color.Black : Color.White, [PieceType.Pawn]) // Second rule.
+            || BoardQuerier.getMoveHistory()[BoardQuerier.getMoveHistory().length - 2] != Converter.squareIDToSquare(square) // Fourth rule.
+            || !(BoardQuerier.getPieceOnSquare(enemyPawn) && isEnemyPawnMovedTwoSquares) // Third rule.
         ) return null;
 
 
@@ -190,7 +190,7 @@ export class MoveExtender{
          */
 
             // Find the pawn by the given square.
-        const pawn: Piece = BoardQueryer.getPieceOnSquare(square)!;
+        const pawn: Piece = BoardQuerier.getPieceOnSquare(square)!;
 
         /**
          * Find last rank for black and white pawns.
@@ -227,11 +227,11 @@ export class MoveExtender{
         ];
 
         // If there is a piece on the left diagonal square, add this square to the promotion moves.
-        if(BoardQueryer.isSquareHasPiece(leftDiagonalMove, enemyColor))
+        if(BoardQuerier.isSquareHasPiece(leftDiagonalMove, enemyColor))
             promotionMoves.push(leftDiagonalMove);
 
         // If there is a piece on the right diagonal square, add this square to the promotion moves.
-        if(BoardQueryer.isSquareHasPiece(rightDiagonalMove, enemyColor))
+        if(BoardQuerier.isSquareHasPiece(rightDiagonalMove, enemyColor))
             promotionMoves.push(rightDiagonalMove);
 
         return promotionMoves;

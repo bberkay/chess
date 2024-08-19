@@ -1,7 +1,7 @@
 import { Square, Color } from "../../../Types";
 import { MoveRoute, Route } from "../../Types";
 import { Locator } from "../Utils/Locator.ts";
-import { BoardQueryer } from "../../Board/BoardQueryer.ts";
+import { BoardQuerier } from "../../Board/BoardQuerier.ts";
 
 /**
  * This class calculates the path and distance of the given square.
@@ -144,14 +144,14 @@ export class DirectionCalculator {
              * if square has no player's piece(has enemy piece) or piece sensitivity is false then
              * add the square to the array.
              */
-            if(!BoardQueryer.isSquareHasPiece(square, safeColor) || !pieceSensitivity)
+            if(!BoardQuerier.isSquareHasPiece(square, safeColor) || !pieceSensitivity)
                 squares.push(square);
 
             /**
              * If piece sensitivity is true AND if square has a piece(enemy or player), then break the loop.
              * Because we can't go further.
              */
-            if(pieceSensitivity && BoardQueryer.isSquareHasPiece(square))
+            if(pieceSensitivity && BoardQuerier.isSquareHasPiece(square))
                 break;
 
             // Increase the step counter.

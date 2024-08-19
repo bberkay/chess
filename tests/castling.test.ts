@@ -8,7 +8,7 @@ import { expect, test } from 'vitest';
 import { TestGame } from './types';
 import { Color, MoveType, PieceType, Square, StartPosition } from '@Chess/Types';
 import { ChessEngine } from '@Chess/Engine/ChessEngine';
-import { BoardQueryer } from "@Chess/Engine/Board/BoardQueryer";
+import { BoardQuerier } from "@Chess/Engine/Board/BoardQuerier";
 
 /**
  * All Castling Tests For every situation.
@@ -142,8 +142,8 @@ test('Castling Moves', () => {
             expect(engine.getGameAsFenNotation()).toEqual(game.expectation);
         else{
             // Get the square of white king
-            const squareOfKing: Square = BoardQueryer.getSquareOfPiece(
-                BoardQueryer.getPiecesWithFilter(Color.White, [PieceType.King])[0]
+            const squareOfKing: Square = BoardQuerier.getSquareOfPiece(
+                BoardQuerier.getPiecesWithFilter(Color.White, [PieceType.King])[0]
             )!;
 
             // Check the castling moves of the king are equal to the expectation.

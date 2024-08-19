@@ -1,6 +1,6 @@
 import {Color, Moves, MoveType, PieceType, Square} from "../../Types";
 import {MoveRoute, Piece, Route} from "../Types";
-import {BoardQueryer} from "../Board/BoardQueryer.ts";
+import {BoardQuerier} from "../Board/BoardQuerier.ts";
 import {Locator} from "./Utils/Locator.ts";
 import {RouteCalculator} from "./Calculator/RouteCalculator.ts";
 import {Extractor} from "./Utils/Extractor.ts";
@@ -27,7 +27,7 @@ export class MoveEngine{
         this.moveFilterer = new MoveFilterer();
         this.moveExtender = new MoveExtender();
     }
-    
+
     /**
      * Get the possible moves of the piece on the given square.
      */
@@ -50,9 +50,9 @@ export class MoveEngine{
 
             return null;
         }
-        
+
         // Get the piece on the given square.
-        this.piece = BoardQueryer.getPieceOnSquare(square);
+        this.piece = BoardQuerier.getPieceOnSquare(square);
         this.pieceSquare = square;
 
         // If there is no piece on the given square, return null;
@@ -137,10 +137,10 @@ export class MoveEngine{
          * If the diagonal squares has no enemy piece, then remove
          * the diagonal routes from the moves.
          */
-        if(!BoardQueryer.isSquareHasPiece(route[moveDirection.leftDiagonal]![0], enemyColor))
+        if(!BoardQuerier.isSquareHasPiece(route[moveDirection.leftDiagonal]![0], enemyColor))
             delete route[moveDirection.leftDiagonal];
 
-        if(!BoardQueryer.isSquareHasPiece(route[moveDirection.rightDiagonal]![0], enemyColor))
+        if(!BoardQuerier.isSquareHasPiece(route[moveDirection.rightDiagonal]![0], enemyColor))
             delete route[moveDirection.rightDiagonal];
 
         // Add normal moves to the pawn's moves.
@@ -305,7 +305,7 @@ export class MoveEngine{
         if(!route) return null;
 
         // Find the king's color
-        const color: Color = BoardQueryer.getPieceOnSquare(this.pieceSquare!)!.getColor();
+        const color: Color = BoardQuerier.getPieceOnSquare(this.pieceSquare!)!.getColor();
 
         /**
          * Remove squares that are threatened by the enemy pieces so that
@@ -316,7 +316,7 @@ export class MoveEngine{
          */
         for(const square of Extractor.extractSquares(route))
         {
-            if(!BoardQueryer.isSquareThreatened(square, color == Color.White ? Color.Black : Color.White))
+            if(!BoardQuerier.isSquareThreatened(square, color == Color.White ? Color.Black : Color.White))
                 moves[MoveType.Normal]!.push(square);
         }
 
@@ -326,11 +326,11 @@ export class MoveEngine{
          * move to the g2 because after the king's move, g2 will be threatened
          * by the enemy's bishop again. This code block prevents this situation.
          */
-        const enemies: boolean | Square[] = BoardQueryer.isSquareThreatened(this.pieceSquare!, color == Color.White ? Color.Black : Color.White, true);
+        const enemies: boolean | Square[] = BoardQuerier.isSquareThreatened(this.pieceSquare!, color == Color.White ? Color.Black : Color.White, true);
         if(moves[MoveType.Normal]!.length > 0 && enemies){
             for(const enemySquare of enemies as Square[])
             {
-                if(BoardQueryer.getPieceOnSquare(enemySquare)!.getType() == PieceType.Knight)
+                if(BoardQuerier.getPieceOnSquare(enemySquare)!.getType() == PieceType.Knight)
                     continue;
 
                 const dangerousRoute: MoveRoute | null = Locator.getRelative(this.pieceSquare!, enemySquare);
@@ -379,15 +379,3 @@ export class MoveEngine{
         return moves;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

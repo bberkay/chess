@@ -3,19 +3,10 @@
  * @see For more information about this component check file: src\Platform\Components\GameCreator.ts
  */
 
-/* Default visibility of the component */
-#game-creator .game-creator-mode{
-    display:none;
+#game-creator {
+    display: flex;
     border:1px solid #2a2a2a;
 
-    /* Visible mode of the component */
-    &.visible{
-        display:flex;
-    }
-}
-
-/* Form */
-#game-creator {
     & input{
         border:2px solid #111;
     }

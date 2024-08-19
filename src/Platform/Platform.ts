@@ -11,7 +11,7 @@ import { Chess } from "../Chess/Chess";
 import { GameCreator } from "./Components/GameCreator.ts";
 import { NotationMenu } from "./Components/NotationMenu.ts";
 import { LogConsole } from "./Components/LogConsole";
-import { MenuOperationType } from "./Types";
+import { MenuOperation } from "./Types";
 
 /**
  * This class is the main class of the chess platform menu.
@@ -36,7 +36,7 @@ export class Platform{
         // Initialize the listeners when the dom is loaded.
         document.addEventListener("DOMContentLoaded", () => {
             this.initBoardListener();
-            this.initComponentListener();
+            this.initOperationListener();
         });
     }
 
@@ -49,9 +49,9 @@ export class Platform{
         document.querySelectorAll("[data-square-id]").forEach(square => {
             square.addEventListener("mousedown", () => {
                 // Update components every time a square is clicked.
-                this.notationMenu?.update(this.chess.getNotation(), this.chess.getScores());
+                this.notationMenu?.update(this.chess.engine.getNotation(), this.chess.engine.getScores());
                 this.logConsole?.print(this.chess.getLogs());
-                this.gameCreator?.show(this.chess.getGameAsFenNotation());
+                this.gameCreator?.show(this.chess.engine.getGameAsFenNotation());
             });
         });
     }
@@ -60,19 +60,38 @@ export class Platform{
      * Listen actions/clicks of user on menu components for
      * updating the chess board, notation menu, log console etc.
      */
-    private initComponentListener(): void
+    protected initOperationListener(): void
     {
-        document.querySelectorAll("[data-operation-type]").forEach(square => {
-            square.addEventListener("click", () => {
-                switch(square.getAttribute("data-operation-type")){
-                    case MenuOperationType.GameCreatorCreate:
-                        this.updateComponentsForNewGame();
-                        break;
-                    default:
-                        break;
-                }
+        document.querySelectorAll("[data-menu-operation]").forEach(menuItem => {
+            menuItem.addEventListener("click", () => {
+                this.handleOperation(
+                    menuItem.getAttribute("data-menu-operation") as MenuOperation
+                );
             });
         });
+    }
+
+    /**
+     * This function makes an operation on menu.
+     */
+    protected handleOperation(menuOperation: MenuOperation): void
+    {
+        // Do operation by given operation type.
+        switch(menuOperation){
+          case MenuOperation.ClearConsole:
+              this.logConsole?.clear();
+              break;
+            case MenuOperation.CreateGame:
+              this.updateComponentsForNewGame();
+              this.gameCreator?.createGame();
+              break;
+            case MenuOperation.ChangeMode:
+              this.gameCreator?.changeMode();
+              break;
+          case MenuOperation.FlipBoard:
+            this.chess.board!.flipBoard();
+            break;
+        }
     }
 
     /**

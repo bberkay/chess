@@ -1,7 +1,7 @@
 import { Color, PieceType } from "../../Chess/Types";
 import { Component } from "./Component.ts";
 import { Chess} from "../../Chess/Chess.ts";
-import { MenuOperationType, MenuOperationValue } from "../Types";
+import { MenuOperation } from "../Types";
 
 /**
  * This class provide a table to show the notation.
@@ -19,36 +19,8 @@ export class NotationMenu extends Component{
         this.chess = chess;
         this.renderComponent();
         document.addEventListener("DOMContentLoaded", () => {
-            this.initListener();
-            this.update(this.chess.getNotation(), this.chess.getScores());
+            this.update(this.chess.engine.getNotation(), this.chess.engine.getScores());
         });
-    }
-
-    /**
-     * Listen actions/clicks of user on log console
-     */
-    protected initListener(): void
-    {
-        document.querySelectorAll("#notation-menu [data-operation-type]").forEach(menuItem => {
-            menuItem.addEventListener("click", () => {
-                // Make operation(from menu)
-                this.handleOperation(
-                    menuItem.getAttribute("data-operation-type") as MenuOperationType,
-                    menuItem.getAttribute("data-operation-value") as MenuOperationValue
-                );
-            });
-        });
-    }
-
-    /**
-     * This function makes an operation on menu.
-     */
-    protected handleOperation(operationType: MenuOperationType, operationValue: MenuOperationValue): void
-    {
-        // Do operation by given operation type.
-        switch(operationType){
-            // Some operations are not implemented yet.
-        }
     }
 
     /**
@@ -69,7 +41,16 @@ export class NotationMenu extends Component{
                     </thead>
                     <tbody id = "notations"></tbody>
                 </table>
-                <div class = "score-table" id = "white-player-pieces"></div>
+                <div class="utility-menu">
+                    <button class="menu-item" data-menu-operation="${MenuOperation.FlipBoard}">F</button>
+                    <button class="menu-item" data-menu-operation="undo">&lt;</button>
+                    <button class="menu-item" data-menu-operation="undo">&lt;</button>
+                    <button class="menu-item" data-menu-operation="redo">&gt;</button>
+                    <button class="menu-item" data-menu-operation="redo">&gt;</button>
+                    <button class="menu-item" data-menu-operation="reset">R</button>
+                </div>
+                <!-- A new menu might be added here for draw, resign etc. options. -->
+                <div class="score-table" id="white-player-pieces"></div>
                 <div class="turn-indicator" id="white-turn-indicator"><span></span><span>White's turn</span></div>
         `);
         this.loadCSS("notation-menu.css");
@@ -169,7 +150,7 @@ export class NotationMenu extends Component{
 
     private changeIndicator(): void
     {
-        const current_player_color = this.chess.getNotation().length % 2 == 0 ? 'white' : 'black';
+        const current_player_color = this.chess.engine.getNotation().length % 2 == 0 ? 'white' : 'black';
         const previous_player_color = current_player_color == 'white' ? 'black' : 'white';
         document.getElementById(`${previous_player_color}-turn-indicator`)!.classList.remove("visible");
         document.getElementById(`${current_player_color}-turn-indicator`)!.classList.add("visible");
@@ -180,7 +161,7 @@ export class NotationMenu extends Component{
      */
     public update(notation: Array<string>, scores: Record<Color, {score: number, pieces: PieceType[]}>): void
     {
-        if(this.chess.getNotation().length == this.moveCount)
+        if(this.chess.engine.getNotation().length == this.moveCount)
             return;
 
         this.setScore(scores);

@@ -591,6 +591,37 @@ export class ChessBoard {
     }
 
     /**
+     * Flips the board without changing the square ids.
+     */
+    public flipBoard(): void
+    {
+      // Changes pieces
+      for(let id = 64; id >= 33; id--){
+        const normalSquare = document.querySelector(`.square[data-square-id="${id}"]`) as HTMLDivElement;
+        const flippedSquare = document.querySelector(`.square[data-square-id="${65 - id}"]`) as HTMLDivElement;
+        const normalSquarePiece = normalSquare.querySelector(".piece");
+        const flippedSquarePiece = flippedSquare.querySelector(".piece");
+        if(normalSquarePiece)
+          flippedSquare.appendChild(normalSquarePiece);
+        if(flippedSquarePiece)
+          normalSquare.appendChild(flippedSquarePiece);
+      }
+
+      // Change coordinates
+      for (let i = 8; i >= 1; i--){
+        const rowSquare = document.querySelector(`.square[data-square-id="${8 * i}"] .row-coordinate`);
+        rowSquare!.textContent = String(9 - parseInt(rowSquare!.textContent as string));
+      }
+
+      const startsWithA = document.querySelector(`.square[data-square-id="57"] .column-coordinate`)!.textContent == "a";
+      for (let i = 1; i <= 8; i++){
+        document.querySelector(
+          `.square[data-square-id="${56 + i}"] .column-coordinate`
+        )!.textContent = String.fromCharCode(startsWithA ? 105 - i : 96 + i);
+      }
+    }
+
+    /**
      * Lock board interactions.
      */
     private lockBoard(useDisableEffect: boolean = true): void

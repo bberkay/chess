@@ -1,6 +1,6 @@
 import {Color, GameStatus, PieceType, Square} from "../../../Types";
 import {MoveRoute, Piece, Route} from "../../Types";
-import {BoardQueryer} from "../../Board/BoardQueryer.ts";
+import {BoardQuerier} from "../../Board/BoardQuerier.ts";
 import {Locator} from "../Utils/Locator.ts";
 import {RouteCalculator} from "../Calculator/RouteCalculator.ts";
 
@@ -36,7 +36,7 @@ export class MoveFilterer{
 
         // Get the threats of the king.
         this.threatsOfKing = this._findThreatsOfKing(pieceColor);
-        
+
         // If king threatened by multiple enemies then king can't protect so mandatory moves calculation is unnecessary.
         if(this.threatsOfKing.length > 1)
             return null;
@@ -44,8 +44,8 @@ export class MoveFilterer{
             return moveRoute;
 
         // Find the route that threat the player's king.
-        const squareOfKing: Square = BoardQueryer.getSquareOfPiece(BoardQueryer.getPiecesWithFilter(pieceColor, [PieceType.King])[0] as Piece) as Square;
-        const isEnemyKnight: boolean = BoardQueryer.getPieceOnSquare(this.threatsOfKing[0])!.getType() == PieceType.Knight;
+        const squareOfKing: Square = BoardQuerier.getSquareOfPiece(BoardQuerier.getPiecesWithFilter(pieceColor, [PieceType.King])[0] as Piece) as Square;
+        const isEnemyKnight: boolean = BoardQuerier.getPieceOnSquare(this.threatsOfKing[0])!.getType() == PieceType.Knight;
 
         /**
          * If enemy is knight then check if the piece can capture the knight, if it is then return the only capture move.
@@ -61,7 +61,7 @@ export class MoveFilterer{
 
         // If enemy is not knight then find the dangerous route of the threat because it can be blocked.
         const dangerousRouteOfThreat: Square[] = RouteCalculator.getRouteBySquare(this.threatsOfKing[0])[Locator.getRelative(squareOfKing, this.threatsOfKing[0])!]!
-     
+
         // If there is no square between king and enemy then there will be no block so return null.
         if(!dangerousRouteOfThreat || dangerousRouteOfThreat.length < 1)
             return null;
@@ -89,11 +89,11 @@ export class MoveFilterer{
          * Find the king and king's square and enemy's color
          * by the given piece color.
          */
-        const king: Piece | null = BoardQueryer.getPiecesWithFilter(pieceColor, [PieceType.King])[0];
+        const king: Piece | null = BoardQuerier.getPiecesWithFilter(pieceColor, [PieceType.King])[0];
         if(!king) return moveRoute;
 
         // Square of the king and enemy's color.
-        const kingSquare: Square = BoardQueryer.getSquareOfPiece(king)!;
+        const kingSquare: Square = BoardQuerier.getSquareOfPiece(king)!;
         const enemyColor: Color = pieceColor == Color.White ? Color.Black : Color.White;
 
         /**
@@ -144,13 +144,13 @@ export class MoveFilterer{
          * First check is there a piece between king and piece, if there is then piece doesn't have to
          * protect the king.
          */
-        if(!BoardQueryer.isSquareHasPiece(Locator.getNext(allRoutes[relativeRoute]!, relativeRoute, pieceSquare), pieceColor, [PieceType.King]))
+        if(!BoardQuerier.isSquareHasPiece(Locator.getNext(allRoutes[relativeRoute]!, relativeRoute, pieceSquare), pieceColor, [PieceType.King]))
             return moveRoute;
 
         // If there is no piece between king and piece, then check the dangerous pieces.
         for(const square of allRoutes[dangerousRoute]!){
             // If route has any dangerous piece, then(next step)
-            if(BoardQueryer.isSquareHasPiece(square, enemyColor, dangerousPieces)){
+            if(BoardQuerier.isSquareHasPiece(square, enemyColor, dangerousPieces)){
                 /**
                  * If moveRoute has MoveRoute.L, then it means that we are in
                  * getKnightMoves() method. In this case, knight can't
@@ -189,12 +189,12 @@ export class MoveFilterer{
     private _findThreatsOfKing(kingColor: Color): Square[]
     {
         // If game is not in check status then there is no threat to the king.
-        if(BoardQueryer.getBoardStatus() != GameStatus.BlackInCheck && BoardQueryer.getBoardStatus() != GameStatus.WhiteInCheck)
+        if(BoardQuerier.getBoardStatus() != GameStatus.BlackInCheck && BoardQuerier.getBoardStatus() != GameStatus.WhiteInCheck)
             return [];
 
         // Find the enemies that threat the king.
-        const squareOfKing: Square = BoardQueryer.getSquareOfPiece(BoardQueryer.getPiecesWithFilter(kingColor, [PieceType.King])[0] as Piece) as Square;
-        this.threatsOfKing = BoardQueryer.isSquareThreatened(squareOfKing, kingColor == Color.White ? Color.Black : Color.White, true) as Square[];
+        const squareOfKing: Square = BoardQuerier.getSquareOfPiece(BoardQuerier.getPiecesWithFilter(kingColor, [PieceType.King])[0] as Piece) as Square;
+        this.threatsOfKing = BoardQuerier.isSquareThreatened(squareOfKing, kingColor == Color.White ? Color.Black : Color.White, true) as Square[];
 
         // Return the threats of king.
         return this.threatsOfKing;

@@ -25,8 +25,8 @@ export class Chess{
     /**
      * Properties of the Chess class.
      */
-    private chessEngine: ChessEngine;
-    private chessBoard: ChessBoard;
+    public engine: ChessEngine;
+    public board: ChessBoard;
     private selectedSquare: Square | null;
     private isPromotionScreenOpen: boolean = false;
     private readonly isCachingEnabled: boolean = true;
@@ -35,8 +35,8 @@ export class Chess{
      * Constructor of the Chess class.
      */
     constructor(enableCaching: boolean = true){
-        this.chessBoard = new ChessBoard(false);
-        this.chessEngine = new ChessEngine(false);
+        this.board = new ChessBoard(false);
+        this.engine = new ChessEngine(false);
         this.selectedSquare = null;
         this.isCachingEnabled = enableCaching;
 
@@ -106,11 +106,11 @@ export class Chess{
         }
 
         // Create a new game on board.
-        this.chessBoard.createGame(position);
+        this.board.createGame(position);
         Logger.save(`Game successfully created on Chessboard`, "createGame", Source.Chess);
 
         // Create a new game on engine.
-        this.chessEngine.createGame(position);
+        this.engine.createGame(position);
         Logger.save(`Game successfully created on ChessEngine`, "createGame", Source.Chess);
 
         // Save the game to the cache as json notation.
@@ -120,7 +120,7 @@ export class Chess{
         }
 
         // Get status from engine and show it on board.
-        this.chessBoard.showStatus(this.chessEngine.getGameStatus());
+        this.board.showStatus(this.engine.getGameStatus());
 
         // Initialize the listener for moves because the game is created from scratch and the listener is not initialized.
         this.initListenerForMoves();
@@ -149,7 +149,7 @@ export class Chess{
              * @see For more information about promote check _doPromote() in src/Chess/Engine/ChessEngine.ts
              */
             if(moveType == SquareClickMode.Promotion)
-                this.chessBoard.refreshBoard();
+                this.board.refreshBoard();
             else
                 this._doClearAction();
 
@@ -166,7 +166,7 @@ export class Chess{
     private _doClearAction(): void
     {
         this.selectedSquare = null;
-        this.chessBoard.refreshBoard();
+        this.board.refreshBoard();
     }
 
     /**
@@ -178,8 +178,8 @@ export class Chess{
     {
         // Get the possible moves of the selected square and highlight them on chessBoard.
         this.selectedSquare = square;
-        this.chessBoard.highlightSelect(square);
-        this.chessBoard.highlightMoves(this.chessEngine.getMoves(square)!);
+        this.board.highlightSelect(square);
+        this.board.highlightMoves(this.engine.getMoves(square)!);
     }
 
     /**
@@ -188,8 +188,8 @@ export class Chess{
      */
     private _doPlayAction(square: Square): void
     {
-        this.chessEngine.playMove(this.selectedSquare!, square);
-        this.chessBoard.playMove(this.selectedSquare!, square);
+        this.engine.playMove(this.selectedSquare!, square);
+        this.board.playMove(this.selectedSquare!, square);
         this.finishTurn();
     }
 
@@ -199,53 +199,13 @@ export class Chess{
     private finishTurn(): void
     {
         // Get status from engine and show it on board.
-        this.chessBoard.showStatus(this.chessEngine.getGameStatus());
+        this.board.showStatus(this.engine.getGameStatus());
 
         // Save the game to the cache as json notation.
         if(this.isCachingEnabled && !this.isPromotionScreenOpen){
-            Cacher.save(this.chessEngine.getGameAsJsonNotation());
+            Cacher.save(this.engine.getGameAsJsonNotation());
             Logger.save("Game updated in cache after move", "finishTurn", Source.Chess);
         }
-    }
-
-    /**
-     * Get algebraic notation of the game
-     */
-    public getNotation(): string[]
-    {
-        return this.chessEngine.getNotation();
-    }
-
-    /**
-     * Get scores of the game
-     */
-    public getScores(): Record<Color, {score: number, pieces: PieceType[]}>
-    {
-        return this.chessEngine.getScores();
-    }
-
-    /**
-     * Get the status of the game
-     */
-    public getStatus(): GameStatus
-    {
-        return this.chessEngine.getGameStatus();
-    }
-
-    /**
-     * Get the game as fen notation
-     */
-    public getGameAsFenNotation(): string
-    {
-        return this.chessEngine.getGameAsFenNotation();
-    }
-
-    /**
-     * Get the game as json notation
-     */
-    public getGameAsJsonNotation(): JsonNotation
-    {
-        return this.chessEngine.getGameAsJsonNotation();
     }
 
     /**

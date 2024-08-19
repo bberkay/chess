@@ -63,6 +63,9 @@
     margin-left: 2px;
 }
 
+/**
+ * Turn indicator
+ */
 #notation-menu .turn-indicator{
     opacity: 0;
     display: flex;
@@ -93,6 +96,39 @@
 
     &.visible{
         opacity: 1;
+    }
+}
+
+/**
+ * Utility Menu
+ */
+#notation-menu .utility-menu{
+    display: flex;
+    justify-content: space-between;
+    width: calc(100% - 12px);
+    background-color: #111;
+    border: 1px solid #2a2a2a;
+    border-top:none;
+    padding: 5px;
+
+    & button{
+        padding: 10px;
+        padding-bottom: 5px;
+        background-color: #222;
+        color: #f5f5f5;
+        border:1px solid #2a2a2a;
+        cursor: pointer;
+        font-size:15px;
+        font-weight: 500;
+        font-family: 'Roboto', sans-serif;
+
+        &:hover{
+            background-color: #2a2a2a;
+        }
+
+        &:active{
+            opacity:0.7;
+        }
     }
 }
 

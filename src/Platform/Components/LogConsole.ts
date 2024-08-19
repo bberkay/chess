@@ -1,5 +1,5 @@
 import { Chess } from "../../Chess/Chess.ts";
-import { MenuOperationType, MenuOperationValue } from "../Types";
+import { MenuOperation } from "../Types";
 import { Component } from "./Component";
 
 /**
@@ -17,38 +17,8 @@ export class LogConsole extends Component{
         this.chess = chess;
         this.renderComponent();
         document.addEventListener("DOMContentLoaded", () => {
-            this.initListener();
             this.print(this.chess.getLogs());
         });
-    }
-
-    /**
-     * Listen actions/clicks of user on log console
-     */
-    protected initListener(): void
-    {
-        document.querySelectorAll("#log-console [data-operation-type]").forEach(menuItem => {
-            menuItem.addEventListener("click", () => {
-                // Make operation(from menu)
-                this.handleOperation(
-                    menuItem.getAttribute("data-operation-type") as MenuOperationType,
-                    menuItem.getAttribute("data-operation-value") as MenuOperationValue
-                );
-            });
-        });
-    }
-
-    /**
-     * This function makes an operation on menu.
-     */
-    protected handleOperation(operationType: MenuOperationType, operationValue: MenuOperationValue): void
-    {
-        // Do operation by given operation type.
-        switch(operationType){
-            case MenuOperationType.LogConsoleClear:
-                this.clear();
-                break;
-        }
     }
 
     /**
@@ -62,7 +32,7 @@ export class LogConsole extends Component{
             </div>
             <div id="log-console-footer">
                 <div id="log-console-footer-btn">
-                    <button data-operation-type="${MenuOperationType.LogConsoleClear}">Clear</button>
+                    <button data-menu-operation="${MenuOperation.ClearConsole}">X</button>
                 </div>
                 <div id="log-console-footer-content">
                     <span id = "log-file"></span>
@@ -70,11 +40,6 @@ export class LogConsole extends Component{
             </div>
         `);
         this.loadCSS("log-console.css");
-
-        // Initialize the listeners when the dom is loaded.
-        document.addEventListener("DOMContentLoaded", () => {
-            this.initListener();
-        });
     }
 
     /**
@@ -128,12 +93,12 @@ export class LogConsole extends Component{
                     words[i] = words[i].slice(0, words[i].lastIndexOf("]"));
                     const tooltipVariable: string = `<div class = "tooltip-container"><div class = "tooltip-text"><pre>${parseAndStringify(words[i])}</pre></div></div>`;
                     log.message = log.message.replace(
-                        originalWord, 
+                        originalWord,
                         `<div class = 'tooltip-toggle'>${originalWord.replace(`[${words[i]}]`, "")} ${tooltipVariable}</div>`
                     );
                 }
             }
-         
+
             // Add log to the log list.
             const logElement = document.createElement("li");
             logElement.innerHTML = `&#x2022 <strong data-log-source="${log.source}">[${log.source.replace(".ts", "").split("/").pop()}] </strong><span>${log.message}</span>`;
@@ -182,18 +147,18 @@ export class LogConsole extends Component{
         document.querySelectorAll(".tooltip-toggle").forEach((tooltip_toggle) => {
             // square ids and tooltip location added when the mouse is over the tooltip.
             tooltip_toggle.addEventListener("mouseover", () => {
-                squares.forEach((square: HTMLElement) => { 
-                    square.innerHTML += `<div class = "square-id">${square.getAttribute("data-square-id")}</div>` 
-                });            
+                squares.forEach((square: HTMLElement) => {
+                    square.innerHTML += `<div class = "square-id">${square.getAttribute("data-square-id")}</div>`
+                });
 
                 const openingLocation: string[] = calculateOpeningLocation((tooltip_toggle as HTMLElement));
                 if(openingLocation.length == 0) return;
                 tooltip_toggle.querySelector(".tooltip-container")!.classList.add(
-                    `tooltip-container--${openingLocation[0]}`, 
+                    `tooltip-container--${openingLocation[0]}`,
                     `tooltip-container--${openingLocation[1]}`
                 );
             });
-            
+
             // removed
             tooltip_toggle.addEventListener("mouseout", () => {
                 document.querySelectorAll(".square-id").forEach((element) => { element.remove() });
@@ -202,12 +167,12 @@ export class LogConsole extends Component{
                 );
             });
         });
-       
+
         // Add event listeners to the log sources.
         const logSourceAddressBar: HTMLElement = document.getElementById("log-file")!;
         document.querySelectorAll("[data-log-source]").forEach((logSource) => {
-            logSource.parentElement!.addEventListener("mouseover", () => { 
-                logSourceAddressBar.innerHTML = logSource.getAttribute("data-log-source")! 
+            logSource.parentElement!.addEventListener("mouseover", () => {
+                logSourceAddressBar.innerHTML = logSource.getAttribute("data-log-source")!
             });
         });
     }

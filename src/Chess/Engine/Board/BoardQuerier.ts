@@ -8,7 +8,7 @@ import {RouteCalculator} from "../Move/Calculator/RouteCalculator.ts";
  * This class provides the traversing and querying of the board.
  * Like, get all pieces, get piece on square, get square of piece, etc.
  */
-export class BoardQueryer extends Board{
+export class BoardQuerier extends Board{
 
     /**
      * Get current game
@@ -29,14 +29,14 @@ export class BoardQueryer extends Board{
         // Return the game as JsonNotation.
         return {
             board: pieces,
-            turn: BoardQueryer.getColorOfTurn(),
-            castling: BoardQueryer.getCastling(),
-            enPassant: BoardQueryer.getEnPassant(),
-            halfMoveClock: BoardQueryer.getHalfMoveCount(),
-            fullMoveNumber: BoardQueryer.getMoveCount(),
-            moveHistory: BoardQueryer.getMoveHistory(),
-            scores: BoardQueryer.getScores(),
-            gameStatus: BoardQueryer.getBoardStatus()
+            turn: BoardQuerier.getColorOfTurn(),
+            castling: BoardQuerier.getCastling(),
+            enPassant: BoardQuerier.getEnPassant(),
+            halfMoveClock: BoardQuerier.getHalfMoveCount(),
+            fullMoveNumber: BoardQuerier.getMoveCount(),
+            moveHistory: BoardQuerier.getMoveHistory(),
+            scores: BoardQuerier.getScores(),
+            gameStatus: BoardQuerier.getBoardStatus()
         }
     }
 
@@ -247,8 +247,8 @@ export class BoardQueryer extends Board{
             }
 
             // If board has no queen, rook or pawn then check the king and bishop count.
-            return BoardQueryer.getPiecesWithFilter(Color.White, [PieceType.Knight, PieceType.Bishop]).length > 1
-                || BoardQueryer.getPiecesWithFilter(Color.Black, [PieceType.Knight, PieceType.Bishop]).length > 1;
+            return BoardQuerier.getPiecesWithFilter(Color.White, [PieceType.Knight, PieceType.Bishop]).length > 1
+                || BoardQuerier.getPiecesWithFilter(Color.Black, [PieceType.Knight, PieceType.Bishop]).length > 1;
         }
     }
 

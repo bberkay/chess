@@ -1,6 +1,6 @@
 import {Board} from "./Board.ts";
 import {CastlingType, Color, JsonNotation, PieceType, Square, GameStatus} from "../../Types";
-import {BoardQueryer} from "./BoardQueryer.ts";
+import {BoardQuerier} from "./BoardQuerier.ts";
 import {PieceModel} from "../Models/PieceModel.ts";
 import {Piece} from "../Types";
 
@@ -71,8 +71,8 @@ export class BoardManager extends Board{
     protected movePiece(from: Square, to:Square): void
     {
         // Check if the square has a piece and get the piece.
-        const fromPiece: Piece | null = BoardQueryer.getPieceOnSquare(from)!;
-        const toPiece: Piece | null = BoardQueryer.getPieceOnSquare(to);
+        const fromPiece: Piece | null = BoardQuerier.getPieceOnSquare(from)!;
+        const toPiece: Piece | null = BoardQuerier.getPieceOnSquare(to);
 
         /**
          * If the moved piece is a pawn or capture move then set half move count to 0
@@ -124,7 +124,7 @@ export class BoardManager extends Board{
      */
     protected changeTurn(): void
     {
-        Board.currentTurn = BoardQueryer.getColorOfOpponent();
+        Board.currentTurn = BoardQuerier.getColorOfOpponent();
         Board.moveCount += Board.currentTurn === Color.White ? 1 : 0;
     }
 
@@ -138,7 +138,7 @@ export class BoardManager extends Board{
     protected updateScores(capturedSquare: Square): void
     {
         const enemyColor: Color = Board.currentTurn == Color.White ? Color.Black : Color.White;
-        const capturedPiece: Piece = BoardQueryer.getPieceOnSquare(capturedSquare)!;
+        const capturedPiece: Piece = BoardQuerier.getPieceOnSquare(capturedSquare)!;
         if(!capturedPiece && capturedSquare != Board.enPassant)
             return;
 
