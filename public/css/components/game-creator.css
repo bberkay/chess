@@ -3,9 +3,13 @@
  * @see For more information about this component check file: src\Platform\Components\GameCreator.ts
  */
 
-#game-creator {
-    display: flex;
+#game-creator .game-creator{
+    display: none;
     border:1px solid #2a2a2a;
+
+    &.visible{
+        display: flex;
+    }
 
     & input{
         border:2px solid #111;

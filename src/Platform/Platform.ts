@@ -103,7 +103,6 @@ export class Platform{
     {
         this.notationMenu?.clear();
         this.logConsole?.clear();
-        this.gameCreator?.clear();
         this.initBoardListener();
 
         // Wait until game creator response is ready.
@@ -116,6 +115,6 @@ export class Platform{
                 this.logConsole?.print(JSON.parse(gameCreatorResponse!.innerHTML));
                 gameCreatorResponse.remove();
             }
-        });
+            });
     }
 }

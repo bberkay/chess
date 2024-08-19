@@ -398,6 +398,7 @@ export class ChessBoard {
         this.createPiece(color, pieceType, firstRowOfSquare);
         this._closePromotions();
 
+        // Set the square effect of the promoted square on the last row.
         this.setSquareEffect(firstRowOfSquare, SquareEffect.To);
         this.playSound(SoundEffect.Promote);
         Logger.save(`Player's[${color}] Piece[${pieceType}] created on square[${firstRowOfSquare}] on board`, "playMove", Source.ChessBoard);
