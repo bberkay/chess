@@ -89,7 +89,7 @@ export class Platform{
               this.gameCreator?.changeMode();
               break;
           case MenuOperation.FlipBoard:
-            this.chess.board!.flipBoard();
+            this.chess.board!.flip();
             break;
         }
     }

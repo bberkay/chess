@@ -8,6 +8,7 @@ import { Component } from "./Component";
  */
 export class GameCreator extends Component{
     protected readonly chess: Chess;
+    private currentMode: "custom-mode" | "template-mode";
 
     /**
      * Constructor of the GameCreatorForm class.
@@ -15,6 +16,7 @@ export class GameCreator extends Component{
     constructor(chess: Chess){
         super();
         this.chess = chess;
+        this.currentMode = "template-mode";
         this.renderComponent();
     }
 
@@ -25,7 +27,6 @@ export class GameCreator extends Component{
     {
       const gameCreator: HTMLElement = document.querySelector("#game-creator")!;
       gameCreator!.classList.add("game-creator");
-      gameCreator!.setAttribute("data-form-mode", "custom-mode");
       this.loadCSS("game-creator.css");
       this.changeMode(); // Start it from template mode.
     }
@@ -36,17 +37,14 @@ export class GameCreator extends Component{
     public changeMode(): void
     {
       const gameCreator: HTMLElement = document.querySelector('#game-creator')!;
-      const currentMode: "custom-mode" | "template-mode" = gameCreator.getAttribute("data-form-mode") as "custom-mode" | "template-mode";
-      let newMode: "custom-mode" | "template-mode";
-      if(currentMode == "custom-mode"){
+      if(this.currentMode == "custom-mode"){
         gameCreator.outerHTML = this.getTemplateMode();
-        newMode = "template-mode";
+        this.currentMode = "template-mode";
       }
-      else if(currentMode == "template-mode"){
+      else if(this.currentMode == "template-mode"){
         gameCreator.outerHTML = this.getCustomMode();
-        newMode = "custom-mode";
+        this.currentMode = "custom-mode";
       }
-      document.querySelector('.game-creator')!.setAttribute("data-form-mode", newMode!);
     }
 
     /**
@@ -64,7 +62,7 @@ export class GameCreator extends Component{
       }
 
       return `
-        <div id="game-creator" class = "game-creator" data-form-mode="template-mode">
+        <div id="game-creator" class = "game-creator">
             <div class = "border-inset"><button data-menu-operation="${MenuOperation.ChangeMode}">Templates</button></div>
             <select>${getTemplateOptions()}</select>
             <div class = "border-inset"><button data-menu-operation="${MenuOperation.CreateGame}">Load</button></div>
@@ -77,7 +75,7 @@ export class GameCreator extends Component{
      */
     private getCustomMode(): string
     {
-      return `<div id="game-creator" class = "game-creator-mode" data-form-mode="custom-mode">
+      return `<div id="game-creator" class = "game-creator-mode">
                 <div class = "border-inset"><button data-menu-operation="${MenuOperation.ChangeMode}">Templates</button></div>
                 <input type="text" placeholder="FEN Notation" value = "${this.chess.engine.getGameAsFenNotation()}">
                 <div class = "border-inset"><button data-menu-operation="${MenuOperation.CreateGame}">Load</button></div>
@@ -97,6 +95,9 @@ export class GameCreator extends Component{
         response.innerHTML = JSON.stringify(this.chess.getLogs());
         response.style.visibility = "hidden";
         document.body.appendChild(response);
+
+        if(this.currentMode == "template-mode")
+          this.changeMode();
     }
 
     /**
@@ -104,13 +105,11 @@ export class GameCreator extends Component{
      */
     private getFormValue(): string
     {
-        const gameCreator: HTMLElement = document.querySelector('.game-creator')!;
-        const currentMode: "custom-mode" | "template-mode" = gameCreator.getAttribute("id") as "custom-mode" | "template-mode";
         let formValue: string;
-        if(currentMode == "custom-mode")
-            formValue = (document.querySelector(`#custom-mode input`) as HTMLInputElement).value;
-        else if(currentMode == "template-mode")
-            formValue = (document.querySelector(`#template-mode select`) as HTMLSelectElement).value;
+        if(this.currentMode == "custom-mode")
+            formValue = (document.querySelector(`#game-creator input`) as HTMLInputElement).value;
+        else if(this.currentMode == "template-mode")
+            formValue = (document.querySelector(`#game-creator select`) as HTMLSelectElement).value;
         return formValue!;
     }
 
@@ -119,7 +118,7 @@ export class GameCreator extends Component{
      */
     public show(fenNotation: string): void
     {
-        (document.querySelector(`#custom-mode input`) as HTMLInputElement).value = fenNotation;
+        (document.querySelector(`#game-creator input`) as HTMLInputElement).value = fenNotation;
     }
 
     /**
@@ -127,7 +126,7 @@ export class GameCreator extends Component{
      */
     public clear(): void
     {
-        (document.querySelector(`#custom-mode input`) as HTMLInputElement).value = "";
-        (document.querySelector(`template-mode input`) as HTMLSelectElement).selectedIndex = 0;
+        (document.querySelector(`#game-creator input`) as HTMLInputElement).value = "";
+        (document.querySelector(`#game-creator select`) as HTMLSelectElement).selectedIndex = 0;
     }
 }

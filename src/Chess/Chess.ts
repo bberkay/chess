@@ -106,7 +106,7 @@ export class Chess{
         }
 
         // Create a new game on board.
-        this.board.createGame(position);
+        this.board.create(position);
         Logger.save(`Game successfully created on Chessboard`, "createGame", Source.Chess);
 
         // Create a new game on engine.
@@ -149,7 +149,7 @@ export class Chess{
              * @see For more information about promote check _doPromote() in src/Chess/Engine/ChessEngine.ts
              */
             if(moveType == SquareClickMode.Promotion)
-                this.board.refreshBoard();
+                this.board.refresh();
             else
                 this._doClearAction();
 
@@ -166,7 +166,7 @@ export class Chess{
     private _doClearAction(): void
     {
         this.selectedSquare = null;
-        this.board.refreshBoard();
+        this.board.refresh();
     }
 
     /**
