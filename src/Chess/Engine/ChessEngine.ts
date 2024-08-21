@@ -44,19 +44,13 @@ export class ChessEngine extends BoardManager {
     private isPromotionMenuOpen: boolean = false;
     private isBoardPlayable: boolean = false;
     private boardHistory: Array<string> = [];
-    private readonly isStandalone: boolean = false;
 
     /**
      * Constructor of the ChessEngine class.
      */
-    constructor(isStandalone: boolean = true){
+    constructor(){
         super();
         this.moveEngine = new MoveEngine();
-        this.isStandalone = isStandalone;
-
-        // If engine is standalone then create a game with the standard position.
-        if(this.isStandalone)
-            this.createGame();
     }
 
     /**
@@ -65,17 +59,9 @@ export class ChessEngine extends BoardManager {
      */
     public createGame(position: JsonNotation | StartPosition | string = StartPosition.Standard): void
     {
-        if(this.isStandalone)
-            Logger.clear();
-
         // Reset properties and create a new game.
         this.clearProperties();
         this.createBoard(typeof position !== "string" ? position : Converter.fenToJson(position));
-
-        if(this.isStandalone)
-            Logger.save(`Game created on ChessEngine`, "createGame", Source.ChessEngine);
-
-        // Check status of board after creating the game.
         this.checkGameStatus();
     }
 
@@ -729,7 +715,15 @@ export class ChessEngine extends BoardManager {
     }
 
     /**
-     * This function returns the finished status of the game, doesn't calculate the game is finished or not.
+     * Get color of current turn.
+     */
+    public getTurnColor(): Color
+    {
+        return BoardQuerier.getColorOfTurn();
+    }
+
+    /**
+     * This function returns the status of board.
      */
     public getGameStatus(): GameStatus
     {
@@ -757,9 +751,6 @@ export class ChessEngine extends BoardManager {
      */
     public getLogs(): Array<{source: string, message: string}>
     {
-        if(!this.isStandalone)
-            throw new Error("This function can only be used on standalone mode");
-
         return Logger.get();
     }
 }

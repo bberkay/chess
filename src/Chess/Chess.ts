@@ -28,40 +28,22 @@ export class Chess{
     public engine: ChessEngine;
     public board: ChessBoard;
     private selectedSquare: Square | null;
-    private isPromotionScreenOpen: boolean = false;
+    private isPromotionScreenOpen: boolean = false; // TODO: Bu kalksın
+    private isClearing: boolean = false;
     private readonly isCachingEnabled: boolean = true;
 
     /**
      * Constructor of the Chess class.
      */
     constructor(enableCaching: boolean = true){
-        this.board = new ChessBoard(false);
-        this.engine = new ChessEngine(false);
+        this.board = new ChessBoard();
+        this.engine = new ChessEngine();
         this.selectedSquare = null;
         this.isCachingEnabled = enableCaching;
 
         // If there is a game in cache, load it. Otherwise, create a new game.
         if(!this.checkAndLoadGameFromCache())
             this.createGame();
-    }
-
-    /**
-     * This function initializes the listener for user's
-     * actions on chessboard to make a move on engine and board.
-     */
-    private initListenerForMoves(): void
-    {
-        document.querySelectorAll("[data-square-id]").forEach(square => {
-            square.addEventListener("mousedown", () => {
-                // Make move(with square ID and click mode)
-                this.doActionOnBoard(
-                    square.getAttribute("data-click-mode") as SquareClickMode,
-                    parseInt(square.getAttribute("data-square-id")!) as Square
-                );
-            });
-        });
-
-        Logger.save("Moves listener initialized", "initListenerForMoves", Source.Chess);
     }
 
     /**
@@ -105,13 +87,12 @@ export class Chess{
             Logger.save(`Given position converted to json notation.`, "createGame", Source.Chess);
         }
 
-        // Create a new game on board.
-        this.board.create(position);
-        Logger.save(`Game successfully created on Chessboard`, "createGame", Source.Chess);
-
-        // Create a new game on engine.
         this.engine.createGame(position);
         Logger.save(`Game successfully created on ChessEngine`, "createGame", Source.Chess);
+        
+        this.board.createGame(position);
+        this.board.setTurnColor(this.engine.getTurnColor());
+        Logger.save(`Game successfully created on Chessboard`, "createGame", Source.Chess);
 
         // Save the game to the cache as json notation.
         if(this.isCachingEnabled){
@@ -127,6 +108,48 @@ export class Chess{
     }
 
     /**
+     * This function initializes the listener for user's
+     * actions on chessboard to make a move on engine and board.
+     */
+    private initListenerForMoves(): void
+    {
+        this.board.listenForMove({
+            onClick: (square: HTMLElement) => {
+                //if(square.querySelector(".piece")?.getAttribute("data-color") == this.engine.getTurnColor())
+                this.doActionOnBoard(
+                  square.getAttribute("data-click-mode") as SquareClickMode,
+                  parseInt(square.getAttribute("data-square-id")!) as Square
+                )
+            },
+            onMouseDown: (square: HTMLElement) => {
+                const squareClickMode = square.getAttribute("data-click-mode") as SquareClickMode;
+                if(squareClickMode != SquareClickMode.Clear){
+                    this.doActionOnBoard(
+                        squareClickMode,
+                        parseInt(square.getAttribute("data-square-id")!) as Square
+                      )
+                }
+            },
+            onMouseUp: (square: HTMLElement) => {
+                const squareClickMode = square.getAttribute("data-click-mode") as SquareClickMode;
+                console.log("square: ", square);
+                console.log("squareClickMode: ", squareClickMode);
+                console.log("this.isClearing: ", this.isClearing);
+                if(this.isClearing || squareClickMode == SquareClickMode.Play){
+                    this.doActionOnBoard(
+                        squareClickMode,
+                        parseInt(square.getAttribute("data-square-id")!) as Square
+                      )
+                    this.isClearing = false;
+                }else{
+                    this.isClearing = true;
+                }
+            }
+        });
+        Logger.save("Moves listener initialized", "initListenerForMoves", Source.Chess);
+    }
+
+    /**
      * Make action on the board.
      * @example doAction(SquareClickMode.Select, Square.a2); // Select the piece on the square a2.
      * @example doAction(SquareClickMode.Play, Square.a3); // Play the selected piece(a2) to the square a3.
@@ -134,25 +157,15 @@ export class Chess{
      */
     public doActionOnBoard(moveType: SquareClickMode, square: Square): void
     {
-        // Find the move type and do the action.
         if([SquareClickMode.Play, SquareClickMode.Castling, SquareClickMode.Promote, SquareClickMode.Promotion, SquareClickMode.EnPassant].includes(moveType))
         {
-            // Do not allow to cache the game when the promotion screen is open.
             this.isPromotionScreenOpen = moveType == SquareClickMode.Promotion;
-
-            // Play the move on engine and board.
             this._doPlayAction(square);
 
-            /**
-             * If the move type is not promotion, clear the board
-             * and set selected square to promotion piece square.
-             * @see For more information about promote check _doPromote() in src/Chess/Engine/ChessEngine.ts
-             */
-            if(moveType == SquareClickMode.Promotion)
+            if(this.isPromotionScreenOpen)
                 this.board.refresh();
             else
                 this._doClearAction();
-
         }
         else if(moveType === SquareClickMode.Select)
             this._doSelectAction(square);
@@ -176,9 +189,8 @@ export class Chess{
      */
     private _doSelectAction(square: Square): void
     {
-        // Get the possible moves of the selected square and highlight them on chessBoard.
         this.selectedSquare = square;
-        this.board.highlightSelect(square);
+        this.board.selectPiece(square);
         this.board.highlightMoves(this.engine.getMoves(square)!);
     }
 
@@ -198,10 +210,8 @@ export class Chess{
      */
     private finishTurn(): void
     {
-        // Get status from engine and show it on board.
         this.board.showStatus(this.engine.getGameStatus());
-
-        // Save the game to the cache as json notation.
+        this.board.setTurnColor(this.engine.getTurnColor());
         if(this.isCachingEnabled && !this.isPromotionScreenOpen){
             Cacher.save(this.engine.getGameAsJsonNotation());
             Logger.save("Game updated in cache after move", "finishTurn", Source.Chess);

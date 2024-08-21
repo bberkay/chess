@@ -65,10 +65,8 @@ export class LogConsole extends Component{
             return JSON.stringify(value, undefined, 2);
         }
 
-        // Find the log list element and the last logs in the logs array.
         const logListElement: HTMLElement = document.getElementById("log-list")!;
         for(const log of logs){
-            // Get the words in the log message.
             const words: string[] = log.message.split(" ");
             for(let i = 0; i < words.length; i++){
                 const originalWord: string = words[i];
@@ -190,10 +188,6 @@ export class LogConsole extends Component{
      */
     public print(logs: Array<{source: string, message: string}>): void
     {
-        /**
-         * If the log count is greater than 130, clear the log console.
-         * This is for preventing the log console from slowing down the browser.
-         */
         if(this.getLogCount() > 75)
             this.clear();
 

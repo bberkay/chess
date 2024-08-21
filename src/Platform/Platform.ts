@@ -46,14 +46,13 @@ export class Platform{
      */
     private initBoardListener(): void
     {
-        document.querySelectorAll("[data-square-id]").forEach(square => {
-            square.addEventListener("mousedown", () => {
-                // Update components every time a square is clicked.
-                this.notationMenu?.update(this.chess.engine.getNotation(), this.chess.engine.getScores());
-                this.logConsole?.print(this.chess.getLogs());
-                this.gameCreator?.show(this.chess.engine.getGameAsFenNotation());
-            });
-        });
+      this.chess.board.listenForMove({
+        onMouseUp: () => {
+            this.notationMenu?.update(this.chess.engine.getNotation(), this.chess.engine.getScores());
+            this.logConsole?.print(this.chess.getLogs());
+            this.gameCreator?.show(this.chess.engine.getGameAsFenNotation());
+        }
+      })
     }
 
     /**
@@ -82,8 +81,8 @@ export class Platform{
               this.logConsole?.clear();
               break;
             case MenuOperation.CreateGame:
-              this.updateComponentsForNewGame();
               this.gameCreator?.createGame();
+              this.updateComponentsForNewGame();
               break;
             case MenuOperation.ChangeMode:
               this.gameCreator?.changeMode();
@@ -115,6 +114,6 @@ export class Platform{
                 this.logConsole?.print(JSON.parse(gameCreatorResponse!.innerHTML));
                 gameCreatorResponse.remove();
             }
-            });
+        });
     }
 }

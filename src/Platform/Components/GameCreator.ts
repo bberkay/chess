@@ -90,7 +90,6 @@ export class GameCreator extends Component{
     private getFormValue(): string
     {
         let formValue: string;
-      console.log(document.querySelector(`.custom-mode input`), document.querySelector(`.template-mode select`));
         if(this.currentMode == "custom-mode")
             formValue = (document.querySelector(`.custom-mode input`) as HTMLInputElement).value;
         else if(this.currentMode == "template-mode")

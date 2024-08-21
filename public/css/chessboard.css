@@ -176,6 +176,10 @@
     z-index:99;
     left:5%;
     top:10%;
+
+    &.dragging {
+        opacity: 0.5;
+    }
 }
 
 /* Animation for piece movement, don't change this */

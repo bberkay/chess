@@ -17,7 +17,6 @@ import {Logger, Source} from "../Services/Logger.ts";
  */
 export class ChessBoard {
 
-    private readonly isStandalone: boolean;
     private sounds: {[key in SoundEffect]: HTMLAudioElement} = {
         Start: new Audio("./sounds/game-start.mp3"),
         WhiteMove: new Audio("./sounds/move-self.mp3"),
@@ -28,20 +27,16 @@ export class ChessBoard {
         Promote: new Audio("./sounds/promote.mp3"),
         End: new Audio("./sounds/game-end.mp3"),
     };
-    private colorOfPlayer: Color | null = null;
     private lockedSquaresModes: Array<SquareClickMode> = [];
-    private lastClickedSquare: Square | null = null;
+    public turnColor: Color.White | Color.Black = Color.White;
 
     /**
      * Constructor of the class which load css file of
      * the chess board.
      */
-    constructor(isStandalone: boolean = true){
-        this.isStandalone = isStandalone;
+    constructor(){
         this._loadCSS();
         this._loadSounds();
-        if(this.isStandalone) this.create();
-        Logger.save("ChessBoard created and CSS loaded." + (this.isStandalone ? " as standalone" : ""), "constructor", Source.ChessBoard);
     }
 
     /**
@@ -70,25 +65,32 @@ export class ChessBoard {
     }
 
     /**
-     * This function initializes the listeners for user's
-     * actions on chessboard to make a move on board.
+     * This function creates a chess board with the given position(fen notation or json notation).
      */
-    private initStandaloneListener(): void
+    public createGame(position: JsonNotation | StartPosition | string = StartPosition.Standard): void
     {
-        document.querySelectorAll("[data-square-id]").forEach(square => {
-            square.addEventListener("mousedown", () => {
-                const squareID = this.getSquareID(square);
-                if(square.lastElementChild && square.lastElementChild.className.includes("piece")){
-                    this.lastClickedSquare = squareID;
-                    this.highlightSelect(this.lastClickedSquare);
-                }
-                else if(this.lastClickedSquare){
-                    this.playMove(this.lastClickedSquare, squareID);
-                    this.lastClickedSquare = null;
-                }
-            });
+        this.createBoard();
+        Logger.save("Chessboard created.", "createGame", Source.ChessBoard);
+
+        this.createPieces(typeof position == "string" ? Converter.fenToJson(position).board : position.board);
+        Logger.save("Pieces created on ChessBoard.", "createGame", Source.ChessBoard);
+
+        this.playSound(SoundEffect.Start);
+    }
+
+    /**
+     * Current player of the game.
+     */
+    public setTurnColor(color: Color.White | Color.Black): void
+    {
+        this.turnColor = color;
+        document.querySelectorAll(`.piece`).forEach((element) => {
+            const square = element.parentElement!;
+            if(!square.lastElementChild?.className.includes("promotion-option") && element.getAttribute("data-color") == this.turnColor)
+                this.setSquareClickMode(square, SquareClickMode.Select);
+            else
+                this.setSquareClickMode(square, SquareClickMode.Clear);
         });
-        Logger.save("Standalone listener initialized.", "initStandaloneListener", Source.ChessBoard);
     }
 
     /**
@@ -148,29 +150,6 @@ export class ChessBoard {
 
             board.appendChild(square);
         }
-
-        if(this.isStandalone)
-            this.initStandaloneListener();
-    }
-
-    /**
-     * This function creates a chess board with the given position(fen notation or json notation).
-     */
-    public create(position: JsonNotation | StartPosition | string = StartPosition.Standard): void
-    {
-        if(this.isStandalone)
-            Logger.clear();
-
-        this.createBoard();
-        Logger.save("Chessboard created.", "createGame", Source.ChessBoard);
-
-        this.createPieces(typeof position == "string" ? Converter.fenToJson(position).board : position.board);
-        Logger.save("Pieces created on ChessBoard.", "createGame", Source.ChessBoard);
-
-        if(this.isStandalone)
-            Logger.save(`Game created on ChessBoard`, "createGame", Source.ChessBoard);
-
-        this.playSound(SoundEffect.Start);
     }
 
     /**
@@ -192,8 +171,8 @@ export class ChessBoard {
         piece.className = "piece";
         piece.setAttribute("data-piece", type);
         piece.setAttribute("data-color", color);
-        this.setSquareClickMode(square, SquareClickMode.Select);
         this.getSquareElement(square).appendChild(piece);
+        this.setSquareClickMode(piece.parentElement!, SquareClickMode.Select);
     }
 
     /**
@@ -206,23 +185,102 @@ export class ChessBoard {
     }
 
     /**
+     * 
+     */
+    public listenForMove(callbacks: {
+        onClick?: (square: HTMLElement) => void,
+        onMouseDown?: (square: HTMLElement) => void,
+        onMouseUp?: (element?: any) => void
+    }): void
+    {
+        Logger.save("Listening for move.", "listenForMove", Source.ChessBoard);
+        const squares = this.getAllSquares();
+        squares.forEach(square => {
+            if(callbacks.onClick){
+                square.addEventListener("click", (e) => {
+                    callbacks.onClick!(square);
+                });
+            }
+            if (callbacks.onMouseDown){
+                square.addEventListener("mousedown", (e) => {
+                    if(square.querySelector(".piece")?.getAttribute("data-color") != this.turnColor)
+                        return;
+
+                    callbacks.onMouseDown!(square);
+                    this.stickPieceToCursor(e, square);
+              });
+            }
+        });
+        if (callbacks.onMouseUp){
+            document.addEventListener("mouseup", (e) => {
+                this.dropPiece(e);
+                const targetSquare = document.elementFromPoint(e.clientX, e.clientY)?.parentElement;
+                callbacks.onMouseUp!(targetSquare);
+            });
+        }
+    }
+
+    /**
      * This function selects the square on the chess board.
      */
-    public highlightSelect(squareID: Square): void
+    public selectPiece(squareID: Square): void
     {
         this.refresh();
         const selectedSquare = this.getSquareElement(squareID);
-        const selectedPiece = selectedSquare.querySelector(".piece")!;
-        this.colorOfPlayer = selectedPiece.getAttribute("data-color") as Color;
         this.setSquareEffect(selectedSquare, SquareEffect.Selected);
-        Logger.save(`Selected square[${squareID}] found on DOM and Selected effect added.`, "highlightSelect", Source.ChessBoard);
+        Logger.save(`Selected square[${squareID}] found on DOM and Selected effect added.`, "selectPiece", Source.ChessBoard);
 
         /**
          * Set the click mode "Clear" to the square because
          * we want to clear the square when it is clicked again.
          */
         this.setSquareClickMode(selectedSquare, SquareClickMode.Clear);
-        Logger.save(`Selected square's[${squareID}] click mode set to clear.`, "highlightSelect", Source.ChessBoard);
+        Logger.save(`Selected square's[${squareID}] click mode set to clear.`, "selectPiece", Source.ChessBoard);
+    }
+
+    /**
+     * Stick the piece to the cursor when the user clicks on the piece.
+     */
+    private stickPieceToCursor(downEvent: MouseEvent, square: HTMLElement): void {
+        const originalPiece = square.querySelector(".piece") as HTMLElement;
+        if (!originalPiece || document.querySelector(".piece.cloned")) return;
+        const clonedPiece = originalPiece.cloneNode(true) as HTMLElement;
+        originalPiece.classList.add("dragging");
+        clonedPiece.classList.add("cloned");
+        document.body.appendChild(clonedPiece);
+        clonedPiece.style.position = "absolute";
+        clonedPiece.style.top = `calc(${downEvent.clientY}px - ${clonedPiece.offsetHeight / 2}px)`;
+        clonedPiece.style.left = `calc(${downEvent.clientX}px - ${clonedPiece.offsetWidth / 2}px)`;
+        document.addEventListener("mousemove", this.dragPiece);
+    }
+
+    /**
+     * Drag the cloned piece with the cursor.
+     */
+    private dragPiece(moveEvent: MouseEvent): void {
+        const clonedPiece = document.querySelector(".piece.cloned") as HTMLElement;
+        if (!clonedPiece) return;
+        clonedPiece.style.top = `calc(${moveEvent.clientY}px - ${clonedPiece.offsetHeight / 2}px)`;
+        clonedPiece.style.left = `calc(${moveEvent.clientX}px - ${clonedPiece.offsetWidth / 2}px)`;
+    }
+
+    /**
+     * Drop the piece to the square where the cursor is.
+     */
+    private dropPiece(upEvent: MouseEvent): void {
+        const originalPiece = document.querySelector(".piece.dragging") as HTMLElement;
+        const clonedPiece = document.querySelector(".piece.cloned") as HTMLElement;
+        if (clonedPiece) {
+            clonedPiece.remove();
+            const targetSquare: Element | null = document.elementFromPoint(upEvent.clientX, upEvent.clientY);
+            if (targetSquare 
+                && targetSquare.className.includes(`square`) 
+                && this.getSquareClickMode(targetSquare) == SquareClickMode.Play
+            )
+                targetSquare.appendChild(originalPiece);
+        }
+        if(originalPiece) originalPiece.classList.remove("dragging");
+        document.removeEventListener("mousemove", this.dragPiece);
     }
 
     /**
@@ -232,9 +290,6 @@ export class ChessBoard {
      */
     public highlightMoves(moves: Moves | null = null): void
     {
-        if(this.isStandalone && !moves)
-          moves![MoveType.Normal] = Array.from({ length: 64 }, (_, index) => index + 1) as Array<Square>;
-
         // If board is not standalone but moves is null then return.
         if(moves == null)
             return;
@@ -249,9 +304,9 @@ export class ChessBoard {
                 // because there will be no "enemy" since there is no engine to calculate that.
                 const square = this.getSquareElement(move);
                 const squareContent = square.lastElementChild;
-                if(squareContent && squareContent.className.includes("piece") && squareContent.getAttribute("data-color") !== this.colorOfPlayer)
+                if(squareContent && squareContent.className.includes("piece"))
                     this.setSquareEffect(move, SquareEffect.Killable);
-                else if(!this.isStandalone)
+                else
                     this.setSquareEffect(move, SquareEffect.Playable);
                 this.setSquareClickMode(move, (moveType == MoveType.Castling ? SquareClickMode.Castling : null)
                     || (moveType == MoveType.EnPassant ? SquareClickMode.EnPassant : null)
@@ -297,6 +352,58 @@ export class ChessBoard {
     }
 
     /**
+     * Do the normal move(move piece to another square) with animation on the chess board.
+     */
+    private async _doNormalMove(fromSquare:HTMLDivElement, toSquare:HTMLDivElement, playMoveSound: boolean = true): Promise<void>
+    {
+        return new Promise((resolve) => {
+            if(playMoveSound){
+                if(toSquare.lastElementChild && toSquare.lastElementChild.className.includes("piece"))
+                    this.playSound(SoundEffect.Capture);
+                else
+                  this.playSound(this.turnColor == Color.White ? SoundEffect.WhiteMove : SoundEffect.BlackMove);
+            }
+
+            //if(clonedPiece)
+            //this.dropPiece(e, this.selectedPiece);
+            //clonedPiece = null;
+
+            /*this.removePiece(this.getSquareID(toSquare));
+            Logger.save(`Target square[${this.getSquareID(toSquare)}] removed on board`, "playMove", Source.ChessBoard);*/
+
+            /*const piece: HTMLDivElement = fromSquare.querySelector(".piece") as HTMLDivElement;
+            this.animatePieceToSquare(piece, toSquare);
+            resolve();*/
+        });
+    }
+
+    /**
+     * Move the piece to the square with animation.
+     */
+    private animatePieceToSquare(piece: HTMLElement, square: HTMLElement): void {
+        if (!piece) return;
+        const pieceRect = piece.getBoundingClientRect();
+        const marginLeft = Math.abs(piece.parentElement!.getBoundingClientRect().left - pieceRect.left);
+        const marginTop = Math.abs(piece.parentElement!.getBoundingClientRect().top - pieceRect.top);
+
+        document.body.appendChild(piece);
+        piece.style.top = `${pieceRect.top}px`;
+        piece.style.left = `${pieceRect.left}px`;
+        piece.style.animation = "move 0.3s ease-in-out forwards";
+        piece.style.setProperty("--move-from-left", `${pieceRect.left}px`);
+        piece.style.setProperty("--move-from-top", `${pieceRect.top}px`);
+        piece.style.setProperty("--move-to-left", `calc(${marginLeft}px + ${square.getBoundingClientRect().left}px)`);
+        piece.style.setProperty("--move-to-top", `calc(${marginTop}px + ${square.getBoundingClientRect().top}px)`);
+
+        piece.addEventListener("animationend", () => {
+          square.appendChild(piece);
+          piece.style.animation = "";
+          piece.style.top = "";
+          piece.style.left = "";
+        });
+    }
+
+    /**
      * Do the castling move on the chess board.
      */
     private async _doCastling(fromSquare:HTMLDivElement, toSquare:HTMLDivElement): Promise<void>
@@ -338,7 +445,6 @@ export class ChessBoard {
         await this._doNormalMove(
             this.getSquareElement(rook),
             this.getSquareElement(rookNewSquare),
-            true,
             false
         );
         this.playSound(SoundEffect.Castle);
@@ -405,56 +511,11 @@ export class ChessBoard {
     }
 
     /**
-     * Do the normal move(move piece to another square) with animation on the chess board.
-     */
-    private async _doNormalMove(fromSquare:HTMLDivElement, toSquare:HTMLDivElement, withAnimation: boolean = true, playMoveSound: boolean = true): Promise<void>
-    {
-        return new Promise((resolve) => {
-            if(playMoveSound){
-                if(toSquare.lastElementChild && toSquare.lastElementChild.className.includes("piece"))
-                    this.playSound(SoundEffect.Capture);
-                else
-                    this.playSound(this.colorOfPlayer == Color.White ? SoundEffect.WhiteMove : SoundEffect.BlackMove);
-            }
-
-            this.removePiece(this.getSquareID(toSquare));
-            Logger.save(`Target square[${this.getSquareID(toSquare)}] removed on board`, "playMove", Source.ChessBoard);
-
-            const piece: HTMLDivElement = fromSquare.querySelector(".piece") as HTMLDivElement;
-            if (!withAnimation) {
-                toSquare.appendChild(piece);
-                resolve();
-                return;
-            }
-
-            // Animate the move.
-            let pieceRect: DOMRect = piece.getBoundingClientRect();
-            const marginLeft: number = Math.abs(piece.parentElement!.getBoundingClientRect().left - pieceRect.left);
-            const marginTop: number = Math.abs(piece.parentElement!.getBoundingClientRect().top - pieceRect.top);
-            document.body.appendChild(piece);
-            piece.style.top = `${pieceRect.top}px`;
-            piece.style.left = `${pieceRect.left}px`;
-            piece.style.animation = "move 0.3s ease-in-out forwards";
-            piece.style.setProperty("--move-from-left", `${pieceRect.left}px`);
-            piece.style.setProperty("--move-from-top", `${pieceRect.top}px`);
-            piece.style.setProperty("--move-to-left", `calc(${marginLeft}px + ${toSquare.getBoundingClientRect().left}px)`);
-            piece.style.setProperty("--move-to-top", `calc(${marginTop}px + ${toSquare.getBoundingClientRect().top}px)`);
-            piece.addEventListener("animationend", () => {
-                toSquare.appendChild(piece);
-                piece.style.animation = "";
-                piece.style.top = "";
-                piece.style.left = "";
-                resolve();
-            });
-        });
-    }
-
-    /**
      * This function removes the effects from board.
      */
     public refresh(): void
     {
-      const squares: NodeListOf<Element> = this.getAllSquares();
+        const squares: NodeListOf<Element> = this.getAllSquares();
         const isFlipped = this.isFlipped();
         const loopRange = isFlipped ? [63, -1, -1] : [0, 64, 1];
         for(let i = loopRange[0]; i != loopRange[1]; i+=loopRange[2]){
@@ -469,27 +530,9 @@ export class ChessBoard {
                 this.setSquareId(squares[i], i + loopRange[2]);
                 Logger.save(`ID of square's fixed from[${id}] to [${(i + loopRange[2]).toString()}] on board`, "refreshBoard", Source.ChessBoard);
             }
-
-            /**
-             * Checked and moved effect didn't removed because
-             * they are for opponent player.
-             */
-            this.removeSquareEffect(squares[i], [
-                SquareEffect.Playable,
-                SquareEffect.Killable,
-                SquareEffect.Selected,
-            ]);
-
-            /**
-             * Promotion options must not be set to "Select"
-             * when clearing the board.
-             */
-            const squareClassName = squares[i].lastElementChild?.className;
-            if (squareClassName?.includes("piece") && !squareClassName?.includes("promotion-option"))
-              this.setSquareClickMode(squares[i] as HTMLDivElement, SquareClickMode.Select);
-            else
-              this.setSquareClickMode(squares[i] as HTMLDivElement, SquareClickMode.Clear);
         }
+        this.removeEffectFromAllSquares([SquareEffect.Playable, SquareEffect.Killable, SquareEffect.Selected]);
+        this.setTurnColor(this.turnColor);
         Logger.save("Playable, Killable, Selected effects are cleaned and Square Click Modes changes to Clear and Select(if square has piece)", "refreshBoard", Source.ChessBoard);
     }
 
@@ -506,36 +549,36 @@ export class ChessBoard {
      */
     public flip(): void
     {
-      this.refresh();
+        this.refresh();
 
-      // Changes pieces
-      for(let id = 64; id >= 33; id--){
-        const normalSquare = this.getSquareElement(id);
-        const flippedSquare = this.getSquareElement(65 - id);
-        const normalSquarePiece = normalSquare.querySelector(".piece");
-        const flippedSquarePiece = flippedSquare.querySelector(".piece");
-        if(normalSquarePiece) flippedSquare.appendChild(normalSquarePiece);
-        if(flippedSquarePiece) normalSquare.appendChild(flippedSquarePiece);
-        this.setSquareId(normalSquare, 65 - id);
-        this.setSquareId(flippedSquare, id);
-        const normalSquareClickMode = this.getSquareClickMode(normalSquare);
-        const flippedSquareClickMode = this.getSquareClickMode(flippedSquare);
-        this.setSquareClickMode(normalSquare, flippedSquareClickMode);
-        this.setSquareClickMode(flippedSquare, normalSquareClickMode);
-      }
+        // Changes pieces
+        for(let id = 64; id >= 33; id--){
+            const normalSquare = this.getSquareElement(id);
+            const flippedSquare = this.getSquareElement(65 - id);
+            const normalSquarePiece = normalSquare.querySelector(".piece");
+            const flippedSquarePiece = flippedSquare.querySelector(".piece");
+            if(normalSquarePiece) flippedSquare.appendChild(normalSquarePiece);
+            if(flippedSquarePiece) normalSquare.appendChild(flippedSquarePiece);
+            this.setSquareId(normalSquare, 65 - id);
+            this.setSquareId(flippedSquare, id);
+            const normalSquareClickMode = this.getSquareClickMode(normalSquare);
+            const flippedSquareClickMode = this.getSquareClickMode(flippedSquare);
+            this.setSquareClickMode(normalSquare, flippedSquareClickMode);
+            this.setSquareClickMode(flippedSquare, normalSquareClickMode);
+        }
 
-      // Flip coordinates of rows and columns
-      const squares: NodeListOf<Element> = this.getAllSquares();
-      for (let i = 8; i >= 1; i--){
-        const rowSquare = squares[(8 * i) - 1].querySelector(" .row-coordinate");
-        rowSquare!.textContent = String(9 - parseInt(rowSquare!.textContent as string));
-      }
+        // Flip coordinates of rows and columns
+        const squares: NodeListOf<Element> = this.getAllSquares();
+        for (let i = 8; i >= 1; i--){
+            const rowSquare = squares[(8 * i) - 1].querySelector(" .row-coordinate");
+            rowSquare!.textContent = String(9 - parseInt(rowSquare!.textContent as string));
+        }
 
-      const isFlipped = this.isFlipped();
-      for (let i = 1; i <= 8; i++){
-        const columnSquare = squares[(56 + i) - 1].querySelector(" .column-coordinate");
-        columnSquare!.textContent = String.fromCharCode(isFlipped ? 96 + i : 105 - i);
-      }
+        const isFlipped = this.isFlipped();
+        for (let i = 1; i <= 8; i++){
+            const columnSquare = squares[(56 + i) - 1].querySelector(" .column-coordinate");
+            columnSquare!.textContent = String.fromCharCode(isFlipped ? 96 + i : 105 - i);
+        }
     }
 
     /**
@@ -790,9 +833,6 @@ export class ChessBoard {
      */
     public getLogs(): Array<{source: string, message: string}>
     {
-        if(!this.isStandalone)
-            throw new Error("This function can only be used on standalone mode");
-
         return Logger.get();
     }
 }
