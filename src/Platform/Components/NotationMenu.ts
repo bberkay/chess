@@ -96,7 +96,7 @@ export class NotationMenu extends Component{
         }
         else
         {
-            const lastNotation: string = notations[notations.length - 1];
+            const lastNotation: string = this.convertStringNotationToUnicodedNotation(notations[notations.length - 1]);
             const lastRow: HTMLElement = notationMenu.lastElementChild as HTMLElement;
             if(notations.length % 2 == 0)
                 lastRow.innerHTML = lastRow.innerHTML.replace(`<td></td>`, `<td>${lastNotation}</td>`);
