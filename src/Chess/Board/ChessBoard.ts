@@ -103,7 +103,7 @@ export class ChessBoard {
 
         for (let i = 1; i <= 64; i++) {
             let square: HTMLDivElement = document.createElement("div");
-            this.setSquareId(square, i);
+            this.setSquareID(square, i);
             square.className = "square";
             this.setSquareClickMode(square, SquareClickMode.Clear); // Default mode
 
@@ -262,6 +262,16 @@ export class ChessBoard {
         if (!clonedPiece) return;
         clonedPiece.style.top = `calc(${moveEvent.clientY}px - ${clonedPiece.offsetHeight / 2}px)`;
         clonedPiece.style.left = `calc(${moveEvent.clientX}px - ${clonedPiece.offsetWidth / 2}px)`;
+
+        // Highlight the square where the cursor is.
+        document.elementsFromPoint(moveEvent.clientX, moveEvent.clientY).forEach((square) => {
+            if(square.className.includes('square') && this.getSquareClickMode(square) == SquareClickMode.Play){
+                this.getAllSquares().forEach((square) => {
+                    this.removeSquareEffect(square, SquareEffect.Hovering);
+                });
+                this.setSquareEffect(square, SquareEffect.Hovering);
+            }
+         });
     }
 
     /**
@@ -364,16 +374,12 @@ export class ChessBoard {
                   this.playSound(this.turnColor == Color.White ? SoundEffect.WhiteMove : SoundEffect.BlackMove);
             }
 
-            //if(clonedPiece)
-            //this.dropPiece(e, this.selectedPiece);
-            //clonedPiece = null;
+            this.removePiece(this.getSquareID(toSquare));
+            Logger.save(`Target square[${this.getSquareID(toSquare)}] removed on board`, "playMove", Source.ChessBoard);
 
-            /*this.removePiece(this.getSquareID(toSquare));
-            Logger.save(`Target square[${this.getSquareID(toSquare)}] removed on board`, "playMove", Source.ChessBoard);*/
-
-            /*const piece: HTMLDivElement = fromSquare.querySelector(".piece") as HTMLDivElement;
+            const piece: HTMLDivElement = fromSquare.querySelector(".piece") as HTMLDivElement;
             this.animatePieceToSquare(piece, toSquare);
-            resolve();*/
+            resolve();
         });
     }
 
@@ -527,7 +533,7 @@ export class ChessBoard {
              * So, we need to fix the square id's.
              */
             if (id !== i + Math.abs(loopRange[2])){
-                this.setSquareId(squares[i], i + loopRange[2]);
+                this.setSquareID(squares[i], i + loopRange[2]);
                 Logger.save(`ID of square's fixed from[${id}] to [${(i + loopRange[2]).toString()}] on board`, "refreshBoard", Source.ChessBoard);
             }
         }
@@ -559,8 +565,8 @@ export class ChessBoard {
             const flippedSquarePiece = flippedSquare.querySelector(".piece");
             if(normalSquarePiece) flippedSquare.appendChild(normalSquarePiece);
             if(flippedSquarePiece) normalSquare.appendChild(flippedSquarePiece);
-            this.setSquareId(normalSquare, 65 - id);
-            this.setSquareId(flippedSquare, id);
+            this.setSquareID(normalSquare, 65 - id);
+            this.setSquareID(flippedSquare, id);
             const normalSquareClickMode = this.getSquareClickMode(normalSquare);
             const flippedSquareClickMode = this.getSquareClickMode(flippedSquare);
             this.setSquareClickMode(normalSquare, flippedSquareClickMode);
@@ -745,7 +751,7 @@ export class ChessBoard {
     /**
      * Set the squareID(data-square-id) to the square element.
      */
-    private setSquareId(squareElement: HTMLDivElement | Element, squareID: Square): void {
+    private setSquareID(squareElement: HTMLDivElement | Element, squareID: Square): void {
         squareElement.setAttribute("data-square-id", squareID.toString());
     }
 
@@ -769,15 +775,6 @@ export class ChessBoard {
         if(typeof square === "number")
             square = this.getSquareElement(square);
         square.setAttribute("data-click-mode", mode);
-    }
-
-    /**
-     * Get the effect of the given square element or id(squareID).
-     */
-    private getSquareEffect(square: Square | HTMLDivElement | Element): SquareEffect {
-      if (typeof square === "number")
-        square = this.getSquareElement(square);
-      return square.getAttribute("data-effect") as SquareEffect;
     }
 
     /**

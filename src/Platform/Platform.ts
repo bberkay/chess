@@ -47,12 +47,20 @@ export class Platform{
     private initBoardListener(): void
     {
       this.chess.board.listenForMove({
-        onMouseUp: () => {
-            this.notationMenu?.update(this.chess.engine.getNotation(), this.chess.engine.getScores());
-            this.logConsole?.print(this.chess.getLogs());
-            this.gameCreator?.show(this.chess.engine.getGameAsFenNotation());
-        }
+        onClick: () => this.updateComponents(),
+        onMouseUp: () => this.updateComponents(),
       })
+    }
+
+    /**
+     * Update the components of the menu, for example
+     * update the notation menu and print the logs of the game on log
+     * console after the move is made.
+     */
+    private updateComponents(){
+        this.notationMenu?.update(this.chess.engine.getNotation(), this.chess.engine.getScores());
+        this.logConsole?.print(this.chess.getLogs());
+        this.gameCreator?.show(this.chess.engine.getGameAsFenNotation());
     }
 
     /**

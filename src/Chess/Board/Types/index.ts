@@ -8,6 +8,7 @@ export enum SquareEffect{
     Playable = "playable",
     Selected = "selected",
     Disabled = "disabled",
+    Hovering = "hovering",
     From = "from",
     To = "to",
 }
