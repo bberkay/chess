@@ -70,7 +70,7 @@
     opacity: 0;
     display: flex;
 
-    & span:first-child{
+    & span.indicator-icon{
         width: 1rem;
         height: 1rem;
         border-radius: 50%;
@@ -80,18 +80,18 @@
 
     &:first-child{
         padding-bottom: 5px;
-
-        & span:first-child{
-            background-color: var(--black-square-color);
-        }
     }
 
     &:last-child{
         padding-top: 5px;
+    }
 
-        & span:first-child{
-            background-color: var(--white-square-color);
-        }
+    &#white-turn-indicator span.indicator-icon{
+        background-color: var(--white-square-color);
+    }
+
+    &#black-turn-indicator span.indicator-icon{
+        background-color: var(--black-square-color);
     }
 
     &.visible{

@@ -30,7 +30,10 @@ export class NotationMenu extends Component{
     {
         this.loadHTML("notation-menu", `
                 <div class="player-score-section" id="black-player-score-section">
-                    <div class="turn-indicator" id="black-turn-indicator"><span></span><span>Black's turn</span></div>
+                    <div class="turn-indicator" id="black-turn-indicator">
+                        <span class = "indicator-icon"></span>
+                        <span>Black's turn</span>
+                    </div>
                     <div class = "score-table" id = "white-captured-pieces"></div>
                 </div>
                 <table id = "notation-table">
@@ -54,7 +57,10 @@ export class NotationMenu extends Component{
                 <!-- A new menu might be added here for draw, resign etc. options. -->
                 <div class="player-score-section" id="white-player-score-section">
                     <div class="score-table" id="black-captured-pieces"></div>
-                    <div class="turn-indicator visible" id="white-turn-indicator"><span></span><span>White's turn</span></div>
+                    <div class="turn-indicator visible" id="white-turn-indicator">
+                        <span class = "indicator-icon"></span>
+                        <span>White's turn</span>
+                    </div>
                 </div>
         `);
         this.loadCSS("notation-menu.css");
