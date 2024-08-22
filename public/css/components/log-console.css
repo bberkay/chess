@@ -31,90 +31,102 @@
 }
 
 /* Body */
-#log-console #log-console-body{
-    height: calc(var(--board-size) + 7px); /* 7px: 2px for border and 5px for padding */
-    width:auto;
-    overflow-y: scroll;
-    overflow-x: hidden;
-}
+#log-console{
+    & #log-console-body{
+        height: calc(var(--board-size) + 7px); /* 7px: 2px for border and 5px for padding */
+        width:auto;
+        overflow-y: scroll;
+        overflow-x: hidden;
 
-/* Log */
-#log-console #log-console-body ul{
-    margin:15px 20px 5px -20px;
-    list-style: none;
-}
+        & ul{
+            margin:15px 20px 5px -20px;
+            list-style: none;
 
-#log-console #log-console-body ul li{
-    cursor: pointer;
-    transition: 0.1s;
-    margin: 7px 0;
-}
+            & li{
+                cursor: pointer;
+                transition: 0.1s;
+                margin: 7px 0;
 
-#log-console #log-console-body ul li span{
-    font-family: monospace;
-    font-weight: bold;
-}
+                & span{
+                    font-family: monospace;
+                    font-weight: bold;
 
-#log-console #log-console-body ul li span:hover, #log-console #log-console-body ul li span:hover div.tooltip-toggle{
-    text-decoration: underline;
-}
+                    &:hover{
+                        text-decoration: underline;
 
-/* ------------------- Tooltip ------------------- */
-#log-console #log-console-body{
-    & .tooltip-toggle{
-        position: relative;
-        display: inline-block;
-        font-style:italic;
-        border-bottom:1px dotted #fff;
-
-        &:hover{
-            background-color: rgba(102, 102, 102, 0.7);
-
-            & .tooltip-container{
-                display:block;
+                        & .tooltip-toggle{
+                            text-decoration: underline;
+                        }
+                    }
+                }
             }
         }
     }
+} 
 
-    & .tooltip-container{
-        left:50%;
-        transform:translate(-50%, 0);
-        position:absolute;
-        z-index:99999999;
-        display:none;
-    }
-
-    & .tooltip-text{
-        padding:10px 20px;
-        color:#fff;
-        background-color:#222222ee;
-        font-weight:normal;
-        font-size:13px;
-        box-sizing:border-box;
-        border:1px solid #2a2a2a;
-        font-style:normal;
-        white-space: pre;
-        text-decoration: none!important;
-        max-height: calc(var(--board-size) / 2.5); /* log console height and board size are equal */
-        overflow-y: auto;
-        margin-top: 5px;
-        position: relative;
-
-        & span:hover{
-            text-decoration: none;
+/* ------------------- Tooltip ------------------- */
+#log-console{
+    & #log-console-body{
+        & .tooltip-toggle{
+            position: relative;
+            display: inline-block;
+            font-style:italic;
+            border-bottom:1px dotted #fff;
+    
+            &:hover{
+                background-color: rgba(102, 102, 102, 0.7);
+    
+                & .tooltip-container{
+                    display:block;
+                }
+            }
         }
-    }
+    
+        & .tooltip-container{
+            left:50%;
+            transform:translate(-50%, 0);
+            position:absolute;
+            z-index:99999999;
+            display:none;
+        }
+    
+        & .tooltip-text{
+            padding:10px 20px;
+            color:#fff;
+            background-color:#222222ee;
+            font-weight:normal;
+            font-size:13px;
+            box-sizing:border-box;
+            border:1px solid #2a2a2a;
+            font-style:normal;
+            white-space: pre;
+            text-decoration: none!important;
+            max-height: calc(var(--board-size) / 2.5); /* log console height and board size are equal */
+            overflow-y: auto;
+            margin-top: 5px;
+            position: relative;
+    
+            & span:hover{
+                text-decoration: none;
+            }
+        }
+    
+        /* Opening locations of tooltip */
+        & .tooltip-container--left{
+            left: auto;
+            transform: none;
+            right: 0;
+        }
+    
+        & .tooltip-container--top{
+            top: auto;
+            bottom: 100%;
+        }
 
-    /* Opening locations of tooltip */
-    & .tooltip-container--left{
-        left: auto;
-        transform: none;
-        right: 0;
-    }
-
-    & .tooltip-container--top{
-        top: auto;
-        bottom: 100%;
+        & .tooltip-container--right{
+            left: 0;
+            transform: none;
+        }
     }
 }
 

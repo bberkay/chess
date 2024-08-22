@@ -13,7 +13,7 @@ import {ChessBoard} from "./Board/ChessBoard";
 import {SquareClickMode} from "./Board/Types";
 import {Cacher} from "./Services/Cacher.ts";
 import {Converter} from "./Utils/Converter.ts";
-import {Logger, Source} from "./Services/Logger.ts";
+import {Logger} from "./Services/Logger.ts";
 
 /**
  * This class provides users to a playable chess game on the web by connecting ChessEngine and ChessBoard. Also,
@@ -58,11 +58,11 @@ export class Chess{
         // If there is a game in the cache, load it.
         if(!Cacher.isEmpty()){
             this.createGame(Cacher.load());
-            Logger.save("Game loaded from cache.", "checkAndLoadGameFromCache", Source.Chess);
+            Logger.save("Game loaded from cache.");
             return true;
         }
 
-        Logger.save("No games found in cache", "checkAndLoadGameFromCache", Source.Chess);
+        Logger.save("No games found in cache");
         return false;
     }
 
@@ -77,26 +77,26 @@ export class Chess{
         // Clear the game from the cache before creating a new game.
         if(this.isCachingEnabled){
             Cacher.clear();
-            Logger.save("Cache cleared before creating a new game", "createGame", Source.Chess);
+            Logger.save("Cache cleared before creating a new game");
         }
 
         // Convert the position to json notation if it is not json notation.
         if(typeof position === "string"){
             position = Converter.fenToJson(position);
-            Logger.save(`Given position converted to json notation.`, "createGame", Source.Chess);
+            Logger.save(`Given position converted to json notation.`);
         }
 
         this.engine.createGame(position);
-        Logger.save(`Game successfully created on ChessEngine`, "createGame", Source.Chess);
+        Logger.save(`Game successfully created on ChessEngine`);
         
         this.board.createGame(position);
         this.board.setTurnColor(this.engine.getTurnColor());
-        Logger.save(`Game successfully created on Chessboard`, "createGame", Source.Chess);
+        Logger.save(`Game successfully created on Chessboard`);
 
         // Save the game to the cache as json notation.
         if(this.isCachingEnabled){
             Cacher.save(position);
-            Logger.save(`Game saved to cache as json notation[${JSON.stringify(position)}]`, "createGame", Source.Chess);
+            Logger.save(`Game saved to cache as json notation[${JSON.stringify(position)}]`);
         }
 
         // Get status from engine and show it on board.
@@ -139,7 +139,7 @@ export class Chess{
                 }
             }
         });
-        Logger.save("Moves listener initialized", "initListenerForMoves", Source.Chess);
+        Logger.save("Moves listener initialized");
     }
 
     /**
@@ -207,7 +207,7 @@ export class Chess{
         this.board.setTurnColor(this.engine.getTurnColor());
         if(this.isCachingEnabled && !this.isPromotionScreenOpen){
             Cacher.save(this.engine.getGameAsJsonNotation());
-            Logger.save("Game updated in cache after move", "finishTurn", Source.Chess);
+            Logger.save("Game updated in cache after move");
         }
     }
 

@@ -1,29 +1,47 @@
 /**
- * Paths of the files that can be logged.
- */
-export enum Source {
-    Chess = "src/Chess/Chess.ts",
-    ChessBoard = "src/Chess/Board/ChessBoard.ts",
-    ChessEngine = "src/Chess/Engine/ChessEngine.ts"
-}
-
-/**
  * This static class provides a logging system.
  */
 export class Logger{
-
     /**
-     * Storage of the logs.
+     * Logs
      */
     private static logs: Array<{source: string, message: string}> = [];
 
     /**
+     * Paths of the sources
+     */
+    private static readonly SOURCE_PATHS: string[] = [
+        "src/Chess/Chess.ts",
+        "src/Chess/Board/ChessBoard.ts",
+        "src/Chess/Engine/ChessEngine.ts"
+    ]
+
+    /**
      * Save the message
      */
-    public static save(message: string, funcName: string, source: Source): void
+    public static save(message: string): void
     {
-        // If end of the message is not a dot, add it.
-        Logger.logs.push({source:funcName + "(...) in " + source, message: message + (message[message.length - 1] === "." ? "" : ".")});
+        let funcNameAndFileName = new Error().stack?.split("\n");
+        let funcName: string = "Unknown";
+        let fileName: string = "Unknown";
+        let source: string = "Unknown";
+        if(funcNameAndFileName)
+        {   
+            // Chrome, Edge and other chromium based browsers
+            if(funcNameAndFileName[0] == "Error") 
+                funcNameAndFileName = funcNameAndFileName[2].trim().split("at ")[1].split(" ")
+            else // Firefox
+                funcNameAndFileName = funcNameAndFileName[2].trim().split("@");
+            
+            funcName = funcNameAndFileName[0];
+            fileName = funcNameAndFileName[1].substring(funcNameAndFileName[1].lastIndexOf("/"), funcNameAndFileName[1].indexOf(".ts"));
+            source = Logger.SOURCE_PATHS.find(path => path.includes(fileName)) || "Unknown";
+        }
+        
+        Logger.logs.push({
+            source:`${funcName}(...) in ${source}`, 
+            message: message
+        });        
     }
 
     /**

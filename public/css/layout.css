@@ -57,10 +57,10 @@ main{
     margin-left: 0.5rem;
     /* 130px is the height of utility-menu and player-score-section(x2) */
     /* 2.5 for centering notation-table to 
-    the board but little bit to the top(.5) because
+    the board but little bit to the top(.2) because
     of the game-creator menu.
     */
-    margin-top: calc((var(--board-size) - (var(--notation-table-height) + 130px)) / 2.5);
+    margin-top: calc((var(--board-size) - (var(--notation-table-height) + 130px)) / 2.2);
 }
 
 #log-console{
