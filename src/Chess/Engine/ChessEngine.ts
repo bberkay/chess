@@ -70,7 +70,6 @@ export class ChessEngine extends BoardManager {
      */
     public getGameAsFenNotation(): string
     {
-        Logger.save("Game returned as fen notation(converted from json notation)", "getGameAsFenNotation", Source.ChessEngine);
         return Converter.jsonToFen(BoardQuerier.getGame());
     }
 
@@ -79,7 +78,6 @@ export class ChessEngine extends BoardManager {
      */
     public getGameAsJsonNotation(): JsonNotation
     {
-        Logger.save("Game returned as json notation", "getGameAsJsonNotation", Source.ChessEngine);
         return BoardQuerier.getGame();
     }
 
@@ -88,7 +86,6 @@ export class ChessEngine extends BoardManager {
      */
     public getGameAsASCII(): string
     {
-        Logger.save("Game returned as ascii notation", "getGameAsASCII", Source.ChessEngine);
         return Converter.jsonToASCII(BoardQuerier.getGame());
     }
 

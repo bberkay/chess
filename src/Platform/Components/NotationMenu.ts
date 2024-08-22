@@ -192,18 +192,15 @@ export class NotationMenu extends Component{
      * Flip the notation table.
      */
     public flip(): void {
-        document.querySelector("#notation-menu .player-score-section")!.append(
-            document.querySelector(".player-score-section")!.firstElementChild!
-        )
-        document.querySelector("#notation-menu")!.append(
-            document.querySelector("#notation-menu .player-score-section")!
-        );
-        document.querySelector("#notation-menu .player-score-section")!.append(
-            document.querySelector(".player-score-section")!.firstElementChild!
-        )
-        document.querySelector("#notation-menu")!.prepend(
-            document.querySelector("#notation-menu .player-score-section")!
-        );
+        const notationMenu = document.getElementById("notation-menu")!;
+        
+        let playerScoreSectionOnTop = notationMenu.querySelector(".player-score-section")!;
+        playerScoreSectionOnTop.append(playerScoreSectionOnTop.firstElementChild!)
+        notationMenu.append(playerScoreSectionOnTop);
+        
+        playerScoreSectionOnTop = notationMenu.querySelector(".player-score-section")!;
+        playerScoreSectionOnTop.append(playerScoreSectionOnTop.firstElementChild!)
+        notationMenu.prepend(playerScoreSectionOnTop!);
     }
 
     /**
@@ -225,8 +222,8 @@ export class NotationMenu extends Component{
     public clear(): void
     {
         document.getElementById("notations")!.innerHTML = "";
-        document.getElementById("white-player-pieces")!.innerHTML = "";
-        document.getElementById("black-player-pieces")!.innerHTML = "";
+        document.getElementById("white-captured-pieces")!.innerHTML = "";
+        document.getElementById("black-captured-pieces")!.innerHTML = "";
         document.getElementById("white-turn-indicator")!.classList.add("visible");
         document.getElementById("black-turn-indicator")!.classList.remove("visible");
         this.moveCount = 0;

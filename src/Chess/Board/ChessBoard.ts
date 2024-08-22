@@ -213,12 +213,12 @@ export class ChessBoard {
         });
         if (callbacks.onMouseUp){
             document.addEventListener("mouseup", (e) => {
-                if(!document.querySelector(".piece.cloned"))
-                    return;
-                
-                this.dropPiece(e);
+                if(document.querySelector(".piece.cloned"))
+                    this.dropPiece(e);
+
                 const targetSquare = document.elementFromPoint(e.clientX, e.clientY)?.parentElement;
-                callbacks.onMouseUp!(targetSquare);
+                if(targetSquare && targetSquare.className.includes("square"))
+                    callbacks.onMouseUp!(targetSquare);
             });
         }
     }
@@ -368,10 +368,10 @@ export class ChessBoard {
     /**
      * Do the normal move(move piece to another square) with animation on the chess board.
      */
-    private _doNormalMove(fromSquare:HTMLDivElement, toSquare:HTMLDivElement, playMoveSound: boolean = true): Promise<void>
+    private async _doNormalMove(fromSquare:HTMLDivElement, toSquare:HTMLDivElement, playMoveSound: boolean = true): Promise<void>
     {
         return new Promise((resolve) => {
-            this.removePiece(this.getSquareID(toSquare));
+            //this.removePiece(this.getSquareID(toSquare));
             Logger.save(`Target square[${this.getSquareID(toSquare)}] removed on board`, "playMove", Source.ChessBoard);
 
             /*const piece: HTMLDivElement = fromSquare.querySelector(".piece") as HTMLDivElement;

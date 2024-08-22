@@ -28,8 +28,7 @@ export class Chess{
     public engine: ChessEngine;
     public board: ChessBoard;
     private selectedSquare: Square | null;
-    private isPromotionScreenOpen: boolean = false; // TODO: Bu kalksın
-    private isClearing: boolean = false;
+    private isPromotionScreenOpen: boolean = false;
     private readonly isCachingEnabled: boolean = true;
 
     /**
@@ -132,17 +131,11 @@ export class Chess{
             },
             onMouseUp: (square: HTMLElement) => {
                 const squareClickMode = square.getAttribute("data-click-mode") as SquareClickMode;
-                console.log("square: ", square);
-                console.log("squareClickMode: ", squareClickMode);
-                console.log("this.isClearing: ", this.isClearing);
-                if(this.isClearing || squareClickMode == SquareClickMode.Play){
+                if(squareClickMode != SquareClickMode.Clear){
                     this.doActionOnBoard(
                         squareClickMode,
                         parseInt(square.getAttribute("data-square-id")!) as Square
-                      )
-                    this.isClearing = false;
-                }else{
-                    this.isClearing = true;
+                    )
                 }
             }
         });
