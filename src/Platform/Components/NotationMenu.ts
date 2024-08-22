@@ -121,21 +121,20 @@ export class NotationMenu extends Component{
         if(this.lastScore.White == scores.White.score && this.lastScore.Black == scores.Black.score)
             return;
 
-        document.getElementById("white-captured-pieces")!.innerHTML = "";
-        document.getElementById("black-captured-pieces")!.innerHTML = "";
+        document.getElementById("white-captured-pieces")!.innerHTML = '<span class="piece-icons"></span><span></span>';
+        document.getElementById("black-captured-pieces")!.innerHTML = '<span class="piece-icons"></span><span></span>';
 
-        // Show the pieces of the players on the top and bottom of the table.
         scores[Color.White].pieces.forEach((piece: PieceType) => {
-            document.getElementById("black-captured-pieces")!.innerHTML += " " + this.getPieceUnicode(piece);
+            document.querySelector("#black-captured-pieces .piece-icons")!.innerHTML += " " + this.getPieceUnicode(piece);
         });
         scores[Color.Black].pieces.forEach((piece: PieceType) => {
-            document.getElementById("white-captured-pieces")!.innerHTML += " " + this.getPieceUnicode(piece);
+            document.querySelector("#white-captured-pieces .piece-icons")!.innerHTML += " " + this.getPieceUnicode(piece);
         });
 
         const whiteScore = scores[Color.White].score;
         const blackScore = scores[Color.Black].score;
-        document.getElementById("black-captured-pieces")!.innerHTML += whiteScore <= 0 ? "" : " +" + whiteScore;
-        document.getElementById("white-captured-pieces")!.innerHTML += blackScore <= 0 ? "" : " +" + blackScore;
+        document.querySelector("#black-captured-pieces :not(.piece-icons)")!.innerHTML += whiteScore <= 0 ? "" : " +" + whiteScore;
+        document.querySelector("#white-captured-pieces :not(.piece-icons)")!.innerHTML += blackScore <= 0 ? "" : " +" + blackScore;
 
         this.lastScore = {[Color.White]: whiteScore, [Color.Black]: blackScore};
     }

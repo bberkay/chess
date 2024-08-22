@@ -218,7 +218,7 @@ export class ChessBoard {
                     this.dropPiece(e);
 
                 const targetSquare = document.elementFromPoint(e.clientX, e.clientY)?.parentElement;
-                if(targetSquare && targetSquare.className.includes("square"))
+                if(targetSquare && targetSquare.closest("#chessboard"))
                     callbacks.onMouseUp!(targetSquare);
             });
         }

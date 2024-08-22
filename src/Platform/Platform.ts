@@ -46,7 +46,6 @@ export class Platform{
      */
     private initBoardListener(): void
     {
-
         this.chess.board.listenForMove({
           onClick: () => this.updateComponents(),
           onMouseUp: () => this.updateComponents()

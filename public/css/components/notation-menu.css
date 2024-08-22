@@ -61,6 +61,13 @@
     margin:10px 0;
     width:100%;
     margin-left: 2px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    
+    & .piece-icons{
+        font-size: 22px;
+    }
 }
 
 /**
@@ -69,6 +76,7 @@
 #notation-menu .turn-indicator{
     opacity: 0;
     display: flex;
+    margin-left: 3px;
 
     & span.indicator-icon{
         width: 1rem;
@@ -76,14 +84,6 @@
         border-radius: 50%;
         display: inline-block;
         margin-right: 6px;
-    }
-
-    &:first-child{
-        padding-bottom: 5px;
-    }
-
-    &:last-child{
-        padding-top: 5px;
     }
 
     &#white-turn-indicator span.indicator-icon{
