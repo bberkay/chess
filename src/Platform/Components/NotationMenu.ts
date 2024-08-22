@@ -29,8 +29,10 @@ export class NotationMenu extends Component{
     protected renderComponent(): void
     {
         this.loadHTML("notation-menu", `
-                <div class="turn-indicator" id="black-turn-indicator"><span></span><span>Black's turn</span></div>
-                <div class = "score-table" id = "black-player-pieces"></div>
+                <div class="player-score-section" id="black-player-score-section">
+                    <div class="turn-indicator" id="black-turn-indicator"><span></span><span>Black's turn</span></div>
+                    <div class = "score-table" id = "white-captured-pieces"></div>
+                </div>
                 <table id = "notation-table">
                     <thead>
                         <tr>
@@ -50,8 +52,10 @@ export class NotationMenu extends Component{
                     <button class="menu-item" data-menu-operation="reset">R</button>
                 </div>
                 <!-- A new menu might be added here for draw, resign etc. options. -->
-                <div class="score-table" id="white-player-pieces"></div>
-                <div class="turn-indicator visible" id="white-turn-indicator"><span></span><span>White's turn</span></div>
+                <div class="player-score-section" id="white-player-score-section">
+                    <div class="score-table" id="black-captured-pieces"></div>
+                    <div class="turn-indicator visible" id="white-turn-indicator"><span></span><span>White's turn</span></div>
+                </div>
         `);
         this.loadCSS("notation-menu.css");
     }
@@ -66,11 +70,10 @@ export class NotationMenu extends Component{
          * otherwise add the notation to the last row as td.
          */
         const notationMenu: HTMLElement = document.getElementById("notations")!;
-
-        // If the notation is empty then add the first notation.
         if(notationMenu.innerHTML == "")
         {
             for(let i = 0; i < notations.length; i += 1){
+                notations[i] = this.convertStringNotationToUnicodedNotation(notations[i]);
                 if(i % 2 == 0){
                     notationMenu.innerHTML +=
                         `
@@ -87,25 +90,20 @@ export class NotationMenu extends Component{
         }
         else
         {
-            // Add the notation to the last row and also check if the notation is not repeated.
             const lastNotation: string = notations[notations.length - 1];
             const lastRow: HTMLElement = notationMenu.lastElementChild as HTMLElement;
-
-            /**
-             * If notation length is even then move is black, so add the notation to the
-             * last row as td, otherwise create new row and add the notation as td.
-             */
             if(notations.length % 2 == 0)
                 lastRow.innerHTML = lastRow.innerHTML.replace(`<td></td>`, `<td>${lastNotation}</td>`);
             else
-                lastRow.insertAdjacentHTML("afterend", `<tr><td>${Math.ceil(notations.length / 2)}</td><td>${lastNotation}</td><td></td></tr>`);
+                lastRow.insertAdjacentHTML(
+                    "afterend", 
+                    `<tr><td>${Math.ceil(notations.length / 2)}</td><td>${lastNotation}</td><td></td></tr>`
+                );
         }
 
-        // Scroll to the bottom of the table.
         const notationTable: HTMLElement = document.querySelector("#notation-table tbody")!;
         notationTable.scrollTop = notationTable.scrollHeight;
 
-        // Set the move count.
         this.moveCount = notations.length;
     }
 
@@ -117,43 +115,89 @@ export class NotationMenu extends Component{
         if(this.lastScore.White == scores.White.score && this.lastScore.Black == scores.Black.score)
             return;
 
-        // Clear the score table.
-        document.getElementById("white-player-pieces")!.innerHTML = "";
-        document.getElementById("black-player-pieces")!.innerHTML = "";
-
-        // Unicode of the pieces.
-        const pieceUnicode: {[key in PieceType]?: string} = {
-            [PieceType.Pawn]: "&#9817;",
-            [PieceType.Rook]: "&#9814;",
-            [PieceType.Knight]: "&#9816;",
-            [PieceType.Bishop]: "&#9815;",
-            [PieceType.Queen]: "&#9813;",
-        }
+        document.getElementById("white-captured-pieces")!.innerHTML = "";
+        document.getElementById("black-captured-pieces")!.innerHTML = "";
 
         // Show the pieces of the players on the top and bottom of the table.
         scores[Color.White].pieces.forEach((piece: PieceType) => {
-            document.getElementById("white-player-pieces")!.innerHTML += " " + pieceUnicode[piece];
+            document.getElementById("black-captured-pieces")!.innerHTML += " " + this.getPieceUnicode(piece);
         });
         scores[Color.Black].pieces.forEach((piece: PieceType) => {
-            document.getElementById("black-player-pieces")!.innerHTML += " " + pieceUnicode[piece];
+            document.getElementById("white-captured-pieces")!.innerHTML += " " + this.getPieceUnicode(piece);
         });
 
-        // Show the score of the players on the top and bottom of the table.
         const whiteScore = scores[Color.White].score;
         const blackScore = scores[Color.Black].score;
-        document.getElementById("white-player-pieces")!.innerHTML += whiteScore <= 0 ? "" : " +" + whiteScore;
-        document.getElementById("black-player-pieces")!.innerHTML += blackScore <= 0 ? "" : " +" + blackScore;
+        document.getElementById("black-captured-pieces")!.innerHTML += whiteScore <= 0 ? "" : " +" + whiteScore;
+        document.getElementById("white-captured-pieces")!.innerHTML += blackScore <= 0 ? "" : " +" + blackScore;
 
-        // Set the last score.
         this.lastScore = {[Color.White]: whiteScore, [Color.Black]: blackScore};
     }
 
+    /**
+     * This function converts the string notation to unicode notation.
+     * @example convertStringNotationToUnicodedNotation("Kf3") returns "&#9812;f3"
+     */
+    private convertStringNotationToUnicodedNotation(notation: string): string
+    {
+        if(notation.length <= 2 || notation == "O-O-O")
+            return notation;
+
+        const pieceInfo = notation[0].toUpperCase();
+        switch(pieceInfo){
+            case "K": return this.getPieceUnicode(PieceType.King) + notation.slice(1);
+            case "N": return this.getPieceUnicode(PieceType.Knight) + notation.slice(1);
+            case "B": return this.getPieceUnicode(PieceType.Bishop) + notation.slice(1);
+            case "R": return this.getPieceUnicode(PieceType.Rook) + notation.slice(1);
+            case "Q": return this.getPieceUnicode(PieceType.Queen) + notation.slice(1);
+            default: return notation;
+        }
+    }
+
+    /**
+     * This function returns the unicode of the piece
+     * according to the given piece type.
+     */
+    private getPieceUnicode(piece: PieceType | string): string
+    {       
+        switch(piece)
+        {
+            case PieceType.Pawn: return "&#9817;";
+            case PieceType.Rook: return "&#9814;";
+            case PieceType.Knight: return "&#9816;";
+            case PieceType.Bishop: return "&#9815;";
+            case PieceType.Queen: return "&#9813;";
+            default: return "";
+        }
+    }
+
+    /**
+     * This function changes the indicator of the turn.
+     */
     private changeIndicator(): void
     {
         const current_player_color = this.chess.engine.getNotation().length % 2 == 0 ? 'white' : 'black';
         const previous_player_color = current_player_color == 'white' ? 'black' : 'white';
         document.getElementById(`${previous_player_color}-turn-indicator`)!.classList.remove("visible");
         document.getElementById(`${current_player_color}-turn-indicator`)!.classList.add("visible");
+    }
+
+    /**
+     * Flip the notation table.
+     */
+    public flip(): void {
+        document.querySelector("#notation-menu .player-score-section")!.append(
+            document.querySelector(".player-score-section")!.firstElementChild!
+        )
+        document.querySelector("#notation-menu")!.append(
+            document.querySelector("#notation-menu .player-score-section")!
+        );
+        document.querySelector("#notation-menu .player-score-section")!.append(
+            document.querySelector(".player-score-section")!.firstElementChild!
+        )
+        document.querySelector("#notation-menu")!.prepend(
+            document.querySelector("#notation-menu .player-score-section")!
+        );
     }
 
     /**

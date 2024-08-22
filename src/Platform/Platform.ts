@@ -97,6 +97,7 @@ export class Platform{
               break;
           case MenuOperation.FlipBoard:
             this.chess.board!.flip();
+            this.notationMenu?.flip();
             break;
         }
     }

@@ -9,7 +9,7 @@
      * For example, if the board size is 800px, the square size will be 100px(1/8 of the board size),
      * font size will be 16px(1/50 of the board size), and the piece size will be 80px(1/10 of the board size).
      */
-    --board-size: 80vh;
+    --board-size: 70vh;
 
     /* Colors */
     --white-square-color: #859884;

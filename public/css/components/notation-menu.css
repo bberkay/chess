@@ -78,19 +78,19 @@
         margin-right: 6px;
     }
 
-    &#white-turn-indicator{
-        padding-top: 5px;
-
-        & span:first-child{
-            background-color: var(--white-square-color);
-        }
-    }
-
-    &#black-turn-indicator{
+    &:first-child{
         padding-bottom: 5px;
 
         & span:first-child{
             background-color: var(--black-square-color);
+        }
+    }
+
+    &:last-child{
+        padding-top: 5px;
+
+        & span:first-child{
+            background-color: var(--white-square-color);
         }
     }
 

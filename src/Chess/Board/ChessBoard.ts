@@ -213,6 +213,9 @@ export class ChessBoard {
         });
         if (callbacks.onMouseUp){
             document.addEventListener("mouseup", (e) => {
+                if(!document.querySelector(".piece.cloned"))
+                    return;
+                
                 this.dropPiece(e);
                 const targetSquare = document.elementFromPoint(e.clientX, e.clientY)?.parentElement;
                 callbacks.onMouseUp!(targetSquare);
@@ -264,14 +267,15 @@ export class ChessBoard {
         clonedPiece.style.left = `calc(${moveEvent.clientX}px - ${clonedPiece.offsetWidth / 2}px)`;
 
         // Highlight the square where the cursor is.
-        document.elementsFromPoint(moveEvent.clientX, moveEvent.clientY).forEach((square) => {
+        /*document.elementsFromPoint(moveEvent.clientX, moveEvent.clientY).forEach((square) => {
+            console.log(square);
             if(square.className.includes('square') && this.getSquareClickMode(square) == SquareClickMode.Play){
                 this.getAllSquares().forEach((square) => {
                     this.removeSquareEffect(square, SquareEffect.Hovering);
                 });
                 this.setSquareEffect(square, SquareEffect.Hovering);
             }
-         });
+         });*/
     }
 
     /**
@@ -364,21 +368,21 @@ export class ChessBoard {
     /**
      * Do the normal move(move piece to another square) with animation on the chess board.
      */
-    private async _doNormalMove(fromSquare:HTMLDivElement, toSquare:HTMLDivElement, playMoveSound: boolean = true): Promise<void>
+    private _doNormalMove(fromSquare:HTMLDivElement, toSquare:HTMLDivElement, playMoveSound: boolean = true): Promise<void>
     {
         return new Promise((resolve) => {
+            this.removePiece(this.getSquareID(toSquare));
+            Logger.save(`Target square[${this.getSquareID(toSquare)}] removed on board`, "playMove", Source.ChessBoard);
+
+            /*const piece: HTMLDivElement = fromSquare.querySelector(".piece") as HTMLDivElement;
+            this.animatePieceToSquare(piece, toSquare);*/
+
             if(playMoveSound){
                 if(toSquare.lastElementChild && toSquare.lastElementChild.className.includes("piece"))
                     this.playSound(SoundEffect.Capture);
                 else
                   this.playSound(this.turnColor == Color.White ? SoundEffect.WhiteMove : SoundEffect.BlackMove);
             }
-
-            this.removePiece(this.getSquareID(toSquare));
-            Logger.save(`Target square[${this.getSquareID(toSquare)}] removed on board`, "playMove", Source.ChessBoard);
-
-            const piece: HTMLDivElement = fromSquare.querySelector(".piece") as HTMLDivElement;
-            this.animatePieceToSquare(piece, toSquare);
             resolve();
         });
     }
