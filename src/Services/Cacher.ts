@@ -4,14 +4,14 @@
 export class Cacher
 {
     // Name of the layer.
-    private static layer: string = "Game";
+    private static storageName: string = "game";
 
     /**
      * Stores the data in the local storage.
      */
     public static save(value: any): void
     {
-        localStorage.setItem(Cacher.layer, JSON.stringify(value));
+        localStorage.setItem(Cacher.storageName, JSON.stringify(value));
     }
 
     /**
@@ -19,7 +19,7 @@ export class Cacher
      */
     public static load(): any | undefined
     {
-        return JSON.parse(localStorage.getItem(Cacher.layer)!);
+        return JSON.parse(localStorage.getItem(Cacher.storageName)!);
     }
 
     /**
@@ -35,6 +35,6 @@ export class Cacher
      */
     public static clear(): void
     {
-        localStorage.setItem(Cacher.layer, JSON.stringify({}));
+        localStorage.setItem(Cacher.storageName, JSON.stringify({}));
     }
 }

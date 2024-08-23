@@ -11,9 +11,9 @@ import {Color, GameStatus, JsonNotation, PieceType, Square, StartPosition} from 
 import {ChessEngine} from "./Engine/ChessEngine";
 import {ChessBoard} from "./Board/ChessBoard";
 import {SquareClickMode} from "./Board/Types";
-import {Cacher} from "./Services/Cacher.ts";
+import {Cacher} from "../Services/Cacher.ts";
 import {Converter} from "./Utils/Converter.ts";
-import {Logger} from "./Services/Logger.ts";
+import {Logger} from "../Services/Logger.ts";
 
 /**
  * This class provides users to a playable chess game on the web by connecting ChessEngine and ChessBoard. Also,
@@ -103,40 +103,26 @@ export class Chess{
         this.board.showStatus(this.engine.getGameStatus());
 
         // Initialize the listener for moves because the game is created from scratch and the listener is not initialized.
-        this.initListenerForMoves();
+        this.initBoardListener();
     }
 
     /**
      * This function initializes the listener for user's
      * actions on chessboard to make a move on engine and board.
      */
-    private initListenerForMoves(): void
+    private initBoardListener(): void
     {
-        this.board.listenForMove({
-            onClick: (square: HTMLElement) => {
-                //if(square.querySelector(".piece")?.getAttribute("data-color") == this.engine.getTurnColor())
-                this.doActionOnBoard(
-                  square.getAttribute("data-click-mode") as SquareClickMode,
-                  parseInt(square.getAttribute("data-square-id")!) as Square
-                )
+        this.board.bindMoveEventCallbacks({
+            onPieceSelected: (square: HTMLElement) => {
+                this._doSelectAction(
+                    parseInt(square.getAttribute("data-square-id")!) as Square
+                );
             },
-            onMouseDown: (square: HTMLElement) => {
-                const squareClickMode = square.getAttribute("data-click-mode") as SquareClickMode;
-                if(squareClickMode != SquareClickMode.Clear){
-                    this.doActionOnBoard(
-                        squareClickMode,
+            onPieceMoved: (square: HTMLElement) => {
+                if(square.getAttribute("data-click-mode") == SquareClickMode.Play)
+                    this._doPlayAction(
                         parseInt(square.getAttribute("data-square-id")!) as Square
-                      )
-                }
-            },
-            onMouseUp: (square: HTMLElement) => {
-                const squareClickMode = square.getAttribute("data-click-mode") as SquareClickMode;
-                if(squareClickMode != SquareClickMode.Clear){
-                    this.doActionOnBoard(
-                        squareClickMode,
-                        parseInt(square.getAttribute("data-square-id")!) as Square
-                    )
-                }
+                    );
             }
         });
         Logger.save("Moves listener initialized");
@@ -150,6 +136,7 @@ export class Chess{
      */
     public doActionOnBoard(moveType: SquareClickMode, square: Square): void
     {
+        console.log("doACtionOnBoard: ", moveType, square);
         if([SquareClickMode.Play, SquareClickMode.Castling, SquareClickMode.Promote, SquareClickMode.Promotion, SquareClickMode.EnPassant].includes(moveType))
         {
             this.isPromotionScreenOpen = moveType == SquareClickMode.Promotion;
@@ -157,22 +144,11 @@ export class Chess{
 
             if(this.isPromotionScreenOpen)
                 this.board.refresh();
-            else
-                this._doClearAction();
+            else{
+                // this.selectedSquare = null;
+                // this.board.refresh();
+            }
         }
-        else if(moveType === SquareClickMode.Select)
-            this._doSelectAction(square);
-        else if(moveType == SquareClickMode.Clear)
-            this._doClearAction();
-    }
-
-    /**
-     * This function clears the selected square and clears the board on chessBoard.
-     */
-    private _doClearAction(): void
-    {
-        this.selectedSquare = null;
-        this.board.refresh();
     }
 
     /**
@@ -183,7 +159,6 @@ export class Chess{
     private _doSelectAction(square: Square): void
     {
         this.selectedSquare = square;
-        this.board.selectPiece(square);
         this.board.highlightMoves(this.engine.getMoves(square)!);
     }
 
@@ -203,6 +178,7 @@ export class Chess{
      */
     private finishTurn(): void
     {
+        this.selectedSquare = null;
         this.board.showStatus(this.engine.getGameStatus());
         this.board.setTurnColor(this.engine.getTurnColor());
         if(this.isCachingEnabled && !this.isPromotionScreenOpen){

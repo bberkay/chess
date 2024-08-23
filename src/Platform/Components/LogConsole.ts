@@ -89,17 +89,11 @@ export class LogConsole extends Component{
                 if(words[i].includes("[") && words[i].includes("]")){
                     words[i] = words[i].replace(words[i].slice(0, words[i].indexOf("[") + 1), "");
                     words[i] = words[i].slice(0, words[i].lastIndexOf("]"));
-                    const tooltipVariable: string = `
-                    <div class = "tooltip-container">
-                        <div class = "tooltip-text">
-                            <pre>${parseAndStringify(words[i])}</pre>
-                        </div>
-                    </div>`;
+                    const tooltipVariable: string = 
+                    `<div class = "tooltip-container"><div class = "tooltip-text"><pre>${parseAndStringify(words[i])}</pre></div></div>`;
                     log.message = log.message.replace(
                         originalWord,
-                        `<div class = 'tooltip-toggle'>
-                            ${originalWord.replace(`[${words[i]}]`, "")} ${tooltipVariable}
-                        </div>`
+                        `<div class = 'tooltip-toggle'>${originalWord.replace(`[${words[i]}]`, "")} ${tooltipVariable}</div>`
                     );
                 }
             }

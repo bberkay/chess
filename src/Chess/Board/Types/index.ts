@@ -19,6 +19,7 @@ export enum SquareEffect{
  */
 export enum SquareClickMode{
     Select = "Select",
+    Selected = "Selected",
     Play = "Play",
     Clear = "Clear",
     Promote = "Promote", // Promote the pawn to the selected piece.
