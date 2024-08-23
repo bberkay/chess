@@ -132,9 +132,23 @@
     }
 }
 
-/* ------------------- Responsive ------------------- */
-@media screen and (max-width: 1000px) {
+/** 
+ * ------------------ Responsive ------------------- 
+ *             700px - 900px - 1250px
+ */
+@media screen and (max-width: 900px) {
     #notation-table{
         width:100%;
+    }
+
+    #notation-menu .utility-menu{
+        justify-content: space-evenly;
+    }
+}
+
+@media screen and (min-width: 700px) and (max-width: 900px) {
+    #notation-menu .utility-menu{
+        justify-content: center;
+        gap: 1rem;
     }
 }

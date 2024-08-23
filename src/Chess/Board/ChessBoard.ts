@@ -269,8 +269,12 @@ export class ChessBoard {
         )?.parentElement as HTMLElement;
         if(targetSquare && targetSquare.closest("#chessboard"))
         {
-            if(this.getSquareClickMode(targetSquare) == SquareClickMode.Clear)
+            if(
+                this.getSquareClickMode(targetSquare) == SquareClickMode.Clear
+                && this.getSquareEffect(targetSquare) == SquareEffect.Selected
+            ){
                 this.refresh();
+            }
 
             onPieceMovedByDragging!(targetSquare);
         }    
@@ -429,12 +433,11 @@ export class ChessBoard {
         return new Promise((resolve) => {
             const piece: HTMLDivElement = fromSquare.querySelector(".piece") as HTMLDivElement;
             this.animatePieceToSquare(piece, toSquare);
-
             if(playMoveSound){
-                if(toSquare.lastElementChild && toSquare.lastElementChild.className.includes("piece"))
+                if(piece)
                     this.playSound(SoundEffect.Capture);
                 else
-                  this.playSound(this.turnColor == Color.White ? SoundEffect.WhiteMove : SoundEffect.BlackMove);
+                    this.playSound(this.turnColor == Color.White ? SoundEffect.WhiteMove : SoundEffect.BlackMove);
             }
 
             resolve();

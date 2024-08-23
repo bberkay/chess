@@ -13,7 +13,8 @@ export class Logger{
     private static readonly SOURCE_PATHS: string[] = [
         "src/Chess/Chess.ts",
         "src/Chess/Board/ChessBoard.ts",
-        "src/Chess/Engine/ChessEngine.ts"
+        "src/Chess/Engine/ChessEngine.ts",
+        "src/Platform/Platform.ts"
     ]
 
     /**

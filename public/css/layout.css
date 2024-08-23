@@ -42,12 +42,6 @@ main{
     margin-right: 5%;
 }
 
-@media screen and (max-width: 1400px) {
-    main{
-        width: auto;
-    }
-}
-
 /* ------------------- Components ------------------- */
 #game-creator{
     margin-top:0.5rem;
@@ -55,10 +49,11 @@ main{
 
 #notation-menu{
     margin-left: 0.5rem;
-    /* 130px is the height of utility-menu and player-score-section(x2) */
-    /* 2.5 for centering notation-table to 
-    the board but little bit to the top(.2) because
-    of the game-creator menu.
+    
+    /* 130px is the height of utility-menu and 
+    player-score-section(x2). 2.5 for centering 
+    notation-table to the board but little bit 
+    to the top(.2) because of the game-creator menu.
     */
     margin-top: calc((var(--board-size) - (var(--notation-table-height) + 130px)) / 2.2);
 }
@@ -67,8 +62,54 @@ main{
     margin-right:0.5rem;
 }
 
-/* ------------------- Responsive ------------------- */
-@media screen and (max-width: 1000px) {
+/** 
+ * ------------------ Responsive ------------------- 
+ *             700px - 900px - 1250px
+ */
+@media screen and (min-width: 900px) and (max-width: 1250px) {
+    main{
+        padding: 1rem;
+        margin-top:0;
+        flex-wrap: wrap;
+        justify-content: start;
+        margin-right: 0;
+
+        & .left { 
+            order:3;
+            margin-top: 0.5rem;
+            flex-basis: 100%;
+        }
+
+        & .center { 
+            order:1; 
+            display:flex; 
+            flex-direction: column; 
+
+            & #chessboard { 
+                order: 2 
+            }
+
+            & #game-creator { 
+                order: 1;
+                margin-top: 0rem;
+                margin-bottom: 0.5rem;
+            }
+        }
+
+        & .right { 
+            order:2 
+        }
+    }
+}
+
+@media screen and (min-width: 700px) and (max-width: 900px) {
+    main{
+        padding: 2rem;
+        margin-right:0;
+    }
+}
+
+@media screen and (max-width: 900px) {
     main{
         margin-top:0;
         flex-direction: column;
@@ -92,3 +133,4 @@ main{
     main .right { order:2 }
     main .left { order:3 }
 }
+

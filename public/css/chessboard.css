@@ -60,13 +60,6 @@
     --move-to-top: 0;
 }
 
-/* ------------------- Responsive ------------------- */
-@media screen and (max-width: 1000px) {
-    :root{
-        --board-size: calc(100vw - 1.1rem);
-    }
-}
-
 /* -------------- Chessboard -------------- */
 #chessboard {
     width: var(--board-size);
@@ -314,4 +307,20 @@
     text-align: center;
     border:1px solid var(--result-screen-border-color);
     z-index:9999!important;
+}
+
+/** 
+ * ------------------ Responsive ------------------- 
+ *             700px - 900px - 1250px
+ */
+@media screen and (max-width: 900px) {
+    :root{
+        --board-size: calc(100vw - 5rem);
+    }
+}
+
+@media screen and (max-width: 700px) {
+    :root{
+        --board-size: calc(100vw - 1.1rem);
+    }
 }

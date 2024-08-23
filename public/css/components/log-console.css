@@ -20,16 +20,6 @@
     overflow: hidden;
 }
 
-/* ------------------- Responsive ------------------- */
-@media screen and (max-width: 1000px) {
-    #log-console{
-        width: 100%;
-        min-width: 0;
-        max-width: var(--board-size);
-        height: auto;
-    }
-}
-
 /* Body */
 #log-console{
     & #log-console-body{
@@ -130,13 +120,6 @@
     }
 }
 
-/* Responsive */
-@media screen and (max-width: 1000px) {
-    #log-console #log-console-body .tooltip-text{
-        max-height: calc(var(--board-size) / 1.5);
-    }
-}
-
 /* ------------------- Footer ------------------- */
 #log-console {
     & #log-console-footer{
@@ -180,6 +163,7 @@
     }
 }
 
+
 /* Show Square ids on chess board when hovering on log console */
 #chessboard .square-id{
     position:absolute;
@@ -194,4 +178,44 @@
     font-size:12px;
     font-family: monospace;
     z-index:999;
+}
+
+/** 
+ * ------------------ Responsive ------------------- 
+ *             700px - 900px - 1250px
+ */
+@media screen and (min-width: 900px) and (max-width: 1250px) {
+    #log-console{
+        width: var(--board-size);
+        max-width: var(--board-size);
+    }
+}
+
+@media screen and (max-width: 900px) {
+    #log-console{
+        width: 100%;
+        min-width: 0;
+        max-width: var(--board-size);
+        height: auto;
+
+        & #log-console-body{
+            height: calc(var(--board-size) / 2);
+        }
+    }
+
+    #log-console #log-console-body .tooltip-text{
+        max-height: calc(var(--board-size) / 1.5);
+    }
+}
+
+@media screen and (min-width: 700px) and (max-width: 900px) {
+    #log-console #log-console-body{
+        height: calc(var(--board-size) / 1.5);
+    }
+}
+
+@media screen and (max-width: 700px) {
+    #log-console #log-console-body{
+        height: calc(var(--notation-table-height) + 150px);
+    }
 }
