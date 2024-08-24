@@ -225,7 +225,8 @@ export class ChessBoard {
         onPieceSelected: (squareId: Square, squareClickMode: SquareClickMode) => void
     ): void
     {   
-        if(this.getSquareClickMode(square) == SquareClickMode.Clear){
+        const squareClickMode = this.getSquareClickMode(square);
+        if(squareClickMode == SquareClickMode.Clear){
             this.refresh();
             return;
         }
@@ -234,14 +235,18 @@ export class ChessBoard {
             return;
 
         this.stickPieceToCursor(mouseDownEvent, square);
-        if(this.getSquareClickMode(square) == SquareClickMode.Selected){
+        if(squareClickMode == SquareClickMode.Selected){
             this.setSquareClickMode(square, SquareClickMode.Clear);
             return;
         }
         
         const squareId = this.getSquareID(square);
-        this.selectPiece(squareId);
-        onPieceSelected(squareId, SquareClickMode.Selected);
+        if(squareClickMode == SquareClickMode.Select){
+            this.selectPiece(squareId);
+            onPieceSelected(squareId, SquareClickMode.Selected);
+        }
+        else if(squareClickMode == SquareClickMode.Castling)
+            onPieceSelected(squareId, SquareClickMode.Castling);
     }
 
     /**
@@ -475,6 +480,7 @@ export class ChessBoard {
           piece.style.animation = "";
           piece.style.top = "";
           piece.style.left = "";
+          Logger.save(`Piece moved to target square[${this.getSquareID(square)}] on board with animation`);
         });
     }
 
