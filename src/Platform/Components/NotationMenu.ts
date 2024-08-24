@@ -19,7 +19,7 @@ export class NotationMenu extends Component{
         this.chess = chess;
         this.renderComponent();
         document.addEventListener("DOMContentLoaded", () => {
-            this.update(this.chess.engine.getNotation(), this.chess.engine.getScores());
+            this.update();
         });
     }
 
@@ -69,7 +69,7 @@ export class NotationMenu extends Component{
     /**
      * This function adds a row/notation to the table.
      */
-    private addNotation(notations: Array<string>): void
+    private addNotation(notations: ReadonlyArray<string>): void
     {
         /**
          * If notation is white then create new notation row/tr and add as td,
@@ -79,18 +79,18 @@ export class NotationMenu extends Component{
         if(notationMenu.innerHTML == "")
         {
             for(let i = 0; i < notations.length; i += 1){
-                notations[i] = this.convertStringNotationToUnicodedNotation(notations[i]);
+                const notationUnicoded = this.convertStringNotationToUnicodedNotation(notations[i]);
                 if(i % 2 == 0){
                     notationMenu.innerHTML +=
                         `
                         <tr>
                             <td>${(i / 2) + 1}</td>
-                            <td>${notations[i]}</td>
+                            <td>${notationUnicoded}</td>
                             <td></td>
                         </tr>
                     `;
                 }else{
-                    notationMenu.lastElementChild!.innerHTML = notationMenu.lastElementChild!.innerHTML.replace("<td></td>", "<td>" + notations[i] + "</td>");
+                    notationMenu.lastElementChild!.innerHTML = notationMenu.lastElementChild!.innerHTML.replace("<td></td>", "<td>" + notationUnicoded + "</td>");
                 }
             }
         }
@@ -172,6 +172,7 @@ export class NotationMenu extends Component{
             case PieceType.Knight: return "&#9816;";
             case PieceType.Bishop: return "&#9815;";
             case PieceType.Queen: return "&#9813;";
+            case PieceType.King: return "&#9812;";
             default: return "";
         }
     }
@@ -191,8 +192,10 @@ export class NotationMenu extends Component{
      * Flip the notation table.
      */
     public flip(): void {
+        this.chess.board!.flip();
+
         const notationMenu = document.getElementById("notation-menu")!;
-        
+                
         let playerScoreSectionOnTop = notationMenu.querySelector(".player-score-section")!;
         playerScoreSectionOnTop.append(playerScoreSectionOnTop.firstElementChild!)
         notationMenu.append(playerScoreSectionOnTop);
@@ -203,15 +206,15 @@ export class NotationMenu extends Component{
     }
 
     /**
-     * Update the notation table.
+     * Update the notation table and the score of the players.
      */
-    public update(notation: Array<string>, scores: Record<Color, {score: number, pieces: PieceType[]}>): void
+    public update(): void
     {
         if(this.chess.engine.getNotation().length == this.moveCount)
             return;
 
-        this.setScore(scores);
-        this.addNotation(notation);
+        this.setScore(this.chess.engine.getScores());
+        this.addNotation(this.chess.engine.getNotation());
         this.changeIndicator();
     }
 

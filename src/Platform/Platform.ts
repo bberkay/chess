@@ -46,6 +46,7 @@ export class Platform{
      */
     private initBoardListener(): void
     {
+
         this.chess.board.bindMoveEventCallbacks({
           onPieceMoved: () => this.updateComponents()
         })
@@ -57,7 +58,7 @@ export class Platform{
      * console after the move is made.
      */
     private updateComponents(){
-        this.notationMenu?.update(this.chess.engine.getNotation(), this.chess.engine.getScores());
+        this.notationMenu?.update();
         this.logConsole?.print(this.chess.getLogs());
         this.gameCreator?.show(this.chess.engine.getGameAsFenNotation());
     }
@@ -95,7 +96,6 @@ export class Platform{
               this.gameCreator?.changeMode();
               break;
           case MenuOperation.FlipBoard:
-            this.chess.board!.flip();
             this.notationMenu?.flip();
             break;
         }
