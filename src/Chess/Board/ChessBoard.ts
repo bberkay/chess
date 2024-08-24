@@ -937,7 +937,7 @@ export class ChessBoard {
     /**
      * This function returns the logs of the game on engine.
      */
-    public getLogs(): Array<{source: string, message: string}>
+    public getLogs(): ReadonlyArray<{source: string, message: string}>
     {
         return Logger.get();
     }

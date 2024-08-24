@@ -74,13 +74,11 @@ export class Chess{
     {
         Logger.clear();
 
-        // Clear the game from the cache before creating a new game.
         if(this.isCachingEnabled){
             Cacher.clear();
             Logger.save("Cache cleared before creating a new game");
         }
 
-        // Convert the position to json notation if it is not json notation.
         if(typeof position === "string"){
             position = Converter.fenToJson(position);
             Logger.save(`Given position converted to json notation.`);
@@ -93,16 +91,15 @@ export class Chess{
         this.board.setTurnColor(this.engine.getTurnColor());
         Logger.save(`Game successfully created on Chessboard`);
 
-        // Save the game to the cache as json notation.
         if(this.isCachingEnabled){
             Cacher.save(position);
             Logger.save(`Game saved to cache as json notation[${JSON.stringify(position)}]`);
         }
 
-        // Get status from engine and show it on board.
         this.board.showStatus(this.engine.getGameStatus());
 
-        // Initialize the listener for moves because the game is created from scratch and the listener is not initialized.
+        // Initialize the listener for moves because the game is 
+        // created from scratch and the listener is not initialized.
         this.initBoardListener();
     }
 
@@ -113,19 +110,34 @@ export class Chess{
     private initBoardListener(): void
     {
         this.board.bindMoveEventCallbacks({
-            onPieceSelected: (square: HTMLElement) => {
-                this._doSelectAction(
-                    parseInt(square.getAttribute("data-square-id")!) as Square
-                );
+            onPieceSelected: (squareId: Square, squareClickMode: SquareClickMode) => {
+                this.handleOnPieceSelected(squareId, squareClickMode);
             },
-            onPieceMoved: (square: HTMLElement) => {
-                if(square.getAttribute("data-click-mode") == SquareClickMode.Play)
-                    this._doPlayAction(
-                        parseInt(square.getAttribute("data-square-id")!) as Square
-                    );
+            onPieceMoved: (squareId: Square, squareClickMode: SquareClickMode) => {
+                this.handleOnPieceMoved(squareId, squareClickMode);   
             }
         });
         Logger.save("Moves listener initialized");
+    }
+
+    /**
+     * 
+     */
+    private handleOnPieceSelected(squareId: Square, squareClickMode: SquareClickMode): void
+    {
+        if(squareClickMode == SquareClickMode.Castling)
+            this._doPlayAction(squareId);
+        else
+            this._doSelectAction(squareId);
+    }
+
+    /**
+     * 
+     */
+    private handleOnPieceMoved(squareId: Square, squareClickMode: SquareClickMode): void
+    {
+        if(squareClickMode == SquareClickMode.Play)
+            this._doPlayAction(squareId);
     }
 
     /**
@@ -190,7 +202,7 @@ export class Chess{
     /**
      * Get log of the game
      */
-    public getLogs(): Array<{source: string, message: string}>
+    public getLogs(): ReadonlyArray<{source: string, message: string}>
     {
         return Logger.get();
     }

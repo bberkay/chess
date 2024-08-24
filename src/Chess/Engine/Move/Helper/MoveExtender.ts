@@ -1,4 +1,4 @@
-import {Color, EnPassantDirection, PieceType, Square} from "../../../Types";
+import {Color, EnPassantDirection, GameStatus, PieceType, Square} from "../../../Types";
 import {Piece} from "../../Types";
 import {BoardQuerier} from "../../Board/BoardQuerier.ts";
 import {Locator} from "../Utils/Locator.ts";
@@ -29,10 +29,6 @@ export class MoveExtender{
          * @see for more information about castling https://en.wikipedia.org/wiki/Castling
          */
 
-        if(color == Color.White && ((castlingType == "Long" && !BoardQuerier.getCastling().WhiteLong) || (castlingType == "Short" && !BoardQuerier.getCastling().WhiteShort))
-            || color == Color.Black && ((castlingType == "Long" && !BoardQuerier.getCastling().BlackLong) || (castlingType == "Short" && !BoardQuerier.getCastling().BlackShort))
-        ) return null;
-
         /**
          * Find needed squares and icons for checking rules.
          * @see for more information icon of the piece https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
@@ -42,16 +38,18 @@ export class MoveExtender{
         const kingIcon: string = color == Color.White ? "K" : "k";
         const rookIcon: string = color == Color.White ? "R" : "r";
 
-        // Check first rule and third rule. Also, check the fen notation for castling availability when the game is loaded from fen notation.
+        // Check first rule and third rule. Also, check the fen 
+        // notation for castling availability when the game is loaded from fen notation.
         if(!BoardQuerier.isSquareHasPiece(kingSquare, color, [PieceType.King])
-            || (BoardQuerier.getMoveHistory().length > 0 && BoardQuerier.getMoveHistory()[BoardQuerier.getMoveHistory().length - 1].includes("+"))
+            || (BoardQuerier.getBoardStatus() == (color == Color.White ? GameStatus.WhiteInCheck : GameStatus.BlackInCheck))
             || (BoardQuerier.getMoveHistory().length == 0 && !(
                 (chosenRookSquare == Square.a8 && BoardQuerier.getCastling().BlackLong)
                 || (chosenRookSquare == Square.h8 && BoardQuerier.getCastling().BlackShort)
                 || (chosenRookSquare == Square.a1 && BoardQuerier.getCastling().WhiteLong)
                 || (chosenRookSquare == Square.h1 && BoardQuerier.getCastling().WhiteShort)
             ))
-        ) return null;
+        )
+            return null;
 
         // For fourth rule.
         const betweenSquares: Array<Square> = castlingType == "Long"
@@ -82,7 +80,6 @@ export class MoveExtender{
                 return null;
         }
 
-        // If all rules are passed, return castling move(chosen rook's square).
         return chosenRookSquare;
     }
 
@@ -154,8 +151,6 @@ export class MoveExtender{
             || !(BoardQuerier.getPieceOnSquare(enemyPawn) && isEnemyPawnMovedTwoSquares) // Third rule.
         ) return null;
 
-
-        // If all rules are passed, return en passant move.
         return enPassantMove;
     }
 

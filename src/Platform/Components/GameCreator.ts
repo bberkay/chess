@@ -82,6 +82,8 @@ export class GameCreator extends Component{
 
         if(this.currentMode == "template-mode")
           this.changeMode();
+
+        this.show(this.chess.engine.getGameAsFenNotation());
     }
 
     /**

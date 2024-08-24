@@ -475,50 +475,9 @@ export class ChessEngine extends BoardManager {
         this.checkGameStatus();
         this.saveMoveNotation(this.moveNotation);
         this.checkEnPassant();
+        this.checkCastling();
         this.moveNotation = "";
         Logger.save(`Turn[${BoardQuerier.getColorOfTurn()}] is finished and board is ready for the next turn`);
-    }
-
-    /**
-     * Get possible en passant moves of enemy and
-     * add/update them in the fen notation.
-     */
-    private checkEnPassant(): void
-    {
-        if(this.getNotation().length < 2)
-            return;
-
-        // Get the last two moves and check the last move is pawn move or not.
-        const lastTwoMove: Square[] = this.getNotation().slice(-2).map(move => Converter.squareToSquareID(move));
-        const lastPlayerMove: Square = lastTwoMove[0];
-        if(
-            BoardQuerier.getPieceOnSquare(lastPlayerMove)?.getType() != PieceType.Pawn
-            || BoardQuerier.getPieceOnSquare(lastTwoMove[1])?.getType() != PieceType.Pawn
-            || Locator.getRow(lastPlayerMove) != (BoardQuerier.getColorOfTurn() == Color.White ? 4 : 5) // fifth row
-        ){
-            this.setEnPassant(null);
-            Logger.save("En passant move is not found");
-            return;
-        }
-
-        /**
-         * Last player's move could be calculated in the current moves at
-         * the checkGameStatus function and this function is called after
-         * the checkGameStatus function so check the last player's move
-         * is in the current moves or not.
-         */
-        if(this.currentMoves.hasOwnProperty(lastPlayerMove) && this.currentMoves[lastPlayerMove]![MoveType.EnPassant] && this.currentMoves[lastPlayerMove]![MoveType.EnPassant]!.length > 0){
-            this.setEnPassant(this.currentMoves[lastPlayerMove]![MoveType.EnPassant]![0]!);
-            Logger.save(`En passant move[${this.currentMoves[lastPlayerMove]![MoveType.EnPassant]![0]!}] is found and set on fen notation`);
-            return;
-        }
-
-        // If the last player's move is not in the current moves then calculate the moves of the last player's move.
-        const lastPlayerMoves: Moves = this.moveEngine.getMoves(lastPlayerMove)!;
-        if(lastPlayerMoves.hasOwnProperty(MoveType.EnPassant) && lastPlayerMoves[MoveType.EnPassant]!.length > 0){
-            this.setEnPassant(lastPlayerMoves[MoveType.EnPassant]![0]!);
-            Logger.save(`En passant move[${lastPlayerMoves[MoveType.EnPassant]![0]!}] is calculated and set on fen notation`);
-        }
     }
 
     /**
@@ -571,12 +530,19 @@ export class ChessEngine extends BoardManager {
          * Start the continue to check, checkmate, stalemate and check status by
          * finding necessary squares and enums.
          */
-        const kingSquare: Square | null = BoardQuerier.getSquareOfPiece(BoardQuerier.getPiecesWithFilter(BoardQuerier.getColorOfTurn(), [PieceType.King])[0]!);
-        const threateningSquares: Square[] = BoardQuerier.isSquareThreatened(kingSquare!, BoardQuerier.getColorOfOpponent(), true) as Square[];
+        const kingSquare: Square | null = BoardQuerier.getSquareOfPiece(
+            BoardQuerier.getPiecesWithFilter(BoardQuerier.getColorOfTurn(), [PieceType.King])[0]!
+        );
+        const threateningSquares: Square[] = BoardQuerier.isSquareThreatened(
+            kingSquare!, 
+            BoardQuerier.getColorOfOpponent(), true
+        ) as Square[];
         Logger.save(`Threatening squares[${JSON.stringify(threateningSquares)}] are found by king's square[${kingSquare}]`);
 
-        const checkEnum: GameStatus = BoardQuerier.getColorOfTurn() == Color.White ? GameStatus.WhiteInCheck : GameStatus.BlackInCheck;
-        const checkmateEnum: GameStatus = BoardQuerier.getColorOfTurn() == Color.White ? GameStatus.BlackVictory : GameStatus.WhiteVictory;
+        const checkEnum: GameStatus = BoardQuerier.getColorOfTurn() == Color.White 
+            ? GameStatus.WhiteInCheck : GameStatus.BlackInCheck;
+        const checkmateEnum: GameStatus = BoardQuerier.getColorOfTurn() == Color.White 
+            ? GameStatus.BlackVictory : GameStatus.WhiteVictory;
         Logger.save(`Check[${checkEnum}] and Checkmate[${checkmateEnum}] enums are found by player's color[${BoardQuerier.getColorOfTurn()}]`);
 
         /**
@@ -712,6 +678,93 @@ export class ChessEngine extends BoardManager {
     }
 
     /**
+     * Get possible en passant moves of enemy and
+     * add/update them in the fen notation.
+     */
+    private checkEnPassant(): void
+    {
+        if(this.getNotation().length < 2)
+        {
+            Logger.save("Not enough moves for possible en passant move");
+            return;
+        }
+
+        // Get the last two moves and check the last move is pawn move or not.
+        const lastTwoMove: Square[] = this.getNotation().slice(-2).map(move => Converter.squareToSquareID(move));
+        const lastPlayerMove: Square = lastTwoMove[0];
+        if(
+            BoardQuerier.getPieceOnSquare(lastPlayerMove)?.getType() != PieceType.Pawn
+            || BoardQuerier.getPieceOnSquare(lastTwoMove[1])?.getType() != PieceType.Pawn
+            || Locator.getRow(lastPlayerMove) != (BoardQuerier.getColorOfTurn() == Color.White ? 4 : 5) // fifth row
+        ){
+            this.setEnPassant(null);
+            Logger.save("En passant move is not found");
+            return;
+        }
+
+        /**
+         * Last player's move could be calculated in the current moves at
+         * the checkGameStatus function and this function is called after
+         * the checkGameStatus function so check the last player's move
+         * is in the current moves or not.
+         */
+        if(this.currentMoves.hasOwnProperty(lastPlayerMove) && this.currentMoves[lastPlayerMove]![MoveType.EnPassant] && this.currentMoves[lastPlayerMove]![MoveType.EnPassant]!.length > 0){
+            this.setEnPassant(this.currentMoves[lastPlayerMove]![MoveType.EnPassant]![0]!);
+            Logger.save(`En passant move[${this.currentMoves[lastPlayerMove]![MoveType.EnPassant]![0]!}] is found and set on fen notation`);
+            return;
+        }
+
+        // If the last player's move is not in the current moves then calculate the moves of the last player's move.
+        const lastPlayerMoves: Moves = this.moveEngine.getMoves(lastPlayerMove)!;
+        if(lastPlayerMoves.hasOwnProperty(MoveType.EnPassant) && lastPlayerMoves[MoveType.EnPassant]!.length > 0){
+            this.setEnPassant(lastPlayerMoves[MoveType.EnPassant]![0]!);
+            Logger.save(`En passant move[${lastPlayerMoves[MoveType.EnPassant]![0]!}] is calculated and set on fen notation`);
+        }
+    }
+
+    /**
+     * Check the castling moves of the players and
+     * update them in the fen notation.
+     */
+    private checkCastling(): void
+    {
+        if(![GameStatus.InPlay, GameStatus.WhiteInCheck, GameStatus.BlackInCheck].includes(BoardQuerier.getBoardStatus())){
+            Logger.save("Castling moves are not checked because game is not playable");
+            return;
+        }
+
+        const color = BoardQuerier.getColorOfTurn() == Color.White ? Color.Black : Color.White;
+        const shortCastling: CastlingType = color + "Short" as CastlingType;
+        const longCastling: CastlingType = color + "Long" as CastlingType;
+        if(!BoardQuerier.getCastling()[shortCastling] && !BoardQuerier.getCastling()[longCastling]){
+            Logger.save("Castling moves are already disabled");
+            return; 
+        }
+
+        const kingSquare = color == Color.White ? Square.e1 : Square.e8;
+        const kingPiece = BoardQuerier.getPieceOnSquare(kingSquare);
+        if(!kingPiece){
+            this.disableCastling(shortCastling);
+            this.disableCastling(longCastling);
+            Logger.save("King is not it's starting square so castling moves are disabled");
+            return;
+        }
+
+        const longRookSquare = color == Color.White ? Square.a1 : Square.a8;
+        const shortRookSquare = color == Color.White ? Square.h1 : Square.h8;
+        const longRookPiece = BoardQuerier.getPieceOnSquare(longRookSquare);
+        const shortRookPiece = BoardQuerier.getPieceOnSquare(shortRookSquare);
+        if(!longRookPiece){
+            this.disableCastling(longCastling);
+            Logger.save("Long rook is not it's starting square so long castling move is disabled");
+        } 
+        if(!shortRookPiece){
+            this.disableCastling(shortCastling);
+            Logger.save("Short rook is not it's starting square so short castling move is disabled");
+        } 
+    }
+
+    /**
      * Get color of current turn.
      */
     public getTurnColor(): Color
@@ -730,23 +783,23 @@ export class ChessEngine extends BoardManager {
     /**
      * This function returns the algebraic notation of the game.
      */
-    public getNotation(): Array<string>
+    public getNotation(): ReadonlyArray<string>
     {
-        return BoardQuerier.getMoveHistory();
+        return Object.freeze([...BoardQuerier.getMoveHistory()]);
     }
 
     /**
      * This function returns the scores of the players.
      */
-    public getScores(): Record<Color, {score: number, pieces: PieceType[]}>
+    public getScores(): Readonly<Record<Color, {score: number, pieces: PieceType[]}>>
     {
-        return BoardQuerier.getScores();
+        return Object.freeze({...BoardQuerier.getScores()});
     }
 
     /**
      * This function returns the logs of the game on engine.
      */
-    public getLogs(): Array<{source: string, message: string}>
+    public getLogs(): ReadonlyArray<{source: string, message: string}>
     {
         return Logger.get();
     }

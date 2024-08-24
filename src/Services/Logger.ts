@@ -14,7 +14,10 @@ export class Logger{
         "src/Chess/Chess.ts",
         "src/Chess/Board/ChessBoard.ts",
         "src/Chess/Engine/ChessEngine.ts",
-        "src/Platform/Platform.ts"
+        "src/Platform/Platform.ts",
+        "src/Platform/Components/GameCreator.ts",
+        "src/Platform/Components/LogConsole.ts",
+        "src/Platform/Components/NotationMenu.ts"
     ]
 
     /**
@@ -48,9 +51,9 @@ export class Logger{
     /**
      * Returns the messages.
      */
-    public static get(): Array<{source: string, message: string}>
+    public static get(): ReadonlyArray<{source: string, message: string}>
     {
-        return Logger.logs;
+        return Object.freeze([...Logger.logs]);
     }
 
     /**

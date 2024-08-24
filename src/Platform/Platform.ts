@@ -33,7 +33,6 @@ export class Platform{
         this.notationMenu = document.querySelector("#notation-menu") ? new NotationMenu(this.chess) : null;
         this.logConsole = document.querySelector("#notation-menu") ? new LogConsole(this.chess) : null;
 
-        // Initialize the listeners when the dom is loaded.
         document.addEventListener("DOMContentLoaded", () => {
             this.initBoardListener();
             this.initOperationListener();
@@ -46,7 +45,6 @@ export class Platform{
      */
     private initBoardListener(): void
     {
-
         this.chess.board.bindMoveEventCallbacks({
           onPieceMoved: () => this.updateComponents()
         })
@@ -83,14 +81,12 @@ export class Platform{
      */
     protected handleOperation(menuOperation: MenuOperation): void
     {
-        // Do operation by given operation type.
         switch(menuOperation){
           case MenuOperation.ClearConsole:
               this.logConsole?.clear();
               break;
             case MenuOperation.CreateGame:
-              this.gameCreator?.createGame();
-              this.updateComponentsForNewGame();
+              this.createGameAndUpdateComponents();
               break;
             case MenuOperation.ChangeMode:
               this.gameCreator?.changeMode();
@@ -106,19 +102,18 @@ export class Platform{
      * clear the notation menu and print the logs of the game on log
      * console after the game is completely created.
      */
-    private updateComponentsForNewGame(): void
+    private createGameAndUpdateComponents(): void
     {
+        this.gameCreator?.createGame();
         this.notationMenu?.clear();
         this.logConsole?.clear();
         this.initBoardListener();
 
-        // Wait until game creator response is ready.
+        // Print first logs of the game.
         const interval = setInterval(() => {
             const gameCreatorResponse = document.querySelector("#game-creator-response");
             if(gameCreatorResponse){
                 clearInterval(interval);
-
-                // Print the logs of the game on log console after the game is completely created.
                 this.logConsole?.print(JSON.parse(gameCreatorResponse!.innerHTML));
                 gameCreatorResponse.remove();
             }

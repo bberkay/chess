@@ -98,13 +98,11 @@ export class LogConsole extends Component{
                 }
             }
 
-            // Add log to the log list.
             const logElement = document.createElement("li");
             logElement.innerHTML = `&#x2022 <strong data-log-source="${log.source}">[${log.source.replace(".ts", "").split("/").pop()}] </strong><span>${log.message}</span>`;
             logListElement.appendChild(logElement);
         }
 
-        // Scroll to the bottom of the log list.
         logListElement!.innerHTML += "<hr>";
         document.getElementById("log-console-body")!.scrollTop = logListElement!.scrollHeight;
     }
@@ -186,7 +184,7 @@ export class LogConsole extends Component{
     /**
      * This function adds a log to the log console.
      */
-    public print(logs: Array<{source: string, message: string}>): void
+    public print(logs: ReadonlyArray<{source: string, message: string}>): void
     {
         if(this.getLogCount() > 75)
             this.clear();

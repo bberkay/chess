@@ -215,21 +215,15 @@ export class MoveEngine{
         const promotionMoves: Square[] | null = this.moveExtender.getPromotionMove(this.pieceSquare!);
         if(promotionMoves){
             route[moveDirection.vertical]!.push(promotionMoves[0]);
-
-            // Delete vertical diagonal  from the normal moves.
             deleteMoveFromNormalMoves(route[moveDirection.vertical]![0]);
 
             // Add diagonal(capture move) promotion moves to the pawn's moves.
             if(promotionMoves[1]){
                 route[moveDirection.leftDiagonal]!.push(promotionMoves[1]);
-
-                // Delete left diagonal move from the normal moves.
                 deleteMoveFromNormalMoves(route[moveDirection.leftDiagonal]![0]);
             }
             if(promotionMoves[2]){
                 route[moveDirection.rightDiagonal]!.push(promotionMoves[2]);
-
-                // Delete right diagonal move from the normal moves.
                 deleteMoveFromNormalMoves(route[moveDirection.rightDiagonal]![0]);
             }
         }
@@ -246,11 +240,8 @@ export class MoveEngine{
      */
     private getKnightMoves(): Moves | null
     {
-        // Find moves of the knight.
         let route: Route = RouteCalculator.getKnightRoute(this.pieceSquare!);
         if(!route) return null;
-
-        // Filter the moves for king safety and convert the route to squares array.
         return {[MoveType.Normal]: Extractor.extractSquares(this.moveFilterer.filterForKingSafety(this.pieceSquare!, this.piece!.getColor(), route))};
     }
 
@@ -259,11 +250,8 @@ export class MoveEngine{
      */
     private getBishopMoves(): Moves | null
     {
-        // Find moves of the bishop.
         let route: Route = RouteCalculator.getBishopRoute(this.pieceSquare!);
         if(!route) return null;
-
-        // Filter the moves for king safety and convert the route to squares array.
         return {[MoveType.Normal]: Extractor.extractSquares(this.moveFilterer.filterForKingSafety(this.pieceSquare!, this.piece!.getColor(), route))};
     }
 
@@ -272,11 +260,8 @@ export class MoveEngine{
      */
     private getRookMoves(): Moves | null
     {
-        // Find moves of the rook.
         let route: Route = RouteCalculator.getRookRoute(this.pieceSquare!);
         if(!route) return null;
-
-        // Filter the moves for king safety and convert the route to squares array.
         return {[MoveType.Normal]: Extractor.extractSquares(this.moveFilterer.filterForKingSafety(this.pieceSquare!, this.piece!.getColor(), route))};
     }
 
@@ -285,11 +270,8 @@ export class MoveEngine{
      */
     private getQueenMoves(): Moves | null
     {
-        // Find moves of the queen.
         let route: Route = RouteCalculator.getQueenRoute(this.pieceSquare!);
         if(!route) return null;
-
-        // Filter the moves for king safety and convert the route to squares array.
         return {[MoveType.Normal]: Extractor.extractSquares(this.moveFilterer.filterForKingSafety(this.pieceSquare!, this.piece!.getColor(), route))};
     }
 
@@ -300,11 +282,9 @@ export class MoveEngine{
     {
         let moves: Moves = {[MoveType.Normal]: [], [MoveType.Castling]: []};
 
-        // Get the king's route.
         let route: Route = RouteCalculator.getKingRoute(this.pieceSquare!);
         if(!route) return null;
 
-        // Find the king's color
         const color: Color = BoardQuerier.getPieceOnSquare(this.pieceSquare!)!.getColor();
 
         /**
@@ -363,17 +343,16 @@ export class MoveEngine{
          */
         for(let path in route) route[path as MoveRoute] = [];
 
-        // Add long castling move to the king's moves.
         const longCastling: Square | null = this.moveExtender.getLongCastlingMove(color);
         if(longCastling)
             route[MoveRoute.Left]!.push(longCastling);
 
-        // Add short castling move to the king's moves.
         const shortCastling: Square | null = this.moveExtender.getShortCastlingMove(color);
         if(shortCastling)
             route[MoveRoute.Right]!.push(shortCastling);
 
-        // Get castling moves of the king. Also, castling doesn't need king safety filter because it is already filtered.
+        // Get castling moves of the king. Also, 
+        // castling doesn't need king safety filter because it is already filtered.
         moves[MoveType.Castling] = Extractor.extractSquares(route);
 
         return moves;
