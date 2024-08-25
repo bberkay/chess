@@ -136,7 +136,7 @@ export class Chess{
      */
     private handleOnPieceMoved(squareId: Square, squareClickMode: SquareClickMode): void
     {
-        if(squareClickMode == SquareClickMode.Play)
+        if(squareClickMode == SquareClickMode.Play || squareClickMode == SquareClickMode.Castling)
             this._doPlayAction(squareId);
     }
 

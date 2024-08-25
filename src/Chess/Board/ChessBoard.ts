@@ -273,12 +273,15 @@ export class ChessBoard {
         if(document.querySelector(".piece.cloned"))
             this.dropPiece(mouseUpEvent);
 
-        const targetSquare = document.elementFromPoint(
+        let targetSquare = document.elementFromPoint(
             mouseUpEvent.clientX, 
             mouseUpEvent.clientY
         )?.parentElement as HTMLElement;
         if(targetSquare && targetSquare.closest("#chessboard"))
         {
+            if(targetSquare.className.includes("piece"))
+                targetSquare = targetSquare.parentElement!;
+
             const targetSquareClickMode = this.getSquareClickMode(targetSquare);
             if(
                 targetSquareClickMode == SquareClickMode.Clear
@@ -350,12 +353,24 @@ export class ChessBoard {
         if (clonedPiece) {
             clonedPiece.remove();
 
-            const targetSquare: Element | null = document.elementFromPoint(upEvent.clientX, upEvent.clientY);
-            if (targetSquare 
-                && targetSquare.className.includes(`square`) 
-                && this.getSquareClickMode(targetSquare) == SquareClickMode.Play
-            )
-                targetSquare.appendChild(originalPiece);
+            let targetSquare: Element | null = document.elementFromPoint(upEvent.clientX, upEvent.clientY);
+            if(targetSquare){
+                let targetSquareClickMode: SquareClickMode = SquareClickMode.Clear;
+                let playCaptureSoundWhenDropped: boolean = false;
+                if(targetSquare.className.includes("piece")){
+                    if(targetSquare.querySelector(".piece")?.getAttribute("data-color") != this.turnColor)
+                        playCaptureSoundWhenDropped = true;
+                    targetSquare = targetSquare.parentElement;
+                }
+                
+                if(targetSquare?.className.includes("square")){
+                    targetSquareClickMode = this.getSquareClickMode(targetSquare);
+                    if([SquareClickMode.Play].includes(targetSquareClickMode)){
+                        if(playCaptureSoundWhenDropped) this.playSound(SoundEffect.Capture);
+                        targetSquare.appendChild(originalPiece);
+                    }
+                }
+            }
         }
 
         if(originalPiece) originalPiece.classList.remove("dragging");
@@ -657,6 +672,8 @@ export class ChessBoard {
 
             const normalSquareEffect = this.getSquareEffects(normalSquare);
             const flippedSquareEffect = this.getSquareEffects(flippedSquare);
+            this.removeSquareEffect(normalSquare, normalSquareEffect);
+            this.removeSquareEffect(flippedSquare, flippedSquareEffect);
             this.addSquareEffects(normalSquare, flippedSquareEffect);
             this.addSquareEffects(flippedSquare, normalSquareEffect);
         }
