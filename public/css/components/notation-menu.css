@@ -53,49 +53,55 @@
 #notation-table tr td:nth-child(2), #notation-table tr td:nth-child(3) { width: 40% }
 
 /**
- * Scores section on the top and bottom of notation table
+ * Player Score Section
  */
-#notation-menu .score-table{
-    font-size:15px;
-    font-weight:bold;
-    margin:10px 0;
-    width:100%;
-    margin-left: 2px;
-    display: flex;
-    align-items: center;
-    gap: 5px;
+.player-score-section {
+    /**
+     * Score Table
+     */
+    & .score-table{
+        font-size:15px;
+        font-weight:bold;
+        margin:10px 0;
+        width:100%;
+        margin-left: 2px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        height: 30px;
+        
+        & .piece-icons{
+            font-size: 22px;
+        }
+    }
+
+    /**
+     * Turn Indicator
+     */
+    & .turn-indicator{
+        opacity: 0;
+        display: flex;
+        margin-left: 3px;
     
-    & .piece-icons{
-        font-size: 22px;
-    }
-}
-
-/**
- * Turn indicator
- */
-#notation-menu .turn-indicator{
-    opacity: 0;
-    display: flex;
-    margin-left: 3px;
-
-    & span.indicator-icon{
-        width: 1rem;
-        height: 1rem;
-        border-radius: 50%;
-        display: inline-block;
-        margin-right: 6px;
-    }
-
-    &#white-turn-indicator span.indicator-icon{
-        background-color: var(--white-square-color);
-    }
-
-    &#black-turn-indicator span.indicator-icon{
-        background-color: var(--black-square-color);
-    }
-
-    &.visible{
-        opacity: 1;
+        & span.indicator-icon{
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+        }
+    
+        &#white-turn-indicator span.indicator-icon{
+            background-color: var(--white-square-color);
+        }
+    
+        &#black-turn-indicator span.indicator-icon{
+            background-color: var(--black-square-color);
+        }
+    
+        &.visible{
+            opacity: 1;
+        }
     }
 }
 
@@ -143,6 +149,22 @@
 
     #notation-menu .utility-menu{
         justify-content: space-evenly;
+    }
+
+    #black-player-score-section, #white-player-score-section{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        & .score-table{
+            width: auto;
+            margin: 0;
+        }
+
+        & .score-table + .turn-indicator{
+            order: -1;
+            margin-left: 0;
+        }
     }
 }
 

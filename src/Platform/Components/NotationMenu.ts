@@ -193,16 +193,14 @@ export class NotationMenu extends Component{
      */
     public flip(): void {
         this.chess.board!.flip();
-
-        const notationMenu = document.getElementById("notation-menu")!;
                 
-        let playerScoreSectionOnTop = notationMenu.querySelector(".player-score-section")!;
+        let playerScoreSectionOnTop = document.querySelector(".player-score-section")!;
         playerScoreSectionOnTop.append(playerScoreSectionOnTop.firstElementChild!)
-        notationMenu.append(playerScoreSectionOnTop);
+        playerScoreSectionOnTop.parentElement!.append(playerScoreSectionOnTop);
         
-        playerScoreSectionOnTop = notationMenu.querySelector(".player-score-section")!;
+        playerScoreSectionOnTop = document.querySelector(".player-score-section")!;
         playerScoreSectionOnTop.append(playerScoreSectionOnTop.firstElementChild!)
-        notationMenu.prepend(playerScoreSectionOnTop!);
+        playerScoreSectionOnTop.parentElement!.prepend(playerScoreSectionOnTop!);
     }
 
     /**
