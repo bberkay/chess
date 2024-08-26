@@ -121,45 +121,28 @@ export class Chess{
     }
 
     /**
-     * 
+     * Handle the selected piece on the board.
      */
     private handleOnPieceSelected(squareId: Square, squareClickMode: SquareClickMode): void
     {
-        if(squareClickMode == SquareClickMode.Castling)
-            this._doPlayAction(squareId);
-        else
-            this._doSelectAction(squareId);
+        //console.log("on piece selected", "squareId: ", squareId, "squareClickMode: ", squareClickMode);
+        this._doSelectAction(squareId);
     }
 
     /**
-     * 
+     * Handle the moved piece on the board.
      */
     private handleOnPieceMoved(squareId: Square, squareClickMode: SquareClickMode): void
     {
-        if(squareClickMode == SquareClickMode.Play || squareClickMode == SquareClickMode.Castling)
+        //console.log("on piece moved", "squareId: ", squareId, "squareClickMode: ", squareClickMode);
+        if(![
+            SquareClickMode.Select, 
+            SquareClickMode.Selected, 
+            SquareClickMode.Clear, 
+            SquareClickMode.Disable].includes(squareClickMode)
+        ){
+            this.isPromotionScreenOpen = squareClickMode == SquareClickMode.Promotion;
             this._doPlayAction(squareId);
-    }
-
-    /**
-     * Make action on the board.
-     * @example doAction(SquareClickMode.Select, Square.a2); // Select the piece on the square a2.
-     * @example doAction(SquareClickMode.Play, Square.a3); // Play the selected piece(a2) to the square a3.
-     * @example doAction(SquareClickMode.Promote, Square.a8); // Promote the selected piece(a2) to the piece on the square a8.
-     */
-    public doActionOnBoard(moveType: SquareClickMode, square: Square): void
-    {
-        console.log("doACtionOnBoard: ", moveType, square);
-        if([SquareClickMode.Play, SquareClickMode.Castling, SquareClickMode.Promote, SquareClickMode.Promotion, SquareClickMode.EnPassant].includes(moveType))
-        {
-            this.isPromotionScreenOpen = moveType == SquareClickMode.Promotion;
-            this._doPlayAction(square);
-
-            if(this.isPromotionScreenOpen)
-                this.board.refresh();
-            else{
-                // this.selectedSquare = null;
-                // this.board.refresh();
-            }
         }
     }
 
@@ -190,7 +173,7 @@ export class Chess{
      */
     private finishTurn(): void
     {
-        this.selectedSquare = null;
+        this.selectedSquare = this.isPromotionScreenOpen ? this.selectedSquare : null;
         this.board.showStatus(this.engine.getGameStatus());
         this.board.setTurnColor(this.engine.getTurnColor());
         if(this.isCachingEnabled && !this.isPromotionScreenOpen){

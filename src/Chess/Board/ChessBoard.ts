@@ -29,6 +29,8 @@ export class ChessBoard {
     };
     private lockedSquaresModes: Array<SquareClickMode> = [];
     private turnColor: Color.White | Color.Black = Color.White;
+    private mouseUpHandler: ((e: MouseEvent) => void) | null = null;
+    private mouseUpTriggered: boolean = false;
 
     /**
      * Constructor of the class which load css file of
@@ -135,7 +137,7 @@ export class ChessBoard {
              * @see For more information about ASCII codes: https://www.ascii-code.com/
              */
             if(i > 56 && i < 65)
-                square.innerHTML += `<div class="column-coordinate ${i % 2 == 0 ? 'column-coordinate--white' : 'column-coordinate--black'}">${String.fromCharCode(96 + (i % 8 || 8))}</div>`;
+                square.innerHTML += `<div class="column-coordinate">${String.fromCharCode(96 + (i % 8 || 8))}</div>`;
 
             /**
              * Set the row numbers of the board. (1, 2, 3, 4, 5, 6, 7, 8)
@@ -148,7 +150,7 @@ export class ChessBoard {
              * number 2 in the 56th square.
              */
             if(i % 8 == 0)
-                square.innerHTML += `<div class="row-coordinate ${(i / 8) % 2 == 0 ? 'row-coordinate--white' : 'row-coordinate--black'}">${9 - Math.floor(i / 8)}</div>`;
+                square.innerHTML += `<div class="row-coordinate">${9 - Math.floor(i / 8)}</div>`;
 
             board.appendChild(square);
         }
@@ -184,7 +186,7 @@ export class ChessBoard {
     {
         if(typeof square == "number")
             square = this.getSquareElement(square);
-        square?.querySelector(".piece")?.remove();
+        square.querySelector('[class="piece"]')?.remove();
     }
 
     /**
@@ -200,19 +202,26 @@ export class ChessBoard {
         squares.forEach(square => {
             if (callbacks.onPieceSelected){
                 square.addEventListener("mousedown", (e: MouseEvent) => {
+                    this.mouseUpTriggered = false;
                     this.handleSquareDown(e, square, callbacks.onPieceSelected!);
                 });
             }
             if(callbacks.onPieceMoved){
                 square.addEventListener("click", () => {
-                    this.handleSquareClick(square, callbacks.onPieceMoved!);
+                    if(!this.mouseUpTriggered)
+                        return this.handleSquareClick(square, callbacks.onPieceMoved!);
                 });
             }
         });
         if (callbacks.onPieceMoved){
-            document.addEventListener("mouseup", (e) => {
-                this.handleMouseUp(e, callbacks.onPieceMoved!);
-            });
+            if(this.mouseUpHandler)
+                document.removeEventListener("mouseup", this.mouseUpHandler);
+
+            this.mouseUpHandler = (e: MouseEvent) => {
+                this.mouseUpTriggered = true;
+                return this.handleMouseUp(e, callbacks.onPieceMoved!);
+            }
+            document.addEventListener("mouseup", this.mouseUpHandler);
         }
     }
 
@@ -245,8 +254,6 @@ export class ChessBoard {
             this.selectPiece(squareId);
             onPieceSelected(squareId, SquareClickMode.Selected);
         }
-        else if(squareClickMode == SquareClickMode.Castling)
-            onPieceSelected(squareId, SquareClickMode.Castling);
     }
 
     /**
@@ -258,7 +265,12 @@ export class ChessBoard {
     ): void 
     {
         const squareClickMode = this.getSquareClickMode(square);
-        if(squareClickMode == SquareClickMode.Play)
+        if([
+            SquareClickMode.Play, 
+            SquareClickMode.Promotion, 
+            SquareClickMode.Promote, 
+            SquareClickMode.EnPassant].includes(squareClickMode)
+        )
             onPieceMovedByClicking!(this.getSquareID(square), squareClickMode);
     }
 
@@ -276,20 +288,28 @@ export class ChessBoard {
         let targetSquare = document.elementFromPoint(
             mouseUpEvent.clientX, 
             mouseUpEvent.clientY
-        )?.parentElement as HTMLElement;
+        );
         if(targetSquare && targetSquare.closest("#chessboard"))
-        {
-            if(targetSquare.className.includes("piece"))
+        {   
+            if(targetSquare.className.includes("piece")){
                 targetSquare = targetSquare.parentElement!;
+            }
 
-            const targetSquareClickMode = this.getSquareClickMode(targetSquare);
-            if(
-                targetSquareClickMode == SquareClickMode.Clear
-                && this.getSquareEffects(targetSquare).includes(SquareEffect.Selected)
-            )
-                this.refresh();
-
-            onPieceMovedByDragging!(this.getSquareID(targetSquare), targetSquareClickMode);
+            if(targetSquare.className.includes("square")){
+                const targetSquareClickMode = this.getSquareClickMode(targetSquare);
+                if(targetSquareClickMode == SquareClickMode.Clear
+                    && this.getSquareEffects(targetSquare).includes(SquareEffect.Selected))
+                    this.refresh();
+                    
+                if([
+                    SquareClickMode.Play, 
+                    SquareClickMode.Promotion, 
+                    SquareClickMode.Promote, 
+                    SquareClickMode.EnPassant, 
+                    SquareClickMode.Castling].includes(targetSquareClickMode)
+                )
+                    onPieceMovedByDragging!(this.getSquareID(targetSquare), targetSquareClickMode);
+            }
         }    
     }
 
@@ -310,6 +330,7 @@ export class ChessBoard {
      */
     private stickPieceToCursor(downEvent: MouseEvent, square: HTMLElement): void {
         const originalPiece = square.querySelector(".piece") as HTMLElement;
+        if(originalPiece.className.includes("promotion-option")) return;
         if (!originalPiece || document.querySelector(".piece.cloned")) return;
 
         const clonedPiece = originalPiece.cloneNode(true) as HTMLElement;
@@ -355,18 +376,12 @@ export class ChessBoard {
 
             let targetSquare: Element | null = document.elementFromPoint(upEvent.clientX, upEvent.clientY);
             if(targetSquare){
-                let targetSquareClickMode: SquareClickMode = SquareClickMode.Clear;
-                let playCaptureSoundWhenDropped: boolean = false;
-                if(targetSquare.className.includes("piece")){
-                    if(targetSquare.querySelector(".piece")?.getAttribute("data-color") != this.turnColor)
-                        playCaptureSoundWhenDropped = true;
+                if(targetSquare.className.includes("piece"))
                     targetSquare = targetSquare.parentElement;
-                }
                 
                 if(targetSquare?.className.includes("square")){
-                    targetSquareClickMode = this.getSquareClickMode(targetSquare);
-                    if([SquareClickMode.Play].includes(targetSquareClickMode)){
-                        if(playCaptureSoundWhenDropped) this.playSound(SoundEffect.Capture);
+                    const targetSquareClickMode = this.getSquareClickMode(targetSquare);
+                    if([SquareClickMode.Play, SquareClickMode.Promotion].includes(targetSquareClickMode)){
                         targetSquare.appendChild(originalPiece);
                     }
                 }
@@ -433,19 +448,19 @@ export class ChessBoard {
         const moveType: SquareClickMode = this.getSquareClickMode(toSquare);
         switch(moveType){
             case SquareClickMode.Castling:
-                this._doCastling(fromSquare, toSquare).then();
+                this._doCastling(fromSquare, toSquare);
                 break;
             case SquareClickMode.EnPassant:
-                this._doEnPassant(fromSquare, toSquare).then();
+                this._doEnPassant(fromSquare, toSquare);
                 break;
             case SquareClickMode.Promotion:
-                this._doPromotion(fromSquare, toSquare).then();
+                this._doPromotion(fromSquare, toSquare);
                 break;
             case SquareClickMode.Promote:
                 this._doPromote(toSquare);
                 break;
             default:
-                this._doNormalMove(fromSquare, toSquare).then();
+                this._doNormalMove(fromSquare, toSquare);
                 break;
         }
     }
@@ -453,56 +468,59 @@ export class ChessBoard {
     /**
      * Do the normal move(move piece to another square) with animation on the chess board.
      */
-    private async _doNormalMove(fromSquare:HTMLDivElement, toSquare:HTMLDivElement, playMoveSound: boolean = true): Promise<void>
+    private _doNormalMove(fromSquare:HTMLDivElement, toSquare:HTMLDivElement, playMoveSound: boolean = true): void
     {
-        return new Promise((resolve) => {
-            const piece: HTMLDivElement = fromSquare.querySelector(".piece") as HTMLDivElement;
-            this.animatePieceToSquare(piece, toSquare);
-            if(playMoveSound){
-                if(piece)
-                    this.playSound(SoundEffect.Capture);
-                else
-                    this.playSound(this.turnColor == Color.White ? SoundEffect.WhiteMove : SoundEffect.BlackMove);
-            }
-
-            resolve();
+        const piece: HTMLDivElement = fromSquare.querySelector(".piece") as HTMLDivElement;
+        this.animatePieceToSquare(piece, toSquare).then(() => { 
+            Logger.save(`Piece moved to target square[${this.getSquareID(toSquare)}] on board`);
         });
     }
 
     /**
      * Move the piece to the square with animation.
      */
-    private animatePieceToSquare(piece: HTMLElement, square: HTMLElement): void {
-        if (!piece) return;
-        this.removePiece(square);
-        Logger.save(`Target square[${this.getSquareID(square)}] cleared`);
+    private async animatePieceToSquare(piece: HTMLElement, square: HTMLElement): Promise<void> {
+        return new Promise((resolve) => {
+            const toSquareContent = square.querySelector(
+                `.piece[data-color="${this.turnColor === Color.White ? Color.Black : Color.White}"]`
+            );
+            if(toSquareContent){
+                this.removePiece(toSquareContent.parentElement!);
+                this.playSound(SoundEffect.Capture);
+            }
+            else
+                this.playSound(this.turnColor == Color.White ? SoundEffect.WhiteMove : SoundEffect.BlackMove);
 
-        const pieceRect = piece.getBoundingClientRect();
-        const marginLeft = Math.abs(piece.parentElement!.getBoundingClientRect().left - pieceRect.left);
-        const marginTop = Math.abs(piece.parentElement!.getBoundingClientRect().top - pieceRect.top);
+            if (!piece) return;
+            Logger.save(`Target square[${this.getSquareID(square)}] cleared`);
 
-        document.body.appendChild(piece);
-        piece.style.top = `${pieceRect.top}px`;
-        piece.style.left = `${pieceRect.left}px`;
-        piece.style.animation = "move 0.3s ease-in-out forwards";
-        piece.style.setProperty("--move-from-left", `${pieceRect.left}px`);
-        piece.style.setProperty("--move-from-top", `${pieceRect.top}px`);
-        piece.style.setProperty("--move-to-left", `calc(${marginLeft}px + ${square.getBoundingClientRect().left}px)`);
-        piece.style.setProperty("--move-to-top", `calc(${marginTop}px + ${square.getBoundingClientRect().top}px)`);
+            const pieceRect = piece.getBoundingClientRect();
+            const marginLeft = Math.abs(piece.parentElement!.getBoundingClientRect().left - pieceRect.left);
+            const marginTop = Math.abs(piece.parentElement!.getBoundingClientRect().top - pieceRect.top);
 
-        piece.addEventListener("animationend", () => {
-          square.appendChild(piece);
-          piece.style.animation = "";
-          piece.style.top = "";
-          piece.style.left = "";
-          Logger.save(`Piece moved to target square[${this.getSquareID(square)}] on board with animation`);
+            document.body.appendChild(piece);
+            piece.style.top = `${pieceRect.top}px`;
+            piece.style.left = `${pieceRect.left}px`;
+            piece.style.animation = "move 0.2s ease-in-out forwards";
+            piece.style.setProperty("--move-from-left", `${pieceRect.left}px`);
+            piece.style.setProperty("--move-from-top", `${pieceRect.top}px`);
+            piece.style.setProperty("--move-to-left", `calc(${marginLeft}px + ${square.getBoundingClientRect().left}px)`);
+            piece.style.setProperty("--move-to-top", `calc(${marginTop}px + ${square.getBoundingClientRect().top}px)`);
+
+            piece.addEventListener("animationend", () => {
+                square.appendChild(piece);
+                piece.style.animation = "";
+                piece.style.top = "";
+                piece.style.left = "";
+                resolve();
+            });
         });
     }
 
     /**
      * Do the castling move on the chess board.
      */
-    private async _doCastling(fromSquare:HTMLDivElement, toSquare:HTMLDivElement): Promise<void>
+    private _doCastling(fromSquare:HTMLDivElement, toSquare:HTMLDivElement): void
     {
         const fromSquareId: number = this.getSquareID(fromSquare)
         const toSquareId: number = this.getSquareID(toSquare);
@@ -525,10 +543,7 @@ export class ChessBoard {
          * right of the fromSquare.
          */
         const kingNewSquare: number = castlingType == "Long" ? fromSquareId - 2 : fromSquareId + 2;
-        await this._doNormalMove(
-            fromSquare,
-            this.getSquareElement(kingNewSquare)
-        )
+        this._doNormalMove(fromSquare, this.getSquareElement(kingNewSquare)); 
         Logger.save(`King moved to target square[${kingNewSquare}] by determined castling type[${castlingType}] on board`);
 
         /**
@@ -538,7 +553,7 @@ export class ChessBoard {
          */
         const rook: number = castlingType == "Long" ? fromSquareId - 4 : fromSquareId + 3;
         const rookNewSquare: number = castlingType == "Long" ? kingNewSquare + 1 : kingNewSquare - 1;
-        await this._doNormalMove(
+        this._doNormalMove(
             this.getSquareElement(rook),
             this.getSquareElement(rookNewSquare),
             false
@@ -550,9 +565,9 @@ export class ChessBoard {
     /**
      * Do the en passant move on the chess board.
      */
-    private async _doEnPassant(fromSquare:HTMLDivElement, toSquare:HTMLDivElement): Promise<void>
+    private _doEnPassant(fromSquare:HTMLDivElement, toSquare:HTMLDivElement): void
     {
-        await this._doNormalMove(fromSquare, toSquare);
+        this._doNormalMove(fromSquare, toSquare);
         Logger.save(`Piece moved to target square[${this.getSquareID(toSquare)}] on board`);
 
         /**
@@ -573,9 +588,9 @@ export class ChessBoard {
     /**
      * Do the promotion move on the chess board.
      */
-    private async _doPromotion(fromSquare:HTMLDivElement, toSquare:HTMLDivElement): Promise<void>
+    private _doPromotion(fromSquare:HTMLDivElement, toSquare:HTMLDivElement): void
     {
-        await this._doNormalMove(fromSquare, toSquare);
+        this._doNormalMove(fromSquare, toSquare)
         Logger.save(`Piece moved to target square[${this.getSquareID(toSquare)}] on board`);
         this._showPromotions(toSquare);
     }
@@ -600,6 +615,7 @@ export class ChessBoard {
         firstRowOfSquare = Converter.squareToSquareID(
             firstRowOfSquare.replace(firstRowOfSquare.slice(-1), (color == Color.White ? "8" : "1"))
         );
+        // this.removePiece(firstRowOfSquare);
         this.createPiece(color, pieceType, firstRowOfSquare);
         this._closePromotions();
 
@@ -634,7 +650,7 @@ export class ChessBoard {
         }
         this.removeEffectFromAllSquares([SquareEffect.Playable, SquareEffect.Killable, SquareEffect.Selected]);
         this.setTurnColor(this.turnColor);
-        Logger.save("Playable, Killable, Selected effects are cleaned and Square Click Modes changes to Clear and Select(if square has piece");
+        Logger.save("Board refreshed. Playable, Killable, Selected effects removed.");
     }
 
     /**
@@ -650,8 +666,6 @@ export class ChessBoard {
      */
     public flip(): void
     {
-        this.refresh();
-
         // Changes pieces
         for(let id = 64; id >= 33; id--){
             const normalSquare = this.getSquareElement(id);
@@ -780,7 +794,7 @@ export class ChessBoard {
     private _showPromotions(promotionSquare: HTMLDivElement): void
     {
         const square: Square = this.getSquareID(promotionSquare);
-        this.removePiece(square);
+        this.removePiece(promotionSquare);
         Logger.save(`Promoted Pawn is removed from square[${square}] on board`);
 
         /**
@@ -819,7 +833,7 @@ export class ChessBoard {
     private _closePromotions(): void
     {
         let promotionOptions: NodeListOf<Element> = document.querySelectorAll(".promotion-option");
-        for(let i = 0; i < 3; i++)
+        for(let i = 0; i < 4; i++)
             promotionOptions[i].remove();
 
         Logger.save("Promotion screen closed.");
