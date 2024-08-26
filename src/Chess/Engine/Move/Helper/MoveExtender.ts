@@ -46,8 +46,8 @@ export class MoveExtender{
                 (chosenRookSquare == Square.a8 && BoardQuerier.getCastling().BlackLong)
                 || (chosenRookSquare == Square.h8 && BoardQuerier.getCastling().BlackShort)
                 || (chosenRookSquare == Square.a1 && BoardQuerier.getCastling().WhiteLong)
-                || (chosenRookSquare == Square.h1 && BoardQuerier.getCastling().WhiteShort)
-            ))
+                || (chosenRookSquare == Square.h1 && BoardQuerier.getCastling().WhiteShort)))
+            || !BoardQuerier.isSquareHasPiece(chosenRookSquare, color, [PieceType.Rook])
         )
             return null;
 

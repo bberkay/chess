@@ -474,10 +474,17 @@ export class ChessEngine extends BoardManager {
         this.changeTurn();
         this.checkGameStatus();
         this.saveMoveNotation(this.moveNotation);
-        this.checkEnPassant();
-        this.checkCastling();
+        if(![
+            GameStatus.WhiteVictory, 
+            GameStatus.BlackVictory, 
+            GameStatus.Draw, 
+            GameStatus.NotStarted].includes(BoardQuerier.getBoardStatus())
+        ){
+            this.checkEnPassant();
+            this.checkCastling();
+        }
         this.moveNotation = "";
-        Logger.save(`Turn[${BoardQuerier.getColorOfTurn()}] is finished and board is ready for the next turn`);
+        Logger.save(`Turn[${BoardQuerier.getColorOfTurn()}] is finished`);
     }
 
     /**
@@ -512,7 +519,6 @@ export class ChessEngine extends BoardManager {
             Logger.save(`Game status is not checked because board is not playable ${BoardQuerier.getBoardStatus() != GameStatus.NotStarted ? `anymore` : ``} so checkGameStatus calculation is unnecessary.`);
             this.setGameStatus(BoardQuerier.getBoardStatus() != GameStatus.NotStarted ? GameStatus.Draw : GameStatus.NotStarted);
             this.isBoardPlayable = false;
-            this.moveNotation = BoardQuerier.getBoardStatus() != GameStatus.NotStarted ? NotationSymbol.Draw : "";
             return;
         }
 
@@ -625,13 +631,10 @@ export class ChessEngine extends BoardManager {
             }
         }
 
-        // Set the current status for the move history.
         if (BoardQuerier.getBoardStatus() === checkmateEnum)
             this.moveNotation += NotationSymbol.Checkmate;
         else if (BoardQuerier.getBoardStatus() === checkEnum)
             this.moveNotation += NotationSymbol.Check;
-        else if (BoardQuerier.getBoardStatus() === GameStatus.Draw)
-            this.moveNotation = NotationSymbol.Draw;
     }
 
     /**

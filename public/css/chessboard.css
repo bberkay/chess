@@ -13,26 +13,26 @@
 
     /* Colors */
     --white-square-color: #859884;
-    --white-coordinate-color: #a2b9a1;
-    --black-square-color: #667c67;
+    --white-coordinate-color: #A2B9A1;
+    --black-square-color: #667C67;
     --black-coordinate-color: #637263;
     --square-shadow-color: none;
     --clicked-color: #000;
 
     /* Promotion Menu */
     --promotion-option-color: #D3D3D3;
-    --promotion-option-hover-color: #808080;
+    --promotion-option-hover-color: #B7B7B7;
 
     /* Result Screen */
     --result-screen-bg-color: #111111;
-    --result-screen-border-color: #2a2a2a;
-    --result-screen-color: #fff;
+    --result-screen-border-color: #2A2A2A;
+    --result-screen-color: #FFF;
 
     /* Effects */
     --playable-color: #57CE92;
     --killable-color: #57CE92;
     --checked-color: #DF3030;
-    --disabled-color: #000;
+    --disabled-color: #0000004F;
     --selected-color: rgba(87, 206, 146, 0.25);
     --from-color: rgba(69, 201, 255, 0.39);
     --to-color: rgba(69, 201, 255, 0.39);
@@ -79,21 +79,6 @@
     position:relative;
 }
 
-/* -------------- Promotion Menu -------------- */
-#chessboard {
-    & .promotion-option{
-        z-index:999!important;
-        position:inherit;
-        background-color: var(--promotion-option-color);
-        border-radius: 50%;
-        margin-left:0;
-
-        &:hover{
-            background-color: var(--promotion-option-hover-color);
-        }
-    }
-}
-
 /* -------------- Board Styles -------------- */
 #chessboard {
     /* Individual square styles */
@@ -127,12 +112,12 @@
     }
 
     /* Row coordinates that on black squares */
-    & .row-coordinate--black{
+    & .square--black .row-coordinate{
         color:var(--white-coordinate-color);
     }
 
     /* Row coordinates that on white squares */
-    & .row-coordinate--white{
+    & .square--white .row-coordinate--white{
         color:var(--black-coordinate-color);
     }
 
@@ -147,12 +132,12 @@
     }
 
     /* Column coordinates that on black squares */
-    & .column-coordinate--black{
+    & .square--black .column-coordinate{
         color:var(--white-coordinate-color);
     }
 
     /* Column coordinates that on white squares */
-    & .column-coordinate--white{
+    & .squre--white .column-coordinate{
         color:var(--black-coordinate-color);
     }
 }
@@ -172,6 +157,22 @@
 
     &.dragging {
         opacity: 0.5;
+    }
+
+    &.promotion-option{
+        z-index:999!important;
+        position:inherit;
+        background-color: var(--promotion-option-color);
+        border-radius: 50%;
+        margin-left: 5%;
+        margin-top: 5%;
+        width: calc(var(--board-size) / 10);
+        height: calc(var(--board-size) / 11);
+        outline: 5px solid var(--promotion-option-hover-color);
+
+        &:hover{
+            background-color: var(--promotion-option-hover-color);
+        }
     }
 }
 
