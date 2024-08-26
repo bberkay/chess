@@ -110,8 +110,8 @@ export class Chess{
     private initBoardListener(): void
     {
         this.board.bindMoveEventCallbacks({
-            onPieceSelected: (squareId: Square, squareClickMode: SquareClickMode) => {
-                this.handleOnPieceSelected(squareId, squareClickMode);
+            onPieceSelected: (squareId: Square) => {
+                this.handleOnPieceSelected(squareId);
             },
             onPieceMoved: (squareId: Square, squareClickMode: SquareClickMode) => {
                 this.handleOnPieceMoved(squareId, squareClickMode);   
@@ -123,9 +123,8 @@ export class Chess{
     /**
      * Handle the selected piece on the board.
      */
-    private handleOnPieceSelected(squareId: Square, squareClickMode: SquareClickMode): void
+    private handleOnPieceSelected(squareId: Square): void
     {
-        //console.log("on piece selected", "squareId: ", squareId, "squareClickMode: ", squareClickMode);
         this._doSelectAction(squareId);
     }
 
@@ -134,7 +133,6 @@ export class Chess{
      */
     private handleOnPieceMoved(squareId: Square, squareClickMode: SquareClickMode): void
     {
-        //console.log("on piece moved", "squareId: ", squareId, "squareClickMode: ", squareClickMode);
         if(![
             SquareClickMode.Select, 
             SquareClickMode.Selected, 
@@ -175,7 +173,7 @@ export class Chess{
     {
         this.selectedSquare = this.isPromotionScreenOpen ? this.selectedSquare : null;
         this.board.showStatus(this.engine.getGameStatus());
-        this.board.setTurnColor(this.engine.getTurnColor());
+        if(!this.isPromotionScreenOpen) this.board.setTurnColor(this.engine.getTurnColor());
         if(this.isCachingEnabled && !this.isPromotionScreenOpen){
             Cacher.save(this.engine.getGameAsJsonNotation());
             Logger.save("Game updated in cache after move");
