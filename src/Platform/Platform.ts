@@ -45,9 +45,17 @@ export class Platform{
      */
     private initBoardListener(): void
     {
-        this.chess.board.bindMoveEventCallbacks({
-          onPieceMoved: () => this.updateComponents()
-        })
+        const observer = new MutationObserver(() => {
+            this.updateComponents();
+        });
+
+        observer.observe(document.getElementById("chessboard")!, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            characterData: true
+        });
+
     }
 
     /**
