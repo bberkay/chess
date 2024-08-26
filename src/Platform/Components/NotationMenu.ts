@@ -48,10 +48,10 @@ export class NotationMenu extends Component{
                 </table>
                 <div class="utility-menu">
                     <button class="menu-item" data-menu-operation="${MenuOperation.FlipBoard}">F</button>
-                    <button class="menu-item" data-menu-operation="undo">&lt;</button>
-                    <button class="menu-item" data-menu-operation="undo">&lt;</button>
-                    <button class="menu-item" data-menu-operation="redo">&gt;</button>
-                    <button class="menu-item" data-menu-operation="redo">&gt;</button>
+                    <button class="menu-item" data-menu-operation="undo">⊴</button>
+                    <button class="menu-item" data-menu-operation="undo">◀</button>
+                    <button class="menu-item" data-menu-operation="redo">▶</button>
+                    <button class="menu-item" data-menu-operation="redo">⟫</button>
                     <button class="menu-item" data-menu-operation="reset">R</button>
                 </div>
                 <!-- A new menu might be added here for draw, resign etc. options. -->
