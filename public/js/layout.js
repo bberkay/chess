@@ -19,19 +19,20 @@ function createTooltips(){
         const tooltipText = tooltipParent.getAttribute("data-tooltip-text");
         const tooltipElement = document.createElement("div");
         tooltipElement.classList.add("tooltip");
-        tooltipElement.textContent = tooltipText;
         tooltipParent.append(tooltipElement);
 
         let tooltipTimeout;
         tooltipParent.addEventListener("mouseover", function() {
             tooltipTimeout = setTimeout(() => {
                 tooltipElement.classList.add("active");
+                tooltipElement.textContent = tooltipText;
             }, 500);
         });
 
         tooltipParent.addEventListener("mouseout", function() {
             clearTimeout(tooltipTimeout);
             tooltipElement.classList.remove("active");
+            tooltipElement.textContent = "";
         });
     });
 }
