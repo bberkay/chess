@@ -344,7 +344,9 @@ export class ChessBoard {
         clonedPiece.style.top = `calc(${downEvent.clientY}px - ${clonedPiece.offsetHeight / 2}px)`;
         clonedPiece.style.left = `calc(${downEvent.clientX}px - ${clonedPiece.offsetWidth / 2}px)`;
 
-        document.addEventListener("mousemove", this.dragPiece);
+        document.addEventListener("mousemove", (e: MouseEvent) => {
+            this.dragPiece(e)
+        });
     }
 
     /**
@@ -357,15 +359,13 @@ export class ChessBoard {
         clonedPiece.style.left = `calc(${moveEvent.clientX}px - ${clonedPiece.offsetWidth / 2}px)`;
 
         // Highlight the square where the cursor is.
-        /*document.elementsFromPoint(moveEvent.clientX, moveEvent.clientY).forEach((square) => {
-            console.log(square);
-            if(square.className.includes('square') && this.getSquareClickMode(square) == SquareClickMode.Play){
-                this.getAllSquares().forEach((square) => {
-                    this.removeSquareEffect(square, SquareEffect.Hovering);
-                });
-                this.setSquareEffect(square, SquareEffect.Hovering);
-            }
-         });*/
+        document.querySelectorAll(`[class*="${SquareEffect.Hovering}"]`).forEach((square) => {
+            this.removeSquareEffect(square, SquareEffect.Hovering);
+        });
+        const elements = document.elementsFromPoint(moveEvent.clientX, moveEvent.clientY);
+        const square = elements.length > 2 ? elements[1] : null;
+        if(square && square.className.includes('square') && this.getSquareClickMode(square) == SquareClickMode.Play)
+            this.addSquareEffects(square, SquareEffect.Hovering);
     }
 
     /**
