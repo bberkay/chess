@@ -24,8 +24,8 @@
     --promotion-option-hover-color: #B7B7B7;
 
     /* Result Screen */
-    --result-screen-bg-color: #111111;
-    --result-screen-border-color: #2A2A2A;
+    --result-screen-bg-color: #111;
+    --result-screen-shadow-color: #000;
     --result-screen-color: #FFF;
 
     /* Effects */
@@ -38,20 +38,20 @@
     --to-color: rgba(69, 201, 255, 0.39);
 
     /* White Pieces */
-    --white-pawn-image: url("../images/pawn_white.png");
-    --white-rook-image: url("../images/rook_white.png");
-    --white-knight-image: url("../images/knight_white.png");
-    --white-bishop-image: url("../images/bishop_white.png");
-    --white-queen-image: url("../images/queen_white.png");
-    --white-king-image: url("../images/king_white.png");
+    --white-pawn-image: url("../assets/images/pawn_white.png");
+    --white-rook-image: url("../assets/images/rook_white.png");
+    --white-knight-image: url("../assets/images/knight_white.png");
+    --white-bishop-image: url("../assets/images/bishop_white.png");
+    --white-queen-image: url("../assets/images/queen_white.png");
+    --white-king-image: url("../assets/images/king_white.png");
 
     /* Black Pieces */
-    --black-pawn-image: url("../images/pawn_black.png");
-    --black-rook-image: url("../images/rook_black.png");
-    --black-knight-image: url("../images/knight_black.png");
-    --black-bishop-image: url("../images/bishop_black.png");
-    --black-queen-image: url("../images/queen_black.png");
-    --black-king-image: url("../images/king_black.png");
+    --black-pawn-image: url("../assets/images/pawn_black.png");
+    --black-rook-image: url("../assets/images/rook_black.png");
+    --black-knight-image: url("../assets/images/knight_black.png");
+    --black-bishop-image: url("../assets/images/bishop_black.png");
+    --black-queen-image: url("../assets/images/queen_black.png");
+    --black-king-image: url("../assets/images/king_black.png");
 
     /* For animation of piece movement */
     --move-from-left: 0;
@@ -293,12 +293,8 @@
 
 /* -------------- Result Message -------------- */
 .result-message{
-    box-shadow: 0 0 5px #000;
-    padding-top:60px;
-    background-color: var(--result-screen-bg-color);
+    box-shadow: 0 0 5px var(--result-screen-shadow-color);
     color: var(--result-screen-color);
-    font-size: 30px;
-    font-weight: bold;
     width: 250px;
     height:100px;
     position: absolute;
@@ -306,8 +302,46 @@
     left: 50%;
     transform: translate(-50%, -50%);
     text-align: center;
-    border:1px solid var(--result-screen-border-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
     z-index:9999!important;
+    overflow: hidden; 
+    padding: 2px;
+
+    & .result-message-bg{
+        width: 100%;
+        height: 100%;
+        position: absolute; 
+        font-size: 100px;
+        color: #ffffff77;
+        z-index: -1;
+        display: flex;
+        justify-content: start;
+        align-items: center;
+        background-color: var(--result-screen-bg-color);
+        opacity: 0.7;
+
+        & img{
+            margin-left: -50px;
+            margin-top: -15px;
+            width: 120px;
+            height: 120px;
+            opacity: 0.5;
+        }
+    }
+
+    & .result-message-title{
+        font-size: 35px;
+        font-weight: bold;
+        margin-top: 3px;
+    }
+
+    & .result-message-content{
+        font-size: 18px;
+        margin-top: 3px;
+    }
 }
 
 /** 

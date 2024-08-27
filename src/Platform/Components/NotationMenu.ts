@@ -48,7 +48,7 @@ export class NotationMenu extends Component{
                 </table>
                 <div class="utility-menu">
                     <button class="menu-item" data-menu-operation="${MenuOperation.FlipBoard}">F</button>
-                    <button class="menu-item" data-menu-operation="undo">⊴</button>
+                    <button class="menu-item" data-menu-operation="undo">⟪</button>
                     <button class="menu-item" data-menu-operation="undo">◀</button>
                     <button class="menu-item" data-menu-operation="redo">▶</button>
                     <button class="menu-item" data-menu-operation="redo">⟫</button>

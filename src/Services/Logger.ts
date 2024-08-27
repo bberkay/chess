@@ -26,6 +26,7 @@ export class Logger{
     public static save(message: string): void
     {
         let funcNameAndFileName = new Error().stack?.split("\n");
+        console.log(funcNameAndFileName);
         let funcName: string = "Unknown";
         let fileName: string = "Unknown";
         let source: string = "Unknown";

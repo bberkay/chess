@@ -18,14 +18,14 @@ import {Logger} from "../../Services/Logger.ts";
 export class ChessBoard {
 
     private sounds: {[key in SoundEffect]: HTMLAudioElement} = {
-        Start: new Audio("./sounds/game-start.mp3"),
-        WhiteMove: new Audio("./sounds/move-self.mp3"),
-        BlackMove: new Audio("./sounds/move-opponent.mp3"),
-        Capture: new Audio("./sounds/capture.mp3"),
-        Castle: new Audio("./sounds/castle.mp3"),
-        Check: new Audio("./sounds/move-check.mp3"),
-        Promote: new Audio("./sounds/promote.mp3"),
-        End: new Audio("./sounds/game-end.mp3"),
+        Start: new Audio("./assets/sounds/game-start.mp3"),
+        WhiteMove: new Audio("./assets/sounds/move-self.mp3"),
+        BlackMove: new Audio("./assets/sounds/move-opponent.mp3"),
+        Capture: new Audio("./assets/sounds/capture.mp3"),
+        Castle: new Audio("./assets/sounds/castle.mp3"),
+        Check: new Audio("./assets/sounds/move-check.mp3"),
+        Promote: new Audio("./assets/sounds/promote.mp3"),
+        End: new Audio("./assets/sounds/game-end.mp3"),
     };
     private lockedSquaresModes: Array<SquareClickMode> = [];
     private turnColor: Color.White | Color.Black = Color.White;
@@ -329,6 +329,8 @@ export class ChessBoard {
      * Stick the piece to the cursor when the user clicks on the piece.
      */
     private stickPieceToCursor(downEvent: MouseEvent, square: HTMLElement): void {
+        if(this.getSquareClickMode(square) == SquareClickMode.Disable) return;
+
         const originalPiece = square.querySelector(".piece") as HTMLElement;
         if(originalPiece.className.includes("promotion-option")) return;
         if (!originalPiece || document.querySelector(".piece.cloned")) return;
@@ -763,7 +765,11 @@ export class ChessBoard {
     private _showCheckmateMessage(wonStatus: GameStatus.WhiteVictory | GameStatus.BlackVictory): void
     {
         this.lock(false);
-        this._showMessage(`${wonStatus == GameStatus.WhiteVictory ? "White" : "Black"} won!`);
+        const winner = wonStatus == GameStatus.WhiteVictory ? "White" : "Black";
+        this._showResult(
+            `${this.turnColor != winner ? "Victory" : "Defeat"}!`,
+            `${winner} won!`
+        );
         Logger.save(`Board locked and Checkmate message[${wonStatus}] showed on board.`);
     }
 
@@ -773,18 +779,27 @@ export class ChessBoard {
     private _showStalemateMessage(): void
     {
         this.lock(false);
-        this._showMessage("Draw!");
+        this._showResult("Stalemate!", "1/2 - 1/2");
         Logger.save(`Board locked and Draw message showed on board.`);
     }
 
     /**
      * Show result message on the board.
      */
-    private _showMessage(message: string): void
+    private _showResult(title: string, message: string): void
     {
         const messageElement: HTMLDivElement = document.createElement("div");
-        messageElement.className = "result-message";
-        messageElement.innerHTML = message;
+        messageElement.innerHTML = `
+            <div class="result-message">
+                <div class="result-message-bg">
+                    <img src="./public/assets/images/result-screen-bg-icon.png" alt="Chessboard">
+                </div>
+                <div class="result-message-title">${title}</div>
+                <div class="result-message-content">
+                    <span>${message}</span>
+                </div>
+            </div>
+        `
         document.getElementById("chessboard")?.appendChild(messageElement);
         this.playSound(SoundEffect.End);
     }
