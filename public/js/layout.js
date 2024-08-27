@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", function() {
+    createTooltips();
     if (window.innerWidth < 900) {
         reOrderLayoutForMobile();    
     }
@@ -11,6 +12,29 @@ window.addEventListener("resize", function() {
         reOrderLayoutForDesktop();
     }
 });
+
+function createTooltips(){
+    const tooltips = document.querySelectorAll("[data-tooltip-text]");
+    tooltips.forEach(tooltipParent => {
+        const tooltipText = tooltipParent.getAttribute("data-tooltip-text");
+        const tooltipElement = document.createElement("div");
+        tooltipElement.classList.add("tooltip");
+        tooltipElement.textContent = tooltipText;
+        tooltipParent.append(tooltipElement);
+
+        let tooltipTimeout;
+        tooltipParent.addEventListener("mouseover", function() {
+            tooltipTimeout = setTimeout(() => {
+                tooltipElement.classList.add("active");
+            }, 500);
+        });
+
+        tooltipParent.addEventListener("mouseout", function() {
+            clearTimeout(tooltipTimeout);
+            tooltipElement.classList.remove("active");
+        });
+    });
+}
 
 function reOrderLayoutForMobile(){
     if(document.querySelector("#notation-menu") == null)

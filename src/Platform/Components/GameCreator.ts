@@ -87,6 +87,14 @@ export class GameCreator extends Component{
     }
 
     /**
+     * This function gets the current mode of the form.
+     */
+    public getCurrentMode(): "custom-mode" | "template-mode"
+    {
+        return this.currentMode;
+    }
+
+    /**
      * Get the form value of the custom or template mode.
      */
     private getFormValue(): string

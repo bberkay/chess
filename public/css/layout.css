@@ -26,7 +26,7 @@ body{
 }
 
 ::-webkit-scrollbar-track {
-    box-shadow: inset 0 0 5px #141414;
+    box-shadow: inset 0 0 5px var(--bg-color);
 }
 
 ::-webkit-scrollbar-thumb {
@@ -40,6 +40,42 @@ main{
     width:100%;
     justify-content: center;
     margin-right: 5%;
+}
+
+[data-tooltip-text]{
+    position: relative;
+}
+
+.tooltip{
+    position: absolute;
+    background-color: var(--border-color);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    padding: 0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 100%;
+    margin-top: 15px;
+    opacity: 0;
+    transition: opacity 0.1s;
+    white-space: nowrap;
+
+    &.active{
+        opacity: 1;
+    }
+}
+
+.tooltip::before{
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-bottom: 7px solid var(--border-color);
+    top: -7px;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 /* ------------------- Components ------------------- */

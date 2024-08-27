@@ -47,12 +47,12 @@ export class NotationMenu extends Component{
                     <tbody id = "notations"></tbody>
                 </table>
                 <div class="utility-menu">
-                    <button class="menu-item" data-menu-operation="${MenuOperation.FlipBoard}">F</button>
-                    <button class="menu-item" data-menu-operation="undo">⟪</button>
-                    <button class="menu-item" data-menu-operation="undo">◀</button>
-                    <button class="menu-item" data-menu-operation="redo">▶</button>
-                    <button class="menu-item" data-menu-operation="redo">⟫</button>
-                    <button class="menu-item" data-menu-operation="reset">R</button>
+                    <button class="menu-item" data-menu-operation="${MenuOperation.FlipBoard}" data-tooltip-text="Flip Board">F</button>
+                    <button class="menu-item" data-menu-operation="undo" disabled="true">⟪</button>
+                    <button class="menu-item" data-menu-operation="undo" disabled="true">◀</button>
+                    <button class="menu-item" data-menu-operation="redo" disabled="true">▶</button>
+                    <button class="menu-item" data-menu-operation="redo" disabled="true">⟫</button>
+                    <button class="menu-item" data-menu-operation="${MenuOperation.Reset}" data-tooltip-text="Reset Game">R</button>
                 </div>
                 <!-- A new menu might be added here for draw, resign etc. options. -->
                 <div class="player-score-section" id="white-player-score-section">

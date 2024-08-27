@@ -30,7 +30,7 @@ export class LogConsole extends Component{
             </div>
             <div id="log-console-footer">
                 <div id="log-console-footer-btn">
-                    <button data-menu-operation="${MenuOperation.ClearConsole}">Ⅹ</button>
+                    <button data-menu-operation="${MenuOperation.ClearConsole}" data-tooltip-text="Clear Logs">Ⅹ</button>
                 </div>
                 <div id="log-console-footer-content">
                     <span id = "log-file"></span>

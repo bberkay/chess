@@ -7,5 +7,6 @@ export enum MenuOperation{
     CreateGame = "CreateGame",
     ChangeMode = "ChangeMode",
     ClearConsole = "ClearConsole",
-    FlipBoard = "FlipBoard"
+    FlipBoard = "FlipBoard",
+    Reset = "Reset",
 }

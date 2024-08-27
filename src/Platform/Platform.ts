@@ -90,18 +90,23 @@ export class Platform{
     protected handleOperation(menuOperation: MenuOperation): void
     {
         switch(menuOperation){
-          case MenuOperation.ClearConsole:
-              this.logConsole?.clear();
-              break;
+            case MenuOperation.ClearConsole:
+                this.logConsole?.clear();
+                break;
             case MenuOperation.CreateGame:
-              this.createGameAndUpdateComponents();
-              break;
+                this.createGameAndUpdateComponents();
+                break;
             case MenuOperation.ChangeMode:
-              this.gameCreator?.changeMode();
-              break;
-          case MenuOperation.FlipBoard:
-            this.notationMenu?.flip();
-            break;
+                this.gameCreator?.changeMode();
+                break;
+            case MenuOperation.FlipBoard:
+                this.notationMenu?.flip();
+                break;
+            case MenuOperation.Reset:
+                if(this.gameCreator?.getCurrentMode() === "custom-mode")
+                    this.gameCreator?.changeMode();
+                this.createGameAndUpdateComponents();
+                break;
         }
     }
 
@@ -112,9 +117,9 @@ export class Platform{
      */
     private createGameAndUpdateComponents(): void
     {
-        this.gameCreator?.createGame();
-        this.notationMenu?.clear();
         this.logConsole?.clear();
+        this.notationMenu?.clear();
+        this.gameCreator?.createGame();
         this.initBoardListener();
 
         // Print first logs of the game.
