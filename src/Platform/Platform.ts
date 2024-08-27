@@ -11,7 +11,7 @@ import { Chess } from "../Chess/Chess";
 import { GameCreator } from "./Components/GameCreator.ts";
 import { NotationMenu } from "./Components/NotationMenu.ts";
 import { LogConsole } from "./Components/LogConsole";
-import { MenuOperation } from "./Types";
+import { MenuOperation, UtilityMenuSection } from "./Types";
 
 /**
  * This class is the main class of the chess platform menu.
@@ -95,6 +95,7 @@ export class Platform{
                 break;
             case MenuOperation.CreateGame:
                 this.createGameAndUpdateComponents();
+                this.notationMenu?.changeUtilityMenuSection(UtilityMenuSection.Board);
                 break;
             case MenuOperation.ChangeMode:
                 this.gameCreator?.changeMode();
@@ -106,7 +107,15 @@ export class Platform{
                 if(this.gameCreator?.getCurrentMode() === "custom-mode")
                     this.gameCreator?.changeMode();
                 this.createGameAndUpdateComponents();
+                this.notationMenu?.changeUtilityMenuSection(UtilityMenuSection.Board);
                 break;
+            case MenuOperation.ToggleUtilityMenu:
+                this.notationMenu?.toggleUtilityMenu();
+                break;
+            case MenuOperation.NewGame:
+                // TODO: Implement new game operation.
+                this.createGameAndUpdateComponents(); 
+                break;  
         }
     }
 

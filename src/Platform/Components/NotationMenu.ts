@@ -1,7 +1,7 @@
 import { Color, PieceType } from "../../Chess/Types";
 import { Component } from "./Component.ts";
 import { Chess} from "../../Chess/Chess.ts";
-import { MenuOperation } from "../Types";
+import { MenuOperation, UtilityMenuSection } from "../Types";
 
 /**
  * This class provide a table to show the notation.
@@ -49,10 +49,24 @@ export class NotationMenu extends Component{
                 <div class="utility-menu">
                     <button class="menu-item" data-menu-operation="${MenuOperation.FlipBoard}" data-tooltip-text="Flip Board">F</button>
                     <button class="menu-item" data-menu-operation="undo" disabled="true">⟪</button>
-                    <button class="menu-item" data-menu-operation="undo" disabled="true">◀</button>
-                    <button class="menu-item" data-menu-operation="redo" disabled="true">▶</button>
+                    <button class="menu-item" data-menu-operation="undo" disabled="true">❮</button>
+                    <button class="menu-item" data-menu-operation="redo" disabled="true">❯</button>
                     <button class="menu-item" data-menu-operation="redo" disabled="true">⟫</button>
-                    <button class="menu-item" data-menu-operation="${MenuOperation.Reset}" data-tooltip-text="Reset Game">R</button>
+                    <button class="menu-item" data-menu-operation="${MenuOperation.ToggleUtilityMenu}">☰</button>
+                </div>
+                <div class="utility-menu utility-toggle-menu">
+                    <div class="utility-toggle-menu-section active" id="${UtilityMenuSection.Board}-utility-menu">
+                        <button class="menu-item" data-menu-operation="${MenuOperation.Reset}" data-tooltip-text="Reset Current Game">↺ Reset Game</button>
+                        <button class="menu-item" data-menu-operation="${MenuOperation.CreateGame}" data-tooltip-text="Create New Game">+ New Game</button>
+                    </div>
+                    <div class="utility-toggle-menu-section" id="${UtilityMenuSection.NewGame}-utility-menu">
+                        <button class="menu-item" data-menu-operation="${MenuOperation.CreateGame}" data-tooltip-text="Create New Game">+ New Game</button>
+                    </div>
+                    <div class="utility-toggle-menu-section" id="${UtilityMenuSection.Match}-utility-menu">
+                        <button class="menu-item" data-menu-operation="${MenuOperation.SendUndoOffer}" data-tooltip-text="Send Undo Offer">↺ Undo</button>
+                        <button class="menu-item" data-menu-operation="${MenuOperation.SendDrawOffer}" data-tooltip-text="Send Draw Offer">Draw</button>
+                        <button class="menu-item" data-menu-operation="${MenuOperation.Resign}" data-tooltip-text="Resign From Game">⚐ Resign</button>
+                    </div>
                 </div>
                 <!-- A new menu might be added here for draw, resign etc. options. -->
                 <div class="player-score-section" id="white-player-score-section">
@@ -214,6 +228,27 @@ export class NotationMenu extends Component{
         this.setScore(this.chess.engine.getScores());
         this.addNotation(this.chess.engine.getNotation());
         this.changeIndicator();
+    }
+
+    /**
+     * This function opens/closes the utility menu.
+     */
+    public toggleUtilityMenu(): void
+    {
+        document.querySelector(`.utility-toggle-menu`)!.classList.toggle("visible");
+    }
+
+    /**
+     * This function changes the utility menu section to the given section.
+     */
+    public changeUtilityMenuSection(utilityMenuSection: UtilityMenuSection): void
+    {
+        const utilityMenuSections = document.querySelectorAll(".utility-toggle-menu-section") as NodeListOf<HTMLElement>;
+        utilityMenuSections.forEach((section: HTMLElement) => {
+            section.classList.remove("active");
+        });
+
+        document.getElementById(`${utilityMenuSection}-utility-menu`)!.classList.add("active");
     }
 
     /**

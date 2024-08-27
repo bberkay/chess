@@ -9,4 +9,20 @@ export enum MenuOperation{
     ClearConsole = "ClearConsole",
     FlipBoard = "FlipBoard",
     Reset = "Reset",
+    ToggleUtilityMenu = "ToggleUtilityMenu",
+    SendDrawOffer = "SendDrawOffer",
+    SendUndoOffer = "SendUndoOffer",
+    Resign = "Resign",
+    NewGame = "NewGame"
+}
+
+/**
+ * UtilityMenuSection enum for the types of sections that can be
+ * displayed in the utility menu.
+ * @see src/Platform/Components/NotationMenu.ts
+ */
+export enum UtilityMenuSection{
+    Match = "match",
+    Board = "board",
+    NewGame = "new-game"
 }

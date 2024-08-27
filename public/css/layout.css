@@ -60,6 +60,7 @@ main{
     transition: opacity 0.1s;
     white-space: nowrap;
     height: 0;
+    z-index: 99;
 
     &.active{
         opacity: 1;

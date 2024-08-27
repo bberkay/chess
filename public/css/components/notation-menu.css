@@ -143,6 +143,25 @@
     }
 }
 
+#notation-menu .utility-menu.utility-toggle-menu{
+    display: none;
+
+    & .utility-toggle-menu-section{
+        flex: 1;
+        display: none;
+        justify-content: space-between;
+        align-items: center;
+
+        &.active{
+            display: flex;
+        }
+    }
+
+    &.visible{
+        display: flex;
+    }
+}
+
 /** 
  * ------------------ Responsive ------------------- 
  *             700px - 900px - 1250px
