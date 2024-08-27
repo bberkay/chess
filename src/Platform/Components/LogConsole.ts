@@ -1,23 +1,21 @@
-import { Chess } from "../../Chess/Chess.ts";
 import { MenuOperation } from "../Types";
 import { Component } from "./Component";
+import { Logger } from "../../Services/Logger"; 
 
 /**
  * This class provide a menu to show the logs.
  */
 export class LogConsole extends Component{
-    protected readonly chess: Chess;
     private logCounter: number = 0;
 
     /**
      * Constructor of the LogConsole class.
      */
-    constructor(chess: Chess) {
+    constructor() {
         super();
-        this.chess = chess;
         this.renderComponent();
         document.addEventListener("DOMContentLoaded", () => {
-            this.print(this.chess.getLogs());
+            this.stream();
         });
     }
 
@@ -184,12 +182,12 @@ export class LogConsole extends Component{
     /**
      * This function adds a log to the log console.
      */
-    public print(logs: ReadonlyArray<{source: string, message: string}>): void
+    public stream(): void
     {
         if(this.getLogCount() > 75)
             this.clear();
 
-        const lastLogs: Array<{source: string, message: string}> = logs.slice(this.logCounter);
+        const lastLogs: Array<{source: string, message: string}> = Logger.messages().slice(this.logCounter);
         if(lastLogs.length == 0) return;
 
         // Print the logs to the log console.
@@ -205,8 +203,7 @@ export class LogConsole extends Component{
      */
     public clear(): void
     {
-        // Clear the logs of the chess.
-        this.chess.clearLogs();
+        Logger.clear();
 
         // Clear the log count.
         this.logCounter = 0;

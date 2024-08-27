@@ -1,60 +1,43 @@
+
+class LogStorage{
+    public static logs: Array<{source: string, message: string}> = [];
+}
+
 /**
  * This static class provides a logging system.
  */
 export class Logger{
-    /**
-     * Logs
-     */
-    private static logs: Array<{source: string, message: string}> = [];
+    private logName: string;
 
     /**
-     * Paths of the sources
+     * Constructor
      */
-    private static readonly SOURCE_PATHS: string[] = [
-        "src/Chess/Chess.ts",
-        "src/Chess/Board/ChessBoard.ts",
-        "src/Chess/Engine/ChessEngine.ts",
-        "src/Platform/Platform.ts",
-        "src/Platform/Components/GameCreator.ts",
-        "src/Platform/Components/LogConsole.ts",
-        "src/Platform/Components/NotationMenu.ts"
-    ]
+    constructor(logName: string){
+        this.logName = logName;
+    }
 
     /**
      * Save the message
      */
-    public static save(message: string): void
+    public save(message: string): void
     {
-        let funcNameAndFileName = new Error().stack?.split("\n");
-        console.log(funcNameAndFileName);
-        let funcName: string = "Unknown";
-        let fileName: string = "Unknown";
-        let source: string = "Unknown";
-        if(funcNameAndFileName)
-        {   
-            // Chrome, Edge and other chromium based browsers
-            if(funcNameAndFileName[0] == "Error") 
-                funcNameAndFileName = funcNameAndFileName[2].trim().split("at ")[1].split(" ")
-            else // Firefox
-                funcNameAndFileName = funcNameAndFileName[2].trim().split("@");
-            
-            funcName = funcNameAndFileName[0];
-            fileName = funcNameAndFileName[1].substring(funcNameAndFileName[1].lastIndexOf("/"), funcNameAndFileName[1].indexOf(".ts"));
-            source = Logger.SOURCE_PATHS.find(path => path.includes(fileName)) || "Unknown";
-        }
-        
-        Logger.logs.push({
-            source:`${funcName}(...) in ${source}`, 
-            message: message
-        });        
+        LogStorage.logs.push({source: this.logName, message: message[message.length - 1] != "." ? message + "." : message});        
+    }
+
+    /**
+     * Returns the name of the logger.
+     */
+    public name(): string
+    {
+        return this.logName;
     }
 
     /**
      * Returns the messages.
      */
-    public static get(): ReadonlyArray<{source: string, message: string}>
+    public static messages(): ReadonlyArray<{source: string, message: string}>
     {
-        return Object.freeze([...Logger.logs]);
+        return Object.freeze([...LogStorage.logs]);
     }
 
     /**
@@ -62,6 +45,6 @@ export class Logger{
      */
     public static clear(): void
     {
-        Logger.logs = [];
+        LogStorage.logs = [];
     }
 }

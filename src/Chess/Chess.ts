@@ -7,7 +7,7 @@
  * @license MIT
  */
 
-import {Color, GameStatus, JsonNotation, PieceType, Square, StartPosition} from "./Types";
+import {JsonNotation, Square, StartPosition} from "./Types";
 import {ChessEngine} from "./Engine/ChessEngine";
 import {ChessBoard} from "./Board/ChessBoard";
 import {SquareClickMode} from "./Board/Types";
@@ -25,20 +25,21 @@ export class Chess{
     /**
      * Properties of the Chess class.
      */
-    public engine: ChessEngine;
-    public board: ChessBoard;
+    public readonly engine: ChessEngine = new ChessEngine();
+    public readonly board: ChessBoard = new ChessBoard();
     private selectedSquare: Square | null;
     private isPromotionScreenOpen: boolean = false;
     private readonly isCachingEnabled: boolean = true;
+    public readonly logger: Logger = new Logger("src/Chess/Chess.ts");
 
     /**
      * Constructor of the Chess class.
      */
     constructor(enableCaching: boolean = true){
-        this.board = new ChessBoard();
-        this.engine = new ChessEngine();
         this.selectedSquare = null;
         this.isCachingEnabled = enableCaching;
+
+        Logger.clear();
 
         // If there is a game in cache, load it. Otherwise, create a new game.
         if(!this.checkAndLoadGameFromCache())
@@ -57,12 +58,13 @@ export class Chess{
 
         // If there is a game in the cache, load it.
         if(!Cacher.isEmpty()){
+            this.logger.save("Game loading from cache...");
             this.createGame(Cacher.load());
-            Logger.save("Game loaded from cache.");
+            this.logger.save("Game loaded from cache");
             return true;
         }
 
-        Logger.save("No games found in cache");
+        this.logger.save("No games found in cache");
         return false;
     }
 
@@ -72,28 +74,26 @@ export class Chess{
      */
     public createGame(position: JsonNotation | StartPosition | string = StartPosition.Standard): void
     {
-        Logger.clear();
-
         if(this.isCachingEnabled){
             Cacher.clear();
-            Logger.save("Cache cleared before creating a new game");
+            this.logger.save("Cache cleared before creating a new game");
         }
 
         if(typeof position === "string"){
             position = Converter.fenToJson(position);
-            Logger.save(`Given position converted to json notation.`);
+            this.logger.save(`Given position converted to json notation.`);
         }
 
         this.engine.createGame(position);
-        Logger.save(`Game successfully created on ChessEngine`);
+        this.logger.save(`Game successfully created on ChessEngine`);
         
         this.board.createGame(position);
         this.board.setTurnColor(this.engine.getTurnColor());
-        Logger.save(`Game successfully created on Chessboard`);
+        this.logger.save(`Game successfully created on Chessboard`);
 
         if(this.isCachingEnabled){
             Cacher.save(position);
-            Logger.save(`Game saved to cache as json notation[${JSON.stringify(position)}]`);
+            this.logger.save(`Game saved to cache as json notation[${JSON.stringify(position)}]`);
         }
 
         this.board.showStatus(this.engine.getGameStatus());
@@ -117,7 +117,7 @@ export class Chess{
                 this.handleOnPieceMoved(squareId, squareClickMode);   
             }
         });
-        Logger.save("Moves listener initialized");
+        this.logger.save("Moves listener initialized");
     }
 
     /**
@@ -176,23 +176,7 @@ export class Chess{
         if(!this.isPromotionScreenOpen) this.board.setTurnColor(this.engine.getTurnColor());
         if(this.isCachingEnabled && !this.isPromotionScreenOpen){
             Cacher.save(this.engine.getGameAsJsonNotation());
-            Logger.save("Game updated in cache after move");
+            this.logger.save("Game updated in cache after move");
         }
-    }
-
-    /**
-     * Get log of the game
-     */
-    public getLogs(): ReadonlyArray<{source: string, message: string}>
-    {
-        return Logger.get();
-    }
-
-    /**
-     * Clear the logs of the game
-     */
-    public clearLogs(): void
-    {
-        Logger.clear();
     }
 }

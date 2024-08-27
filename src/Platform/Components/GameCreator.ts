@@ -7,7 +7,7 @@ import { Component } from "./Component";
  * This class provide a form to create a new game.
  */
 export class GameCreator extends Component{
-    protected readonly chess: Chess;
+    private readonly chess: Chess;
     private currentMode: "custom-mode" | "template-mode";
 
     /**
@@ -73,10 +73,10 @@ export class GameCreator extends Component{
     {
         this.chess.createGame(this.getFormValue());
 
-        // Create invisible div that includes the logs of the game for the first time when game is created.
+        // Create invisible div for triggering the log console to stream 
+        // when the game is created.
         const response: HTMLDivElement = document.createElement("div");
         response.id = "game-creator-response";
-        response.innerHTML = JSON.stringify(this.chess.getLogs());
         response.style.visibility = "hidden";
         document.body.appendChild(response);
 

@@ -133,13 +133,15 @@
         background-color:#222;
         border:1px solid #2a2a2a;
         margin:3px;
-        padding:10px;
         color: #f5f5f5;
         width:100%;
-        font-size:12px;
+        font-size:13px;
         font-family: monospace;
         overflow-x: auto;
         text-wrap:nowrap;
+        display: flex;
+        align-items: center;
+        padding-left: 10px;
     }
 
     & #log-console-footer-btn button{

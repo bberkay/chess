@@ -31,7 +31,7 @@ export class Platform{
         this.chess = chess;
         this.gameCreator = document.querySelector("#game-creator") ? new GameCreator(this.chess) : null;
         this.notationMenu = document.querySelector("#notation-menu") ? new NotationMenu(this.chess) : null;
-        this.logConsole = document.querySelector("#notation-menu") ? new LogConsole(this.chess) : null;
+        this.logConsole = document.querySelector("#log-console") ? new LogConsole() : null;
 
         document.addEventListener("DOMContentLoaded", () => {
             this.initBoardListener();
@@ -65,7 +65,7 @@ export class Platform{
      */
     private updateComponents(){
         this.notationMenu?.update();
-        this.logConsole?.print(this.chess.getLogs());
+        this.logConsole?.stream();
         this.gameCreator?.show(this.chess.engine.getGameAsFenNotation());
     }
 
@@ -118,13 +118,13 @@ export class Platform{
         this.initBoardListener();
 
         // Print first logs of the game.
-        const interval = setInterval(() => {
+        /*const interval = setInterval(() => {
             const gameCreatorResponse = document.querySelector("#game-creator-response");
             if(gameCreatorResponse){
                 clearInterval(interval);
-                this.logConsole?.print(JSON.parse(gameCreatorResponse!.innerHTML));
+                this.logConsole?.stream();
                 gameCreatorResponse.remove();
             }
-        });
+        });*/
     }
 }

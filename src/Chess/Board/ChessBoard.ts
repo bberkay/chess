@@ -17,7 +17,7 @@ import {Logger} from "../../Services/Logger.ts";
  */
 export class ChessBoard {
 
-    private sounds: {[key in SoundEffect]: HTMLAudioElement} = {
+    private readonly sounds: {[key in SoundEffect]: HTMLAudioElement} = {
         Start: new Audio("./assets/sounds/game-start.mp3"),
         WhiteMove: new Audio("./assets/sounds/move-self.mp3"),
         BlackMove: new Audio("./assets/sounds/move-opponent.mp3"),
@@ -31,6 +31,7 @@ export class ChessBoard {
     private turnColor: Color.White | Color.Black = Color.White;
     private mouseUpHandler: ((e: MouseEvent) => void) | null = null;
     private mouseUpTriggered: boolean = false;
+    public readonly logger: Logger = new Logger("src/Chess/Board/ChessBoard.ts");
 
     /**
      * Constructor of the class which load css file of
@@ -72,10 +73,10 @@ export class ChessBoard {
     public createGame(position: JsonNotation | StartPosition | string = StartPosition.Standard): void
     {
         this.createBoard();
-        Logger.save("Chessboard created.");
+        this.logger.save("Chessboard created.");
 
         this.createPieces(typeof position == "string" ? Converter.fenToJson(position).board : position.board);
-        Logger.save("Pieces created on ChessBoard.");
+        this.logger.save("Pieces created on ChessBoard.");
 
         this.playSound(SoundEffect.Start);
     }
@@ -197,7 +198,7 @@ export class ChessBoard {
         onPieceMoved?: (squareId: Square, squareClickMode: SquareClickMode) => void
     }): void
     {
-        Logger.save("Listening for move.");
+        this.logger.save("Listening for move.");
         const squares = this.getAllSquares();
         squares.forEach(square => {
             if (callbacks.onPieceSelected){
@@ -322,7 +323,7 @@ export class ChessBoard {
         const selectedSquare = this.getSquareElement(squareID);
         this.addSquareEffects(selectedSquare, SquareEffect.Selected);
         this.setSquareClickMode(selectedSquare, SquareClickMode.Selected);
-        Logger.save(`Square[${squareID}] selected on board.`);
+        this.logger.save(`Square[${squareID}] selected on board.`);
     }
 
     /**
@@ -430,7 +431,7 @@ export class ChessBoard {
             }
         }
 
-        Logger.save(`Possible moves[${JSON.stringify(moves)}] highlighted on board.`);
+        this.logger.save(`Possible moves[${JSON.stringify(moves)}] highlighted on board.`);
     }
 
     /**
@@ -440,12 +441,12 @@ export class ChessBoard {
     {
         // Remove the from and to effects of enemy player before the player's move.
         this.removeEffectFromAllSquares();
-        Logger.save(`From[${from}], To[${to}] and Checked Square's(if exits) effects are cleaned.`);
+        this.logger.save(`From[${from}], To[${to}] and Checked Square's(if exits) effects are cleaned.`);
         const fromSquare: HTMLDivElement = this.getSquareElement(from);
         const toSquare: HTMLDivElement = this.getSquareElement(to);
         this.addSquareEffects(fromSquare, SquareEffect.From);
         this.addSquareEffects(toSquare, SquareEffect.To);
-        Logger.save(`Moved From and Moved To effects given the From[${from}] and To[${from}] squares.`);
+        this.logger.save(`Moved From and Moved To effects given the From[${from}] and To[${from}] squares.`);
 
         const moveType: SquareClickMode = this.getSquareClickMode(toSquare);
         switch(moveType){
@@ -474,7 +475,7 @@ export class ChessBoard {
     {
         const piece: HTMLDivElement = fromSquare.querySelector(".piece") as HTMLDivElement;
         this.animatePieceToSquare(piece, toSquare, playMoveSound).then(() => { 
-            Logger.save(`Piece moved to target square[${this.getSquareID(toSquare)}] on board`);
+            this.logger.save(`Piece moved to target square[${this.getSquareID(toSquare)}] on board`);
         });
     }
 
@@ -494,7 +495,7 @@ export class ChessBoard {
                 this.playSound(this.turnColor == Color.White ? SoundEffect.WhiteMove : SoundEffect.BlackMove);
 
             if (!piece) return;
-            Logger.save(`Target square[${this.getSquareID(square)}] cleared`);
+            this.logger.save(`Target square[${this.getSquareID(square)}] cleared`);
 
             const pieceRect = piece.getBoundingClientRect();
             const marginLeft = Math.abs(piece.parentElement!.getBoundingClientRect().left - pieceRect.left);
@@ -537,7 +538,7 @@ export class ChessBoard {
          * @see For more information about square ids, see src/Chess/Types/index.ts
          */
         const castlingType: "Long" | "Short" = fromSquareId - toSquareId > 3 ? "Long" : "Short";
-        Logger.save(`Castling type determined[${castlingType}] on board`);
+        this.logger.save(`Castling type determined[${castlingType}] on board`);
 
         /**
          * If the castling is long then the king's new square is
@@ -546,7 +547,7 @@ export class ChessBoard {
          */
         const kingNewSquare: number = castlingType == "Long" ? fromSquareId - 2 : fromSquareId + 2;
         this._doNormalMove(fromSquare, this.getSquareElement(kingNewSquare)); 
-        Logger.save(`King moved to target square[${kingNewSquare}] by determined castling type[${castlingType}] on board`);
+        this.logger.save(`King moved to target square[${kingNewSquare}] by determined castling type[${castlingType}] on board`);
 
         /**
          * If the castling is long and the king's current square
@@ -561,7 +562,7 @@ export class ChessBoard {
             false
         );
         this.playSound(SoundEffect.Castle);
-        Logger.save(`Rook moved to target square[${rookNewSquare}] by determined castling type[${castlingType}] on board`);
+        this.logger.save(`Rook moved to target square[${rookNewSquare}] by determined castling type[${castlingType}] on board`);
     }
 
     /**
@@ -570,7 +571,7 @@ export class ChessBoard {
     private _doEnPassant(fromSquare:HTMLDivElement, toSquare:HTMLDivElement): void
     {
         this._doNormalMove(fromSquare, toSquare);
-        Logger.save(`Piece moved to target square[${this.getSquareID(toSquare)}] on board`);
+        this.logger.save(`Piece moved to target square[${this.getSquareID(toSquare)}] on board`);
 
         /**
          * Get the square of the killed piece by adding 8 to
@@ -584,7 +585,7 @@ export class ChessBoard {
         const killedPieceSquare = toSquareID + (Math.ceil(toSquareID / 8) == 3 ? 8 : -8);
         this.removePiece(killedPieceSquare);
         this.playSound(SoundEffect.Capture);
-        Logger.save(`Captured piece by en passant move is found on square[${killedPieceSquare}] and removed on board`);
+        this.logger.save(`Captured piece by en passant move is found on square[${killedPieceSquare}] and removed on board`);
     }
 
     /**
@@ -594,7 +595,7 @@ export class ChessBoard {
     {
         //this._doNormalMove(fromSquare, toSquare)
         this.removePiece(fromSquare);
-        Logger.save(`Piece moved to target square[${this.getSquareID(toSquare)}] on board`);
+        this.logger.save(`Piece moved to target square[${this.getSquareID(toSquare)}] on board`);
         this._showPromotions(toSquare);
     }
 
@@ -625,7 +626,7 @@ export class ChessBoard {
         // Set the square effect of the promoted square on the last row.
         this.addSquareEffects(firstRowOfSquare, SquareEffect.To);
         this.playSound(SoundEffect.Promote);
-        Logger.save(`Player's[${color}] Piece[${pieceType}] created on square[${firstRowOfSquare}] on board`);
+        this.logger.save(`Player's[${color}] Piece[${pieceType}] created on square[${firstRowOfSquare}] on board`);
     }
 
     /**
@@ -648,12 +649,12 @@ export class ChessBoard {
              */
             if (id !== i + Math.abs(loopRange[2])){
                 this.setSquareID(squares[i], i + loopRange[2]);
-                Logger.save(`ID of square's fixed from[${id}] to [${(i + loopRange[2]).toString()}] on board`);
+                this.logger.save(`ID of square's fixed from[${id}] to [${(i + loopRange[2]).toString()}] on board`);
             }
         }
         this.removeEffectFromAllSquares([SquareEffect.Playable, SquareEffect.Killable, SquareEffect.Selected]);
         this.setTurnColor(this.turnColor);
-        Logger.save("Board refreshed. Playable, Killable, Selected effects removed.");
+        this.logger.save("Board refreshed. Playable, Killable, Selected effects removed.");
     }
 
     /**
@@ -756,7 +757,7 @@ export class ChessBoard {
         const king: HTMLDivElement = document.querySelector(`.piece[data-piece="${PieceType.King}"][data-color="${color}"]`) as HTMLDivElement;
         this.addSquareEffects(king.parentElement as HTMLDivElement, SquareEffect.Checked);
         this.playSound(SoundEffect.Check);
-        Logger.save(`King's square[${this.getSquareID(king.parentElement!)}] found on DOM and Checked effect added`);
+        this.logger.save(`King's square[${this.getSquareID(king.parentElement!)}] found on DOM and Checked effect added`);
     }
 
     /**
@@ -770,7 +771,7 @@ export class ChessBoard {
             `${this.turnColor != winner ? "Victory" : "Defeat"}!`,
             `${winner} won!`
         );
-        Logger.save(`Board locked and Checkmate message[${wonStatus}] showed on board.`);
+        this.logger.save(`Board locked and Checkmate message[${wonStatus}] showed on board.`);
     }
 
     /**
@@ -780,7 +781,7 @@ export class ChessBoard {
     {
         this.lock(false);
         this._showResult("Stalemate!", "1/2 - 1/2");
-        Logger.save(`Board locked and Draw message showed on board.`);
+        this.logger.save(`Board locked and Draw message showed on board.`);
     }
 
     /**
@@ -811,14 +812,14 @@ export class ChessBoard {
     {
         const square: Square = this.getSquareID(promotionSquare);
         this.removePiece(promotionSquare);
-        Logger.save(`Promoted Pawn is removed from square[${square}] on board`);
+        this.logger.save(`Promoted Pawn is removed from square[${square}] on board`);
 
         /**
          * Disable the board. We don't want to allow player to
          * move pieces while choosing promotion piece.
          */
         this.lock();
-        Logger.save("Board locked for promotion screen");
+        this.logger.save("Board locked for promotion screen");
 
         const PROMOTION_TYPES: Array<string> = [PieceType.Queen, PieceType.Rook, PieceType.Bishop, PieceType.Knight];
         for(let i = 0; i < 4; i++){
@@ -840,7 +841,7 @@ export class ChessBoard {
             this.removeSquareEffect(targetSquare, SquareEffect.Disabled);
             this.setSquareClickMode(targetSquare, SquareClickMode.Promote);
         }
-        Logger.save("Promotion screen showed on board.");
+        this.logger.save("Promotion screen showed on board.");
     }
 
     /**
@@ -852,14 +853,14 @@ export class ChessBoard {
         for(let i = 0; i < 4; i++)
             promotionOptions[i].remove();
 
-        Logger.save("Promotion screen closed.");
+        this.logger.save("Promotion screen closed.");
 
         /**
          * Enable the board. If the player choose a promotion piece then
          * allow player to interact with the board.
          */
         this.unlock();
-        Logger.save("Board unlocked after promotion screen closed.");
+        this.logger.save("Board unlocked after promotion screen closed.");
     }
 
     /**
@@ -985,13 +986,5 @@ export class ChessBoard {
     private playSound(name: SoundEffect): void
     {
         this.sounds[name].play().then();
-    }
-
-    /**
-     * This function returns the logs of the game on engine.
-     */
-    public getLogs(): ReadonlyArray<{source: string, message: string}>
-    {
-        return Logger.get();
     }
 }

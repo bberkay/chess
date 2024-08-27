@@ -7,7 +7,7 @@ import { MenuOperation } from "../Types";
  * This class provide a table to show the notation.
  */
 export class NotationMenu extends Component{
-    protected readonly chess: Chess;
+    private readonly chess: Chess;
     private moveCount: number = 0;
     private lastScore: Record<Color, number> = {[Color.White]: 0, [Color.Black]: 0};
 
