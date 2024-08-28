@@ -11,9 +11,6 @@ export class NavigatorModal extends Component{
     constructor() {
         super();
         this.loadCSS("navigator-modal.css");
-        document.addEventListener("DOMContentLoaded", () => {
-            this.showGameCreator();
-        });
     }
 
     /**
@@ -62,20 +59,11 @@ export class NavigatorModal extends Component{
     public showWelcome(): void
     {
         this.show(
-            "Welcome to Chess Platform", 
-            "This is a platform to play chess games. You can create a new game, load a game, save a game, and more."
-        );
-        document.querySelector(".navigator-modal")!.classList.add("navigator-modal--glass");
-    }
-
-    /**
-     * Show the about message.
-     */
-    public showAbout(): void
-    {
-        this.show(
-            "About Chess Platform",
-            "This is a platform to play chess games. You can create a new game, load a game, save a game, and more."
+            "Welcome", 
+            `Chess project that offers a playable 
+            online chess game and additional features.<br> <br> 
+            <a style="font-size:15px" href='https://github.com/bberkay/chess' target='_blank'>Source Code</a>
+            `
         );
         document.querySelector(".navigator-modal")!.classList.add("navigator-modal--glass");
     }

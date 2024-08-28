@@ -8,6 +8,7 @@
  */
 
 import { Chess } from "../Chess/Chess";
+import { LocalStorage, LocalStorageKey } from "../Services/LocalStorage.ts";
 import { BoardCreator } from "./Components/BoardCreator.ts";
 import { NotationMenu } from "./Components/NotationMenu.ts";
 import { LogConsole } from "./Components/LogConsole";
@@ -37,8 +38,11 @@ export class Platform{
         this.navigatorModal = new NavigatorModal();
 
         document.addEventListener("DOMContentLoaded", () => {
-            this.initBoardListener();
-            this.initOperationListener();
+            this.listenBoardChanges();
+            this.bindMenuOperations();
+
+            if(LocalStorage.load(LocalStorageKey.Welcome))
+                this.navigatorModal.showWelcome();
         });
     }
 
@@ -46,7 +50,7 @@ export class Platform{
      * Listen actions/clicks of user on menu squares for
      * updating the notation menu, log console etc.
      */
-    private initBoardListener(): void
+    private listenBoardChanges(): void
     {
         const observer = new MutationObserver(() => {
             this.updateComponents();
@@ -62,10 +66,11 @@ export class Platform{
     }
 
     /**
-     * Listen actions/clicks of user on menu components for
-     * updating the chess board, notation menu, log console etc.
+     * Find the menu operations and bind them to the menu 
+     * items. When the user clicks on the menu item, the
+     * operation will be executed.
      */
-    protected initOperationListener(): void
+    protected bindMenuOperations(): void
     {
         document.querySelectorAll("[data-menu-operation]").forEach(menuItem => {
             menuItem.addEventListener("click", () => {
@@ -106,11 +111,11 @@ export class Platform{
                 break;
             case MenuOperation.CreateLobby:
                 this.navigatorModal.showLobbyInfo();
-                this.initOperationListener();
+                this.bindMenuOperations();
                 break;  
             case MenuOperation.OpenGameCreator:
                 this.navigatorModal.showGameCreator();
-                this.initOperationListener();
+                this.bindMenuOperations();
                 break;
         }
     }
@@ -137,7 +142,7 @@ export class Platform{
         this.logConsole.clear();
         this.notationMenu.clear();
         this.boardCreator.createBoard();
-        this.initBoardListener();
+        this.listenBoardChanges();
     }
 
     /**
@@ -145,7 +150,7 @@ export class Platform{
      */
     private createBoard(): void
     {
-        if(this.boardCreator.getCurrentMode() === "custom-mode")
+        if(this.boardCreator.isCustomMode())
             this.boardCreator.changeMode();
         this.createGameAndUpdateComponents();
         this.notationMenu.changeUtilityMenuSection(UtilityMenuSection.Board);

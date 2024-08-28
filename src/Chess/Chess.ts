@@ -11,13 +11,13 @@ import {JsonNotation, Square, StartPosition} from "./Types";
 import {ChessEngine} from "./Engine/ChessEngine";
 import {ChessBoard} from "./Board/ChessBoard";
 import {SquareClickMode} from "./Board/Types";
-import {Cacher} from "../Services/Cacher.ts";
+import {LocalStorage, LocalStorageKey} from "../Services/LocalStorage.ts";
 import {Converter} from "./Utils/Converter.ts";
 import {Logger} from "../Services/Logger.ts";
 
 /**
  * This class provides users to a playable chess game on the web by connecting ChessEngine and ChessBoard. Also,
- * it uses Cacher which provides users to save the game to the cache and load the game from the cache and Logger
+ * it uses LocalStorage which provides users to save the game to the cache and load the game from the cache and Logger
  * which provides users to log the game.
  */
 export class Chess{
@@ -40,6 +40,7 @@ export class Chess{
         this.isCachingEnabled = enableCaching;
 
         Logger.clear();
+        LocalStorage.save(LocalStorageKey.Welcome, true);
 
         // If there is a game in cache, load it. Otherwise, create a new game.
         if(!this.checkAndLoadGameFromCache())
@@ -49,7 +50,7 @@ export class Chess{
     /**
      * This function checks the cache and loads the game from the cache if there is a game in the cache.
      * @returns Returns true if there is a game in the cache, otherwise returns false.
-     * @see For more information about cache management check src/Chess/Services/Cacher.ts
+     * @see For more information about cache management check src/Chess/Services/LocalStorage.ts
      */
     public checkAndLoadGameFromCache(): boolean
     {
@@ -57,9 +58,10 @@ export class Chess{
             throw new Error("Cache is not enabled. Please enable it on constructor.");
 
         // If there is a game in the cache, load it.
-        if(!Cacher.isEmpty()){
+        if(LocalStorage.isExist(LocalStorageKey.LastGame)){
             this.logger.save("Game loading from cache...");
-            this.createGame(Cacher.load());
+            this.createGame(LocalStorage.load(LocalStorageKey.LastGame));
+            LocalStorage.save(LocalStorageKey.Welcome, false);
             this.logger.save("Game loaded from cache");
             return true;
         }
@@ -75,7 +77,7 @@ export class Chess{
     public createGame(position: JsonNotation | StartPosition | string = StartPosition.Standard): void
     {
         if(this.isCachingEnabled){
-            Cacher.clear();
+            LocalStorage.clear(LocalStorageKey.LastGame);
             this.logger.save("Cache cleared before creating a new game");
         }
 
@@ -92,7 +94,7 @@ export class Chess{
         this.logger.save(`Game successfully created on Chessboard`);
 
         if(this.isCachingEnabled){
-            Cacher.save(position);
+            LocalStorage.save(LocalStorageKey.LastGame, position);
             this.logger.save(`Game saved to cache as json notation[${JSON.stringify(position)}]`);
         }
 
@@ -175,7 +177,7 @@ export class Chess{
         this.board.showStatus(this.engine.getGameStatus());
         if(!this.isPromotionScreenOpen) this.board.setTurnColor(this.engine.getTurnColor());
         if(this.isCachingEnabled && !this.isPromotionScreenOpen){
-            Cacher.save(this.engine.getGameAsJsonNotation());
+            LocalStorage.save(LocalStorageKey.LastGame, this.engine.getGameAsJsonNotation());
             this.logger.save("Game updated in cache after move");
         }
     }

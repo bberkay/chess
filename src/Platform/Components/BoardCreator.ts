@@ -3,12 +3,17 @@ import { Chess } from "../../Chess/Chess";
 import { StartPosition } from "../../Chess/Types";
 import { Component } from "./Component";
 
+enum CreatorMode {
+    Custom = "custom-mode",
+    Template = "template-mode"
+}
+
 /**
  * This class provide a form to create a new board.
  */
 export class BoardCreator extends Component{
     private readonly chess: Chess;
-    private currentMode: "custom-mode" | "template-mode";
+    private currentMode: CreatorMode;
 
     /**
      * Constructor of the BoardCreator class.
@@ -16,7 +21,7 @@ export class BoardCreator extends Component{
     constructor(chess: Chess){
         super();
         this.chess = chess;
-        this.currentMode = "template-mode";
+        this.currentMode = CreatorMode.Template;
         this.renderComponent();
     }
 
@@ -27,12 +32,12 @@ export class BoardCreator extends Component{
     {
       const boardCreator: HTMLElement = document.querySelector("#board-creator")!;
       boardCreator.innerHTML = `
-        <div class = "board-creator template-mode visible">
+        <div class = "board-creator ${CreatorMode.Template} visible">
             <div class = "border-inset"><button data-menu-operation="${MenuOperation.ChangeMode}">Custom</button></div>
             <select>${this.getTemplateOptions()}</select>
             <div class = "border-inset"><button data-menu-operation="${MenuOperation.CreateBoard}">Load</button></div>
         </div>
-        <div class = "board-creator custom-mode">
+        <div class = "board-creator ${CreatorMode.Custom}">
           <div class = "border-inset"><button data-menu-operation="${MenuOperation.ChangeMode}">Templates</button></div>
           <input type="text" placeholder="FEN Notation" value = "${this.chess.engine.getGameAsFenNotation()}">
           <div class = "border-inset"><button data-menu-operation="${MenuOperation.CreateBoard}">Load</button></div>
@@ -49,7 +54,7 @@ export class BoardCreator extends Component{
     {
       const boardCreator: HTMLElement = document.querySelector('#board-creator')!;
       boardCreator.querySelector(`.${this.currentMode}`)!.classList.remove("visible");
-      this.currentMode = this.currentMode === "template-mode" ? "custom-mode" : "template-mode";
+      this.currentMode = this.currentMode === CreatorMode.Template ? CreatorMode.Custom : CreatorMode.Template;
       boardCreator.querySelector(`.${this.currentMode}`)!.classList.add("visible");
     }
 
@@ -80,18 +85,18 @@ export class BoardCreator extends Component{
         response.style.visibility = "hidden";
         document.body.appendChild(response);
 
-        if(this.currentMode == "template-mode")
+        if(this.currentMode == CreatorMode.Template)
           this.changeMode();
 
         this.show(this.chess.engine.getGameAsFenNotation());
     }
 
     /**
-     * This function gets the current mode of the form.
+     * This function if the current mode is custom mode or not.
      */
-    public getCurrentMode(): "custom-mode" | "template-mode"
+    public isCustomMode(): boolean
     {
-        return this.currentMode;
+        return this.currentMode == CreatorMode.Custom;
     }
 
     /**
@@ -100,10 +105,10 @@ export class BoardCreator extends Component{
     private getFormValue(): string
     {
         let formValue: string;
-        if(this.currentMode == "custom-mode")
-            formValue = (document.querySelector(`.custom-mode input`) as HTMLInputElement).value;
-        else if(this.currentMode == "template-mode")
-            formValue = (document.querySelector(`.template-mode select`) as HTMLSelectElement).value;
+        if(this.currentMode == CreatorMode.Custom)
+            formValue = (document.querySelector(`.${CreatorMode.Custom} input`) as HTMLInputElement).value;
+        else if(this.currentMode == CreatorMode.Template)
+            formValue = (document.querySelector(`.${CreatorMode.Template} select`) as HTMLSelectElement).value;
         return formValue!;
     }
 
@@ -112,7 +117,7 @@ export class BoardCreator extends Component{
      */
     public show(fenNotation: string): void
     {
-        (document.querySelector(`.custom-mode input`) as HTMLInputElement).value = fenNotation;
+        (document.querySelector(`.${CreatorMode.Custom} input`) as HTMLInputElement).value = fenNotation;
     }
 
     /**
@@ -120,7 +125,7 @@ export class BoardCreator extends Component{
      */
     public clear(): void
     {
-        (document.querySelector(`.custom-mode input`) as HTMLInputElement).value = "";
-        (document.querySelector(`.template-mode select`) as HTMLSelectElement).selectedIndex = 0;
+        (document.querySelector(`.${CreatorMode.Custom} input`) as HTMLInputElement).value = "";
+        (document.querySelector(`.${CreatorMode.Template} select`) as HTMLSelectElement).selectedIndex = 0;
     }
 }

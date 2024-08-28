@@ -31,6 +31,18 @@
         border:1px solid #111;
     }
 
+    & a{
+        color: #fff;
+
+        &:hover{
+            filter: brightness(0.9);
+        }
+
+        &:active{
+            filter: brightness(0.8);
+        }
+    }
+
     & .navigator-modal-bg{
         width: 100%;
         height: 100%;
