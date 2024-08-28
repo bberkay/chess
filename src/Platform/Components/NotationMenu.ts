@@ -1,6 +1,6 @@
 import { Color, PieceType } from "../../Chess/Types";
 import { Component } from "./Component.ts";
-import { Chess} from "../../Chess/Chess.ts";
+import { Chess } from "../../Chess/Chess.ts";
 import { MenuOperation, UtilityMenuSection } from "../Types";
 
 /**
@@ -19,7 +19,7 @@ export class NotationMenu extends Component{
         this.chess = chess;
         this.renderComponent();
         document.addEventListener("DOMContentLoaded", () => {
-            this.update();
+            this.update(true);
         });
     }
 
@@ -196,10 +196,10 @@ export class NotationMenu extends Component{
      */
     private changeIndicator(): void
     {
-        const current_player_color = this.chess.engine.getNotation().length % 2 == 0 ? 'white' : 'black';
-        const previous_player_color = current_player_color == 'white' ? 'black' : 'white';
-        document.getElementById(`${previous_player_color}-turn-indicator`)!.classList.remove("visible");
-        document.getElementById(`${current_player_color}-turn-indicator`)!.classList.add("visible");
+        const current_player_color = this.chess.engine.getTurnColor();
+        const previous_player_color = current_player_color == Color.White ? Color.Black : Color.White
+        document.getElementById(`${previous_player_color.toLowerCase()  }-turn-indicator`)!.classList.remove("visible");
+        document.getElementById(`${current_player_color.toLowerCase()}-turn-indicator`)!.classList.add("visible");
     }
 
     /**
@@ -220,9 +220,9 @@ export class NotationMenu extends Component{
     /**
      * Update the notation table and the score of the players.
      */
-    public update(): void
+    public update(force: boolean = false): void
     {
-        if(this.chess.engine.getNotation().length == this.moveCount)
+        if(!force && this.chess.engine.getNotation().length == this.moveCount)
             return;
 
         this.setScore(this.chess.engine.getScores());
