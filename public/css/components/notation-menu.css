@@ -146,10 +146,14 @@
         width:100%;
     }
 
-    #notation-menu{
-        & .utility-menu, &.utility-menu.utility-toggle-menu{
-            justify-content: space-evenly;
-        }
+    #notation-menu .utility-menu{
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    #notation-menu .utility-toggle-menu-section{
+        justify-content: center!important;
+        gap: 1rem;
     }
 
     #black-player-score-section, #white-player-score-section{
@@ -166,12 +170,5 @@
             order: -1;
             margin-left: 0;
         }
-    }
-}
-
-@media screen and (min-width: 700px) and (max-width: 900px) {
-    #notation-menu .utility-menu{
-        justify-content: center;
-        gap: 1rem;
     }
 }

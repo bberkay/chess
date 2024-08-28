@@ -31,10 +31,10 @@ input, select{
     &:focus{
         outline: none;
     }
+}
 
-    &:read-only{
-        color: #999;
-    }
+input:read-only{
+    color: #999;
 }
 
 button{
