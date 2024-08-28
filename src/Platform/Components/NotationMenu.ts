@@ -57,10 +57,10 @@ export class NotationMenu extends Component{
                 <div class="utility-menu utility-toggle-menu">
                     <div class="utility-toggle-menu-section active" id="${UtilityMenuSection.Board}-utility-menu">
                         <button class="menu-item" data-menu-operation="${MenuOperation.Reset}" data-tooltip-text="Reset Current Game">↺ Reset Game</button>
-                        <button class="menu-item" data-menu-operation="${MenuOperation.CreateGame}" data-tooltip-text="Create New Game">+ New Game</button>
+                        <button class="menu-item" data-menu-operation="${MenuOperation.OpenGameCreator}" data-tooltip-text="Create New Game">+ New Game</button>
                     </div>
                     <div class="utility-toggle-menu-section" id="${UtilityMenuSection.NewGame}-utility-menu">
-                        <button class="menu-item" data-menu-operation="${MenuOperation.CreateGame}" data-tooltip-text="Create New Game">+ New Game</button>
+                        <button class="menu-item" data-menu-operation="${MenuOperation.OpenGameCreator}" data-tooltip-text="Create New Game">+ New Game</button>
                     </div>
                     <div class="utility-toggle-menu-section" id="${UtilityMenuSection.Match}-utility-menu">
                         <button class="menu-item" data-menu-operation="${MenuOperation.SendUndoOffer}" data-tooltip-text="Send Undo Offer">↺ Undo</button>

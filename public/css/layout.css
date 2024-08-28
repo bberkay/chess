@@ -11,12 +11,100 @@ body.dark-mode{
     --border-color: #2a2a2a;
 }
 
-/* ------------------- Body ------------------- */
+/* ------------------- Layout ------------------- */
 body{
     background-color: var(--bg-color);
     color: var(--text-color);
     font-family: 'Roboto', sans-serif;
     display: flex;
+}
+
+/* Button, Input, Select */
+input, select{
+    font-size:15px;
+    width:100%;
+    padding:10px;
+    background-color: #111;
+    color: #f5f5f5;
+    border:1px solid #111;
+
+    &:focus{
+        outline: none;
+    }
+
+    &:read-only{
+        color: #999;
+    }
+}
+
+button{
+    padding: 10px;
+    background-color: #222;
+    color: #f5f5f5;
+    border:1px solid #2a2a2a;
+    cursor: pointer;
+    font-size:15px;
+    font-weight: 500;
+
+    &:hover{
+        background-color: #2a2a2a;
+    }
+
+    &:active{
+        opacity:0.7;
+    }
+
+    &:disabled{
+        cursor: not-allowed;
+        opacity: 0.5;
+    }
+
+    &.button--text{
+        background-color: transparent!important;
+        color: #f5f5f5;
+        border: none!important;
+        padding: 0;
+        font-size: 15px;
+        font-weight: 500;
+
+        &:hover{
+            background-color: transparent;
+            filter: brightness(0.9);
+        }
+
+        &:active{
+            opacity:0.7;
+        }
+    }
+}
+
+.btn-group{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.btn-group input + button{
+    border-top-left-radius: 0!important;
+    border-bottom-left-radius: 0!important;
+    border-left:none;
+}
+
+.btn-group input{
+    border-top-right-radius: 0!important;
+    border-bottom-right-radius: 0!important;
+}
+
+.btn-group--vertical{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 5px;
+
+    & button{
+        width: 100%;
+    }
 }
 
 /* Scroll */
@@ -31,6 +119,11 @@ body{
 
 ::-webkit-scrollbar-thumb {
     background: grey;
+}
+
+/* Utility */
+.border-inset{
+    border:2px solid #111;
 }
 
 /* ------------------- Main ------------------- */
@@ -84,7 +177,7 @@ main{
 }
 
 /* ------------------- Components ------------------- */
-#game-creator{
+#board-creator{
     margin-top:0.5rem;
 }
 
@@ -94,7 +187,7 @@ main{
     /* 130px is the height of utility-menu and 
     player-score-section(x2). 2.5 for centering 
     notation-table to the board but little bit 
-    to the top(.2) because of the game-creator menu.
+    to the top(.2) because of the board-creator menu.
     */
     margin-top: calc((var(--board-size) - (var(--notation-table-height) + 130px)) / 2.2);
 }
@@ -130,7 +223,7 @@ main{
                 order: 2 
             }
 
-            & #game-creator { 
+            & #board-creator { 
                 order: 1;
                 margin-top: 0rem;
                 margin-bottom: 0.5rem;
@@ -157,7 +250,7 @@ main{
         width: 100%;
     }
 
-    #game-creator{
+    #board-creator{
         margin-bottom: 0.5rem;
     }
 

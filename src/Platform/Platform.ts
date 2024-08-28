@@ -8,9 +8,10 @@
  */
 
 import { Chess } from "../Chess/Chess";
-import { GameCreator } from "./Components/GameCreator.ts";
+import { BoardCreator } from "./Components/BoardCreator.ts";
 import { NotationMenu } from "./Components/NotationMenu.ts";
 import { LogConsole } from "./Components/LogConsole";
+import { NavigatorModal } from "./Components/NavigatorModal";
 import { MenuOperation, UtilityMenuSection } from "./Types";
 
 /**
@@ -20,18 +21,20 @@ import { MenuOperation, UtilityMenuSection } from "./Types";
 export class Platform{
 
     private readonly chess: Chess;
-    private readonly gameCreator: GameCreator | null;
-    private readonly notationMenu: NotationMenu | null;
-    private readonly logConsole: LogConsole | null;
+    private readonly boardCreator: BoardCreator;
+    private readonly notationMenu: NotationMenu;
+    private readonly logConsole: LogConsole;
+    private readonly navigatorModal: NavigatorModal;
 
     /**
      * Constructor of the Platform class.
      */
     constructor(chess: Chess) {
         this.chess = chess;
-        this.gameCreator = document.querySelector("#game-creator") ? new GameCreator(this.chess) : null;
-        this.notationMenu = document.querySelector("#notation-menu") ? new NotationMenu(this.chess) : null;
-        this.logConsole = document.querySelector("#log-console") ? new LogConsole() : null;
+        this.boardCreator = new BoardCreator(this.chess);
+        this.notationMenu = new NotationMenu(this.chess);
+        this.logConsole = new LogConsole();
+        this.navigatorModal = new NavigatorModal();
 
         document.addEventListener("DOMContentLoaded", () => {
             this.initBoardListener();
@@ -59,17 +62,6 @@ export class Platform{
     }
 
     /**
-     * Update the components of the menu, for example
-     * update the notation menu and print the logs of the game on log
-     * console after the move is made.
-     */
-    private updateComponents(){
-        this.notationMenu?.update();
-        this.logConsole?.stream();
-        this.gameCreator?.show(this.chess.engine.getGameAsFenNotation());
-    }
-
-    /**
      * Listen actions/clicks of user on menu components for
      * updating the chess board, notation menu, log console etc.
      */
@@ -91,33 +83,49 @@ export class Platform{
     {
         switch(menuOperation){
             case MenuOperation.ClearConsole:
-                this.logConsole?.clear();
+                this.logConsole.clear();
                 break;
-            case MenuOperation.CreateGame:
+            /*case MenuOperation.CreateGame:
                 this.createGameAndUpdateComponents();
-                this.notationMenu?.changeUtilityMenuSection(UtilityMenuSection.Board);
-                break;
+                this.notationMenu.changeUtilityMenuSection(UtilityMenuSection.Board);
+                break;*/
             case MenuOperation.ChangeMode:
-                this.gameCreator?.changeMode();
+                this.boardCreator.changeMode();
                 break;
             case MenuOperation.FlipBoard:
-                this.notationMenu?.flip();
+                this.notationMenu.flip();
                 break;
             case MenuOperation.Reset:
-                if(this.gameCreator?.getCurrentMode() === "custom-mode")
-                    this.gameCreator?.changeMode();
-                this.createGameAndUpdateComponents();
-                this.notationMenu?.changeUtilityMenuSection(UtilityMenuSection.Board);
+                this.createBoard();
+                break;
+            case MenuOperation.CreateBoard:
+                this.createBoard();
                 break;
             case MenuOperation.ToggleUtilityMenu:
-                this.notationMenu?.toggleUtilityMenu();
+                this.notationMenu.toggleUtilityMenu();
                 break;
-            case MenuOperation.NewGame:
-                // TODO: Implement new game operation.
-                this.createGameAndUpdateComponents(); 
+            case MenuOperation.CreateLobby:
+                this.navigatorModal.showLobbyInfo();
+                this.initOperationListener();
                 break;  
+            case MenuOperation.OpenGameCreator:
+                this.navigatorModal.showGameCreator();
+                this.initOperationListener();
+                break;
         }
     }
+
+    /**
+     * Update the components of the menu, for example
+     * update the notation menu and print the logs of the game on log
+     * console after the move is made.
+     */
+    private updateComponents(){
+        this.notationMenu.update();
+        this.logConsole.stream();
+        this.boardCreator.show(this.chess.engine.getGameAsFenNotation());
+    }
+    
 
     /**
      * Update the components of the menu for new game, for example
@@ -126,19 +134,20 @@ export class Platform{
      */
     private createGameAndUpdateComponents(): void
     {
-        this.logConsole?.clear();
-        this.notationMenu?.clear();
-        this.gameCreator?.createGame();
+        this.logConsole.clear();
+        this.notationMenu.clear();
+        this.boardCreator.createBoard();
         this.initBoardListener();
+    }
 
-        // Print first logs of the game.
-        /*const interval = setInterval(() => {
-            const gameCreatorResponse = document.querySelector("#game-creator-response");
-            if(gameCreatorResponse){
-                clearInterval(interval);
-                this.logConsole?.stream();
-                gameCreatorResponse.remove();
-            }
-        });*/
+    /**
+     * Function for handling MenuOperation.CreateBoard operation.
+     */
+    private createBoard(): void
+    {
+        if(this.boardCreator.getCurrentMode() === "custom-mode")
+            this.boardCreator.changeMode();
+        this.createGameAndUpdateComponents();
+        this.notationMenu.changeUtilityMenuSection(UtilityMenuSection.Board);
     }
 }

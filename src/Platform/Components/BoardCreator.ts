@@ -4,14 +4,14 @@ import { StartPosition } from "../../Chess/Types";
 import { Component } from "./Component";
 
 /**
- * This class provide a form to create a new game.
+ * This class provide a form to create a new board.
  */
-export class GameCreator extends Component{
+export class BoardCreator extends Component{
     private readonly chess: Chess;
     private currentMode: "custom-mode" | "template-mode";
 
     /**
-     * Constructor of the GameCreatorForm class.
+     * Constructor of the BoardCreator class.
      */
     constructor(chess: Chess){
         super();
@@ -25,20 +25,20 @@ export class GameCreator extends Component{
      */
     protected renderComponent(): void
     {
-      const gameCreator: HTMLElement = document.querySelector("#game-creator")!;
-      gameCreator.innerHTML = `
-        <div class = "game-creator template-mode visible">
+      const boardCreator: HTMLElement = document.querySelector("#board-creator")!;
+      boardCreator.innerHTML = `
+        <div class = "board-creator template-mode visible">
             <div class = "border-inset"><button data-menu-operation="${MenuOperation.ChangeMode}">Custom</button></div>
             <select>${this.getTemplateOptions()}</select>
-            <div class = "border-inset"><button data-menu-operation="${MenuOperation.CreateGame}">Load</button></div>
+            <div class = "border-inset"><button data-menu-operation="${MenuOperation.CreateBoard}">Load</button></div>
         </div>
-        <div class = "game-creator custom-mode">
+        <div class = "board-creator custom-mode">
           <div class = "border-inset"><button data-menu-operation="${MenuOperation.ChangeMode}">Templates</button></div>
           <input type="text" placeholder="FEN Notation" value = "${this.chess.engine.getGameAsFenNotation()}">
-          <div class = "border-inset"><button data-menu-operation="${MenuOperation.CreateGame}">Load</button></div>
+          <div class = "border-inset"><button data-menu-operation="${MenuOperation.CreateBoard}">Load</button></div>
         </div>
       `
-      this.loadCSS("game-creator.css");
+      this.loadCSS("board-creator.css");
       this.changeMode(); // Start it from template mode.
     }
 
@@ -47,10 +47,10 @@ export class GameCreator extends Component{
      */
     public changeMode(): void
     {
-      const gameCreator: HTMLElement = document.querySelector('#game-creator')!;
-      gameCreator.querySelector(`.${this.currentMode}`)!.classList.remove("visible");
+      const boardCreator: HTMLElement = document.querySelector('#board-creator')!;
+      boardCreator.querySelector(`.${this.currentMode}`)!.classList.remove("visible");
       this.currentMode = this.currentMode === "template-mode" ? "custom-mode" : "template-mode";
-      gameCreator.querySelector(`.${this.currentMode}`)!.classList.add("visible");
+      boardCreator.querySelector(`.${this.currentMode}`)!.classList.add("visible");
     }
 
     /**
@@ -67,16 +67,16 @@ export class GameCreator extends Component{
     }
 
     /**
-     * This function creates a new game with the game creator.
+     * This function creates a new board with the board creator.
      */
-    public createGame(): void
+    public createBoard(): void
     {
         this.chess.createGame(this.getFormValue());
 
         // Create invisible div for triggering the log console to stream 
         // when the game is created.
         const response: HTMLDivElement = document.createElement("div");
-        response.id = "game-creator-response";
+        response.id = "board-creator-response";
         response.style.visibility = "hidden";
         document.body.appendChild(response);
 

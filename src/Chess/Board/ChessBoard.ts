@@ -741,68 +741,20 @@ export class ChessBoard {
     public showStatus(status: GameStatus): void
     {
         if(status == GameStatus.WhiteInCheck || status == GameStatus.BlackInCheck)
-            this._showCheck(status);
-        else if(status == GameStatus.WhiteVictory || status == GameStatus.BlackVictory)
-            this._showCheckmateMessage(status);
-        else if(status == GameStatus.Draw)
-            this._showStalemateMessage();
-    }
-
-    /**
-     * Show check status on the board.
-     */
-    private _showCheck(checkedStatus: GameStatus.WhiteInCheck | GameStatus.BlackInCheck): void
-    {
-        const color: Color = checkedStatus == GameStatus.WhiteInCheck ? Color.White : Color.Black;
-        const king: HTMLDivElement = document.querySelector(`.piece[data-piece="${PieceType.King}"][data-color="${color}"]`) as HTMLDivElement;
-        this.addSquareEffects(king.parentElement as HTMLDivElement, SquareEffect.Checked);
-        this.playSound(SoundEffect.Check);
-        this.logger.save(`King's square[${this.getSquareID(king.parentElement!)}] found on DOM and Checked effect added`);
-    }
-
-    /**
-     * Show checkmate status on the board.
-     */
-    private _showCheckmateMessage(wonStatus: GameStatus.WhiteVictory | GameStatus.BlackVictory): void
-    {
-        this.lock(false);
-        const winner = wonStatus == GameStatus.WhiteVictory ? "White" : "Black";
-        this._showResult(
-            `${this.turnColor != winner ? "Victory" : "Defeat"}!`,
-            `${winner} won!`
-        );
-        this.logger.save(`Board locked and Checkmate message[${wonStatus}] showed on board.`);
-    }
-
-    /**
-     * Show stalemate status on the board.
-     */
-    private _showStalemateMessage(): void
-    {
-        this.lock(false);
-        this._showResult("Stalemate!", "1/2 - 1/2");
-        this.logger.save(`Board locked and Draw message showed on board.`);
-    }
-
-    /**
-     * Show result message on the board.
-     */
-    private _showResult(title: string, message: string): void
-    {
-        const messageElement: HTMLDivElement = document.createElement("div");
-        messageElement.innerHTML = `
-            <div class="result-message">
-                <div class="result-message-bg">
-                    <img src="./public/assets/images/result-screen-bg-icon.png" alt="Chessboard">
-                </div>
-                <div class="result-message-title">${title}</div>
-                <div class="result-message-content">
-                    <span>${message}</span>
-                </div>
-            </div>
-        `
-        document.getElementById("chessboard")?.appendChild(messageElement);
-        this.playSound(SoundEffect.End);
+        {
+            const color: Color = status == GameStatus.WhiteInCheck ? Color.White : Color.Black;
+            const king: HTMLDivElement = document.querySelector(
+                `.piece[data-piece="${PieceType.King}"][data-color="${color}"]`) as HTMLDivElement;
+            this.addSquareEffects(king.parentElement as HTMLDivElement, SquareEffect.Checked);
+            this.playSound(SoundEffect.Check);
+            this.logger.save(`King's square[${this.getSquareID(king.parentElement!)}] found on DOM and Checked effect added`);
+        }
+        else if(status == GameStatus.WhiteVictory || status == GameStatus.BlackVictory || status == GameStatus.Draw)
+        {
+            this.lock(false);
+            this.playSound(SoundEffect.End);
+            this.logger.save("Game ended. Board locked.");
+        }
     }
 
     /**

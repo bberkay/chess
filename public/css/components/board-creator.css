@@ -1,0 +1,23 @@
+/**
+ * CSS codes of Board Creator component
+ * @see For more information about this component check file: src\Platform\Components\BoardCreator.ts
+ */
+
+#board-creator .board-creator{
+    display: none;
+    border:1px solid #2a2a2a;
+
+    &.visible{
+        display: flex;
+    }
+}
+
+/** 
+ * ------------------ Responsive ------------------- 
+ *             700px - 900px - 1250px
+ */
+@media screen and (max-width: 900px) {
+    #board-creator{
+        width:100%;
+    }
+}

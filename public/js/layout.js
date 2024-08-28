@@ -34,7 +34,21 @@ function createTooltips(){
             tooltipElement.classList.remove("active");
             tooltipElement.textContent = "";
         });
+
+        tooltipParent.addEventListener("mousedown", function(e) {
+            e.preventDefault();
+            clearTimeout(tooltipTimeout);
+            tooltipElement.classList.remove("active");
+            tooltipElement.textContent = "";
+        });
     });
+}
+
+function copyToClipboard(selector){
+    const element = document.querySelector(selector);
+    navigator.clipboard.writeText(element.tagName === "INPUT" ? element.value : element.textContent);
+    element.select();
+    element.parentElement.querySelector("button").textContent = "Copied!";
 }
 
 function reOrderLayoutForMobile(){
@@ -42,7 +56,7 @@ function reOrderLayoutForMobile(){
         return;
 
     document.querySelector(".right").append(
-        document.querySelector("#game-creator")
+        document.querySelector("#board-creator")
     );
 
     document.querySelector("#chessboard").before(
@@ -59,7 +73,7 @@ function reOrderLayoutForDesktop(){
         return;
 
     document.querySelector(".center").append(
-        document.querySelector("#game-creator")
+        document.querySelector("#board-creator")
     );
 
     document.querySelector("#notation-menu").append(

@@ -1,0 +1,94 @@
+/**
+ * CSS codes of Navigator Modal component
+ * @see For more information about this component check file: src\Platform\Components\NavigatorModal.ts
+ */
+
+:root{
+    --navigator-modal-bg-color: #111111c5;
+    --navigator-modal-shadow-color: #000;
+    --navigator-modal-text-color: #FFF;
+}
+
+.navigator-modal{
+    box-shadow: 0 0 5px var(--navigator-modal-shadow-color);
+    background-color: var(--navigator-modal-bg-color);
+    color: var(--navigator-modal-text-color);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    z-index:9999!important;
+    overflow: hidden; 
+    padding: 2rem;
+    border: 1px solid #2a2a2a;
+
+    & button{
+        border:1px solid #111;
+    }
+
+    & .navigator-modal-bg{
+        width: 100%;
+        height: 100%;
+        position: absolute; 
+        font-size: 100px;
+        color: #ffffff77;
+        z-index: -1;
+        display: flex;
+        justify-content: start;
+        align-items: center;
+        opacity: 0.7;
+
+        & img{
+            margin-left: -50px;
+            margin-top: -15px;
+            width: 120px;
+            height: 120px;
+            opacity: 0.5;
+        }
+    }
+
+    & .navigator-modal-title{
+        font-size: 35px;
+        font-weight: bold;
+        margin-top: 3px;
+    }
+
+    & .navigator-modal-content{
+        font-size: 18px;
+        margin-top: 25px;
+    }
+}
+
+.navigator-modal--glass{
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+
+    & button{
+        background: hsla(0,0%,100%,.2);
+        border: 1px solid hsla(0,0%,100%,.1);
+        color: #fff;
+        transition: background-color .15s ease;
+        border-radius: 5px;
+
+        &:hover{
+            background-color: hsla(0,0%,100%,.4);
+        }
+    }
+
+    & input{
+        background: hsla(0,0%,100%,.2);
+        border: 1px solid hsla(0,0%,100%,.1);
+        color: #fff;
+        transition: background-color .15s ease;
+        border-radius: 5px;
+    }
+}

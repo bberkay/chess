@@ -8,7 +8,7 @@ export abstract class Component{
      * This function loads the css file of the component.
      * @param {string} filename The name of the css file.
      * @param {string} fileId The id of the link element. If it is empty, the filename will
-     * be used by replacing the dot with dash. For example: game-creator.css -> game-creator-css
+     * be used by replacing the dot with dash. For example: board-creator.css -> board-creator-css
      */
     protected loadCSS(filename: string, fileId: string = ""): void
     {

@@ -13,7 +13,9 @@ export enum MenuOperation{
     SendDrawOffer = "SendDrawOffer",
     SendUndoOffer = "SendUndoOffer",
     Resign = "Resign",
-    NewGame = "NewGame"
+    CreateLobby = "CreateLobby",
+    CreateBoard = "CreateBoard",
+    OpenGameCreator = "OpenGameCreator",
 }
 
 /**
