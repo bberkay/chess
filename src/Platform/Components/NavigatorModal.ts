@@ -21,7 +21,7 @@ export class NavigatorModal extends Component{
         this.loadHTML("navigator-modal", `
             <div class="navigator-modal navigator-modal--glass">
                 <div class="navigator-modal-bg">
-                    <img src="./public/assets/images/result-screen-bg-icon.png" alt="Chessboard">
+                    <img src="./assets/images/result-screen-bg-icon.png" alt="Chessboard">
                 </div>
                 <div class="navigator-modal-title"></div>
                 <div class="navigator-modal-content"></div>
