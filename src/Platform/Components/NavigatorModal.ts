@@ -75,25 +75,48 @@ export class NavigatorModal extends Component{
     {
         this.show(
             "Create New Game",
-            `<div class = "btn-group btn-group--vertical">
-                <button data-menu-operation="${MenuOperation.CreateLobby}">Create Lobby</button>
+            `<div class = "btn-group-vertical">
+                <button data-menu-operation="${MenuOperation.PlayAgainstFriend}">Play against Friend</button>
+                <button data-menu-operation="${MenuOperation.PlayAgainstBot}">Play against Bot</button>
                 <button data-menu-operation="${MenuOperation.CreateBoard}">Create Board</button>
             </div>`
         );
     }
 
     /**
-     * Show the created lobby information.
+     * Show the play against friend screen.
      */
-    public showLobbyInfo(): void
+    public showPlayAgainstFriend(): void
     {
         this.show(
             "Ready to Play",
-            `<div class = "btn-group" style="padding-bottom:5px;">
+            `<div class = "input-group" style="padding-bottom:5px;">
                 <input type="text" id="lobby-link" placeholder="Lobby Name" value="lobby-link" readonly>
                 <button onclick="copyToClipboard('#lobby-link')">Copy</button>
             </div>
             <span style="font-size:13px">Share this lobby link with your friend to play together.</span>
+            <div style="text-align:center;margin-top:10px;">
+                <button class="button--text" style="font-size:13px!important;" data-menu-operation="${MenuOperation.OpenGameCreator}">
+                    Cancel
+                </button>
+            </div>
+            `
+        );
+    }
+
+    /**
+     * Show the play against bot screen.
+     */
+    public showPlayAgainstBot(): void
+    {
+        this.show(
+            "Play against Bot",
+            `<span style="font-size:13px">Select the difficulty level of the bot:</span>
+            <div class="btn-group-horizontal btn-group-horizontal--triple" style="padding-top:5px;padding-bottom:5px;">
+                <button onclick="ChessPlatform.chess.engine.playAgainstBot()">Easy</button>
+                <button onclick="ChessPlatform.chess.engine.playAgainstBot()">Normal</button>
+                <button onclick="ChessPlatform.chess.engine.playAgainstBot()">Hard</button>
+            </div>
             <div style="text-align:center;margin-top:10px;">
                 <button class="button--text" style="font-size:13px!important;" data-menu-operation="${MenuOperation.OpenGameCreator}">
                     Cancel

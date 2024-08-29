@@ -109,8 +109,12 @@ export class Platform{
             case MenuOperation.ToggleUtilityMenu:
                 this.notationMenu.toggleUtilityMenu();
                 break;
-            case MenuOperation.CreateLobby:
-                this.navigatorModal.showLobbyInfo();
+            case MenuOperation.PlayAgainstBot:
+                this.navigatorModal.showPlayAgainstBot();
+                this.bindMenuOperations();
+                break
+            case MenuOperation.PlayAgainstFriend:
+                this.navigatorModal.showPlayAgainstFriend();
                 this.bindMenuOperations();
                 break;  
             case MenuOperation.OpenGameCreator:
