@@ -7,7 +7,7 @@
  * @license MIT
  */
 
-import { Chess } from '@Chess/Chess.ts';
+import { Chess } from '@Chess/Chess';
 import { Platform } from "@Platform/Platform.ts";
 
 /**
