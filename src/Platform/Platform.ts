@@ -7,13 +7,14 @@
  * @license MIT
  */
 
-import { Chess } from "../Chess/Chess";
-import { LocalStorage, LocalStorageKey } from "../Services/LocalStorage.ts";
+import { Chess } from "@Chess/Chess";
+import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage.ts";
 import { BoardCreator } from "./Components/BoardCreator.ts";
 import { NotationMenu } from "./Components/NotationMenu.ts";
 import { LogConsole } from "./Components/LogConsole";
 import { NavigatorModal } from "./Components/NavigatorModal";
 import { MenuOperation, UtilityMenuSection } from "./Types";
+import { Logger } from "@Services/Logger";
 
 /**
  * This class is the main class of the chess platform menu.
@@ -26,6 +27,7 @@ export class Platform{
     private readonly notationMenu: NotationMenu;
     private readonly logConsole: LogConsole;
     private readonly navigatorModal: NavigatorModal;
+    public readonly logger: Logger = new Logger("src/Platform/Platform.ts");
 
     /**
      * Constructor of the Platform class.
@@ -36,7 +38,7 @@ export class Platform{
         this.notationMenu = new NotationMenu(this.chess);
         this.logConsole = new LogConsole();
         this.navigatorModal = new NavigatorModal();
-
+        
         document.addEventListener("DOMContentLoaded", () => {
             this.listenBoardChanges();
             this.bindMenuOperations();
@@ -44,6 +46,8 @@ export class Platform{
             if(LocalStorage.load(LocalStorageKey.Welcome))
                 this.navigatorModal.showWelcome();
         });
+
+        this.logger.save("Components are created.");
     }
 
     /**
@@ -63,6 +67,7 @@ export class Platform{
             characterData: true
         });
 
+        this.logger.save("Board changes are listening...");
     }
 
     /**
@@ -79,6 +84,8 @@ export class Platform{
                 );
             });
         });
+
+        this.logger.save("Menu operations are binded to the menu items.");
     }
 
     /**
@@ -89,6 +96,7 @@ export class Platform{
         switch(menuOperation){
             case MenuOperation.ClearConsole:
                 this.logConsole.clear();
+                this.logger.save("Console is cleared.");
                 break;
             /*case MenuOperation.CreateGame:
                 this.createGameAndUpdateComponents();
@@ -96,9 +104,11 @@ export class Platform{
                 break;*/
             case MenuOperation.ChangeMode:
                 this.boardCreator.changeMode();
+                this.logger.save("Board Creator mode is changed.");
                 break;
             case MenuOperation.FlipBoard:
                 this.notationMenu.flip();
+                this.logger.save("Board is flipped.");
                 break;
             case MenuOperation.Reset:
                 this.createBoard();
@@ -108,6 +118,7 @@ export class Platform{
                 break;
             case MenuOperation.ToggleUtilityMenu:
                 this.notationMenu.toggleUtilityMenu();
+                this.logger.save("Utility menu is appeareance is switched.");
                 break;
             case MenuOperation.PlayAgainstBot:
                 this.navigatorModal.showPlayAgainstBot();
@@ -133,6 +144,7 @@ export class Platform{
         this.notationMenu.update();
         this.logConsole.stream();
         this.boardCreator.show(this.chess.engine.getGameAsFenNotation());
+        this.logger.save("Components are updated.");
     }
     
 
@@ -147,6 +159,7 @@ export class Platform{
         this.notationMenu.clear();
         this.boardCreator.createBoard();
         this.listenBoardChanges();
+        this.logger.save("Game is created and components are updated.");
     }
 
     /**
@@ -158,5 +171,6 @@ export class Platform{
             this.boardCreator.changeMode();
         this.createGameAndUpdateComponents();
         this.notationMenu.changeUtilityMenuSection(UtilityMenuSection.Board);
+        this.logger.save("Board is created.");
     }
 }

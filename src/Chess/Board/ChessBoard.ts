@@ -10,7 +10,7 @@
 import {Color, GameStatus, JsonNotation, Moves, MoveType, PieceType, Square, StartPosition} from "../Types";
 import {SoundEffect, SquareClickMode, SquareEffect} from "./Types";
 import {Converter} from "../Utils/Converter.ts";
-import {Logger} from "../../Services/Logger.ts";
+import {Logger} from "@Services/Logger.ts";
 
 /**
  * This class provides users to create and manage a chess board(does not include any mechanic/logic).

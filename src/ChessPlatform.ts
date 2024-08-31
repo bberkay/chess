@@ -7,8 +7,8 @@
  * @license MIT
  */
 
-import { Chess } from './Chess/Chess.ts';
-import { Platform } from "./Platform/Platform.ts";
+import { Chess } from '@Chess/Chess.ts';
+import { Platform } from "@Platform/Platform.ts";
 
 /**
  * This class is the main class of the chess platform.

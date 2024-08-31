@@ -11,9 +11,9 @@ import {JsonNotation, Square, StartPosition} from "./Types";
 import {ChessEngine} from "./Engine/ChessEngine";
 import {ChessBoard} from "./Board/ChessBoard";
 import {SquareClickMode} from "./Board/Types";
-import {LocalStorage, LocalStorageKey} from "../Services/LocalStorage.ts";
+import {LocalStorage, LocalStorageKey} from "@Services/LocalStorage.ts";
 import {Converter} from "./Utils/Converter.ts";
-import {Logger} from "../Services/Logger.ts";
+import {Logger} from "@Services/Logger.ts";
 
 /**
  * This class provides users to a playable chess game on the web by connecting ChessEngine and ChessBoard. Also,

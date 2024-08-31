@@ -25,7 +25,7 @@ import {Converter} from "../Utils/Converter";
 import {BoardQuerier} from "./Board/BoardQuerier.ts";
 import {Locator} from "./Move/Utils/Locator.ts";
 import {Extractor} from "./Move/Utils/Extractor.ts";
-import {Logger} from "../../Services/Logger.ts";
+import {Logger} from "@Services/Logger.ts";
 
 
 /**

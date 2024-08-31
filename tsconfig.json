@@ -23,6 +23,8 @@
     "baseUrl": ".",
     "paths": {
       "@Chess/*": ["src/Chess/*"],
+      "@Platform/*": ["src/Platform/*"],
+      "@Services/*": ["src/Services/*"]
     }
   },
   "include": ["src", "tests"]

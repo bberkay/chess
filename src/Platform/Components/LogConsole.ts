@@ -1,6 +1,6 @@
 import { MenuOperation } from "../Types";
 import { Component } from "./Component";
-import { Logger } from "../../Services/Logger"; 
+import { Logger } from "@Services/Logger"; 
 
 /**
  * This class provide a menu to show the logs.
