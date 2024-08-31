@@ -148,7 +148,6 @@ export class Platform{
         this.boardCreator.show(this.chess.engine.getGameAsFenNotation());
 
         const gameStatus = this.chess.engine.getGameStatus();
-        console.log(gameStatus);
         if([GameStatus.BlackVictory, GameStatus.WhiteVictory,GameStatus.Draw].includes(gameStatus))
             this.navigatorModal.showGameOver(gameStatus);
         else if (gameStatus === GameStatus.NotStarted)

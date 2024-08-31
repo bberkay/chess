@@ -487,14 +487,16 @@ export class ChessBoard {
             const toSquareContent = square.querySelector(
                 `.piece[data-color="${this.turnColor === Color.White ? Color.Black : Color.White}"]`
             );
+
             if(toSquareContent){
-                this.removePiece(toSquareContent.parentElement!);
+                // This is the case when the player captures the opponent's piece by drag and drop.
+                if(!piece) this.removePiece(toSquareContent.parentElement!);
                 if(playMoveSound) this.playSound(SoundEffect.Capture);
             }
             else if(playMoveSound)
                 this.playSound(this.turnColor == Color.White ? SoundEffect.WhiteMove : SoundEffect.BlackMove);
 
-            if (!piece) return;
+            if(!piece) return;
             this.logger.save(`Target square[${this.getSquareID(square)}] cleared`);
 
             const pieceRect = piece.getBoundingClientRect();
@@ -511,6 +513,7 @@ export class ChessBoard {
             piece.style.setProperty("--move-to-top", `calc(${marginTop}px + ${square.getBoundingClientRect().top}px)`);
 
             piece.addEventListener("animationend", () => {
+                if(toSquareContent) this.removePiece(toSquareContent.parentElement!);
                 square.appendChild(piece);
                 piece.style.animation = "";
                 piece.style.top = "";
