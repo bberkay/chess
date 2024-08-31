@@ -162,6 +162,10 @@ main{
     width:100%;
     justify-content: center;
     margin-right: 5%;
+
+    & .center{
+        position: relative;
+    }
 }
 
 [data-tooltip-text]{

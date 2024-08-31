@@ -17,6 +17,7 @@ export enum MenuOperation{
     PlayAgainstFriend = "PlayAgainstFriend",
     CreateBoard = "CreateBoard",
     OpenGameCreator = "OpenGameCreator",
+    HideNavigatorModal = "HideNavigatorModal",
 }
 
 /**

@@ -1,6 +1,6 @@
-import { Color, PieceType } from "../../Chess/Types";
+import { Color, PieceType } from "@Chess/Types";
 import { Component } from "./Component.ts";
-import { Chess } from "../../Chess/Chess.ts";
+import { Chess } from "@Chess/Chess.ts";
 import { MenuOperation, UtilityMenuSection } from "../Types";
 
 /**
@@ -205,9 +205,7 @@ export class NotationMenu extends Component{
     /**
      * Flip the notation table.
      */
-    public flip(): void {
-        this.chess.board!.flip();
-                
+    public flip(): void {                
         let playerScoreSectionOnTop = document.querySelector(".player-score-section")!;
         playerScoreSectionOnTop.append(playerScoreSectionOnTop.firstElementChild!)
         playerScoreSectionOnTop.parentElement!.append(playerScoreSectionOnTop);

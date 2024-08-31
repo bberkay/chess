@@ -113,7 +113,7 @@
     }
 
     /* Row coordinates that on white squares */
-    & .square--white .row-coordinate--white{
+    & .square--white .row-coordinate{
         color:var(--black-coordinate-color);
     }
 
@@ -133,7 +133,7 @@
     }
 
     /* Column coordinates that on white squares */
-    & .squre--white .column-coordinate{
+    & .square--white .column-coordinate{
         color:var(--black-coordinate-color);
     }
 }

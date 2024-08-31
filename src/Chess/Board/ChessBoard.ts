@@ -110,7 +110,7 @@ export class ChessBoard {
             let square: HTMLDivElement = document.createElement("div");
             this.setSquareID(square, i);
             square.className = "square";
-            this.setSquareClickMode(square, SquareClickMode.Clear);
+            this.setSquareClickMode(square, SquareClickMode.Disable);
 
             /**
              * Set the color of the square. This formula create a chess board pattern on the board.
@@ -733,6 +733,7 @@ export class ChessBoard {
             this.setSquareClickMode(squares[i], this.lockedSquaresModes[i]);
             this.removeSquareEffect(squares[i], SquareEffect.Disabled);
         }
+        this.lockedSquaresModes = [];
     }
 
     /**
@@ -880,7 +881,7 @@ export class ChessBoard {
         if(typeof square === "number")
             square = this.getSquareElement(square);
         
-        if(square.className.includes("square"))
+        if(square.className.includes("square") && !(this.getSquareClickMode(square) == SquareClickMode.Disable && this.lockedSquaresModes.length > 0))
             square.setAttribute("data-click-mode", mode);
     }
 

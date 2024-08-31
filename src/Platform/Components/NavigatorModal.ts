@@ -1,5 +1,6 @@
 import { MenuOperation } from "../Types";
 import { Component } from "./Component";
+import { GameStatus } from "@Chess/Types";
 
 /**
  * This class provide a menu to show the logs.
@@ -11,6 +12,7 @@ export class NavigatorModal extends Component{
     constructor() {
         super();
         this.loadCSS("navigator-modal.css");
+        this.initCloseEvent();
     }
 
     /**
@@ -30,16 +32,22 @@ export class NavigatorModal extends Component{
     }
 
     /**
+     * This function initializes the close event of the navigator modal.
+     */
+    private initCloseEvent(): void
+    {
+        document.addEventListener("click", (event) => {
+            if(!(event.target as HTMLElement).closest(".navigator-modal") && document.querySelector(".closeable"))
+                this.hide();
+        });
+    }
+
+    /**
      * Show the modal with the given title and content.
      */
     public show(title: string, content: string): void
     {
-        const navigatorModal = document.createElement('div');
-        navigatorModal.id = "navigator-modal";
-        document.querySelector('#chessboard')!.appendChild(navigatorModal);
-        
         this.renderComponent();
-        
         document.querySelector('.navigator-modal-title')!.innerHTML = title;
         document.querySelector('.navigator-modal-content')!.innerHTML = content;
     }
@@ -49,8 +57,7 @@ export class NavigatorModal extends Component{
      */
     public hide(): void
     {
-        const navigatorModal = document.querySelector('#navigator-modal');
-        if(navigatorModal) navigatorModal.remove();
+        document.querySelector('#navigator-modal')!.innerHTML = "";
     }
 
     /**
@@ -66,6 +73,36 @@ export class NavigatorModal extends Component{
             `
         );
         document.querySelector(".navigator-modal")!.classList.add("navigator-modal--glass");
+        document.querySelector(".navigator-modal")!.classList.add("closeable");
+    }
+
+    /**
+     * Show the game over screen.
+     */
+    public showGameOver(status: GameStatus): void
+    {
+        this.show(
+            status === GameStatus.WhiteVictory ? "White Wins" : (status === GameStatus.BlackVictory ? "Black Wins" : "Stalemate"),
+            `<div class="btn-group-vertical">
+                <button data-menu-operation="${MenuOperation.OpenGameCreator}">Play Again</button>
+            </div>`
+        );
+    }
+
+    /**
+     * Show the board not ready screen.
+     */
+    public showBoardNotReady(): void
+    {
+        this.show(
+            "Not Ready",
+            `<span style="font-size:13px">There might be missing pieces like kings. Please create playable board.</span>
+            <div style="text-align:center;margin-top:10px;">
+                <button class="button--text" style="font-size:13px!important;" data-menu-operation="${MenuOperation.HideNavigatorModal}">
+                    Ok
+                </button>
+            </div>`
+        );
     }
 
     /**

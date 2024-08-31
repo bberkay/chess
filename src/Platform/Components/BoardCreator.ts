@@ -1,6 +1,6 @@
 import { MenuOperation } from "../Types";
-import { Chess } from "../../Chess/Chess";
-import { StartPosition } from "../../Chess/Types";
+import { Chess } from "@Chess/Chess";
+import { StartPosition } from "@Chess/Types";
 import { Component } from "./Component";
 
 enum CreatorMode {
@@ -14,6 +14,7 @@ enum CreatorMode {
 export class BoardCreator extends Component{
     private readonly chess: Chess;
     private currentMode: CreatorMode;
+    private lastCreatedFenNotation: string = "";
 
     /**
      * Constructor of the BoardCreator class.
@@ -74,9 +75,10 @@ export class BoardCreator extends Component{
     /**
      * This function creates a new board with the board creator.
      */
-    public createBoard(): void
+    private _createBoard(fenNotation: string): void
     {
-        this.chess.createGame(this.getFormValue());
+        this.lastCreatedFenNotation = fenNotation;
+        this.chess.createGame(fenNotation);
 
         // Create invisible div for triggering the log console to stream 
         // when the game is created.
@@ -89,6 +91,22 @@ export class BoardCreator extends Component{
           this.changeMode();
 
         this.show(this.chess.engine.getGameAsFenNotation());
+    }
+
+    /**
+     * This function creates a new board with the board creator.
+     */
+    public createBoard(): void
+    {
+        this._createBoard(this.getFormValue());
+    }
+
+    /**
+     * This function if the current mode is custom mode or not.
+     */
+    public resetBoard(): void
+    {
+        this._createBoard(this.lastCreatedFenNotation);
     }
 
     /**
