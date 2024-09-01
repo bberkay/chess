@@ -310,7 +310,8 @@ export class MoveEngine{
         if(moves[MoveType.Normal]!.length > 0 && enemies){
             for(const enemySquare of enemies as Square[])
             {
-                if(BoardQuerier.getPieceOnSquare(enemySquare)!.getType() == PieceType.Knight)
+                if(BoardQuerier.getPieceOnSquare(enemySquare)!.getType() == PieceType.Knight 
+                || BoardQuerier.getPieceOnSquare(enemySquare)!.getType() == PieceType.Pawn)
                     continue;
 
                 const dangerousRoute: MoveRoute | null = Locator.getRelative(this.pieceSquare!, enemySquare);
