@@ -80,8 +80,7 @@ test('Promote pawn to the every promotion option', () => {
 
         // Check the pawn is promoted to the current type of promotion.
         expect(engine.getGameAsFenNotation()).toEqual(game.expectation!);
-
-        console.log("Passed");
+        
         console.log("--------------------------------------------------");
     }
 });

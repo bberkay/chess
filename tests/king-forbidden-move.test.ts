@@ -27,6 +27,6 @@ test('King Forbidden Moves', () => {
     engine.createGame(game.board);
 
     expect(engine.getMoves(Square.h8)![MoveType.Normal]!.sort()).toEqual(game.expectation.sort());
-    console.log("Passed");
+
     console.log("--------------------------------------------------");
 });

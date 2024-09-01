@@ -150,8 +150,7 @@ test('En Passant Moves', () => {
             expect(engine.getGameAsFenNotation()).toEqual(game.expectation);
         else
             expect(engine.getMoves(game.expectation.from)![MoveType.EnPassant]).toEqual(game.expectation.to);
-
-        console.log("Passed");
+        
         console.log("--------------------------------------------------");
     }
 });

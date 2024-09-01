@@ -49,8 +49,7 @@ test('Threefold Repetition Test', () => {
 
         // Check if the game status is the expected
         expect(engine.getGameStatus()).toBe(game.expectation);
-
-        console.log("Passed");
+        
         console.log("--------------------------------------------------");
     }
 });

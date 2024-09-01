@@ -102,7 +102,6 @@ test('Mandatory Moves Test', () => {
             }
         }
 
-        console.log("Passed");
         console.log("--------------------------------------------------");
     }
 });

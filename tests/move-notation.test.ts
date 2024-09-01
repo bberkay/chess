@@ -93,7 +93,6 @@ test('Algebraic Notation Test', () => {
 
     // Check the notation is equal to the expectation.
     expect(engine.getNotation()).toEqual(game.expectation);
-
-    console.log("Passed");
+    
     console.log("--------------------------------------------------");
 });

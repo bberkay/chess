@@ -85,7 +85,6 @@ test('Standard Moves', () => {
         else
             expect(moves![MoveType.Normal]!.sort()).toEqual(expectation.to.sort());
     }
-
-    console.log("Passed");
+    
     console.log("--------------------------------------------------");
 });

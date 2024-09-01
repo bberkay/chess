@@ -8,6 +8,7 @@ import { expect, test } from 'vitest';
 import { TestGame } from './types';
 import { GameStatus, Square, StartPosition } from '@Chess/Types';
 import { ChessEngine } from '@Chess/Engine/ChessEngine';
+import { Converter } from '@Chess/Utils/Converter';
 
 /**
  * Games with expected algebraic notation.
@@ -81,18 +82,18 @@ test(`Random Games`, () => {
         console.log("Testing:        " + game.title);
         console.log("Initial Board:  " + game.board);
         engine.createGame(game.board);
-
+        
         for (const move of game.moves!) {
             engine.playMove(move.from, move.to);
         }
 
         console.log("Final Notation: " + engine.getNotation());
         console.log("Final Board:    " + engine.getGameAsFenNotation());
+        console.log("Final Status:   " + engine.getGameStatus());
 
         // Check if the game status is the expected
         expect(engine.getGameStatus()).toBe(game.expectation);
-
-        console.log("Passed");
+        
         console.log("--------------------------------------------------");
     }
 });

@@ -64,7 +64,6 @@ test('King Protection Test', () => {
         else
             expect(moves![MoveType.Normal]!.sort()).toEqual(game.expectation.to.sort());
 
-        console.log("Passed");
         console.log("--------------------------------------------------");
     }
 });

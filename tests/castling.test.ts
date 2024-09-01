@@ -150,7 +150,6 @@ test('Castling Moves', () => {
             expect(engine.getMoves(squareOfKing)![MoveType.Castling]).toEqual(game.expectation);
         }
 
-        console.log("Passed");
         console.log("--------------------------------------------------");
     }
 });

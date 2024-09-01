@@ -68,7 +68,7 @@ test(`Game Status on Start`, () => {
         chessEngine.createGame(game.board);
 
         expect(chessEngine.getGameStatus()).toBe(game.expectation);
-        console.log("Passed");
+
         console.log("--------------------------------------------------");
     }
 });

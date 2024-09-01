@@ -72,7 +72,6 @@ test('Fifty Move Rule Test', () => {
         else
             expect(engine.getGameStatus()).toBe(game.expectation);
 
-        console.log("Passed");
         console.log("--------------------------------------------------");
     }
 });

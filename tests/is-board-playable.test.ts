@@ -103,7 +103,7 @@ test(`Is Board Playable`, () => {
         }
 
         expect(chessEngine.getGameStatus()).toBe(game.expectation);
-        console.log("Passed");
+
         console.log("--------------------------------------------------");
     }
 });
