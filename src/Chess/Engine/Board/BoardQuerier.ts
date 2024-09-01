@@ -2,6 +2,7 @@ import {Board} from "./Board.ts";
 import {CastlingType, Color, GameStatus, JsonNotation, PieceType, Square} from "../../Types";
 import {MoveRoute, Piece, Route} from "../Types";
 import {RouteCalculator} from "../Move/Calculator/RouteCalculator.ts";
+import {Extractor} from "../Move/Utils/Extractor.ts";
 
 
 /**
@@ -235,9 +236,16 @@ export class BoardQuerier extends Board{
         {
             /**
              * Check the pieces on the board and:
+             * - If white king and black king are side by side then the game can't be started.
              * - If there is only one white king and one black king then the game is in draw status.
              * - If there is only one white king and one black king and one white knight or bishop then the game is in draw status.
              */
+            if(Extractor.extractSquares(RouteCalculator.getKingRoute(
+                this.getSquareOfPiece(this.getPiecesWithFilter(Color.White, [PieceType.King])[0])!
+            )).includes(
+                this.getSquareOfPiece(this.getPiecesWithFilter(Color.Black, [PieceType.King])[0])!
+            ))
+                return false;
 
             // If board has any pawn, rook or queen then the game can be finished.
             for(const square in this.getBoard()){

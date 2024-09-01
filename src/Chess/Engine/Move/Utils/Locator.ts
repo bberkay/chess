@@ -58,38 +58,23 @@ export class Locator{
     static getRelative(relative: Square, relativeTo: Square): MoveRoute | null
     {
         const relativeRoute = relativeTo > relative
-            ? {Vertical: MoveRoute.Top, Horizontal: MoveRoute.Left, LeftDiagonal: MoveRoute.TopLeft, RightDiagonal: MoveRoute.TopRight}
+            ? {Vertical: MoveRoute.Top, Horizontal: MoveRoute.Left, LeftDiagonal: MoveRoute.TopRight, RightDiagonal: MoveRoute.TopLeft}
             : {Vertical: MoveRoute.Bottom, Horizontal: MoveRoute.Right, LeftDiagonal: MoveRoute.BottomRight, RightDiagonal: MoveRoute.BottomLeft};
 
-        // If relative and relativeTo are in the same row then get horizontal route and return it.
-        if(Locator.getRow(relative) == Locator.getRow(relativeTo))
+        const relativeRow = Locator.getRow(relative);
+        const relativeToRow = Locator.getRow(relativeTo);
+        if(relativeRow == relativeToRow)
             return relativeRoute.Horizontal;
 
-        // If relative and relativeTo are in the same column then get vertical route and return it.
-        if(Locator.getColumn(relative) == Locator.getColumn(relativeTo))
+        const relativeColumn = Locator.getColumn(relative);
+        const relativeToColumn = Locator.getColumn(relativeTo);
+        if(relativeColumn == relativeToColumn)
             return relativeRoute.Vertical;
+        
+        if(Math.abs(relativeRow - relativeToRow) != Math.abs(relativeColumn - relativeToColumn))
+            return null;
 
-        /**
-         * Algorithm to find diagonal route:
-         * 1. If distance between relative and relativeTo is multiple of 9, then
-         * the relative is in top right or bottom left of the piece.
-         * 2. If distance between relative and relativeTo is multiple of 7, then
-         * the relative is in top left or bottom right of the piece.
-         *
-         * The ASCII table of the formula(P is any piece):
-         * -9 -8 -7
-         * -1  P  1
-         * +7 +8 +9
-         *
-         * The ASCII table of the current example(P is pawn and 29, K is king and 36):
-         * 20 21 22
-         * 28  P 30
-         * K  37 38
-         *
-         * @see For more information about square numbers, check square enum in src/Types.ts
-         */
-        const distance: number = Math.abs(relative - relativeTo);
-        return distance % 7 == 0 ? relativeRoute.RightDiagonal : distance % 9 == 0 ? relativeRoute.LeftDiagonal : null;
+        return relativeColumn < relativeToColumn ? relativeRoute.RightDiagonal : relativeRoute.LeftDiagonal;
     }
 
     /**

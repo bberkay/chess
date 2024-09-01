@@ -169,6 +169,7 @@ export class Platform{
      * Create a new game and update the components of the menu.
      */
     private _createBoard(){
+        this.navigatorModal.hide();
         this.clearComponents();
         this.boardCreator.createBoard();
         this.listenBoardChanges();

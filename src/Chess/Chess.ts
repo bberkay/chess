@@ -45,6 +45,24 @@ export class Chess{
         // If there is a game in cache, load it. Otherwise, create a new game.
         if(!this.checkAndLoadGameFromCache())
             this.createGame();
+
+        /*
+        // This is a test code for the game. It plays a move when the space key is pressed.
+        document.addEventListener("keydown", (event) => {
+            if(event.key === " "){
+                (async () => {
+                    let counter = 0;
+                    const moves = [{from:53,to:37}];
+                    for(const move of moves){
+                        this.engine.playMove(move.from, move.to);
+                        this.board.playMove(move.from, move.to);
+                        this.finishTurn();
+                        await new Promise(resolve => setTimeout(resolve, 1000)); 
+                        counter++;
+                    }
+                })();
+            }
+        });*/
     }
 
     /**
