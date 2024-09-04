@@ -160,7 +160,7 @@ export class ChessBoard {
     /**
      * This function creates the pieces on the chess board.
      */
-    private createPieces(position:Array<{color: Color, type:PieceType, square:Square}>): void
+    public createPieces(position:Array<{color: Color, type:PieceType, square:Square}>): void
     {
         for(let piece of position)
             this.createPiece(piece.color, piece.type, piece.square);
@@ -169,7 +169,7 @@ export class ChessBoard {
     /**
      * This function creates a piece on the chess board.
      */
-    private createPiece(color: Color, type:PieceType, square:Square): void
+    public createPiece(color: Color, type:PieceType, square:Square): void
     {
         this.removePiece(square);
         let piece: HTMLDivElement = document.createElement("div");
@@ -183,7 +183,7 @@ export class ChessBoard {
     /**
      * This function removes the piece from the chess board if exists.
      */
-    private removePiece(square: HTMLDivElement | HTMLElement | Element | Square): void
+    public removePiece(square: HTMLDivElement | HTMLElement | Element | Square): void
     {
         if(typeof square == "number")
             square = this.getSquareElement(square);
@@ -822,21 +822,31 @@ export class ChessBoard {
     /**
      * Get all squares on the board.
      */
-    private getAllSquares(): NodeListOf<HTMLDivElement> {
+    public getAllSquares(): NodeListOf<HTMLDivElement> {
         return document.querySelectorAll(".square");
     }
 
     /**
      * Get the square element by squareID(data-square-id)
      */
-    private getSquareElement(squareID: Square): HTMLDivElement {
+    public getSquareElement(squareID: Square): HTMLDivElement {
         return document.querySelector(`[data-square-id="${squareID.toString()}"]`) as HTMLDivElement;
+    }
+
+    /**
+     * Get the piece element on the square.
+     */
+    public getPieceElementOnSquare(squareElement : HTMLDivElement | Element | Square): HTMLDivElement {
+        if(typeof squareElement == "number")
+            squareElement = this.getSquareElement(squareElement);
+
+        return squareElement.querySelector(".piece") as HTMLDivElement;
     }
 
     /**
      * Get the squareID(data-square-id) by square element.
      */
-    private getSquareID(squareElement: HTMLDivElement | Element): Square {
+    public getSquareID(squareElement: HTMLDivElement | Element): Square {
         return parseInt(squareElement.getAttribute("data-square-id")!) as Square;
     }
 

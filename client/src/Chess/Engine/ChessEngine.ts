@@ -66,6 +66,22 @@ export class ChessEngine extends BoardManager {
     }
 
     /**
+     * This function creates a new piece with the given color, type and square.
+     */
+    public createPiece(color: Color, type: PieceType, square: Square): void
+    {
+        super.createPiece(color, type, square);
+    }
+
+    /**
+     * This function removes the piece on the given square.
+     */
+    public removePiece(square: Square): void
+    {
+        super.removePiece(square);
+    }
+
+    /**
      * This function returns the current game as fen notation.
      */
     public getGameAsFenNotation(): string

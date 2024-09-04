@@ -7,7 +7,7 @@
  * @license MIT
  */
 
-import {JsonNotation, Square, StartPosition} from "./Types";
+import {JsonNotation, PieceType, Square, Color, StartPosition} from "./Types";
 import {ChessEngine} from "./Engine/ChessEngine";
 import {ChessBoard} from "./Board/ChessBoard";
 import {SquareClickMode} from "./Board/Types";
@@ -110,6 +110,24 @@ export class Chess{
         // Initialize the listener for moves because the game is 
         // created from scratch and the listener is not initialized.
         this.initBoardListener();
+    }
+
+    /**
+     * Create a piece on the board and engine.
+     */
+    public createPiece(color: Color, pieceType: PieceType, square: Square): void
+    {
+        this.board.createPiece(color, pieceType, square);
+        this.engine.createPiece(color, pieceType, square);
+    }
+
+    /**
+     * Remove a piece from the board and engine.
+     */
+    public removePiece(square: Square): void
+    {
+        this.board.removePiece(square);
+        this.engine.removePiece(square);
     }
 
     /**

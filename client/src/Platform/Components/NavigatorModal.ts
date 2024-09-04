@@ -1,4 +1,4 @@
-import { MenuOperation } from "../Types";
+import { NavigatorModalOperation } from "../Types";
 import { Component } from "./Component";
 import { GameStatus } from "@Chess/Types";
 
@@ -118,7 +118,7 @@ export class NavigatorModal extends Component{
         this.show(
             status === GameStatus.WhiteVictory ? "White Wins" : (status === GameStatus.BlackVictory ? "Black Wins" : "Stalemate"),
             `<div class="btn-group-vertical">
-                <button data-menu-operation="${MenuOperation.ShowGameCreatorModal}">Play Again</button>
+                <button data-menu-operation="${NavigatorModalOperation.ShowGameCreator}">Play Again</button>
             </div>`
         );
     }
@@ -132,7 +132,7 @@ export class NavigatorModal extends Component{
             "Not Ready",
             `<span style="font-size:13px">There might be missing pieces like kings. Please create playable board.</span>
             <div style="text-align:center;margin-top:10px;">
-                <button class="button--text" style="font-size:13px!important;" data-menu-operation="${MenuOperation.HideNavigatorModal}">
+                <button class="button--text" style="font-size:13px!important;" data-menu-operation="${NavigatorModalOperation.Hide}">
                     Ok
                 </button>
             </div>`
@@ -147,12 +147,12 @@ export class NavigatorModal extends Component{
         this.show(
             "Create New Game",
             `<div class = "btn-group-vertical">
-                <button data-menu-operation="${MenuOperation.CreateLobby}">Play against Friend</button>
-                <button data-menu-operation="${MenuOperation.PlayAgainstBot}">Play against Bot</button>
-                <button data-menu-operation="${MenuOperation.CreateBoard}">Create Board</button>
+                <button data-menu-operation="${NavigatorModalOperation.CreateLobby}">Play against Friend</button>
+                <button data-menu-operation="${NavigatorModalOperation.PlayAgainstBot}">Play against Bot</button>
+                <button data-menu-operation="${NavigatorModalOperation.EnableBoardEditor}">Create Board</button>
             </div>
              <div style="text-align:center;margin-top:10px;">
-                <button class="button--text" style="font-size:13px!important;" data-menu-operation="${MenuOperation.HideNavigatorModal}">
+                <button class="button--text" style="font-size:13px!important;" data-menu-operation="${NavigatorModalOperation.Hide}">
                     Cancel
                 </button>
             </div>
@@ -173,7 +173,7 @@ export class NavigatorModal extends Component{
             </div>
             <span style="font-size:13px">Share this lobby link with your friend to play together.</span>
             <div style="text-align:center;margin-top:10px;">
-                <button class="button--text" style="font-size:13px!important;" data-menu-operation="${MenuOperation.AskConfirmation}">
+                <button class="button--text" style="font-size:13px!important;" data-menu-operation="${NavigatorModalOperation.AskConfirmation}">
                     Cancel
                 </button>
             </div>
@@ -195,7 +195,7 @@ export class NavigatorModal extends Component{
                 <button onclick="ChessPlatform.chess.engine.playAgainstBot()">Hard</button>
             </div>
             <div style="text-align:center;margin-top:10px;">
-                <button class="button--text" style="font-size:13px!important;" data-menu-operation="${MenuOperation.AskConfirmation}">
+                <button class="button--text" style="font-size:13px!important;" data-menu-operation="${NavigatorModalOperation.AskConfirmation}">
                     Cancel
                 </button>
             </div>
@@ -213,8 +213,8 @@ export class NavigatorModal extends Component{
             `<div id = "confirmation">Are you sure you want to cancel the game?
             <br> <br> 
             <div class="btn-group-vertical">
-                <button data-menu-operation="${MenuOperation.UndoNavigatorModal}">Continue Playing</button>
-                <button style="background-color:transparent" data-menu-operation="${MenuOperation.CancelGame}">Yes, Cancel the Game</button>
+                <button data-menu-operation="${NavigatorModalOperation.Undo}">Continue Playing</button>
+                <button style="background-color:transparent" data-menu-operation="${NavigatorModalOperation.CancelGame}">Yes, Cancel the Game</button>
             </div></div>`
         );
     }

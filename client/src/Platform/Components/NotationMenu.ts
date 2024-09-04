@@ -1,7 +1,7 @@
 import { Color, PieceType } from "@Chess/Types";
 import { Component } from "./Component.ts";
 import { Chess } from "@Chess/Chess.ts";
-import { MenuOperation, UtilityMenuSection } from "../Types";
+import { BoardEditorOperation, NavigatorModalOperation, NotationMenuOperation } from "../Types";
 
 /**
  * This class provide a table to show the notation.
@@ -18,10 +18,9 @@ export class NotationMenu extends Component{
         super();
         this.chess = chess;
         this.loadCSS("notation-menu.css");
-        //this.renderComponent();
+        this.renderComponent();
         document.addEventListener("DOMContentLoaded", () => {
             this.update(true);
-            this.toggleUtilityMenu();
         });
     }
 
@@ -49,22 +48,22 @@ export class NotationMenu extends Component{
                     <tbody id = "notations"></tbody>
                 </table>
                 <div class="utility-menu">
-                    <button class="menu-item" data-menu-operation="${MenuOperation.FlipBoard}" data-tooltip-text="Flip Board">F</button>
-                    <button class="menu-item" data-menu-operation="undo" disabled="true" data-tooltip-text="Go First Move">⟪</button>
-                    <button class="menu-item" data-menu-operation="undo" disabled="true" data-tooltip-text="Go Previous Move">❮</button>
-                    <button class="menu-item" data-menu-operation="redo" disabled="true" data-tooltip-text="Go Next Move">❯</button>
-                    <button class="menu-item" data-menu-operation="redo" disabled="true" data-tooltip-text="Go Last Move">⟪</button>
-                    <button class="menu-item" data-menu-operation="${MenuOperation.ToggleUtilityMenu}">☰</button>
+                    <button class="menu-item" data-menu-operation="${BoardEditorOperation.Flip}" data-tooltip-text="Flip Board">F</button>
+                    <button class="menu-item" data-menu-operation="${NotationMenuOperation.FirstMove}" disabled="true" data-tooltip-text="Go First Move">⟪</button>
+                    <button class="menu-item" data-menu-operation="${NotationMenuOperation.PreviousMove}" disabled="true" data-tooltip-text="Go Previous Move">❮</button>
+                    <button class="menu-item" data-menu-operation="${NotationMenuOperation.NextMove}" disabled="true" data-tooltip-text="Go Next Move">❯</button>
+                    <button class="menu-item" data-menu-operation="${NotationMenuOperation.LastMove}" disabled="true" data-tooltip-text="Go Last Move">⟪</button>
+                    <button class="menu-item" data-menu-operation="${NotationMenuOperation.ToggleUtilityMenu}">☰</button>
                 </div>
-                <div class="utility-menu utility-toggle-menu">
-                    <div class="utility-toggle-menu-section" id="${UtilityMenuSection.NewGame}-utility-menu">
-                        <button class="menu-item" data-menu-operation="${MenuOperation.ShowGameCreatorModal}" data-tooltip-text="Create New Game">+ New Game</button>
-                        <button class="menu-item" data-menu-operation="${MenuOperation.ShowWelcomeModal}" data-tooltip-text="About Project">Info</button>
+                <div class="utility-menu utility-toggle-menu visible">
+                    <div class="utility-toggle-menu-section active" id="new-game-utility-menu">
+                        <button class="menu-item" data-menu-operation="${NavigatorModalOperation.ShowGameCreator}" data-tooltip-text="Create New Game">+ New Game</button>
+                        <button class="menu-item" data-menu-operation="${NavigatorModalOperation.ShowWelcome}" data-tooltip-text="About Project">Info</button>
                     </div>
-                    <div class="utility-toggle-menu-section" id="${UtilityMenuSection.Match}-utility-menu">
-                        <button class="menu-item" data-menu-operation="${MenuOperation.SendUndoOffer}" data-tooltip-text="Send Undo Offer">↺ Undo</button>
-                        <button class="menu-item" data-menu-operation="${MenuOperation.SendDrawOffer}" data-tooltip-text="Send Draw Offer">Draw</button>
-                        <button class="menu-item" data-menu-operation="${MenuOperation.Resign}" data-tooltip-text="Resign From Game">⚐ Resign</button>
+                    <div class="utility-toggle-menu-section" id="lobby-utility-menu">
+                        <button class="menu-item" data-menu-operation="${NotationMenuOperation.SendUndoOffer}" data-tooltip-text="Send Undo Offer">↺ Undo</button>
+                        <button class="menu-item" data-menu-operation="${NotationMenuOperation.SendDrawOffer}" data-tooltip-text="Send Draw Offer">Draw</button>
+                        <button class="menu-item" data-menu-operation="${NotationMenuOperation.Resign}" data-tooltip-text="Resign From Game">⚐ Resign</button>
                     </div>
                 </div>
                 <div class="player-score-section" id="white-player-score-section">
@@ -230,20 +229,35 @@ export class NotationMenu extends Component{
      */
     public toggleUtilityMenu(): void
     {
-        document.querySelector(`.utility-toggle-menu`)!.classList.toggle("visible");
+        document.querySelector(`#notation-menu .utility-toggle-menu`)!.classList.toggle("visible");
     }
 
     /**
-     * This function changes the utility menu section to the given section.
+     * Show the new game utility menu section. This menu contains
+     * new game and info buttons.
      */
-    public changeUtilityMenuSection(utilityMenuSection: UtilityMenuSection): void
+    public showNewGameUtilityMenu(): void
     {
         const utilityMenuSections = document.querySelectorAll(".utility-toggle-menu-section") as NodeListOf<HTMLElement>;
         utilityMenuSections.forEach((section: HTMLElement) => {
             section.classList.remove("active");
         });
 
-        document.getElementById(`${utilityMenuSection}-utility-menu`)!.classList.add("active");
+        document.getElementById(`new-game-utility-menu`)!.classList.add("active");
+    }
+
+    /**
+     * Show the lobby utility menu section. This menu contains
+     * undo, draw and resign buttons.
+     */
+    public showLobbyUtilityMenu(): void
+    {
+        const utilityMenuSections = document.querySelectorAll(".utility-toggle-menu-section") as NodeListOf<HTMLElement>;
+        utilityMenuSections.forEach((section: HTMLElement) => {
+            section.classList.remove("active");
+        });
+
+        document.getElementById(`lobby-utility-menu`)!.classList.add("active");
     }
 
     /**

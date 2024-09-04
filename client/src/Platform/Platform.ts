@@ -9,14 +9,14 @@
 
 import { Chess } from "@Chess/Chess";
 import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage.ts";
-import { BoardCreator } from "./Components/BoardCreator.ts";
+import { BoardEditor } from "./Components/BoardEditor.ts";
 import { NotationMenu } from "./Components/NotationMenu.ts";
 import { LogConsole } from "./Components/LogConsole";
 import { NavigatorModal } from "./Components/NavigatorModal";
-import { MenuOperation, UtilityMenuSection } from "./Types";
+import { BoardEditorOperation, LogConsoleOperation, MenuOperation, NavigatorModalOperation, NotationMenuOperation } from "./Types";
 import { WsMessage, WsCommand } from "../Types";
 import { Logger } from "@Services/Logger";
-import { GameStatus } from "@Chess/Types/index.ts";
+import { Color, GameStatus, PieceType } from "@Chess/Types/index.ts";
 
 /**
  * This class is the main class of the chess platform menu.
@@ -25,7 +25,7 @@ import { GameStatus } from "@Chess/Types/index.ts";
 export class Platform{
 
     private readonly chess: Chess;
-    private readonly boardCreator: BoardCreator;
+    private readonly boardEditor: BoardEditor;
     private readonly notationMenu: NotationMenu;
     private readonly logConsole: LogConsole;
     private readonly navigatorModal: NavigatorModal;
@@ -38,7 +38,7 @@ export class Platform{
      */
     constructor(chess: Chess) {
         this.chess = chess;
-        this.boardCreator = new BoardCreator(this.chess);
+        this.boardEditor = new BoardEditor(this.chess);
         this.notationMenu = new NotationMenu(this.chess);
         this.logConsole = new LogConsole();
         this.navigatorModal = new NavigatorModal();
@@ -137,7 +137,7 @@ export class Platform{
         document.querySelectorAll("[data-menu-operation]").forEach(menuItem => {
             if(this.menuOperationItems.length == 0 || !this.menuOperationItems.includes(menuItem)){
                 menuItem.addEventListener("click", () => {
-                    this.handleOperation(menuItem.getAttribute("data-menu-operation") as MenuOperation);
+                    this.handleMenuOperation(menuItem as HTMLElement);
                 });
                 this.menuOperationItems.push(menuItem);
             }
@@ -147,60 +147,153 @@ export class Platform{
     /**
      * This function makes an operation on menu.
      */
-    protected handleOperation(menuOperation: MenuOperation): void
+    protected handleMenuOperation(menuItem: HTMLElement): void
     {
-        switch(menuOperation){
-            case MenuOperation.ClearConsole:
-                this.logConsole.clear();
-                break;
-            case MenuOperation.ChangeMode:
-                this.boardCreator.changeMode();
-                break;
-            case MenuOperation.FlipBoard:
-                this.chess.board!.flip();
-                this.notationMenu.flip();
-                break;
-            case MenuOperation.ResetBoard:
-                this._resetBoard();
-                break;
-            case MenuOperation.CreateBoard:
-                this._createBoard();
-                break;
-            case MenuOperation.ToggleUtilityMenu:
-                this.notationMenu.toggleUtilityMenu();
-                break;
-            case MenuOperation.PlayAgainstBot:
-                this.navigatorModal.showPlayAgainstBot();
-                break
-            case MenuOperation.CreateLobby:
-                this.connectToLobby();
-                break;  
-            case MenuOperation.ShowGameCreatorModal:
-                this.navigatorModal.showGameCreator();
-                break;
-            case MenuOperation.ShowWelcomeModal:
-                this.navigatorModal.showWelcome();
-                break;
-            case MenuOperation.HideNavigatorModal:
-                this.navigatorModal.hide();
-                break;
-            case MenuOperation.UndoNavigatorModal:
-                this.navigatorModal.undo();
-                break;
-            case MenuOperation.AskConfirmation:
-                this.navigatorModal.showConfirmation();
-                break;
-            case MenuOperation.CancelGame:
-                this.navigatorModal.hide();
-                this.socket?.close();
-                this.notationMenu.changeUtilityMenuSection(UtilityMenuSection.NewGame);
-                this.chess.board.lock();
-                break;
-        }
+        const menuOperation = menuItem.getAttribute("data-menu-operation") as MenuOperation;
+        if(LogConsoleOperation.hasOwnProperty(menuOperation))
+            this.handleLogConsoleOperation(
+                menuOperation as LogConsoleOperation, 
+                menuItem
+            );
+        else if(NavigatorModalOperation.hasOwnProperty(menuOperation))
+            this.handleNavigatorModalOperation(
+                menuOperation as NavigatorModalOperation, 
+                menuItem
+            );
+        else if(NotationMenuOperation.hasOwnProperty(menuOperation))
+            this.handleNotationMenuOperation(
+                menuOperation as NotationMenuOperation, 
+                menuItem
+            );
+        else if(BoardEditorOperation.hasOwnProperty(menuOperation))
+            this.handleBoardEditorOperation(
+                menuOperation as BoardEditorOperation, 
+                menuItem
+            );
 
         this._reBindUnbindedMenuOperations();
     }
     
+    /**
+     * Handle the log console operations.
+     */
+    private handleLogConsoleOperation(menuOperation: LogConsoleOperation, menuItem: HTMLElement): void
+    {
+        switch(menuOperation){
+            case LogConsoleOperation.Clear:
+                this.logConsole.clear();
+                break;
+        }
+    }
+
+    /**
+     * Handle the navigator modal operations.
+     */
+    private handleNavigatorModalOperation(menuOperation: NavigatorModalOperation, menuItem: HTMLElement): void
+    {
+        switch(menuOperation){
+            case NavigatorModalOperation.Hide:
+                this.navigatorModal.hide();
+                break;
+            case NavigatorModalOperation.Undo:
+                this.navigatorModal.undo();
+                break;
+            case NavigatorModalOperation.ShowGameCreator:
+                this.navigatorModal.showGameCreator();
+                break;
+            case NavigatorModalOperation.ShowWelcome:
+                this.navigatorModal.showWelcome();
+                break;
+            case NavigatorModalOperation.AskConfirmation:
+                this.navigatorModal.showConfirmation();
+                break;
+            case NavigatorModalOperation.PlayAgainstBot:
+                this.navigatorModal.showPlayAgainstBot();
+                break;
+            case NavigatorModalOperation.CreateLobby:
+                this.connectToLobby();
+                break;
+            case NavigatorModalOperation.EnableBoardEditor:
+                this._enableBoardEditor();
+                break;
+            case NavigatorModalOperation.CancelGame:
+                this._cancelGame();
+                break;
+        }
+    }
+
+    /**
+     * Handle the notation menu operations.
+     */
+    private handleNotationMenuOperation(menuOperation: NotationMenuOperation, menuItem: HTMLElement): void
+    {
+        switch(menuOperation){
+            /*case NotationMenuOperation.SendDrawOffer:
+                this.chess.sendDrawOffer();
+                break;
+            case NotationMenuOperation.SendUndoOffer:
+                this.chess.sendUndoOffer();
+                break;
+            case NotationMenuOperation.Resign:
+                this.chess.resign();
+                break;
+            case NotationMenuOperation.PreviousMove:
+                this.chess.previousMove();
+                break;
+            case NotationMenuOperation.NextMove:
+                this.chess.nextMove();
+                break;
+            case NotationMenuOperation.FirstMove:
+                this.chess.firstMove();
+                break;
+            case NotationMenuOperation.LastMove:
+                this.chess.lastMove();
+                break;*/
+            case NotationMenuOperation.ToggleUtilityMenu:
+                this.notationMenu.toggleUtilityMenu();
+                break;
+        }
+    }
+
+    /**
+     * Handle the board editor operations.
+     */
+    private handleBoardEditorOperation(menuOperation: BoardEditorOperation, menuItem: HTMLElement): void
+    {
+        switch(menuOperation){
+            case BoardEditorOperation.Flip:
+                this._flipBoard();
+                break;
+            case BoardEditorOperation.Reset:
+                this._resetBoard();
+                break;
+            case BoardEditorOperation.CreateBoard:
+                this._createBoard();
+                break;
+            case BoardEditorOperation.ToggleUtilityMenu:
+                this.boardEditor.toggleUtilityMenu();
+                break;
+            case BoardEditorOperation.ChangeBoardCreatorMode:
+                this.boardEditor.changeBoardCreatorMode();
+                break;
+            case BoardEditorOperation.ClearBoard:
+                this.boardEditor.clearBoard();
+                break;
+            case BoardEditorOperation.CreatePiece:
+                this.boardEditor.createPiece(menuItem);
+                break;
+            case BoardEditorOperation.RemovePiece:
+                this.boardEditor.removePiece(menuItem);
+                break;
+            case BoardEditorOperation.EnableAddPieceCursorMode:
+                this.boardEditor.enableAddPieceCursorMode();
+                break;
+            case BoardEditorOperation.EnableRemovePieceCursorMode:
+                this.boardEditor.enableRemovePieceCursorMode();
+                break;
+        }
+    }
+
     /**
      * Rebind the menu operations in case of the menu operations
      * are unbinded. This method is can be used after the new menu items
@@ -211,6 +304,17 @@ export class Platform{
         if(this.menuOperationItems !== Array.from(document.querySelectorAll("[data-menu-operation]")))
             this.bindMenuOperations();
     }
+    
+    /**
+     * Cancel the game and close the socket connection
+     */
+    private _cancelGame(): void
+    {
+        this.navigatorModal.hide();
+        this.socket?.close();
+        this.notationMenu.showNewGameUtilityMenu();
+        this.chess.board.lock();
+    }
 
     /**
      * Update the components of the menu, for example
@@ -220,7 +324,7 @@ export class Platform{
     private updateComponents(){
         this.notationMenu.update();
         this.logConsole.stream();
-        this.boardCreator.show(this.chess.engine.getGameAsFenNotation());
+        this.boardEditor.showFen(this.chess.engine.getGameAsFenNotation());
 
         const gameStatus = this.chess.engine.getGameStatus();
         if([GameStatus.BlackVictory, GameStatus.WhiteVictory,GameStatus.Draw].includes(gameStatus))
@@ -241,17 +345,36 @@ export class Platform{
     }
 
     /**
+     * Enable the board editor and clear the components of the menu.
+     */
+    private _enableBoardEditor(): void
+    {
+        this.navigatorModal.hide();
+        this.clearComponents();
+        this.boardEditor.enable();
+        this.listenBoardChanges();
+        this.logger.save("Board editor is enabled.");
+    }
+
+    /**
      * Create a new game and update the components of the menu.
      */
     private _createBoard(fenNotation: string | null = null): void 
     {
         this.navigatorModal.hide();
         this.clearComponents();
-        console.log("burada",fenNotation);
-        this.boardCreator.createBoard(fenNotation);
+        this.boardEditor.createBoard(fenNotation);
         this.listenBoardChanges();
-        this.notationMenu.changeUtilityMenuSection(UtilityMenuSection.Board);
         this.logger.save("Board is created.");
+    }
+
+    /**
+     * Flip the board and notation menu.
+     */
+    private _flipBoard(): void
+    {
+        this.boardEditor.flipBoard();
+        this.notationMenu.flip();
     }
 
     /**
@@ -260,7 +383,7 @@ export class Platform{
     private _resetBoard(): void
     {
         this.clearComponents();
-        this.boardCreator.resetBoard();
+        this.boardEditor.resetBoard();
         this.listenBoardChanges();
         this.logger.save("Board is reset.");
     }

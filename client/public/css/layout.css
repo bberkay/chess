@@ -210,7 +210,7 @@ main{
 }
 
 /* ------------------- Components ------------------- */
-#board-creator{
+#board-editor{
     margin-top:0.5rem;
 }
 
@@ -220,7 +220,7 @@ main{
     /* 130px is the height of utility-menu and 
     player-score-section(x2). 2.5 for centering 
     notation-table to the board but little bit 
-    to the top(.2) because of the board-creator menu.
+    to the top(.2) because of the board-editor menu.
     */
     margin-top: calc((var(--board-size) - (var(--notation-table-height) + 130px)) / 3);
 }
@@ -263,7 +263,7 @@ main{
                 order: 2 
             }
 
-            & #board-creator { 
+            & #board-editor { 
                 order: 1;
                 margin-top: 0rem;
                 margin-bottom: 0.5rem;
@@ -290,7 +290,7 @@ main{
         width: 100%;
     }
 
-    #board-creator{
+    #board-editor{
         margin-bottom: 0.5rem;
     }
 

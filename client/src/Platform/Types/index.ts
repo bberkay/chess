@@ -3,33 +3,44 @@
  * done in the menu.
  * @see src/Platform/Platform.ts
  */
-export enum MenuOperation{
-    ChangeMode = "ChangeMode",
-    ClearConsole = "ClearConsole",
-    FlipBoard = "FlipBoard",
-    ResetBoard = "ResetBoard",
-    ToggleUtilityMenu = "ToggleUtilityMenu",
+export enum NotationMenuOperation{
     SendDrawOffer = "SendDrawOffer",
     SendUndoOffer = "SendUndoOffer",
     Resign = "Resign",
-    PlayAgainstBot = "PlayAgainstBot",
-    CreateLobby = "CreateLobby",
-    CreateBoard = "CreateBoard",
-    ShowGameCreatorModal = "ShowGameCreatorModal",
-    HideNavigatorModal = "HideNavigatorModal",
-    ShowWelcomeModal = "ShowWelcomeModal",
-    CancelGame = "CancelGame",
-    AskConfirmation = "AskConfirmation",
-    UndoNavigatorModal = "UndoNavigatorModal",
+    PreviousMove = "PreviousMove",
+    NextMove = "NextMove",
+    LastMove = "LastMove",
+    FirstMove = "FirstMove",
+    ToggleUtilityMenu = "ToggleUtilityMenu",
 }
 
-/**
- * UtilityMenuSection enum for the types of sections that can be
- * displayed in the utility menu.
- * @see src/Platform/Components/NotationMenu.ts
- */
-export enum UtilityMenuSection{
-    Match = "match",
-    Board = "board",
-    NewGame = "new-game"
+export enum NavigatorModalOperation{
+    Hide = "Hide",
+    Undo = "Undo",
+    ShowGameCreator = "ShowGameCreator",
+    ShowWelcome = "ShowWelcome",
+    AskConfirmation = "AskConfirmation",
+    PlayAgainstBot = "PlayAgainstBot",
+    CreateLobby = "CreateLobby",
+    EnableBoardEditor = "EnableBoardEditor",
+    CancelGame = "CancelGame"
 }
+
+export enum LogConsoleOperation{
+    Clear = "Clear"
+}
+
+export enum BoardEditorOperation{
+    Flip = "Flip",
+    Reset = "Reset",
+    ClearBoard = "ClearBoard",
+    CreatePiece = "CreatePiece",
+    RemovePiece = "RemovePiece",
+    CreateBoard = "CreateBoard",
+    EnableAddPieceCursorMode = "AddPieceCursorMode",
+    EnableRemovePieceCursorMode = "RemovePieceCursorMode",
+    ChangeBoardCreatorMode = "ChangeBoardCreatorMode",
+    ToggleUtilityMenu = "ToggleUtilityMenu"
+}
+
+export type MenuOperation = BoardEditorOperation | NavigatorModalOperation | NotationMenuOperation | LogConsoleOperation;

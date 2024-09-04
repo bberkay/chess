@@ -108,7 +108,7 @@
 /**
  * Utility Menu
  */
-#piece-creator .utility-menu{
+#notation-menu .utility-menu{
     display: flex;
     justify-content: space-between;
     width: calc(100% - 12px);
@@ -118,7 +118,7 @@
     padding: 5px;
 }
 
-#piece-creator .utility-menu.utility-toggle-menu{
+#notation-menu .utility-menu.utility-toggle-menu{
     display: none;
 
     & .utility-toggle-menu-section{

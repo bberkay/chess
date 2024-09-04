@@ -56,7 +56,7 @@ function reOrderLayoutForMobile(){
         return;
 
     document.querySelector(".right").append(
-        document.querySelector("#board-creator")
+        document.querySelector("#board-editor")
     );
 
     document.querySelector("#chessboard").before(
@@ -73,7 +73,7 @@ function reOrderLayoutForDesktop(){
         return;
 
     document.querySelector(".center").append(
-        document.querySelector("#board-creator")
+        document.querySelector("#board-editor")
     );
 
     document.querySelector("#notation-menu").append(

@@ -1,4 +1,4 @@
-import { MenuOperation } from "../Types";
+import { LogConsoleOperation } from "../Types";
 import { Component } from "./Component";
 import { Logger } from "@Services/Logger"; 
 
@@ -30,7 +30,7 @@ export class LogConsole extends Component{
             </div>
             <div id="log-console-footer">
                 <div id="log-console-footer-btn">
-                    <button data-menu-operation="${MenuOperation.ClearConsole}" data-tooltip-text="Clear Logs">Ⅹ</button>
+                    <button data-menu-operation="${LogConsoleOperation.Clear}" data-tooltip-text="Clear Logs">Ⅹ</button>
                 </div>
                 <div id="log-console-footer-content">
                     <span id = "log-file"></span>

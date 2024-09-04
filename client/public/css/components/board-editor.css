@@ -1,14 +1,14 @@
 /**
- * CSS codes of Board Creator component
- * @see For more information about this component check file: src\Platform\Components\BoardCreator.ts
+ * CSS codes of Board Editor component
+ * @see For more information about this component check file: src\Platform\Components\BoardEditor.ts
  */
  :root{
     /* Same as notation-table */
-    --board-creator-table-height: 240px; 
-    --board-creator-table-width: 250px;
+    --board-editor-table-height: 240px; 
+    --board-editor-table-width: 250px;
 }
 
-#board-creator .board-creator{
+#board-editor .board-creator{
     display: none;
     border:1px solid #2a2a2a;
 
@@ -18,7 +18,7 @@
 }
 
 #piece-table{
-    width: var(--board-creator-table-width);
+    width: var(--board-editor-table-width);
     font-size:15px;
     background-color: #111;
     color: #f5f5f5;
@@ -124,7 +124,7 @@
  *             700px - 900px - 1250px
  */
 @media screen and (max-width: 900px) {
-    #board-creator{
+    #board-editor{
         width:100%;
     }
 
