@@ -17,7 +17,8 @@ export class NotationMenu extends Component{
     constructor(chess: Chess) {
         super();
         this.chess = chess;
-        this.renderComponent();
+        this.loadCSS("notation-menu.css");
+        //this.renderComponent();
         document.addEventListener("DOMContentLoaded", () => {
             this.update(true);
             this.toggleUtilityMenu();
@@ -49,18 +50,13 @@ export class NotationMenu extends Component{
                 </table>
                 <div class="utility-menu">
                     <button class="menu-item" data-menu-operation="${MenuOperation.FlipBoard}" data-tooltip-text="Flip Board">F</button>
-                    <button class="menu-item" data-menu-operation="undo" disabled="true">⟪</button>
-                    <button class="menu-item" data-menu-operation="undo" disabled="true">❮</button>
-                    <button class="menu-item" data-menu-operation="redo" disabled="true">❯</button>
-                    <button class="menu-item" data-menu-operation="redo" disabled="true">⟫</button>
+                    <button class="menu-item" data-menu-operation="undo" disabled="true" data-tooltip-text="Go First Move">⟪</button>
+                    <button class="menu-item" data-menu-operation="undo" disabled="true" data-tooltip-text="Go Previous Move">❮</button>
+                    <button class="menu-item" data-menu-operation="redo" disabled="true" data-tooltip-text="Go Next Move">❯</button>
+                    <button class="menu-item" data-menu-operation="redo" disabled="true" data-tooltip-text="Go Last Move">⟪</button>
                     <button class="menu-item" data-menu-operation="${MenuOperation.ToggleUtilityMenu}">☰</button>
                 </div>
                 <div class="utility-menu utility-toggle-menu">
-                    <div class="utility-toggle-menu-section active" id="${UtilityMenuSection.Board}-utility-menu">
-                        <button class="menu-item" data-menu-operation="${MenuOperation.Reset}" data-tooltip-text="Reset Current Game">↺ Reset</button>
-                        <button class="menu-item" data-menu-operation="${MenuOperation.ShowGameCreatorModal}" data-tooltip-text="Create New Game">+ New Game</button>
-                        <button class="menu-item" data-menu-operation="${MenuOperation.ShowWelcomeModal}" data-tooltip-text="About Project">Info</button>
-                    </div>
                     <div class="utility-toggle-menu-section" id="${UtilityMenuSection.NewGame}-utility-menu">
                         <button class="menu-item" data-menu-operation="${MenuOperation.ShowGameCreatorModal}" data-tooltip-text="Create New Game">+ New Game</button>
                         <button class="menu-item" data-menu-operation="${MenuOperation.ShowWelcomeModal}" data-tooltip-text="About Project">Info</button>
@@ -71,7 +67,6 @@ export class NotationMenu extends Component{
                         <button class="menu-item" data-menu-operation="${MenuOperation.Resign}" data-tooltip-text="Resign From Game">⚐ Resign</button>
                     </div>
                 </div>
-                <!-- A new menu might be added here for draw, resign etc. options. -->
                 <div class="player-score-section" id="white-player-score-section">
                     <div class="score-table" id="black-captured-pieces"></div>
                     <div class="turn-indicator visible" id="white-turn-indicator">
@@ -80,7 +75,6 @@ export class NotationMenu extends Component{
                     </div>
                 </div>
         `);
-        this.loadCSS("notation-menu.css");
     }
 
     /**

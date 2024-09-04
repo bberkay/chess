@@ -225,6 +225,13 @@ main{
     margin-top: calc((var(--board-size) - (var(--notation-table-height) + 130px)) / 3);
 }
 
+#piece-creator{
+    /* Piece creator will replace 
+    the notation menu when it's 
+    active */
+    margin-left: 0.5rem;
+}
+
 #log-console{
     margin-right:0.5rem;
 }

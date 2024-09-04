@@ -160,7 +160,7 @@ export class Platform{
                 this.chess.board!.flip();
                 this.notationMenu.flip();
                 break;
-            case MenuOperation.Reset:
+            case MenuOperation.ResetBoard:
                 this._resetBoard();
                 break;
             case MenuOperation.CreateBoard:
@@ -173,7 +173,7 @@ export class Platform{
                 this.navigatorModal.showPlayAgainstBot();
                 break
             case MenuOperation.CreateLobby:
-                this._createLobby();
+                this.connectToLobby();
                 break;  
             case MenuOperation.ShowGameCreatorModal:
                 this.navigatorModal.showGameCreator();
@@ -263,18 +263,5 @@ export class Platform{
         this.boardCreator.resetBoard();
         this.listenBoardChanges();
         this.logger.save("Board is reset.");
-    }
-
-    /**
-     * Create a lobby and connect to it.
-     */
-    private _createLobby(): void
-    {
-        try {
-            this.connectToLobby();
-        } catch (error) {
-            console.error("Failed to connect to lobby:", error);
-            this.navigatorModal.showLobbyInfo("Failed to connect to lobby.");
-        }
     }
 }

@@ -2,10 +2,117 @@
  * CSS codes of Board Creator component
  * @see For more information about this component check file: src\Platform\Components\BoardCreator.ts
  */
+ :root{
+    /* Same as notation-table */
+    --board-creator-table-height: 240px; 
+    --board-creator-table-width: 250px;
+}
 
 #board-creator .board-creator{
     display: none;
     border:1px solid #2a2a2a;
+
+    &.visible{
+        display: flex;
+    }
+}
+
+#piece-table{
+    width: var(--board-creator-table-width);
+    font-size:15px;
+    background-color: #111;
+    color: #f5f5f5;
+    border:1px solid #2a2a2a;
+
+    & tbody{
+        overflow-x: hidden;
+        scrollbar-width: thin;
+        width:100%;
+        display:block;
+    }
+
+    & tr{
+        display:table;
+        table-layout: fixed;
+        width:100%;
+
+        & th{
+            padding:7px 5px;
+            background-color: #222;
+            border:1px solid #2a2a2a;
+        }
+
+        & td{
+            text-align: center;
+            position: relative;
+            width:calc((var(--board-size) / 9) + 5px);
+            height:calc((var(--board-size) / 10) + 15px);
+            background-color: #222;
+            border:1px solid #2a2a2a;
+            cursor: pointer;
+
+            &:hover{
+                background-color: #333;
+            }
+
+            &:active{
+                filter: brightness(0.8);
+            }
+        }
+    }
+
+    .piece-option{
+        white-space: nowrap;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+
+        & .piece{
+            background-position: center;
+            background-size:cover;
+            background-repeat: no-repeat;
+            width: 6vh;
+            height: 6vh;
+            position: initial;
+            margin-top: -5px;
+        }
+
+        & span{
+            font-size: 13px;
+            margin-top: 3px;
+        }
+    }
+}
+
+/**
+ * Utility Menu
+ */
+#piece-creator .utility-menu{
+    display: flex;
+    justify-content: space-between;
+    width: calc(100% - 12px);
+    background-color: #111;
+    border: 1px solid #2a2a2a;
+    border-top:none;
+    padding: 5px;
+}
+
+#piece-creator .utility-menu.utility-toggle-menu{
+    display: none;
+
+    & .utility-toggle-menu-section{
+        flex: 1;
+        display: none;
+        justify-content: space-between;
+        align-items: center;
+
+        &.active{
+            display: flex;
+        }
+    }
 
     &.visible{
         display: flex;
@@ -19,5 +126,19 @@
 @media screen and (max-width: 900px) {
     #board-creator{
         width:100%;
+    }
+
+    #piece-table{
+        width:100%;
+    }
+
+    #piece-creator .utility-menu{
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    #piece-creator .utility-toggle-menu-section{
+        justify-content: center!important;
+        gap: 1rem;
     }
 }

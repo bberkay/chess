@@ -7,7 +7,7 @@ export enum MenuOperation{
     ChangeMode = "ChangeMode",
     ClearConsole = "ClearConsole",
     FlipBoard = "FlipBoard",
-    Reset = "Reset",
+    ResetBoard = "ResetBoard",
     ToggleUtilityMenu = "ToggleUtilityMenu",
     SendDrawOffer = "SendDrawOffer",
     SendUndoOffer = "SendUndoOffer",

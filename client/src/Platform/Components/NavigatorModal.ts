@@ -213,8 +213,8 @@ export class NavigatorModal extends Component{
             `<div id = "confirmation">Are you sure you want to cancel the game?
             <br> <br> 
             <div class="btn-group-vertical">
-                <button data-menu-operation="${MenuOperation.CancelGame}">Ok</button>
-                <button data-menu-operation="${MenuOperation.UndoNavigatorModal}">Cancel</button>
+                <button data-menu-operation="${MenuOperation.UndoNavigatorModal}">Continue Playing</button>
+                <button style="background-color:transparent" data-menu-operation="${MenuOperation.CancelGame}">Yes, Cancel the Game</button>
             </div></div>`
         );
     }

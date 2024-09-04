@@ -34,20 +34,20 @@
     --to-color: rgba(69, 201, 255, 0.39);
 
     /* White Pieces */
-    --white-pawn-image: url("../assets/images/pawn_white.png");
-    --white-rook-image: url("../assets/images/rook_white.png");
-    --white-knight-image: url("../assets/images/knight_white.png");
-    --white-bishop-image: url("../assets/images/bishop_white.png");
-    --white-queen-image: url("../assets/images/queen_white.png");
-    --white-king-image: url("../assets/images/king_white.png");
+    --white-pawn-image: url("../assets/pieces/pawn_white.png");
+    --white-rook-image: url("../assets/pieces/rook_white.png");
+    --white-knight-image: url("../assets/pieces/knight_white.png");
+    --white-bishop-image: url("../assets/pieces/bishop_white.png");
+    --white-queen-image: url("../assets/pieces/queen_white.png");
+    --white-king-image: url("../assets/pieces/king_white.png");
 
     /* Black Pieces */
-    --black-pawn-image: url("../assets/images/pawn_black.png");
-    --black-rook-image: url("../assets/images/rook_black.png");
-    --black-knight-image: url("../assets/images/knight_black.png");
-    --black-bishop-image: url("../assets/images/bishop_black.png");
-    --black-queen-image: url("../assets/images/queen_black.png");
-    --black-king-image: url("../assets/images/king_black.png");
+    --black-pawn-image: url("../assets/pieces/pawn_black.png");
+    --black-rook-image: url("../assets/pieces/rook_black.png");
+    --black-knight-image: url("../assets/pieces/knight_black.png");
+    --black-bishop-image: url("../assets/pieces/bishop_black.png");
+    --black-queen-image: url("../assets/pieces/queen_black.png");
+    --black-king-image: url("../assets/pieces/king_black.png");
 
     /* For animation of piece movement */
     --move-from-left: 0;
@@ -62,7 +62,7 @@
     height: var(--board-size);
     min-width: var(--board-size);
     min-height: var(--board-size);
-    border:1px solid black;
+    border:1px solid #adadad;
     display:flex;
     flex-wrap: wrap;
     cursor: pointer!important;
