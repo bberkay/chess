@@ -71,7 +71,8 @@ export class NavigatorModal extends Component{
     public hide(): void
     {
         document.querySelector('#navigator-modal')!.innerHTML = "";
-        document.querySelector('.navigator-modal-bg-layer')!.remove();
+        const modalBgLayer = document.querySelector('.navigator-modal-bg-layer');
+        if(modalBgLayer) modalBgLayer.remove();
     }
 
     /**
@@ -195,7 +196,7 @@ export class NavigatorModal extends Component{
                 <button onclick="ChessPlatform.chess.engine.playAgainstBot()">Hard</button>
             </div>
             <div style="text-align:center;margin-top:10px;">
-                <button class="button--text" style="font-size:13px!important;" data-menu-operation="${NavigatorModalOperation.AskConfirmation}">
+                <button class="button--text" style="font-size:13px!important;" data-menu-operation="${NavigatorModalOperation.ShowGameCreator}">
                     Cancel
                 </button>
             </div>

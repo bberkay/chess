@@ -48,12 +48,12 @@ export class NotationMenu extends Component{
                     <tbody id = "notations"></tbody>
                 </table>
                 <div class="utility-menu">
-                    <button class="menu-item" data-menu-operation="${BoardEditorOperation.Flip}" data-tooltip-text="Flip Board">F</button>
+                    <button class="menu-item" data-menu-operation="${BoardEditorOperation.FlipBoard}" data-tooltip-text="Flip Board">F</button>
                     <button class="menu-item" data-menu-operation="${NotationMenuOperation.FirstMove}" disabled="true" data-tooltip-text="Go First Move">⟪</button>
                     <button class="menu-item" data-menu-operation="${NotationMenuOperation.PreviousMove}" disabled="true" data-tooltip-text="Go Previous Move">❮</button>
                     <button class="menu-item" data-menu-operation="${NotationMenuOperation.NextMove}" disabled="true" data-tooltip-text="Go Next Move">❯</button>
                     <button class="menu-item" data-menu-operation="${NotationMenuOperation.LastMove}" disabled="true" data-tooltip-text="Go Last Move">⟪</button>
-                    <button class="menu-item" data-menu-operation="${NotationMenuOperation.ToggleUtilityMenu}">☰</button>
+                    <button class="menu-item" data-menu-operation="${NotationMenuOperation.ToggleNotationMenuUtilityMenu}">☰</button>
                 </div>
                 <div class="utility-menu utility-toggle-menu visible">
                     <div class="utility-toggle-menu-section active" id="new-game-utility-menu">

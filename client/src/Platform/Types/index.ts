@@ -11,7 +11,7 @@ export enum NotationMenuOperation{
     NextMove = "NextMove",
     LastMove = "LastMove",
     FirstMove = "FirstMove",
-    ToggleUtilityMenu = "ToggleUtilityMenu",
+    ToggleNotationMenuUtilityMenu = "ToggleNotationMenuUtilityMenu",
 }
 
 export enum NavigatorModalOperation{
@@ -31,8 +31,8 @@ export enum LogConsoleOperation{
 }
 
 export enum BoardEditorOperation{
-    Flip = "Flip",
-    Reset = "Reset",
+    FlipBoard = "FlipBoard",
+    ResetBoard = "ResetBoard",
     ClearBoard = "ClearBoard",
     CreatePiece = "CreatePiece",
     RemovePiece = "RemovePiece",
@@ -40,7 +40,7 @@ export enum BoardEditorOperation{
     EnableAddPieceCursorMode = "AddPieceCursorMode",
     EnableRemovePieceCursorMode = "RemovePieceCursorMode",
     ChangeBoardCreatorMode = "ChangeBoardCreatorMode",
-    ToggleUtilityMenu = "ToggleUtilityMenu"
+    ToggleBoardEditorUtilityMenu = "ToggleBoardEditorUtilityMenu"
 }
 
 export type MenuOperation = BoardEditorOperation | NavigatorModalOperation | NotationMenuOperation | LogConsoleOperation;

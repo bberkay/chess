@@ -3,9 +3,10 @@
  * Add new keys here.
  */
 export enum LocalStorageKey{
+    WelcomeShown = "welcomeShown",
     LastBoard = "lastBoard",
     LastLobbyConnection = "lastLobbyConnection",
-    Welcome = "welcome"
+    BoardEditorEnabled = "boardEditorEnabled",
 }
 
 /**

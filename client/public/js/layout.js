@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", function() {
-    createTooltips();
     if (window.innerWidth < 900) {
         reOrderLayoutForMobile();    
     }
@@ -13,36 +12,6 @@ window.addEventListener("resize", function() {
     }
 });
 
-function createTooltips(){
-    const tooltips = document.querySelectorAll("[data-tooltip-text]");
-    tooltips.forEach(tooltipParent => {
-        const tooltipText = tooltipParent.getAttribute("data-tooltip-text");
-        const tooltipElement = document.createElement("div");
-        tooltipElement.classList.add("tooltip");
-        tooltipParent.append(tooltipElement);
-
-        let tooltipTimeout;
-        tooltipParent.addEventListener("mouseover", function() {
-            tooltipTimeout = setTimeout(() => {
-                tooltipElement.classList.add("active");
-                tooltipElement.textContent = tooltipText;
-            }, 500);
-        });
-
-        tooltipParent.addEventListener("mouseout", function() {
-            clearTimeout(tooltipTimeout);
-            tooltipElement.classList.remove("active");
-            tooltipElement.textContent = "";
-        });
-
-        tooltipParent.addEventListener("mousedown", function(e) {
-            e.preventDefault();
-            clearTimeout(tooltipTimeout);
-            tooltipElement.classList.remove("active");
-            tooltipElement.textContent = "";
-        });
-    });
-}
 
 function copyToClipboard(selector){
     const element = document.querySelector(selector);

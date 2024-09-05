@@ -42,7 +42,15 @@ export class Platform{
         this.notationMenu = new NotationMenu(this.chess);
         this.logConsole = new LogConsole();
         this.navigatorModal = new NavigatorModal();
-        
+        this.init();
+    }
+
+    /**
+     * Initialize the platform by checking the cache and 
+     * handling the menu operations.
+     */
+    private init(): void
+    {
         if(LocalStorage.isExist(LocalStorageKey.LastLobbyConnection)){
             // @ts-ignore
             this.connectToLobby(LocalStorage.load(LocalStorageKey.LastLobbyConnection));
@@ -54,18 +62,49 @@ export class Platform{
         }
 
         document.addEventListener("DOMContentLoaded", () => {
+            if(!this.checkAndLoadGameFromCache())
+                this.boardEditor.createBoard();
+
+            if(LocalStorage.isExist(LocalStorageKey.BoardEditorEnabled))
+                this._enableBoardEditor();
+        
+            if(!LocalStorage.isExist(LocalStorageKey.WelcomeShown))
+            {
+                this.navigatorModal.showWelcome();
+                LocalStorage.save(LocalStorageKey.WelcomeShown, true);
+            }
+
             this.listenBoardChanges();
             this.bindMenuOperations();
-
-            if(LocalStorage.load(LocalStorageKey.Welcome))
-                this.navigatorModal.showWelcome();
+            this.updateComponents();
         });
         
-        this.logger.save("Components are created.");
+        this.logger.save("Cache is checked, last game/lobby is loaded if exists. Menu operations are binded.");
     }
 
     /**
-     * Parse the websocket message return it as a command-data tuple.
+     * This function checks the cache and loads the game from the cache if there is a game in the cache.
+     * @returns Returns true if there is a game in the cache, otherwise returns false.
+     * @see For more information about cache management check src/Services/LocalStorage.ts
+     */
+    public checkAndLoadGameFromCache(): boolean
+    {
+        // If there is a game in the cache, load it.
+        if(LocalStorage.isExist(LocalStorageKey.LastBoard)){
+            this.logger.save("Game loading from cache...");
+            this.boardEditor.createBoard(LocalStorage.load(LocalStorageKey.LastBoard));
+            this.logger.save("Game loaded from cache");
+            return true;
+        }
+
+        this.logger.save("No games found in cache");
+        return false;
+    }
+
+    /**
+     * Parse the websocket message returned from the server.
+     * @example [Connected, {lobbyId: "1234"}]
+     * @example [Started, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"]
      */
     private _parseWsMessage(event: MessageEvent): [WsCommand, any] {
         const [ wsCommand, wsData ] = event.data.split(/ (.+)/);
@@ -77,6 +116,9 @@ export class Platform{
      */
     private connectToLobby(lobbyId: string | null = null): void
     {
+        LocalStorage.clear(LocalStorageKey.BoardEditorEnabled);
+        LocalStorage.clear(LocalStorageKey.LastLobbyConnection);
+
         // @ts-ignore
         this.socket = new WebSocket(import.meta.env.VITE_WS_ADDRESS + (lobbyId ? "/" + lobbyId : ""));
         
@@ -89,6 +131,8 @@ export class Platform{
             switch(wsCommand){
                 case WsCommand.Connected:
                     this.navigatorModal.showLobbyInfo(window.location.origin + "/" + wsData.lobbyId);
+                    // LocalStorage.save(LocalStorageKey.LastLobbyConnection, {lobbyId: lobbyId, color: data.color});
+                    this.logger.save("Connected to the lobby[" + lobbyId + "] as " + wsData.color + " player.");
                     break;
                 case WsCommand.Started:
                     this._createBoard(wsData);
@@ -102,9 +146,6 @@ export class Platform{
             // if(onPurpose)
             //    LocalStorage.clear(LocalStorageKey.LastLobbyConnection);
         });
-
-        // this.logger.save("Connected to the lobby[" + lobbyId + "] as " + data.color + " player.");
-        //LocalStorage.save(LocalStorageKey.LastLobbyConnection, {lobbyId: lobbyId, color: data.color});
     }
 
     /**
@@ -134,11 +175,45 @@ export class Platform{
      */
     protected bindMenuOperations(): void
     {
-        document.querySelectorAll("[data-menu-operation]").forEach(menuItem => {
+        /**
+         * Create a tooltip for the menu item by data-tooltip-text 
+         * attribute of the menu item.
+         */
+        function createTooltipOfMenuItem(menuItem: HTMLElement): void
+        {
+            const tooltipText = menuItem.getAttribute("data-tooltip-text");
+            if(!tooltipText) return;
+            
+            const tooltipElement = document.createElement("div");
+            tooltipElement.classList.add("tooltip");
+            menuItem.append(tooltipElement);
+
+            let tooltipTimeout: number | Timer | undefined;
+            menuItem.addEventListener("mouseover", function() {
+                tooltipTimeout = setTimeout(() => {
+                    tooltipElement.classList.add("active");
+                    tooltipElement.textContent = tooltipText;
+                }, 500);
+            });
+
+            menuItem.addEventListener("mouseout", function() {
+                clearTimeout(tooltipTimeout);
+                tooltipElement.classList.remove("active");
+                tooltipElement.textContent = "";
+            });
+
+            menuItem.addEventListener("mousedown", function(e) {
+                e.preventDefault();
+                clearTimeout(tooltipTimeout);
+                tooltipElement.classList.remove("active");
+                tooltipElement.textContent = "";
+            });
+        }
+
+        (document.querySelectorAll("[data-menu-operation]") as NodeListOf<HTMLElement>).forEach((menuItem: HTMLElement) => {
             if(this.menuOperationItems.length == 0 || !this.menuOperationItems.includes(menuItem)){
-                menuItem.addEventListener("click", () => {
-                    this.handleMenuOperation(menuItem as HTMLElement);
-                });
+                menuItem.addEventListener("click", () => { this.handleMenuOperation(menuItem) });
+                createTooltipOfMenuItem(menuItem);
                 this.menuOperationItems.push(menuItem);
             }
         });
@@ -249,7 +324,7 @@ export class Platform{
             case NotationMenuOperation.LastMove:
                 this.chess.lastMove();
                 break;*/
-            case NotationMenuOperation.ToggleUtilityMenu:
+            case NotationMenuOperation.ToggleNotationMenuUtilityMenu:
                 this.notationMenu.toggleUtilityMenu();
                 break;
         }
@@ -261,16 +336,16 @@ export class Platform{
     private handleBoardEditorOperation(menuOperation: BoardEditorOperation, menuItem: HTMLElement): void
     {
         switch(menuOperation){
-            case BoardEditorOperation.Flip:
+            case BoardEditorOperation.FlipBoard:
                 this._flipBoard();
                 break;
-            case BoardEditorOperation.Reset:
+            case BoardEditorOperation.ResetBoard:
                 this._resetBoard();
                 break;
             case BoardEditorOperation.CreateBoard:
                 this._createBoard();
                 break;
-            case BoardEditorOperation.ToggleUtilityMenu:
+            case BoardEditorOperation.ToggleBoardEditorUtilityMenu:
                 this.boardEditor.toggleUtilityMenu();
                 break;
             case BoardEditorOperation.ChangeBoardCreatorMode:
@@ -310,6 +385,7 @@ export class Platform{
      */
     private _cancelGame(): void
     {
+        LocalStorage.clear(LocalStorageKey.LastLobbyConnection);
         this.navigatorModal.hide();
         this.socket?.close();
         this.notationMenu.showNewGameUtilityMenu();
@@ -326,11 +402,13 @@ export class Platform{
         this.logConsole.stream();
         this.boardEditor.showFen(this.chess.engine.getGameAsFenNotation());
 
-        const gameStatus = this.chess.engine.getGameStatus();
-        if([GameStatus.BlackVictory, GameStatus.WhiteVictory,GameStatus.Draw].includes(gameStatus))
-            this.navigatorModal.showGameOver(gameStatus);
-        else if (gameStatus === GameStatus.NotStarted)
-            this.navigatorModal.showBoardNotReady();
+        if(!this.boardEditor.isEditorModeEnable()){
+            const gameStatus = this.chess.engine.getGameStatus();
+            if([GameStatus.BlackVictory, GameStatus.WhiteVictory,GameStatus.Draw].includes(gameStatus))
+                this.navigatorModal.showGameOver(gameStatus);
+            else if (gameStatus === GameStatus.NotStarted)
+                this.navigatorModal.showBoardNotReady();
+        }
 
         this.bindMenuOperations();
     }
@@ -349,10 +427,13 @@ export class Platform{
      */
     private _enableBoardEditor(): void
     {
+        if(this.boardEditor.isEditorModeEnable()) return;
         this.navigatorModal.hide();
         this.clearComponents();
-        this.boardEditor.enable();
+        this.boardEditor.enableEditorMode();
         this.listenBoardChanges();
+        LocalStorage.clear(LocalStorageKey.LastLobbyConnection);
+        LocalStorage.save(LocalStorageKey.BoardEditorEnabled, true);
         this.logger.save("Board editor is enabled.");
     }
 
@@ -365,7 +446,7 @@ export class Platform{
         this.clearComponents();
         this.boardEditor.createBoard(fenNotation);
         this.listenBoardChanges();
-        this.logger.save("Board is created.");
+        this.logger.save(`Board is created and components are updated.`);
     }
 
     /**
@@ -374,7 +455,8 @@ export class Platform{
     private _flipBoard(): void
     {
         this.boardEditor.flipBoard();
-        this.notationMenu.flip();
+        if(!this.boardEditor.isEditorModeEnable())
+            this.notationMenu.flip();
     }
 
     /**
@@ -382,7 +464,7 @@ export class Platform{
      */
     private _resetBoard(): void
     {
-        this.clearComponents();
+        this.logConsole.clear();
         this.boardEditor.resetBoard();
         this.listenBoardChanges();
         this.logger.save("Board is reset.");

@@ -13,9 +13,9 @@ enum BoardCreatorMode {
  */
 export class BoardEditor extends Component{
     private readonly chess: Chess;
-    private isEnable: boolean = false;
+    private _isEditorModeEnable: boolean = false;
     private currentBoardCreatorMode: BoardCreatorMode;
-    private lastCreatedFenNotation: string = "";
+    private lastCreatedFenNotation: string = StartPosition.Standard;
 
     /**
      * Constructor of the BoardCreator class.
@@ -41,7 +41,7 @@ export class BoardEditor extends Component{
           </div>
           <div class = "board-creator ${BoardCreatorMode.Custom} visible">
             <div class = "border-inset"><button data-menu-operation="${BoardEditorOperation.ChangeBoardCreatorMode}" disabled="true">Templates</button></div>
-            <input type="text" placeholder="FEN Notation" value = "${this.chess.engine.getGameAsFenNotation()}">
+            <input type="text" placeholder="FEN Notation" value = "${StartPosition.Standard}">
             <div class = "border-inset"><button data-menu-operation="${BoardEditorOperation.CreateBoard}" disabled="true">Load</button></div>
           </div>
         `);
@@ -149,12 +149,12 @@ export class BoardEditor extends Component{
                 </tbody>
             </table>
             <div class="utility-menu">
-                <button class="menu-item" data-menu-operation="${BoardEditorOperation.Flip}" data-tooltip-text="Flip Board">F</button>
+                <button class="menu-item" data-menu-operation="${BoardEditorOperation.FlipBoard}" data-tooltip-text="Flip Board">F</button>
                 <button class="menu-item" data-menu-operation="${BoardEditorOperation.EnableAddPieceCursorMode}" data-tooltip-text="Add Piece">+</button>
                 <button class="menu-item" data-menu-operation="${BoardEditorOperation.EnableRemovePieceCursorMode}" data-tooltip-text="Remove Piece">-</button>
                 <button class="menu-item" data-menu-operation="${BoardEditorOperation.ClearBoard}" data-tooltip-text="Clear Board">X</button>
-                <button class="menu-item" data-menu-operation="${BoardEditorOperation.Reset}" data-tooltip-text="Reset Board">R</button>
-                <button class="menu-item" data-menu-operation="${BoardEditorOperation.ToggleUtilityMenu}">☰</button>
+                <button class="menu-item" data-menu-operation="${BoardEditorOperation.ResetBoard}" data-tooltip-text="Reset Board">R</button>
+                <button class="menu-item" data-menu-operation="${BoardEditorOperation.ToggleBoardEditorUtilityMenu}">☰</button>
             </div>
             <div class="utility-menu utility-toggle-menu visible">
                 <div class="utility-toggle-menu-section active">
@@ -164,6 +164,44 @@ export class BoardEditor extends Component{
                 </div>
             </div>
         `);
+    }
+
+    /**
+     * This function makes board creator interactive.
+     */
+    public enableEditorMode(): void
+    {
+        if(this._isEditorModeEnable === true) return;
+        this.chess.board.lock();
+        this.changeNotationMenuToPieceEditor();
+        if(this.currentBoardCreatorMode == BoardCreatorMode.Template) this.changeBoardCreatorMode();
+        (document.querySelectorAll('#board-editor [disabled="true"]') as NodeListOf<HTMLElement>).forEach((element: HTMLElement) => {
+            element.removeAttribute("disabled");
+        });
+        this._isEditorModeEnable = true;
+    }
+
+    /**
+     * This function makes board creator non-interactive.
+     */
+    public disableEditorMode(): void
+    {
+        if(this._isEditorModeEnable === false) return;
+        this.chess.board.unlock();
+        this.removePieceEditor();
+        if(this.currentBoardCreatorMode == BoardCreatorMode.Template) this.changeBoardCreatorMode();
+        (document.querySelectorAll('#board-editor [disabled="true"]') as NodeListOf<HTMLElement>).forEach((element: HTMLElement) => {
+            element.setAttribute("disabled", "true");
+        });
+        this._isEditorModeEnable = false;
+    }
+
+    /**
+     * Check if the board creator is enabled or not.
+     */
+    public isEditorModeEnable(): boolean
+    {
+        return this._isEditorModeEnable;
     }
 
     /**
@@ -180,37 +218,7 @@ export class BoardEditor extends Component{
      */
     public toggleUtilityMenu(): void
     {
-        document.querySelector(`#board-editor .utility-toggle-menu`)!.classList.toggle("visible");
-    }
-
-    /**
-     * This function makes board creator interactive.
-     */
-    public enable(): void
-    {
-        if(this.isEnable === true) return;
-        this.chess.board.lock();
-        this.changeNotationMenuToPieceEditor();
-        if(this.currentBoardCreatorMode == BoardCreatorMode.Template) this.changeBoardCreatorMode();
-        (document.querySelectorAll('#board-editor [disabled="true"]') as NodeListOf<HTMLElement>).forEach((element: HTMLElement) => {
-            element.removeAttribute("disabled");
-        });
-        this.isEnable = true;
-    }
-
-    /**
-     * This function makes board creator non-interactive.
-     */
-    public disable(): void
-    {
-        if(this.isEnable === false) return;
-        this.chess.board.unlock();
-        this.removePieceEditor();
-        if(this.currentBoardCreatorMode == BoardCreatorMode.Template) this.changeBoardCreatorMode();
-        (document.querySelectorAll('#board-editor [disabled="true"]') as NodeListOf<HTMLElement>).forEach((element: HTMLElement) => {
-            element.setAttribute("disabled", "true");
-        });
-        this.isEnable = false;
+        document.querySelector(`#piece-creator .utility-toggle-menu`)!.classList.toggle("visible");
     }
 
     /**
@@ -242,7 +250,6 @@ export class BoardEditor extends Component{
      */
     private _createBoard(fenNotation: string): void
     {
-        this.lastCreatedFenNotation = fenNotation;
         this.chess.createGame(fenNotation);
 
         // Create invisible div for triggering the log console to stream 
@@ -255,7 +262,9 @@ export class BoardEditor extends Component{
         if(this.currentBoardCreatorMode == BoardCreatorMode.Template)
           this.changeBoardCreatorMode();
 
-        this.showFen(this.chess.engine.getGameAsFenNotation());
+        const finalFenNotation = this.chess.engine.getGameAsFenNotation();
+        this.showFen(finalFenNotation);
+        this.lastCreatedFenNotation = finalFenNotation;
     }
 
     /**
@@ -278,14 +287,14 @@ export class BoardEditor extends Component{
         const color = selectedPieceOption.getAttribute("data-color") as Color;
 
         // Find random empty square and create piece.
-        this.chess.board.getAllSquares().forEach((squareElement: HTMLElement) => {
-            const squareId = this.chess.board.getSquareID(squareElement) as Square;
+        for(let i = 1; i <= 64; i++){
+            const squareId = i as Square;
             if(this.chess.board.getPieceElementOnSquare(squareId) === null)
             {
                 this.chess.createPiece(color, piece, squareId);
-                return;
+                break;
             }
-        });
+        }
 
         this.showFen(this.chess.engine.getGameAsFenNotation());
     }
@@ -320,11 +329,7 @@ export class BoardEditor extends Component{
      */
     public clearBoard(): void
     {
-        this.chess.board.getAllSquares().forEach((squareElement: HTMLElement) => {
-            const squareId = this.chess.board.getSquareID(squareElement) as Square;
-            this.chess.board.removePiece(squareId);
-        });
-        this.showFen("8/8/8/8/8/8/8/8 w - - 0 1");
+        this._createBoard(StartPosition.Empty);
     }
 
     /**

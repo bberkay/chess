@@ -35,30 +35,22 @@ export class Chess{
      * Constructor of the Chess class.
      */
     constructor(){
-        Logger.clear();
-        LocalStorage.save(LocalStorageKey.Welcome, true);
-
-        // If there is a game in cache, load it. Otherwise, create a new game.
-        if(!this.checkAndLoadGameFromCache())
-            this.createGame();
-
-        /*
-        // This is a test code for the game. It plays a move when the space key is pressed.
-        document.addEventListener("keydown", (event) => {
-            if(event.key === " "){
-                (async () => {
-                    let counter = 0;
-                    const moves = [{from:53,to:37}];
-                    for(const move of moves){
-                        this.engine.playMove(move.from, move.to);
-                        this.board.playMove(move.from, move.to);
-                        this.finishTurn();
-                        await new Promise(resolve => setTimeout(resolve, 1000)); 
-                        counter++;
-                    }
-                })();
-            }
-        });*/
+        //For testing purposes
+        //document.addEventListener("keydown", (event) => {
+        //    if(event.key === " "){
+        //        (async () => {
+        //            let counter = 0;
+        //            const moves = [{from:53,to:37}];
+        //            for(const move of moves){
+        //                this.engine.playMove(move.from, move.to);
+        //                this.board.playMove(move.from, move.to);
+        //                this.finishTurn();
+        //                await new Promise(resolve => setTimeout(resolve, 1000)); 
+        //                counter++;
+        //            }
+        //        })();
+        //    }
+        //});
     }
 
     /**
@@ -72,7 +64,6 @@ export class Chess{
         if(LocalStorage.isExist(LocalStorageKey.LastBoard)){
             this.logger.save("Game loading from cache...");
             this.createGame(LocalStorage.load(LocalStorageKey.LastBoard));
-            LocalStorage.save(LocalStorageKey.Welcome, false);
             this.logger.save("Game loaded from cache");
             return true;
         }
