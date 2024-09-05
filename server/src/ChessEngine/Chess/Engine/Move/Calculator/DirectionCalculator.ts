@@ -1,5 +1,5 @@
-import { Square, Color } from "../../../Types/index.ts";
-import { MoveRoute, Route } from "../../Types/index.ts";
+import { Square, Color } from "../../../Types";
+import { MoveRoute, Route } from "../../Types";
 import { Locator } from "../Utils/Locator.ts";
 import { BoardQuerier } from "../../Board/BoardQuerier.ts";
 

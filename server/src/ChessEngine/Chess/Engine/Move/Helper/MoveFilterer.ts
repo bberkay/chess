@@ -1,5 +1,5 @@
-import {Color, GameStatus, PieceType, Square} from "../../../Types/index.ts";
-import {MoveRoute, Piece, Route} from "../../Types/index.ts";
+import {Color, GameStatus, PieceType, Square} from "../../../Types";
+import {MoveRoute, Piece, Route} from "../../Types";
 import {BoardQuerier} from "../../Board/BoardQuerier.ts";
 import {Locator} from "../Utils/Locator.ts";
 import {RouteCalculator} from "../Calculator/RouteCalculator.ts";

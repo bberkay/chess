@@ -52,11 +52,11 @@ export class BoardEditor extends Component{
      */
     private changeNotationMenuToPieceEditor(): void
     {
+        if(this.isEditorModeEnable()) return;
         document.getElementById("notation-menu")!.id = "piece-creator";
-        (document.querySelectorAll(".player-score-section") as NodeListOf<HTMLElement>)
-            .forEach((element: HTMLElement) => { 
-                element.remove() 
-            });
+        document.querySelector("#black-player-score-section")?.remove();
+        document.querySelector("#white-player-score-section")?.remove();
+
         this.loadHTML("piece-creator", `
             <table id = "piece-table">
                 <thead>
@@ -68,13 +68,13 @@ export class BoardEditor extends Component{
                 <tbody id = "piece-options">
                     <tr>
                         <td>
-                            <div class="piece-option" data-menu-operation="${BoardEditorOperation.CreatePiece}">
+                            <div class="piece-option" data-menu-operation="${BoardEditorOperation.SelectPiece}">
                                 <div class="piece" data-piece="King" data-color="White"></div>
                                 <span>White King</span>
                             </div>
                         </td>
                         <td>
-                            <div class="piece-option" data-menu-operation="${BoardEditorOperation.CreatePiece}">
+                            <div class="piece-option" data-menu-operation="${BoardEditorOperation.SelectPiece}">
                                 <div class="piece" data-piece="King" data-color="Black"></div>
                                 <span>Black King</span>
                             </div>
@@ -82,13 +82,13 @@ export class BoardEditor extends Component{
                     </tr>
                     <tr>
                         <td>
-                            <div class="piece-option" data-menu-operation="${BoardEditorOperation.CreatePiece}">
+                            <div class="piece-option" data-menu-operation="${BoardEditorOperation.SelectPiece}">
                                 <div class="piece" data-piece="Queen" data-color="White"></div>
                                 <span>White Queen</span>
                             </div>
                         </td>
                         <td>
-                            <div class="piece-option" data-menu-operation="${BoardEditorOperation.CreatePiece}">
+                            <div class="piece-option" data-menu-operation="${BoardEditorOperation.SelectPiece}">
                                 <div class="piece" data-piece="Queen" data-color="Black"></div>
                                 <span>Black Queen</span>
                             </div>
@@ -96,13 +96,13 @@ export class BoardEditor extends Component{
                     </tr>
                     <tr>
                         <td>
-                            <div class="piece-option" data-menu-operation="${BoardEditorOperation.CreatePiece}">
+                            <div class="piece-option" data-menu-operation="${BoardEditorOperation.SelectPiece}">
                                 <div class="piece" data-piece="Rook" data-color="White"></div>
                                 <span>White Rook</span>
                             </div>
                         </td>
                         <td>
-                            <div class="piece-option" data-menu-operation="${BoardEditorOperation.CreatePiece}">
+                            <div class="piece-option" data-menu-operation="${BoardEditorOperation.SelectPiece}">
                                 <div class="piece" data-piece="Rook" data-color="Black"></div>
                                 <span>Black Rook</span>
                             </div>
@@ -110,13 +110,13 @@ export class BoardEditor extends Component{
                     </tr>
                     <tr>
                         <td>
-                            <div class="piece-option" data-menu-operation="${BoardEditorOperation.CreatePiece}">
+                            <div class="piece-option" data-menu-operation="${BoardEditorOperation.SelectPiece}">
                                 <div class="piece" data-piece="Bishop" data-color="White"></div>
                                 <span>White Bishop</span>
                             </div>
                         </td>
                         <td>
-                            <div class="piece-option" data-menu-operation="${BoardEditorOperation.CreatePiece}">
+                            <div class="piece-option" data-menu-operation="${BoardEditorOperation.SelectPiece}">
                                 <div class="piece" data-piece="Bishop" data-color="Black"></div>
                                 <span>Black Bishop</span>
                             </div>
@@ -124,13 +124,13 @@ export class BoardEditor extends Component{
                     </tr>
                     <tr>
                         <td>
-                            <div class="piece-option" data-menu-operation="${BoardEditorOperation.CreatePiece}">
+                            <div class="piece-option" data-menu-operation="${BoardEditorOperation.SelectPiece}">
                                 <div class="piece" data-piece="Knight" data-color="White"></div>
                                 <span>White Knight</span>
                             </div>
                         </td>
                         <td>
-                            <div class="piece-option" data-menu-operation="${BoardEditorOperation.CreatePiece}">
+                            <div class="piece-option" data-menu-operation="${BoardEditorOperation.SelectPiece}">
                                 <div class="piece" data-piece="Knight" data-color="Black"></div>
                                 <span>Black Knight</span>
                             </div>
@@ -138,13 +138,13 @@ export class BoardEditor extends Component{
                     </tr>
                     <tr>
                         <td>
-                            <div class="piece-option" data-menu-operation="${BoardEditorOperation.CreatePiece}">
+                            <div class="piece-option" data-menu-operation="${BoardEditorOperation.SelectPiece}">
                                 <div class="piece" data-piece="Pawn" data-color="White"></div>
                                 <span>White Pawn</span>
                             </div>
                         </td>
                         <td>
-                            <div class="piece-option" data-menu-operation="${BoardEditorOperation.CreatePiece}">
+                            <div class="piece-option" data-menu-operation="${BoardEditorOperation.SelectPiece}">
                                 <div class="piece" data-piece="Pawn" data-color="Black"></div>
                                 <span>Black Pawn</span>
                             </div>
@@ -154,7 +154,7 @@ export class BoardEditor extends Component{
             </table>
             <div class="utility-menu">
                 <button class="menu-item" data-menu-operation="${BoardEditorOperation.FlipBoard}" data-tooltip-text="Flip Board">F</button>
-                <button class="menu-item" data-menu-operation="${BoardEditorOperation.EnableAddPieceCursorMode}" data-tooltip-text="Add Piece">+</button>
+                <button class="menu-item" data-menu-operation="${BoardEditorOperation.EnableMovePieceCursorMode}" data-tooltip-text="Move Piece">+</button>
                 <button class="menu-item" data-menu-operation="${BoardEditorOperation.EnableRemovePieceCursorMode}" data-tooltip-text="Remove Piece">-</button>
                 <button class="menu-item" data-menu-operation="${BoardEditorOperation.ClearBoard}" data-tooltip-text="Clear Board">X</button>
                 <button class="menu-item" data-menu-operation="${BoardEditorOperation.ResetBoard}" data-tooltip-text="Reset Board">R</button>
@@ -168,6 +168,16 @@ export class BoardEditor extends Component{
                 </div>
             </div>
         `);
+
+        // Drag events for the piece options.
+        (document.querySelectorAll(`
+            [data-menu-operation="${BoardEditorOperation.SelectPiece}"]
+        `) as NodeListOf<HTMLElement>).forEach((element: HTMLElement) => {
+            const piece = element.querySelector(".piece") as HTMLElement;
+            if(!piece) return;
+            piece.setAttribute("draggable", "true");
+            piece.addEventListener("dragstart", () => { this.selectPiece(piece) });
+        });
     }
 
     /**
@@ -175,13 +185,18 @@ export class BoardEditor extends Component{
      */
     public enableEditorMode(): void
     {
-        if(this._isEditorModeEnable === true) return;
+        if(this.isEditorModeEnable()) return;
         this.chess.board.lock();
         this.changeNotationMenuToPieceEditor();
-        if(this.currentBoardCreatorMode == BoardCreatorMode.Template) this.changeBoardCreatorMode();
-        (document.querySelectorAll('#board-editor [disabled="true"]') as NodeListOf<HTMLElement>).forEach((element: HTMLElement) => {
+        (document.querySelectorAll(
+            '#board-editor [disabled="true"]'
+        ) as NodeListOf<HTMLElement>).forEach((element: HTMLElement) => {
             element.removeAttribute("disabled");
         });
+        
+        if(this.currentBoardCreatorMode == BoardCreatorMode.Template) 
+            this.changeBoardCreatorMode();
+
         this._isEditorModeEnable = true;
     }
 
@@ -190,7 +205,7 @@ export class BoardEditor extends Component{
      */
     public disableEditorMode(): void
     {
-        if(this._isEditorModeEnable === false) return;
+        if(!this.isEditorModeEnable()) return;
         this.chess.board.unlock();
         this.removePieceEditor();
         if(this.currentBoardCreatorMode == BoardCreatorMode.Template) this.changeBoardCreatorMode();
@@ -280,27 +295,59 @@ export class BoardEditor extends Component{
     }
 
     /**
-     * This function creates a new piece with the board creator.
+     * Clear the current selected tool effects on the editor
+     * and select the new tool.
      */
-    public createPiece(selectedPieceOption: HTMLElement): void
+    private selectEditorTool(selectedTool: HTMLElement): void
     {
-        selectedPieceOption = selectedPieceOption.querySelector(".piece") as HTMLElement;
-        if(selectedPieceOption === null) return;
+        const currentSelectedOption: HTMLElement = document.querySelector(".selected-tool") as HTMLElement;
+        if(currentSelectedOption) currentSelectedOption.classList.remove("selected-tool");
+        
+        selectedTool.classList.add("selected-tool");
 
-        const piece = selectedPieceOption.getAttribute("data-piece") as PieceType;
-        const color = selectedPieceOption.getAttribute("data-color") as Color;
+        document.querySelector("#chessboard")!.setAttribute("style", "cursor: pointer !important");
+        
+        this.chess.board.getAllSquares().forEach((squareElement: HTMLElement) => {
+            squareElement.removeAttribute("data-menu-operation");
+        });
+    }
 
-        // Find random empty square and create piece.
-        for(let i = 1; i <= 64; i++){
-            const squareId = i as Square;
-            if(this.chess.board.getPieceElementOnSquare(squareId) === null)
-            {
-                this.chess.createPiece(color, piece, squareId);
-                break;
-            }
+    /**
+     * This function select the piece on the piece creator for creating a new piece.
+     */
+    public selectPiece(selectedPieceOption: HTMLElement): void
+    {
+        if(!selectedPieceOption.classList.contains("piece") 
+            && !selectedPieceOption.classList.contains("piece-option")
+            && !selectedPieceOption.parentElement?.classList.contains(".piece-option")) return;
+        this.selectEditorTool(selectedPieceOption.parentElement!);
+        this.chess.board.getAllSquares().forEach((squareElement: HTMLElement) => {
+            squareElement.setAttribute("data-menu-operation", BoardEditorOperation.CreatePiece);
+            squareElement.addEventListener("dragover", (event: DragEvent) => {
+                event.preventDefault();
+            });
+            squareElement.addEventListener("drop", (event: DragEvent) => {
+                event.preventDefault();
+                this.createPiece(squareElement);
+            });
+        });
+    }
+
+    /**
+     * This function creates the selected piece on the board.
+     */
+    public createPiece(selectedSquare: HTMLElement): void
+    {
+        const selectedPieceOption: HTMLElement = document.querySelector(".selected-tool .piece") as HTMLElement;
+        if(selectedSquare.classList.contains("square") && selectedPieceOption !== null){
+            this.chess.createPiece(
+                selectedPieceOption.getAttribute("data-color") as Color,
+                selectedPieceOption.getAttribute("data-piece") as PieceType,
+                this.chess.board.getSquareID(selectedSquare) as Square
+            );
+            selectedSquare.setAttribute("data-menu-operation", BoardEditorOperation.RemovePiece);
+            this.showFen(this.chess.engine.getGameAsFenNotation());
         }
-
-        this.showFen(this.chess.engine.getGameAsFenNotation());
     }
 
     /**
@@ -339,12 +386,13 @@ export class BoardEditor extends Component{
     /**
      * This function enables the add piece cursor mode.
      */
-    public enableAddPieceCursorMode(): void
+    public enableMovePieceCursorMode(): void
     {
-        this.chess.board.getAllSquares().forEach((squareElement: HTMLElement) => {
-            squareElement.removeAttribute("data-menu-operation");
-        });
-        document.querySelector("#chessboard")!.setAttribute("style", "cursor: pointer !important");
+        this.selectEditorTool(
+            document.querySelector(`
+                [data-menu-operation="${BoardEditorOperation.EnableMovePieceCursorMode}"]
+            `) as HTMLElement
+        );
     }
 
     /**
@@ -352,9 +400,16 @@ export class BoardEditor extends Component{
      */
     public enableRemovePieceCursorMode(): void
     {
+        this.selectEditorTool(
+            document.querySelector(`
+                [data-menu-operation="${BoardEditorOperation.EnableRemovePieceCursorMode}"]
+            `) as HTMLElement
+        );
+
         this.chess.board.getAllSquares().forEach((squareElement: HTMLElement) => {
             squareElement.setAttribute("data-menu-operation", BoardEditorOperation.RemovePiece);
         });
+
         document.querySelector("#chessboard")!.setAttribute("style", "cursor: no-drop !important");
     }
 

@@ -1,8 +1,8 @@
 import {Board} from "./Board.ts";
-import {CastlingType, Color, JsonNotation, PieceType, Square, GameStatus} from "../../Types/index.ts";
+import {CastlingType, Color, JsonNotation, PieceType, Square, GameStatus} from "../../Types";
 import {BoardQuerier} from "./BoardQuerier.ts";
 import {PieceModel} from "../Models/PieceModel.ts";
-import {Piece} from "../Types/index.ts";
+import {Piece} from "../Types";
 
 /**
  * This class provides the board management of the game.

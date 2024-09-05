@@ -34,10 +34,11 @@ export enum BoardEditorOperation{
     FlipBoard = "FlipBoard",
     ResetBoard = "ResetBoard",
     ClearBoard = "ClearBoard",
+    SelectPiece = "SelectPiece",
     CreatePiece = "CreatePiece",
     RemovePiece = "RemovePiece",
     CreateBoard = "CreateBoard",
-    EnableAddPieceCursorMode = "EnableAddPieceCursorMode",
+    EnableMovePieceCursorMode = "EnableMovePieceCursorMode",
     EnableRemovePieceCursorMode = "EnableRemovePieceCursorMode",
     ChangeBoardCreatorMode = "ChangeBoardCreatorMode",
     ToggleBoardEditorUtilityMenu = "ToggleBoardEditorUtilityMenu"

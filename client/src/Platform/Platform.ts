@@ -354,14 +354,17 @@ export class Platform{
             case BoardEditorOperation.ClearBoard:
                 this.boardEditor.clearBoard();
                 break;
+            case BoardEditorOperation.SelectPiece:
+                this.boardEditor.selectPiece(menuItem);
+                break;
             case BoardEditorOperation.CreatePiece:
                 this.boardEditor.createPiece(menuItem);
                 break;
             case BoardEditorOperation.RemovePiece:
                 this.boardEditor.removePiece(menuItem);
                 break;
-            case BoardEditorOperation.EnableAddPieceCursorMode:
-                this.boardEditor.enableAddPieceCursorMode();
+            case BoardEditorOperation.EnableMovePieceCursorMode:
+                this.boardEditor.enableMovePieceCursorMode();
                 break;
             case BoardEditorOperation.EnableRemovePieceCursorMode:
                 this.boardEditor.enableRemovePieceCursorMode();

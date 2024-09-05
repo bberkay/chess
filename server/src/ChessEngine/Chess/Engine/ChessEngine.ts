@@ -17,11 +17,11 @@ import {
     PieceType,
     Square,
     StartPosition
-} from "../Types/index.ts";
-import {NotationSymbol, Piece} from "./Types/index.ts";
+} from "../Types";
+import {NotationSymbol, Piece} from "./Types";
 import {MoveEngine} from "./Move/MoveEngine.ts";
 import {BoardManager} from "./Board/BoardManager.ts";
-import {Converter} from "../Utils/Converter.ts";
+import {Converter} from "../Utils/Converter";
 import {BoardQuerier} from "./Board/BoardQuerier.ts";
 import {Locator} from "./Move/Utils/Locator.ts";
 import {Extractor} from "./Move/Utils/Extractor.ts";
@@ -63,6 +63,22 @@ export class ChessEngine extends BoardManager {
         this.clearProperties();
         this.createBoard(typeof position !== "string" ? position : Converter.fenToJson(position));
         this.checkGameStatus();
+    }
+
+    /**
+     * This function creates a new piece with the given color, type and square.
+     */
+    public createPiece(color: Color, type: PieceType, square: Square): void
+    {
+        super.createPiece(color, type, square);
+    }
+
+    /**
+     * This function removes the piece on the given square.
+     */
+    public removePiece(square: Square): void
+    {
+        super.removePiece(square);
     }
 
     /**
