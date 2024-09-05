@@ -19,16 +19,19 @@
 
 #piece-table{
     width: var(--board-editor-table-width);
+    height: calc(var(--board-size) - 52px);
+    max-height: calc(var(--board-size) - 52px);
     font-size:15px;
     background-color: #111;
     color: #f5f5f5;
     border:1px solid #2a2a2a;
 
     & tbody{
-        overflow-x: hidden;
+        overflow: hidden;
         scrollbar-width: thin;
         width:100%;
         display:block;
+        height: calc(var(--board-size) - 95px);
     }
 
     & tr{
@@ -46,7 +49,8 @@
             text-align: center;
             position: relative;
             width:calc((var(--board-size) / 9) + 5px);
-            height:calc((var(--board-size) / 10) + 15px);
+            /*height:calc((var(--board-size) / 10) + 15px);*/
+            height: 100%;
             background-color: #222;
             border:1px solid #2a2a2a;
             cursor: pointer;
@@ -61,7 +65,11 @@
         }
     }
 
-    .piece-option{
+    & tbody tr{
+        height: calc((var(--board-size) - 95px) / 6);
+    }
+
+    & .piece-option{
         white-space: nowrap;
         display: flex;
         justify-content: center;

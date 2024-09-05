@@ -21,12 +21,12 @@ function copyToClipboard(selector){
 }
 
 function reOrderLayoutForMobile(){
-    if(document.querySelector("#notation-menu") == null)
-        return;
-
     document.querySelector(".right").append(
         document.querySelector("#board-editor")
     );
+
+    if(document.querySelector("#piece-creator"))
+        return;
 
     document.querySelector("#chessboard").before(
         document.querySelector("#black-player-score-section")
@@ -38,12 +38,12 @@ function reOrderLayoutForMobile(){
 }
 
 function reOrderLayoutForDesktop(){
-    if(document.querySelector("#notation-menu") == null)
-        return;
-
     document.querySelector(".center").append(
         document.querySelector("#board-editor")
     );
+    
+    if(document.querySelector("#piece-creator"))
+        return;
 
     document.querySelector("#notation-menu").append(
         document.querySelector("#white-player-score-section")

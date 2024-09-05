@@ -53,6 +53,10 @@ export class BoardEditor extends Component{
     private changeNotationMenuToPieceEditor(): void
     {
         document.getElementById("notation-menu")!.id = "piece-creator";
+        (document.querySelectorAll(".player-score-section") as NodeListOf<HTMLElement>)
+            .forEach((element: HTMLElement) => { 
+                element.remove() 
+            });
         this.loadHTML("piece-creator", `
             <table id = "piece-table">
                 <thead>
