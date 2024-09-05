@@ -139,7 +139,7 @@ export class Platform{
                     break;
             }
 
-            this._reBindUnbindedMenuOperations();
+            this.bindMenuOperations();
         });
 
         this.socket.addEventListener("close", event => {
@@ -183,7 +183,7 @@ export class Platform{
         {
             const tooltipText = menuItem.getAttribute("data-tooltip-text");
             if(!tooltipText) return;
-            
+
             const tooltipElement = document.createElement("div");
             tooltipElement.classList.add("tooltip");
             menuItem.append(tooltipElement);
@@ -246,7 +246,7 @@ export class Platform{
                 menuItem
             );
 
-        this._reBindUnbindedMenuOperations();
+        this.bindMenuOperations();
     }
     
     /**
@@ -367,19 +367,10 @@ export class Platform{
                 this.boardEditor.enableRemovePieceCursorMode();
                 break;
         }
+
+        LocalStorage.save(LocalStorageKey.LastBoard, this.chess.engine.getGameAsJsonNotation());
     }
 
-    /**
-     * Rebind the menu operations in case of the menu operations
-     * are unbinded. This method is can be used after the new menu items
-     * are added to the menu.
-     */
-    private _reBindUnbindedMenuOperations(): void
-    {
-        if(this.menuOperationItems !== Array.from(document.querySelectorAll("[data-menu-operation]")))
-            this.bindMenuOperations();
-    }
-    
     /**
      * Cancel the game and close the socket connection
      */
@@ -419,7 +410,7 @@ export class Platform{
      */
     private clearComponents(){
         this.logConsole.clear();
-        this.notationMenu.clear();
+        if(!this.boardEditor.isEditorModeEnable()) this.notationMenu.clear();
     }
 
     /**
@@ -427,8 +418,8 @@ export class Platform{
      */
     private _enableBoardEditor(): void
     {
-        if(this.boardEditor.isEditorModeEnable()) return;
         this.navigatorModal.hide();
+        if(this.boardEditor.isEditorModeEnable()) return;
         this.clearComponents();
         this.boardEditor.enableEditorMode();
         this.listenBoardChanges();

@@ -37,8 +37,8 @@ export enum BoardEditorOperation{
     CreatePiece = "CreatePiece",
     RemovePiece = "RemovePiece",
     CreateBoard = "CreateBoard",
-    EnableAddPieceCursorMode = "AddPieceCursorMode",
-    EnableRemovePieceCursorMode = "RemovePieceCursorMode",
+    EnableAddPieceCursorMode = "EnableAddPieceCursorMode",
+    EnableRemovePieceCursorMode = "EnableRemovePieceCursorMode",
     ChangeBoardCreatorMode = "ChangeBoardCreatorMode",
     ToggleBoardEditorUtilityMenu = "ToggleBoardEditorUtilityMenu"
 }

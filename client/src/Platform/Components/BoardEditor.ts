@@ -340,6 +340,7 @@ export class BoardEditor extends Component{
         this.chess.board.getAllSquares().forEach((squareElement: HTMLElement) => {
             squareElement.removeAttribute("data-menu-operation");
         });
+        document.querySelector("#chessboard")!.setAttribute("style", "cursor: pointer !important");
     }
 
     /**
@@ -350,6 +351,7 @@ export class BoardEditor extends Component{
         this.chess.board.getAllSquares().forEach((squareElement: HTMLElement) => {
             squareElement.setAttribute("data-menu-operation", BoardEditorOperation.RemovePiece);
         });
+        document.querySelector("#chessboard")!.setAttribute("style", "cursor: no-drop !important");
     }
 
     /**
