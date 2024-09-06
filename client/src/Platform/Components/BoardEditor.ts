@@ -54,8 +54,8 @@ export class BoardEditor extends Component{
     {
         if(this.isEditorModeEnable()) return;
         document.getElementById("notation-menu")!.id = "piece-creator";
-        document.querySelector("#black-player-score-section")?.remove();
-        document.querySelector("#white-player-score-section")?.remove();
+        document.querySelector("#black-turn-indicator")?.remove();
+        document.querySelector("#white-turn-indicator")?.remove();
 
         this.loadHTML("piece-creator", `
             <table id = "piece-table">

@@ -30,22 +30,39 @@ export class NotationMenu extends Component{
     protected renderComponent(): void
     {
         this.loadHTML("notation-menu", `
-                <div class="player-score-section" id="black-player-score-section">
-                    <div class="turn-indicator" id="black-turn-indicator">
-                        <span class = "indicator-icon"></span>
-                        <span>Black's turn</span>
-                    </div>
-                    <div class = "score-table" id = "white-captured-pieces"></div>
+                <div class="turn-indicator" id="black-turn-indicator">
+                    <span class = "indicator-icon"></span>
+                    <span>Black's turn</span>
                 </div>
                 <table id = "notation-table">
+                    <thead class="player-score-section">
+                        <tr>
+                            <th>
+                                <div>
+                                    <span id="black-player-name">B John Doe</span>
+                                    <span class="score-table" id="white-captured-pieces">b John Doe</span>
+                                </div>
+                            </th>
+                        </tr>
+                    </thead>
                     <thead>
                         <tr>
                             <th>#</th>
                             <th>White</th>
                             <th>Black</th>
                         </tr>
-                    </thead>
+                    </thead>    
                     <tbody id = "notations"></tbody>
+                    <tfoot class="player-score-section">
+                        <tr>
+                            <th>
+                                <div>
+                                    <span id="white-player-name">W John Doe</span>
+                                    <span class="score-table" id="black-captured-pieces">w John Doe</span>
+                                </div>
+                            </th>
+                        </tr>
+                    </tbody>
                 </table>
                 <div class="utility-menu">
                     <button class="menu-item" data-menu-operation="${BoardEditorOperation.FlipBoard}" data-tooltip-text="Flip Board">F</button>
@@ -66,12 +83,9 @@ export class NotationMenu extends Component{
                         <button class="menu-item" data-menu-operation="${NotationMenuOperation.Resign}" data-tooltip-text="Resign From Game">⚐ Resign</button>
                     </div>
                 </div>
-                <div class="player-score-section" id="white-player-score-section">
-                    <div class="score-table" id="black-captured-pieces"></div>
-                    <div class="turn-indicator visible" id="white-turn-indicator">
-                        <span class = "indicator-icon"></span>
-                        <span>White's turn</span>
-                    </div>
+                <div class="turn-indicator visible" id="white-turn-indicator">
+                    <span class = "indicator-icon"></span>
+                    <span>White's turn</span>
                 </div>
         `);
     }
@@ -117,9 +131,7 @@ export class NotationMenu extends Component{
                 );
         }
 
-        const notationTable: HTMLElement = document.querySelector("#notation-table tbody")!;
-        notationTable.scrollTop = notationTable.scrollHeight;
-
+        notationMenu.scrollTop = notationMenu.scrollHeight;
         this.moveCount = notations.length;
     }
 
@@ -202,13 +214,12 @@ export class NotationMenu extends Component{
      * Flip the notation table.
      */
     public flip(): void {                
-        let playerScoreSectionOnTop = document.querySelector(".player-score-section")!;
-        playerScoreSectionOnTop.append(playerScoreSectionOnTop.firstElementChild!)
-        playerScoreSectionOnTop.parentElement!.append(playerScoreSectionOnTop);
+        const playerScoreSectionAtTop = document.querySelectorAll(".player-score-section")![0];
+        const playerScoreSectionAtBottom = document.querySelectorAll(".player-score-section")![1];
         
-        playerScoreSectionOnTop = document.querySelector(".player-score-section")!;
-        playerScoreSectionOnTop.append(playerScoreSectionOnTop.firstElementChild!)
-        playerScoreSectionOnTop.parentElement!.prepend(playerScoreSectionOnTop!);
+        const temp = playerScoreSectionAtTop.innerHTML;
+        playerScoreSectionAtTop.innerHTML = playerScoreSectionAtBottom.innerHTML;
+        playerScoreSectionAtBottom.innerHTML = temp;
     }
 
     /**

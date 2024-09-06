@@ -14,6 +14,11 @@
     color: #f5f5f5;
     border:1px solid #2a2a2a;
 
+    & thead{
+        margin-bottom:3px;
+        border-spacing: 2px 1px;
+    }
+
     & tbody{
         max-height: var(--notation-table-height);
         overflow-y: scroll;
@@ -30,7 +35,8 @@
         width:100%;
 
         & th{
-            padding:7px 5px;
+            padding:7px 10px;
+            padding-bottom: 3px;
             background-color: #222;
             border:1px solid #2a2a2a;
         }
@@ -56,52 +62,53 @@
  * Player Score Section
  */
 .player-score-section {
-    /**
-     * Score Table
-     */
-    & .score-table{
-        font-size:15px;
-        font-weight:bold;
-        margin:10px 0;
-        width:100%;
-        margin-left: 2px;
-        display: flex;
+    & th div{
+        display: flex; 
+        justify-content: space-between;
         align-items: center;
+    }
+
+    & .score-table{
+        font-size:12px;
+        font-weight:bold;
         gap: 5px;
-        height: 30px;
         
         & .piece-icons{
             font-size: 22px;
         }
     }
+}
 
-    /**
-     * Turn Indicator
-     */
-    & .turn-indicator{
-        opacity: 0;
-        display: flex;
-        margin-left: 3px;
-    
-        & span.indicator-icon{
-            width: 1rem;
-            height: 1rem;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 6px;
-        }
-    
-        &#white-turn-indicator span.indicator-icon{
-            background-color: var(--white-square-color);
-        }
-    
-        &#black-turn-indicator span.indicator-icon{
-            background-color: var(--black-square-color);
-        }
-    
-        &.visible{
-            opacity: 1;
-        }
+.turn-indicator{
+    opacity: 0;
+    display: flex;
+
+    & span.indicator-icon{
+        width: 1rem;
+        height: 1rem;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 6px;
+    }
+
+    &#white-turn-indicator span.indicator-icon{
+        background-color: var(--white-square-color);
+    }
+
+    &#black-turn-indicator span.indicator-icon{
+        background-color: var(--black-square-color);
+    }
+
+    &.visible{
+        opacity: 1;
+    }
+
+    &:first-of-type{
+        margin-bottom: 15px;
+    }
+
+    &:last-of-type{
+        margin-top: 15px;
     }
 }
 
@@ -156,19 +163,9 @@
         gap: 1rem;
     }
 
-    #black-player-score-section, #white-player-score-section{
+    .player-score-section{
         display: flex;
         justify-content: space-between;
         align-items: center;
-
-        & .score-table{
-            width: auto;
-            margin: 0;
-        }
-
-        & .score-table + .turn-indicator{
-            order: -1;
-            margin-left: 0;
-        }
     }
 }

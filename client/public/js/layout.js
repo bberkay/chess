@@ -29,11 +29,11 @@ function reOrderLayoutForMobile(){
         return;
 
     document.querySelector("#chessboard").before(
-        document.querySelector("#black-player-score-section")
+        document.querySelector("#black-turn-indicator")
     );
 
     document.querySelector("#chessboard").after(
-        document.querySelector("#white-player-score-section")
+        document.querySelector("#white-turn-indicator")
     );
 }
 
@@ -46,10 +46,10 @@ function reOrderLayoutForDesktop(){
         return;
 
     document.querySelector("#notation-menu").append(
-        document.querySelector("#white-player-score-section")
+        document.querySelector("#white-turn-indicator")
     );
 
     document.querySelector("#notation-menu").prepend(
-        document.querySelector("#black-player-score-section")
+        document.querySelector("#black-turn-indicator")
     );
 }

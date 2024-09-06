@@ -107,7 +107,6 @@ export abstract class Component{
         }
 
         const submitButton = component.querySelector("button[type='submit']");
-        console.log(submitButton);
         if(!submitButton) return;
 
         submitButton.setAttribute("disabled", "true");
