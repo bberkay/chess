@@ -53,12 +53,15 @@ export class Platform{
     {
         if(LocalStorage.isExist(LocalStorageKey.LastLobbyConnection)){
             // @ts-ignore
-            this.connectToLobby(LocalStorage.load(LocalStorageKey.LastLobbyConnection));
+            this.connectToLobby(
+                LocalStorage.load(LocalStorageKey.LastLobbyConnection), 
+                LocalStorage.load(LocalStorageKey.LastPlayerName)
+            );
         }
         else{
             const lobbyId = window.location.pathname.split("/").pop(); 
             if(lobbyId)
-                this.connectToLobby(lobbyId);
+                this.connectToLobby(lobbyId, LocalStorage.load(LocalStorageKey.LastPlayerName));
         }
 
         document.addEventListener("DOMContentLoaded", () => {
@@ -114,13 +117,16 @@ export class Platform{
     /**
      * Connect to the lobby with the given lobby id.
      */
-    private connectToLobby(lobbyId: string | null = null): void
+    private connectToLobby(lobbyId: string | null = null, playerName: string | null = null): void
     {
         LocalStorage.clear(LocalStorageKey.BoardEditorEnabled);
         LocalStorage.clear(LocalStorageKey.LastLobbyConnection);
 
+        const webSocketUrl = import.meta.env.VITE_WS_ADDRESS + (lobbyId ? "/" + lobbyId : "");
+        if(webSocketUrl.length > 255) return;
+
         // @ts-ignore
-        this.socket = new WebSocket(import.meta.env.VITE_WS_ADDRESS + (lobbyId ? "/" + lobbyId : ""));
+        this.socket = new WebSocket(webSocketUrl);
         
         this.socket.addEventListener("open", event => {
 
@@ -131,8 +137,9 @@ export class Platform{
             switch(wsCommand){
                 case WsCommand.Connected:
                     this.navigatorModal.showLobbyInfo(window.location.origin + "/" + wsData.lobbyId);
-                    // LocalStorage.save(LocalStorageKey.LastLobbyConnection, {lobbyId: lobbyId, color: data.color});
-                    this.logger.save("Connected to the lobby[" + lobbyId + "] as " + wsData.color + " player.");
+                    // LocalStorage.save(LocalStorageKey.LastLobbyConnection, {lobbyId: wsData.lobbyId, color: wsData.color});
+                    // LocalStorage.save(LocalStorageKey.LastPlayerName, ws.data.playerName);
+                    this.logger.save(`Connected to the lobby[${wsData.lobbyId}] as ${wsData.playerName}[${wsData.color}].`);
                     break;
                 case WsCommand.Started:
                     this._createBoard(wsData);
@@ -179,45 +186,9 @@ export class Platform{
      */
     protected bindMenuOperations(): void
     {
-        /**
-         * Create a tooltip for the menu item by data-tooltip-text 
-         * attribute of the menu item.
-         */
-        function createTooltipOfMenuItem(menuItem: HTMLElement): void
-        {
-            const tooltipText = menuItem.getAttribute("data-tooltip-text");
-            if(!tooltipText) return;
-
-            const tooltipElement = document.createElement("div");
-            tooltipElement.classList.add("tooltip");
-            menuItem.append(tooltipElement);
-
-            let tooltipTimeout: number | Timer | undefined;
-            menuItem.addEventListener("mouseover", function() {
-                tooltipTimeout = setTimeout(() => {
-                    tooltipElement.classList.add("active");
-                    tooltipElement.textContent = tooltipText;
-                }, 500);
-            });
-
-            menuItem.addEventListener("mouseout", function() {
-                clearTimeout(tooltipTimeout);
-                tooltipElement.classList.remove("active");
-                tooltipElement.textContent = "";
-            });
-
-            menuItem.addEventListener("mousedown", function(e) {
-                e.preventDefault();
-                clearTimeout(tooltipTimeout);
-                tooltipElement.classList.remove("active");
-                tooltipElement.textContent = "";
-            });
-        }
-
         (document.querySelectorAll("[data-menu-operation]") as NodeListOf<HTMLElement>).forEach((menuItem: HTMLElement) => {
             if(this.menuOperationItems.length == 0 || !this.menuOperationItems.includes(menuItem)){
                 menuItem.addEventListener("click", () => { this.handleMenuOperation(menuItem) });
-                createTooltipOfMenuItem(menuItem);
                 this.menuOperationItems.push(menuItem);
             }
         });
@@ -289,8 +260,11 @@ export class Platform{
             case NavigatorModalOperation.PlayAgainstBot:
                 this.navigatorModal.showPlayAgainstBot();
                 break;
+            case NavigatorModalOperation.PlayAgainstFriend:
+                this.navigatorModal.showPlayAgainstFriend();
+                break
             case NavigatorModalOperation.CreateLobby:
-                this.connectToLobby();
+                this._createLobby();
                 break;
             case NavigatorModalOperation.EnableBoardEditor:
                 this._enableBoardEditor();
@@ -374,18 +348,6 @@ export class Platform{
     }
 
     /**
-     * Cancel the game and close the socket connection
-     */
-    private _cancelGame(): void
-    {
-        LocalStorage.clear(LocalStorageKey.LastLobbyConnection);
-        this.navigatorModal.hide();
-        this.socket?.close();
-        this.notationMenu.showNewGameUtilityMenu();
-        this.chess.board.lock();
-    }
-
-    /**
      * Update the components of the menu, for example
      * update the notation menu and print the logs of the game on log
      * console after the move is made.
@@ -413,6 +375,26 @@ export class Platform{
     private clearComponents(){
         this.logConsole.clear();
         if(!this.boardEditor.isEditorModeEnable()) this.notationMenu.clear();
+    }
+
+    /**
+     * Create a new lobby with the given player name.
+     */
+    private _createLobby(): void
+    {
+        this.connectToLobby(null, (document.getElementById("player-name") as HTMLInputElement).value);
+    }
+
+    /**
+     * Cancel the game and close the socket connection
+     */
+    private _cancelGame(): void
+    {
+        LocalStorage.clear(LocalStorageKey.LastLobbyConnection);
+        this.navigatorModal.hide();
+        this.socket?.close();
+        this.notationMenu.showNewGameUtilityMenu();
+        this.chess.board.lock();
     }
 
     /**

@@ -6,6 +6,7 @@ export enum LocalStorageKey{
     WelcomeShown = "welcomeShown",
     LastBoard = "lastBoard",
     LastLobbyConnection = "lastLobbyConnection",
+    LastPlayerName = "lastPlayerName",
     BoardEditorEnabled = "boardEditorEnabled",
 }
 
@@ -34,6 +35,7 @@ export class LocalStorage
      */
     public static load(key: LocalStorageKey): any
     {
+        if(!LocalStorage.isExist(key)) return null;
         const data = JSON.parse(localStorage.getItem(key)!);
         if(data === null || data.expiration < new Date().getTime())
         {

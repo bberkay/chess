@@ -21,6 +21,7 @@ export enum NavigatorModalOperation{
     ShowWelcome = "ShowWelcome",
     AskConfirmation = "AskConfirmation",
     PlayAgainstBot = "PlayAgainstBot",
+    PlayAgainstFriend = "PlayAgainstFriend",
     CreateLobby = "CreateLobby",
     EnableBoardEditor = "EnableBoardEditor",
     CancelGame = "CancelGame"

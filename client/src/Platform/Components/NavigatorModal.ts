@@ -148,7 +148,7 @@ export class NavigatorModal extends Component{
         this.show(
             "Create New Game",
             `<div class = "btn-group-vertical">
-                <button data-menu-operation="${NavigatorModalOperation.CreateLobby}">Play against Friend</button>
+                <button data-menu-operation="${NavigatorModalOperation.PlayAgainstFriend}">Play against Friend</button>
                 <button data-menu-operation="${NavigatorModalOperation.PlayAgainstBot}">Play against Bot</button>
                 <button data-menu-operation="${NavigatorModalOperation.EnableBoardEditor}">Create Board</button>
             </div>
@@ -159,6 +159,26 @@ export class NavigatorModal extends Component{
             </div>
             `
         );
+    }
+
+    /**
+     * Show the play against friend screen.
+     */
+    public showPlayAgainstFriend(): void
+    {
+        this.show(
+            "Play against a Friend",
+            `<span style="font-size:13px">Enter a name: </span>
+            <div class="input-group" style="padding-top:5px;padding-bottom:5px;">
+                <input type="text" id="player-name" placeholder="Your Name" maxlength="25" minlength="3" required>
+                <button type="submit" data-menu-operation="${NavigatorModalOperation.CreateLobby}">Play</button>
+            </div>
+            <div style="text-align:center;margin-top:10px;">
+                <button class="button--text" style="font-size:13px!important;" data-menu-operation="${NavigatorModalOperation.ShowGameCreator}">
+                    Cancel
+                </button>
+            </div>
+        `);
     }
 
     /**
