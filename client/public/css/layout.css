@@ -239,6 +239,12 @@ main{
  * ------------------ Responsive ------------------- 
  *             700px - 900px - 1250px
  */
+@media screen and (min-width: 1250px) and (max-height: 850px){
+    #notation-menu{
+        margin-top:0;
+    }
+}
+
 @media screen and (min-width: 900px) and (max-width: 1250px) {
     main{
         padding: 1rem;
