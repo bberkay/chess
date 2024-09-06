@@ -165,6 +165,10 @@ export class Platform{
             characterData: true
         });
 
+        document.getElementById("fen-notation")!.addEventListener("change", () => {
+            LocalStorage.save(LocalStorageKey.LastBoard, this.chess.engine.getGameAsFenNotation());
+        });
+
         this.logger.save("Board changes are listening...");
     }
 
@@ -354,9 +358,6 @@ export class Platform{
             case BoardEditorOperation.ClearBoard:
                 this.boardEditor.clearBoard();
                 break;
-            case BoardEditorOperation.SelectPiece:
-                this.boardEditor.selectPiece(menuItem);
-                break;
             case BoardEditorOperation.CreatePiece:
                 this.boardEditor.createPiece(menuItem);
                 break;
@@ -370,8 +371,6 @@ export class Platform{
                 this.boardEditor.enableRemovePieceCursorMode();
                 break;
         }
-
-        LocalStorage.save(LocalStorageKey.LastBoard, this.chess.engine.getGameAsJsonNotation());
     }
 
     /**

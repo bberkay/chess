@@ -860,7 +860,7 @@ export class ChessBoard {
     /**
      * Get the click mode of the given square element or id(squareID).
      */
-    private getSquareClickMode(square: Square | HTMLDivElement | Element): SquareClickMode {
+    public getSquareClickMode(square: Square | HTMLDivElement | Element): SquareClickMode {
       if (typeof square === "number")
         square = this.getSquareElement(square);
       return square.getAttribute("data-click-mode") as SquareClickMode;
@@ -869,7 +869,7 @@ export class ChessBoard {
     /**
      * Get the effect of the given square element or id(squareID).
      */
-    private getSquareEffects(square: Square | HTMLDivElement | Element): SquareEffect[] {
+    public getSquareEffects(square: Square | HTMLDivElement | Element): SquareEffect[] {
         if (typeof square === "number")
             square = this.getSquareElement(square);
 
@@ -886,7 +886,7 @@ export class ChessBoard {
     /**
      * This function sets the click mode of the given square element or id(squareID).
      */
-    private setSquareClickMode(square: Square|HTMLDivElement|Element, mode:SquareClickMode): void
+    public setSquareClickMode(square: Square|HTMLDivElement|Element, mode:SquareClickMode): void
     {
         if(document.querySelector(".result-message"))
             return;
@@ -901,7 +901,7 @@ export class ChessBoard {
     /**
      * This function sets the effect of the given square element or id(squareID).
      */
-    private addSquareEffects(
+    public addSquareEffects(
         square: Square|HTMLDivElement|Element, 
         effect: SquareEffect | Array<SquareEffect>
     ): void {
@@ -921,7 +921,7 @@ export class ChessBoard {
      * @example removeEffectOfSquare(1); // Removes all effects of the square with id 1.
      * @example removeEffectOfSquare(1, [SquareEffect.Select, SquareEffect.Move]); // Removes the select and move effects of the square with id 1.
      */
-    private removeSquareEffect(square: Square|HTMLDivElement|Element, effects: SquareEffect|Array<SquareEffect>|null = null): void
+    public removeSquareEffect(square: Square|HTMLDivElement|Element, effects: SquareEffect|Array<SquareEffect>|null = null): void
     {
         if(typeof square === "number")
           square = this.getSquareElement(square);
@@ -940,7 +940,7 @@ export class ChessBoard {
     /**
      * Find and remove the given effects from all squares.
      */
-    private removeEffectFromAllSquares(effects: Array<SquareEffect> | null = null): void {
+    public removeEffectFromAllSquares(effects: Array<SquareEffect> | null = null): void {
         let squares: NodeListOf<Element> = this.getAllSquares();
         for(let i = 0; i <= 63; i++)
             this.removeSquareEffect(squares[i], effects);

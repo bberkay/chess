@@ -34,7 +34,6 @@ export enum BoardEditorOperation{
     FlipBoard = "FlipBoard",
     ResetBoard = "ResetBoard",
     ClearBoard = "ClearBoard",
-    SelectPiece = "SelectPiece",
     CreatePiece = "CreatePiece",
     RemovePiece = "RemovePiece",
     CreateBoard = "CreateBoard",
