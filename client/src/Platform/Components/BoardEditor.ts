@@ -1,6 +1,6 @@
 import { BoardEditorOperation, NavigatorModalOperation } from "../Types";
 import { Chess } from "@Chess/Chess";
-import { Color, JsonNotation, PieceType, Square, StartPosition } from "@Chess/Types";
+import { Color, GameStatus, JsonNotation, PieceType, Square, StartPosition } from "@Chess/Types";
 import { Component } from "./Component";
 
 enum BoardCreatorMode {
@@ -150,12 +150,30 @@ export class BoardEditor extends Component{
             </div>
             <div class="utility-menu utility-toggle-menu visible">
                 <div class="utility-toggle-menu-section active">
-                    <button class="menu-item" data-menu-operation="" data-tooltip-text="Start the Board" disabled="true">Start</button>
+                    <button class="menu-item" data-menu-operation="${NavigatorModalOperation.ShowStartPlayingBoard}" data-tooltip-text="Start the Board" disabled="true">Start</button>
                     <button class="menu-item" data-menu-operation="${NavigatorModalOperation.ShowGameCreator}" data-tooltip-text="Create New Game">+ New Game</button>
                     <button class="menu-item" data-menu-operation="${NavigatorModalOperation.ShowWelcome}" data-tooltip-text="About Project">Info</button>
                 </div>
             </div>
         `);
+    }
+
+    /**
+     * Enable the start game button.
+     */
+    private enableStartGameButton(): void
+    {
+        const startButton: HTMLElement = document.querySelector(`[data-menu-operation="${NavigatorModalOperation.ShowStartPlayingBoard}"]`) as HTMLElement;
+        startButton.removeAttribute("disabled");
+    }
+
+    /**
+     * Disable the start game button.
+     */
+    private disableStartGameButton(): void
+    {
+        const startButton: HTMLElement = document.querySelector(`[data-menu-operation="${NavigatorModalOperation.ShowStartPlayingBoard}"]`) as HTMLElement;
+        startButton.setAttribute("disabled", "true");
     }
 
     /**
@@ -504,7 +522,13 @@ export class BoardEditor extends Component{
     {
         const inputElement = document.querySelector(`.${BoardCreatorMode.Custom} input`) as HTMLInputElement;
         inputElement.value = fenNotation;
-        inputElement.dispatchEvent(new Event("change"));
+        if(this.isEditorModeEnable()){
+            console.log(this.chess.engine.isBoardValid(), this.chess.engine.getGameStatus(), fenNotation);
+            if(this.chess.engine.isBoardValid())
+                this.enableStartGameButton();
+            else
+                this.disableStartGameButton();
+        }
     }
 
     /**

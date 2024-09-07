@@ -148,10 +148,33 @@ export class NavigatorModal extends Component{
     {
         this.show(
             "Create New Game",
-            `<div class = "btn-group-vertical">
+            `
+            <div class = "btn-group-vertical">
                 <button data-menu-operation="${NavigatorModalOperation.PlayAgainstFriend}">Play against Friend</button>
                 <button data-menu-operation="${NavigatorModalOperation.PlayAgainstBot}">Play against Bot</button>
                 <button data-menu-operation="${NavigatorModalOperation.EnableBoardEditor}">Create Board</button>
+            </div>
+             <div style="text-align:center;margin-top:10px;">
+                <button class="button--text" style="font-size:13px!important;" data-menu-operation="${NavigatorModalOperation.Hide}">
+                    Cancel
+                </button>
+            </div>
+            `
+        );
+    }
+
+    /**
+     * Show the play the board screen.
+     */
+    public showStartPlayingBoard(): void
+    {
+        this.show(
+            "Start Playing the Board",
+            `
+            <div class = "btn-group-vertical">
+                <button data-menu-operation="${NavigatorModalOperation.PlayWithYourself}">Play with Yourself</button>
+                <button data-menu-operation="${NavigatorModalOperation.PlayAgainstFriend}">Play against Friend</button>
+                <button data-menu-operation="${NavigatorModalOperation.PlayAgainstBot}">Play against Bot</button>
             </div>
              <div style="text-align:center;margin-top:10px;">
                 <button class="button--text" style="font-size:13px!important;" data-menu-operation="${NavigatorModalOperation.Hide}">

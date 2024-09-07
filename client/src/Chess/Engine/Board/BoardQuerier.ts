@@ -229,8 +229,8 @@ export class BoardQuerier extends Board{
             this.getBoardStatus() == GameStatus.WhiteVictory
             || this.getBoardStatus() == GameStatus.BlackVictory
             || this.getBoardStatus() == GameStatus.Draw
-            || this.getPiecesWithFilter(Color.White, [PieceType.King]).length == 0
-            || this.getPiecesWithFilter(Color.Black, [PieceType.King]).length == 0
+            || this.getPiecesWithFilter(Color.White, [PieceType.King]).length != 1
+            || this.getPiecesWithFilter(Color.Black, [PieceType.King]).length != 1
         ) return false;
         else
         {

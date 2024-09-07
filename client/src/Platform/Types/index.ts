@@ -20,8 +20,10 @@ export enum NavigatorModalOperation{
     ShowGameCreator = "ShowGameCreator",
     ShowWelcome = "ShowWelcome",
     AskConfirmation = "AskConfirmation",
+    ShowStartPlayingBoard = "ShowStartPlayingBoard",
     PlayAgainstBot = "PlayAgainstBot",
     PlayAgainstFriend = "PlayAgainstFriend",
+    PlayWithYourself = "PlayWithYourself",
     CreateLobby = "CreateLobby",
     EnableBoardEditor = "EnableBoardEditor",
     CancelGame = "CancelGame"

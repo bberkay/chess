@@ -238,20 +238,23 @@ export class Platform{
     private handleNavigatorModalOperation(menuOperation: NavigatorModalOperation, menuItem: HTMLElement): void
     {
         switch(menuOperation){
+            case NavigatorModalOperation.ShowWelcome:
+                this.navigatorModal.showWelcome();
+                break;
             case NavigatorModalOperation.Hide:
                 this.navigatorModal.hide();
                 break;
             case NavigatorModalOperation.Undo:
                 this.navigatorModal.undo();
                 break;
+            case NavigatorModalOperation.AskConfirmation:
+                this.navigatorModal.showConfirmation();
+                break;
             case NavigatorModalOperation.ShowGameCreator:
                 this.navigatorModal.showGameCreator();
                 break;
-            case NavigatorModalOperation.ShowWelcome:
-                this.navigatorModal.showWelcome();
-                break;
-            case NavigatorModalOperation.AskConfirmation:
-                this.navigatorModal.showConfirmation();
+            case NavigatorModalOperation.ShowStartPlayingBoard:
+                this.navigatorModal.showStartPlayingBoard();
                 break;
             case NavigatorModalOperation.PlayAgainstBot:
                 this.navigatorModal.showPlayAgainstBot();
@@ -259,6 +262,9 @@ export class Platform{
             case NavigatorModalOperation.PlayAgainstFriend:
                 this.navigatorModal.showPlayAgainstFriend();
                 break
+            case NavigatorModalOperation.PlayWithYourself:
+                this._createBoard();
+                break;
             case NavigatorModalOperation.CreateLobby:
                 this._createLobby();
                 break;
@@ -310,6 +316,12 @@ export class Platform{
     private handleBoardEditorOperation(menuOperation: BoardEditorOperation, menuItem: HTMLElement): void
     {
         switch(menuOperation){
+            case BoardEditorOperation.ToggleBoardEditorUtilityMenu:
+                this.boardEditor.toggleUtilityMenu();
+                break;
+            case BoardEditorOperation.ChangeBoardCreatorMode:
+                this.boardEditor.changeBoardCreatorMode();
+                break;
             case BoardEditorOperation.FlipBoard:
                 this._flipBoard();
                 break;
@@ -318,12 +330,6 @@ export class Platform{
                 break;
             case BoardEditorOperation.CreateBoard:
                 this._createBoard();
-                break;
-            case BoardEditorOperation.ToggleBoardEditorUtilityMenu:
-                this.boardEditor.toggleUtilityMenu();
-                break;
-            case BoardEditorOperation.ChangeBoardCreatorMode:
-                this.boardEditor.changeBoardCreatorMode();
                 break;
             case BoardEditorOperation.ClearBoard:
                 this.boardEditor.clearBoard();
@@ -359,7 +365,7 @@ export class Platform{
                 this.navigatorModal.showGameOver(gameStatus);
             else if (gameStatus === GameStatus.NotStarted)
                 this.navigatorModal.showBoardNotReady();
-        
+
             this.bindMenuOperations();
         }
     }
