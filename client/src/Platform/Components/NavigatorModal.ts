@@ -44,8 +44,9 @@ export class NavigatorModal extends Component{
         document.querySelector('.navigator-modal-content')!.innerHTML = content;
         if(closeable) document.querySelector('.navigator-modal')!.classList.add("closeable");
 
-        if(!document.querySelector(".navigator-modal-bg-layer")){
-            const modalBgLayer = document.createElement("div");
+        let modalBgLayer = document.querySelector(".navigator-modal-bg-layer")!
+        if(!modalBgLayer){
+            modalBgLayer = document.createElement("div");
             modalBgLayer.classList.add("navigator-modal-bg-layer");
             document.body.appendChild(modalBgLayer);
         }
@@ -55,7 +56,7 @@ export class NavigatorModal extends Component{
             this.lastNavigatorModalContent = content;
         }
 
-        document.querySelector(".navigator-modal-bg-layer")!.addEventListener("click", (event) => {
+        modalBgLayer.addEventListener("click", (event) => {
             if(!(event.target as HTMLElement).closest(".navigator-modal")){
                 if(document.querySelector(".closeable"))
                     this.hide();

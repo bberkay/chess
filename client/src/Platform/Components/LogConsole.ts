@@ -138,8 +138,14 @@ export class LogConsole extends Component{
         }
 
         // Add event listeners to the tooltip toggles.
+        let counter = 0;
         const squares: NodeListOf<HTMLElement> = document.querySelectorAll(".square");
         document.querySelectorAll(".tooltip-toggle").forEach((tooltip_toggle) => {
+            if(counter < this.logCounter){
+                counter++;
+                return;
+            } 
+
             // square ids and tooltip location added when the mouse is over the tooltip.
             tooltip_toggle.addEventListener("mouseover", () => {
                 squares.forEach((square: HTMLElement) => {
@@ -190,11 +196,9 @@ export class LogConsole extends Component{
         const lastLogs: Array<{source: string, message: string}> = Logger.messages().slice(this.logCounter);
         if(lastLogs.length == 0) return;
 
-        // Print the logs to the log console.
         this._createLogMessages(lastLogs);
         this._createLogMessagesEventListeners();
 
-        // Update the log count.
         this.logCounter += lastLogs.length;
     }
 

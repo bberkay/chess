@@ -110,6 +110,8 @@ export class Chess{
     {
         this.board.createPiece(color, pieceType, square);
         this.engine.createPiece(color, pieceType, square);
+        this.logger.save(`Piece[${JSON.stringify({color, pieceType, square})}] created on board and engine`);
+        LocalStorage.save(LocalStorageKey.LastBoard, this.engine.getGameAsJsonNotation());
     }
 
     /**
@@ -119,6 +121,8 @@ export class Chess{
     {
         this.board.removePiece(square);
         this.engine.removePiece(square);
+        this.logger.save(`Piece[${square}] removed from board and engine`);
+        LocalStorage.save(LocalStorageKey.LastBoard, this.engine.getGameAsJsonNotation());
     }
 
     /**

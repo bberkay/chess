@@ -172,11 +172,6 @@ export class Platform{
             characterData: true
         });
 
-        document.getElementById("fen-notation")!.addEventListener("change", () => {
-            if(this.boardEditor.isEditorModeEnable())
-                LocalStorage.save(LocalStorageKey.LastBoard, this.chess.engine.getGameAsJsonNotation());
-        });
-
         this.logger.save("Board changes are listening...");
     }
 
@@ -354,7 +349,7 @@ export class Platform{
      * console after the move is made.
      */
     private updateComponents(){
-        this.notationMenu.update();
+        if(!this.boardEditor.isEditorModeEnable()) this.notationMenu.update();
         this.logConsole.stream();
         this.boardEditor.showFen(this.chess.engine.getGameAsFenNotation());
 
@@ -364,9 +359,9 @@ export class Platform{
                 this.navigatorModal.showGameOver(gameStatus);
             else if (gameStatus === GameStatus.NotStarted)
                 this.navigatorModal.showBoardNotReady();
+        
+            this.bindMenuOperations();
         }
-
-        this.bindMenuOperations();
     }
 
     /**

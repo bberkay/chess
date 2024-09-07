@@ -57,6 +57,7 @@ export abstract class Component{
      */
     private createTooltips(component: HTMLElement): void
     {
+        if(!component) return;
         for(const menuItem of component.querySelectorAll("[data-tooltip-text]")){
             const tooltipText = menuItem.getAttribute("data-tooltip-text");
             if(!tooltipText) continue;
@@ -93,6 +94,7 @@ export abstract class Component{
      */
     private createValidations(component: HTMLElement): void
     {
+        if(!component) return;
         function isValid(input: HTMLInputElement): boolean
         {
             if(input.hasAttribute("required") && input.value === "")
@@ -124,6 +126,7 @@ export abstract class Component{
      */
     private createCopyToClipboard(component: HTMLElement): void
     {
+        if(!component) return;
         for(const copyButton of component.querySelectorAll("[data-clipboard-text]")){
             copyButton.addEventListener("click", function() {
                 const input = copyButton.parentElement!.querySelector(

@@ -97,6 +97,7 @@
         box-shadow: inset 0 0 0 1px var(--square-shadow-color);
         text-align: center;
         margin:0!important;
+        cursor: pointer!important;
     }
 
     /* Black squares */
@@ -162,6 +163,7 @@
     z-index:99;
     left:5%;
     top:10%;
+    cursor: pointer!important;
 
     &.dragging {
         opacity: 0.5;

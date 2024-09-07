@@ -70,13 +70,11 @@ export class BoardEditor extends Component{
                         <td>
                             <div class="piece-option">
                                 <div class="piece" data-piece="King" data-color="White"></div>
-                                <span>White King</span>
                             </div>
                         </td>
                         <td>
                             <div class="piece-option">
                                 <div class="piece" data-piece="King" data-color="Black"></div>
-                                <span>Black King</span>
                             </div>
                         </td>
                     </tr>
@@ -84,13 +82,11 @@ export class BoardEditor extends Component{
                         <td>
                             <div class="piece-option">
                                 <div class="piece" data-piece="Queen" data-color="White"></div>
-                                <span>White Queen</span>
                             </div>
                         </td>
                         <td>
                             <div class="piece-option">
                                 <div class="piece" data-piece="Queen" data-color="Black"></div>
-                                <span>Black Queen</span>
                             </div>
                         </td>
                     </tr>
@@ -98,13 +94,11 @@ export class BoardEditor extends Component{
                         <td>
                             <div class="piece-option">
                                 <div class="piece" data-piece="Rook" data-color="White"></div>
-                                <span>White Rook</span>
                             </div>
                         </td>
                         <td>
                             <div class="piece-option">
                                 <div class="piece" data-piece="Rook" data-color="Black"></div>
-                                <span>Black Rook</span>
                             </div>
                         </td>
                     </tr>
@@ -112,13 +106,11 @@ export class BoardEditor extends Component{
                         <td>
                             <div class="piece-option">
                                 <div class="piece" data-piece="Bishop" data-color="White"></div>
-                                <span>White Bishop</span>
                             </div>
                         </td>
                         <td>
                             <div class="piece-option">
                                 <div class="piece" data-piece="Bishop" data-color="Black"></div>
-                                <span>Black Bishop</span>
                             </div>
                         </td>
                     </tr>
@@ -126,13 +118,11 @@ export class BoardEditor extends Component{
                         <td>
                             <div class="piece-option">
                                 <div class="piece" data-piece="Knight" data-color="White"></div>
-                                <span>White Knight</span>
                             </div>
                         </td>
                         <td>
                             <div class="piece-option">
                                 <div class="piece" data-piece="Knight" data-color="Black"></div>
-                                <span>Black Knight</span>
                             </div>
                         </td>
                     </tr>
@@ -140,13 +130,11 @@ export class BoardEditor extends Component{
                         <td>
                             <div class="piece-option">
                                 <div class="piece" data-piece="Pawn" data-color="White"></div>
-                                <span>White Pawn</span>
                             </div>
                         </td>
                         <td>
                             <div class="piece-option">
                                 <div class="piece" data-piece="Pawn" data-color="Black"></div>
-                                <span>Black Pawn</span>
                             </div>
                         </td>
                     </tr>
@@ -204,6 +192,7 @@ export class BoardEditor extends Component{
         this.chess.board.unlock();
         this.removeDragAndDropEventListeners();
         this.disableBoardCreator();
+        this.disableCursorMode();
         this.removePieceEditor();
         if(this.currentBoardCreatorMode == BoardCreatorMode.Template) this.changeBoardCreatorMode();
         this._isEditorModeEnable = false;
@@ -239,7 +228,6 @@ export class BoardEditor extends Component{
             // For creating the piece on the board by dropping the piece on the square.
             squareElement.addEventListener("dragover", (event: DragEvent) => { event.preventDefault() });
             squareElement.addEventListener("drop", (event: DragEvent) => {
-                console.log("Dropping piece: ", squareElement);
                 event.preventDefault();
                 this.createPiece(squareElement);
                 const selectedPieceOption: HTMLElement = document.querySelector(".selected-option") as HTMLElement;
@@ -256,8 +244,14 @@ export class BoardEditor extends Component{
         (document.querySelectorAll(`.piece`) as NodeListOf<HTMLElement>).forEach((piece: HTMLElement) => {
             piece.removeAttribute("draggable");
         });
+
         this.chess.board.getAllSquares().forEach((squareElement: HTMLElement) => {
             squareElement.removeAttribute("data-menu-operation");
+        });
+
+        this.chess.board.getAllSquares().forEach((squareElement: HTMLElement) => {
+            const newElement = squareElement.cloneNode(true) as HTMLElement;
+            squareElement.parentNode!.replaceChild(newElement, squareElement);
         });
     }
 
@@ -337,8 +331,6 @@ export class BoardEditor extends Component{
 
         if(this.currentBoardCreatorMode == BoardCreatorMode.Template)
           this.changeBoardCreatorMode();
-
-        this.showFen(this.chess.engine.getGameAsFenNotation());
     }
 
     /**
@@ -360,7 +352,8 @@ export class BoardEditor extends Component{
         
         selectedOption.classList.add("selected-option");
 
-        document.querySelector("#chessboard")!.setAttribute("style", "cursor: pointer !important");
+        (document.querySelectorAll("#chessboard, #chessboard .piece, #chessboard .square") as NodeListOf<HTMLElement>)
+            .forEach((piece: HTMLElement) => { piece.setAttribute("style", "cursor: pointer !important") });
     }
 
     /**
@@ -371,7 +364,7 @@ export class BoardEditor extends Component{
         if(piece.classList.contains("piece")){
             piece.setAttribute("draggable", "true");
             piece.parentElement!.addEventListener("dragstart", () => { 
-                this.selectOption(piece.parentElement!);
+                if(piece.parentElement) this.selectOption(piece.parentElement!);
             });
             if(!piece.closest("#chessboard")){
                 piece.parentElement!.addEventListener("click", () => {
@@ -394,7 +387,6 @@ export class BoardEditor extends Component{
                 this.chess.board.getSquareID(selectedSquare) as Square
             );
             this.makePieceSelectable(selectedSquare.querySelector(".piece") as HTMLElement);
-            this.showFen(this.chess.engine.getGameAsFenNotation());
         }
     }
 
@@ -405,7 +397,6 @@ export class BoardEditor extends Component{
     {
         this.chess.removePiece(this.chess.board.getSquareID(squareElement) as Square);
         squareElement.setAttribute("data-menu-operation", BoardEditorOperation.CreatePiece);
-        this.showFen(this.chess.engine.getGameAsFenNotation());
     }
 
     /**
@@ -441,9 +432,23 @@ export class BoardEditor extends Component{
                 squareElement.setAttribute("data-menu-operation", BoardEditorOperation.RemovePiece);
         });
 
-        document.querySelector("#chessboard")!.setAttribute("style", "cursor: no-drop !important");
+        (document.querySelectorAll("#chessboard, #chessboard .piece, #chessboard .square") as NodeListOf<HTMLElement>)
+            .forEach((piece: HTMLElement) => { piece.setAttribute("style", "cursor: no-drop !important") });
     }
     
+    /**
+     * This function disables the cursor mode.
+     */
+    public disableCursorMode(): void
+    {
+        this.chess.board.getAllSquares().forEach((squareElement: HTMLElement) => {
+            squareElement.removeAttribute("data-menu-operation");
+        });
+
+        (document.querySelectorAll("#chessboard, #chessboard .piece, #chessboard .square") as NodeListOf<HTMLElement>)
+            .forEach((piece: HTMLElement) => { piece.removeAttribute("style") });
+    }
+
     /**
      * This function flips the board.
      */

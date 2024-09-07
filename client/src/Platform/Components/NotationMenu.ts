@@ -32,7 +32,7 @@ export class NotationMenu extends Component{
         this.loadHTML("notation-menu", `
                 <div class="player-section your-turn-effect" id="black-player-section">
                     <div class="player-name-container">
-                        <div class="player-name" id="black-player-name">B John Doe</div> 
+                        <div class="player-name" id="black-player-name">Black Player</div> 
                     </div>
                     <div class="score-table" id="white-captured-pieces"></div>
                 </div>
@@ -69,7 +69,7 @@ export class NotationMenu extends Component{
                 </div>
                 <div class="player-section your-turn-effect" id="white-player-section">
                     <div class="player-name-container">
-                        <div class="player-name" id="white-player-name">W John Doe</div> 
+                        <div class="player-name" id="white-player-name">White Player</div> 
                     </div>
                     <div class="score-table" id="black-captured-pieces"></div>
                 </div>
