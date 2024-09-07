@@ -215,13 +215,6 @@ main{
 
 #notation-menu{
     margin-left: 0.5rem;
-    
-    /* 130px is the height of utility-menu and 
-    player-score-section(x2). 2.5 for centering 
-    notation-table to the board but little bit 
-    to the top(.2) because of the board-editor menu.
-    */
-    margin-top: calc((var(--board-size) - (var(--notation-table-height) + 130px)) / 3);
 }
 
 #piece-creator{
@@ -239,12 +232,6 @@ main{
  * ------------------ Responsive ------------------- 
  *             700px - 900px - 1250px
  */
-@media screen and (min-width: 1250px) and (max-height: 850px){
-    #notation-menu{
-        margin-top:0;
-    }
-}
-
 @media screen and (min-width: 900px) and (max-width: 1250px) {
     main{
         padding: 1rem;
@@ -276,7 +263,11 @@ main{
         }
 
         & .right { 
-            order:2 
+            order:2;
+
+            & #notation-menu, & #piece-creator{
+                margin-top: 55px;
+            }
         }
     }
 }
@@ -303,6 +294,7 @@ main{
         margin-left: 0;
         margin-top: 0.5rem;
         margin-bottom: 0.5rem;
+        height: auto!important;
     }
 
     /* Reorder for mobile */

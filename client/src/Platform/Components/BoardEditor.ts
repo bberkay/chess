@@ -1,6 +1,6 @@
 import { BoardEditorOperation, NavigatorModalOperation } from "../Types";
 import { Chess } from "@Chess/Chess";
-import { Color, PieceType, Square, StartPosition } from "@Chess/Types";
+import { Color, JsonNotation, PieceType, Square, StartPosition } from "@Chess/Types";
 import { Component } from "./Component";
 
 enum BoardCreatorMode {
@@ -54,8 +54,8 @@ export class BoardEditor extends Component{
     {
         if(this.isEditorModeEnable()) return;
         document.getElementById("notation-menu")!.id = "piece-creator";
-        document.querySelector("#black-turn-indicator")?.remove();
-        document.querySelector("#white-turn-indicator")?.remove();
+        document.querySelector("#black-score-section")?.remove();
+        document.querySelector("#white-score-section")?.remove();
 
         this.loadHTML("piece-creator", `
             <table id = "piece-table">
@@ -318,9 +318,9 @@ export class BoardEditor extends Component{
     /**
      * This function creates a new board with the board creator.
      */
-    private _createBoard(fenNotation: string): void
+    private _createBoard(notation: string | JsonNotation): void
     {
-        this.chess.createGame(fenNotation);
+        this.chess.createGame(notation);
         if(this.isEditorModeEnable()){
             this.chess.board.lock();
             this.chess.board.removeEffectFromAllSquares();
@@ -338,8 +338,7 @@ export class BoardEditor extends Component{
         if(this.currentBoardCreatorMode == BoardCreatorMode.Template)
           this.changeBoardCreatorMode();
 
-        const finalFenNotation = this.chess.engine.getGameAsFenNotation();
-        this.showFen(finalFenNotation);
+        this.showFen(this.chess.engine.getGameAsFenNotation());
     }
 
     /**

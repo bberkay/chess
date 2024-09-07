@@ -4,7 +4,14 @@
  */
 :root{
     --notation-table-height: 240px;
-    --notation-table-width: 250px;
+    --notation-table-width: 300px;
+}
+
+#notation-menu{
+    height: var(--board-size);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 #notation-table{
@@ -13,11 +20,6 @@
     background-color: #111;
     color: #f5f5f5;
     border:1px solid #2a2a2a;
-
-    & thead{
-        margin-bottom:3px;
-        border-spacing: 2px 1px;
-    }
 
     & tbody{
         max-height: var(--notation-table-height);
@@ -35,8 +37,8 @@
         width:100%;
 
         & th{
-            padding:7px 10px;
-            padding-bottom: 3px;
+            padding:7px 5px;
+            padding-bottom:3px;
             background-color: #222;
             border:1px solid #2a2a2a;
         }
@@ -61,54 +63,49 @@
 /**
  * Player Score Section
  */
-.player-score-section {
-    & th div{
-        display: flex; 
-        justify-content: space-between;
+.player-section {
+    & .player-name-container{
+        display:flex;
+        justify-content: center;
         align-items: center;
+        background-color: #111;
+        border:1px solid #2a2a2a;
+        padding: 4px;
+        
+        & .player-name{
+            padding: 10px 10px;
+            padding-bottom: 7px;
+            background-color: #222;
+            border:1px solid #2a2a2a;
+            font-weight: bold;
+            font-size: 13px;
+            width: 100%;
+        }
+    }
+
+    &#white-player-section.your-turn-effect .player-name{
+        border-left:4px solid var(--white-square-color);
+    }
+
+    &#black-player-section.your-turn-effect .player-name{
+        border-left:4px solid var(--black-square-color);
     }
 
     & .score-table{
-        font-size:12px;
         font-weight:bold;
-        gap: 5px;
-        
+        display: flex;
+        align-items: center;
+        gap: 3px;
+
         & .piece-icons{
-            font-size: 22px;
+            font-size: 23px;
+            font-weight: normal;
         }
-    }
-}
 
-.turn-indicator{
-    opacity: 0;
-    display: flex;
-
-    & span.indicator-icon{
-        width: 1rem;
-        height: 1rem;
-        border-radius: 50%;
-        display: inline-block;
-        margin-right: 6px;
-    }
-
-    &#white-turn-indicator span.indicator-icon{
-        background-color: var(--white-square-color);
-    }
-
-    &#black-turn-indicator span.indicator-icon{
-        background-color: var(--black-square-color);
-    }
-
-    &.visible{
-        opacity: 1;
-    }
-
-    &:first-of-type{
-        margin-bottom: 15px;
-    }
-
-    &:last-of-type{
-        margin-top: 15px;
+        & :not(.piece-icons){
+            font-size: 15px;
+            margin-top: 1px;
+        }
     }
 }
 
@@ -118,15 +115,19 @@
 #notation-menu .utility-menu{
     display: flex;
     justify-content: space-between;
-    width: calc(100% - 12px);
     background-color: #111;
     border: 1px solid #2a2a2a;
     border-top:none;
-    padding: 5px;
+    padding: 4px;
+
+    & button{
+        padding:7px 10px;
+        font-size: 14px;
+    }
 }
 
 #notation-menu .utility-menu.utility-toggle-menu{
-    display: none;
+    opacity: 0;
 
     & .utility-toggle-menu-section{
         flex: 1;
@@ -140,7 +141,7 @@
     }
 
     &.visible{
-        display: flex;
+        opacity: 1;
     }
 }
 
@@ -163,9 +164,30 @@
         gap: 1rem;
     }
 
-    .player-score-section{
+    .player-section{
         display: flex;
         justify-content: space-between;
         align-items: center;
+        
+        &:first-of-type{
+            margin-bottom: 0.5rem;
+        }
+
+        &:not(:first-of-type){
+            margin-top: 0.5rem;
+
+            & .player-name-container{
+                order: -1;
+            }
+        }
+
+        & .player-name-container{
+            width: 50%;
+        }
+
+        & .score-table{
+            width: auto;
+            margin: 0;
+        }
     }
 }

@@ -30,62 +30,48 @@ export class NotationMenu extends Component{
     protected renderComponent(): void
     {
         this.loadHTML("notation-menu", `
-                <div class="turn-indicator" id="black-turn-indicator">
-                    <span class = "indicator-icon"></span>
-                    <span>Black's turn</span>
-                </div>
-                <table id = "notation-table">
-                    <thead class="player-score-section">
-                        <tr>
-                            <th>
-                                <div>
-                                    <span id="black-player-name">B John Doe</span>
-                                    <span class="score-table" id="white-captured-pieces">b John Doe</span>
-                                </div>
-                            </th>
-                        </tr>
-                    </thead>
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>White</th>
-                            <th>Black</th>
-                        </tr>
-                    </thead>    
-                    <tbody id = "notations"></tbody>
-                    <tfoot class="player-score-section">
-                        <tr>
-                            <th>
-                                <div>
-                                    <span id="white-player-name">W John Doe</span>
-                                    <span class="score-table" id="black-captured-pieces">w John Doe</span>
-                                </div>
-                            </th>
-                        </tr>
-                    </tbody>
-                </table>
-                <div class="utility-menu">
-                    <button class="menu-item" data-menu-operation="${BoardEditorOperation.FlipBoard}" data-tooltip-text="Flip Board">F</button>
-                    <button class="menu-item" data-menu-operation="${NotationMenuOperation.FirstMove}" disabled="true" data-tooltip-text="Go First Move">⟪</button>
-                    <button class="menu-item" data-menu-operation="${NotationMenuOperation.PreviousMove}" disabled="true" data-tooltip-text="Go Previous Move">❮</button>
-                    <button class="menu-item" data-menu-operation="${NotationMenuOperation.NextMove}" disabled="true" data-tooltip-text="Go Next Move">❯</button>
-                    <button class="menu-item" data-menu-operation="${NotationMenuOperation.LastMove}" disabled="true" data-tooltip-text="Go Last Move">⟪</button>
-                    <button class="menu-item" data-menu-operation="${NotationMenuOperation.ToggleNotationMenuUtilityMenu}">☰</button>
-                </div>
-                <div class="utility-menu utility-toggle-menu visible">
-                    <div class="utility-toggle-menu-section active" id="new-game-utility-menu">
-                        <button class="menu-item" data-menu-operation="${NavigatorModalOperation.ShowGameCreator}" data-tooltip-text="Create New Game">+ New Game</button>
-                        <button class="menu-item" data-menu-operation="${NavigatorModalOperation.ShowWelcome}" data-tooltip-text="About Project">Info</button>
+                <div class="player-section your-turn-effect" id="black-player-section">
+                    <div class="player-name-container">
+                        <div class="player-name" id="black-player-name">B John Doe</div> 
                     </div>
-                    <div class="utility-toggle-menu-section" id="lobby-utility-menu">
-                        <button class="menu-item" data-menu-operation="${NotationMenuOperation.SendUndoOffer}" data-tooltip-text="Send Undo Offer">↺ Undo</button>
-                        <button class="menu-item" data-menu-operation="${NotationMenuOperation.SendDrawOffer}" data-tooltip-text="Send Draw Offer">Draw</button>
-                        <button class="menu-item" data-menu-operation="${NotationMenuOperation.Resign}" data-tooltip-text="Resign From Game">⚐ Resign</button>
+                    <div class="score-table" id="white-captured-pieces"></div>
+                </div>
+                <div>
+                    <table id = "notation-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>White</th>
+                                <th>Black</th>
+                            </tr>
+                        </thead>
+                        <tbody id = "notations"></tbody>
+                    </table>
+                    <div class="utility-menu">
+                        <button class="menu-item" data-menu-operation="${BoardEditorOperation.FlipBoard}" data-tooltip-text="Flip Board">F</button>
+                        <button class="menu-item" data-menu-operation="${NotationMenuOperation.FirstMove}" disabled="true" data-tooltip-text="Go First Move">⟪</button>
+                        <button class="menu-item" data-menu-operation="${NotationMenuOperation.PreviousMove}" disabled="true" data-tooltip-text="Go Previous Move">❮</button>
+                        <button class="menu-item" data-menu-operation="${NotationMenuOperation.NextMove}" disabled="true" data-tooltip-text="Go Next Move">❯</button>
+                        <button class="menu-item" data-menu-operation="${NotationMenuOperation.LastMove}" disabled="true" data-tooltip-text="Go Last Move">⟪</button>
+                        <button class="menu-item" data-menu-operation="${NotationMenuOperation.ToggleNotationMenuUtilityMenu}">☰</button>
+                    </div>
+                    <div class="utility-menu utility-toggle-menu visible">
+                        <div class="utility-toggle-menu-section active" id="new-game-utility-menu">
+                            <button class="menu-item" data-menu-operation="${NavigatorModalOperation.ShowGameCreator}" data-tooltip-text="Create New Game">+ New Game</button>
+                            <button class="menu-item" data-menu-operation="${NavigatorModalOperation.ShowWelcome}" data-tooltip-text="About Project">Info</button>
+                        </div>
+                        <div class="utility-toggle-menu-section" id="lobby-utility-menu">
+                            <button class="menu-item" data-menu-operation="${NotationMenuOperation.SendUndoOffer}" data-tooltip-text="Send Undo Offer">↺ Undo</button>
+                            <button class="menu-item" data-menu-operation="${NotationMenuOperation.SendDrawOffer}" data-tooltip-text="Send Draw Offer">Draw</button>
+                            <button class="menu-item" data-menu-operation="${NotationMenuOperation.Resign}" data-tooltip-text="Resign From Game">⚐ Resign</button>
+                        </div>
                     </div>
                 </div>
-                <div class="turn-indicator visible" id="white-turn-indicator">
-                    <span class = "indicator-icon"></span>
-                    <span>White's turn</span>
+                <div class="player-section your-turn-effect" id="white-player-section">
+                    <div class="score-table" id="black-captured-pieces"></div>
+                    <div class="player-name-container">
+                        <div class="player-name" id="white-player-name">W John Doe</div> 
+                    </div>
                 </div>
         `);
     }
@@ -131,7 +117,9 @@ export class NotationMenu extends Component{
                 );
         }
 
-        notationMenu.scrollTop = notationMenu.scrollHeight;
+        const notationTable: HTMLElement = document.querySelector("#notation-table tbody")!;
+        notationTable.scrollTop = notationTable.scrollHeight;
+
         this.moveCount = notations.length;
     }
 
@@ -206,20 +194,21 @@ export class NotationMenu extends Component{
     {
         const current_player_color = this.chess.engine.getTurnColor();
         const previous_player_color = current_player_color == Color.White ? Color.Black : Color.White
-        document.getElementById(`${previous_player_color.toLowerCase()  }-turn-indicator`)!.classList.remove("visible");
-        document.getElementById(`${current_player_color.toLowerCase()}-turn-indicator`)!.classList.add("visible");
+        document.getElementById(`${previous_player_color.toLowerCase()  }-player-section`)!.classList.remove("your-turn-effect");
+        document.getElementById(`${current_player_color.toLowerCase()}-player-section`)!.classList.add("your-turn-effect");
     }
 
     /**
      * Flip the notation table.
      */
     public flip(): void {                
-        const playerScoreSectionAtTop = document.querySelectorAll(".player-score-section")![0];
-        const playerScoreSectionAtBottom = document.querySelectorAll(".player-score-section")![1];
+        let playerScoreSectionOnTop = document.querySelector(".player-section")!;
+        playerScoreSectionOnTop.append(playerScoreSectionOnTop.firstElementChild!)
+        playerScoreSectionOnTop.parentElement!.append(playerScoreSectionOnTop);
         
-        const temp = playerScoreSectionAtTop.innerHTML;
-        playerScoreSectionAtTop.innerHTML = playerScoreSectionAtBottom.innerHTML;
-        playerScoreSectionAtBottom.innerHTML = temp;
+        playerScoreSectionOnTop = document.querySelector(".player-section")!;
+        playerScoreSectionOnTop.append(playerScoreSectionOnTop.firstElementChild!)
+        playerScoreSectionOnTop.parentElement!.prepend(playerScoreSectionOnTop!);
     }
 
     /**
@@ -247,7 +236,7 @@ export class NotationMenu extends Component{
      * Show the new game utility menu section. This menu contains
      * new game and info buttons.
      */
-    public showNewGameUtilityMenu(): void
+    public setUtilityMenuToNewGame(): void
     {
         const utilityMenuSections = document.querySelectorAll(".utility-toggle-menu-section") as NodeListOf<HTMLElement>;
         utilityMenuSections.forEach((section: HTMLElement) => {
@@ -261,7 +250,7 @@ export class NotationMenu extends Component{
      * Show the lobby utility menu section. This menu contains
      * undo, draw and resign buttons.
      */
-    public showLobbyUtilityMenu(): void
+    public setUtilityMenuToLobby(): void
     {
         const utilityMenuSections = document.querySelectorAll(".utility-toggle-menu-section") as NodeListOf<HTMLElement>;
         utilityMenuSections.forEach((section: HTMLElement) => {
@@ -279,8 +268,8 @@ export class NotationMenu extends Component{
         document.getElementById("notations")!.innerHTML = "";
         document.getElementById("white-captured-pieces")!.innerHTML = "";
         document.getElementById("black-captured-pieces")!.innerHTML = "";
-        document.getElementById("white-turn-indicator")!.classList.add("visible");
-        document.getElementById("black-turn-indicator")!.classList.remove("visible");
+        document.getElementById("white-player-section")!.classList.add("your-turn-effect");
+        document.getElementById("black-player-section")!.classList.remove("your-turn-effect");
         this.moveCount = 0;
         this.lastScore = {[Color.White]: 0, [Color.Black]: 0};
     }

@@ -12,10 +12,8 @@
     --board-size: 70vh;
 
     /* Colors */
-    --white-square-color: #859884;
-    --white-coordinate-color: #A2B9A1;
-    --black-square-color: #667C67;
-    --black-coordinate-color: #637263;
+    --white-square-color: #879A86;
+    --black-square-color: #647A65;
     --square-shadow-color: none;
     --clicked-color: #000;
 
@@ -28,26 +26,26 @@
     --killable-color: #57CE92;
     --checked-color: #DF3030;
     --disabled-color: #0000004F;
-    --hovering-color: #57ce9248;
+    --hovering-color: #57CE9248;
     --selected-color: rgba(87, 206, 146, 0.25);
     --from-color: rgba(69, 201, 255, 0.39);
     --to-color: rgba(69, 201, 255, 0.39);
 
     /* White Pieces */
-    --white-pawn-image: url("../assets/pieces/pawn_white.png");
-    --white-rook-image: url("../assets/pieces/rook_white.png");
-    --white-knight-image: url("../assets/pieces/knight_white.png");
-    --white-bishop-image: url("../assets/pieces/bishop_white.png");
-    --white-queen-image: url("../assets/pieces/queen_white.png");
-    --white-king-image: url("../assets/pieces/king_white.png");
+    --white-pawn-image: url("../assets/pieces/white_pawn.svg");
+    --white-rook-image: url("../assets/pieces/white_rook.svg");
+    --white-knight-image: url("../assets/pieces/white_knight.svg");
+    --white-bishop-image: url("../assets/pieces/white_bishop.svg");
+    --white-queen-image: url("../assets/pieces/white_queen.svg");
+    --white-king-image: url("../assets/pieces/white_king.svg");
 
     /* Black Pieces */
-    --black-pawn-image: url("../assets/pieces/pawn_black.png");
-    --black-rook-image: url("../assets/pieces/rook_black.png");
-    --black-knight-image: url("../assets/pieces/knight_black.png");
-    --black-bishop-image: url("../assets/pieces/bishop_black.png");
-    --black-queen-image: url("../assets/pieces/queen_black.png");
-    --black-king-image: url("../assets/pieces/king_black.png");
+    --black-pawn-image: url("../assets/pieces/black_pawn.svg");
+    --black-rook-image: url("../assets/pieces/black_rook.svg");
+    --black-knight-image: url("../assets/pieces/black_knight.svg");
+    --black-bishop-image: url("../assets/pieces/black_bishop.svg");
+    --black-queen-image: url("../assets/pieces/black_queen.svg");
+    --black-king-image: url("../assets/pieces/black_king.svg");
 
     /* For animation of piece movement */
     --move-from-left: 0;
@@ -58,14 +56,14 @@
 
 /* -------------- Chessboard -------------- */
 #chessboard {
-    width: var(--board-size);
-    height: var(--board-size);
-    min-width: var(--board-size);
-    min-height: var(--board-size);
-    border:1px solid #adadad;
+    width: calc(var(--board-size) - 2px);
+    height: calc(var(--board-size) - 2px);
+    min-width: calc(var(--board-size) - 2px);
+    min-height: calc(var(--board-size) - 2px);
     display:flex;
     flex-wrap: wrap;
     cursor: pointer!important;
+    border: 2px solid #FFFFFFBB;
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -73,6 +71,20 @@
     -ms-user-select: none;
     user-select: none;
     position:relative;
+    background-size: cover;
+}
+
+#chessboard::after{
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("../assets/images/chessboard-noise-effect.png");
+    opacity: 0.4;
+    filter: brightness(0);
+    pointer-events: none;
 }
 
 /* -------------- Board Styles -------------- */
@@ -80,8 +92,8 @@
     /* Individual square styles */
     & .square{
         position: relative;
-        width:calc(var(--board-size) / 8);
-        height:calc(var(--board-size) / 8);
+        width:calc((var(--board-size) - 2px) / 8);
+        height:calc((var(--board-size) - 2px) / 8);
         box-shadow: inset 0 0 0 1px var(--square-shadow-color);
         text-align: center;
         margin:0!important;
@@ -109,12 +121,12 @@
 
     /* Row coordinates that on black squares */
     & .square--black .row-coordinate{
-        color:var(--white-coordinate-color);
+        color:var(--white-square-color);
     }
 
     /* Row coordinates that on white squares */
     & .square--white .row-coordinate{
-        color:var(--black-coordinate-color);
+        color:var(--black-square-color);
     }
 
     /* Column coordinates display styles */
@@ -129,12 +141,12 @@
 
     /* Column coordinates that on black squares */
     & .square--black .column-coordinate{
-        color:var(--white-coordinate-color);
+        color:var(--white-square-color);
     }
 
     /* Column coordinates that on white squares */
     & .square--white .column-coordinate{
-        color:var(--black-coordinate-color);
+        color:var(--black-square-color);
     }
 }
 

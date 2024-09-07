@@ -173,7 +173,8 @@ export class Platform{
         });
 
         document.getElementById("fen-notation")!.addEventListener("change", () => {
-            LocalStorage.save(LocalStorageKey.LastBoard, this.chess.engine.getGameAsFenNotation());
+            if(this.boardEditor.isEditorModeEnable())
+                LocalStorage.save(LocalStorageKey.LastBoard, this.chess.engine.getGameAsJsonNotation());
         });
 
         this.logger.save("Board changes are listening...");
@@ -393,7 +394,7 @@ export class Platform{
         LocalStorage.clear(LocalStorageKey.LastLobbyConnection);
         this.navigatorModal.hide();
         this.socket?.close();
-        this.notationMenu.showNewGameUtilityMenu();
+        this.notationMenu.setUtilityMenuToNewGame();
         this.chess.board.lock();
     }
 
