@@ -64,6 +64,9 @@
  * Player Score Section
  */
 .player-section {
+    display:flex;
+    flex-direction: column;
+
     & .player-name-container{
         display:flex;
         justify-content: center;
@@ -80,6 +83,12 @@
             font-weight: bold;
             font-size: 13px;
             width: 100%;
+        }
+    }
+
+    &:not(:first-of-type){
+        & .player-name-container{
+            order: 1;
         }
     }
 
@@ -168,6 +177,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+        flex-direction: row;
         
         &:first-of-type{
             margin-bottom: 0.5rem;

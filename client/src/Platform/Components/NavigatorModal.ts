@@ -190,7 +190,7 @@ export class NavigatorModal extends Component{
             "Ready to Play",
             `<div class = "input-group" style="padding-bottom:5px;">
                 <input type="text" id="lobby-link" placeholder="Lobby Name" value="${lobbyLink}" readonly>
-                <button onclick="copyToClipboard('#lobby-link')">Copy</button>
+                <button data-clipboard-text="lobby-link">Copy</button>
             </div>
             <span style="font-size:13px">Share this lobby link with your friend to play together.</span>
             <div style="text-align:center;margin-top:10px;">

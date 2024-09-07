@@ -1,24 +1,26 @@
+let isOrderedForMobile = false;
+let isOrderedForDesktop = false;
 document.addEventListener("DOMContentLoaded", function() {
     if (window.innerWidth < 900) {
         reOrderLayoutForMobile();    
+        isOrderedForMobile = true;
+    }else{
+        // default layout is for desktop
+        isOrderedForDesktop = true
     }
 });
 
 window.addEventListener("resize", function() {
     if (window.innerWidth < 900) {
-        reOrderLayoutForMobile();    
+        if(!isOrderedForMobile) reOrderLayoutForMobile();  
+        isOrderedForMobile = true;  
+        isOrderedForDesktop = false;
     } else {
-        reOrderLayoutForDesktop();
+        if(!isOrderedForDesktop) reOrderLayoutForDesktop();
+        isOrderedForDesktop = true;
+        isOrderedForMobile = false;
     }
 });
-
-
-function copyToClipboard(selector){
-    const element = document.querySelector(selector);
-    navigator.clipboard.writeText(element.tagName === "INPUT" ? element.value : element.textContent);
-    element.select();
-    element.parentElement.querySelector("button").textContent = "Copied!";
-}
 
 function reOrderLayoutForMobile(){
     document.querySelector(".right").append(
@@ -29,11 +31,11 @@ function reOrderLayoutForMobile(){
         return;
 
     document.querySelector("#chessboard").before(
-        document.querySelector("#black-player-section")
+        document.querySelector(".player-section")
     );
 
     document.querySelector("#chessboard").after(
-        document.querySelector("#white-player-section")
+        document.querySelector(".player-section:not(:first-of-type)")
     );
 }
 
@@ -45,11 +47,11 @@ function reOrderLayoutForDesktop(){
     if(document.querySelector("#piece-creator"))
         return;
 
-    document.querySelector("#notation-menu").append(
-        document.querySelector("#white-player-section")
+    document.querySelector("#notation-menu").prepend(
+        document.querySelector(".player-section")
     );
 
-    document.querySelector("#notation-menu").prepend(
-        document.querySelector("#black-player-section")
+    document.querySelector("#notation-menu").append(
+        document.querySelector(".player-section")
     );
 }

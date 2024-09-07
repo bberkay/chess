@@ -46,6 +46,7 @@ export abstract class Component{
         const observer = new MutationObserver(() => {
             this.createTooltips(document.getElementById(componentId)!);
             this.createValidations(document.getElementById(componentId)!);
+            this.createCopyToClipboard(document.getElementById(componentId)!);
         });
         observer.observe(document.getElementById(componentId)!, { childList: true });
     }
@@ -116,5 +117,24 @@ export abstract class Component{
                 else submitButton.setAttribute("disabled", "true");
             });
         });
+    }
+
+    /**
+     * Create copy to clipboard functionality of the component.
+     */
+    private createCopyToClipboard(component: HTMLElement): void
+    {
+        for(const copyButton of component.querySelectorAll("[data-clipboard-text]")){
+            copyButton.addEventListener("click", function() {
+                const input = copyButton.parentElement!.querySelector(
+                    "#" + copyButton.getAttribute("data-clipboard-text")!
+                ) as HTMLInputElement;
+                if(!input || !input.value) return;
+
+                copyButton.textContent = "Copied!";
+                input.select();
+                navigator.clipboard.writeText(input.value);
+            });
+        }
     }
 }

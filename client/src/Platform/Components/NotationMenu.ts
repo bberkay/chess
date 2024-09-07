@@ -68,10 +68,10 @@ export class NotationMenu extends Component{
                     </div>
                 </div>
                 <div class="player-section your-turn-effect" id="white-player-section">
-                    <div class="score-table" id="black-captured-pieces"></div>
                     <div class="player-name-container">
                         <div class="player-name" id="white-player-name">W John Doe</div> 
                     </div>
+                    <div class="score-table" id="black-captured-pieces"></div>
                 </div>
         `);
     }
@@ -203,11 +203,9 @@ export class NotationMenu extends Component{
      */
     public flip(): void {                
         let playerScoreSectionOnTop = document.querySelector(".player-section")!;
-        playerScoreSectionOnTop.append(playerScoreSectionOnTop.firstElementChild!)
         playerScoreSectionOnTop.parentElement!.append(playerScoreSectionOnTop);
         
         playerScoreSectionOnTop = document.querySelector(".player-section")!;
-        playerScoreSectionOnTop.append(playerScoreSectionOnTop.firstElementChild!)
         playerScoreSectionOnTop.parentElement!.prepend(playerScoreSectionOnTop!);
     }
 
