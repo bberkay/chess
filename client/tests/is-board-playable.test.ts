@@ -18,7 +18,7 @@ const games: TestGame[] = [
         title: "1 White King, 1 Black King",
         board: "4k3/8/8/8/8/8/8/4K3 w - - 0 1",
         moves: [],
-        expectation: GameStatus.NotStarted
+        expectation: GameStatus.NotReady
     },
     {
         title: "1 White King, 1 Black King, 1 White Pawn",
@@ -30,13 +30,13 @@ const games: TestGame[] = [
         title: "1 White King, 1 Black King, 1 White Bishop",
         board: "4k3/8/8/8/8/8/5B2/4K3 w - - 0 1",
         moves: [],
-        expectation: GameStatus.NotStarted
+        expectation: GameStatus.NotReady
     },
     {
         title: "1 White King, 1 Black King, 1 White Knight",
         board: "4k3/8/8/8/8/8/5N2/4K3 w - - 0 1",
         moves: [],
-        expectation: GameStatus.NotStarted
+        expectation: GameStatus.NotReady
     },
     {
         title: "1 White King, 1 Black King, 1 White Rook",

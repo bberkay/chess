@@ -363,7 +363,7 @@ export class Platform{
             const gameStatus = this.chess.engine.getGameStatus();
             if([GameStatus.BlackVictory, GameStatus.WhiteVictory,GameStatus.Draw].includes(gameStatus))
                 this.navigatorModal.showGameOver(gameStatus);
-            else if (gameStatus === GameStatus.NotStarted)
+            else if (gameStatus === GameStatus.NotReady)
                 this.navigatorModal.showBoardNotReady();
 
             this.bindMenuOperations();

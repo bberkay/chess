@@ -52,7 +52,7 @@ const games: TestGame[] = [
     {
         title: "Not Started (Black and/or White King Missing)",
         board: "r5n1/ppp1pp1p/3p4/6p1/2P1P3/8/PP2PPPP/R3K2R w KQa - 0 1",
-        expectation: GameStatus.NotStarted
+        expectation: GameStatus.NotReady
     }
 ]
 

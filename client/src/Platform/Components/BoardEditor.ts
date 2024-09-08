@@ -523,8 +523,7 @@ export class BoardEditor extends Component{
         const inputElement = document.querySelector(`.${BoardCreatorMode.Custom} input`) as HTMLInputElement;
         inputElement.value = fenNotation;
         if(this.isEditorModeEnable()){
-            console.log(this.chess.engine.isBoardValid(), this.chess.engine.getGameStatus(), fenNotation);
-            if(this.chess.engine.isBoardValid())
+            if(this.chess.engine.getGameStatus() == GameStatus.ReadyToStart)
                 this.enableStartGameButton();
             else
                 this.disableStartGameButton();
