@@ -20,7 +20,7 @@ export class BoardEditor extends Component{
     /**
      * Constructor of the BoardCreator class.
      */
-    constructor(chess: Chess){
+    constructor(chess: Chess) {
         super();
         this.chess = chess;
         this.currentBoardCreatorMode = BoardCreatorMode.Custom;
@@ -244,9 +244,9 @@ export class BoardEditor extends Component{
             squareElement.setAttribute("data-menu-operation", BoardEditorOperation.CreatePiece);
 
             // For creating the piece on the board by dropping the piece on the square.
-            squareElement.addEventListener("dragover", (event: DragEvent) => { event.preventDefault() });
-            squareElement.addEventListener("drop", (event: DragEvent) => {
-                event.preventDefault();
+            squareElement.addEventListener("dragover", (e: DragEvent) => { e.preventDefault() });
+            squareElement.addEventListener("drop", (e: DragEvent) => {
+                e.preventDefault();
                 this.createPiece(squareElement);
                 const selectedPieceOption: HTMLElement = document.querySelector(".selected-option") as HTMLElement;
                 if(selectedPieceOption.closest("#chessboard")) this.removePiece(selectedPieceOption);
@@ -349,6 +349,8 @@ export class BoardEditor extends Component{
 
         if(this.currentBoardCreatorMode == BoardCreatorMode.Template)
           this.changeBoardCreatorMode();
+
+        this.updateFen();
     }
 
     /**
@@ -384,6 +386,10 @@ export class BoardEditor extends Component{
             piece.parentElement!.addEventListener("dragstart", () => { 
                 if(piece.parentElement) this.selectOption(piece.parentElement!);
             });
+            piece.parentElement!.addEventListener("dragend", () => {
+                if(piece.parentElement && piece.parentElement.classList.contains("square"))
+                    this.removePiece(piece.parentElement);
+            });
             if(!piece.closest("#chessboard")){
                 piece.parentElement!.addEventListener("click", () => {
                     this.selectOption(piece.parentElement!);
@@ -405,6 +411,7 @@ export class BoardEditor extends Component{
                 this.chess.board.getSquareID(selectedSquare) as Square
             );
             this.makePieceSelectable(selectedSquare.querySelector(".piece") as HTMLElement);
+            this.updateFen();
         }
     }
 
@@ -415,6 +422,7 @@ export class BoardEditor extends Component{
     {
         this.chess.removePiece(this.chess.board.getSquareID(squareElement) as Square);
         squareElement.setAttribute("data-menu-operation", BoardEditorOperation.CreatePiece);
+        this.updateFen();
     }
 
     /**
@@ -518,14 +526,16 @@ export class BoardEditor extends Component{
     /**
      * This function shows the FEN notation on the form.
      */
-    public showFen(fenNotation: string): void
+    public updateFen(): void
     {
         const inputElement = document.querySelector(`.${BoardCreatorMode.Custom} input`) as HTMLInputElement;
-        inputElement.value = fenNotation;
+        inputElement.value = this.chess.engine.getGameAsFenNotation();
+        inputElement.dispatchEvent(new Event("change"));
+
         if(this.isEditorModeEnable()){
-            if(this.chess.engine.getGameStatus() == GameStatus.ReadyToStart)
+            if(this.chess.engine.getGameStatus() == GameStatus.ReadyToStart) 
                 this.enableStartGameButton();
-            else
+            else 
                 this.disableStartGameButton();
         }
     }

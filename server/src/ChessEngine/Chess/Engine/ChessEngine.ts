@@ -71,6 +71,7 @@ export class ChessEngine extends BoardManager {
     public createPiece(color: Color, type: PieceType, square: Square): void
     {
         super.createPiece(color, type, square);
+        this.checkGameStatus();
     }
 
     /**
@@ -79,6 +80,7 @@ export class ChessEngine extends BoardManager {
     public removePiece(square: Square): void
     {
         super.removePiece(square);
+        this.checkGameStatus();
     }
 
     /**
@@ -117,7 +119,7 @@ export class ChessEngine extends BoardManager {
         this.currentMoves = {};
         this.isPromotionMenuOpen = false;
         this.isBoardPlayable = false;
-        this.setGameStatus(GameStatus.NotStarted);
+        this.setGameStatus(GameStatus.NotReady);
         this.logger.save("Game properties set to default on ChessEngine");
     }
 
@@ -192,7 +194,7 @@ export class ChessEngine extends BoardManager {
     public playMove(from: Square, to: Square): void
     {
         // If the game is not started or game is finished then return.
-        if([GameStatus.NotStarted, GameStatus.Draw, GameStatus.WhiteVictory, GameStatus.BlackVictory].includes(BoardQuerier.getBoardStatus())){
+        if([GameStatus.NotReady, GameStatus.Draw, GameStatus.WhiteVictory, GameStatus.BlackVictory].includes(BoardQuerier.getBoardStatus())){
             this.logger.save("Move is not played because game is not started or game is finished.");
             return;
         }
@@ -455,7 +457,7 @@ export class ChessEngine extends BoardManager {
         const playerColor: Color = BoardQuerier.getColorOfTurn();
 
         // Create the new piece and increase the score of the player.
-        this.createPiece(playerColor, selectedPromote as PieceType, firstRowOfSquare);
+        super.createPiece(playerColor, selectedPromote as PieceType, firstRowOfSquare);
         this.updateScores(firstRowOfSquare);
         this.logger.save(`Player's[${playerColor}] Piece[${selectedPromote}] created on square[${to}] on engine`);
 
@@ -490,11 +492,10 @@ export class ChessEngine extends BoardManager {
         this.changeTurn();
         this.checkGameStatus();
         this.saveMoveNotation(this.moveNotation);
-        if(![
-            GameStatus.WhiteVictory, 
-            GameStatus.BlackVictory, 
-            GameStatus.Draw, 
-            GameStatus.NotStarted].includes(BoardQuerier.getBoardStatus())
+        if([
+            GameStatus.InPlay,
+            GameStatus.WhiteInCheck,
+            GameStatus.BlackInCheck].includes(BoardQuerier.getBoardStatus())
         ){
             this.checkEnPassant();
             this.checkCastling();
@@ -517,7 +518,7 @@ export class ChessEngine extends BoardManager {
         if(Converter.jsonToFen(BoardQuerier.getGame()) == StartPosition.Standard)
         {
             this.logger.save("Game status will not be checked because board is the standard position.");
-            this.setGameStatus(GameStatus.InPlay);
+            this.setGameStatus(GameStatus.ReadyToStart);
             this.isBoardPlayable = true;
             return;
         }
@@ -528,13 +529,18 @@ export class ChessEngine extends BoardManager {
          */
         this.isBoardPlayable = BoardQuerier.isBoardPlayable();
         if(this.isBoardPlayable){
-            this.logger.save("Game status set to InPlay because board is playable.");
-            this.setGameStatus(BoardQuerier.getBoardStatus() != GameStatus.NotStarted ? BoardQuerier.getBoardStatus() : GameStatus.InPlay);
+            this.setGameStatus(
+                BoardQuerier.getBoardStatus() != GameStatus.NotReady ? BoardQuerier.getBoardStatus() : GameStatus.ReadyToStart
+            );
+            this.logger.save(`Game status set ${BoardQuerier.getBoardStatus()} because board is playable.`);
         }
         else{
-            this.logger.save(`Game status is not checked because board is not playable ${BoardQuerier.getBoardStatus() != GameStatus.NotStarted ? `anymore` : ``} so checkGameStatus calculation is unnecessary.`);
-            this.setGameStatus(BoardQuerier.getBoardStatus() != GameStatus.NotStarted ? GameStatus.Draw : GameStatus.NotStarted);
+            this.setGameStatus(
+                [GameStatus.InPlay, GameStatus.WhiteInCheck, GameStatus.BlackInCheck].includes(BoardQuerier.getBoardStatus()) 
+                    ? GameStatus.Draw : GameStatus.NotReady
+            );
             this.isBoardPlayable = false;
+            this.logger.save(`Game status is not checked because board is not playable so checkGameStatus calculation is unnecessary.`);
             return;
         }
 
@@ -545,7 +551,7 @@ export class ChessEngine extends BoardManager {
          */
         this._checkFiftyMoveRule();
         this._checkThreefoldRepetition();
-        if(![GameStatus.InPlay, GameStatus.BlackInCheck, GameStatus.WhiteInCheck].includes(BoardQuerier.getBoardStatus()))
+        if(BoardQuerier.getBoardStatus() == GameStatus.Draw)
             return;
 
         /**
@@ -576,7 +582,7 @@ export class ChessEngine extends BoardManager {
          *
          * @see For more information about check please check the https://en.wikipedia.org/wiki/Check_(chess)
          */
-        this.setGameStatus(threateningSquares.length > 0 ? checkEnum : GameStatus.InPlay);
+        this.setGameStatus(threateningSquares.length > 0 ? checkEnum : this.getGameStatus());
 
         // Calculate the moves of the king and save the moves to the calculatedMoves.
         let movesOfKing: Moves | null = this.moveEngine.getMoves(kingSquare!)!;

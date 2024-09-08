@@ -51,6 +51,24 @@ export class Platform{
      */
     private init(): void
     {
+        document.addEventListener("DOMContentLoaded", () => {
+            if(!this.checkAndLoadGameFromCache())
+                this.boardEditor.createBoard();
+
+            if(LocalStorage.isExist(LocalStorageKey.BoardEditorEnabled))
+                this._enableBoardEditor();
+
+            if(!LocalStorage.isExist(LocalStorageKey.WelcomeShown))
+            {
+                this.navigatorModal.showWelcome();
+                LocalStorage.save(LocalStorageKey.WelcomeShown, true);
+            }
+
+            this.listenBoardChanges();
+            this.bindMenuOperations();
+            this.updateComponents();
+        });
+        
         if(LocalStorage.isExist(LocalStorageKey.LastLobbyConnection)){
             // @ts-ignore
             this.connectToLobby(
@@ -63,24 +81,6 @@ export class Platform{
             if(lobbyId)
                 this.connectToLobby(lobbyId, LocalStorage.load(LocalStorageKey.LastPlayerName));
         }
-
-        document.addEventListener("DOMContentLoaded", () => {
-            if(!this.checkAndLoadGameFromCache())
-                this.boardEditor.createBoard();
-
-            if(LocalStorage.isExist(LocalStorageKey.BoardEditorEnabled))
-                this._enableBoardEditor();
-        
-            if(!LocalStorage.isExist(LocalStorageKey.WelcomeShown))
-            {
-                this.navigatorModal.showWelcome();
-                LocalStorage.save(LocalStorageKey.WelcomeShown, true);
-            }
-
-            this.listenBoardChanges();
-            this.bindMenuOperations();
-            this.updateComponents();
-        });
         
         this.logger.save("Cache is checked, last game/lobby is loaded if exists. Menu operations are binded.");
     }
@@ -161,15 +161,11 @@ export class Platform{
      */
     private listenBoardChanges(): void
     {
-        const observer = new MutationObserver(() => {
-            this.updateComponents();
-        });
+        // Update first time
+        this.boardEditor.updateFen();
 
-        observer.observe(document.getElementById("chessboard")!, {
-            childList: true,
-            subtree: true,
-            attributes: true,
-            characterData: true
+        document.getElementById("fen-notation")!.addEventListener("change", () => {
+            this.updateComponents();
         });
 
         this.logger.save("Board changes are listening...");
@@ -354,12 +350,12 @@ export class Platform{
      * update the notation menu and print the logs of the game on log
      * console after the move is made.
      */
-    private updateComponents(){
-        if(!this.boardEditor.isEditorModeEnable()) this.notationMenu.update();
+    private updateComponents(): void {
         this.logConsole.stream();
-        this.boardEditor.showFen(this.chess.engine.getGameAsFenNotation());
 
         if(!this.boardEditor.isEditorModeEnable()){
+            this.notationMenu.update()
+
             const gameStatus = this.chess.engine.getGameStatus();
             if([GameStatus.BlackVictory, GameStatus.WhiteVictory,GameStatus.Draw].includes(gameStatus))
                 this.navigatorModal.showGameOver(gameStatus);
@@ -408,7 +404,6 @@ export class Platform{
         if(this.boardEditor.isEditorModeEnable()) return;
         this.clearComponents();
         this.boardEditor.enableEditorMode();
-        this.listenBoardChanges();
         LocalStorage.clear(LocalStorageKey.LastLobbyConnection);
         LocalStorage.save(LocalStorageKey.BoardEditorEnabled, true);
         this.logger.save("Board editor is enabled.");
@@ -422,7 +417,6 @@ export class Platform{
         this.navigatorModal.hide();
         this.clearComponents();
         this.boardEditor.createBoard(fenNotation);
-        this.listenBoardChanges();
         this.logger.save(`Board is created and components are updated.`);
     }
 
@@ -443,7 +437,6 @@ export class Platform{
     {
         this.logConsole.clear();
         this.boardEditor.resetBoard();
-        this.listenBoardChanges();
         this.logger.save("Board is reset.");
     }
 }

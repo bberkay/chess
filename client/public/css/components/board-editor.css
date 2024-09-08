@@ -89,7 +89,7 @@
             height: 100%;
             position: initial;
             margin: 0.4rem 0.5rem;            
-            margin-top:-3px;
+            margin-top:auto;
         }
     }
 }

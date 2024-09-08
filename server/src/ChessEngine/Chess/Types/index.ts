@@ -121,11 +121,12 @@ export enum StartPosition{
  * @see For more information, check src/Chess.ts
  */
 export enum GameStatus{
+    NotReady = "NotReady",
+    ReadyToStart = "ReadyToStart",
+    InPlay = "InPlay",
     WhiteInCheck = "WhiteInCheck",
     BlackInCheck = "BlackInCheck",
+    Draw = "Draw",
     WhiteVictory = "WhiteVictory",
     BlackVictory = "BlackVictory",
-    Draw = "Draw",
-    InPlay = "InPlay",
-    NotStarted = "NotStarted"
 }

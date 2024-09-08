@@ -71,6 +71,7 @@ export class ChessEngine extends BoardManager {
     public createPiece(color: Color, type: PieceType, square: Square): void
     {
         super.createPiece(color, type, square);
+        this.checkGameStatus();
     }
 
     /**
@@ -79,6 +80,7 @@ export class ChessEngine extends BoardManager {
     public removePiece(square: Square): void
     {
         super.removePiece(square);
+        this.checkGameStatus();
     }
 
     /**
@@ -455,7 +457,7 @@ export class ChessEngine extends BoardManager {
         const playerColor: Color = BoardQuerier.getColorOfTurn();
 
         // Create the new piece and increase the score of the player.
-        this.createPiece(playerColor, selectedPromote as PieceType, firstRowOfSquare);
+        super.createPiece(playerColor, selectedPromote as PieceType, firstRowOfSquare);
         this.updateScores(firstRowOfSquare);
         this.logger.save(`Player's[${playerColor}] Piece[${selectedPromote}] created on square[${to}] on engine`);
 
@@ -580,7 +582,7 @@ export class ChessEngine extends BoardManager {
          *
          * @see For more information about check please check the https://en.wikipedia.org/wiki/Check_(chess)
          */
-        this.setGameStatus(threateningSquares.length > 0 ? checkEnum : GameStatus.InPlay);
+        this.setGameStatus(threateningSquares.length > 0 ? checkEnum : this.getGameStatus());
 
         // Calculate the moves of the king and save the moves to the calculatedMoves.
         let movesOfKing: Moves | null = this.moveEngine.getMoves(kingSquare!)!;

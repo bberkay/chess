@@ -229,16 +229,16 @@ export class BoardQuerier extends Board{
             this.getBoardStatus() == GameStatus.WhiteVictory
             || this.getBoardStatus() == GameStatus.BlackVictory
             || this.getBoardStatus() == GameStatus.Draw
-            || this.getPiecesWithFilter(Color.White, [PieceType.King]).length == 0
-            || this.getPiecesWithFilter(Color.Black, [PieceType.King]).length == 0
+            || this.getPiecesWithFilter(Color.White, [PieceType.King]).length != 1
+            || this.getPiecesWithFilter(Color.Black, [PieceType.King]).length != 1
         ) return false;
         else
         {
             /**
              * Check the pieces on the board and:
-             * - If white king and black king are side by side then the game can't be started.
-             * - If there is only one white king and one black king then the game is in draw status.
-             * - If there is only one white king and one black king and one white knight or bishop then the game is in draw status.
+             * - If white king and black king are side by side then the game can't play anymore.
+             * - If there is only one white king and one black king then the game can't play anymore.
+             * - If there is only one white king and one black king and one white knight or bishop then the game can't play anymore.
              */
             if(Extractor.extractSquares(RouteCalculator.getKingRoute(
                 this.getSquareOfPiece(this.getPiecesWithFilter(Color.White, [PieceType.King])[0])!
