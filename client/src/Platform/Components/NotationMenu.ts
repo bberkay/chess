@@ -25,6 +25,18 @@ export class NotationMenu extends Component{
     }
 
     /**
+     * This function recreates the notation table. If the #notation-menu
+     * is not found in the document then this function does nothing.
+     */
+    public recreate(): void
+    {
+        if(!document.getElementById("notation-menu")) return;
+        else if(document.getElementById("notation-menu")!.innerHTML != "") return;
+        this.renderComponent();
+        this.update(true);
+    }
+
+    /**
      * This function render the notation table.
      */
     protected renderComponent(): void
@@ -211,6 +223,8 @@ export class NotationMenu extends Component{
 
     /**
      * Update the notation table and the score of the players.
+     * @param force If force is true then the notation table will be updated
+     * even if the notation is not changed.
      */
     public update(force: boolean = false): void
     {

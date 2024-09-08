@@ -186,7 +186,7 @@ export class BoardEditor extends Component{
     }
 
     /**
-     * This function makes board creator interactive.
+     * This function enables the editor mode.
      */
     public enableEditorMode(): void
     {
@@ -202,7 +202,7 @@ export class BoardEditor extends Component{
     }
 
     /**
-     * This function makes board creator non-interactive.
+     * This function disables the editor mode.
      */
     public disableEditorMode(): void
     {
@@ -349,8 +349,6 @@ export class BoardEditor extends Component{
 
         if(this.currentBoardCreatorMode == BoardCreatorMode.Template)
           this.changeBoardCreatorMode();
-
-        this.updateFen();
     }
 
     /**
@@ -411,7 +409,6 @@ export class BoardEditor extends Component{
                 this.chess.board.getSquareID(selectedSquare) as Square
             );
             this.makePieceSelectable(selectedSquare.querySelector(".piece") as HTMLElement);
-            this.updateFen();
         }
     }
 
@@ -422,7 +419,6 @@ export class BoardEditor extends Component{
     {
         this.chess.removePiece(this.chess.board.getSquareID(squareElement) as Square);
         squareElement.setAttribute("data-menu-operation", BoardEditorOperation.CreatePiece);
-        this.updateFen();
     }
 
     /**
@@ -528,9 +524,9 @@ export class BoardEditor extends Component{
      */
     public updateFen(): void
     {
+        if(!this.isBoardCreatorModeCustom()) this.changeBoardCreatorMode();
         const inputElement = document.querySelector(`.${BoardCreatorMode.Custom} input`) as HTMLInputElement;
         inputElement.value = this.chess.engine.getGameAsFenNotation();
-        inputElement.dispatchEvent(new Event("change"));
 
         if(this.isEditorModeEnable()){
             if(this.chess.engine.getGameStatus() == GameStatus.ReadyToStart) 

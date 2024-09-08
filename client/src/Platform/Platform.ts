@@ -164,9 +164,19 @@ export class Platform{
         // Update first time
         this.boardEditor.updateFen();
 
-        document.getElementById("fen-notation")!.addEventListener("change", () => {
+        const observer = new MutationObserver(() => {
             this.updateComponents();
         });
+
+        observer.observe(
+            document.getElementById("chessboard")!, 
+            { 
+                childList: true, 
+                subtree: true,
+                attributes: true,
+                characterData: true
+            }
+        );
 
         this.logger.save("Board changes are listening...");
     }
@@ -259,7 +269,7 @@ export class Platform{
                 this.navigatorModal.showPlayAgainstFriend();
                 break
             case NavigatorModalOperation.PlayWithYourself:
-                this._createBoard();
+                this._playWithYourself();
                 break;
             case NavigatorModalOperation.CreateLobby:
                 this._createLobby();
@@ -352,6 +362,7 @@ export class Platform{
      */
     private updateComponents(): void {
         this.logConsole.stream();
+        this.boardEditor.updateFen();
 
         if(!this.boardEditor.isEditorModeEnable()){
             this.notationMenu.update()
@@ -418,6 +429,19 @@ export class Platform{
         this.clearComponents();
         this.boardEditor.createBoard(fenNotation);
         this.logger.save(`Board is created and components are updated.`);
+    }
+
+    /**
+     * Create a new game and update the components of the menu.
+     */
+    private _playWithYourself(fenNotation: string | null = null): void 
+    {
+        this.navigatorModal.hide();
+        this.boardEditor.disableEditorMode();
+        this.logConsole.clear();
+        this.boardEditor.createBoard(fenNotation);
+        this.notationMenu.recreate();
+        this.logger.save(`Editor mode is disabled and notation menu is recreated.`);
     }
 
     /**
