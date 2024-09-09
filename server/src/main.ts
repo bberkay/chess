@@ -39,10 +39,10 @@
 
 import type { Server } from "bun";
 import { LobbyManager } from "./Classes/LobbyManager";
-import type { WebSocketData, Player, Color } from "./Types";
+import type { PlayerWsData, Player, Color } from "./Types";
 import { WsCommand } from "./Classes/WsCommand";
 import { createUserToken, isOriginAllowed, areParametersValid } from "./Classes/Helper";
-import { MAX_PAYLOAD_LENGTH } from "./Consts";
+import { MAX_PAYLOAD_LENGTH, SERVER_PORT } from "./Consts";
 
 /**
  * Handle the player name process. This contains creating a new lobby 
@@ -77,10 +77,55 @@ function handleUserTokenProcess(lobbyId: string, userToken: string | null): Resp
     return { lobbyId, playerName };
 }
 
-const server = Bun.serve<WebSocketData>({
-    port: 3000,
+/**
+ * Join the lobby and start the game if the lobby is ready.
+ * Send connected command to the client.
+ */
+function joinLobby(player: Player){
+    if(LobbyManager.joinLobby(player)){
+        const lobbyId = player.data.lobbyId;
+        const lobby = LobbyManager.getLobby(lobbyId)!;
+        const color = lobby.getPlayerColor(player)!;
+
+        player.subscribe(lobbyId);
+        player.send(WsCommand.connected(player.data));
+        console.log("Connection opened: ", lobbyId, color, player.data.playerName);
+
+        if(lobby.isGameReadyToStart()){
+            if(lobby.isGameAlreadyStarted()){
+                player.send(WsCommand.started(lobby.getBoard()));
+                return;
+            }
+            lobby.startGame();
+            server.publish(lobbyId, WsCommand.started(lobby.getBoard()));
+            console.log("Game started: ", lobbyId);
+        }
+    }
+}
+
+/**
+ * Leave the lobby and send disconnected command to the client.
+ */
+function leaveLobby(player: Player, isDisconnected: boolean = false){
+    const lobbyId = player.data.lobbyId;
+    const lobby = LobbyManager.getLobby(lobbyId)!;
+    const color = lobby.getPlayerColor(player);
+    if(!isDisconnected)
+        lobby.removePlayer(player);
+    else
+        lobby.setPlayerOffline(player);
+    player.send(WsCommand.disconnected(player.data));
+    player.unsubscribe(lobbyId);
+    console.log("Connection closed: ", lobbyId, color);
+}
+
+/**
+ * Server instance.
+ */
+const server = Bun.serve<PlayerWsData>({
+    port: SERVER_PORT,
     fetch(req: Request, server: Server) {
-        if(isOriginAllowed(req))
+        if(!isOriginAllowed(req))
             return new Response("Invalid origin.", {status: 403});
 
         const url = new URL(req.url);
@@ -115,38 +160,16 @@ const server = Bun.serve<WebSocketData>({
     },
     websocket: {
         open(ws: Player) {
-            if(LobbyManager.joinLobby(ws)){
-                const lobbyId = ws.data.lobbyId;
-                const lobby = LobbyManager.getLobby(lobbyId)!;
-                const color = lobby.getPlayerColor(ws)!;
-                const playerName = lobby.getPlayerName(ws)!;
-                ws.subscribe(lobbyId);
-                ws.send(WsCommand.connected(ws.data));
-                console.log("Connection opened: ", lobbyId, color, playerName);
-
-                if(lobby.isGameReadyToStart()){
-                    lobby.startGame();
-                    server.publish(lobbyId, WsCommand.started(lobbyId, lobby.getBoard()));
-                    console.log("Game started: ", lobbyId);
-                }
-            }
+            joinLobby(ws);
         },
         message(ws: Player, message: string) {
             ws.send(`You said: ${message}`);
         },
         close(ws: Player) {
-            const lobbyId = ws.data.lobbyId;
-            if(LobbyManager.isLobbyExist(lobbyId)){
-                const lobby = LobbyManager.getLobby(lobbyId)!;
-                const color = lobby.getPlayerColor(ws);
-                LobbyManager.leaveLobby(ws);
-                ws.send(WsCommand.disconnected(lobbyId, color!));
-                ws.unsubscribe(lobbyId);
-                console.log("Connection closed: ", lobbyId, color);
-            }
+            leaveLobby(ws, true);
         },
         maxPayloadLength: MAX_PAYLOAD_LENGTH,
-        idleTimeout: 60000, // This is going to be game timeout(1+0, 3+0, 5+0 etc.)
+        idleTimeout: 960, // This is going to be game timeout(1+0, 3+0, 5+0 etc.)
     }
 });
   

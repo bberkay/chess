@@ -5,7 +5,9 @@ import { ChessEngine } from '@Chess/Engine/ChessEngine';
 export class Lobby{
     private readonly lobbyId: string;
     private players: {[Color.White]: Player | null, [Color.Black]: Player | null};
-    private board: JsonNotation | string;;
+    private isGameStarted: boolean = false;
+    private chessEngine: ChessEngine = new ChessEngine();
+    private board: StartPosition | JsonNotation | string;
 
     public constructor(lobbyId: string){
         this.lobbyId = lobbyId;
@@ -19,11 +21,6 @@ export class Lobby{
     public getId(): string
     {
         return this.lobbyId;
-    }
-
-    public getBoard(): string | JsonNotation
-    {
-        return this.board;
     }
 
     public getWhitePlayer(): Player | null
@@ -50,6 +47,15 @@ export class Lobby{
         return this.players[color]!.data.playerName || null;
     }
 
+    public getPlayerColorByToken(userToken: string): Color | null
+    {
+        if(this.getWhitePlayer() !== null && this.getWhitePlayer()!.data.userToken === userToken)
+            return Color.White;
+        if(this.getBlackPlayer() !== null && this.getBlackPlayer()!.data.userToken === userToken)
+            return Color.Black;
+        return null;
+    }
+
     public getPlayerNameByToken(userToken: string): string | null
     {
         if(this.getWhitePlayer() !== null && this.getWhitePlayer()!.data.userToken === userToken)
@@ -72,10 +78,25 @@ export class Lobby{
                 ? this.getBlackPlayer()!.data.isOnline
                 : false;
     }
-    
-    public addPlayer(player: Player, color: Color): void
+
+    public setPlayer(player: Player, color: Color): void
     {
         this.players[color] = player;
+        this.setPlayerOnline(player);
+    }
+
+    public setPlayerOffline(player: Player): void
+    {
+        const color = this.getPlayerColor(player);
+        if(color === null) return;
+        this.players[color]!.data.isOnline = false;
+    }
+
+    public setPlayerOnline(player: Player): void
+    {
+        const color = this.getPlayerColor(player);
+        if(color === null) return;
+        this.players[color]!.data.isOnline = true;
     }
 
     public removePlayer(player: Player): void
@@ -92,23 +113,37 @@ export class Lobby{
     
     public isGameReadyToStart(): boolean
     {
-        return this.getWhitePlayer() !== null && this.getBlackPlayer() !== null;
+        const whitePlayer = this.getWhitePlayer();
+        const blackPlayer = this.getBlackPlayer();
+        return whitePlayer !== null && blackPlayer !== null && whitePlayer.data.isOnline && blackPlayer.data.isOnline;
+    }
+
+    public isGameAlreadyStarted(): boolean
+    {
+        return this.isGameStarted;
     }
 
     public startGame(): void
     {
+        if(this.isGameStarted) return;
+
         if(!this.isGameReadyToStart()){
             console.log("Game cannot be started.");
             return;
         }
 
         try{
-            const engine = new ChessEngine();
-            engine.createGame(this.getBoard());
+            this.chessEngine.createGame(this.board);
+            this.isGameStarted = true;
             //engine.playMove(move.from, move.to);
         }catch(e){
             console.log("There was an error while playing the game on engine.");
             return;
         }
+    }
+
+    public getBoard(): string | JsonNotation
+    {
+        return this.chessEngine.getGameAsJsonNotation();
     }
 }

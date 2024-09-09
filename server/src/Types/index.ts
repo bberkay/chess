@@ -1,6 +1,6 @@
 import type { ServerWebSocket } from "bun";
 
-export type WebSocketData = {
+export type PlayerWsData = {
     playerName: string;
     lobbyId: string;
     userToken: string;
@@ -12,4 +12,4 @@ export enum Color {
     Black="Black"
 }
 
-export type Player = ServerWebSocket<WebSocketData>;
+export type Player = ServerWebSocket<PlayerWsData>;

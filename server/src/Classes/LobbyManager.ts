@@ -32,42 +32,36 @@ export class LobbyManager{
         }
 
         const lobby = this.getLobby(lobbyId)!;
-        if(lobby.getWhitePlayer() && lobby.getBlackPlayer()){
-            console.log("Lobby is full.");
-            return false;
+        if(lobby.getPlayerNameByToken(player.data.userToken)){
+            if(lobby.isPlayerOnlineByToken(player.data.userToken)){
+                console.log("Player already connected.");
+                return false;
+            }
+
+            lobby.setPlayer(player, lobby.getPlayerColorByToken(player.data.userToken)!);
+        }
+        else
+        {
+            if(lobby.getWhitePlayer() && lobby.getBlackPlayer()){
+                console.log("Lobby is full.");
+                return false;
+            }
+
+            let randomColor = Math.random() > 0.5 ? Color.White : Color.Black;
+            if(
+                (randomColor == Color.White && lobby.getWhitePlayer()) 
+                || (randomColor == Color.Black && lobby.getBlackPlayer())
+            )
+                randomColor = randomColor === Color.White ? Color.Black : Color.White;
+
+            lobby.setPlayer(player, randomColor);
         }
 
-        let randomColor = Math.random() > 0.5 ? Color.White : Color.Black;
-        if(
-            (randomColor == Color.White && lobby.getWhitePlayer()) 
-            || (randomColor == Color.Black && lobby.getBlackPlayer())
-        )
-            randomColor = randomColor === Color.White ? Color.Black : Color.White;
-
-        lobby.addPlayer(player, randomColor);
         return true;
     }
 
-    static leaveLobby(player: Player): void
+    static deleteLobby(lobbyId: string): void
     {
-        const lobbyId = player.data.lobbyId;
-        if(!this.isLobbyExist(lobbyId)){
-            console.log("Lobby not found.");
-            return;
-        }
 
-        const lobby = this.getLobby(lobbyId)!;
-        const color = lobby.getPlayerColor(player);
-        if(!color){
-            console.log("Player not found.");
-            return;
-        }
-
-        lobby.removePlayerByColor(color);
-
-        if(lobby.getWhitePlayer() === null && lobby.getBlackPlayer() === null)
-            LobbyManager.lobbies.delete(lobbyId);
-
-        return;
     }
 }

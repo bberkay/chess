@@ -37,7 +37,7 @@ export class Chess{
     constructor(){
         //For testing purposes
         //document.addEventListener("keydown", (event) => {
-        //    if(event.key === " "){
+        //    if(event.ctrlKey && event.key === " "){
         //        (async () => {
         //            let counter = 0;
         //            const moves = [{from:53,to:37}];

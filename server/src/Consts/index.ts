@@ -1,8 +1,13 @@
 /**
+ * Port for the websocket server.
+ */
+export const SERVER_PORT = 3000;
+
+/**
  * Allowed origins for the websocket server.
  */
 export const ALLOWED_ORIGINS = [
-    'http://localhost:5174',
+    'http://localhost:5173',
 ];
 
 /**

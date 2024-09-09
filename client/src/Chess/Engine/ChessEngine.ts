@@ -70,7 +70,8 @@ export class ChessEngine extends BoardManager {
      */
     public createPiece(color: Color, type: PieceType, square: Square): void
     {
-        super.createPiece(color, type, square);
+        console.log("createPiece2");
+        super.createPieceModel(color, type, square);
         this.checkGameStatus();
     }
 
@@ -79,7 +80,7 @@ export class ChessEngine extends BoardManager {
      */
     public removePiece(square: Square): void
     {
-        super.removePiece(square);
+        super.removePieceModel(square);
         this.checkGameStatus();
     }
 
@@ -457,7 +458,7 @@ export class ChessEngine extends BoardManager {
         const playerColor: Color = BoardQuerier.getColorOfTurn();
 
         // Create the new piece and increase the score of the player.
-        super.createPiece(playerColor, selectedPromote as PieceType, firstRowOfSquare);
+        super.createPieceModel(playerColor, selectedPromote as PieceType, firstRowOfSquare);
         this.updateScores(firstRowOfSquare);
         this.logger.save(`Player's[${playerColor}] Piece[${selectedPromote}] created on square[${to}] on engine`);
 

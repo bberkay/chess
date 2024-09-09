@@ -16,7 +16,7 @@ import { NavigatorModal } from "./Components/NavigatorModal";
 import { BoardEditorOperation, LogConsoleOperation, MenuOperation, NavigatorModalOperation, NotationMenuOperation } from "./Types";
 import { WsMessage, WsCommand } from "../Types";
 import { Logger } from "@Services/Logger";
-import { Color, GameStatus, PieceType } from "@Chess/Types/index.ts";
+import { Color, GameStatus, JsonNotation, PieceType, StartPosition } from "@Chess/Types/index.ts";
 
 const DEFULT_PLAYER_NAME = "Anonymous";
 
@@ -45,16 +45,12 @@ export class Platform{
         this.logConsole = new LogConsole();
         this.navigatorModal = new NavigatorModal();
         this.init();
-    }
 
-    /**
-     * Check the lobby id from the url and return it if exists.
-     */
-    public checkAndGetLobbyIdFromUrl(): string | null
-    {
-        const lobbyId = window.location.pathname.split("/").pop(); 
-        if(lobbyId) return lobbyId;
-        return null;
+        //For testing purposes
+        document.addEventListener("keydown", (event) => {
+            if(event.ctrlKey && event.key === " ")
+                LocalStorage.clear();
+        });
     }
 
     /**
@@ -72,14 +68,15 @@ export class Platform{
                 this.navigatorModal.showWelcome();
                 LocalStorage.save(LocalStorageKey.WelcomeShown, true);
             }
-
+  
             if(LocalStorage.isExist(LocalStorageKey.LastLobbyConnection)){
-                this.joinLastLobby();
+                this.reconnectLobby();
             }
             else{
-                if(this.checkAndGetLobbyIdFromUrl()) this.navigatorModal.showJoinLobby();
-                else
-                    if(!this.checkAndLoadGameFromCache()) this.boardEditor.createBoard();    
+                if(!this.checkAndLoadGameFromCache()) 
+                    this.boardEditor.createBoard();                 
+                if(this.checkAndGetLobbyIdFromUrl()) 
+                    this.navigatorModal.showJoinLobby();
             }
 
             this.listenBoardChanges();
@@ -88,6 +85,15 @@ export class Platform{
         });
         
         this.logger.save("Cache is checked, last game/lobby is loaded if exists. Menu operations are binded.");
+    }
+
+    /**
+     * Check the lobby id from the url and return it if exists.
+     */
+    private checkAndGetLobbyIdFromUrl(): string | null
+    {
+        const lobbyId = window.location.pathname.split("/").pop(); 
+        return lobbyId || null;
     }
 
     /**
@@ -114,20 +120,9 @@ export class Platform{
      */
     private createLobby(playerName: string): void
     {  
-        if(this.socket){
-            this.socket.close();
-            this.socket = null;
-        }
-        
-        const webSocketUrl = import.meta.env.VITE_WS_ADDRESS + new URLSearchParams({
+        this.createAndHandleWebSocket(new URLSearchParams({
             playerName: (playerName || DEFULT_PLAYER_NAME),
-        }).toString();
-        if(webSocketUrl.length > Number(import.meta.env.VITE_WS_URL_MAX_LENGTH))
-            throw new Error("The WebSocket URL is too long.");
-
-        // @ts-ignore
-        this.socket = new WebSocket(webSocketUrl);
-        this.handleWsSocketEvents();
+        }).toString());
     }
 
     /**
@@ -138,53 +133,31 @@ export class Platform{
         const lobbyId = this.checkAndGetLobbyIdFromUrl();
         if(!lobbyId) throw new Error("Lobby id is not found in the url.");
 
-        if(this.socket){
-            this.socket.close();
-            this.socket = null;
-        }
-
-        const webSocketUrl = import.meta.env.VITE_WS_ADDRESS + new URLSearchParams({
+        this.createAndHandleWebSocket(new URLSearchParams({
             playerName: (playerName || DEFULT_PLAYER_NAME),
             lobbyId: lobbyId
-        }).toString();
-        if(webSocketUrl.length > Number(import.meta.env.VITE_WS_URL_MAX_LENGTH))
-            throw new Error("The WebSocket URL is too long.");
-
-        // @ts-ignore
-        this.socket = new WebSocket(webSocketUrl);
-        this.handleWsSocketEvents();
+        }).toString());
     }
 
     /**
-     * Join the last lobby that the user connected.
+     * Reconnect the last lobby that the user connected.
      */
-    private joinLastLobby(): void
+    private reconnectLobby(): void
     {
         if(!LocalStorage.isExist(LocalStorageKey.LastLobbyConnection)) return;
 
-        if(this.socket){
-            this.socket.close();
-            this.socket = null;
-        }
-
         const lastLobbyConnection = LocalStorage.load(LocalStorageKey.LastLobbyConnection);
-        const webSocketUrl = import.meta.env.VITE_WS_ADDRESS + new URLSearchParams({
+        this.createAndHandleWebSocket(new URLSearchParams({
             lobbyId: lastLobbyConnection.lobbyId,
             userToken: lastLobbyConnection.userToken
-        }).toString();
-        if(webSocketUrl.length > Number(import.meta.env.VITE_WS_URL_MAX_LENGTH))
-            throw new Error("The WebSocket URL is too long.");
-
-        // @ts-ignore
-        this.socket = new WebSocket(webSocketUrl);
-        this.handleWsSocketEvents();
+        }).toString());
     }
-    
+
     /**
      * Handle the websocket socket connection and listen the
      * messages from the server.
      */
-    private handleWsSocketEvents(): void
+    private createAndHandleWebSocket(webSocketEndpoint: string): void
     {
         /**
          * Parse the websocket response returned from the server.
@@ -196,8 +169,15 @@ export class Platform{
             return [wsCommand, JSON.parse(wsData)];
         }    
 
-        if(!this.socket) throw new Error("WebSocket is not initialized. Create or connect to a lobby first.");
+        if(webSocketEndpoint.length > Number(import.meta.env.VITE_WS_ENDPOINT_MAX_LENGTH))
+            throw new Error("The WebSocket URL is too long.");
 
+        if(this.socket){
+            this.socket.close();
+            this.socket = null;
+        }
+
+        this.socket = new WebSocket(import.meta.env.VITE_WS_ADDRESS + (webSocketEndpoint ? "?" + webSocketEndpoint : ""));
         this.socket.onopen = (event) => {
 
         };
@@ -216,6 +196,7 @@ export class Platform{
                         LocalStorageKey.LobbyConnections, 
                         (LocalStorage.load(LocalStorageKey.LobbyConnections) || []).concat(wsData)
                     );
+                    LocalStorage.save(LocalStorageKey.LastLobbyConnection, wsData);
                     this.navigatorModal.showLobbyInfo(window.location.origin + "/" + wsData.lobbyId);
 
                     this.logger.save(`Connected to the lobby[${wsData.lobbyId}] as ${wsData.playerName}[${wsData.color}].`);
@@ -224,7 +205,7 @@ export class Platform{
                     if(LocalStorage.isExist(LocalStorageKey.BoardEditorEnabled)) 
                         LocalStorage.clear(LocalStorageKey.BoardEditorEnabled);
 
-                    this._createBoard(wsData.board);
+                    this._createBoard(wsData);
                     break;
             }
 
@@ -519,11 +500,11 @@ export class Platform{
     /**
      * Create a new game and update the components of the menu.
      */
-    private _createBoard(fenNotation: string | null = null): void 
+    private _createBoard(notation: string | StartPosition | JsonNotation | null = null): void 
     {
         this.navigatorModal.hide();
         this.clearComponents();
-        this.boardEditor.createBoard(fenNotation);
+        this.boardEditor.createBoard(notation);
         this.logger.save(`Board is created and components are updated.`);
     }
 

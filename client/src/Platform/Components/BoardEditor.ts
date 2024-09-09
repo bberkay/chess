@@ -354,7 +354,7 @@ export class BoardEditor extends Component{
     /**
      * This function creates a new board with the board creator.
      */
-    public createBoard(fenNotation: string | null = null): void
+    public createBoard(fenNotation: string | StartPosition | JsonNotation | null = null): void
     {
         this._createBoard(fenNotation || this.getBoardCreatorValue());
     }

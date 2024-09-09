@@ -191,7 +191,7 @@ export class NavigatorModal extends Component{
     public showCreateLobby(): void
     {
         this.show(
-            "Play against a Friend",
+            "Create a Lobby",
             `<span style="font-size:13px">Enter a name: </span>
             <div class="input-group" style="padding-top:5px;padding-bottom:5px;">
                 <input type="text" id="player-name" placeholder="Your Name" maxlength="25" minlength="3" required>
@@ -215,7 +215,7 @@ export class NavigatorModal extends Component{
             `<span style="font-size:13px">Enter a name: </span>
             <div class="input-group" style="padding-top:5px;padding-bottom:5px;">
                 <input type="text" id="player-name" placeholder="Your Name" maxlength="25" minlength="3" required>
-                <button type="submit" data-menu-operation="${NavigatorModalOperation.JoinLobby}">Join</button>
+                <button type="submit" data-menu-operation="${NavigatorModalOperation.JoinLobby}">Play</button>
             </div>
             <div style="text-align:center;margin-top:10px;">
                 <button class="button--text" style="font-size:13px!important;" data-menu-operation="${NavigatorModalOperation.ShowGameCreator}">

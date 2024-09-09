@@ -1,4 +1,4 @@
-import { Color } from "../Types";
+import { PlayerWsData } from "../Types";
 
 enum WsCommandTitle {
     Connected="CONNECTED",
@@ -12,15 +12,15 @@ export class WsCommand{
         return command + " " +  JSON.stringify(data);
     }
 
-    static connected(connectedResponseData: {lobbyId: string, color: Color}): string {
-        return this._wsCommand(WsCommandTitle.Connected, connectedResponseData);
+    static connected(playerWsData: PlayerWsData): string {
+        return this._wsCommand(WsCommandTitle.Connected, playerWsData);
     }
 
-    static started(startedResponseData: {lobbyId: string, data: any}): string {
-        return this._wsCommand(WsCommandTitle.Started, startedResponseData);
+    static started(startedData: any): string {
+        return this._wsCommand(WsCommandTitle.Started, startedData);
     }
 
-    static disconnected(disconnectedResponseData: {lobbyId: string, color: Color}): string {
-        return this._wsCommand(WsCommandTitle.Disconnected, disconnectedResponseData);
+    static disconnected(playerWsData: PlayerWsData): string {
+        return this._wsCommand(WsCommandTitle.Disconnected, playerWsData);
     }
 }

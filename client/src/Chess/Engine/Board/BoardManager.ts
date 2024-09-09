@@ -51,18 +51,24 @@ export class BoardManager extends Board{
     protected createPieces(pieces:Array<{color: Color, type:PieceType, square:Square}>): void
     {
         for(let piece of pieces){
-            this.createPiece(piece.color, piece.type, piece.square);
+            this.createPieceModel(piece.color, piece.type, piece.square);
         }
     }
 
     /**
      * This function creates a piece with the given color, type and square.
-     * @example createPiece(Color.White, PieceType.Pawn, Square.a2); This will create a white pawn on a2.
      */
-    protected createPiece(color: Color, type:PieceType, square:Square): void
+    protected createPieceModel(color: Color, type:PieceType, square:Square): void
     {
-        // Create piece on the given square.
         Board.currentBoard[square] = new PieceModel(color, type);
+    }
+
+    /**
+     * Remove piece from square
+     */
+    protected removePieceModel(square: Square): void
+    {
+        Board.currentBoard[square] = null;
     }
 
     /**
@@ -93,14 +99,6 @@ export class BoardManager extends Board{
         // Move piece from square to square.
         Board.currentBoard[to] = fromPiece;
         Board.currentBoard[from] = null;
-    }
-
-    /**
-     * Remove piece from square
-     */
-    protected removePiece(square: Square): void
-    {
-        Board.currentBoard[square] = null;
     }
 
     /**
