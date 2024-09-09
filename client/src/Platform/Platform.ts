@@ -18,6 +18,8 @@ import { WsMessage, WsCommand } from "../Types";
 import { Logger } from "@Services/Logger";
 import { Color, GameStatus, PieceType } from "@Chess/Types/index.ts";
 
+const DEFULT_PLAYER_NAME = "Anonymous";
+
 /**
  * This class is the main class of the chess platform menu.
  * It provides the components of the menu and connections between the chess and menu.
@@ -46,15 +48,22 @@ export class Platform{
     }
 
     /**
+     * Check the lobby id from the url and return it if exists.
+     */
+    public checkAndGetLobbyIdFromUrl(): string | null
+    {
+        const lobbyId = window.location.pathname.split("/").pop(); 
+        if(lobbyId) return lobbyId;
+        return null;
+    }
+
+    /**
      * Initialize the platform by checking the cache and 
      * handling the menu operations.
      */
     private init(): void
     {
         document.addEventListener("DOMContentLoaded", () => {
-            if(!this.checkAndLoadGameFromCache())
-                this.boardEditor.createBoard();
-
             if(LocalStorage.isExist(LocalStorageKey.BoardEditorEnabled))
                 this._enableBoardEditor();
 
@@ -64,23 +73,19 @@ export class Platform{
                 LocalStorage.save(LocalStorageKey.WelcomeShown, true);
             }
 
+            if(LocalStorage.isExist(LocalStorageKey.LastLobbyConnection)){
+                this.joinLastLobby();
+            }
+            else{
+                if(this.checkAndGetLobbyIdFromUrl()) this.navigatorModal.showJoinLobby();
+                else
+                    if(!this.checkAndLoadGameFromCache()) this.boardEditor.createBoard();    
+            }
+
             this.listenBoardChanges();
             this.bindMenuOperations();
             this.updateComponents();
         });
-        
-        if(LocalStorage.isExist(LocalStorageKey.LastLobbyConnection)){
-            // @ts-ignore
-            this.connectToLobby(
-                LocalStorage.load(LocalStorageKey.LastLobbyConnection), 
-                LocalStorage.load(LocalStorageKey.LastPlayerName)
-            );
-        }
-        else{
-            const lobbyId = window.location.pathname.split("/").pop(); 
-            if(lobbyId)
-                this.connectToLobby(lobbyId, LocalStorage.load(LocalStorageKey.LastPlayerName));
-        }
         
         this.logger.save("Cache is checked, last game/lobby is loaded if exists. Menu operations are binded.");
     }
@@ -105,54 +110,131 @@ export class Platform{
     }
 
     /**
-     * Parse the websocket message returned from the server.
-     * @example [Connected, {lobbyId: "1234"}]
-     * @example [Started, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"]
+     * Create a new lobby with the given player name
      */
-    private _parseWsMessage(event: MessageEvent): [WsCommand, any] {
-        const [ wsCommand, wsData ] = event.data.split(/ (.+)/);
-        return [wsCommand, wsData.startsWith("{") ? JSON.parse(wsData) : wsData];
+    private createLobby(playerName: string): void
+    {  
+        if(this.socket){
+            this.socket.close();
+            this.socket = null;
+        }
+        
+        const webSocketUrl = import.meta.env.VITE_WS_ADDRESS + new URLSearchParams({
+            playerName: (playerName || DEFULT_PLAYER_NAME),
+        }).toString();
+        if(webSocketUrl.length > Number(import.meta.env.VITE_WS_URL_MAX_LENGTH))
+            throw new Error("The WebSocket URL is too long.");
+
+        // @ts-ignore
+        this.socket = new WebSocket(webSocketUrl);
+        this.handleWsSocketEvents();
     }
 
     /**
      * Connect to the lobby with the given lobby id.
      */
-    private connectToLobby(lobbyId: string | null = null, playerName: string | null = null): void
+    private joinLobby(playerName: string): void
     {
-        LocalStorage.clear(LocalStorageKey.BoardEditorEnabled);
-        LocalStorage.clear(LocalStorageKey.LastLobbyConnection);
+        const lobbyId = this.checkAndGetLobbyIdFromUrl();
+        if(!lobbyId) throw new Error("Lobby id is not found in the url.");
 
-        const webSocketUrl = import.meta.env.VITE_WS_ADDRESS + (lobbyId ? "/" + lobbyId : "");
-        if(webSocketUrl.length > 255) return;
+        if(this.socket){
+            this.socket.close();
+            this.socket = null;
+        }
+
+        const webSocketUrl = import.meta.env.VITE_WS_ADDRESS + new URLSearchParams({
+            playerName: (playerName || DEFULT_PLAYER_NAME),
+            lobbyId: lobbyId
+        }).toString();
+        if(webSocketUrl.length > Number(import.meta.env.VITE_WS_URL_MAX_LENGTH))
+            throw new Error("The WebSocket URL is too long.");
 
         // @ts-ignore
         this.socket = new WebSocket(webSocketUrl);
-        
-        this.socket.addEventListener("open", event => {
+        this.handleWsSocketEvents();
+    }
 
-        });
+    /**
+     * Join the last lobby that the user connected.
+     */
+    private joinLastLobby(): void
+    {
+        if(!LocalStorage.isExist(LocalStorageKey.LastLobbyConnection)) return;
 
-        this.socket.addEventListener("message", event => {
-            const [wsCommand, wsData] = this._parseWsMessage(event);
+        if(this.socket){
+            this.socket.close();
+            this.socket = null;
+        }
+
+        const lastLobbyConnection = LocalStorage.load(LocalStorageKey.LastLobbyConnection);
+        const webSocketUrl = import.meta.env.VITE_WS_ADDRESS + new URLSearchParams({
+            lobbyId: lastLobbyConnection.lobbyId,
+            userToken: lastLobbyConnection.userToken
+        }).toString();
+        if(webSocketUrl.length > Number(import.meta.env.VITE_WS_URL_MAX_LENGTH))
+            throw new Error("The WebSocket URL is too long.");
+
+        // @ts-ignore
+        this.socket = new WebSocket(webSocketUrl);
+        this.handleWsSocketEvents();
+    }
+    
+    /**
+     * Handle the websocket socket connection and listen the
+     * messages from the server.
+     */
+    private handleWsSocketEvents(): void
+    {
+        /**
+         * Parse the websocket response returned from the server.
+         * @example [Connected, {lobbyId: "1234"}]
+         * @example [Started, {lobbyId: "1234", board: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"}]
+         */
+        function parseWsResponse(event: MessageEvent): [WsCommand, any] {
+            const [ wsCommand, wsData ] = event.data.split(/ (.+)/);
+            return [wsCommand, JSON.parse(wsData)];
+        }    
+
+        if(!this.socket) throw new Error("WebSocket is not initialized. Create or connect to a lobby first.");
+
+        this.socket.onopen = (event) => {
+
+        };
+
+        this.socket.onmessage = (event) => {
+            const [wsCommand, wsData] = parseWsResponse(event);
             switch(wsCommand){
                 case WsCommand.Connected:
+                    if(!this.checkAndGetLobbyIdFromUrl()){
+                        const url = new URL(window.location.href);
+                        url.pathname = wsData.lobbyId;
+                        window.history.pushState({}, "", url.toString());
+                    }
+
+                    LocalStorage.save(
+                        LocalStorageKey.LobbyConnections, 
+                        (LocalStorage.load(LocalStorageKey.LobbyConnections) || []).concat(wsData)
+                    );
                     this.navigatorModal.showLobbyInfo(window.location.origin + "/" + wsData.lobbyId);
-                    // LocalStorage.save(LocalStorageKey.LastLobbyConnection, {lobbyId: wsData.lobbyId, color: wsData.color});
-                    // LocalStorage.save(LocalStorageKey.LastPlayerName, ws.data.playerName);
+
                     this.logger.save(`Connected to the lobby[${wsData.lobbyId}] as ${wsData.playerName}[${wsData.color}].`);
                     break;
                 case WsCommand.Started:
-                    this._createBoard(wsData);
+                    if(LocalStorage.isExist(LocalStorageKey.BoardEditorEnabled)) 
+                        LocalStorage.clear(LocalStorageKey.BoardEditorEnabled);
+
+                    this._createBoard(wsData.board);
                     break;
             }
 
             this.bindMenuOperations();
-        });
+        };
 
-        this.socket.addEventListener("close", event => {
+        this.socket.onclose = (event) => {
             // if(onPurpose)
             //    LocalStorage.clear(LocalStorageKey.LastLobbyConnection);
-        });
+        };
     }
 
     /**
@@ -265,14 +347,20 @@ export class Platform{
             case NavigatorModalOperation.PlayAgainstBot:
                 this.navigatorModal.showPlayAgainstBot();
                 break;
-            case NavigatorModalOperation.PlayAgainstFriend:
-                this.navigatorModal.showPlayAgainstFriend();
+            case NavigatorModalOperation.ShowCreateLobby:
+                this.navigatorModal.showCreateLobby();
                 break
+            case NavigatorModalOperation.ShowJoinLobby:
+                this.navigatorModal.showJoinLobby();
+                break;
             case NavigatorModalOperation.PlayWithYourself:
                 this._playWithYourself();
                 break;
             case NavigatorModalOperation.CreateLobby:
                 this._createLobby();
+                break;
+            case NavigatorModalOperation.JoinLobby:
+                this._joinLobby();
                 break;
             case NavigatorModalOperation.EnableBoardEditor:
                 this._enableBoardEditor();
@@ -391,7 +479,15 @@ export class Platform{
      */
     private _createLobby(): void
     {
-        this.connectToLobby(null, (document.getElementById("player-name") as HTMLInputElement).value);
+        this.createLobby((document.getElementById("player-name") as HTMLInputElement).value);
+    }
+
+    /**
+     * Join the lobby with the given player name and url lobby id.
+     */
+    private _joinLobby(): void
+    {
+        this.joinLobby((document.getElementById("player-name") as HTMLInputElement).value);
     }
 
     /**
@@ -441,6 +537,7 @@ export class Platform{
         this.logConsole.clear();
         this.boardEditor.createBoard(fenNotation);
         this.notationMenu.recreate();
+        LocalStorage.clear(LocalStorageKey.BoardEditorEnabled);
         this.logger.save(`Editor mode is disabled and notation menu is recreated.`);
     }
 

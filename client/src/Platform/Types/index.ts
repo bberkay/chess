@@ -1,6 +1,6 @@
 /**
  * MenuOperation enum for the types of operations that can be
- * done in the menu.
+ * done in/by the menu.
  * @see src/Platform/Platform.ts
  */
 export enum NotationMenuOperation{
@@ -14,6 +14,10 @@ export enum NotationMenuOperation{
     ToggleNotationMenuUtilityMenu = "ToggleNotationMenuUtilityMenu",
 }
 
+/**
+ * NavigatorModalOperation enum for the types of operations that can be
+ * done in/by the navigator modal.
+ */
 export enum NavigatorModalOperation{
     Hide = "Hide",
     Undo = "Undo",
@@ -21,18 +25,28 @@ export enum NavigatorModalOperation{
     ShowWelcome = "ShowWelcome",
     AskConfirmation = "AskConfirmation",
     ShowStartPlayingBoard = "ShowStartPlayingBoard",
+    ShowCreateLobby = "ShowCreateLobby",
+    ShowJoinLobby = "ShowJoinLobby",
     PlayAgainstBot = "PlayAgainstBot",
-    PlayAgainstFriend = "PlayAgainstFriend",
     PlayWithYourself = "PlayWithYourself",
     CreateLobby = "CreateLobby",
+    JoinLobby = "JoinLobby",
     EnableBoardEditor = "EnableBoardEditor",
     CancelGame = "CancelGame"
 }
 
+/**
+ * LogConsoleOperation enum for the types of operations that can be
+ * done in/by the log console.
+ */
 export enum LogConsoleOperation{
     Clear = "Clear"
 }
 
+/**
+ * BoardEditorOperation enum for the types of operations that can be
+ * done in/by the board editor.
+ */
 export enum BoardEditorOperation{
     FlipBoard = "FlipBoard",
     ResetBoard = "ResetBoard",
@@ -46,4 +60,7 @@ export enum BoardEditorOperation{
     ToggleBoardEditorUtilityMenu = "ToggleBoardEditorUtilityMenu"
 }
 
+/**
+ * MenuOperation type as a union of all the operation types.
+ */
 export type MenuOperation = BoardEditorOperation | NavigatorModalOperation | NotationMenuOperation | LogConsoleOperation;

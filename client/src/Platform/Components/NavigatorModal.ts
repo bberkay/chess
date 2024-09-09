@@ -150,7 +150,7 @@ export class NavigatorModal extends Component{
             "Create New Game",
             `
             <div class = "btn-group-vertical">
-                <button data-menu-operation="${NavigatorModalOperation.PlayAgainstFriend}">Play against Friend</button>
+                <button data-menu-operation="${NavigatorModalOperation.ShowCreateLobby}">Play against Friend</button>
                 <button data-menu-operation="${NavigatorModalOperation.PlayAgainstBot}">Play against Bot</button>
                 <button data-menu-operation="${NavigatorModalOperation.EnableBoardEditor}">Create Board</button>
             </div>
@@ -173,7 +173,7 @@ export class NavigatorModal extends Component{
             `
             <div class = "btn-group-vertical">
                 <button data-menu-operation="${NavigatorModalOperation.PlayWithYourself}">Play with Yourself</button>
-                <button data-menu-operation="${NavigatorModalOperation.PlayAgainstFriend}">Play against Friend</button>
+                <button data-menu-operation="${NavigatorModalOperation.ShowCreateLobby}">Play against Friend</button>
                 <button data-menu-operation="${NavigatorModalOperation.PlayAgainstBot}">Play against Bot</button>
             </div>
              <div style="text-align:center;margin-top:10px;">
@@ -186,16 +186,36 @@ export class NavigatorModal extends Component{
     }
 
     /**
-     * Show the play against friend screen.
+     * Show the create lobby screen.
      */
-    public showPlayAgainstFriend(): void
+    public showCreateLobby(): void
     {
         this.show(
             "Play against a Friend",
             `<span style="font-size:13px">Enter a name: </span>
             <div class="input-group" style="padding-top:5px;padding-bottom:5px;">
                 <input type="text" id="player-name" placeholder="Your Name" maxlength="25" minlength="3" required>
-                <button type="submit" data-menu-operation="${NavigatorModalOperation.CreateLobby}">Play</button>
+                <button type="submit" data-menu-operation="${NavigatorModalOperation.CreateLobby}">Create</button>
+            </div>
+            <div style="text-align:center;margin-top:10px;">
+                <button class="button--text" style="font-size:13px!important;" data-menu-operation="${NavigatorModalOperation.ShowGameCreator}">
+                    Cancel
+                </button>
+            </div>
+        `);
+    }
+
+    /**
+     * Show the join lobby screen.
+     */
+    public showJoinLobby(): void
+    {
+        this.show(
+            "Join a Lobby",
+            `<span style="font-size:13px">Enter a name: </span>
+            <div class="input-group" style="padding-top:5px;padding-bottom:5px;">
+                <input type="text" id="player-name" placeholder="Your Name" maxlength="25" minlength="3" required>
+                <button type="submit" data-menu-operation="${NavigatorModalOperation.JoinLobby}">Join</button>
             </div>
             <div style="text-align:center;margin-top:10px;">
                 <button class="button--text" style="font-size:13px!important;" data-menu-operation="${NavigatorModalOperation.ShowGameCreator}">

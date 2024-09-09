@@ -9,4 +9,9 @@ export enum WsCommand {
     Disconnected="DISCONNECTED"
 };
 
+/**
+ * WsMessage type for the command and data that can be
+ * received from the WebSocket.
+ * @see src/Platform/Platform.ts
+ */
 export type WsMessage = [WsCommand, any];

@@ -1,8 +1,10 @@
 import type { ServerWebSocket } from "bun";
-import { JsonNotation, StartPosition } from '@Chess/Types';
 
 export type WebSocketData = {
+    playerName: string;
     lobbyId: string;
+    userToken: string;
+    isOnline: boolean;
 }
 
 export enum Color {
@@ -11,11 +13,3 @@ export enum Color {
 }
 
 export type Player = ServerWebSocket<WebSocketData>;
-
-export type Lobby = {
-    Players: {
-        [Color.White]: Player | null;
-        [Color.Black]: Player | null;
-    }
-    Board: JsonNotation | string;
-}
