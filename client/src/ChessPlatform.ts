@@ -23,8 +23,9 @@ export class ChessPlatform{
 
     public readonly chess: Chess;
     public readonly platform: Platform;
-    private socket: WebSocket | null = null;
     public readonly logger: Logger = new Logger("src/ChessPlatform.ts");
+
+    private socket: WebSocket | null = null;
 
     private _bindedSocketOperationItems: HTMLElement[] = [];
     private _isSocketOperationsBindedOnce: boolean = false;
@@ -140,7 +141,7 @@ export class ChessPlatform{
     private createLobby(playerName: string, board: string, duration: [number, number]): void
     {  
         this.createAndHandleWebSocket(new URLSearchParams({
-            playerName: (playerName || DEFULT_PLAYER_NAME),
+            name: (playerName || DEFULT_PLAYER_NAME),
             board: board || StartPosition.Standard,
             totalTime: (duration[0] || DEFAULT_TOTAL_TIME).toString(),
             incrementTime: (duration[1] || DEFAULT_INCREMENT_TIME).toString()
@@ -153,10 +154,10 @@ export class ChessPlatform{
     private joinLobby(playerName: string): void
     {
         const lobbyId = this.checkAndGetLobbyIdFromUrl();
-        if(!lobbyId) throw new Error("Lobby id is not found in the url.");
+        if(!lobbyId) return;
 
         this.createAndHandleWebSocket(new URLSearchParams({
-            playerName: (playerName || DEFULT_PLAYER_NAME),
+            name: (playerName || DEFULT_PLAYER_NAME),
             lobbyId: lobbyId
         }).toString());
     }
@@ -217,30 +218,31 @@ export class ChessPlatform{
 
         };
 
-        let playerWsData: any = {};
+        let player: {name: string, userToken: string, isOnline: boolean, color: Color};
+        let lobbyId: string;
         this.socket.onmessage = (event) => {
             const [wsCommand, wsData] = parseWsResponse(event);
             console.log("after response: ", wsCommand, wsData); 
             switch(wsCommand){
                 case WsCommand.Connected:
-                    playerWsData = wsData;
+                    lobbyId = wsData.lobbyId;
+                    player = wsData.player;
                     if(!this.checkAndGetLobbyIdFromUrl()){
-                        this.platform.navigatorModal.showLobbyInfo(window.location.origin + "/" + playerWsData.lobbyId);
-                        this.displayLobbyIdOnUrl(wsData.lobbyId);
+                        this.platform.navigatorModal.showLobbyInfo(window.location.origin + "/" + lobbyId);
+                        this.displayLobbyIdOnUrl(lobbyId);
                     }
-                    
                     /*LocalStorage.save(
                         LocalStorageKey.LobbyConnections, 
                         (LocalStorage.load(LocalStorageKey.LobbyConnections) || []).concat(wsData)
                     );*/
-                    LocalStorage.save(LocalStorageKey.LastLobbyConnection, playerWsData);
-                    this.logger.save(`Connected to the lobby[${playerWsData.lobbyId}] as ${playerWsData.playerName}[${playerWsData.color}].`);
+                    LocalStorage.save(LocalStorageKey.LastLobbyConnection, wsData);
+                    this.logger.save(`Connected to the lobby[${lobbyId}] as ${player.name}[${player.color}].`);
                     break;
                 case WsCommand.Started:
                     if(LocalStorage.isExist(LocalStorageKey.BoardEditorEnabled)) 
                         LocalStorage.clear(LocalStorageKey.BoardEditorEnabled);
 
-                    this.platform.prepareComponentsForOnlineGame(playerWsData.color, wsData);
+                    this.platform.prepareComponentsForOnlineGame(player.color, wsData);
                     break;
             }
         };

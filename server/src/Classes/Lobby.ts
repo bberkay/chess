@@ -42,17 +42,19 @@ export class Lobby{
     /**
      * Get the white player of the lobby.
      */
-    public getWhitePlayer(): Player | null
+    public getWhitePlayer(): Readonly<Player | null>
     {
-        return Object.freeze(this.whitePlayer);
+        if(this.whitePlayer === null) return null;
+        return Object.freeze({ ...this.whitePlayer });
     }
 
     /**
      * Get the black player of the lobby.
      */
-    public getBlackPlayer(): Player | null
+    public getBlackPlayer(): Readonly<Player | null>
     {
-        return Object.freeze(this.blackPlayer);
+        if(this.blackPlayer === null) return null;
+        return Object.freeze({ ...this.blackPlayer });
     }
 
     /**
@@ -185,12 +187,24 @@ export class Lobby{
 
             let randomColor = Math.random() > 0.5 ? Color.White : Color.Black;
             if(randomColor == Color.White){
-                if(this.getWhitePlayer()) this.blackPlayer = player;
-                else this.whitePlayer = player;
+                if(this.getWhitePlayer()){
+                    this.blackPlayer = player;
+                    player.color = Color.Black;
+                } 
+                else{
+                    this.whitePlayer = player;
+                    player.color = Color.White;
+                } 
             }
             else if(randomColor == Color.Black){
-                if(this.getBlackPlayer()) this.whitePlayer = player;
-                else this.blackPlayer = player;
+                if(this.getBlackPlayer()){
+                    this.whitePlayer = player;
+                    player.color = Color.White;
+                } 
+                else{
+                    this.blackPlayer = player;
+                    player.color = Color.Black;
+                } 
             }
 
             this.setPlayerOnline(player);

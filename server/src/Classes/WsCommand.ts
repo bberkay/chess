@@ -24,10 +24,10 @@ export class WsCommand{
 
     /**
      * Send connected command to the client.
-     * @example CONNECTED {color: "white", name: "Player1"}
+     * @example CONNECTED {lobbyId: "1234", player: {name: "Player1", userToken: "1234", isOnline: true, color: "white"}}
      */
-    static connected(player: Player): string {
-        return this._wsCommand(WsCommandTitle.Connected, player);
+    static connected(playerWithLobbyId: {lobbyId: string, player: Player}): string {
+        return this._wsCommand(WsCommandTitle.Connected, playerWithLobbyId);
     }
 
     /**
@@ -40,9 +40,9 @@ export class WsCommand{
 
     /**
      * Send disconnected command to the client.
-     * @example DISCONNECTED {color: "white", name: "Player1"}
+     * @example DISCONNECTED {lobbyId: "1234", player: {name: "Player1", userToken: "1234", isOnline: true, color: "white"}}
      */
-    static disconnected(player: Player): string {
-        return this._wsCommand(WsCommandTitle.Disconnected, player);
+    static disconnected(playerWithLobbyId: {lobbyId: string, player: Player}): string {
+        return this._wsCommand(WsCommandTitle.Disconnected, playerWithLobbyId);
     }
 }

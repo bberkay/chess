@@ -400,19 +400,18 @@ export class NavigatorModal extends Component{
         let totalTime;
         let incrementTime;
         if(isCustomDurationModalOpen){
+            const totalTimeInput = document.querySelector("#navigator-modal #total-time") as HTMLInputElement;
+            const incrementTimeInput = (document.querySelector("#navigator-modal #increment-time") as HTMLInputElement);
+            if(totalTimeInput) totalTime = totalTimeInput.valueAsNumber;
+            if(incrementTimeInput) incrementTime = incrementTimeInput.valueAsNumber;
+        }else{
             const selectedButton = document.querySelector("#navigator-modal .btn-group-grid button[data-selected='true']") as HTMLElement;
             if(selectedButton){
                 totalTime = parseInt(selectedButton.querySelector(".total-time")!.textContent!);
                 incrementTime = parseInt(selectedButton.querySelector(".increment-time")!.textContent!);
             }
-        }else{
-            const totalTimeInput = document.querySelector("#navigator-modal #total-time") as HTMLInputElement;
-            const incrementTimeInput = (document.querySelector("#navigator-modal #increment-time") as HTMLInputElement);
-            if(totalTimeInput) totalTime = totalTimeInput.valueAsNumber;
-            if(incrementTimeInput) incrementTime = incrementTimeInput.valueAsNumber;
         }
 
-        
         totalTime = !totalTime && this.lastSelectedDuration[0] ? this.lastSelectedDuration[0] : totalTime;
         totalTime = (!totalTime || totalTime < MIN_TOTAL_TIME || totalTime > MAX_TOTAL_TIME) 
             ? DEFAULT_TOTAL_TIME : totalTime;
@@ -421,6 +420,7 @@ export class NavigatorModal extends Component{
         incrementTime = (!incrementTime || incrementTime < MIN_INCREMENT_TIME || incrementTime > MAX_INCREMENT_TIME) 
             ? DEFAULT_INCREMENT_TIME : incrementTime;
 
+        this.lastSelectedDuration = [totalTime, incrementTime];
         return [totalTime, incrementTime];
     }
 

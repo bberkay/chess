@@ -210,7 +210,7 @@ function handleUserTokenProcess(
  * or name(name of the player). If the parameters are
  * incorrect, it will return a response.
  */
-function handleParameters(...params: any): 
+function handleParameters(params: any): 
     Response | { 
         lobbyId: string, 
         name: string, 
@@ -221,7 +221,7 @@ function handleParameters(...params: any):
     }
 {   
     let handledParams: Response | { lobbyId: string, name: string} | { lobbyId: string, userToken: string };
-    if(params && params.playerName)
+    if(params && params.name)
         handledParams = handlePlayerNameProcess(
             params.lobbyId, 
             params.board as string, 
@@ -314,7 +314,7 @@ function joinLobby(ws: RWebSocket){
     const lobby = LobbyManager.joinLobby(lobbyId, player);
     if(lobby){
         ws.subscribe(lobbyId);
-        ws.send(WsCommand.connected(player));
+        ws.send(WsCommand.connected({lobbyId, player}));
         console.log("Connection opened: ", lobbyId, player.color, player.name);
 
         console.log("Is game ready to start: ", lobby.isGameReadyToStart());
@@ -339,7 +339,7 @@ function leaveLobby(ws: RWebSocket, isDisconnected: boolean = false){
     const player = ws.data.player;
     if(!LobbyManager.leaveLobby(lobbyId, player, isDisconnected)) return;
     
-    ws.send(WsCommand.disconnected(player));
+    ws.send(WsCommand.disconnected({lobbyId, player}));
     ws.unsubscribe(lobbyId);
 
     console.log("Connection closed: ", lobbyId, player.color, player.name);
