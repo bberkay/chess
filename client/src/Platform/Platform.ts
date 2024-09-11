@@ -28,8 +28,10 @@ export class Platform{
     public readonly notationMenu: NotationMenu;
     public readonly logConsole: LogConsole;
     public readonly navigatorModal: NavigatorModal;
-    private menuOperationItems: Array<Element> = [];
     public readonly logger: Logger = new Logger("src/Platform/Platform.ts");
+
+    private _bindedMenuOperationItems: HTMLElement[] = [];
+    private _isMenuOperationsBindedOnce: boolean = false;
 
     /**
      * Constructor of the Platform class.
@@ -58,12 +60,6 @@ export class Platform{
         document.addEventListener("DOMContentLoaded", () => {
             if(LocalStorage.isExist(LocalStorageKey.BoardEditorEnabled))
                 this._enableBoardEditor();
-
-            if(!LocalStorage.isExist(LocalStorageKey.WelcomeShown))
-            {
-                this.navigatorModal.showWelcome();
-                LocalStorage.save(LocalStorageKey.WelcomeShown, true);
-            }  
 
             if(!this.checkAndLoadGameFromCache()) 
                 this.boardEditor.createBoard();
@@ -128,12 +124,35 @@ export class Platform{
      */
     private bindMenuOperations(): void
     {
-        (document.querySelectorAll("[data-menu-operation]") as NodeListOf<HTMLElement>).forEach((menuItem: HTMLElement) => {
-            if(this.menuOperationItems.length == 0 || !this.menuOperationItems.includes(menuItem)){
-                menuItem.addEventListener("click", () => { this.handleMenuOperation(menuItem) });
-                this.menuOperationItems.push(menuItem);
+        if(this._isMenuOperationsBindedOnce) return;
+        this._isMenuOperationsBindedOnce = true;
+
+        document.querySelectorAll("[data-menu-operation]").forEach((menuItem) => {
+            menuItem.addEventListener("click", () => { this.handleMenuOperation(menuItem as HTMLElement) });
+        });
+
+        const observer = new MutationObserver((mutations) => {
+            for(const mutation of mutations){
+                if(mutation.addedNodes.length === 0 || (mutation.target as HTMLElement).id === "log-list") return;
+                for(const node of mutation.addedNodes){
+                    if(node instanceof HTMLElement || node instanceof Element){
+                        const menuOperationItems = node.querySelectorAll("[data-menu-operation]") as NodeListOf<HTMLElement>;
+                        for(const menuOperationItem of menuOperationItems){
+                            if(menuOperationItem && !this._bindedMenuOperationItems.includes(menuOperationItem))
+                            {
+                                menuOperationItem.addEventListener("click", () => { 
+                                    this.handleMenuOperation(menuOperationItem as HTMLElement) 
+                                });
+                                this._bindedMenuOperationItems.push(menuOperationItem);
+                            }
+                        }
+                    }
+                }
             }
         });
+
+        observer.observe(document.body, { childList: true, subtree: true, attributes: false, characterData: false });
+        this.logger.save("Menu operations are binded to the menu items.");
     }
 
     /**
@@ -162,8 +181,6 @@ export class Platform{
                 menuOperation as BoardEditorOperation, 
                 menuItem
             );
-
-        this.bindMenuOperations();
     }
     
     /**
@@ -319,8 +336,6 @@ export class Platform{
                 this.navigatorModal.showGameOver(gameStatus);
             else if (gameStatus === GameStatus.NotReady)
                 this.navigatorModal.showBoardNotReady();
-
-            this.bindMenuOperations();
         }
     }
 
@@ -350,13 +365,11 @@ export class Platform{
     /**
      * Prepare the platform components for the online game.
      */
-    public prepareComponentsForOnlineGame(wsData: { 
+    public prepareComponentsForOnlineGame(playerColor: Color, wsData: { 
         whitePlayerName: string, 
         blackPlayerName: string, 
         board: string, 
-        playerColor: Color,
-        whitePlayerDuration: number,
-        blackPlayerDuration: number
+        duration: [number, number]
     }): void
     {
         this._createBoard(wsData.board);
@@ -364,9 +377,9 @@ export class Platform{
         this.notationMenu.displayBlackPlayerName(wsData.blackPlayerName);
         this.notationMenu.displayPlayerAsOnline(Color.White);
         this.notationMenu.displayPlayerAsOnline(Color.Black);
-        this.notationMenu.displayWhitePlayerDuration(wsData.whitePlayerDuration.toString());
-        this.notationMenu.displayBlackPlayerDuration(wsData.blackPlayerDuration.toString());
-        if(wsData.playerColor === Color.Black) this._flipBoard();
+        //this.notationMenu.displayWhitePlayerDuration(wsData.duration[0].toString());
+        //this.notationMenu.displayBlackPlayerDuration(wsData.duration[0].toString());
+        if(playerColor === Color.Black) this._flipBoard();
     }
 
     /**

@@ -46,7 +46,7 @@ export class NavigatorModal extends Component{
             </div>
         `);
     }
-
+    
     /**
      * Show the modal with the given title and content.
      */
@@ -220,7 +220,7 @@ export class NavigatorModal extends Component{
                 <button data-selected="false"><span class="total-time">30</span> + <span class="increment-time">0</span></button>
                 <button data-menu-operation="${NavigatorModalOperation.ShowSelectDurationCustom}">Custom</button>
             </div>
-            <button type="submit" data-socket-operation="${NavigatorModalOperation.ShowCreateLobby}">Next</button>
+            <button type="submit" data-menu-operation="${NavigatorModalOperation.ShowCreateLobby}">Next</button>
             <div style="text-align:center;margin-top:10px;">
                 <button class="button--text" style="font-size:13px!important;" data-menu-operation="${NavigatorModalOperation.Hide}">
                     Cancel
@@ -236,14 +236,14 @@ export class NavigatorModal extends Component{
     public showSelectDurationCustom(): void
     {
         this.show(
-            "Select Game Duration",
+            "Enter Game Duration",
             `<span style="font-size:13px">Enter the total and increment time:</span>
             <div class="btn-group-horizontal" style="padding-top:5px;padding-bottom:15px;">
                 <input type="number" id="total-time" placeholder="Min" min="${MIN_TOTAL_TIME}" max="${MAX_TOTAL_TIME}" required>
                 <span style="font-size:28px;padding:0 10px;">+</span>
-                <input type="number" id="increment-time" placeholder="Sec" min="${MIN_INCREMENT_TIME}" max="${MAX_INCREMENT_TIME}" required>
+                <input type="number" id="increment-time" placeholder="Sec" value="${MIN_INCREMENT_TIME}" min="${MIN_INCREMENT_TIME}" max="${MAX_INCREMENT_TIME}" required>
             </div>
-            <button type="submit" data-socket-operation="${NavigatorModalOperation.ShowCreateLobby}">Next</button>
+            <button type="submit" data-menu-operation="${NavigatorModalOperation.ShowCreateLobby}">Next</button>
             <div style="text-align:center;margin-top:10px;">
                 <button class="button--text" style="font-size:13px!important;" data-menu-operation="${NavigatorModalOperation.ShowSelectDuration}">
                     Back

@@ -1,20 +1,32 @@
-import { JsonNotation, StartPosition } from "@Chess/Types";
-import { Color, type Player } from "../Types";
+import type { Player } from "../Types";
+import type { JsonNotation, StartPosition } from "@Chess/Types";
 import { Lobby } from "./Lobby";
 
+/**
+ * This class manages the lobbies of the game.
+ */
 export class LobbyManager{
     private static lobbies: Map<string, Lobby> = new Map<string, Lobby>();
     
+    /**
+     * Get the lobby by id.
+     */
     static getLobby(lobbyId: string): Lobby | null
     {
         return LobbyManager.lobbies.get(lobbyId) || null;
     }
 
+    /**
+     * Check if the lobby exists.
+     */
     static isLobbyExist(lobbyId: string): boolean
     {
         return LobbyManager.lobbies.has(lobbyId);
     }
 
+    /**
+     * Create a new lobby with the given board and duration.
+     */
     static createLobby(
         board: StartPosition | JsonNotation | string,
         duration: [number, number],
@@ -27,45 +39,46 @@ export class LobbyManager{
         return lobbyId;
     }
 
-    static joinLobby(player: Player): boolean
+    /**
+     * Join player to the lobby with the given id.
+     */
+    static joinLobby(lobbyId: string, player: Player): Lobby | false
     {
-        const lobbyId = player.data.lobbyId;
         if (!this.isLobbyExist(lobbyId)){
             console.log("Lobby not found.");
             return false;
         }
 
         const lobby = this.getLobby(lobbyId)!;
-        if(lobby.getPlayerNameByToken(player.data.userToken)){
-            if(lobby.isPlayerOnlineByToken(player.data.userToken)){
-                console.log("Player already connected.");
-                return false;
-            }
+        if(lobby.addPlayer(player))
+            return lobby;
 
-            lobby.setPlayer(player, lobby.getPlayerColorByToken(player.data.userToken)!);
-        }
-        else
-        {
-            if(lobby.getWhitePlayer() && lobby.getBlackPlayer()){
-                console.log("Lobby is full.");
-                return false;
-            }
-
-            let randomColor = Math.random() > 0.5 ? Color.White : Color.Black;
-            if(
-                (randomColor == Color.White && lobby.getWhitePlayer()) 
-                || (randomColor == Color.Black && lobby.getBlackPlayer())
-            )
-                randomColor = randomColor === Color.White ? Color.Black : Color.White;
-
-            lobby.setPlayer(player, randomColor);
-        }
-
-        return true;
+        return false;
     }
 
-    static deleteLobby(lobbyId: string): void
+    /**
+     * Leave player from the lobby with the given id. 
+     * @param isDisconnected If the player is disconnected
+     * then the player will not be removed but marked as disconnected
+     * so that the player can reconnect to the lobby with the same 
+     * color.
+     */
+    static leaveLobby(lobbyId: string, player: Player, isDisconnected: boolean = false): boolean
     {
+        if (!this.isLobbyExist(lobbyId)){
+            console.log("Lobby not found.");
+            return false;
+        }
 
+        const lobby = this.getLobby(lobbyId)!;
+        return lobby.removePlayer(player, isDisconnected);
+    }
+
+    /**
+     * Delete the empty lobbies.
+     */
+    static deleteEmptyLobbies(): void
+    {
+        
     }
 }

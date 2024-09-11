@@ -47,8 +47,10 @@ export class NotationMenu extends Component{
                         <div class="player-name" id="black-player-name">
                             Black Player
                         </div> 
-                        <div class="duration" id="black-player-duration">
-                            00:00
+                        <div class="duration hidden" id="black-player-duration">
+                            <div style="display: flex;align-items: end;">
+                                <span class="minute-second">00:00</span> <small class="milliseconds">.00</small>
+                            </div>
                         </div>
                         <div class="player-status">
                             <span class="status-icon" id="black-player-status"></span>
@@ -92,8 +94,10 @@ export class NotationMenu extends Component{
                         <div class="player-name" id="white-player-name">
                             White Player
                         </div> 
-                        <div class="duration" id="white-player-duration">
-                            00:00
+                        <div class="duration hidden" id="white-player-duration">
+                            <div style="display: flex;align-items: end;">
+                                <span class="minute-second">00:00</span> <small class="milliseconds">.00</small>
+                            </div>
                         </div>
                         <div class="player-status">
                             <span class="status-icon" id="white-player-status"></span>
@@ -337,6 +341,7 @@ export class NotationMenu extends Component{
     {
         const whitePlayerDuration = document.getElementById(`white-player-duration`)!;
         if(!whitePlayerDuration) return;
+        whitePlayerDuration.classList.remove("hidden");
         whitePlayerDuration.textContent = duration;
     }
 
@@ -347,7 +352,26 @@ export class NotationMenu extends Component{
     {
         const blackPlayerDuration = document.getElementById(`black-player-duration`)!;
         if(!blackPlayerDuration) return;
+        blackPlayerDuration.classList.remove("hidden");
         blackPlayerDuration.textContent = duration;
+    }
+
+    /**
+     * Start the given player duration.
+     */
+    public startPlayerDuration(color: Color): void
+    {
+        const playerDuration = document.getElementById(`${color.toLowerCase()}-player-duration`)!;
+        playerDuration.classList.add("running");
+    }
+
+    /**
+     * Stop the given player duration.
+     */
+    public stopPlayerDuration(color: Color): void
+    {
+        const playerDuration = document.getElementById(`${color.toLowerCase()}-player-duration`)!;
+        playerDuration.classList.remove("running");
     }
 
     /**
@@ -356,14 +380,27 @@ export class NotationMenu extends Component{
     public clear(): void
     {
         document.getElementById("notations")!.innerHTML = "";
-        document.getElementById("white-captured-pieces")!.innerHTML = "";
-        document.getElementById("black-captured-pieces")!.innerHTML = "";
-        document.getElementById("white-player-status")!.classList.remove("online", "offline");
-        document.getElementById("black-player-status")!.classList.remove("online", "offline");
-        document.getElementById("white-player-duration")!.textContent = "00:00";
-        document.getElementById("black-player-duration")!.textContent = "00:00";
-        document.getElementById("white-player-section")!.classList.add("your-turn-effect");
-        document.getElementById("black-player-section")!.classList.remove("your-turn-effect");
+
+        const whitePlayerSection = document.getElementById("white-player-section")!;
+        const whitePlayerDuration = whitePlayerSection.querySelector(`#white-player-duration`)!;
+        whitePlayerSection.classList.remove("your-turn-effect");
+        whitePlayerSection.querySelector("#white-player-status")!.classList.remove("online", "offline");
+        whitePlayerSection.querySelector("#white-player-name")!.textContent = "White Player";
+        whitePlayerSection.querySelector("#black-captured-pieces")!.innerHTML = "";
+        whitePlayerDuration.classList.add("hidden");
+        whitePlayerDuration.querySelector(".minute-second")!.textContent = "00:00";
+        whitePlayerDuration.querySelector(".milliseconds")!.textContent = ".00";
+
+        const blackPlayerSection = document.getElementById("black-player-section")!;
+        const blackPlayerDuration = blackPlayerSection.querySelector(`#black-player-duration`)!;
+        blackPlayerSection.classList.remove("your-turn-effect");
+        blackPlayerSection.querySelector("#black-player-status")!.classList.remove("online", "offline");
+        blackPlayerSection.querySelector("#black-player-name")!.textContent = "Black Player";
+        blackPlayerSection.querySelector("#white-captured-pieces")!.innerHTML = "";
+        blackPlayerDuration.classList.add("hidden");
+        blackPlayerDuration.querySelector(".minute-second")!.textContent = "00:00";
+        blackPlayerDuration.querySelector(".milliseconds")!.textContent = ".00";
+
         this.moveCount = 0;
         this.lastScore = {[Color.White]: 0, [Color.Black]: 0};
     }

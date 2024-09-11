@@ -1,9 +1,8 @@
-import { s } from "vitest/dist/reporters-cb94c88b.js";
-
 /**
  * Component abstract class. All components must inherit from this class.
  */
 export abstract class Component{
+    private observers: Map<string, MutationObserver> = new Map();
     protected abstract renderComponent(): void;
 
     /**
@@ -35,31 +34,51 @@ export abstract class Component{
      */
     protected loadHTML(componentId: string, html: string): void
     {
-        if(!document.getElementById(componentId))
+        const createObserver = (componentId: string, callback: () => void) => {
+            const observer = new MutationObserver((mutationsList) => {
+                if(mutationsList.length === 1 && (mutationsList[0].target as HTMLElement).id === "log-file")
+                    return;
+
+                callback();
+            });
+
+            observer.observe(document.getElementById(componentId)!, { 
+                childList: true, 
+                subtree: true, 
+                characterData: false, 
+                attributes: false 
+            });
+            this.observers.set(componentId, observer);
+        }
+
+        const createComponentFunctionality = (componentId: string) => {
+            if(this.observers.has(componentId)){
+                this.observers.get(componentId)?.disconnect();
+            }
+
+            this.createTooltips(componentId);
+            this.createValidations(componentId);
+            this.createCopyToClipboard(componentId);
+            this.createSelectableButtons(componentId);
+
+            createObserver(componentId, () => { createComponentFunctionality(componentId) });
+        }
+
+        const component = document.getElementById(componentId);
+        if(!component)
             throw new Error(`${componentId} element is not initialized. Please add it to the html file.`);
 
-        document.getElementById(componentId)!.innerHTML = html;
-
-        this.createTooltips(document.getElementById(componentId)!);
-        this.createValidations(document.getElementById(componentId)!);
-
-        const observer = new MutationObserver(() => {
-            const component = document.getElementById(componentId);
-            if(!component) return;
-            this.createTooltips(component);
-            this.createValidations(component);
-            this.createCopyToClipboard(component);
-            this.createSelectableButtons(component);
-        });
-        observer.observe(document.getElementById(componentId)!, { childList: true });
+        component.innerHTML = html;
+        createComponentFunctionality(componentId);
     }
 
     /**
      * Create tooltips of the component by data-tooltip-text 
      * attribute.
      */
-    private createTooltips(component: HTMLElement): void
+    private createTooltips(componentId: string): void
     {
+        const component = document.getElementById(componentId);
         if(!component) return;
         for(const menuItem of component.querySelectorAll("[data-tooltip-text]")){
             const tooltipText = menuItem.getAttribute("data-tooltip-text");
@@ -95,8 +114,9 @@ export abstract class Component{
     /**
      * This function creates the validations of the component.
      */
-    private createValidations(component: HTMLElement): void
+    private createValidations(componentId: string): void
     {
+        const component = document.getElementById(componentId);
         if(!component) return;
         function isValid(input: HTMLInputElement): boolean
         {
@@ -115,10 +135,21 @@ export abstract class Component{
         const submitButton = component.querySelector("button[type='submit']");
         if(!submitButton) return;
 
+        let allValid = false;
         submitButton.setAttribute("disabled", "true");
-        component.querySelectorAll("input").forEach((input: HTMLInputElement) => {
+        const inputs = component.querySelectorAll("input");
+        inputs.forEach((input: HTMLInputElement) => {
+            if(!input) return;
             input.addEventListener("input", () => {
-                if(isValid(input)) submitButton.removeAttribute("disabled");
+                for(const input of inputs){
+                    if(!isValid(input)){
+                        allValid = false;
+                        break;
+                    }
+                    allValid = true;
+                }
+
+                if(allValid) submitButton.removeAttribute("disabled");
                 else submitButton.setAttribute("disabled", "true");
             });
         });
@@ -127,10 +158,12 @@ export abstract class Component{
     /**
      * Create copy to clipboard functionality of the component.
      */
-    private createCopyToClipboard(component: HTMLElement): void
+    private createCopyToClipboard(componentId: string): void
     {
+        const component = document.getElementById(componentId);
         if(!component) return;
         for(const copyButton of component.querySelectorAll("[data-clipboard-text]")){
+            if(!(copyButton instanceof HTMLButtonElement)) continue;
             copyButton.addEventListener("click", function() {
                 const input = copyButton.parentElement!.querySelector(
                     "#" + copyButton.getAttribute("data-clipboard-text")!
@@ -147,18 +180,25 @@ export abstract class Component{
     /**
      * Create selectable buttons of the component.
      */
-    private createSelectableButtons(component: HTMLElement): void {
+    private createSelectableButtons(componentId: string): void
+    {
+        const component = document.getElementById(componentId);
         if(!component) return;
-        const buttons = component.querySelectorAll(`${component.id} button[data-selected]`) as NodeListOf<HTMLButtonElement>;
+
+        const buttons = component.querySelectorAll(`button[data-selected="false"]`) as NodeListOf<HTMLButtonElement>;
+        if(!buttons) return;
+
         const submitButton = component.querySelector("button[type='submit']");
         if(submitButton) submitButton?.setAttribute("disabled", "true");
+
         buttons.forEach((button: HTMLButtonElement) => {
             button.addEventListener("click", () => {
                 if(submitButton) submitButton?.removeAttribute("disabled");
+                
                 const selectedButton = document.querySelector("button[data-selected='true']");
                 if(selectedButton) selectedButton.setAttribute("data-selected", "false");
+
                 button.setAttribute("data-selected", "true");
-                button.setAttribute("data-selected", "false");
             });
         });
     }

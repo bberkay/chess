@@ -24,8 +24,10 @@ export class ChessPlatform{
     public readonly chess: Chess;
     public readonly platform: Platform;
     private socket: WebSocket | null = null;
-    private socketOperationItems: HTMLElement[] = [];
     public readonly logger: Logger = new Logger("src/ChessPlatform.ts");
+
+    private _bindedSocketOperationItems: HTMLElement[] = [];
+    private _isSocketOperationsBindedOnce: boolean = false;
 
     /**
      * Constructor of the ChessPlatform class.
@@ -41,6 +43,12 @@ export class ChessPlatform{
      */
     private init(): void
     {
+        if(!LocalStorage.isExist(LocalStorageKey.WelcomeShown))
+        {
+            this.platform.navigatorModal.showWelcome();
+            LocalStorage.save(LocalStorageKey.WelcomeShown, true);
+        }  
+
         if(LocalStorage.isExist(LocalStorageKey.LastLobbyConnection))
             this.reconnectLobby();
         else if(this.checkAndGetLobbyIdFromUrl())
@@ -55,17 +63,37 @@ export class ChessPlatform{
      * items. When the user clicks on the menu item, the
      * operation will be executed.
      */
-     private bindSocketOperations(): void
-     {
-         (document.querySelectorAll("[data-socket-operation]") as NodeListOf<HTMLElement>).forEach((socketOperationItem: HTMLElement) => {
-             if(this.socketOperationItems.length == 0 || !this.socketOperationItems.includes(socketOperationItem)){
-                socketOperationItem.addEventListener("click", () => { this.handleSocketOperation(socketOperationItem) });
-                 this.socketOperationItems.push(socketOperationItem);
-             }
-         });
+    private bindSocketOperations(): void
+    {
+        if(this._isSocketOperationsBindedOnce) return;
+        this._isSocketOperationsBindedOnce = true;
+        document.querySelectorAll("[data-socket-operation]").forEach((menuItem) => {
+            menuItem.addEventListener("click", () => { this.handleSocketOperation(menuItem as HTMLElement) });
+        });
 
+        const observer = new MutationObserver((mutations) => {
+            for(const mutation of mutations){
+                if(mutation.addedNodes.length === 0 || (mutation.target as HTMLElement).id === "log-list") return;
+                for(const node of mutation.addedNodes){
+                    if(node instanceof HTMLElement){
+                        const socketOperationItems = node.querySelectorAll("[data-socket-operation]") as NodeListOf<HTMLElement>;
+                        for(const socketOperationItem of socketOperationItems){
+                            if(socketOperationItem && !this._bindedSocketOperationItems.includes(socketOperationItem))
+                            {
+                                socketOperationItem.addEventListener("click", () => { 
+                                    this.handleSocketOperation(socketOperationItem as HTMLElement) 
+                                });
+                                this._bindedSocketOperationItems.push(socketOperationItem);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        observer.observe(document.body, { childList: true, subtree: true, characterData: false, attributes: false });
         this.logger.save("Socket operations are bound to the menu items.");
-     }
+    }
 
     /**
      * Handle the socket operation of the given socket operation item.
@@ -195,12 +223,12 @@ export class ChessPlatform{
             console.log("after response: ", wsCommand, wsData); 
             switch(wsCommand){
                 case WsCommand.Connected:
-                    if(!this.checkAndGetLobbyIdFromUrl())
-                        this.displayLobbyIdOnUrl(wsData.lobbyId);
-
                     playerWsData = wsData;
-                    this.platform.navigatorModal.showLobbyInfo(window.location.origin + "/" + playerWsData.lobbyId);
-
+                    if(!this.checkAndGetLobbyIdFromUrl()){
+                        this.platform.navigatorModal.showLobbyInfo(window.location.origin + "/" + playerWsData.lobbyId);
+                        this.displayLobbyIdOnUrl(wsData.lobbyId);
+                    }
+                    
                     /*LocalStorage.save(
                         LocalStorageKey.LobbyConnections, 
                         (LocalStorage.load(LocalStorageKey.LobbyConnections) || []).concat(wsData)
@@ -212,11 +240,14 @@ export class ChessPlatform{
                     if(LocalStorage.isExist(LocalStorageKey.BoardEditorEnabled)) 
                         LocalStorage.clear(LocalStorageKey.BoardEditorEnabled);
 
-                    this.platform.prepareComponentsForOnlineGame(wsData);
+                    this.platform.prepareComponentsForOnlineGame(playerWsData.color, wsData);
                     break;
             }
         };
 
+        this.socket.onerror = (event) => {
+        }
+        
         this.socket.onclose = (event) => {
             // if(onPurpose)
             //    LocalStorage.clear(LocalStorageKey.LastLobbyConnection);
