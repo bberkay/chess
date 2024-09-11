@@ -11,7 +11,7 @@
  * ********* Websocket Connection Rules ***********
  * 
  * Creating Lobby:
- * ws://localhost:3000?playerName=Player1
+ * ws://localhost:3000?playerName=Player1&board=pppppppprnbqkbnr/8/8/8/8/8/PPPPPPPPRNBQKBNR%20w%20KQkq%20-%200%201&totalTime=5&incrementTime=0
  * lobbyId and userToken will be created randomly by server
  * and sent to client with connected WsCommand. Example:
  * CONNECTED JSON.stringify({
@@ -43,15 +43,16 @@ import type { PlayerWsData, Player, Color } from "./Types";
 import { WsCommand } from "./Classes/WsCommand";
 import { createUserToken, isOriginAllowed, areParametersValid } from "./Classes/Helper";
 import { MAX_PAYLOAD_LENGTH, SERVER_PORT } from "./Consts";
+import { JsonNotation, StartPosition } from "@Chess/Types";
 
 /**
  * Handle the player name process. This contains creating a new lobby 
  * or joining an existing lobby.
  */
-function handlePlayerNameProcess(lobbyId: string | null): Response | { lobbyId: string, userToken: string } 
+function handlePlayerNameProcess(lobbyId: string | null, board: string | JsonNotation | StartPosition, duration: [number, number]): Response | { lobbyId: string, userToken: string }
 {
     if(!lobbyId)
-        lobbyId = LobbyManager.createLobby();
+        lobbyId = LobbyManager.createLobby(board, duration);
     else{
         const lobby = LobbyManager.getLobby(lobbyId)!;
         if(lobby.isGameReadyToStart())
@@ -94,10 +95,15 @@ function joinLobby(player: Player){
         if(lobby.isGameReadyToStart()){
             if(lobby.isGameAlreadyStarted()){
                 player.send(WsCommand.started(lobby.getBoard()));
+                console.log("Game already started: ", lobbyId);
                 return;
             }
             lobby.startGame();
-            server.publish(lobbyId, WsCommand.started(lobby.getBoard()));
+            server.publish(lobbyId, WsCommand.started({
+                whitePlayerName: lobby.getWhitePlayerName(),
+                blackPlayerName: lobby.getBlackPlayerName(),
+                board: lobby.getBoard()
+            }));
             console.log("Game started: ", lobbyId);
         }
     }
@@ -127,21 +133,18 @@ const server = Bun.serve<PlayerWsData>({
     fetch(req: Request, server: Server) {
         if(!isOriginAllowed(req))
             return new Response("Invalid origin.", {status: 403});
-
-        const url = new URL(req.url);
-        let playerName = url.searchParams.get("playerName");
-        let lobbyId = url.searchParams.get("lobbyId");
-        let userToken = url.searchParams.get("userToken");
         
-        const parameterValidation = areParametersValid(playerName, lobbyId, userToken)
+        const parameterValidation = areParametersValid(req);
         if(parameterValidation instanceof Response)
             return parameterValidation;
+        
+        let { playerName, lobbyId, userToken, board, totalTime, incrementTime } = parameterValidation;
 
         if(lobbyId && !LobbyManager.isLobbyExist(lobbyId))
             return new Response("Lobby not found.", {status: 404});
 
         if(playerName){
-            const handleResponse = handlePlayerNameProcess(lobbyId);
+            const handleResponse = handlePlayerNameProcess(lobbyId, board as string, [parseInt(totalTime!), parseInt(incrementTime!)]);
             if(handleResponse instanceof Response)
                 return handleResponse;
             ({ lobbyId, userToken } = handleResponse);
@@ -169,7 +172,7 @@ const server = Bun.serve<PlayerWsData>({
             leaveLobby(ws, true);
         },
         maxPayloadLength: MAX_PAYLOAD_LENGTH,
-        idleTimeout: 960, // This is going to be game timeout(1+0, 3+0, 5+0 etc.)
+        idleTimeout: 960,
     }
 });
   

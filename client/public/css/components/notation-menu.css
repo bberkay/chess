@@ -69,7 +69,7 @@
 
     & .player-name-container{
         display:flex;
-        justify-content: center;
+        justify-content: space-between;
         align-items: center;
         background-color: #111;
         border:1px solid #2a2a2a;
@@ -82,7 +82,49 @@
             border:1px solid #2a2a2a;
             font-weight: bold;
             font-size: 13px;
-            width: 100%;
+            width: 75%;
+        }
+
+        & .duration{
+            font-size: 18px;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 25%;
+            border-top: 1px solid #2a2a2a;
+            border-bottom: 1px solid #2a2a2a;
+            height: 86%;
+            padding-top: 2px;
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+
+        & .player-status{
+            background-color: #222;
+            border:1px solid #2a2a2a;
+            width: 10%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 95%;
+
+            & .status-icon{
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                border:1px solid grey;
+
+                &.online{
+                    border:none;
+                    background-color: #6EAF23;
+                }
+
+                &.offline{
+                    border:none;
+                    background: #C2091F;
+                }
+            }
         }
     }
 

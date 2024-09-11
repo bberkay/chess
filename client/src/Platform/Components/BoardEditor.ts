@@ -356,7 +356,7 @@ export class BoardEditor extends Component{
      */
     public createBoard(fenNotation: string | StartPosition | JsonNotation | null = null): void
     {
-        this._createBoard(fenNotation || this.getBoardCreatorValue());
+        this._createBoard(fenNotation || this.getFen());
     }
 
     /**
@@ -377,7 +377,7 @@ export class BoardEditor extends Component{
     /**
      * This function select the piece on the piece creator for creating a new piece.
      */
-    public makePieceSelectable(piece: HTMLElement): void
+    private makePieceSelectable(piece: HTMLElement): void
     {
         if(piece.classList.contains("piece")){
             piece.setAttribute("draggable", "true");
@@ -461,7 +461,7 @@ export class BoardEditor extends Component{
     /**
      * This function disables the cursor mode.
      */
-    public disableCursorMode(): void
+    private disableCursorMode(): void
     {
         this.chess.board.getAllSquares().forEach((squareElement: HTMLElement) => {
             squareElement.removeAttribute("data-menu-operation");
@@ -506,7 +506,7 @@ export class BoardEditor extends Component{
     /**
      * Get the form value of the custom or template mode.
      */
-    private getBoardCreatorValue(): string
+    public getFen(): string
     {
         let formValue: string;
         

@@ -1,21 +1,27 @@
 import { Color, type Player } from "../Types";
-import { JsonNotation, StartPosition } from '@Chess/Types';
+import { GameStatus, JsonNotation, StartPosition } from '@Chess/Types';
 import { ChessEngine } from '@Chess/Engine/ChessEngine';
 
 export class Lobby{
     private readonly lobbyId: string;
     private players: {[Color.White]: Player | null, [Color.Black]: Player | null};
+    private duration: [number, number]; // total time(in minutes), increment time(in seconds)
     private isGameStarted: boolean = false;
     private chessEngine: ChessEngine = new ChessEngine();
     private board: StartPosition | JsonNotation | string;
 
-    public constructor(lobbyId: string){
+    public constructor(
+        lobbyId: string, 
+        board: StartPosition | JsonNotation | string = StartPosition.Standard,
+        duration: [number, number]
+    ){
         this.lobbyId = lobbyId;
+        this.duration = duration;
+        this.board = board;
         this.players = {
             [Color.White]: null,
             [Color.Black]: null
         };
-        this.board = StartPosition.Standard;
     }
 
     public getId(): string
@@ -45,6 +51,20 @@ export class Lobby{
         const color = this.getPlayerColor(player);
         if(color === null) return null;
         return this.players[color]!.data.playerName || null;
+    }
+
+    public getWhitePlayerName(): string | null
+    {
+        const whitePlayer = this.getWhitePlayer();
+        if(whitePlayer === null) return null;
+        return this.getPlayerName(whitePlayer);
+    }
+
+    public getBlackPlayerName(): string | null
+    {
+        const blackPlayer = this.getBlackPlayer();
+        if(blackPlayer === null) return null;
+        return this.getPlayerName(blackPlayer);
     }
 
     public getPlayerColorByToken(userToken: string): Color | null
@@ -99,6 +119,11 @@ export class Lobby{
         this.players[color]!.data.isOnline = true;
     }
 
+    public setDuration(totalTime: number, incrementTime: number): void
+    {
+        this.duration = [totalTime, incrementTime];
+    }
+
     public removePlayer(player: Player): void
     {
         const color = this.getPlayerColor(player);
@@ -115,7 +140,10 @@ export class Lobby{
     {
         const whitePlayer = this.getWhitePlayer();
         const blackPlayer = this.getBlackPlayer();
-        return whitePlayer !== null && blackPlayer !== null && whitePlayer.data.isOnline && blackPlayer.data.isOnline;
+        return !this.isGameAlreadyStarted() 
+            && whitePlayer !== null && blackPlayer !== null 
+                && whitePlayer.data.isOnline && blackPlayer.data.isOnline
+                    && this.duration[0] > 0 && this.duration[1] > 0;
     }
 
     public isGameAlreadyStarted(): boolean
@@ -134,7 +162,8 @@ export class Lobby{
 
         try{
             this.chessEngine.createGame(this.board);
-            this.isGameStarted = true;
+            if(this.chessEngine.getGameStatus() == GameStatus.ReadyToStart)
+                this.isGameStarted = true;
             //engine.playMove(move.from, move.to);
         }catch(e){
             console.log("There was an error while playing the game on engine.");

@@ -14,11 +14,8 @@ import { NotationMenu } from "./Components/NotationMenu.ts";
 import { LogConsole } from "./Components/LogConsole";
 import { NavigatorModal } from "./Components/NavigatorModal";
 import { BoardEditorOperation, LogConsoleOperation, MenuOperation, NavigatorModalOperation, NotationMenuOperation } from "./Types";
-import { WsMessage, WsCommand } from "../Types";
 import { Logger } from "@Services/Logger";
 import { Color, GameStatus, JsonNotation, PieceType, StartPosition } from "@Chess/Types/index.ts";
-
-const DEFULT_PLAYER_NAME = "Anonymous";
 
 /**
  * This class is the main class of the chess platform menu.
@@ -27,13 +24,12 @@ const DEFULT_PLAYER_NAME = "Anonymous";
 export class Platform{
 
     private readonly chess: Chess;
-    private readonly boardEditor: BoardEditor;
-    private readonly notationMenu: NotationMenu;
-    private readonly logConsole: LogConsole;
-    private readonly navigatorModal: NavigatorModal;
-    public readonly logger: Logger = new Logger("src/Platform/Platform.ts");
-    private socket: WebSocket | null = null;
+    public readonly boardEditor: BoardEditor;
+    public readonly notationMenu: NotationMenu;
+    public readonly logConsole: LogConsole;
+    public readonly navigatorModal: NavigatorModal;
     private menuOperationItems: Array<Element> = [];
+    public readonly logger: Logger = new Logger("src/Platform/Platform.ts");
 
     /**
      * Constructor of the Platform class.
@@ -67,17 +63,10 @@ export class Platform{
             {
                 this.navigatorModal.showWelcome();
                 LocalStorage.save(LocalStorageKey.WelcomeShown, true);
-            }
-  
-            if(LocalStorage.isExist(LocalStorageKey.LastLobbyConnection)){
-                this.reconnectLobby();
-            }
-            else{
-                if(!this.checkAndLoadGameFromCache()) 
-                    this.boardEditor.createBoard();                 
-                if(this.checkAndGetLobbyIdFromUrl()) 
-                    this.navigatorModal.showJoinLobby();
-            }
+            }  
+
+            if(!this.checkAndLoadGameFromCache()) 
+                this.boardEditor.createBoard();
 
             this.listenBoardChanges();
             this.bindMenuOperations();
@@ -88,20 +77,11 @@ export class Platform{
     }
 
     /**
-     * Check the lobby id from the url and return it if exists.
-     */
-    private checkAndGetLobbyIdFromUrl(): string | null
-    {
-        const lobbyId = window.location.pathname.split("/").pop(); 
-        return lobbyId || null;
-    }
-
-    /**
      * This function checks the cache and loads the game from the cache if there is a game in the cache.
      * @returns Returns true if there is a game in the cache, otherwise returns false.
      * @see For more information about cache management check src/Services/LocalStorage.ts
      */
-    public checkAndLoadGameFromCache(): boolean
+    private checkAndLoadGameFromCache(): boolean
     {
         // If there is a game in the cache, load it.
         if(LocalStorage.isExist(LocalStorageKey.LastBoard)){
@@ -113,109 +93,6 @@ export class Platform{
 
         this.logger.save("No games found in cache");
         return false;
-    }
-
-    /**
-     * Create a new lobby with the given player name
-     */
-    private createLobby(playerName: string): void
-    {  
-        this.createAndHandleWebSocket(new URLSearchParams({
-            playerName: (playerName || DEFULT_PLAYER_NAME),
-        }).toString());
-    }
-
-    /**
-     * Connect to the lobby with the given lobby id.
-     */
-    private joinLobby(playerName: string): void
-    {
-        const lobbyId = this.checkAndGetLobbyIdFromUrl();
-        if(!lobbyId) throw new Error("Lobby id is not found in the url.");
-
-        this.createAndHandleWebSocket(new URLSearchParams({
-            playerName: (playerName || DEFULT_PLAYER_NAME),
-            lobbyId: lobbyId
-        }).toString());
-    }
-
-    /**
-     * Reconnect the last lobby that the user connected.
-     */
-    private reconnectLobby(): void
-    {
-        if(!LocalStorage.isExist(LocalStorageKey.LastLobbyConnection)) return;
-
-        const lastLobbyConnection = LocalStorage.load(LocalStorageKey.LastLobbyConnection);
-        this.createAndHandleWebSocket(new URLSearchParams({
-            lobbyId: lastLobbyConnection.lobbyId,
-            userToken: lastLobbyConnection.userToken
-        }).toString());
-    }
-
-    /**
-     * Handle the websocket socket connection and listen the
-     * messages from the server.
-     */
-    private createAndHandleWebSocket(webSocketEndpoint: string): void
-    {
-        /**
-         * Parse the websocket response returned from the server.
-         * @example [Connected, {lobbyId: "1234"}]
-         * @example [Started, {lobbyId: "1234", board: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"}]
-         */
-        function parseWsResponse(event: MessageEvent): [WsCommand, any] {
-            const [ wsCommand, wsData ] = event.data.split(/ (.+)/);
-            return [wsCommand, JSON.parse(wsData)];
-        }    
-
-        if(webSocketEndpoint.length > Number(import.meta.env.VITE_WS_ENDPOINT_MAX_LENGTH))
-            throw new Error("The WebSocket URL is too long.");
-
-        if(this.socket){
-            this.socket.close();
-            this.socket = null;
-        }
-
-        this.socket = new WebSocket(import.meta.env.VITE_WS_ADDRESS + (webSocketEndpoint ? "?" + webSocketEndpoint : ""));
-        this.socket.onopen = (event) => {
-
-        };
-
-        this.socket.onmessage = (event) => {
-            const [wsCommand, wsData] = parseWsResponse(event);
-            switch(wsCommand){
-                case WsCommand.Connected:
-                    if(!this.checkAndGetLobbyIdFromUrl()){
-                        const url = new URL(window.location.href);
-                        url.pathname = wsData.lobbyId;
-                        window.history.pushState({}, "", url.toString());
-                    }
-
-                    LocalStorage.save(
-                        LocalStorageKey.LobbyConnections, 
-                        (LocalStorage.load(LocalStorageKey.LobbyConnections) || []).concat(wsData)
-                    );
-                    LocalStorage.save(LocalStorageKey.LastLobbyConnection, wsData);
-                    this.navigatorModal.showLobbyInfo(window.location.origin + "/" + wsData.lobbyId);
-
-                    this.logger.save(`Connected to the lobby[${wsData.lobbyId}] as ${wsData.playerName}[${wsData.color}].`);
-                    break;
-                case WsCommand.Started:
-                    if(LocalStorage.isExist(LocalStorageKey.BoardEditorEnabled)) 
-                        LocalStorage.clear(LocalStorageKey.BoardEditorEnabled);
-
-                    this._createBoard(wsData);
-                    break;
-            }
-
-            this.bindMenuOperations();
-        };
-
-        this.socket.onclose = (event) => {
-            // if(onPurpose)
-            //    LocalStorage.clear(LocalStorageKey.LastLobbyConnection);
-        };
     }
 
     /**
@@ -249,7 +126,7 @@ export class Platform{
      * items. When the user clicks on the menu item, the
      * operation will be executed.
      */
-    protected bindMenuOperations(): void
+    private bindMenuOperations(): void
     {
         (document.querySelectorAll("[data-menu-operation]") as NodeListOf<HTMLElement>).forEach((menuItem: HTMLElement) => {
             if(this.menuOperationItems.length == 0 || !this.menuOperationItems.includes(menuItem)){
@@ -262,7 +139,7 @@ export class Platform{
     /**
      * This function makes an operation on menu.
      */
-    protected handleMenuOperation(menuItem: HTMLElement): void
+    private handleMenuOperation(menuItem: HTMLElement): void
     {
         const menuOperation = menuItem.getAttribute("data-menu-operation") as MenuOperation;
         if(LogConsoleOperation.hasOwnProperty(menuOperation))
@@ -322,32 +199,33 @@ export class Platform{
             case NavigatorModalOperation.ShowGameCreator:
                 this.navigatorModal.showGameCreator();
                 break;
+            case NavigatorModalOperation.ShowSelectDuration:
+                this.navigatorModal.showSelectDuration();
+                break;
+            case NavigatorModalOperation.ShowSelectDurationCustom:
+                this.navigatorModal.showSelectDurationCustom();
+                break
             case NavigatorModalOperation.ShowStartPlayingBoard:
-                this.navigatorModal.showStartPlayingBoard();
+                this.navigatorModal.showStartPlayingBoard(this.boardEditor.getFen());
                 break;
             case NavigatorModalOperation.PlayAgainstBot:
                 this.navigatorModal.showPlayAgainstBot();
                 break;
             case NavigatorModalOperation.ShowCreateLobby:
+                if(LocalStorage.isExist(LocalStorageKey.LastPlayerName))
+                    this.navigatorModal.setPlayerNameInputValue(LocalStorage.load(LocalStorageKey.LastPlayerName));
                 this.navigatorModal.showCreateLobby();
                 break
             case NavigatorModalOperation.ShowJoinLobby:
+                if(LocalStorage.isExist(LocalStorageKey.LastPlayerName))
+                    this.navigatorModal.setPlayerNameInputValue(LocalStorage.load(LocalStorageKey.LastPlayerName));
                 this.navigatorModal.showJoinLobby();
                 break;
             case NavigatorModalOperation.PlayWithYourself:
-                this._playWithYourself();
-                break;
-            case NavigatorModalOperation.CreateLobby:
-                this._createLobby();
-                break;
-            case NavigatorModalOperation.JoinLobby:
-                this._joinLobby();
+                this._playBoard();
                 break;
             case NavigatorModalOperation.EnableBoardEditor:
                 this._enableBoardEditor();
-                break;
-            case NavigatorModalOperation.CancelGame:
-                this._cancelGame();
                 break;
         }
     }
@@ -454,35 +332,7 @@ export class Platform{
         this.logConsole.clear();
         if(!this.boardEditor.isEditorModeEnable()) this.notationMenu.clear();
     }
-
-    /**
-     * Create a new lobby with the given player name.
-     */
-    private _createLobby(): void
-    {
-        this.createLobby((document.getElementById("player-name") as HTMLInputElement).value);
-    }
-
-    /**
-     * Join the lobby with the given player name and url lobby id.
-     */
-    private _joinLobby(): void
-    {
-        this.joinLobby((document.getElementById("player-name") as HTMLInputElement).value);
-    }
-
-    /**
-     * Cancel the game and close the socket connection
-     */
-    private _cancelGame(): void
-    {
-        LocalStorage.clear(LocalStorageKey.LastLobbyConnection);
-        this.navigatorModal.hide();
-        this.socket?.close();
-        this.notationMenu.setUtilityMenuToNewGame();
-        this.chess.board.lock();
-    }
-
+    
     /**
      * Enable the board editor and clear the components of the menu.
      */
@@ -495,6 +345,28 @@ export class Platform{
         LocalStorage.clear(LocalStorageKey.LastLobbyConnection);
         LocalStorage.save(LocalStorageKey.BoardEditorEnabled, true);
         this.logger.save("Board editor is enabled.");
+    }
+
+    /**
+     * Prepare the platform components for the online game.
+     */
+    public prepareComponentsForOnlineGame(wsData: { 
+        whitePlayerName: string, 
+        blackPlayerName: string, 
+        board: string, 
+        playerColor: Color,
+        whitePlayerDuration: number,
+        blackPlayerDuration: number
+    }): void
+    {
+        this._createBoard(wsData.board);
+        this.notationMenu.displayWhitePlayerName(wsData.whitePlayerName);
+        this.notationMenu.displayBlackPlayerName(wsData.blackPlayerName);
+        this.notationMenu.displayPlayerAsOnline(Color.White);
+        this.notationMenu.displayPlayerAsOnline(Color.Black);
+        this.notationMenu.displayWhitePlayerDuration(wsData.whitePlayerDuration.toString());
+        this.notationMenu.displayBlackPlayerDuration(wsData.blackPlayerDuration.toString());
+        if(wsData.playerColor === Color.Black) this._flipBoard();
     }
 
     /**
@@ -511,7 +383,7 @@ export class Platform{
     /**
      * Create a new game and update the components of the menu.
      */
-    private _playWithYourself(fenNotation: string | null = null): void 
+    private _playBoard(fenNotation: string | null = null): void 
     {
         this.navigatorModal.hide();
         this.boardEditor.disableEditorMode();

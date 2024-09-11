@@ -1,6 +1,18 @@
+import { SocketOperation } from "../../Types";
 import { NavigatorModalOperation } from "../Types";
 import { Component } from "./Component";
-import { GameStatus } from "@Chess/Types";
+import { GameStatus, StartPosition } from "@Chess/Types";
+import { 
+    DEFULT_PLAYER_NAME,
+    MAX_PLAYER_NAME_LENGTH,
+    MIN_PLAYER_NAME_LENGTH,
+    DEFAULT_TOTAL_TIME,
+    MAX_TOTAL_TIME,
+    MIN_TOTAL_TIME,
+    DEFAULT_INCREMENT_TIME,
+    MAX_INCREMENT_TIME,
+    MIN_INCREMENT_TIME
+} from "@Platform/Consts";
 
 /**
  * This class provide a menu to show the logs.
@@ -8,7 +20,9 @@ import { GameStatus } from "@Chess/Types";
 export class NavigatorModal extends Component{
     private lastNavigatorModalTitle: string = "";
     private lastNavigatorModalContent: string = "";
-
+    private lastCreatedBoard: string = StartPosition.Standard;
+    private lastSelectedDuration: [number, number] = [DEFAULT_TOTAL_TIME, DEFAULT_INCREMENT_TIME];
+    
     /**
      * Constructor of the NavigatorModal class.
      */
@@ -146,11 +160,12 @@ export class NavigatorModal extends Component{
      */
     public showGameCreator(): void
     {
+        this.lastCreatedBoard = StartPosition.Standard;
         this.show(
             "Create New Game",
             `
             <div class = "btn-group-vertical">
-                <button data-menu-operation="${NavigatorModalOperation.ShowCreateLobby}">Play against Friend</button>
+                <button data-menu-operation="${NavigatorModalOperation.ShowSelectDuration}">Play against Friend</button>
                 <button data-menu-operation="${NavigatorModalOperation.PlayAgainstBot}">Play against Bot</button>
                 <button data-menu-operation="${NavigatorModalOperation.EnableBoardEditor}">Create Board</button>
             </div>
@@ -166,14 +181,15 @@ export class NavigatorModal extends Component{
     /**
      * Show the play the board screen.
      */
-    public showStartPlayingBoard(): void
+    public showStartPlayingBoard(board: string): void
     {
+        this.lastCreatedBoard = board;
         this.show(
             "Start Playing the Board",
             `
             <div class = "btn-group-vertical">
                 <button data-menu-operation="${NavigatorModalOperation.PlayWithYourself}">Play with Yourself</button>
-                <button data-menu-operation="${NavigatorModalOperation.ShowCreateLobby}">Play against Friend</button>
+                <button data-menu-operation="${NavigatorModalOperation.ShowSelectDuration}">Play against Friend</button>
                 <button data-menu-operation="${NavigatorModalOperation.PlayAgainstBot}">Play against Bot</button>
             </div>
              <div style="text-align:center;margin-top:10px;">
@@ -186,19 +202,72 @@ export class NavigatorModal extends Component{
     }
 
     /**
+     * Show the select game duration screen.
+     */
+    public showSelectDuration(): void
+    {
+        this.show(
+            "Select Game Duration",
+            `<span style="font-size:13px">Select the total and increment time:</span>
+            <div class="btn-group-grid" style="padding-top:5px;padding-bottom:15px;">
+                <button data-selected="false"><span class="total-time">1</span> + <span class="increment-time">0</span></button>
+                <button data-selected="false"><span class="total-time">1</span> + <span class="increment-time">1</span></button>
+                <button data-selected="false"><span class="total-time">2</span> + <span class="increment-time">1</span></button>
+                <button data-selected="false"><span class="total-time">3</span> + <span class="increment-time">0</span></button>
+                <button data-selected="false"><span class="total-time">3</span> + <span class="increment-time">2</span></button>
+                <button data-selected="false"><span class="total-time">5</span> + <span class="increment-time">0</span></button>
+                <button data-selected="false"><span class="total-time">10</span> + <span class="increment-time">0</span></button>
+                <button data-selected="false"><span class="total-time">30</span> + <span class="increment-time">0</span></button>
+                <button data-menu-operation="${NavigatorModalOperation.ShowSelectDurationCustom}">Custom</button>
+            </div>
+            <button type="submit" data-socket-operation="${NavigatorModalOperation.ShowCreateLobby}">Next</button>
+            <div style="text-align:center;margin-top:10px;">
+                <button class="button--text" style="font-size:13px!important;" data-menu-operation="${NavigatorModalOperation.Hide}">
+                    Cancel
+                </button>
+            </div>
+            `
+        );
+    }
+
+    /**
+     * Show the select custom duration screen.
+     */
+    public showSelectDurationCustom(): void
+    {
+        this.show(
+            "Select Game Duration",
+            `<span style="font-size:13px">Enter the total and increment time:</span>
+            <div class="btn-group-horizontal" style="padding-top:5px;padding-bottom:15px;">
+                <input type="number" id="total-time" placeholder="Min" min="${MIN_TOTAL_TIME}" max="${MAX_TOTAL_TIME}" required>
+                <span style="font-size:28px;padding:0 10px;">+</span>
+                <input type="number" id="increment-time" placeholder="Sec" min="${MIN_INCREMENT_TIME}" max="${MAX_INCREMENT_TIME}" required>
+            </div>
+            <button type="submit" data-socket-operation="${NavigatorModalOperation.ShowCreateLobby}">Next</button>
+            <div style="text-align:center;margin-top:10px;">
+                <button class="button--text" style="font-size:13px!important;" data-menu-operation="${NavigatorModalOperation.ShowSelectDuration}">
+                    Back
+                </button>
+            </div>
+            `
+        );
+    }
+
+    /**
      * Show the create lobby screen.
      */
     public showCreateLobby(): void
     {
+        this.lastSelectedDuration = this.getSelectedGameDuration();
         this.show(
             "Create a Lobby",
             `<span style="font-size:13px">Enter a name: </span>
             <div class="input-group" style="padding-top:5px;padding-bottom:5px;">
-                <input type="text" id="player-name" placeholder="Your Name" maxlength="25" minlength="3" required>
-                <button type="submit" data-menu-operation="${NavigatorModalOperation.CreateLobby}">Create</button>
+                <input type="text" id="player-name" placeholder="Your Name" maxlength="${MAX_PLAYER_NAME_LENGTH}" minlength="${MIN_PLAYER_NAME_LENGTH}" required>
+                <button type="submit" data-socket-operation="${SocketOperation.CreateLobby}">Create</button>
             </div>
             <div style="text-align:center;margin-top:10px;">
-                <button class="button--text" style="font-size:13px!important;" data-menu-operation="${NavigatorModalOperation.ShowGameCreator}">
+                <button class="button--text" style="font-size:13px!important;" data-menu-operation="${NavigatorModalOperation.Hide}">
                     Cancel
                 </button>
             </div>
@@ -214,11 +283,11 @@ export class NavigatorModal extends Component{
             "Join a Lobby",
             `<span style="font-size:13px">Enter a name: </span>
             <div class="input-group" style="padding-top:5px;padding-bottom:5px;">
-                <input type="text" id="player-name" placeholder="Your Name" maxlength="25" minlength="3" required>
-                <button type="submit" data-menu-operation="${NavigatorModalOperation.JoinLobby}">Play</button>
+                <input type="text" id="player-name" placeholder="Your Name" maxlength="${MAX_PLAYER_NAME_LENGTH}" minlength="${MIN_PLAYER_NAME_LENGTH}" required>
+                <button type="submit" data-socket-operation="${SocketOperation.JoinLobby}">Play</button>
             </div>
             <div style="text-align:center;margin-top:10px;">
-                <button class="button--text" style="font-size:13px!important;" data-menu-operation="${NavigatorModalOperation.ShowGameCreator}">
+                <button class="button--text" style="font-size:13px!important;" data-menu-operation="${NavigatorModalOperation.Hide}">
                     Cancel
                 </button>
             </div>
@@ -279,8 +348,91 @@ export class NavigatorModal extends Component{
             <br> <br> 
             <div class="btn-group-vertical">
                 <button data-menu-operation="${NavigatorModalOperation.Undo}">Continue Playing</button>
-                <button style="background-color:transparent" data-menu-operation="${NavigatorModalOperation.CancelGame}">Yes, Cancel the Game</button>
+                <button style="background-color:transparent" data-socket-operation="${SocketOperation.CancelLobby}">Yes, Cancel the Game</button>
             </div></div>`
         );
+    }
+
+    /**
+     * Get the entered player name from the 
+     * modal. If the player name modal is open.
+     * 
+     * @returns Must be between MIN_PLAYER_NAME_LENGTH and MAX_PLAYER_NAME_LENGTH
+     * characters. If not, it will be DEFULT_PLAYER_NAME.
+     */
+    public getEnteredPlayerName(): string
+    {
+        let playerName = (document.querySelector("#navigator-modal #player-name") as HTMLInputElement).value;
+        if(playerName.length < MIN_PLAYER_NAME_LENGTH || playerName.length > MAX_PLAYER_NAME_LENGTH)
+            playerName = DEFULT_PLAYER_NAME;
+        return playerName;
+    }
+
+    /**
+     * Set the input value of the player name.
+     * If the player name modal is open.
+     * 
+     * @param value Must be between MIN_PLAYER_NAME_LENGTH and MAX_PLAYER_NAME_LENGTH
+     * characters. If not, it will be set to DEFULT_PLAYER_NAME.
+     */
+    public setPlayerNameInputValue(value: string): void
+    {
+        if(value.length < MIN_PLAYER_NAME_LENGTH || value.length > MAX_PLAYER_NAME_LENGTH)
+            value = DEFULT_PLAYER_NAME;
+        (document.querySelector("#navigator-modal #player-name") as HTMLInputElement).value = value;
+    }
+
+    /**
+     * Get the selected game duration from the
+     * modal. If the select duration modal is open.
+     * 
+     * @returns Must be between MIN_TOTAL_TIME and MAX_TOTAL_TIME
+     * minutes for total time and MIN_INCREMENT_TIME and MAX_INCREMENT_TIME
+     * seconds for increment time. If not, it will be DEFAULT_TOTAL_TIME
+     * and DEFAULT_INCREMENT_TIME.
+     */
+    public getSelectedGameDuration(): [number, number]
+    {
+        const isCustomDurationModalOpen = document.querySelector(
+            `[data-menu-operation="${NavigatorModalOperation.ShowSelectDurationCustom}"]
+        `) ? false : true;
+
+        let totalTime;
+        let incrementTime;
+        if(isCustomDurationModalOpen){
+            const selectedButton = document.querySelector("#navigator-modal .btn-group-grid button[data-selected='true']") as HTMLElement;
+            if(selectedButton){
+                totalTime = parseInt(selectedButton.querySelector(".total-time")!.textContent!);
+                incrementTime = parseInt(selectedButton.querySelector(".increment-time")!.textContent!);
+            }
+        }else{
+            const totalTimeInput = document.querySelector("#navigator-modal #total-time") as HTMLInputElement;
+            const incrementTimeInput = (document.querySelector("#navigator-modal #increment-time") as HTMLInputElement);
+            if(totalTimeInput) totalTime = totalTimeInput.valueAsNumber;
+            if(incrementTimeInput) incrementTime = incrementTimeInput.valueAsNumber;
+        }
+
+        
+        totalTime = !totalTime && this.lastSelectedDuration[0] ? this.lastSelectedDuration[0] : totalTime;
+        totalTime = (!totalTime || totalTime < MIN_TOTAL_TIME || totalTime > MAX_TOTAL_TIME) 
+            ? DEFAULT_TOTAL_TIME : totalTime;
+
+        incrementTime = !incrementTime && this.lastSelectedDuration[1] ? this.lastSelectedDuration[1] : incrementTime;
+        incrementTime = (!incrementTime || incrementTime < MIN_INCREMENT_TIME || incrementTime > MAX_INCREMENT_TIME) 
+            ? DEFAULT_INCREMENT_TIME : incrementTime;
+
+        return [totalTime, incrementTime];
+    }
+
+    /**
+     * Get the created lobby settings from the modal. 
+     */
+    public getCreatedLobbySettings(): {playerName: string, board: string, duration: [number, number]}
+    {
+        return {
+            playerName: this.getEnteredPlayerName(),
+            board: this.lastCreatedBoard || StartPosition.Standard,
+            duration: this.getSelectedGameDuration()
+        };
     }
 }

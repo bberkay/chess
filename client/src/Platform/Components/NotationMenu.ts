@@ -44,7 +44,15 @@ export class NotationMenu extends Component{
         this.loadHTML("notation-menu", `
                 <div class="player-section your-turn-effect" id="black-player-section">
                     <div class="player-name-container">
-                        <div class="player-name" id="black-player-name">Black Player</div> 
+                        <div class="player-name" id="black-player-name">
+                            Black Player
+                        </div> 
+                        <div class="duration" id="black-player-duration">
+                            00:00
+                        </div>
+                        <div class="player-status">
+                            <span class="status-icon" id="black-player-status"></span>
+                        </div>
                     </div>
                     <div class="score-table" id="white-captured-pieces"></div>
                 </div>
@@ -81,7 +89,15 @@ export class NotationMenu extends Component{
                 </div>
                 <div class="player-section your-turn-effect" id="white-player-section">
                     <div class="player-name-container">
-                        <div class="player-name" id="white-player-name">White Player</div> 
+                        <div class="player-name" id="white-player-name">
+                            White Player
+                        </div> 
+                        <div class="duration" id="white-player-duration">
+                            00:00
+                        </div>
+                        <div class="player-status">
+                            <span class="status-icon" id="white-player-status"></span>
+                        </div>
                     </div>
                     <div class="score-table" id="black-captured-pieces"></div>
                 </div>
@@ -273,6 +289,68 @@ export class NotationMenu extends Component{
     }
 
     /**
+     * Add white player name to the menu.
+     */
+    public displayWhitePlayerName(name: string): void
+    {
+        const whitePlayerName = document.getElementById(`white-player-name`)!;
+        if(!whitePlayerName) return;
+        whitePlayerName.textContent = name;
+    }
+
+    /**
+     * Add black player name to the menu.
+     */
+    public displayBlackPlayerName(name: string): void
+    {
+        const blackPlayerName = document.getElementById(`black-player-name`)!;
+        if(!blackPlayerName) return;
+        blackPlayerName.textContent = name;
+    }
+
+    /**
+     * Change the player status to online.
+     */
+    public displayPlayerAsOnline(color: Color): void
+    {
+        const playerStatus = document.getElementById(`${color.toLowerCase()}-player-status`)!;
+        if(!playerStatus) return;
+        playerStatus.classList.add("online");
+        playerStatus.classList.remove("offline");
+    }
+
+    /**
+     * Change the player status to offline.
+     */
+    public displayPlayerAsOffline(color: Color): void
+    {
+        const playerStatus = document.getElementById(`${color.toLowerCase()}-player-status`)!;
+        if(!playerStatus) return;
+        playerStatus.classList.add("offline");
+        playerStatus.classList.remove("online");
+    }
+
+    /**
+     * Display the white player duration on the notation menu.
+     */
+    public displayWhitePlayerDuration(duration: string): void
+    {
+        const whitePlayerDuration = document.getElementById(`white-player-duration`)!;
+        if(!whitePlayerDuration) return;
+        whitePlayerDuration.textContent = duration;
+    }
+
+    /**
+     * Display the black player duration on the notation menu.
+     */
+    public displayBlackPlayerDuration(duration: string): void
+    {
+        const blackPlayerDuration = document.getElementById(`black-player-duration`)!;
+        if(!blackPlayerDuration) return;
+        blackPlayerDuration.textContent = duration;
+    }
+
+    /**
      * This function clears the table.
      */
     public clear(): void
@@ -280,6 +358,10 @@ export class NotationMenu extends Component{
         document.getElementById("notations")!.innerHTML = "";
         document.getElementById("white-captured-pieces")!.innerHTML = "";
         document.getElementById("black-captured-pieces")!.innerHTML = "";
+        document.getElementById("white-player-status")!.classList.remove("online", "offline");
+        document.getElementById("black-player-status")!.classList.remove("online", "offline");
+        document.getElementById("white-player-duration")!.textContent = "00:00";
+        document.getElementById("black-player-duration")!.textContent = "00:00";
         document.getElementById("white-player-section")!.classList.add("your-turn-effect");
         document.getElementById("black-player-section")!.classList.remove("your-turn-effect");
         this.moveCount = 0;

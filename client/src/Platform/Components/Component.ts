@@ -44,9 +44,12 @@ export abstract class Component{
         this.createValidations(document.getElementById(componentId)!);
 
         const observer = new MutationObserver(() => {
-            this.createTooltips(document.getElementById(componentId)!);
-            this.createValidations(document.getElementById(componentId)!);
-            this.createCopyToClipboard(document.getElementById(componentId)!);
+            const component = document.getElementById(componentId);
+            if(!component) return;
+            this.createTooltips(component);
+            this.createValidations(component);
+            this.createCopyToClipboard(component);
+            this.createSelectableButtons(component);
         });
         observer.observe(document.getElementById(componentId)!, { childList: true });
     }
@@ -139,5 +142,24 @@ export abstract class Component{
                 navigator.clipboard.writeText(input.value);
             });
         }
+    }
+
+    /**
+     * Create selectable buttons of the component.
+     */
+    private createSelectableButtons(component: HTMLElement): void {
+        if(!component) return;
+        const buttons = component.querySelectorAll(`${component.id} button[data-selected]`) as NodeListOf<HTMLButtonElement>;
+        const submitButton = component.querySelector("button[type='submit']");
+        if(submitButton) submitButton?.setAttribute("disabled", "true");
+        buttons.forEach((button: HTMLButtonElement) => {
+            button.addEventListener("click", () => {
+                if(submitButton) submitButton?.removeAttribute("disabled");
+                const selectedButton = document.querySelector("button[data-selected='true']");
+                if(selectedButton) selectedButton.setAttribute("data-selected", "false");
+                button.setAttribute("data-selected", "true");
+                button.setAttribute("data-selected", "false");
+            });
+        });
     }
 }

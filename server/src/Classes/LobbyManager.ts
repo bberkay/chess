@@ -1,3 +1,4 @@
+import { JsonNotation, StartPosition } from "@Chess/Types";
 import { Color, type Player } from "../Types";
 import { Lobby } from "./Lobby";
 
@@ -14,12 +15,15 @@ export class LobbyManager{
         return LobbyManager.lobbies.has(lobbyId);
     }
 
-    static createLobby(): string
+    static createLobby(
+        board: StartPosition | JsonNotation | string,
+        duration: [number, number],
+    ): string
     {
         const lobbyId = Math.floor(100000 + Math.random() * 900000).toString();
-        if(this.isLobbyExist(lobbyId)) return this.createLobby();
+        if(this.isLobbyExist(lobbyId)) return this.createLobby(board, duration);
 
-        LobbyManager.lobbies.set(lobbyId, new Lobby(lobbyId));
+        LobbyManager.lobbies.set(lobbyId, new Lobby(lobbyId, board, duration));
         return lobbyId;
     }
 
