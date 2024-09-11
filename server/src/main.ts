@@ -290,6 +290,7 @@ const server = Bun.serve<WebSocketData>({
         open(ws: RWebSocket) {
             joinLobby(ws);
         },
+        message(ws: RWebSocket, message: string) {
             // Last Move gönderilir {frm: "e2", to: "e4"} şeklinde olabilir.
             ws.send(`You said: ${message}`);
         },
