@@ -328,7 +328,7 @@ export class Platform{
         this.logConsole.stream();
         this.boardEditor.updateFen();
 
-        if(!this.boardEditor.isEditorModeEnable()){
+        if(!BoardEditor.isEditorModeEnable()){
             this.notationMenu.update()
 
             const gameStatus = this.chess.engine.getGameStatus();
@@ -345,7 +345,7 @@ export class Platform{
      */
     private clearComponents(){
         this.logConsole.clear();
-        if(!this.boardEditor.isEditorModeEnable()) this.notationMenu.clear();
+        if(!BoardEditor.isEditorModeEnable()) this.notationMenu.clear();
     }
     
     /**
@@ -354,7 +354,7 @@ export class Platform{
     private _enableBoardEditor(): void
     {
         this.navigatorModal.hide();
-        if(this.boardEditor.isEditorModeEnable()) return;
+        if(BoardEditor.isEditorModeEnable()) return;
         this.clearComponents();
         this.boardEditor.enableEditorMode();
         LocalStorage.clear(LocalStorageKey.LastLobbyConnection);
@@ -373,10 +373,10 @@ export class Platform{
     }): void
     {
         this._createBoard(wsData.board);
-        this.notationMenu.displayWhitePlayerName(wsData.whitePlayerName);
-        this.notationMenu.displayBlackPlayerName(wsData.blackPlayerName);
-        this.notationMenu.displayPlayerAsOnline(Color.White);
-        this.notationMenu.displayPlayerAsOnline(Color.Black);
+        this.notationMenu.displayLobbyUtilityMenu();
+        this.notationMenu.displayWhitePlayer(wsData.whitePlayerName);
+        this.notationMenu.displayBlackPlayer(wsData.blackPlayerName);
+        this.notationMenu.changeTurnIndicator(this.chess.engine.getTurnColor());
         //this.notationMenu.displayWhitePlayerDuration(wsData.duration[0].toString());
         //this.notationMenu.displayBlackPlayerDuration(wsData.duration[0].toString());
         if(playerColor === Color.Black) this._flipBoard();
@@ -413,7 +413,7 @@ export class Platform{
     private _flipBoard(): void
     {
         this.boardEditor.flipBoard();
-        if(!this.boardEditor.isEditorModeEnable())
+        if(!BoardEditor.isEditorModeEnable())
             this.notationMenu.flip();
     }
 

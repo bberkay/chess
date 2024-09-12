@@ -81,61 +81,61 @@ function areParametersValid(req: Request): Response | {
     const board = url.searchParams.get("board");
     const totalTime = url.searchParams.get("totalTime");
     const incrementTime = url.searchParams.get("incrementTime");
-
+    console.log("Parameters: ", name, lobbyId, userToken, board, totalTime, incrementTime);
     if(name && userToken)
         return new Response(
             "Invalid request. name and userToken cannot be used together.", 
             {status: 400}
         );
-    
+    console.log("check 1");
     if(!name && !userToken)
         return new Response(
             "Invalid request. name or userToken must be provided.", 
             {status: 400}
         );
-
+    console.log("check 2");
     if(userToken && !lobbyId)
         return new Response(
             "Invalid request. userToken must be used with lobbyId.", 
             {status: 400}
         );
-
+    console.log("check 3");
     if(name && (name.length < MIN_PLAYER_NAME_LENGTH || name.length > MAX_PLAYER_NAME_LENGTH))
         return new Response(
             "Invalid request. playerName length must be between 3 and 25.", 
             {status: 400}
         );
-
+    console.log("check 4");
     if(lobbyId && (lobbyId.length < 6 || lobbyId.length > 6))
         return new Response(
             "Invalid request. lobbyId length must be 6.", 
             {status: 400}
         );
-
+    console.log("check 5");
     if(userToken && (userToken.length < 6 || userToken.length > 6))
         return new Response(
             "Invalid request. userToken length must be 6.", 
             {status: 400}
         );
-
+    console.log("check 6");
     if((board || totalTime || incrementTime) && (!name || lobbyId || userToken))
         return new Response(
             "Invalid request. board, totalTime, incrementTime can only be used when creating a new lobby.", 
             {status: 400}
         );
-
+    console.log("check 7");
     if((name && !lobbyId) && (!board || !totalTime || !incrementTime))
         return new Response(
             "Invalid request. board, totalTime, incrementTime must be provided when creating a new lobby.", 
             {status: 400}
         );
-
+    console.log("check 8");
     if(board && board.length > 100)
         return new Response(
             "Invalid request. board length must be less than 100.", 
             {status: 400}
         );
-
+    console.log("check 9");
     if(totalTime){
         const totalTimeNumber = parseFloat(totalTime);
         if(isNaN(totalTimeNumber) 
@@ -146,7 +146,7 @@ function areParametersValid(req: Request): Response | {
                 {status: 400}
             );
     }
-
+    console.log("check 10");
     if(incrementTime){
         const incrementTimeNumber = parseInt(incrementTime);
         if(isNaN(incrementTimeNumber) 
@@ -157,10 +157,10 @@ function areParametersValid(req: Request): Response | {
                 {status: 400}
             );
     }
-
+    console.log("check 11");
     if(lobbyId && !LobbyManager.isLobbyExist(lobbyId))
         return new Response("Lobby not found.", {status: 404});
-
+    console.log("check 12");
     return { name, lobbyId, userToken, board, totalTime, incrementTime };
 }
 
@@ -220,6 +220,7 @@ function handleParameters(params: any):
         incrementTime: string 
     }
 {   
+    console.log("Handling parameters...: ", params);
     let handledParams: Response | { lobbyId: string, name: string} | { lobbyId: string, userToken: string };
     if(params && params.name)
         handledParams = handlePlayerNameProcess(
@@ -250,6 +251,7 @@ const server = Bun.serve<WebSocketData>({
         
         // Check if the parameters are valid.
         const parameterValidation = areParametersValid(req);
+        console.log("Parameter validation: ", parameterValidation);
         if(parameterValidation instanceof Response)
             return parameterValidation;
         
@@ -257,7 +259,7 @@ const server = Bun.serve<WebSocketData>({
         const finalParameters = handleParameters(parameterValidation);
         if(finalParameters instanceof Response)
             return finalParameters;
-
+        console.log("Parameters are handled.");
         const { 
             lobbyId, 
             userToken,
@@ -314,7 +316,7 @@ function joinLobby(ws: RWebSocket){
     const lobby = LobbyManager.joinLobby(lobbyId, player);
     if(lobby){
         ws.subscribe(lobbyId);
-        ws.send(WsCommand.connected({lobbyId, player}));
+        ws.send(WsCommand.connected(lobbyId, player));
         console.log("Connection opened: ", lobbyId, player.color, player.name);
 
         console.log("Is game ready to start: ", lobby.isGameReadyToStart());
@@ -339,7 +341,7 @@ function leaveLobby(ws: RWebSocket, isDisconnected: boolean = false){
     const player = ws.data.player;
     if(!LobbyManager.leaveLobby(lobbyId, player, isDisconnected)) return;
     
-    ws.send(WsCommand.disconnected({lobbyId, player}));
+    server.publish(lobbyId, WsCommand.disconnected(lobbyId, player.name, player.color!));
     ws.unsubscribe(lobbyId);
 
     console.log("Connection closed: ", lobbyId, player.color, player.name);

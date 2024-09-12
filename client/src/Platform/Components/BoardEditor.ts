@@ -9,11 +9,28 @@ enum BoardCreatorMode {
 }
 
 /**
+ * Decorator to check if the editor mode is enabled or not
+ * before executing the function that requires the editor mode to be enabled.
+ */
+function isEditorModeEnable() {
+    return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+      const originalMethod = descriptor.value;
+  
+      descriptor.value = function (...args: any[]) {
+        if (!BoardEditor.isEditorModeEnable()) {
+          throw new Error("The editor mode is not enabled.");
+        }
+        return originalMethod.apply(this, args);
+      };
+    };
+}
+
+/**
  * This class provide a form to create a new board.
  */
 export class BoardEditor extends Component{
     private readonly chess: Chess;
-    private _isEditorModeEnable: boolean = false;
+    private static _isEditorModeEnable: boolean = false;
     private currentBoardCreatorMode: BoardCreatorMode;
     private lastLoadedFenNotation: string = StartPosition.Standard;
 
@@ -52,7 +69,7 @@ export class BoardEditor extends Component{
      */
     public createPieceEditor(): void
     {
-        if(this.isEditorModeEnable()) return;
+        if(BoardEditor.isEditorModeEnable()) return;
         document.getElementById("notation-menu")!.id = "piece-creator";
         document.querySelector("#black-score-section")?.remove();
         document.querySelector("#white-score-section")?.remove();
@@ -190,7 +207,7 @@ export class BoardEditor extends Component{
      */
     public enableEditorMode(): void
     {
-        if(this.isEditorModeEnable()) return;
+        if(BoardEditor.isEditorModeEnable()) return;
         this.chess.board.lock();
         this.chess.board.removeEffectFromAllSquares();
         this.createPieceEditor();
@@ -198,30 +215,30 @@ export class BoardEditor extends Component{
         this.enableMovePieceCursorMode();
         this.enableBoardCreator();
         if(this.currentBoardCreatorMode == BoardCreatorMode.Template) this.changeBoardCreatorMode();
-        this._isEditorModeEnable = true;
+        BoardEditor._isEditorModeEnable = true;
     }
 
     /**
      * This function disables the editor mode.
      */
+    @isEditorModeEnable()
     public disableEditorMode(): void
     {
-        if(!this.isEditorModeEnable()) return;
         this.chess.board.unlock();
         this.removeDragAndDropEventListeners();
         this.disableBoardCreator();
         this.disableCursorMode();
         this.removePieceEditor();
         if(this.currentBoardCreatorMode == BoardCreatorMode.Template) this.changeBoardCreatorMode();
-        this._isEditorModeEnable = false;
+        BoardEditor._isEditorModeEnable = false;
     }
 
     /**
      * Check if the board creator is enabled or not.
      */
-    public isEditorModeEnable(): boolean
+    public static isEditorModeEnable(): boolean
     {
-        return this._isEditorModeEnable;
+        return BoardEditor._isEditorModeEnable;
     }
 
     /**
@@ -333,7 +350,7 @@ export class BoardEditor extends Component{
     private _createBoard(notation: string | JsonNotation): void
     {
         this.chess.createGame(notation);
-        if(this.isEditorModeEnable()){
+        if(BoardEditor.isEditorModeEnable()){
             this.chess.board.lock();
             this.chess.board.removeEffectFromAllSquares();
             this.addDragAndDropEventListeners();
@@ -363,6 +380,7 @@ export class BoardEditor extends Component{
      * Clear the current selected option effects on the editor
      * and select the new tool.
      */
+    @isEditorModeEnable()
     private selectOption(selectedOption: HTMLElement): void
     {
         const currentSelectedOption: HTMLElement = document.querySelector(".selected-option") as HTMLElement;
@@ -377,6 +395,7 @@ export class BoardEditor extends Component{
     /**
      * This function select the piece on the piece creator for creating a new piece.
      */
+    @isEditorModeEnable()
     private makePieceSelectable(piece: HTMLElement): void
     {
         if(piece.classList.contains("piece")){
@@ -399,6 +418,7 @@ export class BoardEditor extends Component{
     /**
      * This function creates the selected piece on the board.
      */
+    @isEditorModeEnable()
     public createPiece(selectedSquare: HTMLElement): void
     {
         const selectedPieceOption: HTMLElement = document.querySelector(".selected-option .piece") as HTMLElement;
@@ -415,6 +435,7 @@ export class BoardEditor extends Component{
     /**
      * Remove the piece from the board.
      */
+    @isEditorModeEnable()
     public removePiece(squareElement: HTMLElement): void
     {
         this.chess.removePiece(this.chess.board.getSquareID(squareElement) as Square);
@@ -424,6 +445,7 @@ export class BoardEditor extends Component{
     /**
      * This function enables the add piece cursor mode.
      */
+    @isEditorModeEnable()
     public enableMovePieceCursorMode(): void
     {
         this.selectOption(
@@ -441,6 +463,7 @@ export class BoardEditor extends Component{
     /**
      * This function enables the remove piece cursor mode.
      */
+    @isEditorModeEnable()
     public enableRemovePieceCursorMode(): void
     {
         this.selectOption(
@@ -461,6 +484,7 @@ export class BoardEditor extends Component{
     /**
      * This function disables the cursor mode.
      */
+    @isEditorModeEnable()
     private disableCursorMode(): void
     {
         this.chess.board.getAllSquares().forEach((squareElement: HTMLElement) => {
@@ -471,6 +495,15 @@ export class BoardEditor extends Component{
             .forEach((piece: HTMLElement) => { piece.removeAttribute("style") });
     }
 
+    /**
+     * This function clears the board.
+     */
+    @isEditorModeEnable()
+    public clearBoard(): void
+    {
+        this._createBoard(StartPosition.Empty);
+    }
+    
     /**
      * This function flips the board.
      */
@@ -485,14 +518,6 @@ export class BoardEditor extends Component{
     public resetBoard(): void
     {
         this._createBoard(this.lastLoadedFenNotation);
-    }
-
-    /**
-     * This function clears the board.
-     */
-    public clearBoard(): void
-    {
-        this._createBoard(StartPosition.Empty);
     }
 
     /**
@@ -528,7 +553,7 @@ export class BoardEditor extends Component{
         const inputElement = document.querySelector(`.${BoardCreatorMode.Custom} input`) as HTMLInputElement;
         inputElement.value = this.chess.engine.getGameAsFenNotation();
 
-        if(this.isEditorModeEnable()){
+        if(BoardEditor.isEditorModeEnable()){
             if(this.chess.engine.getGameStatus() == GameStatus.ReadyToStart) 
                 this.enableStartGameButton();
             else 
@@ -539,7 +564,7 @@ export class BoardEditor extends Component{
     /**
      * This function clears the form.
      */
-    public clearBoardCreator(): void
+    public clearFen(): void
     {
         (document.querySelector(`.${BoardCreatorMode.Custom} input`) as HTMLInputElement).value = "";
         (document.querySelector(`.${BoardCreatorMode.Template} select`) as HTMLSelectElement).selectedIndex = 0;

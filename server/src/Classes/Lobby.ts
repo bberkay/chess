@@ -109,13 +109,30 @@ export class Lobby{
 
     /**
      * Is given player in the lobby.
+     * @param objectCheck If true, it checks the player object.
+     * If false, it checks the name, userToken and color.
      */
-    public isPlayerInLobby(player: Player): boolean
+    public isPlayerInLobby(player: Player, objectCheck: boolean = true): boolean
     {
-        const isInLobby = this.getWhitePlayer() === player || this.getBlackPlayer() === player;
-        if(!isInLobby) console.log("Player is not in the lobby: ", player);
-        else console.log("Player is in the lobby: ", player);
-        return isInLobby;
+        const whitePlayer = this.getWhitePlayer();
+        const blackPlayer = this.getBlackPlayer();
+        if(objectCheck){
+            if(whitePlayer === player || blackPlayer === player) 
+                return true;
+            else
+                return false;
+        }
+        else{
+            if(whitePlayer && whitePlayer.name === player.name 
+                && whitePlayer.color === player.color && whitePlayer.userToken === player.userToken) 
+                return true;
+
+            if(blackPlayer && blackPlayer.name === player.name
+                    && blackPlayer.color === player.color && blackPlayer.userToken === player.userToken) 
+                return true;
+        }
+
+        return false;
     }
 
     /**
@@ -123,8 +140,11 @@ export class Lobby{
      */
     public isTokenInLobby(userToken: string): boolean
     {
-        return this.getWhitePlayer() !== null && this.getWhitePlayer()!.userToken === userToken
-            || this.getBlackPlayer() !== null && this.getBlackPlayer()!.userToken === userToken;
+        const whitePlayer = this.getWhitePlayer();
+        const blackPlayer = this.getBlackPlayer();
+        if(whitePlayer && whitePlayer.userToken === userToken) return true;
+        if(blackPlayer && blackPlayer.userToken === userToken) return true;
+        return false;
     }
 
     /**
@@ -132,11 +152,11 @@ export class Lobby{
      */
     public isTokenOnline(userToken: string): boolean
     {
-        return this.getWhitePlayer() !== null && this.getWhitePlayer()!.userToken === userToken
-            ? this.getWhitePlayer()!.isOnline
-            : this.getBlackPlayer() !== null && this.getBlackPlayer()!.userToken === userToken
-                ? this.getBlackPlayer()!.isOnline
-                : false;
+        const whitePlayer = this.getWhitePlayer();
+        const blackPlayer = this.getBlackPlayer();
+        if(whitePlayer && whitePlayer.userToken === userToken) return whitePlayer.isOnline;
+        if(blackPlayer && blackPlayer.userToken === userToken) return blackPlayer.isOnline;
+        return false;
     }
 
     /**
@@ -144,10 +164,10 @@ export class Lobby{
      */
     public getTokenColor(userToken: string): Color | null
     {
-        if(this.getWhitePlayer() !== null && this.getWhitePlayer()!.userToken === userToken)
-            return Color.White;
-        if(this.getBlackPlayer() !== null && this.getBlackPlayer()!.userToken === userToken)
-            return Color.Black;
+        const whitePlayer = this.getWhitePlayer();
+        const blackPlayer = this.getBlackPlayer();
+        if(whitePlayer !== null && whitePlayer.userToken === userToken) return Color.White;
+        if(blackPlayer !== null && blackPlayer.userToken === userToken) return Color.Black;
         return null;
     }
 
@@ -161,16 +181,15 @@ export class Lobby{
     }
 
     /**
-     * Set the player to the lobby with the given color.
+     * Add the player to the lobby.
      */
     public addPlayer(player: Player): boolean
     {
-        if(this.isTokenInLobby(player.userToken)){
+        if(this.isTokenInLobby(player.userToken))
+        {
             // Reconnect the player with the same color
-            if(this.isTokenOnline(player.userToken)){
-                console.log("Player is already in the lobby.");
+            if(this.isTokenOnline(player.userToken))
                 return false;
-            }
 
             const color = this.getTokenColor(player.userToken);
             if(color === Color.White) this.whitePlayer = player;
@@ -179,38 +198,29 @@ export class Lobby{
         }
         else
         {
-            // Add player to the lobby with random color
-            if(this.getWhitePlayer() && this.getBlackPlayer()){
-                console.log("Lobby is full.");
+            // Add the player to the lobby with the random color 
+            // if there is no player unless add with available color. 
+            const whitePlayer = this.getWhitePlayer();
+            const blackPlayer = this.getBlackPlayer();
+            if(whitePlayer && blackPlayer)
                 return false;   
-            }
 
-            let randomColor = Math.random() > 0.5 ? Color.White : Color.Black;
-            if(randomColor == Color.White){
-                if(this.getWhitePlayer()){
-                    this.blackPlayer = player;
-                    player.color = Color.Black;
-                } 
-                else{
-                    this.whitePlayer = player;
-                    player.color = Color.White;
-                } 
-            }
-            else if(randomColor == Color.Black){
-                if(this.getBlackPlayer()){
-                    this.whitePlayer = player;
-                    player.color = Color.White;
-                } 
-                else{
-                    this.blackPlayer = player;
-                    player.color = Color.Black;
-                } 
+            if(whitePlayer)
+                this.setBlackPlayer(player);
+            else if(blackPlayer)
+                this.setWhitePlayer(player);
+            else
+            {
+                let randomColor = Math.random() > 0.5 ? Color.White : Color.Black;
+                if(randomColor == Color.White)
+                    this.setWhitePlayer(player);
+                else if(randomColor == Color.Black)
+                    this.setBlackPlayer(player);
             }
 
             this.setPlayerOnline(player);
         }
         
-        console.log("Player is added to the lobby: ", player);
         return true;
     }
 
@@ -219,18 +229,35 @@ export class Lobby{
      */
     public removePlayer(player: Player, isDisconnected: boolean = false): boolean
     {
-        if(!this.isPlayerInLobby(player)) return false;
+        if(!this.isPlayerInLobby(player, false)) return false;
 
-        if(isDisconnected){
+        if(isDisconnected)
             this.setPlayerOffline(player);
-        }
-        else{
+        else
+        {
             if(this.getWhitePlayer() === player) this.whitePlayer = null;
             else if(this.getBlackPlayer() === player) this.blackPlayer = null;
         }
 
-        console.log("Player is removed from the lobby: ", player);
         return true;
+    }
+
+    /**
+     * Set the white player of the lobby.
+     */
+    private setWhitePlayer(player: Player): void
+    {
+        this.whitePlayer = player;
+        player.color = Color.White;
+    }
+
+    /**
+     * Set the black player of the lobby.
+     */
+    private setBlackPlayer(player: Player): void
+    {
+        this.blackPlayer = player;
+        player.color = Color.Black;
     }
 
     /**
@@ -240,8 +267,6 @@ export class Lobby{
     {
         if(this.isPlayerInLobby(player))
             player.isOnline = true;
-        else
-            console.log("Player couldn't be set as online");
     }
 
     /**
@@ -251,8 +276,6 @@ export class Lobby{
     {
         if(this.isPlayerInLobby(player))
             player.isOnline = false;
-        else
-            console.log("Player couldn't be set as offline");
     }
     
     /**
@@ -262,13 +285,12 @@ export class Lobby{
     {
         const whitePlayer = this.getWhitePlayer();
         const blackPlayer = this.getBlackPlayer();
-        const result = !this.isGameAlreadyStarted() 
-            && whitePlayer !== null && blackPlayer !== null 
-                && whitePlayer.isOnline && blackPlayer.isOnline
-                    && this.duration[0] > 0 && this.duration[1] >= 0;
-        if(!result) console.log("Game is not ready to start.");
-        else console.log("Game is ready to start.");
-        return result;
+        if(this.isGameAlreadyStarted()) return false;
+        if(!this.board) return false;
+        if(whitePlayer === null || blackPlayer === null) return false;
+        if(!whitePlayer.isOnline || !blackPlayer.isOnline) return false;
+        if(this.duration[0] <= 0 || this.duration[1] <= 0) return false;
+        return true;
     }
 
     /**
@@ -276,8 +298,6 @@ export class Lobby{
      */
     public isGameAlreadyStarted(): boolean
     {
-        if(this.isGameStarted) console.log("Game is already started.");
-        else console.log("Game is not started yet.");
         return this.isGameStarted;
     }
 

@@ -172,7 +172,7 @@ export class ChessPlatform{
         const lastLobbyConnection = LocalStorage.load(LocalStorageKey.LastLobbyConnection);
         this.createAndHandleWebSocket(new URLSearchParams({
             lobbyId: lastLobbyConnection.lobbyId,
-            userToken: lastLobbyConnection.userToken
+            userToken: lastLobbyConnection.player.userToken
         }).toString());
     }
 
@@ -184,7 +184,7 @@ export class ChessPlatform{
         LocalStorage.clear(LocalStorageKey.LastLobbyConnection);
         this.platform.navigatorModal.hide();
         this.socket?.close();
-        this.platform.notationMenu.setUtilityMenuToNewGame();
+        this.platform.notationMenu.displayNewGameUtilityMenu();
         this.chess.board.lock();
     }
 
@@ -213,12 +213,14 @@ export class ChessPlatform{
             this.socket = null;
         }
 
+        console.log("WebSocket endpoint: ", import.meta.env.VITE_WS_ADDRESS + (webSocketEndpoint ? "?" + webSocketEndpoint : ""));
         this.socket = new WebSocket(import.meta.env.VITE_WS_ADDRESS + (webSocketEndpoint ? "?" + webSocketEndpoint : ""));
         this.socket.onopen = (event) => {
 
         };
 
         let player: {name: string, userToken: string, isOnline: boolean, color: Color};
+        let disconnectedPlayer: {name: string, color: Color} | null = null;
         let lobbyId: string;
         this.socket.onmessage = (event) => {
             const [wsCommand, wsData] = parseWsResponse(event);
@@ -241,8 +243,20 @@ export class ChessPlatform{
                 case WsCommand.Started:
                     if(LocalStorage.isExist(LocalStorageKey.BoardEditorEnabled)) 
                         LocalStorage.clear(LocalStorageKey.BoardEditorEnabled);
-
-                    this.platform.prepareComponentsForOnlineGame(player.color, wsData);
+                    
+                    if(disconnectedPlayer){
+                        // Started command is received again after the disconnected player is reconnected.
+                        this.platform.notationMenu.displayPlayerAsOnline(player.color);
+                        disconnectedPlayer = null;
+                    }
+                    else{
+                        // Started command is received for the first time after both players are connected.
+                        this.platform.prepareComponentsForOnlineGame(player.color, wsData);
+                    }
+                    break;
+                case WsCommand.Disconnected:
+                    disconnectedPlayer = wsData.player;
+                    this.platform.notationMenu.displayPlayerAsOffline(disconnectedPlayer!.color);
                     break;
             }
         };

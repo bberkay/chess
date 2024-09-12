@@ -233,10 +233,10 @@ export class NotationMenu extends Component{
     /**
      * Flip the notation table.
      */
-    public flip(): void {                
+    public flip(): void {            
         let playerScoreSectionOnTop = document.querySelector(".player-section")!;
         playerScoreSectionOnTop.parentElement!.append(playerScoreSectionOnTop);
-        
+
         playerScoreSectionOnTop = document.querySelector(".player-section")!;
         playerScoreSectionOnTop.parentElement!.prepend(playerScoreSectionOnTop!);
     }
@@ -268,7 +268,7 @@ export class NotationMenu extends Component{
      * Show the new game utility menu section. This menu contains
      * new game and info buttons.
      */
-    public setUtilityMenuToNewGame(): void
+    public displayNewGameUtilityMenu(): void
     {
         const utilityMenuSections = document.querySelectorAll(".utility-toggle-menu-section") as NodeListOf<HTMLElement>;
         utilityMenuSections.forEach((section: HTMLElement) => {
@@ -282,7 +282,7 @@ export class NotationMenu extends Component{
      * Show the lobby utility menu section. This menu contains
      * undo, draw and resign buttons.
      */
-    public setUtilityMenuToLobby(): void
+    public displayLobbyUtilityMenu(): void
     {
         const utilityMenuSections = document.querySelectorAll(".utility-toggle-menu-section") as NodeListOf<HTMLElement>;
         utilityMenuSections.forEach((section: HTMLElement) => {
@@ -295,7 +295,7 @@ export class NotationMenu extends Component{
     /**
      * Add white player name to the menu.
      */
-    public displayWhitePlayerName(name: string): void
+    private displayWhitePlayerName(name: string): void
     {
         const whitePlayerName = document.getElementById(`white-player-name`)!;
         if(!whitePlayerName) return;
@@ -305,7 +305,7 @@ export class NotationMenu extends Component{
     /**
      * Add black player name to the menu.
      */
-    public displayBlackPlayerName(name: string): void
+    private displayBlackPlayerName(name: string): void
     {
         const blackPlayerName = document.getElementById(`black-player-name`)!;
         if(!blackPlayerName) return;
@@ -337,7 +337,7 @@ export class NotationMenu extends Component{
     /**
      * Display the white player duration on the notation menu.
      */
-    public displayWhitePlayerDuration(duration: string): void
+    private displayWhitePlayerDuration(duration: string): void
     {
         const whitePlayerDuration = document.getElementById(`white-player-duration`)!;
         if(!whitePlayerDuration) return;
@@ -348,12 +348,30 @@ export class NotationMenu extends Component{
     /**
      * Display the black player duration on the notation menu.
      */
-    public displayBlackPlayerDuration(duration: string): void
+    private displayBlackPlayerDuration(duration: string): void
     {
         const blackPlayerDuration = document.getElementById(`black-player-duration`)!;
         if(!blackPlayerDuration) return;
         blackPlayerDuration.classList.remove("hidden");
         blackPlayerDuration.textContent = duration;
+    }
+
+    /**
+     * Display the white player name and status.
+     */
+    public displayWhitePlayer(name: string): void
+    {
+        this.displayWhitePlayerName(name);
+        this.displayPlayerAsOnline(Color.White);
+    }
+
+    /**
+     * Display the black player name and status.
+     */
+    public displayBlackPlayer(name: string): void
+    {
+        this.displayBlackPlayerName(name);
+        this.displayPlayerAsOnline(Color.Black);
     }
 
     /**
@@ -375,32 +393,21 @@ export class NotationMenu extends Component{
     }
 
     /**
+     * Change the turn indicator to the given color.
+     */
+    public changeTurnIndicator(color: Color): void
+    {
+        document.querySelector(`.your-turn-effect`)?.classList.remove("your-turn-effect");
+        document.getElementById(`${color.toLowerCase()}-player-section`)!.classList.add("your-turn-effect");
+    }
+
+
+    /**
      * This function clears the table.
      */
     public clear(): void
     {
-        document.getElementById("notations")!.innerHTML = "";
-
-        const whitePlayerSection = document.getElementById("white-player-section")!;
-        const whitePlayerDuration = whitePlayerSection.querySelector(`#white-player-duration`)!;
-        whitePlayerSection.classList.remove("your-turn-effect");
-        whitePlayerSection.querySelector("#white-player-status")!.classList.remove("online", "offline");
-        whitePlayerSection.querySelector("#white-player-name")!.textContent = "White Player";
-        whitePlayerSection.querySelector("#black-captured-pieces")!.innerHTML = "";
-        whitePlayerDuration.classList.add("hidden");
-        whitePlayerDuration.querySelector(".minute-second")!.textContent = "00:00";
-        whitePlayerDuration.querySelector(".milliseconds")!.textContent = ".00";
-
-        const blackPlayerSection = document.getElementById("black-player-section")!;
-        const blackPlayerDuration = blackPlayerSection.querySelector(`#black-player-duration`)!;
-        blackPlayerSection.classList.remove("your-turn-effect");
-        blackPlayerSection.querySelector("#black-player-status")!.classList.remove("online", "offline");
-        blackPlayerSection.querySelector("#black-player-name")!.textContent = "Black Player";
-        blackPlayerSection.querySelector("#white-captured-pieces")!.innerHTML = "";
-        blackPlayerDuration.classList.add("hidden");
-        blackPlayerDuration.querySelector(".minute-second")!.textContent = "00:00";
-        blackPlayerDuration.querySelector(".milliseconds")!.textContent = ".00";
-
+        this.renderComponent();
         this.moveCount = 0;
         this.lastScore = {[Color.White]: 0, [Color.Black]: 0};
     }

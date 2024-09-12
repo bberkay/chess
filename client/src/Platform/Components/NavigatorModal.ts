@@ -105,6 +105,7 @@ export class NavigatorModal extends Component{
     public bounce(): void
     {
         const modal = document.querySelector('.navigator-modal')!;
+        if(!modal) return;
         modal.classList.add("bounce");
         setTimeout(() => {
             modal.classList.remove("bounce");
@@ -261,7 +262,7 @@ export class NavigatorModal extends Component{
         this.lastSelectedDuration = this.getSelectedGameDuration();
         this.show(
             "Create a Lobby",
-            `<span style="font-size:13px">Enter a name: </span>
+            `<span style="font-size:13px">Enter your name: </span>
             <div class="input-group" style="padding-top:5px;padding-bottom:5px;">
                 <input type="text" id="player-name" placeholder="Your Name" maxlength="${MAX_PLAYER_NAME_LENGTH}" minlength="${MIN_PLAYER_NAME_LENGTH}" required>
                 <button type="submit" data-socket-operation="${SocketOperation.CreateLobby}">Create</button>
@@ -281,7 +282,7 @@ export class NavigatorModal extends Component{
     {
         this.show(
             "Join a Lobby",
-            `<span style="font-size:13px">Enter a name: </span>
+            `<span style="font-size:13px">Enter your name: </span>
             <div class="input-group" style="padding-top:5px;padding-bottom:5px;">
                 <input type="text" id="player-name" placeholder="Your Name" maxlength="${MAX_PLAYER_NAME_LENGTH}" minlength="${MIN_PLAYER_NAME_LENGTH}" required>
                 <button type="submit" data-socket-operation="${SocketOperation.JoinLobby}">Play</button>
