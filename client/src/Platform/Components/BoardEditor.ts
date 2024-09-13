@@ -69,7 +69,7 @@ export class BoardEditor extends Component{
      */
     public createPieceEditor(): void
     {
-        if(BoardEditor.isEditorModeEnable()) return;
+        if(!BoardEditor.isEditorModeEnable()) return;
         document.getElementById("notation-menu")!.id = "piece-creator";
         document.querySelector("#black-score-section")?.remove();
         document.querySelector("#white-score-section")?.remove();
@@ -178,6 +178,7 @@ export class BoardEditor extends Component{
     /**
      * Enable the start game button.
      */
+    @isEditorModeEnable()
     private enableStartGameButton(): void
     {
         const startButton: HTMLElement = document.querySelector(`[data-menu-operation="${NavigatorModalOperation.ShowStartPlayingBoard}"]`) as HTMLElement;
@@ -187,6 +188,7 @@ export class BoardEditor extends Component{
     /**
      * Disable the start game button.
      */
+    @isEditorModeEnable()
     private disableStartGameButton(): void
     {
         const startButton: HTMLElement = document.querySelector(`[data-menu-operation="${NavigatorModalOperation.ShowStartPlayingBoard}"]`) as HTMLElement;
@@ -196,6 +198,7 @@ export class BoardEditor extends Component{
     /**
      * This function removes the piece editor.
      */
+    @isEditorModeEnable()
     private removePieceEditor(): void
     {
         document.getElementById("piece-creator")!.innerHTML = "";
@@ -208,6 +211,7 @@ export class BoardEditor extends Component{
     public enableEditorMode(): void
     {
         if(BoardEditor.isEditorModeEnable()) return;
+        BoardEditor._isEditorModeEnable = true;
         this.chess.board.lock();
         this.chess.board.removeEffectFromAllSquares();
         this.createPieceEditor();
@@ -215,7 +219,6 @@ export class BoardEditor extends Component{
         this.enableMovePieceCursorMode();
         this.enableBoardCreator();
         if(this.currentBoardCreatorMode == BoardCreatorMode.Template) this.changeBoardCreatorMode();
-        BoardEditor._isEditorModeEnable = true;
     }
 
     /**
@@ -229,8 +232,8 @@ export class BoardEditor extends Component{
         this.disableBoardCreator();
         this.disableCursorMode();
         this.removePieceEditor();
-        if(this.currentBoardCreatorMode == BoardCreatorMode.Template) this.changeBoardCreatorMode();
         BoardEditor._isEditorModeEnable = false;
+        if(this.currentBoardCreatorMode == BoardCreatorMode.Template) this.changeBoardCreatorMode();
     }
 
     /**
@@ -245,6 +248,7 @@ export class BoardEditor extends Component{
      * This function adds drag and drop event listeners to the pieces and squares
      * for editing the board.
      */
+    @isEditorModeEnable()
     private addDragAndDropEventListeners(): void
     {
         // Drag event listeners for the pieces.
@@ -274,6 +278,7 @@ export class BoardEditor extends Component{
     /**
      * This function removes the drag and drop event listeners from the pieces and squares.
      */
+    @isEditorModeEnable()
     private removeDragAndDropEventListeners(): void
     {
         (document.querySelectorAll(`.piece`) as NodeListOf<HTMLElement>).forEach((piece: HTMLElement) => {
@@ -356,16 +361,11 @@ export class BoardEditor extends Component{
             this.addDragAndDropEventListeners();
             this.enableMovePieceCursorMode();
         }
-
-        // Create invisible div for triggering the log console to stream 
-        // when the game is created.
-        const response: HTMLDivElement = document.createElement("div");
-        response.id = "board-editor-response";
-        response.style.visibility = "hidden";
-        document.body.appendChild(response);
-
+        
         if(this.currentBoardCreatorMode == BoardCreatorMode.Template)
           this.changeBoardCreatorMode();
+
+        document.dispatchEvent(new Event("boardCreatedByBoardEditor"));
     }
 
     /**

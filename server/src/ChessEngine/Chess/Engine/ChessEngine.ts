@@ -70,7 +70,6 @@ export class ChessEngine extends BoardManager {
      */
     public createPiece(color: Color, type: PieceType, square: Square): void
     {
-        console.log("createPiece2");
         super.createPieceModel(color, type, square);
         this.checkGameStatus();
     }

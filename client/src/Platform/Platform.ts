@@ -30,9 +30,6 @@ export class Platform{
     public readonly navigatorModal: NavigatorModal;
     public readonly logger: Logger = new Logger("src/Platform/Platform.ts");
 
-    private _bindedMenuOperationItems: HTMLElement[] = [];
-    private _isMenuOperationsBindedOnce: boolean = false;
-
     /**
      * Constructor of the Platform class.
      */
@@ -57,15 +54,75 @@ export class Platform{
      */
     private init(): void
     {
-        document.addEventListener("DOMContentLoaded", () => {
-            if(LocalStorage.isExist(LocalStorageKey.BoardEditorEnabled))
-                this._enableBoardEditor();
+        /**
+         * Listen actions/clicks of user on menu squares for
+         * updating the notation menu, log console etc.
+         */
+        const listenBoardChanges = () => {
+            // For the first time
+            this.boardEditor.updateFen();
 
+            // When a board is created by the board editor
+            // this is because the stream first logs on the log console
+            document.addEventListener("boardCreatedByBoardEditor", () => {
+                this.updateComponents();
+            });
+
+            // Every change on the board like moving a piece, removing a piece etc.
+            const observer = new MutationObserver(() => {
+                this.updateComponents();
+            });
+
+            observer.observe(
+                document.getElementById("chessboard")!, 
+                { 
+                    childList: true, 
+                    subtree: true,
+                    attributes: true,
+                    characterData: true
+                }
+            );
+
+            this.logger.save("Board changes are listening...");
+        }
+
+        /**
+         * Find the menu operations and bind them to the menu 
+         * items. When the user clicks on the menu item, the
+         * operation will be executed.
+         */
+        const bindMenuOperations = () => {
+            document.querySelectorAll("[data-menu-operation]").forEach((menuItem) => {
+                menuItem.addEventListener("click", () => {
+                    this.handleMenuOperation(menuItem as HTMLElement) 
+                });
+            });
+
+            document.addEventListener("componentLoaded", ((event: CustomEvent) => {
+                const menuOperations = document.querySelectorAll(`#${event.detail.componentId} [data-menu-operation]`);
+                if(!menuOperations) return;
+                menuOperations.forEach((menuItem) => {
+                    menuItem.addEventListener("click", () => {
+                        this.handleMenuOperation(menuItem as HTMLElement) 
+                    });
+                });
+            }) as EventListener);
+
+            this.logger.save("Menu operations are binded to loaded components.");
+        }
+
+        /**
+         * Initialize the platform components.
+         */
+        document.addEventListener("DOMContentLoaded", () => {
             if(!this.checkAndLoadGameFromCache()) 
                 this.boardEditor.createBoard();
 
-            this.listenBoardChanges();
-            this.bindMenuOperations();
+            if(LocalStorage.isExist(LocalStorageKey.BoardEditorEnabled))
+                this._enableBoardEditor();
+
+            bindMenuOperations();
+            listenBoardChanges();
             this.updateComponents();
         });
         
@@ -89,70 +146,6 @@ export class Platform{
 
         this.logger.save("No games found in cache");
         return false;
-    }
-
-    /**
-     * Listen actions/clicks of user on menu squares for
-     * updating the notation menu, log console etc.
-     */
-    private listenBoardChanges(): void
-    {
-        // Update first time
-        this.boardEditor.updateFen();
-
-        const observer = new MutationObserver(() => {
-            this.updateComponents();
-        });
-
-        observer.observe(
-            document.getElementById("chessboard")!, 
-            { 
-                childList: true, 
-                subtree: true,
-                attributes: true,
-                characterData: true
-            }
-        );
-
-        this.logger.save("Board changes are listening...");
-    }
-
-    /**
-     * Find the menu operations and bind them to the menu 
-     * items. When the user clicks on the menu item, the
-     * operation will be executed.
-     */
-    private bindMenuOperations(): void
-    {
-        if(this._isMenuOperationsBindedOnce) return;
-        this._isMenuOperationsBindedOnce = true;
-
-        document.querySelectorAll("[data-menu-operation]").forEach((menuItem) => {
-            menuItem.addEventListener("click", () => { this.handleMenuOperation(menuItem as HTMLElement) });
-        });
-
-        const observer = new MutationObserver((mutations) => {
-            for(const mutation of mutations){
-                if(mutation.addedNodes.length === 0 || (mutation.target as HTMLElement).id === "log-list") return;
-                for(const node of mutation.addedNodes){
-                    if(node instanceof HTMLElement || node instanceof Element){
-                        const menuOperationItems = node.querySelectorAll("[data-menu-operation]") as NodeListOf<HTMLElement>;
-                        for(const menuOperationItem of menuOperationItems){
-                            if(menuOperationItem && !this._bindedMenuOperationItems.includes(menuOperationItem))
-                            {
-                                menuOperationItem.addEventListener("click", () => { 
-                                    this.handleMenuOperation(menuOperationItem as HTMLElement) 
-                                });
-                                this._bindedMenuOperationItems.push(menuOperationItem);
-                            }
-                        }
-                    }
-                }
-            }
-        });
-
-        observer.observe(document.body, { childList: true, subtree: true, attributes: false, characterData: false });
-        this.logger.save("Menu operations are binded to the menu items.");
     }
 
     /**
@@ -225,7 +218,7 @@ export class Platform{
             case NavigatorModalOperation.ShowStartPlayingBoard:
                 this.navigatorModal.showStartPlayingBoard(this.boardEditor.getFen());
                 break;
-            case NavigatorModalOperation.PlayAgainstBot:
+            case NavigatorModalOperation.ShowPlayAgainstBot:
                 this.navigatorModal.showPlayAgainstBot();
                 break;
             case NavigatorModalOperation.ShowCreateLobby:
@@ -238,11 +231,9 @@ export class Platform{
                     this.navigatorModal.setPlayerNameInputValue(LocalStorage.load(LocalStorageKey.LastPlayerName));
                 this.navigatorModal.showJoinLobby();
                 break;
-            case NavigatorModalOperation.PlayWithYourself:
+            case NavigatorModalOperation.PlayByYourself:
+                this.navigatorModal.hide();
                 this._playBoard();
-                break;
-            case NavigatorModalOperation.EnableBoardEditor:
-                this._enableBoardEditor();
                 break;
         }
     }
@@ -285,7 +276,12 @@ export class Platform{
      */
     private handleBoardEditorOperation(menuOperation: BoardEditorOperation, menuItem: HTMLElement): void
     {
+        // TODO: Satranç taşları sıra gelmeyince de drag edilebilmeli. Bu move işlemi olmadan yapılamaz. 
         switch(menuOperation){
+            case BoardEditorOperation.Enable:
+                this.navigatorModal.hide();
+                this._enableBoardEditor();
+                break;
             case BoardEditorOperation.ToggleBoardEditorUtilityMenu:
                 this.boardEditor.toggleUtilityMenu();
                 break;
@@ -353,7 +349,6 @@ export class Platform{
      */
     private _enableBoardEditor(): void
     {
-        this.navigatorModal.hide();
         if(BoardEditor.isEditorModeEnable()) return;
         this.clearComponents();
         this.boardEditor.enableEditorMode();
@@ -398,13 +393,12 @@ export class Platform{
      */
     private _playBoard(fenNotation: string | null = null): void 
     {
-        this.navigatorModal.hide();
         this.boardEditor.disableEditorMode();
         this.logConsole.clear();
+        this.notationMenu.clear();
         this.boardEditor.createBoard(fenNotation);
-        this.notationMenu.recreate();
         LocalStorage.clear(LocalStorageKey.BoardEditorEnabled);
-        this.logger.save(`Editor mode is disabled and notation menu is recreated.`);
+        this.logger.save(`Editor mode is disabled and board is now playable.`);
     }
 
     /**

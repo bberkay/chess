@@ -23,19 +23,7 @@ export class NotationMenu extends Component{
             this.update(true);
         });
     }
-
-    /**
-     * This function recreates the notation table. If the #notation-menu
-     * is not found in the document then this function does nothing.
-     */
-    public recreate(): void
-    {
-        if(!document.getElementById("notation-menu")) return;
-        else if(document.getElementById("notation-menu")!.innerHTML != "") return;
-        this.renderComponent();
-        this.update(true);
-    }
-
+    
     /**
      * This function render the notation table.
      */

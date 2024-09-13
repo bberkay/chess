@@ -1,5 +1,5 @@
 import { SocketOperation } from "../../Types";
-import { NavigatorModalOperation } from "../Types";
+import { BoardEditorOperation, NavigatorModalOperation } from "../Types";
 import { Component } from "./Component";
 import { GameStatus, StartPosition } from "@Chess/Types";
 import { 
@@ -52,10 +52,16 @@ export class NavigatorModal extends Component{
      */
     public show(title: string, content: string, closeable: boolean = false): void
     {
-        this.renderComponent();
+        this.loadHTML("navigator-modal", `
+            <div class="navigator-modal navigator-modal--glass">
+                <div class="navigator-modal-bg">
+                    <img src="./assets/images/result-screen-bg-icon.png" alt="Chessboard">
+                </div>
+                <div class="navigator-modal-title">${title}</div>
+                <div class="navigator-modal-content">${content}</div>
+            </div>
+        `);
 
-        document.querySelector('.navigator-modal-title')!.innerHTML = title;
-        document.querySelector('.navigator-modal-content')!.innerHTML = content;
         if(closeable) document.querySelector('.navigator-modal')!.classList.add("closeable");
 
         let modalBgLayer = document.querySelector(".navigator-modal-bg-layer")!
@@ -167,8 +173,8 @@ export class NavigatorModal extends Component{
             `
             <div class = "btn-group-vertical">
                 <button data-menu-operation="${NavigatorModalOperation.ShowSelectDuration}">Play against Friend</button>
-                <button data-menu-operation="${NavigatorModalOperation.PlayAgainstBot}">Play against Bot</button>
-                <button data-menu-operation="${NavigatorModalOperation.EnableBoardEditor}">Create Board</button>
+                <button data-menu-operation="${NavigatorModalOperation.ShowPlayAgainstBot}">Play against Bot</button>
+                <button data-menu-operation="${BoardEditorOperation.Enable}">Create Board</button>
             </div>
              <div style="text-align:center;margin-top:10px;">
                 <button class="button--text" style="font-size:13px!important;" data-menu-operation="${NavigatorModalOperation.Hide}">
@@ -189,9 +195,9 @@ export class NavigatorModal extends Component{
             "Start Playing the Board",
             `
             <div class = "btn-group-vertical">
-                <button data-menu-operation="${NavigatorModalOperation.PlayWithYourself}">Play with Yourself</button>
                 <button data-menu-operation="${NavigatorModalOperation.ShowSelectDuration}">Play against Friend</button>
-                <button data-menu-operation="${NavigatorModalOperation.PlayAgainstBot}">Play against Bot</button>
+                <button data-menu-operation="${NavigatorModalOperation.ShowPlayAgainstBot}">Play against Bot</button>
+                <button data-menu-operation="${NavigatorModalOperation.PlayByYourself}">Play by Yourself</button>
             </div>
              <div style="text-align:center;margin-top:10px;">
                 <button class="button--text" style="font-size:13px!important;" data-menu-operation="${NavigatorModalOperation.Hide}">

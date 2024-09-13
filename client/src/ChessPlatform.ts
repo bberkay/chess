@@ -27,9 +27,6 @@ export class ChessPlatform{
 
     private socket: WebSocket | null = null;
 
-    private _bindedSocketOperationItems: HTMLElement[] = [];
-    private _isSocketOperationsBindedOnce: boolean = false;
-
     /**
      * Constructor of the ChessPlatform class.
      */
@@ -44,6 +41,34 @@ export class ChessPlatform{
      */
     private init(): void
     {
+        /**
+         * Find the socket operations and bind them to the menu 
+         * items. When the user clicks on the menu item, the
+         * operation will be executed.
+         */
+        const bindSocketOperations = () => {
+            document.querySelectorAll("[data-socket-operation]").forEach((menuItem) => {
+                menuItem.addEventListener("click", () => {
+                    this.handleSocketOperation(menuItem as HTMLElement) 
+                });
+            });
+
+            document.addEventListener("componentLoaded", ((event: CustomEvent) => {
+                const socketOperations = document.querySelectorAll(`#${event.detail.componentId} [data-socket-operation]`);
+                if(!socketOperations) return;
+                socketOperations.forEach((menuItem) => {
+                    menuItem.addEventListener("click", () => {
+                        this.handleSocketOperation(menuItem as HTMLElement) 
+                    });
+                });
+            }) as EventListener);
+
+            this.logger.save("Socket operations are bound to the menu items.");
+        }
+
+        /**
+         * Initialize the chess platform.
+         */
         if(!LocalStorage.isExist(LocalStorageKey.WelcomeShown))
         {
             this.platform.navigatorModal.showWelcome();
@@ -55,45 +80,9 @@ export class ChessPlatform{
         else if(this.checkAndGetLobbyIdFromUrl())
             this.platform.navigatorModal.showJoinLobby();
 
-        this.bindSocketOperations();
+        bindSocketOperations();
+       
         this.logger.save("Chess platform is initialized.");
-    }
-
-     /**
-     * Find the socket operations and bind them to the menu 
-     * items. When the user clicks on the menu item, the
-     * operation will be executed.
-     */
-    private bindSocketOperations(): void
-    {
-        if(this._isSocketOperationsBindedOnce) return;
-        this._isSocketOperationsBindedOnce = true;
-        document.querySelectorAll("[data-socket-operation]").forEach((menuItem) => {
-            menuItem.addEventListener("click", () => { this.handleSocketOperation(menuItem as HTMLElement) });
-        });
-
-        const observer = new MutationObserver((mutations) => {
-            for(const mutation of mutations){
-                if(mutation.addedNodes.length === 0 || (mutation.target as HTMLElement).id === "log-list") return;
-                for(const node of mutation.addedNodes){
-                    if(node instanceof HTMLElement){
-                        const socketOperationItems = node.querySelectorAll("[data-socket-operation]") as NodeListOf<HTMLElement>;
-                        for(const socketOperationItem of socketOperationItems){
-                            if(socketOperationItem && !this._bindedSocketOperationItems.includes(socketOperationItem))
-                            {
-                                socketOperationItem.addEventListener("click", () => { 
-                                    this.handleSocketOperation(socketOperationItem as HTMLElement) 
-                                });
-                                this._bindedSocketOperationItems.push(socketOperationItem);
-                            }
-                        }
-                    }
-                }
-            }
-        });
-
-        observer.observe(document.body, { childList: true, subtree: true, characterData: false, attributes: false });
-        this.logger.save("Socket operations are bound to the menu items.");
     }
 
     /**

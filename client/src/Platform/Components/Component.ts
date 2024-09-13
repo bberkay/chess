@@ -2,7 +2,6 @@
  * Component abstract class. All components must inherit from this class.
  */
 export abstract class Component{
-    private observers: Map<string, MutationObserver> = new Map();
     protected abstract renderComponent(): void;
 
     /**
@@ -34,42 +33,16 @@ export abstract class Component{
      */
     protected loadHTML(componentId: string, html: string): void
     {
-        const createObserver = (componentId: string, callback: () => void) => {
-            const observer = new MutationObserver((mutationsList) => {
-                if(mutationsList.length === 1 && (mutationsList[0].target as HTMLElement).id === "log-file")
-                    return;
-
-                callback();
-            });
-
-            observer.observe(document.getElementById(componentId)!, { 
-                childList: true, 
-                subtree: true, 
-                characterData: false, 
-                attributes: false 
-            });
-            this.observers.set(componentId, observer);
-        }
-
-        const createComponentFunctionality = (componentId: string) => {
-            if(this.observers.has(componentId)){
-                this.observers.get(componentId)?.disconnect();
-            }
-
-            this.createTooltips(componentId);
-            this.createValidations(componentId);
-            this.createCopyToClipboard(componentId);
-            this.createSelectableButtons(componentId);
-
-            createObserver(componentId, () => { createComponentFunctionality(componentId) });
-        }
-
         const component = document.getElementById(componentId);
         if(!component)
             throw new Error(`${componentId} element is not initialized. Please add it to the html file.`);
 
         component.innerHTML = html;
-        createComponentFunctionality(componentId);
+        this.createTooltips(componentId);
+        this.createValidations(componentId);
+        this.createCopyToClipboard(componentId);
+        this.createSelectableButtons(componentId);
+        document.dispatchEvent(new CustomEvent("componentLoaded", {detail: {componentId: componentId}}));
     }
 
     /**

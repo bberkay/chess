@@ -20,9 +20,8 @@ export enum NavigatorModalOperation{
     ShowSelectDurationCustom = "ShowSelectDurationCustom",
     ShowCreateLobby = "ShowCreateLobby",
     ShowJoinLobby = "ShowJoinLobby",
-    PlayAgainstBot = "PlayAgainstBot",
-    PlayWithYourself = "PlayWithYourself",
-    EnableBoardEditor = "EnableBoardEditor"
+    ShowPlayAgainstBot = "ShowPlayAgainstBot",
+    PlayByYourself = "PlayByYourself"
 }
 
 export enum LogConsoleOperation{
@@ -30,6 +29,7 @@ export enum LogConsoleOperation{
 }
 
 export enum BoardEditorOperation{
+    Enable = "Enable",
     FlipBoard = "FlipBoard",
     ResetBoard = "ResetBoard",
     ClearBoard = "ClearBoard",
