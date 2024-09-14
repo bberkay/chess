@@ -361,6 +361,24 @@ export class NavigatorModal extends Component{
     }
 
     /**
+     * Show error screen.
+     */
+    public showError(message: string): void
+    {
+        this.show(
+            "Something Went Wrong",
+            `<span style="font-size:13px">${message}</span>
+            <div style="text-align:center;margin-top:10px;">
+                <button class="button--text" style="font-size:13px!important;" data-menu-operation="${NavigatorModalOperation.Hide}">
+                    Ok
+                </button>
+            </div>
+            `
+        );
+        document.querySelector('.navigator-modal')!.classList.add("navigator-modal--error");
+    }
+
+    /**
      * Get the entered player name from the 
      * modal. If the player name modal is open.
      * 

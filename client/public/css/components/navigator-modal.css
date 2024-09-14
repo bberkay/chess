@@ -114,6 +114,12 @@
     }
 }
 
+.navigator-modal--error{
+    --navigator-modal-bg-color: #D44141;
+    --navigator-modal-shadow-color: #D44141;
+    --navigator-modal-text-color: #FFF;
+}
+
 .navigator-modal-bg-layer{
     overflow: hidden;
     z-index:100;
