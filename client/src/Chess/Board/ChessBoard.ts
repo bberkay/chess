@@ -27,9 +27,12 @@ export class ChessBoard {
         Promote: new Audio("./assets/sounds/promote.mp3"),
         End: new Audio("./assets/sounds/game-end.mp3"),
     };
-    private lockedSquaresModes: Array<SquareClickMode> = [];
+        
     private turnColor: Color.White | Color.Black = Color.White;
-    private readonly boundDragPiece: (e: MouseEvent) => void = this.dragPiece.bind(this);
+    private _lockedSquaresModes: Array<SquareClickMode> = [];
+    private _isBoardMoveEventBound: boolean = false;
+
+    private readonly _bindDragPiece: (e: MouseEvent) => void = this.dragPiece.bind(this);
     public readonly logger: Logger = new Logger("src/Chess/Board/ChessBoard.ts");
 
     /**
@@ -67,10 +70,22 @@ export class ChessBoard {
     }
 
     /**
+     * Set the properties of the chess board to the initial values.
+     */
+    private clearProperties(): void
+    {
+        this.turnColor = Color.White;
+        this._lockedSquaresModes = [];
+        this._isBoardMoveEventBound = false;
+    }
+
+    /**
      * This function creates a chess board with the given position(fen notation or json notation).
      */
     public createGame(position: JsonNotation | StartPosition | string = StartPosition.Standard): void
     {
+        this.clearProperties();
+
         this.createBoard();
         this.logger.save("Chessboard created.");
 
@@ -197,7 +212,10 @@ export class ChessBoard {
         onPieceMoved?: (squareId: Square, squareClickMode: SquareClickMode) => void
     }): void
     {
-        this.logger.save("Listening for move.");
+        if(this._isBoardMoveEventBound) 
+            throw Error("Move event callbacks already bound.");
+        this._isBoardMoveEventBound = true;
+
         let mouseUpTriggered: boolean = false;
         const squares = this.getAllSquares();
         squares.forEach(square => {
@@ -220,6 +238,8 @@ export class ChessBoard {
                 return this.handleMouseUp(e, callbacks.onPieceMoved!);
             });
         }
+
+        this.logger.save("Move event callbacks bound to the board.");
     }
 
     /**
@@ -337,11 +357,11 @@ export class ChessBoard {
         clonedPiece.classList.add("cloned");
         document.body.appendChild(clonedPiece);
         clonedPiece.style.position = "absolute";
-        clonedPiece.style.top = `calc(${downEvent.clientY}px - ${clonedPiece.offsetHeight / 2}px)`;
-        clonedPiece.style.left = `calc(${downEvent.clientX}px - ${clonedPiece.offsetWidth / 2}px)`;
+        clonedPiece.style.top = `calc(${downEvent.clientY + window.scrollY}px - ${clonedPiece.offsetHeight / 2}px)`;
+        clonedPiece.style.left = `calc(${downEvent.clientX + window.scrollX}px - ${clonedPiece.offsetWidth / 2}px)`;
 
-        document.removeEventListener("mousemove", this.boundDragPiece);
-        document.addEventListener("mousemove", this.boundDragPiece);
+        document.removeEventListener("mousemove", this._bindDragPiece);
+        document.addEventListener("mousemove", this._bindDragPiece);
     }
 
     /**
@@ -350,8 +370,8 @@ export class ChessBoard {
     private dragPiece(moveEvent: MouseEvent): void {
         const clonedPiece = document.querySelector(".piece.cloned") as HTMLElement;
         if (!clonedPiece) return;
-        clonedPiece.style.top = `calc(${moveEvent.clientY}px - ${clonedPiece.offsetHeight / 2}px)`;
-        clonedPiece.style.left = `calc(${moveEvent.clientX}px - ${clonedPiece.offsetWidth / 2}px)`;
+        clonedPiece.style.top = `calc(${moveEvent.clientY + window.scrollY}px - ${clonedPiece.offsetHeight / 2}px)`;
+        clonedPiece.style.left = `calc(${moveEvent.clientX + window.scrollX}px - ${clonedPiece.offsetWidth / 2}px)`;
 
         // Highlight the square where the cursor is.
         this.removeSquareEffect(document.querySelector(`[class*="${SquareEffect.Hovering}"]`)!, SquareEffect.Hovering);
@@ -384,7 +404,7 @@ export class ChessBoard {
         }
 
         if(originalPiece) originalPiece.classList.remove("dragging");
-        document.removeEventListener("mousemove", this.boundDragPiece);
+        document.removeEventListener("mousemove", this._bindDragPiece);
     }
 
     /**
@@ -712,7 +732,7 @@ export class ChessBoard {
     {
         let squares: NodeListOf<Element> = this.getAllSquares();
         for(let i = 0; i < 64; i++){
-            this.lockedSquaresModes.push(this.getSquareClickMode(squares[i]));
+            this._lockedSquaresModes.push(this.getSquareClickMode(squares[i]));
             this.setSquareClickMode(squares[i], SquareClickMode.Disable);
             if(useDisableEffect) this.addSquareEffects(squares[i], SquareEffect.Disabled);
         }
@@ -725,10 +745,10 @@ export class ChessBoard {
     {
         let squares: NodeListOf<Element> = this.getAllSquares();
         for(let i = 0; i <= 63; i++){
-            this.setSquareClickMode(squares[i], this.lockedSquaresModes[i]);
+            this.setSquareClickMode(squares[i], this._lockedSquaresModes[i]);
             this.removeSquareEffect(squares[i], SquareEffect.Disabled);
         }
-        this.lockedSquaresModes = [];
+        this._lockedSquaresModes = [];
     }
 
     /**
@@ -886,7 +906,7 @@ export class ChessBoard {
         if(typeof square === "number")
             square = this.getSquareElement(square);
         
-        if(square.className.includes("square") && !(this.getSquareClickMode(square) == SquareClickMode.Disable && this.lockedSquaresModes.length > 0))
+        if(square.className.includes("square"))
             square.setAttribute("data-click-mode", mode);
     }
 
