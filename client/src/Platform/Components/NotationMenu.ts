@@ -62,7 +62,7 @@ export class NotationMenu extends Component{
                         <button class="menu-item" data-menu-operation="${NotationMenuOperation.FirstMove}" disabled="true" data-tooltip-text="Go First Move">⟪</button>
                         <button class="menu-item" data-menu-operation="${NotationMenuOperation.PreviousMove}" disabled="true" data-tooltip-text="Go Previous Move">❮</button>
                         <button class="menu-item" data-menu-operation="${NotationMenuOperation.NextMove}" disabled="true" data-tooltip-text="Go Next Move">❯</button>
-                        <button class="menu-item" data-menu-operation="${NotationMenuOperation.LastMove}" disabled="true" data-tooltip-text="Go Last Move">⟪</button>
+                        <button class="menu-item" data-menu-operation="${NotationMenuOperation.LastMove}" disabled="true" data-tooltip-text="Go Last Move">⟫</button>
                         <button class="menu-item" data-menu-operation="${NotationMenuOperation.ToggleNotationMenuUtilityMenu}">☰</button>
                     </div>
                     <div class="utility-menu utility-toggle-menu visible">
