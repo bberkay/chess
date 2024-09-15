@@ -214,8 +214,9 @@ export class ChessBoard {
     {
         if(this._isBoardMoveEventBound) 
             throw Error("Move event callbacks already bound.");
-        this._isBoardMoveEventBound = true;
 
+        this._isBoardMoveEventBound = true;
+        
         let mouseUpTriggered: boolean = false;
         const squares = this.getAllSquares();
         squares.forEach(square => {
@@ -451,7 +452,6 @@ export class ChessBoard {
      */
     public playMove(from:Square, to:Square): void
     {
-        // Remove the from and to effects of enemy player before the player's move.
         this.removeEffectFromAllSquares();
         this.logger.save(`From[${from}], To[${to}] and Checked Square's(if exits) effects are cleaned.`);
         const fromSquare: HTMLDivElement = this.getSquareElement(from);
@@ -727,14 +727,17 @@ export class ChessBoard {
 
     /**
      * Lock board interactions.
+     * @param {boolean} showDisabledEffect - Show disabled effect on 
+     * the squares while locking the board.
      */
-    public lock(useDisableEffect: boolean = false): void
+    public lock(showDisabledEffect: boolean = false): void
     {
         let squares: NodeListOf<Element> = this.getAllSquares();
         for(let i = 0; i < 64; i++){
             this._lockedSquaresModes.push(this.getSquareClickMode(squares[i]));
             this.setSquareClickMode(squares[i], SquareClickMode.Disable);
-            if(useDisableEffect) this.addSquareEffects(squares[i], SquareEffect.Disabled);
+            if(showDisabledEffect) 
+                this.addSquareEffects(squares[i], SquareEffect.Disabled);
         }
     }
 
@@ -743,6 +746,7 @@ export class ChessBoard {
      */
     public unlock(): void
     {
+        if(this._lockedSquaresModes.length == 0) return;
         let squares: NodeListOf<Element> = this.getAllSquares();
         for(let i = 0; i <= 63; i++){
             this.setSquareClickMode(squares[i], this._lockedSquaresModes[i]);

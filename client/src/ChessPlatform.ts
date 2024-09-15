@@ -243,11 +243,11 @@ export class ChessPlatform{
                     }) as EventListener);
                     break;
                 case WsCommand.Moved:
+                    this.chess.board.unlock();
                     this.chess.playMove(wsData.from, wsData.to);
                     document.dispatchEvent(new CustomEvent(
                         ChessEvent.onPieceMovedByOppoent, {detail: {from: wsData.from, to: wsData.to}}
                     ));
-                    this.chess.board.unlock();
                     break;
                 case WsCommand.Disconnected:
                     this.platform.notationMenu.updatePlayerAsOffline(wsData.player.color);

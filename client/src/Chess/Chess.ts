@@ -149,7 +149,6 @@ export class Chess{
      */
     private handleOnPieceSelected(squareId: Square): void
     {
-        console.log("Selected square: ", squareId);
         this._selectedSquare = squareId;
         this.board.highlightMoves(this.engine.getMoves(this._selectedSquare)!);
         document.dispatchEvent(new CustomEvent(ChessEvent.OnPieceSelected, {detail: {square: squareId}}));
