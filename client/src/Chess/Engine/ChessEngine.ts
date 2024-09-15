@@ -27,6 +27,12 @@ import {Locator} from "./Move/Utils/Locator.ts";
 import {Extractor} from "./Move/Utils/Extractor.ts";
 import {Logger} from "@Services/Logger.ts";
 
+export class MoveValidationError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = "MoveValidationError";
+    }
+}
 
 /**
  * This class provides users to create and manage a game(does not include board or other ui elements).
@@ -59,7 +65,6 @@ export class ChessEngine extends BoardManager {
      */
     public createGame(position: JsonNotation | StartPosition | string = StartPosition.Standard): void
     {
-        // Reset properties and create a new game.
         this.clearProperties();
         this.createBoard(typeof position !== "string" ? position : Converter.fenToJson(position));
         this.checkGameStatus();
@@ -193,25 +198,28 @@ export class ChessEngine extends BoardManager {
      */
     public playMove(from: Square, to: Square): void
     {
-        // If the game is not started or game is finished then return.
-        if([GameStatus.NotReady, GameStatus.Draw, GameStatus.WhiteVictory, GameStatus.BlackVictory].includes(BoardQuerier.getBoardStatus())){
+        if([GameStatus.NotReady, 
+            GameStatus.Draw, 
+            GameStatus.WhiteVictory, 
+            GameStatus.BlackVictory
+        ].includes(BoardQuerier.getBoardStatus())){
             this.logger.save("Move is not played because game is not started or game is finished.");
             return;
         }
 
-        // If moves is not calculated then calculate the moves.
-        if(!this.currentMoves.hasOwnProperty(from)){
-            this.logger.save("Moves of the square is not calculated so calculate the moves");
-            this.currentMoves[from] = this.getMoves(from);
-        }else{
-            this.logger.save("Moves of the square is already calculated");
+        if(this.getGameStatus() == GameStatus.ReadyToStart){
+            this.setGameStatus(GameStatus.InPlay);
+            this.logger.save("Game status set to in play because game is started");
         }
 
-        // Set the playedFrom and playedTo properties.
+        if(!this.currentMoves.hasOwnProperty(from)){
+            this.currentMoves[from] = this.getMoves(from);
+            this.logger.save("Moves of the square is not calculated so calculate the moves");
+        }
+
         this.playedFrom = from!;
         this.playedTo = to!
 
-        // Do the move.
         if(this.isPromotionMenuOpen){
             /**
              * If the given move is a promote move(not promotion),
@@ -224,12 +232,9 @@ export class ChessEngine extends BoardManager {
             this._doPromote(to);
         }
         else{
-            // Check if the given move is valid.
             const move: MoveType | null = this.checkAndFindMoveType(from);
-            if(!move)
-                return;
+            if(!move) throw new MoveValidationError("Move is not valid");
 
-            // Play the move according to the move type.
             switch(move){
                 case MoveType.Castling:
                     this._doCastling();
@@ -251,9 +256,8 @@ export class ChessEngine extends BoardManager {
          * If move is promotion move, then don't change the turn.
          * Because, user must promote the piece.
          */
-        if(!this.isPromotionMenuOpen){
+        if(!this.isPromotionMenuOpen)
             this.finishTurn();
-        }
     }
 
     /**
@@ -457,7 +461,7 @@ export class ChessEngine extends BoardManager {
         const playerColor: Color = BoardQuerier.getColorOfTurn();
 
         // Create the new piece and increase the score of the player.
-        super.createPieceModel(playerColor, selectedPromote as PieceType, firstRowOfSquare);
+        this.createPiece(playerColor, selectedPromote as PieceType, firstRowOfSquare);
         this.updateScores(firstRowOfSquare);
         this.logger.save(`Player's[${playerColor}] Piece[${selectedPromote}] created on square[${to}] on engine`);
 
@@ -582,7 +586,10 @@ export class ChessEngine extends BoardManager {
          *
          * @see For more information about check please check the https://en.wikipedia.org/wiki/Check_(chess)
          */
-        this.setGameStatus(threateningSquares.length > 0 ? checkEnum : this.getGameStatus());
+        if(threateningSquares.length > 0)
+            this.setGameStatus(checkEnum);
+        else if([GameStatus.InPlay, GameStatus.WhiteInCheck, GameStatus.BlackInCheck].includes(this.getGameStatus()))
+            this.setGameStatus(GameStatus.InPlay);
 
         // Calculate the moves of the king and save the moves to the calculatedMoves.
         let movesOfKing: Moves | null = this.moveEngine.getMoves(kingSquare!)!;

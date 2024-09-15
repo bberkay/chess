@@ -7,7 +7,7 @@
  * @license MIT
  */
 
-import {JsonNotation, PieceType, Square, Color, StartPosition} from "./Types";
+import {JsonNotation, PieceType, Square, Color, StartPosition, ChessEvent} from "./Types";
 import {ChessEngine} from "./Engine/ChessEngine";
 import {ChessBoard} from "./Board/ChessBoard";
 import {SquareClickMode} from "./Board/Types";
@@ -27,8 +27,10 @@ export class Chess{
      */
     public readonly engine: ChessEngine = new ChessEngine();
     public readonly board: ChessBoard = new ChessBoard();
-    private selectedSquare: Square | null = null;
-    private isPromotionScreenOpen: boolean = false;
+
+    private _selectedSquare: Square | null = null;
+    private _isPromotionScreenOpen: boolean = false;
+
     public readonly logger: Logger = new Logger("src/Chess/Chess.ts");
 
     /**
@@ -147,7 +149,10 @@ export class Chess{
      */
     private handleOnPieceSelected(squareId: Square): void
     {
-        this._doSelectAction(squareId);
+        console.log("Selected square: ", squareId);
+        this._selectedSquare = squareId;
+        this.board.highlightMoves(this.engine.getMoves(this._selectedSquare)!);
+        document.dispatchEvent(new CustomEvent(ChessEvent.OnPieceSelected, {detail: {square: squareId}}));
     }
 
     /**
@@ -161,41 +166,35 @@ export class Chess{
             SquareClickMode.Clear, 
             SquareClickMode.Disable].includes(squareClickMode)
         ){
-            this.isPromotionScreenOpen = squareClickMode == SquareClickMode.Promotion;
-            this._doPlayAction(squareId);
+            const selectedSquare = this._selectedSquare;
+            this._isPromotionScreenOpen = squareClickMode == SquareClickMode.Promotion;
+            this.playMove(selectedSquare!, squareId);
+            document.dispatchEvent(new CustomEvent(
+                ChessEvent.onPieceMovedByPlayer, {detail: {from: selectedSquare, to: squareId}}
+            ));
         }
     }
 
     /**
-     * This function set the selected square and highlight select on
-     * chessBoard then get the possible moves of the selected square
-     * with chessEngine and highlight them on chessBoard.
+     * Play a move on the board and engine.
      */
-    private _doSelectAction(square: Square): void
+    public playMove(from: Square, to: Square): void
     {
-        this.selectedSquare = square;
-        this.board.highlightMoves(this.engine.getMoves(square)!);
+        this.engine.playMove(from, to);
+        this.board.playMove(from, to);
+        this.finishTurn();
+        document.dispatchEvent(new CustomEvent(ChessEvent.OnPieceMoved, {detail: {from: from, to: to}}));
     }
 
-    /**
-     * This function move the selected square on chessEngine and chessBoard,
-     * then finish the turn.
-     */
-    private _doPlayAction(square: Square): void
-    {
-        this.engine.playMove(this.selectedSquare!, square);
-        this.board.playMove(this.selectedSquare!, square);
-        this.finishTurn();
-    }
 
     /**
      * This function returns the game as fen notation.
      */
-    private finishTurn(): void
+    public finishTurn(): void
     {
-        this.selectedSquare = this.isPromotionScreenOpen ? this.selectedSquare : null;
+        this._selectedSquare = this._isPromotionScreenOpen ? this._selectedSquare : null;
         this.board.showStatus(this.engine.getGameStatus());
-        if(!this.isPromotionScreenOpen){
+        if(!this._isPromotionScreenOpen){
             this.board.setTurnColor(this.engine.getTurnColor());
             LocalStorage.save(LocalStorageKey.LastBoard, this.engine.getGameAsJsonNotation());
             this.logger.save("Game updated in cache after move");

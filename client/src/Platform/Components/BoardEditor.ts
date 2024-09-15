@@ -1,4 +1,4 @@
-import { BoardEditorOperation, NavigatorModalOperation } from "../Types";
+import { BoardEditorEvent, BoardEditorOperation, NavigatorModalOperation } from "../Types";
 import { Chess } from "@Chess/Chess";
 import { Color, GameStatus, JsonNotation, PieceType, Square, StartPosition } from "@Chess/Types";
 import { Component } from "./Component";
@@ -365,7 +365,7 @@ export class BoardEditor extends Component{
         if(this.currentBoardCreatorMode == BoardCreatorMode.Template)
           this.changeBoardCreatorMode();
 
-        document.dispatchEvent(new Event("boardCreatedByBoardEditor"));
+        document.dispatchEvent(new Event(BoardEditorEvent.onBoardCreatedByBoardEditor));
     }
 
     /**

@@ -1,13 +1,13 @@
-import type { Player } from "../Types";
-import type { JsonNotation, StartPosition } from "@Chess/Types";
+import type { Player, RWebSocket } from "../Types";
+import { JsonNotation, StartPosition, Color } from "@Chess/Types";
 import { Lobby } from "./Lobby";
 
 /**
  * This class manages the lobbies of the game.
  */
 export class LobbyManager{
-    private static lobbies: Map<string, Lobby> = new Map<string, Lobby>();
-    
+    private static lobbies: Map<string, Lobby> = new Map();
+
     /**
      * Get the lobby by id.
      */
@@ -42,7 +42,10 @@ export class LobbyManager{
     /**
      * Join player to the lobby with the given id.
      */
-    static joinLobby(lobbyId: string, player: Player): Lobby | false
+    static joinLobby(
+        lobbyId: string, 
+        player: Player
+    ): Lobby | false
     {
         if (!this.isLobbyExist(lobbyId)){
             console.log("Lobby not found.");
@@ -58,12 +61,8 @@ export class LobbyManager{
 
     /**
      * Leave player from the lobby with the given id. 
-     * @param isDisconnected If the player is disconnected
-     * then the player will not be removed but marked as disconnected
-     * so that the player can reconnect to the lobby with the same 
-     * color.
      */
-    static leaveLobby(lobbyId: string, player: Player, isDisconnected: boolean = false): boolean
+    static leaveLobby(lobbyId: string, player: Player): boolean
     {
         if (!this.isLobbyExist(lobbyId)){
             console.log("Lobby not found.");
@@ -71,7 +70,8 @@ export class LobbyManager{
         }
 
         const lobby = this.getLobby(lobbyId)!;
-        return lobby.removePlayer(player, isDisconnected);
+        lobby.setPlayerOffline(player);
+        return true;
     }
 
     /**

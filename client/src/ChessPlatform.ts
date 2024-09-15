@@ -12,7 +12,7 @@ import { Platform } from "@Platform/Platform.ts";
 import { Logger } from "@Services/Logger";
 import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage.ts";
 import { WsMessage, WsCommand, SocketOperation } from "./Types";
-import { Color, StartPosition } from '@Chess/Types';
+import { ChessEvent, Color, Square, StartPosition } from '@Chess/Types';
 import { DEFULT_PLAYER_NAME, DEFAULT_TOTAL_TIME, DEFAULT_INCREMENT_TIME } from "@Platform/Consts";
 
 /**
@@ -91,6 +91,9 @@ export class ChessPlatform{
     private handleSocketOperation(socketOperationItem: HTMLElement): void
     {
         const operation = socketOperationItem.getAttribute("data-socket-operation") as SocketOperation;
+        if(operation != SocketOperation.CancelLobby && LocalStorage.isExist(LocalStorageKey.BoardEditorEnabled)) 
+            LocalStorage.clear(LocalStorageKey.BoardEditorEnabled);
+        
         switch(operation){
             case SocketOperation.CreateLobby:
                 const { playerName, board, duration } = this.platform.navigatorModal.getCreatedLobbySettings();
@@ -190,8 +193,12 @@ export class ChessPlatform{
          */
         function parseWsResponse(event: MessageEvent): [WsCommand, any] {
             console.log("Message: ", event.data);
-            const [ wsCommand, wsData ] = event.data.split(/ (.+)/);
-            return [wsCommand, JSON.parse(wsData)];
+            try{
+                const [ wsCommand, wsData ] = event.data.split(/ (.+)/);
+                return [wsCommand, JSON.parse(wsData)];
+            }catch(error){
+                throw new Error("Invalid WebSocket response.");
+            }
         }    
 
         if(webSocketEndpoint.length > Number(import.meta.env.VITE_WS_ENDPOINT_MAX_LENGTH))
@@ -208,12 +215,10 @@ export class ChessPlatform{
 
         };
 
-        let player: {name: string, userToken: string, isOnline: boolean, color: Color};
-        let disconnectedPlayer: {name: string, color: Color} | null = null;
         let lobbyId: string;
+        let player: {name: string, userToken: string, isOnline: boolean, color: Color};
         this.socket.onmessage = (event) => {
             const [wsCommand, wsData] = parseWsResponse(event);
-            console.log("after response: ", wsCommand, wsData); 
             switch(wsCommand){
                 case WsCommand.Connected:
                     lobbyId = wsData.lobbyId;
@@ -230,22 +235,29 @@ export class ChessPlatform{
                     this.logger.save(`Connected to the lobby[${lobbyId}] as ${player.name}[${player.color}].`);
                     break;
                 case WsCommand.Started:
-                    if(LocalStorage.isExist(LocalStorageKey.BoardEditorEnabled)) 
-                        LocalStorage.clear(LocalStorageKey.BoardEditorEnabled);
-                    
-                    if(disconnectedPlayer){
-                        // Started command is received again after the disconnected player is reconnected.
-                        this.platform.notationMenu.displayPlayerAsOnline(player.color);
-                        disconnectedPlayer = null;
-                    }
-                    else{
-                        // Started command is received for the first time after both players are connected.
-                        this.platform.prepareComponentsForOnlineGame(player.color, wsData);
-                    }
+                    this.platform.createOnlineGame(wsData, player.color);
+                    document.addEventListener(ChessEvent.onPieceMovedByPlayer, ((event: CustomEvent) => {
+                        const { from, to } = event.detail;
+                        this.socket?.send(JSON.stringify([WsCommand.Moved, {from, to}]));
+                        this.chess.board.lock();
+                    }) as EventListener);
+                    break;
+                case WsCommand.Moved:
+                    this.chess.playMove(wsData.from, wsData.to);
+                    document.dispatchEvent(new CustomEvent(
+                        ChessEvent.onPieceMovedByOppoent, {detail: {from: wsData.from, to: wsData.to}}
+                    ));
+                    this.chess.board.unlock();
                     break;
                 case WsCommand.Disconnected:
-                    disconnectedPlayer = wsData.player;
-                    this.platform.notationMenu.displayPlayerAsOffline(disconnectedPlayer!.color);
+                    this.platform.notationMenu.updatePlayerAsOffline(wsData.player.color);
+                    break;
+                case WsCommand.Reconnected:
+                    this.platform.notationMenu.updatePlayerAsOnline(wsData.player.color);
+                    break;
+                case WsCommand.Error:
+                    this.platform.navigatorModal.showError(wsData.message);
+                    this.logger.save(`Error: ${wsData}`);
                     break;
             }
         };

@@ -1,5 +1,5 @@
-import { Color, type Player } from "../Types";
-import { GameStatus, JsonNotation, StartPosition } from '@Chess/Types';
+import type { Player } from "../Types";
+import { Color, GameStatus, JsonNotation, Square, StartPosition } from '@Chess/Types';
 import { ChessEngine } from '@Chess/Engine/ChessEngine';
 
 /**
@@ -96,7 +96,7 @@ export class Lobby{
      */
     public getCurrentBoard(): string | JsonNotation
     {
-        return this.chessEngine.getGameAsJsonNotation();
+        return this.isGameAlreadyStarted() ? this.chessEngine.getGameAsJsonNotation() : this.getInitialBoard();
     }
 
     /**
@@ -109,28 +109,18 @@ export class Lobby{
 
     /**
      * Is given player in the lobby.
-     * @param objectCheck If true, it checks the player object.
-     * If false, it checks the name, userToken and color.
      */
-    public isPlayerInLobby(player: Player, objectCheck: boolean = true): boolean
+    public isPlayerInLobby(player: Player): boolean
     {
         const whitePlayer = this.getWhitePlayer();
         const blackPlayer = this.getBlackPlayer();
-        if(objectCheck){
-            if(whitePlayer === player || blackPlayer === player) 
-                return true;
-            else
-                return false;
-        }
-        else{
-            if(whitePlayer && whitePlayer.name === player.name 
-                && whitePlayer.color === player.color && whitePlayer.userToken === player.userToken) 
-                return true;
+        if(whitePlayer && whitePlayer.name === player.name 
+            && whitePlayer.color === player.color && whitePlayer.userToken === player.userToken) 
+            return true;
 
-            if(blackPlayer && blackPlayer.name === player.name
-                    && blackPlayer.color === player.color && blackPlayer.userToken === player.userToken) 
-                return true;
-        }
+        if(blackPlayer && blackPlayer.name === player.name
+                && blackPlayer.color === player.color && blackPlayer.userToken === player.userToken) 
+            return true;
 
         return false;
     }
@@ -154,8 +144,10 @@ export class Lobby{
     {
         const whitePlayer = this.getWhitePlayer();
         const blackPlayer = this.getBlackPlayer();
-        if(whitePlayer && whitePlayer.userToken === userToken) return whitePlayer.isOnline;
-        if(blackPlayer && blackPlayer.userToken === userToken) return blackPlayer.isOnline;
+        if(whitePlayer && whitePlayer.userToken === userToken) 
+            return whitePlayer.isOnline;
+        if(blackPlayer && blackPlayer.userToken === userToken) 
+            return blackPlayer.isOnline;
         return false;
     }
 
@@ -166,8 +158,10 @@ export class Lobby{
     {
         const whitePlayer = this.getWhitePlayer();
         const blackPlayer = this.getBlackPlayer();
-        if(whitePlayer !== null && whitePlayer.userToken === userToken) return Color.White;
-        if(blackPlayer !== null && blackPlayer.userToken === userToken) return Color.Black;
+        if(whitePlayer !== null && whitePlayer.userToken === userToken) 
+            return Color.White;
+        if(blackPlayer !== null && blackPlayer.userToken === userToken) 
+            return Color.Black;
         return null;
     }
 
@@ -192,8 +186,11 @@ export class Lobby{
                 return false;
 
             const color = this.getTokenColor(player.userToken);
-            if(color === Color.White) this.whitePlayer = player;
-            else if(color === Color.Black) this.blackPlayer = player;
+            if(color === Color.White) 
+                this.setWhitePlayer(player);
+            else if(color === Color.Black) 
+                this.setBlackPlayer(player);
+
             this.setPlayerOnline(player);
         }
         else
@@ -225,30 +222,12 @@ export class Lobby{
     }
 
     /**
-     * Remove the player from the lobby.
-     */
-    public removePlayer(player: Player, isDisconnected: boolean = false): boolean
-    {
-        if(!this.isPlayerInLobby(player, false)) return false;
-
-        if(isDisconnected)
-            this.setPlayerOffline(player);
-        else
-        {
-            if(this.getWhitePlayer() === player) this.whitePlayer = null;
-            else if(this.getBlackPlayer() === player) this.blackPlayer = null;
-        }
-
-        return true;
-    }
-
-    /**
      * Set the white player of the lobby.
      */
     private setWhitePlayer(player: Player): void
     {
         this.whitePlayer = player;
-        player.color = Color.White;
+        this.whitePlayer.color = Color.White;
     }
 
     /**
@@ -257,7 +236,7 @@ export class Lobby{
     private setBlackPlayer(player: Player): void
     {
         this.blackPlayer = player;
-        player.color = Color.Black;
+        this.blackPlayer.color = Color.Black;
     }
 
     /**
@@ -283,13 +262,15 @@ export class Lobby{
      */
     public isGameReadyToStart(): boolean
     {
-        const whitePlayer = this.getWhitePlayer();
-        const blackPlayer = this.getBlackPlayer();
         if(this.isGameAlreadyStarted()) return false;
         if(!this.board) return false;
+        if(this.duration[0] <= 0 || this.duration[1] <= 0) return false;
+
+        const whitePlayer = this.getWhitePlayer();
+        const blackPlayer = this.getBlackPlayer();
         if(whitePlayer === null || blackPlayer === null) return false;
         if(!whitePlayer.isOnline || !blackPlayer.isOnline) return false;
-        if(this.duration[0] <= 0 || this.duration[1] <= 0) return false;
+
         return true;
     }
 
@@ -302,21 +283,36 @@ export class Lobby{
     }
 
     /**
+     * Is player's turn?
+     */
+    public isPlayerTurn(player: Player): boolean
+    {
+        if(!this.isGameAlreadyStarted()) return false;
+        if(!this.isPlayerInLobby(player)) return false;
+        if(!player.color) return false;
+        return this.chessEngine.getTurnColor() == player.color;
+    }
+
+    /**
+     * Make a move on the board.
+     */
+    public makeMove(from: Square, to: Square): void
+    {
+        if(!this.isGameAlreadyStarted()) return;
+        this.chessEngine.playMove(from, to);
+    }
+
+    /**
      * Start the game.
      */
     public startGame(): void
     {
-        if(this.isGameAlreadyStarted()) return;
-
-        if(!this.isGameReadyToStart()) return;
+        if(this.isGameAlreadyStarted() || !this.isGameReadyToStart()) return;
 
         try{
             this.chessEngine.createGame(this.board);
-            if(this.chessEngine.getGameStatus() == GameStatus.ReadyToStart){
+            if(this.chessEngine.getGameStatus() == GameStatus.ReadyToStart)
                 this.isGameStarted = true;
-                console.log("Game is started.");
-            }
-            //engine.playMove(move.from, move.to);
         }catch(e){
             console.log("There was an error while playing the game on engine.");
             return;

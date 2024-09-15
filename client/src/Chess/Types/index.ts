@@ -1,5 +1,6 @@
 /**
  * Color enum for the color of the chess pieces and the players.
+ * @enum {string}
  * @see For more information, check src/Models/PieceModel.ts
  */
 export enum Color{
@@ -9,6 +10,7 @@ export enum Color{
 
 /**
  * Square enum for board squares.
+ * @enum {number}
  * @see For more information, check src/Engine/Core/Board/BoardEngine.ts
  */
 export enum Square{
@@ -24,6 +26,7 @@ export enum Square{
 
 /**
  * PieceType enum for the type of the chess pieces.
+ * @enum {string}
  * @see For more information, check src/Models/PieceModel.ts
  */
 export enum PieceType{
@@ -37,6 +40,7 @@ export enum PieceType{
 
 /**
  * CastlingType enum for the castling types.
+ * @enum {string}
  * @see src/Engine/Checker/MoveChecker.ts For more information.
  */
 export enum CastlingType{
@@ -48,6 +52,7 @@ export enum CastlingType{
 
 /**
  * MoveType enum for the move types.
+ * @enum {string}
  * @see src/Engine/ChessEngine.ts For more information.
  */
 export enum MoveType {
@@ -59,6 +64,7 @@ export enum MoveType {
 
 /**
  * EnPassantDirection enum for the en passant directions.
+ * @enum {string}
  * @see src/Engine/Checker/MoveChecker.ts For more information.
  */
 export enum EnPassantDirection{
@@ -129,4 +135,42 @@ export enum GameStatus{
     Draw = "Draw",
     WhiteVictory = "WhiteVictory",
     BlackVictory = "BlackVictory",
+}
+
+/**
+ * ChessEvent enum for the custom chess events.
+ * @enum {string}
+ */
+export enum ChessEvent {
+    /**
+     * Triggered when a piece is selected.
+     * @CustomEvent
+     * @param {Square} square - The square where the piece is selected.
+     */
+    OnPieceSelected = "OnPieceSelected",
+
+    /**
+     * Triggered when a piece is moved.
+     * @CustomEvent
+     * @param {Square} from - The starting square of the move.
+     * @param {Square} to - The ending square of the move.
+     */
+    OnPieceMoved = "OnPieceMoved",
+
+    /**
+     * Triggered when a piece is moved by the player
+     * by clicking on the board.
+     * @CustomEvent
+     * @param {Square} from - The starting square of the move.
+     * @param {Square} to - The ending square of the move.
+     */
+    onPieceMovedByPlayer = "onPieceMovedByUser",
+
+    /**
+     * Triggered when a piece is moved by the opponent client.
+     * @CustomEvent
+     * @param {Square} from - The starting square of the move.
+     * @param {Square} to - The ending square of the move.
+     */
+    onPieceMovedByOppoent = "onPieceMovedByOpponent",
 }

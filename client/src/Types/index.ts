@@ -6,7 +6,10 @@
 export enum WsCommand {
     Connected="CONNECTED",
     Started="STARTED",
-    Disconnected="DISCONNECTED"
+    Disconnected="DISCONNECTED",
+    Reconnected="RECONNECTED",
+    Moved="MOVED",
+    Error="ERROR",
 };
 
 /**

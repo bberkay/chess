@@ -13,9 +13,9 @@ import { BoardEditor } from "./Components/BoardEditor.ts";
 import { NotationMenu } from "./Components/NotationMenu.ts";
 import { LogConsole } from "./Components/LogConsole";
 import { NavigatorModal } from "./Components/NavigatorModal";
-import { BoardEditorOperation, LogConsoleOperation, MenuOperation, NavigatorModalOperation, NotationMenuOperation } from "./Types";
+import { BoardEditorEvent, BoardEditorOperation, LogConsoleOperation, MenuOperation, NavigatorModalOperation, NotationMenuOperation } from "./Types";
 import { Logger } from "@Services/Logger";
-import { Color, GameStatus, JsonNotation, PieceType, StartPosition } from "@Chess/Types/index.ts";
+import { ChessEvent, Color, GameStatus, JsonNotation, PieceType, StartPosition } from "@Chess/Types/index.ts";
 
 /**
  * This class is the main class of the chess platform menu.
@@ -64,24 +64,13 @@ export class Platform{
 
             // When a board is created by the board editor
             // this is because the stream first logs on the log console
-            document.addEventListener("boardCreatedByBoardEditor", () => {
+            document.addEventListener(BoardEditorEvent.onBoardCreatedByBoardEditor, () => {
                 this.updateComponents();
             });
 
             // Every change on the board like moving a piece, removing a piece etc.
-            const observer = new MutationObserver(() => {
-                this.updateComponents();
-            });
-
-            observer.observe(
-                document.getElementById("chessboard")!, 
-                { 
-                    childList: true, 
-                    subtree: true,
-                    attributes: true,
-                    characterData: true
-                }
-            );
+            document.addEventListener(ChessEvent.OnPieceSelected, () => { this.updateComponents() });
+            document.addEventListener(ChessEvent.OnPieceMoved, () => { this.updateComponents() });
 
             this.logger.save("Board changes are listening...");
         }
@@ -360,21 +349,22 @@ export class Platform{
     /**
      * Prepare the platform components for the online game.
      */
-    public prepareComponentsForOnlineGame(playerColor: Color, wsData: { 
-        whitePlayerName: string, 
-        blackPlayerName: string, 
+    public createOnlineGame(game: { 
+        whitePlayer: {name: string, isOnline: boolean},
+        blackPlayer: {name: string, isOnline: boolean},
         board: string, 
         duration: [number, number]
-    }): void
+    }, playerColor: Color): void
     {
-        this._createBoard(wsData.board);
+        this._createBoard(game.board);
         this.notationMenu.displayLobbyUtilityMenu();
-        this.notationMenu.displayWhitePlayer(wsData.whitePlayerName);
-        this.notationMenu.displayBlackPlayer(wsData.blackPlayerName);
+        this.notationMenu.updatePlayerCards(game.whitePlayer, game.blackPlayer, game.duration);
         this.notationMenu.changeTurnIndicator(this.chess.engine.getTurnColor());
         //this.notationMenu.displayWhitePlayerDuration(wsData.duration[0].toString());
         //this.notationMenu.displayBlackPlayerDuration(wsData.duration[0].toString());
         if(playerColor === Color.Black) this._flipBoard();
+        if(playerColor !== this.chess.engine.getTurnColor()) this.chess.board.lock();
+        else this.chess.board.unlock();
     }
 
     /**

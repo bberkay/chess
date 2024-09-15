@@ -1,15 +1,11 @@
 import type { ServerWebSocket } from "bun";
-
-export enum Color {
-    White="White",
-    Black="Black"
-}
+import type { Color } from "@Chess/Types";
 
 export type Player = {
     name: string;
-    userToken: string;
+    color: Color;
     isOnline: boolean;
-    color?: Color;
+    userToken: string;
 }
 
 export type WebSocketData = {

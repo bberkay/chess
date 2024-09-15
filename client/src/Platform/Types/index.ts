@@ -1,3 +1,15 @@
+/**
+ * BoardEditorEvent enum for board editor related events.
+ * @enum {string}
+ */
+export enum BoardEditorEvent {
+    /**
+     * Triggered when a board is created by the board editor.
+     * @event
+     */
+    onBoardCreatedByBoardEditor = "onBoardCreatedByBoardEditor"
+}
+
 export enum NotationMenuOperation{
     SendDrawOffer = "SendDrawOffer",
     SendUndoOffer = "SendUndoOffer",

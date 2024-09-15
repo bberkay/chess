@@ -38,11 +38,13 @@
  */
 
 import type { Server, ServerWebSocket } from "bun";
-import type { RWebSocket, WebSocketData, Color } from "./Types";
-import type { JsonNotation, StartPosition } from "@Chess/Types";
+import type { RWebSocket, WebSocketData } from "./Types";
+import type { JsonNotation, Square, StartPosition } from "@Chess/Types";
+import { Color } from "@Chess/Types";
+import { MoveValidationError } from "@Chess/Engine/ChessEngine";
 import { LobbyManager } from "./Classes/LobbyManager";
-import { WsCommand } from "./Classes/WsCommand";
-import { createUserToken } from "./Classes/Helper";
+import { WsCommand, WsCommandTitle } from "./Classes/WsCommand";
+import { createRandomId } from "./Classes/Helper";
 import { MAX_PAYLOAD_LENGTH, SERVER_PORT } from "./Consts";
 import { ALLOWED_ORIGINS } from "./Consts";
 import { 
@@ -53,6 +55,7 @@ import {
     MAX_INCREMENT_TIME,
     MIN_INCREMENT_TIME
 } from "./Consts";
+import { SocketManager } from "./Classes/SocketManager";
 
 /**
  * Check if the origin is allowed to connect.
@@ -87,55 +90,55 @@ function areParametersValid(req: Request): Response | {
             "Invalid request. name and userToken cannot be used together.", 
             {status: 400}
         );
-    console.log("check 1");
+
     if(!name && !userToken)
         return new Response(
             "Invalid request. name or userToken must be provided.", 
             {status: 400}
         );
-    console.log("check 2");
+
     if(userToken && !lobbyId)
         return new Response(
             "Invalid request. userToken must be used with lobbyId.", 
             {status: 400}
         );
-    console.log("check 3");
+
     if(name && (name.length < MIN_PLAYER_NAME_LENGTH || name.length > MAX_PLAYER_NAME_LENGTH))
         return new Response(
             "Invalid request. playerName length must be between 3 and 25.", 
             {status: 400}
         );
-    console.log("check 4");
+
     if(lobbyId && (lobbyId.length < 6 || lobbyId.length > 6))
         return new Response(
             "Invalid request. lobbyId length must be 6.", 
             {status: 400}
         );
-    console.log("check 5");
+
     if(userToken && (userToken.length < 6 || userToken.length > 6))
         return new Response(
             "Invalid request. userToken length must be 6.", 
             {status: 400}
         );
-    console.log("check 6");
+
     if((board || totalTime || incrementTime) && (!name || lobbyId || userToken))
         return new Response(
             "Invalid request. board, totalTime, incrementTime can only be used when creating a new lobby.", 
             {status: 400}
         );
-    console.log("check 7");
+
     if((name && !lobbyId) && (!board || !totalTime || !incrementTime))
         return new Response(
             "Invalid request. board, totalTime, incrementTime must be provided when creating a new lobby.", 
             {status: 400}
         );
-    console.log("check 8");
+
     if(board && board.length > 100)
         return new Response(
             "Invalid request. board length must be less than 100.", 
             {status: 400}
         );
-    console.log("check 9");
+
     if(totalTime){
         const totalTimeNumber = parseFloat(totalTime);
         if(isNaN(totalTimeNumber) 
@@ -146,7 +149,7 @@ function areParametersValid(req: Request): Response | {
                 {status: 400}
             );
     }
-    console.log("check 10");
+
     if(incrementTime){
         const incrementTimeNumber = parseInt(incrementTime);
         if(isNaN(incrementTimeNumber) 
@@ -157,10 +160,10 @@ function areParametersValid(req: Request): Response | {
                 {status: 400}
             );
     }
-    console.log("check 11");
+
     if(lobbyId && !LobbyManager.isLobbyExist(lobbyId))
         return new Response("Lobby not found.", {status: 404});
-    console.log("check 12");
+
     return { name, lobbyId, userToken, board, totalTime, incrementTime };
 }
 
@@ -182,7 +185,7 @@ function handlePlayerNameProcess(
             return new Response("Lobby is already started to play.", {status: 400});
     }
 
-    return { lobbyId, userToken: createUserToken() };
+    return { lobbyId, userToken: createRandomId() };
 }
 
 /**
@@ -220,7 +223,6 @@ function handleParameters(params: any):
         incrementTime: string 
     }
 {   
-    console.log("Handling parameters...: ", params);
     let handledParams: Response | { lobbyId: string, name: string} | { lobbyId: string, userToken: string };
     if(params && params.name)
         handledParams = handlePlayerNameProcess(
@@ -251,7 +253,6 @@ const server = Bun.serve<WebSocketData>({
         
         // Check if the parameters are valid.
         const parameterValidation = areParametersValid(req);
-        console.log("Parameter validation: ", parameterValidation);
         if(parameterValidation instanceof Response)
             return parameterValidation;
         
@@ -259,7 +260,7 @@ const server = Bun.serve<WebSocketData>({
         const finalParameters = handleParameters(parameterValidation);
         if(finalParameters instanceof Response)
             return finalParameters;
-        console.log("Parameters are handled.");
+
         const { 
             lobbyId, 
             userToken,
@@ -293,11 +294,13 @@ const server = Bun.serve<WebSocketData>({
             joinLobby(ws);
         },
         message(ws: RWebSocket, message: string) {
-            // Last Move gönderilir {frm: "e2", to: "e4"} şeklinde olabilir.
-            ws.send(`You said: ${message}`);
+            console.log("Ws:", ws.data.player.name, ws.data.player.color, "Message: ", message);
+            if(SocketManager.getSocket(ws.data.lobbyId, ws.data.player.userToken) === ws)
+                handleMessage(ws, message);
         },
         close(ws: RWebSocket) {
-            leaveLobby(ws, true);
+            if(SocketManager.getSocket(ws.data.lobbyId, ws.data.player.userToken) === ws)
+                leaveLobby(ws);
         },
         maxPayloadLength: MAX_PAYLOAD_LENGTH,
         idleTimeout: 960,
@@ -317,18 +320,29 @@ function joinLobby(ws: RWebSocket){
     if(lobby){
         ws.subscribe(lobbyId);
         ws.send(WsCommand.connected(lobbyId, player));
-        console.log("Connection opened: ", lobbyId, player.color, player.name);
+        SocketManager.addSocket(ws.data.lobbyId, ws.data.player.userToken, ws);
+        console.log("Lobby Join: ", lobbyId, player.color, player.name);
 
-        console.log("Is game ready to start: ", lobby.isGameReadyToStart());
-        if(lobby.isGameReadyToStart()){
-            lobby.startGame();
-            server.publish(lobbyId, WsCommand.started({
-                whitePlayerName: lobby.getWhitePlayerName(),
-                blackPlayerName: lobby.getBlackPlayerName(),
+        const isGameReadyToStart = lobby.isGameReadyToStart();
+        const isGameAlreadyStarted = lobby.isGameAlreadyStarted();
+        if(isGameReadyToStart || isGameAlreadyStarted){
+            const whitePlayer = lobby.getWhitePlayer()!;
+            const blackPlayer = lobby.getBlackPlayer()!;
+            const startedData = ({
+                whitePlayer: {name: whitePlayer.name, isOnline: whitePlayer.isOnline},
+                blackPlayer: {name: blackPlayer.name, isOnline: blackPlayer.isOnline},
                 board: lobby.getCurrentBoard(),
                 duration: lobby.getDuration()
-            }));
-            console.log("Game started: ", lobbyId);
+            });
+
+            if(isGameReadyToStart){
+                lobby.startGame();
+                server.publish(lobbyId, WsCommand.started(startedData));
+            }
+            else if(isGameAlreadyStarted){
+                ws.send(WsCommand.started(startedData));
+                server.publish(lobbyId, WsCommand.reconnected(lobbyId, player.name, player.color!));
+            }
         }
     }
 }
@@ -336,13 +350,59 @@ function joinLobby(ws: RWebSocket){
 /**
  * Leave the lobby and send disconnected command to the client.
  */
-function leaveLobby(ws: RWebSocket, isDisconnected: boolean = false){
+function leaveLobby(ws: RWebSocket){
     const lobbyId = ws.data.lobbyId;
     const player = ws.data.player;
-    if(!LobbyManager.leaveLobby(lobbyId, player, isDisconnected)) return;
-    
+    if(!LobbyManager.leaveLobby(lobbyId, player)) return;
+        
     server.publish(lobbyId, WsCommand.disconnected(lobbyId, player.name, player.color!));
     ws.unsubscribe(lobbyId);
+    SocketManager.removeSocket(lobbyId, player.userToken);
 
     console.log("Connection closed: ", lobbyId, player.color, player.name);
+}
+
+/**
+ * Handle the messages from the client.
+ */
+function handleMessage(ws: RWebSocket, message: string){
+    const [command, data] = WsCommand.parse(message);
+    switch(command){
+        case WsCommandTitle.Moved:
+            movePiece(ws, data.from, data.to);
+            break;
+    }
+}
+
+/**
+ * Move the piece on the board as the player wants
+ * then send to the other player.
+ */
+function movePiece(ws: RWebSocket, from: Square, to: Square){
+    const lobbyId = ws.data.lobbyId;
+    const player = ws.data.player;
+    const lobby = LobbyManager.getLobby(lobbyId);
+    if(lobby && lobby.isPlayerTurn(player)){
+        console.log("Move: ", from, to, player.color, player.name);
+        try{
+            lobby.makeMove(from, to);
+            
+            const opponentPlayer = player.color === Color.White 
+                ? lobby.getBlackPlayer() 
+                : lobby.getWhitePlayer();
+            if(!opponentPlayer) return;
+
+            const opponentPlayerWs = SocketManager.getSocket(
+                lobbyId, 
+                opponentPlayer.userToken
+            )!;
+            if(!opponentPlayerWs) return;
+            opponentPlayerWs.send(WsCommand.moved(from, to));
+        }
+        catch(e){
+            if(e instanceof MoveValidationError)
+                ws.send(WsCommand.error(e.message));
+            return;
+        }
+    }
 }
