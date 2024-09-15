@@ -45,9 +45,9 @@ const games: TestGame[] = [
         expectation: GameStatus.Draw
     },
     {
-        title: "In Play",
+        title: "Ready To Start",
         board: "r3k1n1/ppp1pp1p/3p4/6p1/2P1P3/8/PP2PPPP/R2QK2R w KQq - 0 1",
-        expectation: GameStatus.InPlay
+        expectation: GameStatus.ReadyToStart
     },
     {
         title: "Not Started (Black and/or White King Missing)",
