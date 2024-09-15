@@ -155,7 +155,7 @@ export class NavigatorModal extends Component{
             "Not Ready",
             `<span style="font-size:13px">There might be missing pieces like kings. Please create playable board.</span>
             <div style="text-align:center;margin-top:10px;">
-                <button class="button--text" style="font-size:13px!important;" data-menu-operation="${NavigatorModalOperation.Hide}">
+                <button class="" style="font-size:13px!important;" data-menu-operation="${NavigatorModalOperation.Hide}">
                     Ok
                 </button>
             </div>`
@@ -369,7 +369,7 @@ export class NavigatorModal extends Component{
             "Something Went Wrong",
             `<span style="font-size:13px">${message}</span>
             <div style="text-align:center;margin-top:10px;">
-                <button class="button--text" style="font-size:13px!important;" data-menu-operation="${NavigatorModalOperation.Hide}">
+                <button style="font-size:13px!important;" data-menu-operation="${NavigatorModalOperation.Hide}">
                     Ok
                 </button>
             </div>

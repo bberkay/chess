@@ -115,9 +115,12 @@
 }
 
 .navigator-modal--error{
-    --navigator-modal-bg-color: #D44141;
-    --navigator-modal-shadow-color: #D44141;
-    --navigator-modal-text-color: #FFF;
+    border: 1px solid rgba(155, 4, 4, 0.46);
+    background: rgba(255, 1, 1, 0.2);
+
+    & button{
+        width: 100%;
+    }
 }
 
 .navigator-modal-bg-layer{
