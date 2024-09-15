@@ -303,7 +303,7 @@ export class NotationMenu extends Component{
     /**
      * Change the player status to online.
      */
-    public displayPlayerAsOnline(color: Color): void
+    public updatePlayerAsOnline(color: Color): void
     {
         const playerStatus = document.getElementById(`${color.toLowerCase()}-player-status`)!;
         if(!playerStatus) return;
@@ -314,7 +314,7 @@ export class NotationMenu extends Component{
     /**
      * Change the player status to offline.
      */
-    public displayPlayerAsOffline(color: Color): void
+    public updatePlayerAsOffline(color: Color): void
     {
         const playerStatus = document.getElementById(`${color.toLowerCase()}-player-status`)!;
         if(!playerStatus) return;
@@ -325,41 +325,30 @@ export class NotationMenu extends Component{
     /**
      * Display the white player duration on the notation menu.
      */
-    private displayWhitePlayerDuration(duration: string): void
+    private displayPlayerDurations(duration: [number, number]): void
     {
-        const whitePlayerDuration = document.getElementById(`white-player-duration`)!;
-        if(!whitePlayerDuration) return;
-        whitePlayerDuration.classList.remove("hidden");
-        whitePlayerDuration.textContent = duration;
+        (document.querySelectorAll(".duration") as NodeListOf<HTMLElement>).forEach((durationItem) => {
+            durationItem.classList.remove("hidden");
+            durationItem.textContent = duration[0].toString().concat(":", duration[1].toString());
+        });
     }
 
     /**
-     * Display the black player duration on the notation menu.
+     * Initialize the player names, durations and online status.
      */
-    private displayBlackPlayerDuration(duration: string): void
+    public updatePlayerCards(
+        whitePlayer: {name: string, isOnline: boolean}, 
+        blackPlayer: {name: string, isOnline: boolean}, 
+        duration: [number, number] | null = null
+    ): void
     {
-        const blackPlayerDuration = document.getElementById(`black-player-duration`)!;
-        if(!blackPlayerDuration) return;
-        blackPlayerDuration.classList.remove("hidden");
-        blackPlayerDuration.textContent = duration;
-    }
-
-    /**
-     * Display the white player name and status.
-     */
-    public displayWhitePlayer(name: string): void
-    {
-        this.displayWhitePlayerName(name);
-        this.displayPlayerAsOnline(Color.White);
-    }
-
-    /**
-     * Display the black player name and status.
-     */
-    public displayBlackPlayer(name: string): void
-    {
-        this.displayBlackPlayerName(name);
-        this.displayPlayerAsOnline(Color.Black);
+        this.displayWhitePlayerName(whitePlayer.name);
+        this.displayBlackPlayerName(blackPlayer.name);
+        if(whitePlayer.isOnline) this.updatePlayerAsOnline(Color.White);
+        else this.updatePlayerAsOffline(Color.White);
+        if(blackPlayer.isOnline) this.updatePlayerAsOnline(Color.Black);
+        else this.updatePlayerAsOffline(Color.Black);
+        //if(duration) this.displayPlayerDurations(duration);
     }
 
     /**
