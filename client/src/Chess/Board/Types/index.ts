@@ -3,14 +3,17 @@
  * @see src/Chess/Board/ChessBoard.ts For more information.
  */
 export enum SquareEffect{
-    Checked = "checked",
-    Killable = "killable",
-    Playable = "playable",
     Selected = "selected",
+    PreSelected = "preselected",
     Disabled = "disabled",
     Hovering = "hovering",
     From = "from",
     To = "to",
+    Checked = "checked",
+    Killable = "killable",
+    PreKillable = "prekillable",
+    Playable = "playable",
+    PrePlayable = "preplayable",
 }
 
 /**
@@ -19,7 +22,9 @@ export enum SquareEffect{
  */
 export enum SquareClickMode{
     Select = "Select",
+    PreSelect = "PreSelect",
     Selected = "Selected",
+    PreSelected = "PreSelected",
     Play = "Play",
     Clear = "Clear",
     Promote = "Promote", // Promote the pawn to the selected piece.

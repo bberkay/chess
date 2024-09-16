@@ -101,14 +101,15 @@ export class ChessBoard {
     public setTurnColor(color: Color.White | Color.Black): void
     {
         this.turnColor = color;
-        document.querySelectorAll(`.piece`).forEach((element) => {
-            const square = element.parentElement!;
-            if(
-                !square.lastElementChild?.className.includes("promotion-option") 
-                && element.getAttribute("data-color") == this.turnColor)
-                this.setSquareClickMode(square, SquareClickMode.Select);
-            else
-                this.setSquareClickMode(square, SquareClickMode.Clear);
+        this.getAllPieces().forEach((pieceElement) => {
+            const square = this.getSquareElementOfPiece(pieceElement);
+            if(!pieceElement.className.includes("promotion-option"))
+                this.setSquareClickMode(
+                    square, 
+                    this.getPieceColorOnSquare(square) == this.turnColor 
+                    ? SquareClickMode.Select 
+                    : SquareClickMode.PreSelect
+                );
         });
     }
 
@@ -191,7 +192,7 @@ export class ChessBoard {
         piece.setAttribute("data-piece", type);
         piece.setAttribute("data-color", color);
         this.getSquareElement(square).appendChild(piece);
-        this.setSquareClickMode(piece.parentElement!, SquareClickMode.Select);
+        this.setSquareClickMode(this.getSquareElementOfPiece(piece), SquareClickMode.Select);
     }
 
     /**
@@ -214,7 +215,6 @@ export class ChessBoard {
     {
         if(this._isBoardMoveEventBound) 
             throw Error("Move event callbacks already bound.");
-
         this._isBoardMoveEventBound = true;
         
         let mouseUpTriggered: boolean = false;
@@ -258,18 +258,18 @@ export class ChessBoard {
             return;
         }
         
-        if(square.querySelector(".piece")?.getAttribute("data-color") != this.turnColor)
-            return;
+        /*if(this.getPieceColorOnSquare(square) != this.turnColor)
+            return;*/
 
         this.stickPieceToCursor(mouseDownEvent, square);
-        if(squareClickMode == SquareClickMode.Selected){
+        if([SquareClickMode.Selected, SquareClickMode.PreSelected].includes(squareClickMode)){
             this.setSquareClickMode(square, SquareClickMode.Clear);
             return;
         }
         
         const squareId = this.getSquareID(square);
-        if(squareClickMode == SquareClickMode.Select){
-            this.selectPiece(squareId);
+        if([SquareClickMode.Select, SquareClickMode.PreSelect].includes(squareClickMode)){
+            this.selectPiece(squareId, squareClickMode == SquareClickMode.PreSelect);
             onPieceSelected(squareId);
         }
     }
@@ -309,23 +309,23 @@ export class ChessBoard {
         );
         if(targetSquare && targetSquare.closest("#chessboard"))
         {   
-            if(targetSquare.className.includes("piece")){
-                targetSquare = targetSquare.parentElement!;
-            }
+            if(targetSquare.className.includes("piece"))
+                targetSquare = this.getSquareElementOfPiece(targetSquare);
 
             if(targetSquare.className.includes("square")){
                 const targetSquareClickMode = this.getSquareClickMode(targetSquare);
+                const targetSquareEffects = this.getSquareEffects(targetSquare);
                 if(targetSquareClickMode == SquareClickMode.Clear
-                    && this.getSquareEffects(targetSquare).includes(SquareEffect.Selected))
+                    && (targetSquareEffects.includes(SquareEffect.Selected) 
+                        || targetSquareEffects.includes(SquareEffect.PreSelected)))
                     this.refresh();
                     
-                if([
-                    SquareClickMode.Play, 
+                if([SquareClickMode.Play, 
                     SquareClickMode.Promotion, 
                     SquareClickMode.Promote, 
                     SquareClickMode.EnPassant, 
-                    SquareClickMode.Castling].includes(targetSquareClickMode)
-                )
+                    SquareClickMode.Castling
+                ].includes(targetSquareClickMode))
                     onPieceMovedByDragging!(this.getSquareID(targetSquare), targetSquareClickMode);
             }
         }    
@@ -334,12 +334,12 @@ export class ChessBoard {
     /**
      * This function selects the square on the chess board.
      */
-    public selectPiece(squareID: Square): void
+    public selectPiece(squareID: Square, preSelect: boolean = false): void
     {
         this.refresh();
         const selectedSquare = this.getSquareElement(squareID);
-        this.addSquareEffects(selectedSquare, SquareEffect.Selected);
-        this.setSquareClickMode(selectedSquare, SquareClickMode.Selected);
+        this.setSquareClickMode(selectedSquare, preSelect ? SquareClickMode.PreSelected : SquareClickMode.Selected);
+        this.addSquareEffects(selectedSquare, preSelect ? SquareEffect.PreSelected : SquareEffect.Selected);
         this.logger.save(`Square[${squareID}] selected on board.`);
     }
 
@@ -394,7 +394,7 @@ export class ChessBoard {
             let targetSquare: Element | null = document.elementFromPoint(upEvent.clientX, upEvent.clientY);
             if(targetSquare){
                 if(targetSquare.className.includes("piece"))
-                    targetSquare = targetSquare.parentElement;
+                    targetSquare = this.getSquareElementOfPiece(targetSquare);
                 
                 if(targetSquare?.className.includes("square")){
                     const targetSquareClickMode = this.getSquareClickMode(targetSquare);
@@ -409,9 +409,8 @@ export class ChessBoard {
     }
 
     /**
-     * This function shows the possible moves of the given piece on the chess board.
-     * @param {Moves|null} moves - Possible moves of the piece, null for is standalone version and
-     * all squares will be highlighted.
+     * This function shows the possible moves of the selected or pre selected 
+     * piece on the chess board.
      */
     public highlightMoves(moves: Moves | null = null): void
     {
@@ -419,6 +418,12 @@ export class ChessBoard {
         if(moves == null)
             return;
 
+        const selectedPiece = this.getSelectedPieceElement();
+        if(!selectedPiece) return;
+
+        const isSelectionPre = this.getSquareClickMode(
+            this.getSquareElementOfPiece(selectedPiece)
+        ) == SquareClickMode.PreSelect;
         for(let moveType in moves){
             if(!moves[moveType as MoveType])
                 continue;
@@ -430,16 +435,16 @@ export class ChessBoard {
                 const square = this.getSquareElement(move);
                 const squareContent = square.lastElementChild;
                 if(squareContent && squareContent.className.includes("piece"))
-                    this.addSquareEffects(move, SquareEffect.Killable);
+                    this.addSquareEffects(move, isSelectionPre ? SquareEffect.PreKillable : SquareEffect.Killable);
                 else
-                    this.addSquareEffects(move, SquareEffect.Playable);
+                    this.addSquareEffects(move, isSelectionPre ? SquareEffect.PrePlayable : SquareEffect.Playable);
 
                 this.setSquareClickMode(
                     move, 
                     (moveType == MoveType.Castling ? SquareClickMode.Castling : null)
                     || (moveType == MoveType.EnPassant ? SquareClickMode.EnPassant : null)
                     || (moveType == MoveType.Promotion ? SquareClickMode.Promotion : null) 
-                    || SquareClickMode.Play
+                    || (!isSelectionPre ? SquareClickMode.Play : this.getSquareClickMode(move))
                 );
             }
         }
@@ -502,7 +507,7 @@ export class ChessBoard {
 
             if(toSquareContent){
                 // This is the case when the player captures the opponent's piece by drag and drop.
-                if(!piece) this.removePiece(toSquareContent.parentElement!);
+                if(!piece) this.removePiece(this.getSquareElementOfPiece(toSquareContent));
                 if(playMoveSound) this.playSound(SoundEffect.Capture);
             }
             else if(playMoveSound)
@@ -511,9 +516,10 @@ export class ChessBoard {
             if(!piece) return;
             this.logger.save(`Target square[${this.getSquareID(square)}] cleared`);
 
+            const pieceSquare = this.getSquareElementOfPiece(piece);
             const pieceRect = piece.getBoundingClientRect();
-            const marginLeft = Math.abs(piece.parentElement!.getBoundingClientRect().left - pieceRect.left);
-            const marginTop = Math.abs(piece.parentElement!.getBoundingClientRect().top - pieceRect.top);
+            const marginLeft = Math.abs(pieceSquare.getBoundingClientRect().left - pieceRect.left);
+            const marginTop = Math.abs(pieceSquare.getBoundingClientRect().top - pieceRect.top);
 
             document.body.appendChild(piece);
             piece.style.top = `${pieceRect.top}px`;
@@ -525,7 +531,7 @@ export class ChessBoard {
             piece.style.setProperty("--move-to-top", `calc(${marginTop}px + ${square.getBoundingClientRect().top}px)`);
 
             piece.addEventListener("animationend", () => {
-                if(toSquareContent) this.removePiece(toSquareContent.parentElement!);
+                if(toSquareContent) this.removePiece(this.getSquareElementOfPiece(toSquareContent));
                 square.appendChild(piece);
                 piece.style.animation = "";
                 piece.style.top = "";
@@ -619,9 +625,9 @@ export class ChessBoard {
      */
     private _doPromote(selectedSquare:HTMLDivElement): void
     {
-        const selectedOption: HTMLDivElement = selectedSquare.lastElementChild as HTMLDivElement;
-        const color: Color = selectedOption.getAttribute("data-color") as Color;
-        const pieceType: PieceType = selectedOption.getAttribute("data-piece") as PieceType;
+        const selectedOption: HTMLDivElement = this.getPieceElementOnSquare(selectedSquare);
+        const color: Color = this.getPieceColorOnSquare(selectedSquare);
+        const pieceType: PieceType = this.getPieceTypeOnSquare(selectedOption);
 
         /**
          * Example: Promoted pawn is white and on the "a8" square. Promotion options are
@@ -654,7 +660,7 @@ export class ChessBoard {
         const loopRange = isFlipped ? [63, -1, -1] : [0, 64, 1];
         for(let i = loopRange[0]; i != loopRange[1]; i+=loopRange[2]){
             const id = this.getSquareID(squares[Math.abs(loopRange[0] - i)]);
-            if(this.getSquareClickMode(squares[i]) != SquareClickMode.Select)
+            if(![SquareClickMode.Select, SquareClickMode.PreSelect].includes(this.getSquareClickMode(squares[i])))
                 this.setSquareClickMode(squares[i], SquareClickMode.Clear);
 
             /**
@@ -667,7 +673,12 @@ export class ChessBoard {
                 this.logger.save(`ID of square's fixed from[${id}] to [${(i + loopRange[2]).toString()}] on board`);
             }
         }
-        this.removeEffectFromAllSquares([SquareEffect.Playable, SquareEffect.Killable, SquareEffect.Selected]);
+        this.removeEffectFromAllSquares([
+            SquareEffect.Playable, 
+            SquareEffect.Killable, 
+            SquareEffect.Selected, 
+            SquareEffect.PreSelected
+        ]);
         this.setTurnColor(this.turnColor);
         this.logger.save("Board refreshed. Playable, Killable, Selected effects removed.");
     }
@@ -727,8 +738,6 @@ export class ChessBoard {
 
     /**
      * Lock board interactions.
-     * @param {boolean} showDisabledEffect - Show disabled effect on 
-     * the squares while locking the board.
      */
     public lock(showDisabledEffect: boolean = false): void
     {
@@ -765,9 +774,10 @@ export class ChessBoard {
             const color: Color = status == GameStatus.WhiteInCheck ? Color.White : Color.Black;
             const king: HTMLDivElement = document.querySelector(
                 `.piece[data-piece="${PieceType.King}"][data-color="${color}"]`) as HTMLDivElement;
-            this.addSquareEffects(king.parentElement as HTMLDivElement, SquareEffect.Checked);
+            const kingSquare = this.getSquareElementOfPiece(king);
+            this.addSquareEffects(kingSquare as HTMLDivElement, SquareEffect.Checked);
             this.playSound(SoundEffect.Check);
-            this.logger.save(`King's square[${this.getSquareID(king.parentElement!)}] found on DOM and Checked effect added`);
+            this.logger.save(`King's square[${this.getSquareID(kingSquare)}] found on DOM and Checked effect added`);
         }
         else if(status == GameStatus.WhiteVictory || status == GameStatus.BlackVictory || status == GameStatus.Draw)
         {
@@ -843,6 +853,13 @@ export class ChessBoard {
     }
 
     /**
+     * Get all pieces on the board.
+     */
+    public getAllPieces(): NodeListOf<HTMLDivElement> {
+        return document.querySelectorAll(".piece");
+    }
+
+    /**
      * Get the square element by squareID(data-square-id)
      */
     public getSquareElement(squareID: Square): HTMLDivElement {
@@ -857,6 +874,35 @@ export class ChessBoard {
             squareElement = this.getSquareElement(squareElement);
 
         return squareElement.querySelector(".piece") as HTMLDivElement;
+    }
+
+    /**
+     * Get the selected or preselected piece element on the board.
+     */
+    public getSelectedPieceElement(): HTMLDivElement | null {
+        return (document.querySelector(`.piece[data-click-mode="${SquareClickMode.Selected}"]`) as HTMLDivElement)
+            || (document.querySelector(`.piece[data-click-mode="${SquareClickMode.PreSelected}"]`) as HTMLDivElement);
+    }
+
+    /**
+     * Get the color of the piece on the square.
+     */
+    public getPieceColorOnSquare(squareElement: HTMLDivElement | Element | Square): Color {
+        return this.getPieceElementOnSquare(squareElement).getAttribute("data-color") as Color;
+    }
+
+    /**
+     * Get the type of the piece on the square.
+     */
+    public getPieceTypeOnSquare(squareElement: HTMLDivElement | Element | Square): PieceType {
+        return this.getPieceElementOnSquare(squareElement).getAttribute("data-piece") as PieceType;
+    }
+
+    /**
+     * Get the square element of given piece element.
+     */
+    public getSquareElementOfPiece(pieceElement: HTMLDivElement | Element): HTMLDivElement {
+        return pieceElement.parentElement! as HTMLDivElement;
     }
 
     /**
