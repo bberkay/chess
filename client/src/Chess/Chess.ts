@@ -159,8 +159,9 @@ export class Chess{
      */
     private handleOnPieceMoved(squareId: Square, squareClickMode: SquareClickMode): void
     {
-        if(![
+        if(![SquareClickMode.PreSelect,
             SquareClickMode.Select, 
+            SquareClickMode.PreSelected,
             SquareClickMode.Selected, 
             SquareClickMode.Clear, 
             SquareClickMode.Disable].includes(squareClickMode)

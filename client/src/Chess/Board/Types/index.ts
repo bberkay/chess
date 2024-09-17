@@ -21,17 +21,22 @@ export enum SquareEffect{
  * @see src/Chess/Board/ChessBoard.ts For more information.
  */
 export enum SquareClickMode{
-    Select = "Select",
     PreSelect = "PreSelect",
-    Selected = "Selected",
+    Select = "Select",
     PreSelected = "PreSelected",
+    Selected = "Selected",
+    PrePlay = "PrePlay",
     Play = "Play",
-    Clear = "Clear",
+    PrePromote = "PrePromote", // Promote the pawn to queen.
     Promote = "Promote", // Promote the pawn to the selected piece.
+    PrePromotion = "PrePromotion", 
     Promotion = "Promotion", // Move pawn to the promotion square.
-    Disable = "Disable",
+    PreCastling = "PreCastling",
     Castling = "Castling",
-    EnPassant = "EnPassant"
+    PreEnPassant = "PreEnPassant",
+    EnPassant = "EnPassant",
+    Disable = "Disable",
+    Clear = "Clear",
 }
 
 /**

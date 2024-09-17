@@ -357,13 +357,14 @@ export class Platform{
     }, playerColor: Color): void
     {
         this._createBoard(game.board);
+        this.chess.board.disablePreSelectionFor(playerColor === Color.White ? Color.Black : Color.White);
         this.notationMenu.displayLobbyUtilityMenu();
         this.notationMenu.updatePlayerCards(game.whitePlayer, game.blackPlayer, game.duration);
         this.notationMenu.changeTurnIndicator(this.chess.engine.getTurnColor());
         //this.notationMenu.displayWhitePlayerDuration(wsData.duration[0].toString());
         //this.notationMenu.displayBlackPlayerDuration(wsData.duration[0].toString());
         if(playerColor === Color.Black) this._flipBoard();
-        if(playerColor !== this.chess.engine.getTurnColor()) this.chess.board.lock();
+        if(playerColor !== this.chess.engine.getTurnColor()) this.chess.board.lock(false);
         else this.chess.board.unlock();
     }
 

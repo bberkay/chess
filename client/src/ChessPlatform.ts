@@ -239,7 +239,7 @@ export class ChessPlatform{
                     document.addEventListener(ChessEvent.onPieceMovedByPlayer, ((event: CustomEvent) => {
                         const { from, to } = event.detail;
                         this.socket?.send(JSON.stringify([WsCommand.Moved, {from, to}]));
-                        this.chess.board.lock();
+                        this.chess.board.lock(false);
                     }) as EventListener);
                     break;
                 case WsCommand.Moved:

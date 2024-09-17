@@ -30,7 +30,8 @@
     --prekillable-color: #888888;
     --checked-color: #DF3030;
     --disabled-color: #0000004F;
-    --hovering-color: #57CE9248;
+    --hovering-color: #246d49;
+    --prehovering-color: #888888;
     --from-color: #45C9FF63;
     --to-color: #45C9FF63;
 
@@ -264,6 +265,10 @@
         background-color: var(--hovering-color);
     }
 
+    & .square:has(.square-effect--preplayable .square-effect-layer:hover){
+        background-color: var(--prehovering-color);
+    }
+
     & .square:has(.square-effect--selected .square-effect-layer){
         background-color: var(--selected-color);
     }
@@ -294,12 +299,56 @@
         background-color: var(--preplayable-color)!important;
     }
 
-    & .square-effect--killable .square-effect-icon{
-        box-shadow:inset 0 0 15px var(--killable-color)!important;
+    & .square-effect--killable .square-effect-icon::before, 
+    & .square-effect--prekillable .square-effect-icon::before{
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width:calc((var(--board-size) - 2px) / 8);
+        height:calc((var(--board-size) - 2px) / 8);
+        background-color: transparent;
+        box-shadow: none;
+        transform: translate(-50%, -50%);
     }
 
-    & .square-effect--prekillable .square-effect-icon{
-        box-shadow:inset 0 0 15px var(--prekillable-color)!important;
+    & .square-effect--killable .square-effect-icon::before{
+        background-color: var(--killable-color);
+    }
+
+    & .square-effect--prekillable .square-effect-icon::before{
+        background-color: var(--prekillable-color);
+    }
+    
+    & .square-effect--killable .square-effect-icon::after,
+    & .square-effect--prekillable .square-effect-icon::after{
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width:calc((var(--board-size) - 2px) / 8);
+        height:calc((var(--board-size) - 2px) / 8);
+        background-color: transparent;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    & .square--black .square-effect--killable .square-effect-icon::after,
+    & .square--black .square-effect--prekillable .square-effect-icon::after{
+        background-color: var(--black-square-color);
+    }
+
+    & .square--white .square-effect--killable .square-effect-icon::after,
+    & .square--white .square-effect--prekillable .square-effect-icon::after{
+        background-color: var(--white-square-color);
+    }
+
+    & .square:has(.square-effect--killable:hover) .square-effect-icon::after {
+        background-color: var(--hovering-color);
+    }
+
+    & .square:has(.square-effect--prekillable:hover) .square-effect-icon::after {
+        background-color: var(--prehovering-color);
     }
 
     & .square:has(.square-effect--checked .square-effect-layer){
