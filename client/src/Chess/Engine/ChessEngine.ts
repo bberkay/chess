@@ -168,23 +168,31 @@ export class ChessEngine extends BoardManager {
     /**
      * This function returns the moves of the given square with move engine.
      */
-    public getMoves(square: Square): Moves | null
+    public getMoves(square: Square, isPreCalculation: boolean = false): Moves | null
     {
+        if(isPreCalculation){
+            this.changeTurnColor(BoardQuerier.getColorOfOpponent());
+            this.logger.save("Move calculation set to pre calculation mode");
+        }
+
         if(!this.isBoardPlayable || !BoardQuerier.isSquareSelectable(square)){
             this.logger.save(`Moves of the square is not found because ${!this.isBoardPlayable ? `board is not playable` : ` square[${square}] is not selectable`}`);
             return null;
         }
 
-        /**
-         * Get the moves of square with move engine. If the moves of the square
-         * is already calculated then get the moves from the calculatedMoves.
-         * Otherwise, calculate the moves with move engine and save the moves
-         */
+        if(isPreCalculation){
+            const moves = this.moveEngine.getMoves(square);
+            this.logger.save(`Moves of the pre selected square[${square}] is calculated by move engine`);
+            this.changeTurnColor(BoardQuerier.getColorOfOpponent());
+            this.logger.save("Move calculation set to normal calculation mode");
+            return moves;
+        }
+
         this.currentMoves[square] = this.currentMoves[square] ?? this.moveEngine.getMoves(square);
         this.logger.save(this.currentMoves.hasOwnProperty(square)
             ? `Moves of the square[${square}] is found from calculated moves[${JSON.stringify(this.currentMoves)}]`
             : `Moves of the square[${square}] is calculated by move engine`);
-
+        
         // Save the moves to the calculatedMoves.
         this.logger.save(`Moves of the square is saved to calculated moves(or updated)[${JSON.stringify(this.currentMoves)}]`);
 
@@ -478,29 +486,16 @@ export class ChessEngine extends BoardManager {
      */
     private finishTurn(): void
     {
-        /**
-         * Order of the functions is important.
-         *
-         * Example scenario for White:
-         * 1- Clear current moves and board playable status for the next turn.
-         * 2- Change the turn(White -> Black)
-         * 3- Check the game is finished or not for Black
-         * 4- Set move notation of white player's move.
-         * 4.1- Check en passant move for update the fen notation.
-         *      - This function must be called after the saveMoveNotation function because moveEngine calculate en passant
-         *      move by checking the last two moves with BoardQueyer.
-         * 5- Clear the moveNotation for black player's turn.
-         */
+        // Order of the operations is important.
         this.currentMoves = {};
         this.isBoardPlayable = false;
         this.changeTurn();
         this.checkGameStatus();
         this.saveMoveNotation(this.moveNotation);
-        if([
-            GameStatus.InPlay,
+        if([GameStatus.InPlay,
             GameStatus.WhiteInCheck,
-            GameStatus.BlackInCheck].includes(BoardQuerier.getBoardStatus())
-        ){
+            GameStatus.BlackInCheck
+        ].includes(BoardQuerier.getBoardStatus())){
             this.checkEnPassant();
             this.checkCastling();
         }

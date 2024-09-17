@@ -11,6 +11,7 @@ import {Color, GameStatus, JsonNotation, Moves, MoveType, PieceType, Square, Sta
 import {SoundEffect, SquareClickMode, SquareEffect} from "./Types";
 import {Converter} from "../Utils/Converter.ts";
 import {Logger} from "@Services/Logger.ts";
+import { H } from "vitest/dist/reporters-cb94c88b.js";
 
 /**
  * This class provides users to create and manage a chess board(does not include any mechanic/logic).
@@ -209,7 +210,7 @@ export class ChessBoard {
      * Bind functions to the specific events of the chess board.
      */
     public bindMoveEventCallbacks(callbacks: {
-        onPieceSelected?: (squareId: Square) => void,
+        onPieceSelected?: (squareId: Square, isPreSelected: boolean) => void,
         onPieceMoved?: (squareId: Square, squareClickMode: SquareClickMode) => void
     }): void
     {
@@ -249,7 +250,7 @@ export class ChessBoard {
     private handleSquareDown(
         mouseDownEvent: MouseEvent, 
         square: HTMLElement,
-        onPieceSelected: (squareId: Square) => void
+        onPieceSelected: (squareId: Square, isPreSelected: boolean) => void
     ): void
     {   
         const squareClickMode = this.getSquareClickMode(square);
@@ -270,7 +271,7 @@ export class ChessBoard {
         const squareId = this.getSquareID(square);
         if([SquareClickMode.Select, SquareClickMode.PreSelect].includes(squareClickMode)){
             this.selectPiece(squareId, squareClickMode == SquareClickMode.PreSelect);
-            onPieceSelected(squareId);
+            onPieceSelected(squareId, squareClickMode == SquareClickMode.PreSelect);
         }
     }
 
@@ -309,12 +310,15 @@ export class ChessBoard {
         );
         if(targetSquare && targetSquare.closest("#chessboard"))
         {   
+            targetSquare = this.getClosestSquareElement(targetSquare as HTMLElement) as HTMLElement;
+
             if(targetSquare.className.includes("piece"))
                 targetSquare = this.getSquareElementOfPiece(targetSquare);
 
             if(targetSquare.className.includes("square")){
                 const targetSquareClickMode = this.getSquareClickMode(targetSquare);
                 const targetSquareEffects = this.getSquareEffects(targetSquare);
+                console.log(targetSquare, targetSquareClickMode, targetSquareEffects);
                 if(targetSquareClickMode == SquareClickMode.Clear
                     && (targetSquareEffects.includes(SquareEffect.Selected) 
                         || targetSquareEffects.includes(SquareEffect.PreSelected)))
@@ -375,11 +379,11 @@ export class ChessBoard {
         clonedPiece.style.left = `calc(${moveEvent.clientX + window.scrollX}px - ${clonedPiece.offsetWidth / 2}px)`;
 
         // Highlight the square where the cursor is.
-        this.removeSquareEffect(document.querySelector(`[class*="${SquareEffect.Hovering}"]`)!, SquareEffect.Hovering);
+        /*this.removeSquareEffect(document.querySelector(`[class*="${SquareEffect.Hovering}"]`)!, SquareEffect.Hovering);
         const elements = document.elementsFromPoint(moveEvent.clientX, moveEvent.clientY);
         const square = elements.length > 2 ? elements[1] : null;
         if(square && square.className.includes('square') && this.getSquareClickMode(square) == SquareClickMode.Play)
-            this.addSquareEffects(square, SquareEffect.Hovering);
+            this.addSquareEffects(square, SquareEffect.Hovering);*/
     }
 
     /**
@@ -418,12 +422,10 @@ export class ChessBoard {
         if(moves == null)
             return;
 
-        const selectedPiece = this.getSelectedPieceElement();
-        if(!selectedPiece) return;
+        const selectedSquare = this.getSelectedSquareElement();
+        if(!selectedSquare) return;
 
-        const isSelectionPre = this.getSquareClickMode(
-            this.getSquareElementOfPiece(selectedPiece)
-        ) == SquareClickMode.PreSelect;
+        const isSelectionPre = this.getSquareClickMode(selectedSquare) == SquareClickMode.PreSelected;
         for(let moveType in moves){
             if(!moves[moveType as MoveType])
                 continue;
@@ -675,7 +677,9 @@ export class ChessBoard {
         }
         this.removeEffectFromAllSquares([
             SquareEffect.Playable, 
+            SquareEffect.PrePlayable,
             SquareEffect.Killable, 
+            SquareEffect.PreKillable,
             SquareEffect.Selected, 
             SquareEffect.PreSelected
         ]);
@@ -860,6 +864,15 @@ export class ChessBoard {
     }
 
     /**
+     * Get the closest square element of the given element.
+     * If the given element is already a square element 
+     * then return itself.
+     */
+    public getClosestSquareElement(element: HTMLElement): HTMLElement | null {
+        return element.getAttribute("data-square-id") ? element : element.closest("[data-square-id]");
+    }
+
+    /**
      * Get the square element by squareID(data-square-id)
      */
     public getSquareElement(squareID: Square): HTMLDivElement {
@@ -879,9 +892,9 @@ export class ChessBoard {
     /**
      * Get the selected or preselected piece element on the board.
      */
-    public getSelectedPieceElement(): HTMLDivElement | null {
-        return (document.querySelector(`.piece[data-click-mode="${SquareClickMode.Selected}"]`) as HTMLDivElement)
-            || (document.querySelector(`.piece[data-click-mode="${SquareClickMode.PreSelected}"]`) as HTMLDivElement);
+    public getSelectedSquareElement(): HTMLDivElement | null {
+        return (document.querySelector(`.square[data-click-mode="${SquareClickMode.Selected}"]`) as HTMLDivElement)
+            || (document.querySelector(`.square[data-click-mode="${SquareClickMode.PreSelected}"]`) as HTMLDivElement);
     }
 
     /**
@@ -923,9 +936,9 @@ export class ChessBoard {
      * Get the click mode of the given square element or id(squareID).
      */
     public getSquareClickMode(square: Square | HTMLDivElement | Element): SquareClickMode {
-      if (typeof square === "number")
-        square = this.getSquareElement(square);
-      return square.getAttribute("data-click-mode") as SquareClickMode;
+        if (typeof square === "number")
+            square = this.getSquareElement(square);
+        return square.getAttribute("data-click-mode") as SquareClickMode;
     }
 
     /**
@@ -935,7 +948,10 @@ export class ChessBoard {
         if (typeof square === "number")
             square = this.getSquareElement(square);
 
-        const matches = square.className.match(/square-effect--(\w+)/g) || [];
+        const squareEffect = square.querySelector(".square-effect") as HTMLDivElement;
+        if(!squareEffect) return [];
+
+        const matches = squareEffect.className.match(/square-effect--(\w+)/g) || [];
         const effects: SquareEffect[] = [];
 
         matches.forEach((match) => {
@@ -966,15 +982,25 @@ export class ChessBoard {
     public addSquareEffects(
         square: Square|HTMLDivElement|Element, 
         effect: SquareEffect | Array<SquareEffect>
-    ): void {
+    ): void 
+    {
         if(typeof square === "number")
             square = this.getSquareElement(square);
         
         if(!Array.isArray(effect))
             effect = [effect];
 
-        for(let e of effect)
-            square.className += ` square-effect--${e}`;
+        square.innerHTML += `
+            <div class="square-effect">
+                <div class="square-effect-layer"></div>
+                <div class="square-effect-icon"></div>
+            </div>
+        `;
+
+        const squareEffect = square.querySelector(".square-effect") as HTMLDivElement;
+        for(let e of effect){
+            squareEffect.className += ` square-effect--${e}`;
+        }
     }
 
     /**
@@ -983,21 +1009,30 @@ export class ChessBoard {
      * @example removeEffectOfSquare(1); // Removes all effects of the square with id 1.
      * @example removeEffectOfSquare(1, [SquareEffect.Select, SquareEffect.Move]); // Removes the select and move effects of the square with id 1.
      */
-    public removeSquareEffect(square: Square|HTMLDivElement|Element, effects: SquareEffect|Array<SquareEffect>|null = null): void
+    public removeSquareEffect(
+        square: Square|HTMLDivElement|Element, 
+        effects: SquareEffect|Array<SquareEffect>|null = null
+    ): void
     {
         if(!square) return;
 
         if(typeof square === "number")
           square = this.getSquareElement(square);
 
+        const squareEffect = square.querySelector(".square-effect") as HTMLDivElement;
+        if(!squareEffect) return;
+
         if(effects == null)
-            square.className = square.className.replace(/square-effect--\w+/g, "");
+            squareEffect.remove();
         else{
             if(!Array.isArray(effects))
                 effects = [effects];
 
             for(let e of effects)
-                square.className = square.className.replace(`square-effect--${e}`, "");
+                squareEffect.className = squareEffect.className.replace(`square-effect--${e}`, "");
+
+            if(squareEffect.className.trim() == "square-effect")
+                squareEffect.remove();
         }
     }
 

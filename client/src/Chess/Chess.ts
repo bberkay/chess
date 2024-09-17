@@ -134,8 +134,8 @@ export class Chess{
     private initBoardListener(): void
     {
         this.board.bindMoveEventCallbacks({
-            onPieceSelected: (squareId: Square) => {
-                this.handleOnPieceSelected(squareId);
+            onPieceSelected: (squareId: Square, isPreSelected: boolean) => {
+                this.handleOnPieceSelected(squareId, isPreSelected);
             },
             onPieceMoved: (squareId: Square, squareClickMode: SquareClickMode) => {
                 this.handleOnPieceMoved(squareId, squareClickMode);   
@@ -147,10 +147,10 @@ export class Chess{
     /**
      * Handle the selected piece on the board.
      */
-    private handleOnPieceSelected(squareId: Square): void
+    private handleOnPieceSelected(squareId: Square, isPreSelected: boolean): void
     {
         this._selectedSquare = squareId;
-        this.board.highlightMoves(this.engine.getMoves(this._selectedSquare)!);
+        this.board.highlightMoves(this.engine.getMoves(this._selectedSquare, isPreSelected)!);
         document.dispatchEvent(new CustomEvent(ChessEvent.OnPieceSelected, {detail: {square: squareId}}));
     }
 
