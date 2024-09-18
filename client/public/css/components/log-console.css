@@ -3,19 +3,15 @@
  * @see For more information about this component check file: src\Platform\Components\LogConsole.ts
  */
 
-:root{
-    --log-console-width: 400px;
-}
-
 #log-console{
-    background-color:#111;
-    border:1px solid #2a2a2a;
+    background-color:var(--log-console-bg-color);
+    border:1px solid var(--log-console-border-color);
     height: calc(var(--board-size) + 55px); /* 55px: 50px for footer(clear button and path input) and 5px for padding */
     width: var(--log-console-width);
     min-width: var(--log-console-width);
     max-width: calc(var(--board-size) - 50px);
-    color: #f5f5f5;
-    font-family: monospace;
+    color: var(--log-console-text-color);
+    font-family: var(--log-console-font-family);
     resize: horizontal;
 }
 
@@ -37,7 +33,7 @@
                 margin: 7px 0;
 
                 & span{
-                    font-family: monospace;
+                    font-family: var(--log-console-font-family);
                     font-weight: bold;
 
                     &:hover{
@@ -60,10 +56,10 @@
             position: relative;
             display: inline-block;
             font-style:italic;
-            border-bottom:1px dotted #fff;
+            border-bottom:1px dotted var(--log-console-tooltip-underline-color);
     
             &:hover{
-                background-color: rgba(102, 102, 102, 0.7);
+                background-color: var(--log-console-tooltip-hover-bg-color);
     
                 & .tooltip-container{
                     display:block;
@@ -75,18 +71,18 @@
             left:50%;
             transform:translate(-50%, 0);
             position:absolute;
-            z-index:99999999;
+            z-index:var(--log-console-tooltip-z-index);
             display:none;
         }
     
         & .tooltip-text{
             padding:10px 20px;
-            color:#fff;
-            background-color:#222222ee;
+            color:var(--log-console-tooltip-text-color);
+            background-color:var(--log-console-tooltip-bg-color);
             font-weight:normal;
-            font-size:13px;
+            font-size:var(--log-console-font-size);
             box-sizing:border-box;
-            border:1px solid #2a2a2a;
+            border:1px solid var(--log-console-border-color);
             font-style:normal;
             white-space: pre;
             text-decoration: none!important;
@@ -122,20 +118,20 @@
 /* ------------------- Footer ------------------- */
 #log-console {
     & #log-console-footer{
-        background-color:#111;
+        background-color:var(--log-console-bg-color);
         display:flex;
         width:100%;
-        border-top:1px solid #2a2a2a;
+        border-top:1px solid var(--log-console-border-color);
     }
 
     & #log-console-footer-content{
-        background-color:#222;
-        border:1px solid #2a2a2a;
+        background-color:var(--log-console-input-bg-color);
+        border:1px solid var(--log-console-border-color);
         margin:3px;
-        color: #f5f5f5;
+        color: var(--log-console-text-color);
         width:100%;
-        font-size:13px;
-        font-family: monospace;
+        font-size:var(--log-console-font-size);
+        font-family: var(--log-console-font-family);
         overflow-x: auto;
         text-wrap:nowrap;
         display: flex;
@@ -156,13 +152,13 @@
     bottom:0;
     padding:5px;
     min-width:13px;
-    background-color: rgba(0, 0, 0, 0.68);
-    color:#fff;
+    background-color: var(--square-id-bg-color);
+    color:var(--square-id-text-color);
     text-align:center;
     margin:7px;
-    font-size:12px;
-    font-family: monospace;
-    z-index:999;
+    font-size:var(--log-console-square-id-font-size);
+    font-family: var(--log-console-font-family);
+    z-index:var(--log-console-square-id-z-index);
 }
 
 /** 

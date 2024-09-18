@@ -14,8 +14,7 @@
     /* Colors */
     --white-square-color: #879A86;
     --black-square-color: #647A65;
-    --square-shadow-color: none;
-    --clicked-color: #000;
+    --border-color: #FFFFFFBB;
 
     /* Promotion Menu */
     --promotion-option-color: #D3D3D3;
@@ -30,7 +29,7 @@
     --prekillable-color: #888888;
     --checked-color: #DF3030;
     --disabled-color: #0000004F;
-    --hovering-color: #246d49;
+    --hovering-color: #246D49;
     --prehovering-color: #888888;
     --from-color: #45C9FF63;
     --to-color: #45C9FF63;
@@ -56,6 +55,11 @@
     --move-from-top: 0;
     --move-to-left: 0;
     --move-to-top: 0;
+
+    /* Z-Index, change shouldn't be necessary */
+    --piece-z-index: 5;
+    --promotion-option-z-index: 7;
+    --square-effect-layer-z-index: 6; /* Higher than piece-z-index but lower than promotion-option-z-index */
 }
 
 /* -------------- Chessboard -------------- */
@@ -67,7 +71,7 @@
     display:flex;
     flex-wrap: wrap;
     cursor: pointer!important;
-    border: 2px solid #FFFFFFBB;
+    border: 2px solid var(--border-color);
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -155,7 +159,7 @@
     width:calc(var(--board-size) / 9);
     height:calc(var(--board-size) / 10);
     position: absolute;
-    z-index:99;
+    z-index:var(--piece-z-index);
     left:5%;
     top:10%;
     cursor: pointer!important;
@@ -165,7 +169,7 @@
     }
 
     &.promotion-option{
-        z-index:999!important;
+        z-index:var(--promotion-option-z-index)!important;
         position:inherit;
         background-color: var(--promotion-option-color);
         border-radius: 50%;
@@ -254,7 +258,7 @@
         margin:0!important;
         cursor: pointer!important;
         background-color: transparent;
-        z-index: 100;
+        z-index: var(--square-effect-layer-z-index);
         pointer-events: auto;
     }
 

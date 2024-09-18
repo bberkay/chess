@@ -2,10 +2,6 @@
  * CSS codes of Notation Table component
  * @see For more information about this component check file: src\Platform\Components\NotationTable.ts
  */
-:root{
-    --notation-table-height: 240px;
-    --notation-table-width: 300px;
-}
 
 #notation-menu{
     height: var(--board-size);
@@ -16,10 +12,10 @@
 
 #notation-table{
     width: var(--notation-table-width);
-    font-size:15px;
-    background-color: #111;
-    color: #f5f5f5;
-    border:1px solid #2a2a2a;
+    font-size:var(--notation-table-font-size);
+    background-color: var(--notation-menu-bg-color);
+    color: var(--notation-menu-text-color);
+    border:1px solid var(--notation-menu-border-color);
 
     & tbody{
         max-height: var(--notation-table-height);
@@ -39,8 +35,8 @@
         & th{
             padding:7px 5px;
             padding-bottom:3px;
-            background-color: #222;
-            border:1px solid #2a2a2a;
+            background-color: var(--notation-menu-title-bg-color);
+            border:1px solid var(--notation-menu-title-border-color);
         }
 
         & td{
@@ -49,8 +45,8 @@
         }
 
         &:nth-child(odd) td{
-            background-color: #222;
-            border:1px solid #2a2a2a;
+            background-color: var(--notation-menu-odd-row-bg-color);
+            border:1px solid var(--notation-menu-odd-row-border-color);
         }
     }
 }
@@ -71,44 +67,44 @@
         display:flex;
         justify-content: space-between;
         align-items: center;
-        background-color: #111;
-        border:1px solid #2a2a2a;
+        background-color: var(--notation-menu-player-name-bg-color);
+        border:1px solid var(--notation-menu-player-name-border-color);
         padding: 4px;
         
         & .player-name{
             padding: 10px 10px;
             padding-bottom: 7px;
-            background-color: #222;
-            border:1px solid #2a2a2a;
+            background-color: var(--notation-menu-player-name-inner-bg-color);
+            border:1px solid var(--notation-menu-player-name-border-color);
             border-right: none;
             font-weight: bold;
-            font-size: 13px;
+            font-size: var(--notation-menu-player-name-font-size);
             width: 75%;
         }
 
         & .duration{
-            font-size: 18px;
+            font-size: var(--notation-menu-duration-font-size);
             font-weight: bold;
             display: flex;
             justify-content: center;
             align-items: center;
             width: 25%;
-            border: 1px solid #2a2a2a;
+            border: 1px solid var(--notation-menu-player-name-border-color);
             height: 86%;
             padding-top: 3px;
             padding-left: 5px;
             padding-right: 5px;
 
             &.hidden{
-                background-color: #222;
-                color: #222;
+                background-color: var(--notation-menu-player-name-inner-bg-color);
+                color: var(--notation-menu-player-name-inner-bg-color);
                 border-left: none;
                 border-right: none;
                 user-select: none;
             }
             
             & .milliseconds{
-                font-size: 12px;
+                font-size: var(--notation-menu-milliseconds-font-size);
                 margin-left: 2px;
                 margin-top: -5px;
                 padding-top: 0;
@@ -117,8 +113,8 @@
         }
 
         & .player-status{
-            background-color: #222;
-            border:1px solid #2a2a2a;
+            background-color: var(--notation-menu-player-name-inner-bg-color);
+            border:1px solid var(--notation-menu-player-name-border-color);
             width: 10%;
             display: flex;
             justify-content: center;
@@ -130,16 +126,16 @@
                 width: 10px;
                 height: 10px;
                 border-radius: 50%;
-                border:1px solid grey;
+                border:1px solid var(--notation-menu-status-bg-color);
 
                 &.online{
                     border:none;
-                    background-color: #6EAF23;
+                    background-color: var(--notation-menu-online-status-bg-color);
                 }
 
                 &.offline{
                     border:none;
-                    background: #C2091F;
+                    background: var(--notation-menu-offline-status-bg-color);
                 }
             }
         }
@@ -166,12 +162,12 @@
         gap: 3px;
 
         & .piece-icons{
-            font-size: 23px;
+            font-size: var(--score-table-piece-icons-size);
             font-weight: normal;
         }
 
         & :not(.piece-icons){
-            font-size: 15px;
+            font-size: var(--score-table-score-font-size);
             margin-top: 1px;
         }
     }
@@ -183,14 +179,14 @@
 #notation-menu .utility-menu{
     display: flex;
     justify-content: space-between;
-    background-color: #111;
-    border: 1px solid #2a2a2a;
+    background-color: var(--utility-menu-bg-color);
+    border: 1px solid var(--utility-menu-border-color);
     border-top:none;
     padding: 4px;
 
     & button{
         padding:7px 10px;
-        font-size: 14px;
+        font-size: var(--utility-menu-font-size);
     }
 }
 

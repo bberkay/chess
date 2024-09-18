@@ -127,7 +127,7 @@ export class NavigatorModal extends Component{
             "Welcome", 
             `Chess project that offers a playable 
             online chess game and additional features.<br> <br> 
-            <a style="font-size:15px" href='https://github.com/bberkay/chess' target='_blank'>Source Code</a>
+            <a style="font-size:var(--navigator-modal-content-source-code-button-font-size);" href='${import.meta.env.VITE_REPOSITORY_URL}' target='_blank'>Source Code</a>
             `, 
             true
         );   
@@ -153,9 +153,9 @@ export class NavigatorModal extends Component{
     {
         this.show(
             "Not Ready",
-            `<span style="font-size:13px">There might be missing pieces like kings. Please create playable board.</span>
+            `<span>There might be missing pieces like kings. Please create playable board.</span>
             <div style="text-align:center;margin-top:10px;">
-                <button class="" style="font-size:13px!important;" data-menu-operation="${NavigatorModalOperation.Hide}">
+                <button class="" data-menu-operation="${NavigatorModalOperation.Hide}">
                     Ok
                 </button>
             </div>`
@@ -177,7 +177,7 @@ export class NavigatorModal extends Component{
                 <button data-menu-operation="${BoardEditorOperation.Enable}">Create Board</button>
             </div>
              <div style="text-align:center;margin-top:10px;">
-                <button class="button--text" style="font-size:13px!important;" data-menu-operation="${NavigatorModalOperation.Hide}">
+                <button class="button--text" data-menu-operation="${NavigatorModalOperation.Hide}">
                     Cancel
                 </button>
             </div>
@@ -200,7 +200,7 @@ export class NavigatorModal extends Component{
                 <button data-menu-operation="${NavigatorModalOperation.PlayByYourself}">Play by Yourself</button>
             </div>
              <div style="text-align:center;margin-top:10px;">
-                <button class="button--text" style="font-size:13px!important;" data-menu-operation="${NavigatorModalOperation.Hide}">
+                <button class="button--text" data-menu-operation="${NavigatorModalOperation.Hide}">
                     Cancel
                 </button>
             </div>
@@ -215,7 +215,7 @@ export class NavigatorModal extends Component{
     {
         this.show(
             "Select Game Duration",
-            `<span style="font-size:13px">Select the total and increment time:</span>
+            `<span>Select the total and increment time:</span>
             <div class="btn-group-grid" style="padding-top:5px;padding-bottom:15px;">
                 <button data-selected="false"><span class="total-time">1</span> + <span class="increment-time">0</span></button>
                 <button data-selected="false"><span class="total-time">1</span> + <span class="increment-time">1</span></button>
@@ -229,7 +229,7 @@ export class NavigatorModal extends Component{
             </div>
             <button type="submit" data-menu-operation="${NavigatorModalOperation.ShowCreateLobby}">Next</button>
             <div style="text-align:center;margin-top:10px;">
-                <button class="button--text" style="font-size:13px!important;" data-menu-operation="${NavigatorModalOperation.Hide}">
+                <button class="button--text" data-menu-operation="${NavigatorModalOperation.Hide}">
                     Cancel
                 </button>
             </div>
@@ -244,15 +244,15 @@ export class NavigatorModal extends Component{
     {
         this.show(
             "Enter Game Duration",
-            `<span style="font-size:13px">Enter the total and increment time:</span>
+            `<span>Enter the total and increment time:</span>
             <div class="btn-group-horizontal" style="padding-top:5px;padding-bottom:15px;">
                 <input type="number" id="total-time" placeholder="Min" min="${MIN_TOTAL_TIME}" max="${MAX_TOTAL_TIME}" required>
-                <span style="font-size:28px;padding:0 10px;">+</span>
+                <span style="font-size:var(--navigator-modal-content-duration-separator-font-size);padding:0 10px;">+</span>
                 <input type="number" id="increment-time" placeholder="Sec" value="${MIN_INCREMENT_TIME}" min="${MIN_INCREMENT_TIME}" max="${MAX_INCREMENT_TIME}" required>
             </div>
             <button type="submit" data-menu-operation="${NavigatorModalOperation.ShowCreateLobby}">Next</button>
             <div style="text-align:center;margin-top:10px;">
-                <button class="button--text" style="font-size:13px!important;" data-menu-operation="${NavigatorModalOperation.ShowSelectDuration}">
+                <button class="button--text" data-menu-operation="${NavigatorModalOperation.ShowSelectDuration}">
                     Back
                 </button>
             </div>
@@ -268,13 +268,13 @@ export class NavigatorModal extends Component{
         this.lastSelectedDuration = this.getSelectedGameDuration();
         this.show(
             "Create a Lobby",
-            `<span style="font-size:13px">Enter your name: </span>
+            `<span>Enter your name: </span>
             <div class="input-group" style="padding-top:5px;padding-bottom:5px;">
                 <input type="text" id="player-name" placeholder="Your Name" maxlength="${MAX_PLAYER_NAME_LENGTH}" minlength="${MIN_PLAYER_NAME_LENGTH}" required>
                 <button type="submit" data-socket-operation="${SocketOperation.CreateLobby}">Create</button>
             </div>
             <div style="text-align:center;margin-top:10px;">
-                <button class="button--text" style="font-size:13px!important;" data-menu-operation="${NavigatorModalOperation.Hide}">
+                <button class="button--text" data-menu-operation="${NavigatorModalOperation.Hide}">
                     Cancel
                 </button>
             </div>
@@ -288,13 +288,13 @@ export class NavigatorModal extends Component{
     {
         this.show(
             "Join a Lobby",
-            `<span style="font-size:13px">Enter your name: </span>
+            `<span>Enter your name: </span>
             <div class="input-group" style="padding-top:5px;padding-bottom:5px;">
                 <input type="text" id="player-name" placeholder="Your Name" maxlength="${MAX_PLAYER_NAME_LENGTH}" minlength="${MIN_PLAYER_NAME_LENGTH}" required>
                 <button type="submit" data-socket-operation="${SocketOperation.JoinLobby}">Play</button>
             </div>
             <div style="text-align:center;margin-top:10px;">
-                <button class="button--text" style="font-size:13px!important;" data-menu-operation="${NavigatorModalOperation.Hide}">
+                <button class="button--text" data-menu-operation="${NavigatorModalOperation.Hide}">
                     Cancel
                 </button>
             </div>
@@ -312,9 +312,9 @@ export class NavigatorModal extends Component{
                 <input type="text" id="lobby-link" placeholder="Lobby Name" value="${lobbyLink}" readonly>
                 <button data-clipboard-text="lobby-link">Copy</button>
             </div>
-            <span style="font-size:13px">Share this lobby link with your friend to play together.</span>
+            <span>Share this lobby link with your friend to play together.</span>
             <div style="text-align:center;margin-top:10px;">
-                <button class="button--text" style="font-size:13px!important;" data-menu-operation="${NavigatorModalOperation.AskConfirmation}">
+                <button class="button--text" data-menu-operation="${NavigatorModalOperation.AskConfirmation}">
                     Cancel
                 </button>
             </div>
@@ -329,14 +329,14 @@ export class NavigatorModal extends Component{
     {
         this.show(
             "Play against Bot",
-            `<span style="font-size:13px">Select the difficulty level of the bot:</span>
+            `<span>Select the difficulty level of the bot:</span>
             <div class="btn-group-horizontal btn-group-horizontal--triple" style="padding-top:5px;padding-bottom:5px;">
                 <button onclick="ChessPlatform.chess.engine.playAgainstBot()">Easy</button>
                 <button onclick="ChessPlatform.chess.engine.playAgainstBot()">Normal</button>
                 <button onclick="ChessPlatform.chess.engine.playAgainstBot()">Hard</button>
             </div>
             <div style="text-align:center;margin-top:10px;">
-                <button class="button--text" style="font-size:13px!important;" data-menu-operation="${NavigatorModalOperation.ShowGameCreator}">
+                <button class="button--text" data-menu-operation="${NavigatorModalOperation.ShowGameCreator}">
                     Cancel
                 </button>
             </div>
@@ -367,9 +367,9 @@ export class NavigatorModal extends Component{
     {
         this.show(
             "Something Went Wrong",
-            `<span style="font-size:13px">${message}</span>
+            `<span>${message}</span>
             <div style="text-align:center;margin-top:10px;">
-                <button style="font-size:13px!important;" data-menu-operation="${NavigatorModalOperation.Hide}">
+                <button data-menu-operation="${NavigatorModalOperation.Hide}">
                     Ok
                 </button>
             </div>

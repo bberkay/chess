@@ -3,12 +3,6 @@
  * @see For more information about this component check file: src\Platform\Components\NavigatorModal.ts
  */
 
-:root{
-    --navigator-modal-bg-color: #111111C5;
-    --navigator-modal-shadow-color: #000;
-    --navigator-modal-text-color: #FFF;
-}
-
 .navigator-modal{
     box-shadow: 0 0 5px var(--navigator-modal-shadow-color);
     background-color: var(--navigator-modal-bg-color);
@@ -21,19 +15,19 @@
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    z-index:9999!important;
+    z-index:var(--navigator-modal-z-index)!important;
     overflow: hidden; 
     padding: 2rem;
-    border: 1px solid #2a2a2a;
+    border: 1px solid var(--navigator-modal-border-color);
     transform: translate(-50%, -50%) scale(1);
     transition: all 0.1s ease-in;
 
     & button{
-        border:1px solid #111;
+        border:1px solid var(--navigator-modal-button-bg-color);
     }
 
     & a{
-        color: #fff;
+        color: var(--navigator-modal-text-button-color);
 
         &:hover{
             filter: brightness(0.9);
@@ -48,9 +42,8 @@
         width: 100%;
         height: 100%;
         position: absolute; 
-        font-size: 100px;
-        color: #ffffff77;
-        z-index: -1;
+        font-size: var(--navigator-modal-icon-size);
+        z-index: var(--navigator-modal-bgicon-z-index);
         display: flex;
         justify-content: start;
         align-items: center;
@@ -66,14 +59,18 @@
     }
 
     & .navigator-modal-title{
-        font-size: 35px;
+        font-size: var(--navigator-modal-title-size);
         font-weight: bold;
         margin-top: 3px;
     }
 
     & .navigator-modal-content{
-        font-size: 18px;
+        font-size: var(--navigator-modal-content-font-size);
         margin-top: 25px;
+
+        & button, & span{
+            font-size: var(--navigator-modal-content-small-font-size);
+        }
     }
 
     &.bounce{
@@ -82,41 +79,41 @@
 }
 
 .navigator-modal--glass{
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 30px var(--navigator-modal-glass-box-shadow-color);
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--navigator-modal-glass-border-color);
+    background: var(--navigator-modal-glass-bg-color);
     border-radius: 10px;
 
     & button{
-        background: hsla(0,0%,100%,.2);
-        border: 1px solid hsla(0,0%,100%,.1);
-        color: #fff;
+        background: var(--navigator-modal-glass-button-bg-color);
+        border: 1px solid var(--navigator-modal-glass-button-border-color);
+        color: var(--navigator-modal-glass-button-text-color);
         transition: background-color .15s ease;
         border-radius: 5px;
 
         &:hover{
-            background-color: hsla(0,0%,100%,.4);
+            background-color: var(--navigator-modal-glass-active-color);
         }
 
         &[data-selected="true"]{
-            background-color: hsla(0,0%,100%,.4);
+            background-color: var(--navigator-modal-glass-active-color);
         }
     }
 
     & input{
-        background: hsla(0,0%,100%,.2);
-        border: 1px solid hsla(0,0%,100%,.1);
-        color: #fff;
+        background: var(--navigator-modal-glass-input-bg-color);
+        border: 1px solid var(--navigator-modal-glass-border-color);
+        color: var(--navigator-modal-glass-button-text-color);
         transition: background-color .15s ease;
         border-radius: 5px;
     }
 }
 
 .navigator-modal--error{
-    border: 1px solid rgba(155, 4, 4, 0.46);
-    background: rgba(255, 1, 1, 0.2);
+    border: 1px solid var(--navigator-modal-glass-error-bg-color);
+    background: var(--navigator-modal-glass-error-bg-color);
 
     & button{
         width: 100%;
@@ -125,13 +122,13 @@
 
 .navigator-modal-bg-layer{
     overflow: hidden;
-    z-index:100;
+    z-index:var(--navigator-modal-backdrop-z-index);
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: #0000005C;
+    background: var(--navigator-modal-backdrop-bg-color);
     backdrop-filter: blur(1px);
     -webkit-backdrop-filter: blur(1px);
 }

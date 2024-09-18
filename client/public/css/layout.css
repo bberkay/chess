@@ -1,21 +1,192 @@
+:root{
+    --font-family: 'Roboto', sans-serif;
+    --component-font-size: 15px;
+
+    /* Log Console */
+    --log-console-width: 400px;
+    --log-console-font-family: monospace;
+    --log-console-font-size: 13px;
+    --log-console-square-id-font-size: 12px;
+
+    /* Board Editor */
+    --board-editor-table-height: 240px; 
+    --board-editor-table-width: 230px;
+
+    /* Notation Menu */
+    --notation-table-height: 240px;
+    --notation-table-width: 300px;
+    --notation-table-font-size: 15px;
+    --notation-menu-player-name-font-size: 13px;
+    --notation-menu-duration-font-size: 18px;
+    --notation-menu-milliseconds-font-size: 12px;
+    --score-table-piece-icons-size: 23px;
+    --score-table-score-font-size: 15px;
+
+    /* Navigator Modal */
+    --navigator-modal-icon-font-size: 100px;
+    --navigator-modal-title-font-size: 35px;
+    --navigator-modal-content-font-size: 18px;
+    --navigator-modal-content-small-font-size: 13px;
+    --navigator-modal-content-source-code-button-font-size: 15px;
+    --navigator-modal-content-duration-separator-font-size: 28px;
+
+    /* Utility Menu */
+    --utility-menu-font-size: 14px;
+
+    /* Z-Index, change shouldn't be necessary */
+    --tooltip-z-index: 5;
+    --log-console-tooltip-z-index: 5;
+    --log-console-square-id-z-index: 10; /* Higher than piece-z-index and promotion-option-z-index */
+    --navigator-modal-z-index:15; /* Higher than everything */
+    --navigator-modal-bgicon-z-index: 14; /* Higher than everything except navigator-modal-z-index */
+    --navigator-modal-backdrop-z-index: 13; /* Higher than everything except navigator-modal-bgicon-z-index */
+}
+
 /* ------------------- Themes ------------------- */
 body{
-    --bg-color: #f5f5f5;
+    /* Colors */
+    --bg-color: #141414;
+    --dark-color: #111;
+    --dark-opaque-color: #111111C5;
+    --text-color: #F5F5F5;
+    --white-color: #FFF;
+    --black-color: #000;
+    --black-opaque-color: #000000AD;
+    --light-gray-color: #999;
+    --gray-color: #808080;
+    --dark-gray-color: #666;
+    --dark-gray-opaque-color: #666666B3;
+    --darker-gray-color: #333;
+    --darkest-gray-color: #222;
+    --darkest-gray-opaque-color: #222222EE;
+    --border-color: #2A2A2A;
+    --online-color: #6EAF23;
+    --offline-color: #C2091F;
+    --backdrop-bg-color: #0000005C;
+    --glass-bg-color: #FFFFFF1A;
+    --glass-border-color:#FFFFFF4D;
+    --glass-box-shadow-color: #0000001A;
+    --glass-error-bg-color: #9B040475;
+    --glass-error-border-color: #FF010133;
+    --glass-default-component-bg-color: hsla(0,0%,100%,.2);
+    --glass-active-component-bg-color: hsla(0,0%,100%,.4);
+
 }
 
 body.dark-mode{
+    /* Colors */
     --bg-color: #141414;
-    --bg-color--light: #222;
-    --bg-color--dark: #111;
-    --text-color: #f5f5f5;
-    --border-color: #2a2a2a;
+    --dark-color: #111;
+    --dark-opaque-color: #111111C5;
+    --text-color: #F5F5F5;
+    --white-color: #FFF;
+    --black-color: #000;
+    --black-opaque-color: #000000AD;
+    --light-gray-color: #999;
+    --gray-color: #808080;
+    --dark-gray-color: #666;
+    --dark-gray-opaque-color: #666666B3;
+    --darker-gray-color: #333;
+    --darkest-gray-color: #222;
+    --darkest-gray-opaque-color: #222222EE;
+    --border-color: #2A2A2A;
+    --online-color: #6EAF23;
+    --offline-color: #C2091F;
+    --backdrop-bg-color: #0000005C;
+    --glass-bg-color: #FFFFFF1A;
+    --glass-border-color:#FFFFFF4D;
+    --glass-box-shadow-color: #0000001A;
+    --glass-error-bg-color: #9B040475;
+    --glass-error-border-color: #FF010133;
+    --glass-default-component-bg-color: hsla(0,0%,100%,.2);
+    --glass-active-component-bg-color: hsla(0,0%,100%,.4);
+}
+
+body{
+    /* Input, Select */
+    --input-bg-color: var(--dark-color);
+    --input-border-color: var(--dark-color);
+    --input-read-only-bg-color: var(--light-gray-color);
+
+    /* Button */
+    --button-bg-color: var(--darkest-gray-color);
+
+    /* Tooltip */
+    --tooltip-bg-color: var(--black-color);
+    --tooltip-text-color: var(--white-color);
+
+    /* Scrollbar */
+    --scrollbar-thumb-color: var(--gray-color);
+
+    /* Log Console */
+    --log-console-bg-color: var(--dark-color);
+    --log-console-text-color: var(--text-color);
+    --log-console-border-color: var(--border-color);
+    --log-console-input-bg-color: var(--button-bg-color);
+    --log-console-tooltip-bg-color: var(--darkest-gray-opaque-color);
+    --log-console-tooltip-text-color: var(--white-color);
+    --log-console-tooltip-underline-color: var(--white-color);
+    --log-console-tooltip-hover-bg-color: var(--dark-gray-opaque-color);
+    --square-id-bg-color: var(--black-opaque-color);
+    --square-id-text-color: var(--white-color);
+
+    /* Board Editor*/
+    --board-editor-text-color: var(--text-color);
+    --board-editor-border-color: var(--border-color);
+    --board-editor-piece-table-bg-color: var(--dark-color);
+    --board-editor-piece-creator-selected-option-bg-color: var(--darker-gray-color);
+    --board-editor-piece-table-title-bg-color: var(--darkest-gray-color);
+    --board-editor-piece-table-title-border-color: var(--border-color);
+    --board-editor-piece-table-option-bg-color: var(--darkest-gray-color);
+    --board-editor-piece-table-option-border-color: var(--border-color);
+    --board-editor-piece-table-option-hover-bg-color: var(--darker-gray-color);
+
+    /* Notation Menu */
+    --notation-menu-bg-color: var(--dark-color);
+    --notation-menu-border-color: var(--border-color);
+    --notation-menu-text-color: var(--text-color);
+    --notation-menu-title-bg-color: var(--darkest-gray-color);
+    --notation-menu-title-border-color: var(--border-color);
+    --notation-menu-odd-row-bg-color: var(--darker-gray-color);
+    --notation-menu-odd-row-border-color: var(--darkest-gray-color);
+    --notation-menu-status-bg-color: var(--gray-color);
+    --notation-menu-player-name-bg-color: var(--dark-color);
+    --notation-menu-player-name-inner-bg-color: var(--darkest-gray-color);
+    --notation-menu-player-name-border-color: var(--border-color);
+    --notation-menu-online-status-bg-color: var(--online-color);
+    --notation-menu-offline-status-bg-color: var(--offline-color);
+
+    /* Utility Menu */
+    --utility-menu-bg-color: var(--dark-color);
+    --utility-menu-border-color: var(--border-color);
+
+    /* Navigator Modal */
+    --navigator-modal-bg-color: var(--dark-opaque-color);
+    --navigator-modal-shadow-color: var(--black-color);
+    --navigator-modal-text-color: var(--white-color);
+    --navigator-modal-border-color: var(--border-color);
+    --navigator-modal-button-bg-color: var(--dark-color);
+    --navigator-modal-text-button-color: var(--white-color);
+    --navigator-modal-glass-bg-color: var(--glass-bg-color);
+    --navigator-modal-glass-border-color: var(--glass-border-color);
+    --navigator-modal-glass-box-shadow-color: var(--glass-box-shadow-color);
+    --navigator-modal-glass-button-bg-color: var(--glass-default-component-bg-color);
+    --navigator-modal-glass-button-border-color: var(--glass-default-component-bg-color);
+    --navigator-modal-glass-button-text-color: var(--white-color);
+    --navigator-modal-glass-input-bg-color: var(--glass-default-component-bg-color);
+    --navigator-modal-glass-input-border-color: var(--glass-default-component-bg-color);
+    --navigator-modal-glass-input-text-color: var(--white-color);
+    --navigator-modal-glass-active-color: var(--glass-active-component-bg-color);
+    --navigator-modal-glass-error-bg-color: var(--glass-error-bg-color);
+    --navigator-modal-glass-error-border-color: var(--glass-error-border-color);
+    --navigator-modal-backdrop-bg-color: var(--backdrop-bg-color);
 }
 
 /* ------------------- Layout ------------------- */
 body{
     background-color: var(--bg-color);
     color: var(--text-color);
-    font-family: 'Roboto', sans-serif;
+    font-family: var(--font-family);
     display: flex;
 }
 
@@ -32,12 +203,12 @@ input[type=number] {
 
 /* Button, Input, Select */
 input, select{
-    font-size:15px;
+    font-size:var(--component-font-size);
     width:100%;
     padding:10px;
-    background-color: #111;
-    color: #f5f5f5;
-    border:1px solid #111;
+    background-color: var(--input-bg-color);
+    color: var(--text-color);
+    border:1px solid var(--input-border-color);
 
     &:focus{
         outline: none;
@@ -45,20 +216,20 @@ input, select{
 }
 
 input:read-only{
-    color: #999;
+    color: var(--input-read-only-bg-color);
 }
 
 button{
     padding: 10px;
-    background-color: #222;
-    color: #f5f5f5;
-    border:1px solid #2a2a2a;
+    background-color: var(--button-bg-color);
+    color: var(--text-color);
+    border:1px solid var(--border-color);
     cursor: pointer;
-    font-size:15px;
+    font-size:var(--component-font-size);
     font-weight: 500;
 
     &:hover{
-        background-color: #2a2a2a;
+        background-color: var(--border-color);
     }
 
     &:active{
@@ -72,10 +243,10 @@ button{
 
     &.button--text{
         background-color: transparent!important;
-        color: #f5f5f5;
+        color: var(--text-color);
         border: none!important;
         padding: 0;
-        font-size: 15px;
+        font-size: var(--component-font-size);
         font-weight: 500;
 
         &:hover{
@@ -164,12 +335,12 @@ button{
 }
 
 ::-webkit-scrollbar-thumb {
-    background: grey;
+    background: var(--scrollbar-thumb-color);
 }
 
 /* Utility */
 .border-inset{
-    border:2px solid #111;
+    border:2px solid var(--input-border-color);
 }
 
 /* ------------------- Main ------------------- */
@@ -191,8 +362,8 @@ main{
 
 .tooltip{
     position: absolute;
-    background-color: black;
-    color: white;
+    background-color: var(--tooltip-bg-color);
+    color: var(--tooltip-text-color);
     padding: 0;
     left: 50%;
     transform: translateX(-50%);
@@ -202,7 +373,7 @@ main{
     transition: opacity 0.1s;
     white-space: nowrap;
     height: 0;
-    z-index: 99;
+    z-index: var(--tooltip-z-index);
 
     &.active{
         opacity: 1;
@@ -219,7 +390,7 @@ main{
     height: 0;
     border-left: 7px solid transparent;
     border-right: 7px solid transparent;
-    border-bottom: 7px solid black;
+    border-bottom: 7px solid var(--tooltip-bg-color);
     top: -7px;
     left: 50%;
     transform: translateX(-50%);

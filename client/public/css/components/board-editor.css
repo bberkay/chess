@@ -2,15 +2,10 @@
  * CSS codes of Board Editor component
  * @see For more information about this component check file: src\Platform\Components\BoardEditor.ts
  */
- :root{
-    /* Same as notation-table */
-    --board-editor-table-height: 240px; 
-    --board-editor-table-width: 230px;
-}
 
 #board-editor .board-creator{
     display: none;
-    border:1px solid #2a2a2a;
+    border:1px solid var(--board-editor-border-color);
 
     &.visible{
         display: flex;
@@ -19,7 +14,7 @@
 
 #piece-creator{
     & .selected-option{
-        background-color: #333;
+        background-color: var(--board-editor-piece-creator-selected-option-bg-color);
     }
 }
 
@@ -27,10 +22,9 @@
     width: var(--board-editor-table-width);
     height: calc(var(--board-size) - 52px);
     max-height: calc(var(--board-size) - 52px);
-    font-size:15px;
-    background-color: #111;
-    color: #f5f5f5;
-    border:1px solid #2a2a2a;
+    background-color: var(--board-editor-piece-table-bg-color);
+    color: var(--board-editor-text-color);
+    border:1px solid var(--board-editor-border-color);
     user-select: none;
 
     & tbody{
@@ -48,8 +42,8 @@
 
         & th{
             padding:7px 5px;
-            background-color: #222;
-            border:1px solid #2a2a2a;
+            background-color: var(--board-editor-piece-table-title-bg-color);
+            border:1px solid var(--board-editor-piece-table-title-border-color);
         }
 
         & td{
@@ -58,12 +52,12 @@
             width:calc((var(--board-size) / 9) + 5px);
             /*height:calc((var(--board-size) / 10) + 15px);*/
             height: 100%;
-            background-color: #222;
-            border:1px solid #2a2a2a;
+            background-color: var(--board-editor-piece-table-option-bg-color);
+            border:1px solid var(--board-editor-piece-table-option-border-color);
             cursor: pointer;
 
             &:hover{
-                background-color: #333;
+                background-color: var(--board-editor-piece-table-option-hover-bg-color);
             }
         }
     }
@@ -101,8 +95,8 @@
     display: flex;
     justify-content: space-between;
     width: calc(100% - 12px);
-    background-color: #111;
-    border: 1px solid #2a2a2a;
+    background-color: var(--utility-menu-bg-color);
+    border: 1px solid var(--utility-menu-border-color);
     border-top:none;
     padding: 5px;
 }
