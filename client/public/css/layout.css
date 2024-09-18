@@ -1,3 +1,11 @@
+/**
+ * CSS codes of the layout of the application. Mostly
+ * mostly contains the colors, width, height, font-size
+ * of the components and the layout of the application. 
+ * Not the components itself and can't change the 
+ * chessboard. For the chessboard, see chessboard.css
+ */
+
 :root{
     --font-family: 'Roboto', sans-serif;
     --component-font-size: 15px;
@@ -33,7 +41,7 @@
     /* Utility Menu */
     --utility-menu-font-size: 14px;
 
-    /* Z-Index, change shouldn't be necessary */
+    /* Z-Index, avoid changing */
     --tooltip-z-index: 5;
     --log-console-tooltip-z-index: 5;
     --log-console-square-id-z-index: 10; /* Higher than piece-z-index and promotion-option-z-index */
@@ -45,10 +53,18 @@
 /* ------------------- Themes ------------------- */
 body{
     /* Colors */
-    --bg-color: #141414;
-    --dark-color: #111;
-    --dark-opaque-color: #111111C5;
-    --text-color: #F5F5F5;
+
+    /* Theme colors, change these to change the theme */
+    --bg-color: #F5F5F5;
+    --text-color: #141414;
+    --accent-color: #FFF;
+    --accent-opaque-color: #FFFFFFC5;
+    --component-color: #EAEAEA;
+    --component-opaque-color: #EAEAEAEA;
+    --component-active-color: #D5D5D5; 
+    --border-color: #CCC;
+
+    /* Standard colors, avoid changing */
     --white-color: #FFF;
     --black-color: #000;
     --black-opaque-color: #000000AD;
@@ -56,10 +72,6 @@ body{
     --gray-color: #808080;
     --dark-gray-color: #666;
     --dark-gray-opaque-color: #666666B3;
-    --darker-gray-color: #333;
-    --darkest-gray-color: #222;
-    --darkest-gray-opaque-color: #222222EE;
-    --border-color: #2A2A2A;
     --online-color: #6EAF23;
     --offline-color: #C2091F;
     --backdrop-bg-color: #0000005C;
@@ -68,28 +80,31 @@ body{
     --glass-box-shadow-color: #0000001A;
     --glass-error-bg-color: #9B040475;
     --glass-error-border-color: #FF010133;
-    --glass-default-component-bg-color: hsla(0,0%,100%,.2);
-    --glass-active-component-bg-color: hsla(0,0%,100%,.4);
-
+    --glass-component-bg-color: hsla(0,0%,100%,.2);
+    --glass-component-active-bg-color: hsla(0,0%,100%,.4);
 }
 
 body.dark-mode{
     /* Colors */
+
+    /* Theme colors, change these to change the theme */
     --bg-color: #141414;
-    --dark-color: #111;
-    --dark-opaque-color: #111111C5;
     --text-color: #F5F5F5;
+    --accent-color: #111;
+    --accent-opaque-color: #111111C5;
+    --component-color: #222;
+    --component-opaque-color: #222222EE;
+    --component-active-color: #333;
+    --border-color: #2A2A2A;
+
+    /* Standard colors, avoid changing */
     --white-color: #FFF;
     --black-color: #000;
     --black-opaque-color: #000000AD;
-    --light-gray-color: #999;
     --gray-color: #808080;
+    --light-gray-color: #999;
     --dark-gray-color: #666;
     --dark-gray-opaque-color: #666666B3;
-    --darker-gray-color: #333;
-    --darkest-gray-color: #222;
-    --darkest-gray-opaque-color: #222222EE;
-    --border-color: #2A2A2A;
     --online-color: #6EAF23;
     --offline-color: #C2091F;
     --backdrop-bg-color: #0000005C;
@@ -98,18 +113,18 @@ body.dark-mode{
     --glass-box-shadow-color: #0000001A;
     --glass-error-bg-color: #9B040475;
     --glass-error-border-color: #FF010133;
-    --glass-default-component-bg-color: hsla(0,0%,100%,.2);
-    --glass-active-component-bg-color: hsla(0,0%,100%,.4);
+    --glass-component-bg-color: hsla(0,0%,100%,.2);
+    --glass-component-active-bg-color: hsla(0,0%,100%,.4);
 }
 
 body{
     /* Input, Select */
-    --input-bg-color: var(--dark-color);
-    --input-border-color: var(--dark-color);
+    --input-bg-color: var(--accent-color);
+    --input-border-color: var(--accent-color);
     --input-read-only-bg-color: var(--light-gray-color);
 
     /* Button */
-    --button-bg-color: var(--darkest-gray-color);
+    --button-bg-color: var(--component-color);
 
     /* Tooltip */
     --tooltip-bg-color: var(--black-color);
@@ -119,11 +134,11 @@ body{
     --scrollbar-thumb-color: var(--gray-color);
 
     /* Log Console */
-    --log-console-bg-color: var(--dark-color);
+    --log-console-bg-color: var(--accent-color);
     --log-console-text-color: var(--text-color);
     --log-console-border-color: var(--border-color);
     --log-console-input-bg-color: var(--button-bg-color);
-    --log-console-tooltip-bg-color: var(--darkest-gray-opaque-color);
+    --log-console-tooltip-bg-color: var(--component-opaque-color);
     --log-console-tooltip-text-color: var(--white-color);
     --log-console-tooltip-underline-color: var(--white-color);
     --log-console-tooltip-hover-bg-color: var(--dark-gray-opaque-color);
@@ -133,50 +148,50 @@ body{
     /* Board Editor*/
     --board-editor-text-color: var(--text-color);
     --board-editor-border-color: var(--border-color);
-    --board-editor-piece-table-bg-color: var(--dark-color);
-    --board-editor-piece-creator-selected-option-bg-color: var(--darker-gray-color);
-    --board-editor-piece-table-title-bg-color: var(--darkest-gray-color);
+    --board-editor-piece-table-bg-color: var(--accent-color);
+    --board-editor-piece-creator-selected-option-bg-color: var(--component-active-color);
+    --board-editor-piece-table-title-bg-color: var(--component-color);
     --board-editor-piece-table-title-border-color: var(--border-color);
-    --board-editor-piece-table-option-bg-color: var(--darkest-gray-color);
+    --board-editor-piece-table-option-bg-color: var(--component-color);
     --board-editor-piece-table-option-border-color: var(--border-color);
-    --board-editor-piece-table-option-hover-bg-color: var(--darker-gray-color);
+    --board-editor-piece-table-option-hover-bg-color: var(--component-active-color);
 
     /* Notation Menu */
-    --notation-menu-bg-color: var(--dark-color);
+    --notation-menu-bg-color: var(--accent-color);
     --notation-menu-border-color: var(--border-color);
     --notation-menu-text-color: var(--text-color);
-    --notation-menu-title-bg-color: var(--darkest-gray-color);
+    --notation-menu-title-bg-color: var(--component-color);
     --notation-menu-title-border-color: var(--border-color);
-    --notation-menu-odd-row-bg-color: var(--darker-gray-color);
-    --notation-menu-odd-row-border-color: var(--darkest-gray-color);
+    --notation-menu-odd-row-bg-color: var(--component-active-color);
+    --notation-menu-odd-row-border-color: var(--component-color);
     --notation-menu-status-bg-color: var(--gray-color);
-    --notation-menu-player-name-bg-color: var(--dark-color);
-    --notation-menu-player-name-inner-bg-color: var(--darkest-gray-color);
+    --notation-menu-player-name-bg-color: var(--accent-color);
+    --notation-menu-player-name-inner-bg-color: var(--component-color);
     --notation-menu-player-name-border-color: var(--border-color);
     --notation-menu-online-status-bg-color: var(--online-color);
     --notation-menu-offline-status-bg-color: var(--offline-color);
 
     /* Utility Menu */
-    --utility-menu-bg-color: var(--dark-color);
+    --utility-menu-bg-color: var(--accent-color);
     --utility-menu-border-color: var(--border-color);
 
     /* Navigator Modal */
-    --navigator-modal-bg-color: var(--dark-opaque-color);
+    --navigator-modal-bg-color: var(--accent-opaque-color);
     --navigator-modal-shadow-color: var(--black-color);
-    --navigator-modal-text-color: var(--white-color);
+    --navigator-modal-text-color: var(--text-color);
     --navigator-modal-border-color: var(--border-color);
-    --navigator-modal-button-bg-color: var(--dark-color);
-    --navigator-modal-text-button-color: var(--white-color);
+    --navigator-modal-button-bg-color: var(--accent-color);
+    --navigator-modal-text-button-color: var(--text-color);
     --navigator-modal-glass-bg-color: var(--glass-bg-color);
     --navigator-modal-glass-border-color: var(--glass-border-color);
     --navigator-modal-glass-box-shadow-color: var(--glass-box-shadow-color);
-    --navigator-modal-glass-button-bg-color: var(--glass-default-component-bg-color);
-    --navigator-modal-glass-button-border-color: var(--glass-default-component-bg-color);
-    --navigator-modal-glass-button-text-color: var(--white-color);
-    --navigator-modal-glass-input-bg-color: var(--glass-default-component-bg-color);
-    --navigator-modal-glass-input-border-color: var(--glass-default-component-bg-color);
-    --navigator-modal-glass-input-text-color: var(--white-color);
-    --navigator-modal-glass-active-color: var(--glass-active-component-bg-color);
+    --navigator-modal-glass-button-bg-color: var(--glass-component-bg-color);
+    --navigator-modal-glass-button-border-color: var(--glass-component-bg-color);
+    --navigator-modal-glass-button-text-color: var(--text-color);
+    --navigator-modal-glass-input-bg-color: var(--glass-component-bg-color);
+    --navigator-modal-glass-input-border-color: var(--glass-component-bg-color);
+    --navigator-modal-glass-input-text-color: var(--text-color);
+    --navigator-modal-glass-active-color: var(--glass-component-active-bg-color);
     --navigator-modal-glass-error-bg-color: var(--glass-error-bg-color);
     --navigator-modal-glass-error-border-color: var(--glass-error-border-color);
     --navigator-modal-backdrop-bg-color: var(--backdrop-bg-color);

@@ -50,16 +50,16 @@
     --black-queen-image: url("../assets/pieces/black_queen.svg");
     --black-king-image: url("../assets/pieces/black_king.svg");
 
-    /* For animation of piece movement */
+    /* Z-Index, avoid changing */
+    --piece-z-index: 5;
+    --promotion-option-z-index: 7;
+    --square-effect-layer-z-index: 6; /* Higher than piece-z-index but lower than promotion-option-z-index */
+
+    /* For animation of piece movement, DON'T change these */
     --move-from-left: 0;
     --move-from-top: 0;
     --move-to-left: 0;
     --move-to-top: 0;
-
-    /* Z-Index, change shouldn't be necessary */
-    --piece-z-index: 5;
-    --promotion-option-z-index: 7;
-    --square-effect-layer-z-index: 6; /* Higher than piece-z-index but lower than promotion-option-z-index */
 }
 
 /* -------------- Chessboard -------------- */
