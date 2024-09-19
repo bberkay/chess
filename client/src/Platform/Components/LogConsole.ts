@@ -184,9 +184,6 @@ export class LogConsole extends Component{
      */
     public stream(): void
     {
-        if(this.getLogCount() > 75)
-            this.clear();
-
         const lastLogs: Array<{source: string, message: string}> = Logger.messages().slice(this.logCounter);
         if(lastLogs.length == 0) return;
 
@@ -194,6 +191,11 @@ export class LogConsole extends Component{
         this._createLogMessagesEventListeners();
 
         this.logCounter += lastLogs.length;
+        
+        if(this.logCounter > 1000){
+            this.clear();
+            this.logCounter = 0
+        }
     }
 
     /**
