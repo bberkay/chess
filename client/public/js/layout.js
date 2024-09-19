@@ -86,7 +86,7 @@ function reOrderLayoutForDesktop(){
         document.querySelector("#log-console")
     );
     
-    if(document.querySelector("#piece-creator"))
+    if(document.querySelector("#piece-creator") || document.querySelector("#notation-menu .player-section"))
         return;
 
     document.querySelector("#notation-menu").prepend(
