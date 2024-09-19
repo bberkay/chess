@@ -143,6 +143,20 @@ export enum GameStatus{
  */
 export enum ChessEvent {
     /**
+     * Triggered when a piece is created.
+     * @CustomEvent
+     * @param {Square} square - The square where the piece is created.
+     */
+    OnPieceCreated = "OnPieceCreated",
+
+    /**
+     * Triggered when a piece is removed.
+     * @CustomEvent
+     * @param {Square} square - The square where the piece is removed.
+     */
+    OnPieceRemoved = "OnPieceRemoved",
+
+    /**
      * Triggered when a piece is selected.
      * @CustomEvent
      * @param {Square} square - The square where the piece is selected.
@@ -172,5 +186,5 @@ export enum ChessEvent {
      * @param {Square} from - The starting square of the move.
      * @param {Square} to - The ending square of the move.
      */
-    onPieceMovedByOppoent = "onPieceMovedByOpponent",
+    onPieceMovedByOpponent = "onPieceMovedByOpponent",
 }

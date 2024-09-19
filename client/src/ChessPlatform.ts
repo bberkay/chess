@@ -14,6 +14,7 @@ import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage.ts";
 import { WsMessage, WsCommand, SocketOperation } from "./Types";
 import { ChessEvent, Color, Square, StartPosition } from '@Chess/Types';
 import { DEFULT_PLAYER_NAME, DEFAULT_TOTAL_TIME, DEFAULT_INCREMENT_TIME } from "@Platform/Consts";
+import { PlatformEvent } from '@Platform/Types';
 
 /**
  * This class is the main class of the chess platform.
@@ -53,14 +54,22 @@ export class ChessPlatform{
                 });
             });
 
-            document.addEventListener("componentLoaded", ((event: CustomEvent) => {
-                const socketOperations = document.querySelectorAll(`#${event.detail.componentId} [data-socket-operation]`);
-                if(!socketOperations) return;
-                socketOperations.forEach((menuItem) => {
-                    menuItem.addEventListener("click", () => {
-                        this.handleSocketOperation(menuItem as HTMLElement) 
+            document.addEventListener(PlatformEvent.OnOperationMounted, ((event: CustomEvent) => {
+                if(typeof event.detail.selector === "string"){
+                    const socketOperations = document.querySelectorAll(`${event.detail.selector} [data-socket-operation]`);
+                    if(!socketOperations) return;
+                    socketOperations.forEach((menuItem) => {
+                        menuItem.addEventListener("click", () => {
+                            this.handleSocketOperation(menuItem as HTMLElement) 
+                        });
                     });
-                });
+                }
+                else if(event.detail.selector instanceof HTMLElement){
+                    if(!event.detail.selector.hasAttribute("data-socket-operation")) return;
+                    event.detail.selector.addEventListener("click", () => {
+                        this.handleSocketOperation(event.detail.selector as HTMLElement) 
+                    });
+                }
             }) as EventListener);
 
             this.logger.save("Socket operations are bound to the menu items.");
@@ -246,7 +255,7 @@ export class ChessPlatform{
                     this.chess.board.unlock();
                     this.chess.playMove(wsData.from, wsData.to);
                     document.dispatchEvent(new CustomEvent(
-                        ChessEvent.onPieceMovedByOppoent, {detail: {from: wsData.from, to: wsData.to}}
+                        ChessEvent.onPieceMovedByOpponent, {detail: {from: wsData.from, to: wsData.to}}
                     ));
                     break;
                 case WsCommand.Disconnected:

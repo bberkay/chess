@@ -1,4 +1,4 @@
-import { BoardEditorEvent, BoardEditorOperation, NavigatorModalOperation } from "../Types";
+import { PlatformEvent, BoardEditorOperation, NavigatorModalOperation } from "../Types";
 import { Chess } from "@Chess/Chess";
 import { Color, GameStatus, JsonNotation, PieceType, Square, StartPosition } from "@Chess/Types";
 import { Component } from "./Component";
@@ -30,9 +30,11 @@ function isEditorModeEnable() {
  */
 export class BoardEditor extends Component{
     private readonly chess: Chess;
+
     private static _isEditorModeEnable: boolean = false;
-    private currentBoardCreatorMode: BoardCreatorMode;
-    private lastLoadedFenNotation: string = StartPosition.Standard;
+    private _boardEditorObserver: MutationObserver | null = null;
+    private _currentBoardCreatorMode: BoardCreatorMode = BoardCreatorMode.Custom
+    private _lastLoadedFenNotation: string = StartPosition.Standard;
 
     /**
      * Constructor of the BoardCreator class.
@@ -40,7 +42,6 @@ export class BoardEditor extends Component{
     constructor(chess: Chess) {
         super();
         this.chess = chess;
-        this.currentBoardCreatorMode = BoardCreatorMode.Custom;
         this.loadCSS("board-editor.css");
         this.renderComponent();
     }
@@ -218,7 +219,8 @@ export class BoardEditor extends Component{
         this.addDragAndDropEventListeners();
         this.enableMovePieceCursorMode();
         this.enableBoardCreator();
-        if(this.currentBoardCreatorMode == BoardCreatorMode.Template) this.changeBoardCreatorMode();
+        this.enableBoardObserver();
+        if(this._currentBoardCreatorMode == BoardCreatorMode.Template) this.changeBoardCreatorMode();
     }
 
     /**
@@ -232,8 +234,9 @@ export class BoardEditor extends Component{
         this.disableBoardCreator();
         this.disableCursorMode();
         this.removePieceEditor();
+        this.disableBoardObserver();
         BoardEditor._isEditorModeEnable = false;
-        if(this.currentBoardCreatorMode == BoardCreatorMode.Template) this.changeBoardCreatorMode();
+        if(this._currentBoardCreatorMode == BoardCreatorMode.Template) this.changeBoardCreatorMode();
     }
 
     /**
@@ -242,6 +245,44 @@ export class BoardEditor extends Component{
     public static isEditorModeEnable(): boolean
     {
         return BoardEditor._isEditorModeEnable;
+    }
+
+    /**
+     * This function initiates the board observer for dispatching the event 
+     * when there is a change in the board that made by the editor.
+     */
+    @isEditorModeEnable()
+    private enableBoardObserver(): void
+    {
+        this._boardEditorObserver = new MutationObserver((mutations: MutationRecord[]) => {
+            mutations.forEach((mutation: MutationRecord) => {
+                if((mutation.target as HTMLElement).hasAttribute("data-menu-operation")){
+                    document.dispatchEvent(new CustomEvent(
+                        PlatformEvent.OnOperationMounted, 
+                        { detail: { selector: mutation.target } }
+                    ));
+                }
+            });
+        });
+
+        this._boardEditorObserver.observe(
+            document.getElementById("chessboard")!,
+            { 
+                childList: true, 
+                subtree: true, 
+                attributes: true,
+                attributeFilter: ["data-menu-operation"],
+                characterData: false,
+            }
+        );
+    }
+
+    /**
+     * This function disables the board observer.
+     */
+    private disableBoardObserver(): void
+    {
+        if(this._boardEditorObserver) this._boardEditorObserver.disconnect();
     }
 
     /**
@@ -332,8 +373,10 @@ export class BoardEditor extends Component{
     {
         const boardCreator: HTMLElement = document.querySelector('.board-creator.visible') as HTMLElement;
         boardCreator.classList.remove("visible");
-        this.currentBoardCreatorMode = this.currentBoardCreatorMode === BoardCreatorMode.Template ? BoardCreatorMode.Custom : BoardCreatorMode.Template;
-        document.querySelector(`.board-creator.${this.currentBoardCreatorMode}`)!.classList.add("visible");
+        this._currentBoardCreatorMode = this._currentBoardCreatorMode === BoardCreatorMode.Template 
+            ? BoardCreatorMode.Custom 
+            : BoardCreatorMode.Template;
+        document.querySelector(`.board-creator.${this._currentBoardCreatorMode}`)!.classList.add("visible");
     }
 
     /**
@@ -362,10 +405,10 @@ export class BoardEditor extends Component{
             this.enableMovePieceCursorMode();
         }
         
-        if(this.currentBoardCreatorMode == BoardCreatorMode.Template)
+        if(this._currentBoardCreatorMode == BoardCreatorMode.Template)
           this.changeBoardCreatorMode();
 
-        document.dispatchEvent(new Event(BoardEditorEvent.onBoardCreatedByBoardEditor));
+        document.dispatchEvent(new Event(PlatformEvent.OnBoardCreated));
     }
 
     /**
@@ -471,10 +514,11 @@ export class BoardEditor extends Component{
                 [data-menu-operation="${BoardEditorOperation.EnableRemovePieceCursorMode}"]
             `) as HTMLElement
         );
-
+        
         this.chess.board.getAllSquares().forEach((squareElement: HTMLElement) => {
-            if(this.chess.board.getPieceElementOnSquare(squareElement))
+            if(this.chess.board.getPieceElementOnSquare(squareElement)){
                 squareElement.setAttribute("data-menu-operation", BoardEditorOperation.RemovePiece);
+            }
         });
 
         (document.querySelectorAll("#chessboard, #chessboard .piece, #chessboard .square") as NodeListOf<HTMLElement>)
@@ -517,7 +561,7 @@ export class BoardEditor extends Component{
      */
     public resetBoard(): void
     {
-        this._createBoard(this.lastLoadedFenNotation);
+        this._createBoard(this._lastLoadedFenNotation);
     }
 
     /**
@@ -525,7 +569,7 @@ export class BoardEditor extends Component{
      */
     public isBoardCreatorModeCustom(): boolean
     {
-        return this.currentBoardCreatorMode == BoardCreatorMode.Custom;
+        return this._currentBoardCreatorMode == BoardCreatorMode.Custom;
     }
 
     /**
@@ -535,12 +579,12 @@ export class BoardEditor extends Component{
     {
         let formValue: string;
         
-        if(this.currentBoardCreatorMode == BoardCreatorMode.Custom)
+        if(this._currentBoardCreatorMode == BoardCreatorMode.Custom)
             formValue = (document.querySelector(`.${BoardCreatorMode.Custom} input`) as HTMLInputElement).value;
-        else if(this.currentBoardCreatorMode == BoardCreatorMode.Template)
+        else if(this._currentBoardCreatorMode == BoardCreatorMode.Template)
             formValue = (document.querySelector(`.${BoardCreatorMode.Template} select`) as HTMLSelectElement).value;
 
-        this.lastLoadedFenNotation = formValue!;
+        this._lastLoadedFenNotation = formValue!;
         return formValue!;
     }
 
@@ -552,7 +596,7 @@ export class BoardEditor extends Component{
         if(!this.isBoardCreatorModeCustom()) this.changeBoardCreatorMode();
         const inputElement = document.querySelector(`.${BoardCreatorMode.Custom} input`) as HTMLInputElement;
         inputElement.value = this.chess.engine.getGameAsFenNotation();
-
+        
         if(BoardEditor.isEditorModeEnable()){
             if(this.chess.engine.getGameStatus() == GameStatus.ReadyToStart) 
                 this.enableStartGameButton();

@@ -1,3 +1,5 @@
+import { PlatformEvent } from "@Platform/Types";
+
 /**
  * Component abstract class. All components must inherit from this class.
  */
@@ -42,7 +44,7 @@ export abstract class Component{
         this.createValidations(componentId);
         this.createCopyToClipboard(componentId);
         this.createSelectableButtons(componentId);
-        document.dispatchEvent(new CustomEvent("componentLoaded", {detail: {componentId: componentId}}));
+        document.dispatchEvent(new CustomEvent(PlatformEvent.OnOperationMounted, {detail: {selector: "#" + componentId}}));
     }
 
     /**

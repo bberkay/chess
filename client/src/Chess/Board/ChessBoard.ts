@@ -175,7 +175,10 @@ export class ChessBoard {
         piece.setAttribute("data-piece", type);
         piece.setAttribute("data-color", color);
         this.getSquareElement(square).appendChild(piece);
-        this.setSquareClickMode(this.getSquareElementOfPiece(piece), SquareClickMode.PreSelect);
+        this.setSquareClickMode(
+            this.getSquareElementOfPiece(piece), 
+            this.isLocked() ? SquareClickMode.Disable : SquareClickMode.PreSelect
+        );
     }
 
     /**
@@ -782,6 +785,14 @@ export class ChessBoard {
             this.removeSquareEffect(squares[i], SquareEffect.Disabled);
         }
         this._lockedSquaresModes = [];
+    }
+
+    /**
+     * Is board locked?
+     */
+    public isLocked(): boolean
+    {
+        return this._lockedSquaresModes.length > 0;
     }
 
     /**

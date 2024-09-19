@@ -13,7 +13,7 @@ import { BoardEditor } from "./Components/BoardEditor.ts";
 import { NotationMenu } from "./Components/NotationMenu.ts";
 import { LogConsole } from "./Components/LogConsole";
 import { NavigatorModal } from "./Components/NavigatorModal";
-import { BoardEditorEvent, BoardEditorOperation, LogConsoleOperation, MenuOperation, NavigatorModalOperation, NotationMenuOperation } from "./Types";
+import { BoardEditorOperation, LogConsoleOperation, MenuOperation, NavigatorModalOperation, NotationMenuOperation, PlatformEvent } from "./Types";
 import { Logger } from "@Services/Logger";
 import { ChessEvent, Color, GameStatus, JsonNotation, PieceType, StartPosition } from "@Chess/Types/index.ts";
 
@@ -59,18 +59,22 @@ export class Platform{
          * updating the notation menu, log console etc.
          */
         const listenBoardChanges = () => {
-            // For the first time
+            // First time update
             this.boardEditor.updateFen();
 
-            // When a board is created by the board editor
-            // this is because the stream first logs on the log console
-            document.addEventListener(BoardEditorEvent.onBoardCreatedByBoardEditor, () => {
-                this.updateComponents();
-            });
+            const updateFenTriggers = [
+                PlatformEvent.OnBoardCreated,
+                ChessEvent.OnPieceCreated,
+                ChessEvent.OnPieceRemoved,
+                ChessEvent.OnPieceSelected,
+                ChessEvent.OnPieceMoved
+            ]
 
-            // Every change on the board like moving a piece, removing a piece etc.
-            document.addEventListener(ChessEvent.OnPieceSelected, () => { this.updateComponents() });
-            document.addEventListener(ChessEvent.OnPieceMoved, () => { this.updateComponents() });
+            updateFenTriggers.forEach((trigger) => {
+                document.addEventListener(trigger, () => {
+                    this.updateComponents();
+                });
+            });
 
             this.logger.save("Board changes are listening...");
         }
@@ -87,14 +91,22 @@ export class Platform{
                 });
             });
 
-            document.addEventListener("componentLoaded", ((event: CustomEvent) => {
-                const menuOperations = document.querySelectorAll(`#${event.detail.componentId} [data-menu-operation]`);
-                if(!menuOperations) return;
-                menuOperations.forEach((menuItem) => {
-                    menuItem.addEventListener("click", () => {
-                        this.handleMenuOperation(menuItem as HTMLElement) 
+            document.addEventListener(PlatformEvent.OnOperationMounted, ((event: CustomEvent) => {
+                if(typeof event.detail.selector === "string"){
+                    const menuOperations = document.querySelectorAll(`${event.detail.selector} [data-menu-operation]`);
+                    if(!menuOperations) return;
+                    menuOperations.forEach((menuItem) => {
+                        menuItem.addEventListener("click", () => {
+                            this.handleMenuOperation(menuItem as HTMLElement) 
+                        });
                     });
-                });
+                }
+                else if(event.detail.selector instanceof HTMLElement){
+                    if(!event.detail.selector.hasAttribute("data-menu-operation")) return;
+                    event.detail.selector.addEventListener("click", () => {
+                        this.handleMenuOperation(event.detail.selector as HTMLElement) 
+                    });
+                }
             }) as EventListener);
 
             this.logger.save("Menu operations are binded to loaded components.");

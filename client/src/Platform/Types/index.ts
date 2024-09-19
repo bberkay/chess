@@ -2,12 +2,22 @@
  * BoardEditorEvent enum for board editor related events.
  * @enum {string}
  */
-export enum BoardEditorEvent {
+export enum PlatformEvent {
     /**
      * Triggered when a board is created by the board editor.
      * @event
      */
-    onBoardCreatedByBoardEditor = "onBoardCreatedByBoardEditor"
+    OnBoardCreated = "OnBoardCreated",
+
+    /**
+     * Triggered when a component that has a data-menu-operation or 
+     * data-socket-operation attribute is mounted.
+     * @CustomEvent
+     * @param {string|HTMLElement} selector - If a string is passed, 
+     * the selector will be used as querySelectorAll(selector + data-menu/socket-operation).
+     * If an HTMLElement is passed, the element directly will be used as data-menu/socket-operation.
+     */
+    OnOperationMounted = "OnOperationMounted",
 }
 
 export enum NotationMenuOperation{
