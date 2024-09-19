@@ -64,6 +64,17 @@ function reOrderLayoutForTablet(){
     document.querySelector(".center").prepend(
         document.querySelector("#board-editor")
     );
+
+    if(document.querySelector("#notation-menu .player-section"))
+        return;
+    
+    document.querySelector("#notation-menu").prepend(
+        document.querySelector(".player-section")
+    );
+
+    document.querySelector("#notation-menu").append(
+        document.querySelector(".player-section")
+    );
 }
 
 function reOrderLayoutForDesktop(){
