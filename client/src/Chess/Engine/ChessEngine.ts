@@ -715,7 +715,7 @@ export class ChessEngine extends BoardManager {
             this.logger.save("Not enough moves for possible en passant move");
             return;
         }
-
+    
         // Get the last two moves and check the last move is pawn move or not.
         const lastTwoMove: Square[] = this.getNotation().slice(-2).map(move => Converter.squareToSquareID(move));
         const lastPlayerMove: Square = lastTwoMove[0];
@@ -729,21 +729,17 @@ export class ChessEngine extends BoardManager {
             return;
         }
 
-        /**
-         * Last player's move could be calculated in the current moves at
-         * the checkGameStatus function and this function is called after
-         * the checkGameStatus function so check the last player's move
-         * is in the current moves or not.
-         */
-        if(this.currentMoves.hasOwnProperty(lastPlayerMove) && this.currentMoves[lastPlayerMove]![MoveType.EnPassant] && this.currentMoves[lastPlayerMove]![MoveType.EnPassant]!.length > 0){
+        if(this.currentMoves.hasOwnProperty(lastPlayerMove) 
+            && this.currentMoves[lastPlayerMove]![MoveType.EnPassant] 
+            && this.currentMoves[lastPlayerMove]![MoveType.EnPassant]!.length > 0){
             this.setEnPassant(this.currentMoves[lastPlayerMove]![MoveType.EnPassant]![0]!);
             this.logger.save(`En passant move[${this.currentMoves[lastPlayerMove]![MoveType.EnPassant]![0]!}] is found and set on fen notation`);
             return;
         }
 
-        // If the last player's move is not in the current moves then calculate the moves of the last player's move.
         const lastPlayerMoves: Moves = this.moveEngine.getMoves(lastPlayerMove)!;
-        if(lastPlayerMoves.hasOwnProperty(MoveType.EnPassant) && lastPlayerMoves[MoveType.EnPassant]!.length > 0){
+        if(lastPlayerMoves.hasOwnProperty(MoveType.EnPassant) 
+            && lastPlayerMoves[MoveType.EnPassant]!.length > 0){
             this.setEnPassant(lastPlayerMoves[MoveType.EnPassant]![0]!);
             this.logger.save(`En passant move[${lastPlayerMoves[MoveType.EnPassant]![0]!}] is calculated and set on fen notation`);
         }
