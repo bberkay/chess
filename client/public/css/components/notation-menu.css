@@ -4,7 +4,7 @@
  */
 
 #notation-menu{
-    height: var(--board-size);
+    height: var(--chessboard-board-size);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -148,11 +148,11 @@
     }
 
     &#white-player-section.your-turn-effect .player-name{
-        border-left:4px solid var(--white-square-color);
+        border-left:4px solid var(--chessboard-white-square-color);
     }
 
     &#black-player-section.your-turn-effect .player-name{
-        border-left:4px solid var(--black-square-color);
+        border-left:4px solid var(--chessboard-black-square-color);
     }
 
     & .score-table{

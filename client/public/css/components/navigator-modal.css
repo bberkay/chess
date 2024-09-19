@@ -42,7 +42,7 @@
         width: 100%;
         height: 100%;
         position: absolute; 
-        font-size: var(--navigator-modal-icon-size);
+        font-size: var(--navigator-modal-icon-font-size);
         z-index: var(--navigator-modal-bgicon-z-index);
         display: flex;
         justify-content: start;
@@ -59,7 +59,7 @@
     }
 
     & .navigator-modal-title{
-        font-size: var(--navigator-modal-title-size);
+        font-size: var(--navigator-modal-title-font-size);
         font-weight: bold;
         margin-top: 3px;
     }
@@ -67,7 +67,8 @@
     & .navigator-modal-content{
         font-size: var(--navigator-modal-content-font-size);
         margin-top: 25px;
-
+        z-index:var(--navigator-modal-z-index)!important;
+        
         & button, & span{
             font-size: var(--navigator-modal-content-small-font-size);
         }

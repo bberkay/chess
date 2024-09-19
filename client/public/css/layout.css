@@ -34,7 +34,7 @@
     --navigator-modal-icon-font-size: 100px;
     --navigator-modal-title-font-size: 35px;
     --navigator-modal-content-font-size: 18px;
-    --navigator-modal-content-small-font-size: 13px;
+    --navigator-modal-content-small-font-size: 15px;
     --navigator-modal-content-source-code-button-font-size: 15px;
     --navigator-modal-content-duration-separator-font-size: 28px;
 
@@ -138,9 +138,9 @@ body{
     --log-console-text-color: var(--text-color);
     --log-console-border-color: var(--border-color);
     --log-console-input-bg-color: var(--button-bg-color);
-    --log-console-tooltip-bg-color: var(--component-opaque-color);
+    --log-console-tooltip-bg-color: var(--black-opaque-color);
     --log-console-tooltip-text-color: var(--white-color);
-    --log-console-tooltip-underline-color: var(--white-color);
+    --log-console-tooltip-underline-color: var(--text-color);
     --log-console-tooltip-hover-bg-color: var(--dark-gray-opaque-color);
     --square-id-bg-color: var(--black-opaque-color);
     --square-id-text-color: var(--white-color);
@@ -162,7 +162,7 @@ body{
     --notation-menu-text-color: var(--text-color);
     --notation-menu-title-bg-color: var(--component-color);
     --notation-menu-title-border-color: var(--border-color);
-    --notation-menu-odd-row-bg-color: var(--component-active-color);
+    --notation-menu-odd-row-bg-color: var(--component-color);
     --notation-menu-odd-row-border-color: var(--component-color);
     --notation-menu-status-bg-color: var(--gray-color);
     --notation-menu-player-name-bg-color: var(--accent-color);

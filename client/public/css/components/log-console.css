@@ -6,10 +6,10 @@
 #log-console{
     background-color:var(--log-console-bg-color);
     border:1px solid var(--log-console-border-color);
-    height: calc(var(--board-size) + 55px); /* 55px: 50px for footer(clear button and path input) and 5px for padding */
+    height: calc(var(--chessboard-board-size) + 55px); /* 55px: 50px for footer(clear button and path input) and 5px for padding */
     width: var(--log-console-width);
     min-width: var(--log-console-width);
-    max-width: calc(var(--board-size) - 50px);
+    max-width: calc(var(--chessboard-board-size) - 50px);
     color: var(--log-console-text-color);
     font-family: var(--log-console-font-family);
     resize: horizontal;
@@ -18,7 +18,7 @@
 /* Body */
 #log-console{
     & #log-console-body{
-        height: calc(var(--board-size) + 7px); /* 7px: 2px for border and 5px for padding */
+        height: calc(var(--chessboard-board-size) + 7px); /* 7px: 2px for border and 5px for padding */
         width:auto;
         overflow-y: scroll;
         overflow-x: hidden;
@@ -86,7 +86,7 @@
             font-style:normal;
             white-space: pre;
             text-decoration: none!important;
-            max-height: calc(var(--board-size) / 2.5); /* log console height and board size are equal */
+            max-height: calc(var(--chessboard-board-size) / 2.5); /* log console height and board size are equal */
             overflow-y: auto;
             margin-top: 5px;
             position: relative;
@@ -167,8 +167,8 @@
  */
 @media screen and (min-width: 900px) and (max-width: 1250px) {
     #log-console{
-        width: var(--board-size);
-        max-width: var(--board-size);
+        width: var(--chessboard-board-size);
+        max-width: var(--chessboard-board-size);
     }
 }
 
@@ -176,22 +176,22 @@
     #log-console{
         width: 100%;
         min-width: 0;
-        max-width: var(--board-size);
+        max-width: var(--chessboard-board-size);
         height: auto;
 
         & #log-console-body{
-            height: calc(var(--board-size) / 2);
+            height: calc(var(--chessboard-board-size) / 2);
         }
     }
 
     #log-console #log-console-body .tooltip-text{
-        max-height: calc(var(--board-size) / 1.5);
+        max-height: calc(var(--chessboard-board-size) / 1.5);
     }
 }
 
 @media screen and (min-width: 700px) and (max-width: 900px) {
     #log-console #log-console-body{
-        height: calc(var(--board-size) / 1.5);
+        height: calc(var(--chessboard-board-size) / 1.5);
     }
 }
 

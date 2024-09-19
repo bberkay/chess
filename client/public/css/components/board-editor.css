@@ -20,8 +20,8 @@
 
 #piece-table{
     width: var(--board-editor-table-width);
-    height: calc(var(--board-size) - 52px);
-    max-height: calc(var(--board-size) - 52px);
+    height: calc(var(--chessboard-board-size) - 52px);
+    max-height: calc(var(--chessboard-board-size) - 52px);
     background-color: var(--board-editor-piece-table-bg-color);
     color: var(--board-editor-text-color);
     border:1px solid var(--board-editor-border-color);
@@ -32,7 +32,7 @@
         scrollbar-width: thin;
         width:100%;
         display:block;
-        height: calc(var(--board-size) - 95px);
+        height: calc(var(--chessboard-board-size) - 95px);
     }
 
     & tr{
@@ -49,8 +49,8 @@
         & td{
             text-align: center;
             position: relative;
-            width:calc((var(--board-size) / 9) + 5px);
-            /*height:calc((var(--board-size) / 10) + 15px);*/
+            width:calc((var(--chessboard-board-size) / 9) + 5px);
+            /*height:calc((var(--chessboard-board-size) / 10) + 15px);*/
             height: 100%;
             background-color: var(--board-editor-piece-table-option-bg-color);
             border:1px solid var(--board-editor-piece-table-option-border-color);
@@ -63,7 +63,7 @@
     }
 
     & tbody tr{
-        height: calc((var(--board-size) - 95px) / 6);
+        height: calc((var(--chessboard-board-size) - 95px) / 6);
     }
 
     & .piece-option{
