@@ -738,7 +738,7 @@ export class ChessEngine extends BoardManager {
         }
 
         const lastPlayerMoves: Moves = this.moveEngine.getMoves(lastPlayerMove)!;
-        if(lastPlayerMoves.hasOwnProperty(MoveType.EnPassant) 
+        if(lastPlayerMoves && lastPlayerMoves.hasOwnProperty(MoveType.EnPassant) 
             && lastPlayerMoves[MoveType.EnPassant]!.length > 0){
             this.setEnPassant(lastPlayerMoves[MoveType.EnPassant]![0]!);
             this.logger.save(`En passant move[${lastPlayerMoves[MoveType.EnPassant]![0]!}] is calculated and set on fen notation`);

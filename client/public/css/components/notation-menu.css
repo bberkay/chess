@@ -63,6 +63,10 @@
     display:flex;
     flex-direction: column;
 
+    &.hidden{
+        opacity: 0;
+    }
+
     & .player-name-container{
         display:flex;
         justify-content: space-between;

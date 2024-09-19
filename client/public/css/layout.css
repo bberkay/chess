@@ -454,14 +454,14 @@ main{
             display:flex; 
             flex-direction: column; 
 
-            & #chessboard { 
-                order: 2 
-            }
-
             & #board-editor { 
-                order: 1;
                 margin-top: 0rem;
                 margin-bottom: 0.5rem;
+            }
+
+            & #log-console{
+                margin-right: 0;
+                margin-top: 0.5rem;
             }
         }
 

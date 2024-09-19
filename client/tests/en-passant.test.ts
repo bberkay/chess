@@ -37,7 +37,18 @@ const enPassantTestGames: TestGame[] = [
         expectation: {from: Square.d5, to: [Square.e6]}
     },
     {
-        title: "Missed En Passant Left Because Of One Turn Limit",
+        title: "Enemy Pawn Moved 2 Square Directly From Start Position but after en passant pawn",
+        board: StartPosition.EnPassantRight,
+        moves: [
+            {from: Square.d2, to: Square.d4},
+            {from: Square.e7, to: Square.e5},
+            {from: Square.d4, to: Square.d5},
+            {from: Square.a7, to: Square.a6}
+        ],
+        expectation: {from: Square.d5, to: []}
+    },
+    {
+        title: "Missed En Passant Left Because of One Turn Limit",
         board: StartPosition.EnPassantLeft,
         moves: [
             {from: Square.e2, to: Square.e4},

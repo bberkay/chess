@@ -334,7 +334,7 @@ export class NotationMenu extends Component{
     }
 
     /**
-     * Initialize the player names, durations and online status.
+     * Update the player names, durations and online status.
      */
     public updatePlayerCards(
         whitePlayer: {name: string, isOnline: boolean}, 
@@ -342,6 +342,7 @@ export class NotationMenu extends Component{
         duration: [number, number] | null = null
     ): void
     {
+        this.showPlayerCards();
         this.displayWhitePlayerName(whitePlayer.name);
         this.displayBlackPlayerName(blackPlayer.name);
         if(whitePlayer.isOnline) this.updatePlayerAsOnline(Color.White);
@@ -349,6 +350,26 @@ export class NotationMenu extends Component{
         if(blackPlayer.isOnline) this.updatePlayerAsOnline(Color.Black);
         else this.updatePlayerAsOffline(Color.Black);
         //if(duration) this.displayPlayerDurations(duration);
+    }
+
+    /**
+     * Hide the player cards.
+     */
+    public hidePlayerCards(): void
+    {
+        (document.querySelectorAll(".player-section") as NodeListOf<HTMLElement>).forEach((playerCard) => {
+            playerCard.classList.add("hidden");
+        });
+    }
+
+    /**
+     * Show the player cards.
+     */
+    public showPlayerCards(): void
+    {
+        (document.querySelectorAll(".player-section") as NodeListOf<HTMLElement>).forEach((playerCard) => {
+            playerCard.classList.remove("hidden");
+        });
     }
 
     /**
@@ -377,7 +398,6 @@ export class NotationMenu extends Component{
         document.querySelector(`.your-turn-effect`)?.classList.remove("your-turn-effect");
         document.getElementById(`${color.toLowerCase()}-player-section`)!.classList.add("your-turn-effect");
     }
-
 
     /**
      * This function clears the table.

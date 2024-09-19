@@ -119,9 +119,11 @@ export class Platform{
             if(!this.checkAndLoadGameFromCache()) 
                 this.boardEditor.createBoard();
 
-            if(LocalStorage.isExist(LocalStorageKey.BoardEditorEnabled))
+            if(LocalStorage.isExist(LocalStorageKey.BoardEditorEnabled)){
+                this.notationMenu.hidePlayerCards();
                 this._enableBoardEditor();
-
+            }
+                
             bindMenuOperations();
             listenBoardChanges();
             this.updateComponents();
@@ -399,6 +401,8 @@ export class Platform{
         this.boardEditor.disableEditorMode();
         this.logConsole.clear();
         this.notationMenu.clear();
+        this.notationMenu.showPlayerCards();
+        this.notationMenu.changeTurnIndicator(this.chess.engine.getTurnColor());
         this.boardEditor.createBoard(fenNotation);
         LocalStorage.clear(LocalStorageKey.BoardEditorEnabled);
         this.logger.save(`Editor mode is disabled and board is now playable.`);
