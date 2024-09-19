@@ -84,6 +84,8 @@ export class NavigatorModal extends Component{
                     this.bounce();
             }   
         });
+
+        window.scrollTo(0, 0);
     }
 
     /**

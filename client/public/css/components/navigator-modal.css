@@ -133,3 +133,17 @@
     backdrop-filter: blur(1px);
     -webkit-backdrop-filter: blur(1px);
 }
+
+/** 
+ * ------------------ Responsive ------------------- 
+ *             700px - 900px - 1250px
+ */
+@media screen and (max-width: 1250px) {
+    body:has(.navigator-modal-bg-layer){
+        overflow: hidden;
+    }
+
+    .navigator-modal-bg-layer{
+        position: absolute;
+    }
+}
