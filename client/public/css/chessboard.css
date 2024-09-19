@@ -18,7 +18,8 @@
 
     /* Promotion Menu */
     --chessboard-promotion-option-color: #D3D3D3;
-    --chessboard-promotion-option-hover-color: #B7B7B7;
+    --chessboard-promotion-option-outline-color: #B7B7B7;
+    --chessboard-promotion-option-box-shadow-color: #000;
 
     /* Effects */
     --chessboard-selected-color: #57CE9240;
@@ -172,15 +173,15 @@
         z-index:var(--chessboard-promotion-option-z-index)!important;
         position:inherit;
         background-color: var(--chessboard-promotion-option-color);
-        border-radius: 50%;
-        margin-left: 5%;
-        margin-top: 5%;
-        width: calc(var(--chessboard-board-size) / 10);
+        margin-left: 8%;
+        margin-top: 3%;
+        width: calc(var(--chessboard-board-size) / 11);
         height: calc(var(--chessboard-board-size) / 11);
-        outline: 5px solid var(--chessboard-promotion-option-hover-color);
+        outline: 4px solid var(--chessboard-promotion-option-outline-color);
+        border:1px solid var(--chessboard-border-color);
 
         &:hover{
-            background-color: var(--chessboard-promotion-option-hover-color);
+            box-shadow: 0 5px 15px var(--chessboard-promotion-option-box-shadow-color);
         }
     }
 }

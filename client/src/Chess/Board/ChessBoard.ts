@@ -920,7 +920,10 @@ export class ChessBoard {
         if(typeof squareElement == "number")
             squareElement = this.getSquareElement(squareElement);
         
-        return squareElement.querySelector(".piece") as HTMLDivElement;
+        return (squareElement.className.includes("piece") 
+            ? squareElement 
+            : squareElement.querySelector(".piece")
+        ) as HTMLDivElement;
     }
 
     /**
