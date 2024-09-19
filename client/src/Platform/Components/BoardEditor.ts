@@ -213,14 +213,14 @@ export class BoardEditor extends Component{
     {
         if(BoardEditor.isEditorModeEnable()) return;
         BoardEditor._isEditorModeEnable = true;
-        this.chess.board.lock();
-        this.chess.board.removeEffectFromAllSquares();
+
+        if(this._currentBoardCreatorMode == BoardCreatorMode.Template) 
+            this.changeBoardCreatorMode();
+        
         this.createPieceEditor();
-        this.addDragAndDropEventListeners();
-        this.enableMovePieceCursorMode();
         this.enableBoardCreator();
+        this.createBoard();
         this.enableBoardObserver();
-        if(this._currentBoardCreatorMode == BoardCreatorMode.Template) this.changeBoardCreatorMode();
     }
 
     /**
@@ -229,14 +229,16 @@ export class BoardEditor extends Component{
     @isEditorModeEnable()
     public disableEditorMode(): void
     {
-        this.chess.board.unlock();
-        this.removeDragAndDropEventListeners();
+        if(this._currentBoardCreatorMode == BoardCreatorMode.Template) 
+            this.changeBoardCreatorMode();
+        
         this.disableBoardCreator();
         this.disableCursorMode();
         this.removePieceEditor();
         this.disableBoardObserver();
         BoardEditor._isEditorModeEnable = false;
-        if(this._currentBoardCreatorMode == BoardCreatorMode.Template) this.changeBoardCreatorMode();
+
+        this.createBoard();
     }
 
     /**
@@ -313,26 +315,6 @@ export class BoardEditor extends Component{
                 const selectedPieceOption: HTMLElement = document.querySelector(".selected-option") as HTMLElement;
                 if(selectedPieceOption.closest("#chessboard")) this.removePiece(selectedPieceOption);
             });
-        });
-    }
-
-    /**
-     * This function removes the drag and drop event listeners from the pieces and squares.
-     */
-    @isEditorModeEnable()
-    private removeDragAndDropEventListeners(): void
-    {
-        (document.querySelectorAll(`.piece`) as NodeListOf<HTMLElement>).forEach((piece: HTMLElement) => {
-            piece.removeAttribute("draggable");
-        });
-
-        this.chess.board.getAllSquares().forEach((squareElement: HTMLElement) => {
-            squareElement.removeAttribute("data-menu-operation");
-        });
-
-        this.chess.board.getAllSquares().forEach((squareElement: HTMLElement) => {
-            const newElement = squareElement.cloneNode(true) as HTMLElement;
-            squareElement.parentNode!.replaceChild(newElement, squareElement);
         });
     }
 

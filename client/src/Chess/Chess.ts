@@ -165,13 +165,13 @@ export class Chess{
      */
     private handleOnPieceMoved(squareId: Square, squareClickMode: SquareClickMode): void
     {
-        if(![SquareClickMode.PreSelect,
-            SquareClickMode.Select, 
-            SquareClickMode.PreSelected,
-            SquareClickMode.Selected, 
-            SquareClickMode.Clear, 
-            SquareClickMode.Disable].includes(squareClickMode)
-        ){
+        if([SquareClickMode.Play, 
+            SquareClickMode.Promote, 
+            SquareClickMode.Promotion, 
+            SquareClickMode.Castling, 
+            SquareClickMode.EnPassant
+        ].includes(squareClickMode))
+        {
             const selectedSquare = this._selectedSquare;
             this._isPromotionScreenOpen = squareClickMode == SquareClickMode.Promotion;
             this.playMove(selectedSquare!, squareId);

@@ -246,6 +246,7 @@ export class ChessPlatform{
                 case WsCommand.Started:
                     this.platform.createOnlineGame(wsData, player.color);
                     document.addEventListener(ChessEvent.onPieceMovedByPlayer, ((event: CustomEvent) => {
+                        if(!this.socket) return;
                         const { from, to } = event.detail;
                         this.socket?.send(JSON.stringify([WsCommand.Moved, {from, to}]));
                         this.chess.board.lock(false);
@@ -268,6 +269,8 @@ export class ChessPlatform{
                     this.platform.navigatorModal.showError(wsData.message);
                     this.logger.save(`Error: ${wsData}`);
                     break;
+                default:
+                    throw new Error("Invalid WebSocket command.");
             }
         };
 
@@ -279,4 +282,5 @@ export class ChessPlatform{
             //    LocalStorage.clear(LocalStorageKey.LastLobbyConnection);
         };
     }
+
 }

@@ -262,6 +262,14 @@
         pointer-events: auto;
     }
 
+    & .square:has(.square-effect--from .square-effect-layer){
+        box-shadow:inset 0 0 100px var(--chessboard-from-color);
+    }
+
+    & .square:has(.square-effect--to .square-effect-layer){
+        box-shadow:inset 0 0 100px var(--chessboard-to-color);
+    }
+    
     & .square:has(
         .square-effect--playable .square-effect-layer:hover,
         .square-effect--killable .square-effect-layer:hover
@@ -361,14 +369,6 @@
     
     & .square:has(.square-effect--disabled .square-effect-layer){
         box-shadow:inset 0 0 100px var(--chessboard-disabled-color)!important;
-    }
-
-    & .square:has(.square-effect--from .square-effect-layer){
-        box-shadow:inset 0 0 100px var(--chessboard-from-color);
-    }
-
-    & .square:has(.square-effect--to .square-effect-layer){
-        box-shadow:inset 0 0 100px var(--chessboard-to-color);
     }
 
     & .square:has(.square-effect--selected .piece){
