@@ -535,10 +535,10 @@ export class ChessBoard {
             piece.style.top = `${pieceRect.top}px`;
             piece.style.left = `${pieceRect.left}px`;
             piece.style.animation = "move 0.2s ease-in-out forwards";
-            piece.style.setProperty("--move-from-left", `${pieceRect.left}px`);
-            piece.style.setProperty("--move-from-top", `${pieceRect.top}px`);
-            piece.style.setProperty("--move-to-left", `calc(${marginLeft}px + ${square.getBoundingClientRect().left}px)`);
-            piece.style.setProperty("--move-to-top", `calc(${marginTop}px + ${square.getBoundingClientRect().top}px)`);
+            piece.style.setProperty("--chessboard-move-from-left", `${pieceRect.left}px`);
+            piece.style.setProperty("--chessboard-move-from-top", `${pieceRect.top}px`);
+            piece.style.setProperty("--chessboard-move-to-left", `calc(${marginLeft}px + ${square.getBoundingClientRect().left}px)`);
+            piece.style.setProperty("--chessboard-move-to-top", `calc(${marginTop}px + ${square.getBoundingClientRect().top}px)`);
 
             piece.addEventListener("animationend", () => {
                 if(toSquareContent) this.removePiece(this.getSquareElementOfPiece(toSquareContent));
