@@ -213,9 +213,25 @@ export class Chess{
             this.finishTurn();   
             this.logger.save(`Move[${JSON.stringify({from, to})}] played on board and engine`);
             document.dispatchEvent(new CustomEvent(ChessEvent.OnPieceMoved, {detail: {from: from, to: to}}));
-        }, 500);
+        }, 100);
     }
 
+    /**
+     * Play the pre-move if it exists.
+     */
+    private playPreMoveIfExist(): void
+    {
+        if(!this._preMove)
+            return;
+
+        const { from, to } = this._preMove;
+        this._preMove = null;
+        this.playMove(from, to);
+        this.logger.save(`Pre-move[${JSON.stringify(this._preMove)}] played`);
+        document.dispatchEvent(new CustomEvent(
+            ChessEvent.onPieceMovedByPlayer, {detail: {from: from, to: to}}
+        ));
+    }
 
     /**
      * This function returns the game as fen notation.
@@ -228,13 +244,7 @@ export class Chess{
             this.board.setTurnColor(this.engine.getTurnColor());
             LocalStorage.save(LocalStorageKey.LastBoard, this.engine.getGameAsJsonNotation());
             this.logger.save("Game updated in cache after move");
-            if(this._preMove){
-                const { from, to } = this._preMove;
-                this._preMove = null;
-                this.playMove(from, to);
-                this.logger.save(`Pre-move[${JSON.stringify(this._preMove)}] played`);
-            }
+            this.playPreMoveIfExist();
         } 
-        
     }
 }

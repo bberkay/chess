@@ -205,7 +205,7 @@ export class ChessBoard {
             if(!pieceElement.className.includes("promotion-option"))
                 this.setSquareClickMode(
                     square, 
-                    pieceColor == this.turnColor
+                    pieceColor == this.turnColor && !this.isLocked()
                     ? SquareClickMode.Select 
                     : (this._disablePreSelectionFor == pieceColor 
                         ? SquareClickMode.Disable 
@@ -849,7 +849,7 @@ export class ChessBoard {
         }
         else if(status == GameStatus.WhiteVictory || status == GameStatus.BlackVictory || status == GameStatus.Draw)
         {
-            this.lock(true);
+            this.lock();
             this.playSound(SoundEffect.End);
             this.logger.save("Game ended. Board locked.");
         }
@@ -868,7 +868,7 @@ export class ChessBoard {
          * Disable the board. We don't want to allow player to
          * move pieces while choosing promotion piece.
          */
-        this.lock(true);
+        this.lock(true, false);
         this.logger.save("Board locked for promotion screen");
 
         const PROMOTION_TYPES: Array<string> = [PieceType.Queen, PieceType.Rook, PieceType.Bishop, PieceType.Knight];
