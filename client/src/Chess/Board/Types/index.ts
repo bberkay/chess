@@ -12,8 +12,10 @@ export enum SquareEffect{
     Checked = "checked",
     Killable = "killable",
     PreKillable = "prekillable",
+    PreKilled = "prekilled",
     Playable = "playable",
     PrePlayable = "preplayable",
+    PrePlayed = "preplayed",
 }
 
 /**

@@ -23,11 +23,13 @@
 
     /* Effects */
     --chessboard-selected-color: #57CE9240;
-    --chessboard-preselected-color: #57CE9240;
+    --chessboard-preselected-color: #888888;
     --chessboard-playable-color: #57CE92;
     --chessboard-preplayable-color: #888888;
+    --chessboard-preplayed-color: #888888;
     --chessboard-killable-color: #57CE92;
     --chessboard-prekillable-color: #888888;
+    --chessboard-prekilled-color: #888888;
     --chessboard-checked-color: #DF3030;
     --chessboard-disabled-color: #0000004F;
     --chessboard-hovering-color: #246D49;
@@ -264,13 +266,25 @@
     }
 
     & .square:has(.square-effect--from .square-effect-layer){
-        box-shadow:inset 0 0 100px var(--chessboard-from-color);
+        background-color: var(--chessboard-from-color);
     }
 
     & .square:has(.square-effect--to .square-effect-layer){
-        box-shadow:inset 0 0 100px var(--chessboard-to-color);
+        background-color: var(--chessboard-to-color);
     }
     
+    & .square:has(.square-effect--selected .square-effect-layer){
+        background-color: var(--chessboard-selected-color);
+    }
+
+    & .square:has(.square-effect--preselected .square-effect-layer){
+        background-color: var(--chessboard-preselected-color);
+    }
+
+    & .square:has(.square-effect--preplayed .square-effect-layer){
+        background-color: var(--chessboard-preplayed-color);
+    }
+
     & .square:has(
         .square-effect--playable .square-effect-layer:hover,
         .square-effect--killable .square-effect-layer:hover
@@ -280,14 +294,6 @@
 
     & .square:has(.square-effect--preplayable .square-effect-layer:hover){
         background-color: var(--chessboard-prehovering-color);
-    }
-
-    & .square:has(.square-effect--selected .square-effect-layer){
-        background-color: var(--chessboard-selected-color);
-    }
-
-    & .square:has(.square-effect--preselected .square-effect-layer){
-        background-color: var(--chessboard-preselected-color);
     }
 
     & .square-effect--playable .square-effect-icon, 
@@ -313,7 +319,8 @@
     }
 
     & .square-effect--killable .square-effect-icon::before, 
-    & .square-effect--prekillable .square-effect-icon::before{
+    & .square-effect--prekillable .square-effect-icon::before,
+    & .square-effect--prekilled .square-effect-icon::before{
         content: '';
         position: absolute;
         top: 50%;
@@ -332,9 +339,14 @@
     & .square-effect--prekillable .square-effect-icon::before{
         background-color: var(--chessboard-prekillable-color);
     }
+
+    & .square-effect--prekilled .square-effect-icon::before{
+        background-color: var(--chessboard-prekilled-color);
+    }
     
     & .square-effect--killable .square-effect-icon::after,
-    & .square-effect--prekillable .square-effect-icon::after{
+    & .square-effect--prekillable .square-effect-icon::after,
+    & .square-effect--prekilled .square-effect-icon::after{
         content: '';
         position: absolute;
         top: 50%;
@@ -369,7 +381,7 @@
     }
     
     & .square:has(.square-effect--disabled .square-effect-layer){
-        box-shadow:inset 0 0 100px var(--chessboard-disabled-color)!important;
+        background-color: var(--chessboard-disabled-color);
     }
 
     & .square:has(.square-effect--selected .piece){

@@ -68,6 +68,7 @@ export class NotationMenu extends Component{
                     <div class="utility-menu utility-toggle-menu visible">
                         <div class="utility-toggle-menu-section active" id="new-game-utility-menu">
                             <button class="menu-item" data-menu-operation="${NavigatorModalOperation.ShowGameCreator}" data-tooltip-text="Create New Game">+ New Game</button>
+                            <button class="menu-item" data-menu-operation="${NavigatorModalOperation.ShowGameCreator}" data-tooltip-text="Create New Game" disabled="true">❖ Last Games</button>
                             <button class="menu-item" data-menu-operation="${NavigatorModalOperation.ShowWelcome}" data-tooltip-text="About Project">Info</button>
                         </div>
                         <div class="utility-toggle-menu-section" id="lobby-utility-menu">

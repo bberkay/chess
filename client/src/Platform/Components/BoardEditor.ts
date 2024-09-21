@@ -451,7 +451,7 @@ export class BoardEditor extends Component{
             this.chess.createPiece(
                 selectedPieceOption.getAttribute("data-color") as Color,
                 selectedPieceOption.getAttribute("data-piece") as PieceType,
-                this.chess.board.getSquareID(selectedSquare) as Square
+                this.chess.board.getSquareId(selectedSquare) as Square
             );
             this.makePieceSelectable(selectedSquare.querySelector(".piece") as HTMLElement);
         }
@@ -463,7 +463,7 @@ export class BoardEditor extends Component{
     @isEditorModeEnable()
     public removePiece(squareElement: HTMLElement): void
     {
-        this.chess.removePiece(this.chess.board.getSquareID(squareElement) as Square);
+        this.chess.removePiece(this.chess.board.getSquareId(squareElement) as Square);
         squareElement.setAttribute("data-menu-operation", BoardEditorOperation.CreatePiece);
     }
 

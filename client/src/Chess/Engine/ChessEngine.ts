@@ -140,7 +140,7 @@ export class ChessEngine extends BoardManager {
          * there is no moves for the given square.
          * @see getMoves function.
          */
-        if(!this.currentMoves.hasOwnProperty(square)){
+        if(!Object.hasOwn(this.currentMoves, square)){
             this.logger.save("Move type is not found because there is no selected square");
             return null;
         }
@@ -220,7 +220,7 @@ export class ChessEngine extends BoardManager {
             this.logger.save("Game status set to in play because game is started");
         }
 
-        if(!this.currentMoves.hasOwnProperty(from)){
+        if(!this.currentMoves || !Object.hasOwn(this.currentMoves, from)){
             this.currentMoves[from] = this.getMoves(from);
             this.logger.save("Moves of the square is not calculated so calculate the moves");
         }

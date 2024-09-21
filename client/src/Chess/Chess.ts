@@ -8,7 +8,7 @@
  */
 
 import {JsonNotation, PieceType, Square, Color, StartPosition, ChessEvent} from "./Types";
-import {ChessEngine} from "./Engine/ChessEngine";
+import {ChessEngine, MoveValidationError} from "./Engine/ChessEngine";
 import {ChessBoard} from "./Board/ChessBoard";
 import {SquareClickMode} from "./Board/Types";
 import {LocalStorage, LocalStorageKey} from "@Services/LocalStorage.ts";
@@ -30,6 +30,8 @@ export class Chess{
 
     private _selectedSquare: Square | null = null;
     private _isPromotionScreenOpen: boolean = false;
+    private _preSelectedSquare: Square | null = null;
+    private _preMove: {from: Square, to: Square} | null = null;
 
     public readonly logger: Logger = new Logger("src/Chess/Chess.ts");
     
@@ -97,8 +99,8 @@ export class Chess{
     {
         this.board.createPiece(color, pieceType, square);
         this.engine.createPiece(color, pieceType, square);
-        this.logger.save(`Piece[${JSON.stringify({color, pieceType, square})}] created on board and engine`);
         LocalStorage.save(LocalStorageKey.LastBoard, this.engine.getGameAsJsonNotation());
+        this.logger.save(`Piece[${JSON.stringify({color, pieceType, square})}] created on board and engine`);
         document.dispatchEvent(new CustomEvent(
             ChessEvent.OnPieceCreated, {detail: {square: square}}
         ));
@@ -111,8 +113,8 @@ export class Chess{
     {
         this.board.removePiece(square);
         this.engine.removePiece(square);
-        this.logger.save(`Piece[${square}] removed from board and engine`);
         LocalStorage.save(LocalStorageKey.LastBoard, this.engine.getGameAsJsonNotation());
+        this.logger.save(`Piece[${square}] removed from board and engine`);
         document.dispatchEvent(new CustomEvent(
             ChessEvent.OnPieceRemoved, {detail: {square: square}}
         ));
@@ -130,6 +132,11 @@ export class Chess{
             },
             onPieceMoved: (squareId: Square, squareClickMode: SquareClickMode) => {
                 this.handleOnPieceMoved(squareId, squareClickMode);   
+            },
+            onPreMoveCanceled: () => {
+                this._preSelectedSquare = null;
+                this._preMove = null;
+                this.logger.save("Pre-move canceled");
             }
         });
         this.logger.save("Moves listener initialized");
@@ -140,8 +147,20 @@ export class Chess{
      */
     private handleOnPieceSelected(squareId: Square, isPreSelected: boolean): void
     {
-        this._selectedSquare = squareId;
-        this.board.highlightMoves(this.engine.getMoves(this._selectedSquare, isPreSelected)!);
+        if(isPreSelected) 
+            this._preSelectedSquare = squareId;
+        else 
+            this._selectedSquare = squareId;    
+
+        const selectedSquare = isPreSelected ? this._preSelectedSquare : this._selectedSquare;
+        this.board.highlightMoves(
+            this.engine.getMoves(
+                selectedSquare!, 
+                isPreSelected
+            ), 
+            isPreSelected
+        );
+        this.logger.save(`Piece[${squareId}] selected on the board`);
         document.dispatchEvent(new CustomEvent(ChessEvent.OnPieceSelected, {detail: {square: squareId}}));
     }
 
@@ -157,12 +176,22 @@ export class Chess{
             SquareClickMode.EnPassant
         ].includes(squareClickMode))
         {
-            const selectedSquare = this._selectedSquare;
             this._isPromotionScreenOpen = squareClickMode == SquareClickMode.Promotion;
-            this.playMove(selectedSquare!, squareId);
+            this.playMove(this._selectedSquare!, squareId);
             document.dispatchEvent(new CustomEvent(
-                ChessEvent.onPieceMovedByPlayer, {detail: {from: selectedSquare, to: squareId}}
+                ChessEvent.onPieceMovedByPlayer, {detail: {from: this._selectedSquare!, to: squareId}}
             ));
+        }
+        else if([SquareClickMode.PrePlay,
+            SquareClickMode.PrePromote,
+            SquareClickMode.PrePromotion,
+            SquareClickMode.PreCastling,
+            SquareClickMode.PreEnPassant
+        ].includes(squareClickMode))
+        {
+            this._preMove = {from: this._preSelectedSquare!, to: squareId}
+            this.logger.save(`Pre-move[${JSON.stringify({from: this._preSelectedSquare!, to: squareId})}] saved`);
+            document.dispatchEvent(new CustomEvent(ChessEvent.OnPieceSelected, {detail: {square: squareId}}));
         }
     }
 
@@ -171,10 +200,20 @@ export class Chess{
      */
     public playMove(from: Square, to: Square): void
     {
-        this.engine.playMove(from, to);
+        try{
+            this.engine.playMove(from, to);
+            this._preSelectedSquare = null;
+        }catch(e){
+            if(!(e instanceof MoveValidationError && this._preSelectedSquare)){
+                throw e;
+            }
+        }
         this.board.playMove(from, to);
-        this.finishTurn();
-        document.dispatchEvent(new CustomEvent(ChessEvent.OnPieceMoved, {detail: {from: from, to: to}}));
+        setTimeout(() => {
+            this.finishTurn();   
+            this.logger.save(`Move[${JSON.stringify({from, to})}] played on board and engine`);
+            document.dispatchEvent(new CustomEvent(ChessEvent.OnPieceMoved, {detail: {from: from, to: to}}));
+        }, 500);
     }
 
 
@@ -189,6 +228,13 @@ export class Chess{
             this.board.setTurnColor(this.engine.getTurnColor());
             LocalStorage.save(LocalStorageKey.LastBoard, this.engine.getGameAsJsonNotation());
             this.logger.save("Game updated in cache after move");
+            if(this._preMove){
+                const { from, to } = this._preMove;
+                this._preMove = null;
+                this.playMove(from, to);
+                this.logger.save(`Pre-move[${JSON.stringify(this._preMove)}] played`);
+            }
         } 
+        
     }
 }
