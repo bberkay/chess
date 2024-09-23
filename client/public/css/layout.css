@@ -113,8 +113,9 @@ body.dark-mode{
     --light-gray-color: #999;
     --dark-gray-color: #666;
     --dark-gray-opaque-color: #666666B3;
-    --online-color: #6EAF23;
-    --offline-color: #C2091F;
+    --online-status-color: #6EAF23;
+    --offline-status-color: #C2091F;
+    --no-status-color: #666;
     --backdrop-bg-color: #0000005C;
     --glass-bg-color: #FFFFFF1A;
     --glass-border-color:#FFFFFF4D;
@@ -160,7 +161,8 @@ body{
     --connections-menu-bg-color: var(--accent-color);
     --connections-menu-border-color: var(--border-color);
     --connections-menu-text-color: var(--text-color);
-
+    --connections-menu-hover-bg-color: var(--component-color);
+    
     /* Appearance Menu(Navbar Component) */
     --appearance-menu-bg-color: var(--accent-color);
     --appearance-menu-border-color: var(--border-color);
@@ -200,12 +202,9 @@ body{
     --notation-menu-title-border-color: var(--border-color);
     --notation-menu-odd-row-bg-color: var(--component-color);
     --notation-menu-odd-row-border-color: var(--component-color);
-    --notation-menu-status-bg-color: var(--gray-color);
     --notation-menu-player-name-bg-color: var(--accent-color);
     --notation-menu-player-name-inner-bg-color: var(--component-color);
     --notation-menu-player-name-border-color: var(--border-color);
-    --notation-menu-online-status-bg-color: var(--online-color);
-    --notation-menu-offline-status-bg-color: var(--offline-color);
 
     /* Utility Menu */
     --utility-menu-bg-color: var(--accent-color);

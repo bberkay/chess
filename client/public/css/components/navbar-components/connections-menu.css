@@ -8,6 +8,121 @@
     color: var(--connections-menu-text-color);
 }
 
+#connections-body{
+    height: 100%;
+
+    & .connection{
+        border-bottom: 1px solid var(--connections-menu-border-color);
+        padding: 10px;
+        cursor: pointer;
+        display: flex;
+
+        & .board-preview{
+            width: 100px;
+            height: 100px;
+            margin-right: 10px;
+            background-color: blue;
+        }
+
+        & .connection-info{
+            display:flex;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 100%;
+
+            & #white-player .player-color{
+                background-color: var(--chessboard-white-square-color);
+            }
+
+            & #black-player .player-color{
+                background-color: var(--chessboard-black-square-color);
+            }
+
+            & .player{
+                display:flex;
+                justify-content: space-between;
+                align-items: center;
+
+                & .player-match-info{
+                    display:flex;
+                    align-items: center;
+                    gap: 3px;
+
+                    & .indicator{
+                        display:flex;
+
+                        & .player-duration{
+                            font-size: 0.8rem;
+                            color: white;
+                            background-color: #222;
+                            border: 1px solid #333;
+                            padding: 2px 5px;
+
+                            & .milliseconds{
+                                font-size: 0.7rem;
+                            }
+                        }
+                    
+                        & .player-color{
+                            width: 5px;
+                            background-color: green;
+                            margin-right: 5px;
+                        }    
+                    }
+
+                    & .player-info{
+                        font-size: 0.95rem;
+                        padding-top:4px;
+                        & .player-name {
+                            font-weight: bold;
+                        }
+                    }
+
+                }
+
+                & .player-last-status .player-status-icon{
+                    width: 10px;
+                    height: 10px;
+                    border-radius: 50%;
+                    border: 1px solid var(--no-status-color);
+
+                    &.online{
+                        background-color: var(--online-status-color);
+                    }
+
+                    &.offline{
+                        background-color: var(--offline-status-color);
+                    }
+                }
+            }
+
+            & .move-history span{
+                font-size: 0.9rem;
+            }
+            
+        }
+    }
+
+    & .connection:hover{
+        background-color: var(--connections-menu-hover-bg-color);
+    }
+}
+
+#connections-body:has(.no-connections){
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .no-connections{
+        margin-top:-5rem;
+        text-align: center;
+
+        & h1{
+            margin-bottom:10px;
+        }
+    }
+}
+
  /** 
  * ------------------ Responsive ------------------- 
  *             700px - 900px - 1250px

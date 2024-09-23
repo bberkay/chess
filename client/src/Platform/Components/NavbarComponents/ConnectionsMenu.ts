@@ -11,6 +11,9 @@ export class ConnectionsMenu extends NavbarComponent{
     constructor() {
         super();
         this.renderComponent();
+        //this.showNoConnectionsMessage();
+        this.add();
+
     }
 
     /**
@@ -19,18 +22,7 @@ export class ConnectionsMenu extends NavbarComponent{
     protected renderComponent(): void
     {
         this.loadHTML("connections-menu", `
-            <div id="about-body">
-                <h1>Chess Game</h1>
-                <p>Chess Game is a web application that allows you to play chess with your friends online.</p>
-                <p>It is built using the following technologies:</p>
-                <ul>
-                    <li>HTML</li>
-                    <li>CSS</li>
-                    <li>JavaScript</li>
-                    <li>Node.js</li>
-                    <li>Express</li>
-                    <li>Socket.IO</li>
-                </ul>
+            <div id="connections-body">
             </div>
         `);
         this.loadCSS("connections-menu.css");
@@ -50,5 +42,78 @@ export class ConnectionsMenu extends NavbarComponent{
     public show(): void
     {
         document.getElementById("connections-menu")!.style.display = "block";
+    }
+
+    /**
+     * Return the HTML code to show the connections.
+     */
+    private showNoConnectionsMessage(): void
+    {
+        document.getElementById("connections-body")!.innerHTML = `
+            <div class="no-connections">
+                <h1>No Connections</h1>
+                <span>There are no active games.</span>
+            </div>
+        `;
+    }
+
+    /**
+     * 
+     */
+    public add(): void
+    {
+        document.getElementById("connections-body")!.innerHTML += `
+            <div class="connection">
+                <div class="board-preview">
+                </div>
+                <div class="connection-info">
+                    <div class="player" id="black-player">
+                        <div class="player-match-info">
+                            <div class="indicator">
+                                <div class="player-duration">
+                                    <span class="minute-second">05:10</span><span class="milliseconds">.01</span>
+                                </div>
+                                <div class="player-color"></div>
+                            </div>
+                            <div class="player-info">
+                                <span class="player-name">Black Player</span>
+                                <span class="player-score">+4</span>
+                            </div>
+                        </div>
+                        <div class="player-last-status">
+                            <div class="player-status-icon"></div>
+                        </div>
+                    </div>
+                    <div class="move-history">
+                        <span>e3</span>
+                        <span>e5</span>
+                        <span>Nf3</span>
+                        <span>Nc6</span>
+                        <span>Bb5</span>
+                        <span>a6</span>
+                        <span>Ba4</span>
+                        <span>Ba8</span>
+                        <span>...</span>
+                    </div>
+                    <div class="player" id="white-player">
+                        <div class="player-match-info">
+                            <div class="indicator">
+                                <div class="player-duration">
+                                    <span class="minute-second">05:10</span><span class="milliseconds">.01</span>
+                                </div>
+                                <div class="player-color"></div>
+                            </div>
+                            <div class="player-info">
+                                <span class="player-name">Black Player</span>
+                                <span class="player-score">+4</span>
+                            </div>
+                        </div>
+                        <div class="player-last-status">
+                            <div class="player-status-icon"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
     }
 }
