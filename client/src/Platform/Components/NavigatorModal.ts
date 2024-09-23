@@ -121,21 +121,6 @@ export class NavigatorModal extends Component{
     }
 
     /**
-     * Show the welcome message.
-     */
-    public showWelcome(): void
-    {
-        this.show(
-            "Welcome", 
-            `Chess project that offers a playable 
-            online chess game and additional features.<br> <br> 
-            <a style="font-size:var(--navigator-modal-content-source-code-button-font-size);" href='${import.meta.env.VITE_REPOSITORY_URL}' target='_blank'>Source Code</a>
-            `, 
-            true
-        );   
-    }
-
-    /**
      * Show the game over screen.
      */
     public showGameOver(status: GameStatus): void

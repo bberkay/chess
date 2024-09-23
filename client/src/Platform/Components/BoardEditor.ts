@@ -170,7 +170,6 @@ export class BoardEditor extends Component{
                 <div class="utility-toggle-menu-section active">
                     <button class="menu-item" data-menu-operation="${NavigatorModalOperation.ShowStartPlayingBoard}" data-tooltip-text="Start the Board" disabled="true">Start</button>
                     <button class="menu-item" data-menu-operation="${NavigatorModalOperation.ShowGameCreator}" data-tooltip-text="Create New Game">+ New Game</button>
-                    <button class="menu-item" data-menu-operation="${NavigatorModalOperation.ShowWelcome}" data-tooltip-text="About Project">Info</button>
                 </div>
             </div>
         `);

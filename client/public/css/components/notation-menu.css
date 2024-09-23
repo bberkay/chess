@@ -198,11 +198,16 @@
     opacity: 0;
 
     & .utility-toggle-menu-section{
-        flex: 1;
         display: none;
         justify-content: space-between;
         align-items: center;
+        width: 100%;
+        gap: 5px;
 
+        & button{
+            flex-grow: 1;
+        }
+        
         &.active{
             display: flex;
         }

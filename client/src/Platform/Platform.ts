@@ -238,9 +238,6 @@ export class Platform{
     private handleNavigatorModalOperation(menuOperation: NavigatorModalOperation, menuItem: HTMLElement): void
     {
         switch(menuOperation){
-            case NavigatorModalOperation.ShowWelcome:
-                this.navigatorModal.showWelcome();
-                break;
             case NavigatorModalOperation.Hide:
                 this.navigatorModal.hide();
                 break;
@@ -249,9 +246,6 @@ export class Platform{
                 break;
             case NavigatorModalOperation.AskConfirmation:
                 this.navigatorModal.showConfirmation();
-                break;
-            case NavigatorModalOperation.ShowGameCreator:
-                this.navigatorModal.showGameCreator();
                 break;
             case NavigatorModalOperation.ShowSelectDuration:
                 this.navigatorModal.showSelectDuration();

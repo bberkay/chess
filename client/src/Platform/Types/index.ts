@@ -34,8 +34,6 @@ export enum NotationMenuOperation{
 export enum NavigatorModalOperation{
     Hide = "Hide",
     Undo = "Undo",
-    ShowGameCreator = "ShowGameCreator",
-    ShowWelcome = "ShowWelcome",
     AskConfirmation = "AskConfirmation",
     ShowStartPlayingBoard = "ShowStartPlayingBoard",
     ShowSelectDuration = "ShowSelectDuration",
