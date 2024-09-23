@@ -247,6 +247,9 @@ export class Platform{
             case NavigatorModalOperation.AskConfirmation:
                 this.navigatorModal.showConfirmation();
                 break;
+            case NavigatorModalOperation.ShowGameCreator:
+                this.navigatorModal.showGameCreator();
+                break;
             case NavigatorModalOperation.ShowSelectDuration:
                 this.navigatorModal.showSelectDuration();
                 break;
