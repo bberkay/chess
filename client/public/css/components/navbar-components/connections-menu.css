@@ -1,0 +1,14 @@
+/**
+ * CSS codes of ConnectionsMenu component
+ * @see For more information about this component check file: src\Platform\Components\NavbarComponents\ConnectionsMenu.ts
+ */
+#connections-menu{
+    background-color:var(--connections-menu-bg-color);
+    border:1px solid var(--connections-menu-border-color);
+    color: var(--connections-menu-text-color);
+}
+
+ /** 
+ * ------------------ Responsive ------------------- 
+ *             700px - 900px - 1250px
+ */

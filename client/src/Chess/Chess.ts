@@ -99,11 +99,11 @@ export class Chess{
     {
         this.board.createPiece(color, pieceType, square);
         this.engine.createPiece(color, pieceType, square);
-        LocalStorage.save(LocalStorageKey.LastBoard, this.engine.getGameAsJsonNotation());
         this.logger.save(`Piece[${JSON.stringify({color, pieceType, square})}] created on board and engine`);
         document.dispatchEvent(new CustomEvent(
             ChessEvent.OnPieceCreated, {detail: {square: square}}
         ));
+        LocalStorage.save(LocalStorageKey.LastBoard, this.engine.getGameAsJsonNotation());
     }
 
     /**
@@ -113,11 +113,11 @@ export class Chess{
     {
         this.board.removePiece(square);
         this.engine.removePiece(square);
-        LocalStorage.save(LocalStorageKey.LastBoard, this.engine.getGameAsJsonNotation());
         this.logger.save(`Piece[${square}] removed from board and engine`);
         document.dispatchEvent(new CustomEvent(
             ChessEvent.OnPieceRemoved, {detail: {square: square}}
         ));
+        LocalStorage.save(LocalStorageKey.LastBoard, this.engine.getGameAsJsonNotation());
     }
 
     /**
@@ -242,9 +242,9 @@ export class Chess{
         this.board.showStatus(this.engine.getGameStatus());
         if(!this._isPromotionScreenOpen){
             this.board.setTurnColor(this.engine.getTurnColor());
-            LocalStorage.save(LocalStorageKey.LastBoard, this.engine.getGameAsJsonNotation());
             this.logger.save("Game updated in cache after move");
             this.playPreMoveIfExist();
+            LocalStorage.save(LocalStorageKey.LastBoard, this.engine.getGameAsJsonNotation());
         } 
     }
 }

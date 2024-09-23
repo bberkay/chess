@@ -9,25 +9,21 @@ export abstract class Component{
     /**
      * This function loads the css file of the component.
      * @param {string} filename The name of the css file.
-     * @param {string} fileId The id of the link element. If it is empty, the filename will
-     * be used by replacing the dot with dash. For example: board-editor.css -> board-editor-css
      */
-    protected loadCSS(filename: string, fileId: string = ""): void
+    protected loadCSS(filename: string): void
     {
-        if(fileId === "")
-            fileId = filename.replace(".", "-");
-
-        if(document.getElementById(`${fileId}`))
-            throw new Error(`${filename} file is already loaded.`);
+        const fileId = filename.replace(".", "-");
 
         if(!filename.endsWith(".css"))
             throw new Error("The filename must end with .css");
 
-        let link: HTMLLinkElement = document.createElement("link");
-        link.id = fileId;
-        link.rel = "stylesheet";
-        link.href = `./css/components/${filename}`;
-        document.head.appendChild(link);
+        if(!document.getElementById(`${fileId}`)){
+            let link: HTMLLinkElement = document.createElement("link");
+            link.id = fileId;
+            link.rel = "stylesheet";
+            link.href = `./css/components/${filename}`;
+            document.head.appendChild(link);
+        }
     }
 
     /**

@@ -6,10 +6,6 @@
 #log-console{
     background-color:var(--log-console-bg-color);
     border:1px solid var(--log-console-border-color);
-    height: calc(var(--chessboard-board-size) + 55px); /* 55px: 50px for footer(clear button and path input) and 5px for padding */
-    width: var(--log-console-width);
-    min-width: var(--log-console-width);
-    max-width: calc(var(--chessboard-board-size) - 50px);
     color: var(--log-console-text-color);
     font-family: var(--log-console-font-family);
     resize: horizontal;
@@ -17,14 +13,19 @@
 
 /* Body */
 #log-console{
+    & .log-console-header-body-separator{
+        background-color: var(--log-console-bg-color);
+        height: 5px;
+    }
+
     & #log-console-body{
-        height: calc(var(--chessboard-board-size) + 7px); /* 7px: 2px for border and 5px for padding */
+        height: calc(var(--chessboard-board-size) - 48px);
         width:auto;
         overflow-y: scroll;
         overflow-x: hidden;
 
         & ul{
-            margin:15px 20px 5px -20px;
+            margin:5px 20px 5px -20px;
             list-style: none;
 
             & li{
@@ -165,20 +166,8 @@
  * ------------------ Responsive ------------------- 
  *             700px - 900px - 1250px
  */
-@media screen and (min-width: 900px) and (max-width: 1250px) {
-    #log-console{
-        width: var(--chessboard-board-size);
-        max-width: var(--chessboard-board-size);
-    }
-}
-
 @media screen and (max-width: 900px) {
     #log-console{
-        width: 100%;
-        min-width: 0;
-        max-width: var(--chessboard-board-size);
-        height: auto;
-
         & #log-console-body{
             height: calc(var(--chessboard-board-size) / 2);
         }

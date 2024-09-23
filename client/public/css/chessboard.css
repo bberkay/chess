@@ -12,24 +12,38 @@
     --chessboard-board-size: 70vh;
 
     /* Colors */
+    --chessboard-default-white-square-color: #879A86;
+    --chessboard-default-black-square-color: #647A65;
+    --chessboard-default-border-color: #FFFFFFBB;
     --chessboard-white-square-color: #879A86;
     --chessboard-black-square-color: #647A65;
     --chessboard-border-color: #FFFFFFBB;
 
     /* Promotion Menu */
+    --chessboard-default-promotion-option-color: #D3D3D3;
+    --chessboard-default-promotion-option-outline-color: #B7B7B7;
+    --chessboard-default-promotion-option-box-shadow-color: #000;
     --chessboard-promotion-option-color: #D3D3D3;
     --chessboard-promotion-option-outline-color: #B7B7B7;
     --chessboard-promotion-option-box-shadow-color: #000;
 
     /* Effects */
+    --chessboard-default-selected-color: #57CE9240;
+    --chessboard-default-preselected-color: #888888;
+    --chessboard-default-playable-color: #57CE92;
+    --chessboard-default-preplayable-color: #888888;
+    --chessboard-default-preplayed-color: #888888;
+    --chessboard-default-checked-color: #DF3030;
+    --chessboard-default-disabled-color: #0000004F;
+    --chessboard-default-hovering-color: #246D49;
+    --chessboard-default-prehovering-color: #888888;
+    --chessboard-default-from-color: #45C9FF63;
+    --chessboard-default-to-color: #45C9FF63;
     --chessboard-selected-color: #57CE9240;
     --chessboard-preselected-color: #888888;
     --chessboard-playable-color: #57CE92;
     --chessboard-preplayable-color: #888888;
     --chessboard-preplayed-color: #888888;
-    --chessboard-killable-color: #57CE92;
-    --chessboard-prekillable-color: #888888;
-    --chessboard-prekilled-color: #888888;
     --chessboard-checked-color: #DF3030;
     --chessboard-disabled-color: #0000004F;
     --chessboard-hovering-color: #246D49;
@@ -332,18 +346,6 @@
         transform: translate(-50%, -50%);
     }
 
-    & .square-effect--killable .square-effect-icon::before{
-        background-color: var(--chessboard-killable-color);
-    }
-
-    & .square-effect--prekillable .square-effect-icon::before{
-        background-color: var(--chessboard-prekillable-color);
-    }
-
-    & .square-effect--prekilled .square-effect-icon::before{
-        background-color: var(--chessboard-prekilled-color);
-    }
-    
     & .square-effect--killable .square-effect-icon::after,
     & .square-effect--prekillable .square-effect-icon::after,
     & .square-effect--prekilled .square-effect-icon::after{

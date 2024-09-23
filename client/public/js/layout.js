@@ -44,7 +44,7 @@ function reOrderLayoutForMobile(){
         document.querySelector("#log-console")
     );
 
-    if(document.querySelector("#piece-creator"))
+    if(document.querySelector("#piece-creator").innerHTML)
         return;
 
     document.querySelector("#chessboard").before(
@@ -86,7 +86,7 @@ function reOrderLayoutForDesktop(){
         document.querySelector("#log-console")
     );
     
-    if(document.querySelector("#piece-creator") || document.querySelector("#notation-menu .player-section"))
+    if(document.querySelector("#piece-creator").innerHTML || document.querySelector("#notation-menu .player-section"))
         return;
 
     document.querySelector("#notation-menu").prepend(

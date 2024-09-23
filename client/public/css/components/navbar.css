@@ -1,0 +1,42 @@
+/**
+ * CSS codes of Navbar component
+ * @see For more information about this component check file: src\Platform\Components\Navbar.ts
+ */
+
+#navbar{
+    background-color: var(--navbar-bg-color);
+    color: var(--navbar-text-color);
+    border: 1px solid var(--navbar-border-color);
+    border-bottom: none;
+    padding: 4px;
+    width: calc(var(--navbar-width) - 8px);
+}
+
+#navbar .navbar-buttons{
+    display: flex;
+    gap: 4px;
+
+    & button{
+        flex-grow: 1;
+        box-sizing: border-box;
+    }
+}
+
+/** 
+ * ------------------ Responsive ------------------- 
+ *             700px - 900px - 1250px
+ */
+@media screen and (min-width: 900px) and (max-width: 1250px) {
+    #navbar{
+        width: calc(var(--chessboard-board-size) - 8px);
+        max-width: calc(var(--chessboard-board-size) - 8px);
+    }
+}
+
+@media screen and (max-width: 900px) {
+    #navbar{
+        width: calc(100% - 8px);
+        min-width: 0;
+        max-width: calc(var(--chessboard-board-size) - 8px);
+    }
+}

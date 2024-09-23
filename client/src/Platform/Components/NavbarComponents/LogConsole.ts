@@ -1,11 +1,11 @@
-import { LogConsoleOperation } from "../Types";
-import { Component } from "./Component";
+import { LogConsoleOperation } from "../../Types";
 import { Logger } from "@Services/Logger"; 
+import { NavbarComponent } from "./NavbarComponent";
 
 /**
  * This class provide a menu to show the logs.
  */
-export class LogConsole extends Component{
+export class LogConsole extends NavbarComponent{
     private logCounter: number = 0;
 
     /**
@@ -25,6 +25,7 @@ export class LogConsole extends Component{
     protected renderComponent(): void
     {
         this.loadHTML("log-console", `
+            <div class="log-console-header-body-separator"></div>
             <div id="log-console-body">
                 <ul id = "log-list"></ul>
             </div>
@@ -172,14 +173,6 @@ export class LogConsole extends Component{
     }
 
     /**
-     * This function returns the log count.
-     */
-    private getLogCount(): number
-    {
-        return this.logCounter;
-    }
-
-    /**
      * This function adds a log to the log console.
      */
     public stream(): void
@@ -213,5 +206,21 @@ export class LogConsole extends Component{
 
         // Clear the log file.
         document.getElementById("log-file")!.innerHTML = "";
+    }
+
+    /**
+     * Hide the log console.
+     */
+    public hide(): void
+    {
+        document.getElementById("log-console")!.style.display = "none";
+    }
+
+    /**
+     * Show the log console.
+     */
+    public show(): void
+    {
+        document.getElementById("log-console")!.style.display = "block";
     }
 }

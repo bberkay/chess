@@ -71,7 +71,7 @@ export class BoardEditor extends Component{
     public createPieceEditor(): void
     {
         if(!BoardEditor.isEditorModeEnable()) return;
-        document.getElementById("notation-menu")!.id = "piece-creator";
+        document.getElementById("notation-menu")!.style.display = "none";
         document.querySelector("#black-score-section")?.remove();
         document.querySelector("#white-score-section")?.remove();
 
@@ -203,7 +203,7 @@ export class BoardEditor extends Component{
     private removePieceEditor(): void
     {
         document.getElementById("piece-creator")!.innerHTML = "";
-        document.getElementById("piece-creator")!.id = "notation-menu";
+        document.getElementById("notation-menu")!.style.display = "flex";
     }
 
     /**

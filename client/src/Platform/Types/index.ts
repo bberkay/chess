@@ -64,7 +64,21 @@ export enum BoardEditorOperation{
     ToggleBoardEditorUtilityMenu = "ToggleBoardEditorUtilityMenu"
 }
 
+export enum NavbarOperation{
+    ShowAbout = "ShowAbout",
+    ShowLogConsole = "ShowLogConsole",
+    ShowAppearance = "ShowAppearance",
+    ShowConnections = "ShowConnections",
+}
+
+export enum AppearanceMenuOperation{
+    Reset = "Reset",
+    ChangeTheme = "ChangeTheme"
+}
+
 export type MenuOperation = BoardEditorOperation 
     | NavigatorModalOperation 
     | NotationMenuOperation 
-    | LogConsoleOperation;
+    | LogConsoleOperation
+    | NavbarOperation
+    | AppearanceMenuOperation;

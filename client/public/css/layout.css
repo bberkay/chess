@@ -10,12 +10,20 @@
     --font-family: 'Roboto', sans-serif;
     --component-font-size: 15px;
 
-    /* Log Console */
-    --log-console-width: 400px;
+    /* Navbar */
+    --navbar-width: 400px; 
+    
+    /* Navbar Component */
+    --navbar-component-width: 400px; /* better to keep it same as navbar-width */
+
+    /* Log Console(Navbar Component) */
     --log-console-font-family: monospace;
     --log-console-font-size: 13px;
     --log-console-square-id-font-size: 12px;
 
+    /* Appearance Menu(Navbar Component) */
+    --appearance-menu-font-size: 13px;
+    
     /* Board Editor */
     --board-editor-table-height: 240px; 
     --board-editor-table-width: 230px;
@@ -133,7 +141,35 @@ body{
     /* Scrollbar */
     --scrollbar-thumb-color: var(--gray-color);
 
-    /* Log Console */
+    /* Navbar */
+    --navbar-bg-color: var(--accent-color);
+    --navbar-text-color: var(--text-color);
+    --navbar-border-color: var(--border-color);
+
+    /* Navbar Component, default style for all navbar components */
+    --navbar-component-bg-color: var(--accent-color);
+    --navbar-component-text-color: var(--text-color);
+    --navbar-component-border-color: var(--border-color);
+
+    /* About Menu(Navbar Component) */
+    --about-menu-bg-color: var(--accent-color);
+    --about-menu-border-color: var(--border-color);
+    --about-menu-text-color: var(--text-color);
+
+    /* Connections Menu(Navbar Component) */
+    --connections-menu-bg-color: var(--accent-color);
+    --connections-menu-border-color: var(--border-color);
+    --connections-menu-text-color: var(--text-color);
+
+    /* Appearance Menu(Navbar Component) */
+    --appearance-menu-bg-color: var(--accent-color);
+    --appearance-menu-border-color: var(--border-color);
+    --appearance-menu-text-color: var(--text-color);
+    --appearance-menu-button-bg-color: var(--component-color);
+    --appearance-menu-color-picker-border-color: var(--border-color);
+    --appearance-menu-fieldset-border-color: var(--component-color);
+
+    /* Log Console(Navbar Component) */
     --log-console-bg-color: var(--accent-color);
     --log-console-text-color: var(--text-color);
     --log-console-border-color: var(--border-color);
@@ -224,10 +260,15 @@ input, select{
     background-color: var(--input-bg-color);
     color: var(--text-color);
     border:1px solid var(--input-border-color);
+    cursor: pointer;
 
     &:focus{
         outline: none;
     }
+}
+
+input[type="color"]::-webkit-color-swatch {
+	border: none;
 }
 
 input:read-only{
@@ -421,13 +462,10 @@ main{
 }
 
 #piece-creator{
-    /* Piece creator will replace 
-    the notation menu when it's 
-    active */
     margin-left: 0.5rem;
 }
 
-#log-console{
+#navbar{
     margin-right:0.5rem;
 }
 

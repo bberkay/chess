@@ -1,0 +1,88 @@
+/**
+ * CSS codes of AppearanceMenu component
+ * @see For more information about this component check file: src\Platform\Components\NavbarComponents\AppearanceMenu.ts
+ */
+#appearance-menu{
+    background-color:var(--appearance-menu-bg-color);
+    border:1px solid var(--appearance-menu-border-color);
+    color: var(--appearance-menu-text-color);
+    font-size: var(--appearance-menu-font-size);
+}
+
+#appearance-body{
+    padding: 10px;
+
+    & fieldset{
+        border: 1px solid var(--appearance-menu-fieldset-border-color);
+        padding: 10px 10px;
+        padding-bottom: 15px;
+        margin: 15px 0;
+
+        & legend{
+            font-weight: bold;
+            margin-left: 0px;
+        }
+    }
+
+    & fieldset:nth-child(1){
+        margin-top: 0;
+    }
+
+    & div.form-group{
+        display: flex;
+        gap: 10px;
+        width: 100%;
+        
+        & div.input-group{
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            box-sizing: border-box;
+            align-items: flex-start;
+            width: 33%;
+
+            & label{
+                margin-left:2px;
+            }
+
+            & .input-group--horizontal{
+                display: flex;
+                flex-direction: row;
+                width: 100%;
+                margin-top: 3px;
+
+                & input{
+                    width: 100%;
+                    padding: 0;
+                    box-sizing: border-box;
+                    border:1px solid var(--appearance-menu-color-picker-border-color);
+                }
+
+                & button{
+                    padding:0 7px;
+                    background-color: var(--appearance-menu-button-bg-color);
+                }
+            }
+        }
+    }
+
+
+    & .separator{
+        margin:15px 0;
+    }
+
+    & .appearance-utilities{
+        width: 100%;
+        display: flex;
+        gap: 5px;
+
+        & button{
+            flex-grow: 1;
+        }
+    }
+}
+
+ /** 
+ * ------------------ Responsive ------------------- 
+ *             700px - 900px - 1250px
+ */

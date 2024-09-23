@@ -8,14 +8,34 @@
  */
 
 import { Chess } from "@Chess/Chess";
-import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage.ts";
+import { Navbar } from "./Components/Navbar";
 import { BoardEditor } from "./Components/BoardEditor.ts";
 import { NotationMenu } from "./Components/NotationMenu.ts";
-import { LogConsole } from "./Components/LogConsole";
 import { NavigatorModal } from "./Components/NavigatorModal";
-import { BoardEditorOperation, LogConsoleOperation, MenuOperation, NavigatorModalOperation, NotationMenuOperation, PlatformEvent } from "./Types";
+import { 
+    AppearanceMenuOperation,
+    BoardEditorOperation, 
+    LogConsoleOperation, 
+    MenuOperation, 
+    NavbarOperation, 
+    NavigatorModalOperation, 
+    NotationMenuOperation, 
+    PlatformEvent 
+} from "./Types";
+import { 
+    ChessEvent, 
+    Color, 
+    GameStatus, 
+    JsonNotation, 
+    PieceType, 
+    StartPosition 
+} from "@Chess/Types/index.ts";
+import { LogConsole } from "./Components/NavbarComponents/LogConsole";
+import { AboutMenu } from "./Components/NavbarComponents/AboutMenu.ts";
+import { ConnectionsMenu } from "./Components/NavbarComponents/ConnectionsMenu.ts";
+import { AppearanceMenu } from "./Components/NavbarComponents/AppearanceMenu.ts";
 import { Logger } from "@Services/Logger";
-import { ChessEvent, Color, GameStatus, JsonNotation, PieceType, StartPosition } from "@Chess/Types/index.ts";
+import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage.ts";
 
 /**
  * This class is the main class of the chess platform menu.
@@ -24,10 +44,14 @@ import { ChessEvent, Color, GameStatus, JsonNotation, PieceType, StartPosition }
 export class Platform{
 
     private readonly chess: Chess;
+    public readonly navbar: Navbar;
     public readonly boardEditor: BoardEditor;
     public readonly notationMenu: NotationMenu;
-    public readonly logConsole: LogConsole;
     public readonly navigatorModal: NavigatorModal;
+    public readonly logConsole: LogConsole;
+    public readonly connectionsMenu: ConnectionsMenu
+    public readonly appearanceMenu: AppearanceMenu;
+    public readonly aboutMenu: AboutMenu;
     public readonly logger: Logger = new Logger("src/Platform/Platform.ts");
 
     /**
@@ -35,10 +59,14 @@ export class Platform{
      */
     constructor(chess: Chess) {
         this.chess = chess;
+        this.appearanceMenu = new AppearanceMenu();
         this.boardEditor = new BoardEditor(this.chess);
         this.notationMenu = new NotationMenu(this.chess);
-        this.logConsole = new LogConsole();
         this.navigatorModal = new NavigatorModal();
+        this.logConsole = new LogConsole();
+        this.aboutMenu = new AboutMenu();
+        this.connectionsMenu = new ConnectionsMenu();
+        this.navbar = new Navbar([this.logConsole, this.aboutMenu, this.connectionsMenu, this.appearanceMenu]);
         this.init();
 
         //For testing purposes
@@ -116,6 +144,9 @@ export class Platform{
          * Initialize the platform components.
          */
         document.addEventListener("DOMContentLoaded", () => {
+            this.navbar.hideComponents();
+            this.navbar.showComponent(this.logConsole);
+
             if(!this.checkAndLoadGameFromCache()) 
                 this.boardEditor.createBoard();
 
@@ -157,24 +188,34 @@ export class Platform{
     private handleMenuOperation(menuItem: HTMLElement): void
     {
         const menuOperation = menuItem.getAttribute("data-menu-operation") as MenuOperation;
-        if(LogConsoleOperation.hasOwnProperty(menuOperation))
+        if(Object.hasOwn(LogConsoleOperation, menuOperation))
             this.handleLogConsoleOperation(
                 menuOperation as LogConsoleOperation, 
                 menuItem
             );
-        else if(NavigatorModalOperation.hasOwnProperty(menuOperation))
+        else if(Object.hasOwn(NavigatorModalOperation, menuOperation))
             this.handleNavigatorModalOperation(
                 menuOperation as NavigatorModalOperation, 
                 menuItem
             );
-        else if(NotationMenuOperation.hasOwnProperty(menuOperation))
+        else if(Object.hasOwn(NotationMenuOperation, menuOperation))
             this.handleNotationMenuOperation(
                 menuOperation as NotationMenuOperation, 
                 menuItem
             );
-        else if(BoardEditorOperation.hasOwnProperty(menuOperation))
+        else if(Object.hasOwn(BoardEditorOperation, menuOperation))
             this.handleBoardEditorOperation(
                 menuOperation as BoardEditorOperation, 
+                menuItem
+            );
+        else if(Object.hasOwn(NavbarOperation, menuOperation))
+            this.handleNavbarOperation(
+                menuOperation as NavbarOperation, 
+                menuItem
+            );
+        else if(Object.hasOwn(AppearanceMenuOperation, menuOperation))
+            this.handleAppearanceMenuOperation(
+                menuOperation as AppearanceMenuOperation, 
                 menuItem
             );
     }
@@ -314,6 +355,43 @@ export class Platform{
                 break;
             case BoardEditorOperation.EnableRemovePieceCursorMode:
                 this.boardEditor.enableRemovePieceCursorMode();
+                break;
+        }
+    }
+
+    /**
+     * Handle the navbar operations.
+     */
+    private handleNavbarOperation(menuOperation: NavbarOperation, menuItem: HTMLElement): void
+    {
+        switch(menuOperation){
+            case NavbarOperation.ShowLogConsole:
+                this.navbar.showComponent(this.logConsole);
+                break;
+            case NavbarOperation.ShowConnections:
+                this.navbar.showComponent(this.connectionsMenu);
+                break;
+            case NavbarOperation.ShowAppearance:
+                this.navbar.showComponent(this.appearanceMenu);
+                this.appearanceMenu.showLastColorPalette();
+                break;
+            case NavbarOperation.ShowAbout:
+                this.navbar.showComponent(this.aboutMenu);
+                break;
+        }
+    }
+
+    /**
+     * Handle the appearance menu operations.
+     */
+    private handleAppearanceMenuOperation(menuOperation: AppearanceMenuOperation, menuItem: HTMLElement): void
+    {
+        switch(menuOperation){
+            case AppearanceMenuOperation.Reset:
+                this.appearanceMenu.showDefaultColorPalette();
+                break;
+            case AppearanceMenuOperation.ChangeTheme:
+                this.appearanceMenu.changeTheme();
                 break;
         }
     }
