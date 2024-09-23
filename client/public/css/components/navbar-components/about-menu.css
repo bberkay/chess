@@ -8,6 +8,10 @@
     color: var(--about-menu-text-color);
 }
 
+#about-body{
+    padding: 5px 20px;
+}
+
  /** 
  * ------------------ Responsive ------------------- 
  *             700px - 900px - 1250px

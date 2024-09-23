@@ -52,27 +52,27 @@
                         display:flex;
 
                         & .player-duration{
-                            font-size: 0.8rem;
-                            color: white;
-                            background-color: #222;
-                            border: 1px solid #333;
+                            font-size: var(--connections-menu-player-duration-font-size);
+                            color: var(--connections-menu-player-duration-text-color);
+                            background-color: var(--connections-menu-player-duration-bg-color);
+                            border: 1px solid var(--connections-menu-border-color);
                             padding: 2px 5px;
 
                             & .milliseconds{
-                                font-size: 0.7rem;
+                                font-size: var(--connections-menu-player-duration-milliseconds-font-size);
                             }
                         }
                     
                         & .player-color{
                             width: 5px;
-                            background-color: green;
                             margin-right: 5px;
                         }    
                     }
 
                     & .player-info{
-                        font-size: 0.95rem;
+                        font-size: var(--connections-menu-player-info-font-size);
                         padding-top:4px;
+
                         & .player-name {
                             font-weight: bold;
                         }
@@ -97,7 +97,7 @@
             }
 
             & .move-history span{
-                font-size: 0.9rem;
+                font-size: var(--connections-menu-move-history-font-size);
             }
             
         }

@@ -23,6 +23,12 @@
 
     /* Appearance Menu(Navbar Component) */
     --appearance-menu-font-size: 13px;
+
+    /* Connections Menu(Navbar Component) */
+    --connections-menu-player-info-font-size: 0.95rem;
+    --connections-menu-move-history-font-size: 0.9rem;
+    --connections-menu-player-duration-font-size: 0.8rem;
+    --connections-menu-player-duration-milliseconds-font-size: 0.7rem;
     
     /* Board Editor */
     --board-editor-table-height: 240px; 
@@ -162,6 +168,9 @@ body{
     --connections-menu-border-color: var(--border-color);
     --connections-menu-text-color: var(--text-color);
     --connections-menu-hover-bg-color: var(--component-color);
+    --connections-menu-player-duration-text-color: var(--text-color);
+    --connections-menu-player-duration-bg-color: var(--component-color);
+    --connections-menu-connection-border-color: var(--component-active-color);
     
     /* Appearance Menu(Navbar Component) */
     --appearance-menu-bg-color: var(--accent-color);
