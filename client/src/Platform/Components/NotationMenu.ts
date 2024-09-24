@@ -246,7 +246,7 @@ export class NotationMenu extends Component{
     /**
      * This function opens/closes the utility menu.
      */
-    public toggleUtilityMenu(): void
+    private toggleUtilityMenu(): void
     {
         document.querySelector(`#notation-menu .utility-toggle-menu`)!.classList.toggle("visible");
     }
@@ -406,5 +406,17 @@ export class NotationMenu extends Component{
         this.renderComponent();
         this.moveCount = 0;
         this.lastScore = {[Color.White]: 0, [Color.Black]: 0};
+    }
+
+    /**
+     * Handle the notation menu operation.
+     */
+    public handleOperation(operation: NotationMenuOperation): void
+    {
+        switch(operation){
+            case NotationMenuOperation.ToggleNotationMenuUtilityMenu:
+                this.toggleUtilityMenu();
+                break;
+        }
     }
 }

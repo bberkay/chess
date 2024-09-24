@@ -342,7 +342,7 @@ export class BoardEditor extends Component{
     /**
      * This function toggles the utility menu.
      */
-    public toggleUtilityMenu(): void
+    private toggleUtilityMenu(): void
     {
         document.querySelector(`#piece-creator .utility-toggle-menu`)!.classList.toggle("visible");
     }
@@ -350,7 +350,7 @@ export class BoardEditor extends Component{
     /**
      * This function changes the mode of the form.
      */
-    public changeBoardCreatorMode(): void
+    private changeBoardCreatorMode(): void
     {
         const boardCreator: HTMLElement = document.querySelector('.board-creator.visible') as HTMLElement;
         boardCreator.classList.remove("visible");
@@ -443,7 +443,7 @@ export class BoardEditor extends Component{
      * This function creates the selected piece on the board.
      */
     @isEditorModeEnable()
-    public createPiece(selectedSquare: HTMLElement): void
+    private createPiece(selectedSquare: HTMLElement): void
     {
         const selectedPieceOption: HTMLElement = document.querySelector(".selected-option .piece") as HTMLElement;
         if(selectedSquare.classList.contains("square") && selectedPieceOption !== null){
@@ -460,7 +460,7 @@ export class BoardEditor extends Component{
      * Remove the piece from the board.
      */
     @isEditorModeEnable()
-    public removePiece(squareElement: HTMLElement): void
+    private removePiece(squareElement: HTMLElement): void
     {
         this.chess.removePiece(this.chess.board.getSquareId(squareElement) as Square);
         squareElement.setAttribute("data-menu-operation", BoardEditorOperation.CreatePiece);
@@ -470,7 +470,7 @@ export class BoardEditor extends Component{
      * This function enables the add piece cursor mode.
      */
     @isEditorModeEnable()
-    public enableMovePieceCursorMode(): void
+    private enableMovePieceCursorMode(): void
     {
         this.selectOption(
             document.querySelector(`
@@ -488,7 +488,7 @@ export class BoardEditor extends Component{
      * This function enables the remove piece cursor mode.
      */
     @isEditorModeEnable()
-    public enableRemovePieceCursorMode(): void
+    private enableRemovePieceCursorMode(): void
     {
         this.selectOption(
             document.querySelector(`
@@ -524,7 +524,7 @@ export class BoardEditor extends Component{
      * This function clears the board.
      */
     @isEditorModeEnable()
-    public clearBoard(): void
+    private clearBoard(): void
     {
         this._createBoard(StartPosition.Empty);
     }
@@ -548,7 +548,7 @@ export class BoardEditor extends Component{
     /**
      * This function if the current mode is custom mode or not.
      */
-    public isBoardCreatorModeCustom(): boolean
+    private isBoardCreatorModeCustom(): boolean
     {
         return this._currentBoardCreatorMode == BoardCreatorMode.Custom;
     }
@@ -589,9 +589,39 @@ export class BoardEditor extends Component{
     /**
      * This function clears the form.
      */
-    public clearFen(): void
+    private clearFen(): void
     {
         (document.querySelector(`.${BoardCreatorMode.Custom} input`) as HTMLInputElement).value = "";
         (document.querySelector(`.${BoardCreatorMode.Template} select`) as HTMLSelectElement).selectedIndex = 0;
+    }
+
+    /**
+     * This function handles the board creator operation.
+     */
+    public handleOperation(operation: BoardEditorOperation, menuItem: HTMLElement): void
+    {
+        switch(operation){
+            case BoardEditorOperation.ToggleBoardEditorUtilityMenu:
+                this.toggleUtilityMenu();
+                break;
+            case BoardEditorOperation.ChangeBoardCreatorMode:
+                this.changeBoardCreatorMode();
+                break;
+            case BoardEditorOperation.ClearBoard:
+                this.clearBoard();
+                break;
+            case BoardEditorOperation.CreatePiece:
+                this.createPiece(menuItem);
+                break;
+            case BoardEditorOperation.RemovePiece:
+                this.removePiece(menuItem);
+                break;
+            case BoardEditorOperation.EnableMovePieceCursorMode:
+                this.enableMovePieceCursorMode();
+                break;
+            case BoardEditorOperation.EnableRemovePieceCursorMode:
+                this.enableRemovePieceCursorMode();
+                break;
+        }
     }
 }

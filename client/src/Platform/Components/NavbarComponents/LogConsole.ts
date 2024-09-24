@@ -223,4 +223,16 @@ export class LogConsole extends NavbarComponent{
     {
         document.getElementById("log-console")!.style.display = "block";
     }
+
+    /**
+     * Handle the operations of the log console.
+     */
+    public handleOperation(operation: LogConsoleOperation): void
+    {
+        switch(operation){
+            case LogConsoleOperation.Clear:
+                this.clear();
+                break;
+        }
+    }
 }

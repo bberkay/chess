@@ -189,88 +189,67 @@ export class Platform{
     {
         const menuOperation = menuItem.getAttribute("data-menu-operation") as MenuOperation;
         if(Object.hasOwn(LogConsoleOperation, menuOperation))
-            this.handleLogConsoleOperation(
-                menuOperation as LogConsoleOperation, 
-                menuItem
+        {
+            this.logConsole.handleOperation(
+                menuOperation as LogConsoleOperation
             );
+        }
+        else if(Object.hasOwn(AppearanceMenuOperation, menuOperation))
+        {
+            this.appearanceMenu.handleOperation(
+                menuOperation as AppearanceMenuOperation
+            );
+        }
         else if(Object.hasOwn(NavigatorModalOperation, menuOperation))
+        {
+            this.navigatorModal.handleOperation(
+                menuOperation as NavigatorModalOperation,
+            );
             this.handleNavigatorModalOperation(
                 menuOperation as NavigatorModalOperation, 
                 menuItem
             );
+        }
         else if(Object.hasOwn(NotationMenuOperation, menuOperation))
+        {
+            this.notationMenu.handleOperation(
+                menuOperation as NotationMenuOperation
+            );
             this.handleNotationMenuOperation(
                 menuOperation as NotationMenuOperation, 
                 menuItem
             );
+        }
         else if(Object.hasOwn(BoardEditorOperation, menuOperation))
+        {
+            this.boardEditor.handleOperation(
+                menuOperation as BoardEditorOperation,
+                menuItem
+            );
             this.handleBoardEditorOperation(
                 menuOperation as BoardEditorOperation, 
                 menuItem
             );
+        }
         else if(Object.hasOwn(NavbarOperation, menuOperation))
+        {
+            this.navbar.handleOperation(
+                menuOperation as NavbarOperation
+            );
             this.handleNavbarOperation(
-                menuOperation as NavbarOperation, 
-                menuItem
+                menuOperation as NavbarOperation
             );
-        else if(Object.hasOwn(AppearanceMenuOperation, menuOperation))
-            this.handleAppearanceMenuOperation(
-                menuOperation as AppearanceMenuOperation, 
-                menuItem
-            );
-    }
-    
-    /**
-     * Handle the log console operations.
-     */
-    private handleLogConsoleOperation(menuOperation: LogConsoleOperation, menuItem: HTMLElement): void
-    {
-        switch(menuOperation){
-            case LogConsoleOperation.Clear:
-                this.logConsole.clear();
-                break;
         }
     }
-
+    
     /**
      * Handle the navigator modal operations.
      */
     private handleNavigatorModalOperation(menuOperation: NavigatorModalOperation, menuItem: HTMLElement): void
     {
         switch(menuOperation){
-            case NavigatorModalOperation.Hide:
-                this.navigatorModal.hide();
-                break;
-            case NavigatorModalOperation.Undo:
-                this.navigatorModal.undo();
-                break;
-            case NavigatorModalOperation.AskConfirmation:
-                this.navigatorModal.showConfirmation();
-                break;
-            case NavigatorModalOperation.ShowGameCreator:
-                this.navigatorModal.showGameCreator();
-                break;
-            case NavigatorModalOperation.ShowSelectDuration:
-                this.navigatorModal.showSelectDuration();
-                break;
-            case NavigatorModalOperation.ShowSelectDurationCustom:
-                this.navigatorModal.showSelectDurationCustom();
-                break
             case NavigatorModalOperation.ShowStartPlayingBoard:
                 this.navigatorModal.showStartPlayingBoard(this.boardEditor.getFen());
-                break;
-            case NavigatorModalOperation.ShowPlayAgainstBot:
-                this.navigatorModal.showPlayAgainstBot();
-                break;
-            case NavigatorModalOperation.ShowCreateLobby:
-                if(LocalStorage.isExist(LocalStorageKey.LastPlayerName))
-                    this.navigatorModal.setPlayerNameInputValue(LocalStorage.load(LocalStorageKey.LastPlayerName));
-                this.navigatorModal.showCreateLobby();
-                break
-            case NavigatorModalOperation.ShowJoinLobby:
-                if(LocalStorage.isExist(LocalStorageKey.LastPlayerName))
-                    this.navigatorModal.setPlayerNameInputValue(LocalStorage.load(LocalStorageKey.LastPlayerName));
-                this.navigatorModal.showJoinLobby();
                 break;
             case NavigatorModalOperation.PlayByYourself:
                 this.navigatorModal.hide();
@@ -306,9 +285,6 @@ export class Platform{
             case NotationMenuOperation.LastMove:
                 this.chess.lastMove();
                 break;*/
-            case NotationMenuOperation.ToggleNotationMenuUtilityMenu:
-                this.notationMenu.toggleUtilityMenu();
-                break;
         }
     }
 
@@ -323,12 +299,6 @@ export class Platform{
                 this.navigatorModal.hide();
                 this._enableBoardEditor();
                 break;
-            case BoardEditorOperation.ToggleBoardEditorUtilityMenu:
-                this.boardEditor.toggleUtilityMenu();
-                break;
-            case BoardEditorOperation.ChangeBoardCreatorMode:
-                this.boardEditor.changeBoardCreatorMode();
-                break;
             case BoardEditorOperation.FlipBoard:
                 this._flipBoard();
                 break;
@@ -338,28 +308,13 @@ export class Platform{
             case BoardEditorOperation.CreateBoard:
                 this._createBoard();
                 break;
-            case BoardEditorOperation.ClearBoard:
-                this.boardEditor.clearBoard();
-                break;
-            case BoardEditorOperation.CreatePiece:
-                this.boardEditor.createPiece(menuItem);
-                break;
-            case BoardEditorOperation.RemovePiece:
-                this.boardEditor.removePiece(menuItem);
-                break;
-            case BoardEditorOperation.EnableMovePieceCursorMode:
-                this.boardEditor.enableMovePieceCursorMode();
-                break;
-            case BoardEditorOperation.EnableRemovePieceCursorMode:
-                this.boardEditor.enableRemovePieceCursorMode();
-                break;
         }
     }
 
     /**
      * Handle the navbar operations.
      */
-    private handleNavbarOperation(menuOperation: NavbarOperation, menuItem: HTMLElement): void
+    private handleNavbarOperation(menuOperation: NavbarOperation): void
     {
         switch(menuOperation){
             case NavbarOperation.ShowLogConsole:
@@ -370,25 +325,13 @@ export class Platform{
                 break;
             case NavbarOperation.ShowAppearance:
                 this.navbar.showComponent(this.appearanceMenu);
-                this.appearanceMenu.showLastColorPalette();
                 break;
             case NavbarOperation.ShowAbout:
                 this.navbar.showComponent(this.aboutMenu);
                 break;
-        }
-    }
-
-    /**
-     * Handle the appearance menu operations.
-     */
-    private handleAppearanceMenuOperation(menuOperation: AppearanceMenuOperation, menuItem: HTMLElement): void
-    {
-        switch(menuOperation){
-            case AppearanceMenuOperation.Reset:
-                this.appearanceMenu.showDefaultColorPalette();
-                break;
-            case AppearanceMenuOperation.ChangeTheme:
-                this.appearanceMenu.changeTheme();
+            case NavbarOperation.ShowAppearance:
+                this.navbar.showComponent(this.appearanceMenu);
+                this.appearanceMenu.showLastColorPalette();
                 break;
         }
     }

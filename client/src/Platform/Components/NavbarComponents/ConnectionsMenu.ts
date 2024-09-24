@@ -58,7 +58,7 @@ export class ConnectionsMenu extends NavbarComponent{
     }
 
     /**
-     * 
+     * Add a connection to the connections menu.
      */
     public add(): void
     {

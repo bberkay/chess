@@ -1,3 +1,4 @@
+import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage";
 import { SocketOperation } from "../../Types";
 import { BoardEditorOperation, NavigatorModalOperation } from "../Types";
 import { Component } from "./Component";
@@ -110,7 +111,7 @@ export class NavigatorModal extends Component{
     /**
      * This function bounce the current navigator modal
      */
-    public bounce(): void
+    private bounce(): void
     {
         const modal = document.querySelector('.navigator-modal')!;
         if(!modal) return;
@@ -198,7 +199,7 @@ export class NavigatorModal extends Component{
     /**
      * Show the select game duration screen.
      */
-    public showSelectDuration(): void
+    private showSelectDuration(): void
     {
         this.show(
             "Select Game Duration",
@@ -227,7 +228,7 @@ export class NavigatorModal extends Component{
     /**
      * Show the select custom duration screen.
      */
-    public showSelectDurationCustom(): void
+    private showSelectDurationCustom(): void
     {
         this.show(
             "Enter Game Duration",
@@ -250,7 +251,7 @@ export class NavigatorModal extends Component{
     /**
      * Show the create lobby screen.
      */
-    public showCreateLobby(): void
+    private showCreateLobby(): void
     {
         this.lastSelectedDuration = this.getSelectedGameDuration();
         this.show(
@@ -312,7 +313,7 @@ export class NavigatorModal extends Component{
     /**
      * Show the play against bot screen.
      */
-    public showPlayAgainstBot(): void
+    private showPlayAgainstBot(): void
     {
         this.show(
             "Play against Bot",
@@ -334,7 +335,7 @@ export class NavigatorModal extends Component{
     /**
      * Show the confirmation screen.
      */
-    public showConfirmation(): void
+    private showConfirmation(): void
     {
         this.show(
             "Confirmation",
@@ -366,6 +367,60 @@ export class NavigatorModal extends Component{
     }
 
     /**
+     * Handle the operation of the navigator modal.
+     */
+    public handleOperation(operation: NavigatorModalOperation): void
+    {
+        switch(operation){
+            case NavigatorModalOperation.Hide:
+                this.hide();
+                break;
+            case NavigatorModalOperation.Undo:
+                this.undo();
+                break;
+            case NavigatorModalOperation.AskConfirmation:
+                this.showConfirmation();
+                break;
+            case NavigatorModalOperation.ShowGameCreator:
+                this.showGameCreator();
+                break;
+            case NavigatorModalOperation.ShowSelectDuration:
+                this.showSelectDuration();
+                break;
+            case NavigatorModalOperation.ShowSelectDurationCustom:
+                this.showSelectDurationCustom();
+                break
+            case NavigatorModalOperation.ShowPlayAgainstBot:
+                this.showPlayAgainstBot();
+                break;
+            case NavigatorModalOperation.ShowCreateLobby:
+                if(LocalStorage.isExist(LocalStorageKey.LastPlayerName))
+                    this.setPlayerNameInputValue(LocalStorage.load(LocalStorageKey.LastPlayerName));
+                this.showCreateLobby();
+                break
+            case NavigatorModalOperation.ShowJoinLobby:
+                if(LocalStorage.isExist(LocalStorageKey.LastPlayerName))
+                    this.setPlayerNameInputValue(LocalStorage.load(LocalStorageKey.LastPlayerName));
+                this.showJoinLobby();
+                break;
+        }
+    }
+
+    /**
+     * Set the input value of the player name.
+     * If the player name modal is open.
+     * 
+     * @param value Must be between MIN_PLAYER_NAME_LENGTH and MAX_PLAYER_NAME_LENGTH
+     * characters. If not, it will be set to DEFULT_PLAYER_NAME.
+     */
+    private setPlayerNameInputValue(value: string): void
+    {
+        if(value.length < MIN_PLAYER_NAME_LENGTH || value.length > MAX_PLAYER_NAME_LENGTH)
+            value = DEFULT_PLAYER_NAME;
+        (document.querySelector("#navigator-modal #player-name") as HTMLInputElement).value = value;
+    }
+
+    /**
      * Get the entered player name from the 
      * modal. If the player name modal is open.
      * 
@@ -378,20 +433,6 @@ export class NavigatorModal extends Component{
         if(playerName.length < MIN_PLAYER_NAME_LENGTH || playerName.length > MAX_PLAYER_NAME_LENGTH)
             playerName = DEFULT_PLAYER_NAME;
         return playerName;
-    }
-
-    /**
-     * Set the input value of the player name.
-     * If the player name modal is open.
-     * 
-     * @param value Must be between MIN_PLAYER_NAME_LENGTH and MAX_PLAYER_NAME_LENGTH
-     * characters. If not, it will be set to DEFULT_PLAYER_NAME.
-     */
-    public setPlayerNameInputValue(value: string): void
-    {
-        if(value.length < MIN_PLAYER_NAME_LENGTH || value.length > MAX_PLAYER_NAME_LENGTH)
-            value = DEFULT_PLAYER_NAME;
-        (document.querySelector("#navigator-modal #player-name") as HTMLInputElement).value = value;
     }
 
     /**

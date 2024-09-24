@@ -200,7 +200,7 @@ export class AppearanceMenu extends NavbarComponent{
     /**
      * Change the theme of the app.
      */
-    public changeTheme(): void
+    private changeTheme(): void
     {
         const changeThemeButton = document.querySelector(`
             [data-menu-operation="${AppearanceMenuOperation.ChangeTheme}"]
@@ -219,7 +219,7 @@ export class AppearanceMenu extends NavbarComponent{
     /**
      * Show the default color palette.
      */
-    public showDefaultColorPalette(): void
+    private showDefaultColorPalette(): void
     {
         const rootComputedStyle = getComputedStyle(document.documentElement);
         for(const input of document.querySelectorAll("#appearance-menu input[type='color']") as NodeListOf<HTMLInputElement>){
@@ -233,5 +233,20 @@ export class AppearanceMenu extends NavbarComponent{
     public showLastColorPalette(): void
     {
         this.showDefaultColorPalette();
+    }
+
+    /**
+     * Handle the appearance menu events.
+     */
+    public handleOperation(operation: AppearanceMenuOperation): void
+    {
+        switch(operation){
+            case AppearanceMenuOperation.Reset:
+                this.showDefaultColorPalette();
+                break;
+            case AppearanceMenuOperation.ChangeTheme:
+                this.changeTheme();
+                break;
+        }
     }
 }
