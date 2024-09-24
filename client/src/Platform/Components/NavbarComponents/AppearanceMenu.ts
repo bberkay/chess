@@ -33,26 +33,32 @@ export class AppearanceMenu extends NavbarComponent{
                         <div class="input-group">
                             <label for="white-square-color">White</label>
                             <div class="input-group--horizontal">
-                                <input type="color" id="white-square-color" value="#ffffff">
+                                <div class="input-group">
+                                    <input type="color" id="white-square-color" value="#ffffff">
+                                    <input type="range" id="white-square-color-opacity" min="0" max="1" step="0.1" value="1">
+                                </div>
                                 <button id="reset-white-square-color">↻</button>
                             </div>
-                            <input type="range" id="white-square-opacity" min="0" max="1" step="0.1" value="1">
                         </div>
                         <div class="input-group">
                             <label for="black-square-color">Black</label>
                             <div class="input-group--horizontal">
-                                <input type="color" id="black-square-color" value="#ffffff">
+                                <div class="input-group">
+                                    <input type="color" id="black-square-color" value="#ffffff">
+                                    <input type="range" id="black-square-color-opacity" min="0" max="1" step="0.1" value="1">
+                                </div>
                                 <button id="reset-black-square-color">↻</button>
                             </div>
-                            <input type="range" id="white-square-opacity" min="0" max="1" step="0.1" value="1">
                         </div>
                         <div class="input-group">
                             <label for="border-color">Border</label>
                             <div class="input-group--horizontal">
-                                <input type="color" id="border-color" value="#ffffff">
+                                <div class="input-group">
+                                    <input type="color" id="border-color" value="#ffffff">
+                                    <input type="range" id="border-color-opacity" min="0" max="1" step="0.1" value="1">
+                                </div>
                                 <button id="reset-border-color">↻</button>
                             </div>
-                            <input type="range" id="white-square-opacity" min="0" max="1" step="0.1" value="1">
                         </div>
                     </div>
                 </fieldset>
@@ -62,26 +68,32 @@ export class AppearanceMenu extends NavbarComponent{
                         <div class="input-group">
                             <label for="selected-color">Selected</label>
                             <div class="input-group--horizontal">
-                                <input type="color" id="selected-color" value="#ffffff">
+                                <div class="input-group">
+                                    <input type="color" id="selected-color" value="#ffffff">
+                                    <input type="range" id="selected-color-opacity" min="0" max="1" step="0.1" value="1">
+                                </div>
                                 <button id="reset-selected-color">↻</button>
                             </div>
-                            <input type="range" id="white-square-opacity" min="0" max="1" step="0.1" value="1">
                         </div>
                         <div class="input-group">
                             <label for="playable-color">Playable</label>
                             <div class="input-group--horizontal">
-                                <input type="color" id="playable-color" value="#ffffff">
+                                <div class="input-group">
+                                    <input type="color" id="playable-color" value="#ffffff">
+                                    <input type="range" id="playable-color-opacity" min="0" max="1" step="0.1" value="1">
+                                </div>
                                 <button id="reset-playable-color">↻</button>
                             </div>
-                            <input type="range" id="white-square-opacity" min="0" max="1" step="0.1" value="1">
                         </div>
                         <div class="input-group">
                             <label for="checked-color">Checked</label>
                             <div class="input-group--horizontal">
-                                <input type="color" id="checked-color" value="#ffffff">
+                                <div class="input-group">
+                                    <input type="color" id="checked-color" value="#ffffff">
+                                    <input type="range" id="checked-color-opacity" min="0" max="1" step="0.1" value="1">
+                                </div>
                                 <button id="reset-checked-color">↻</button>
                             </div>
-                            <input type="range" id="white-square-opacity" min="0" max="1" step="0.1" value="1">
                         </div>
                     </div>
                     <div class="separator"></div>
@@ -89,26 +101,32 @@ export class AppearanceMenu extends NavbarComponent{
                         <div class="input-group">
                             <label for="from-color">From</label>
                             <div class="input-group--horizontal">
-                                <input type="color" id="from-color" value="#ffffff">
+                                <div class="input-group">
+                                    <input type="color" id="from-color" value="#ffffff">
+                                    <input type="range" id="from-color-opacity" min="0" max="1" step="0.1" value="1">
+                                </div>
                                 <button id="reset-from-color">↻</button>
                             </div>
-                            <input type="range" id="white-square-opacity" min="0" max="1" step="0.1" value="1">
                         </div>
-                        <div class="input-group">
+                         <div class="input-group">
                             <label for="to-color">To</label>
                             <div class="input-group--horizontal">
-                                <input type="color" id="to-color" value="#ffffff">
-                                <button id="reset-to-color">↻</button>
+                                <div class="input-group">
+                                    <input type="color" id="to-color" value="#ffffff">
+                                    <input type="range" id="to-color-opacity" min="0" max="1" step="0.1" value="1">
+                                </div>
+                               <button id="reset-to-color">↻</button>
                             </div>
-                            <input type="range" id="white-square-opacity" min="0" max="1" step="0.1" value="1">
                         </div>
                         <div class="input-group">
                             <label for="hovering-color">Hovering</label>
                             <div class="input-group--horizontal">
-                                <input type="color" id="hovering-color" value="#ffffff">
+                                <div class="input-group">
+                                    <input type="color" id="hovering-color" value="#ffffff">
+                                    <input type="range" id="hovering-color-opacity" min="0" max="1" step="0.1" value="1">
+                                </div>
                                 <button id="reset-hovering-color">↻</button>
                             </div>
-                            <input type="range" id="white-square-opacity" min="0" max="1" step="0.1" value="1">
                         </div>
                     </div>
                     <div class="separator"></div>
@@ -116,26 +134,32 @@ export class AppearanceMenu extends NavbarComponent{
                         <div class="input-group">
                             <label for="preselected-color">Preselected</label>
                             <div class="input-group--horizontal">
-                                <input type="color" id="preselected-color" value="#ffffff">
+                                <div class="input-group">
+                                    <input type="color" id="preselected-color" value="#ffffff">
+                                    <input type="range" id="preselected-color-opacity" min="0" max="1" step="0.1" value="1">
+                                </div>
                                 <button id="reset-preselected-color">↻</button>
                             </div>
-                            <input type="range" id="white-square-opacity" min="0" max="1" step="0.1" value="1">
                         </div>
-                        <div class="input-group">
+                         <div class="input-group">
                             <label for="preplayable-color">Preplayable</label>
                             <div class="input-group--horizontal">
-                                <input type="color" id="preplayable-color" value="#ffffff">
+                                <div class="input-group">
+                                    <input type="color" id="preplayable-color" value="#ffffff">
+                                    <input type="range" id="preplayable-color-opacity" min="0" max="1" step="0.1" value="1">
+                                </div>
                                 <button id="reset-preplayable-color">↻</button>
                             </div>
-                            <input type="range" id="white-square-opacity" min="0" max="1" step="0.1" value="1">
                         </div>
                         <div class="input-group">
                             <label for="preplayed-color">Preplayed</label>
                             <div class="input-group--horizontal">
-                                <input type="color" id="preplayed-color" value="#ffffff">
+                                <div class="input-group">
+                                    <input type="color" id="preplayed-color" value="#ffffff">
+                                    <input type="range" id="preplayed-color-opacity" min="0" max="1" step="0.1" value="1">
+                                </div>
                                 <button id="reset-preplayed-color">↻</button>
                             </div>
-                            <input type="range" id="white-square-opacity" min="0" max="1" step="0.1" value="1">
                         </div>
                     </div>
                     <div class="separator"></div>
@@ -143,15 +167,20 @@ export class AppearanceMenu extends NavbarComponent{
                         <div class="input-group">
                             <label for="prehovering-color">Prehovering</label>
                             <div class="input-group--horizontal">
-                                <input type="color" id="prehovering-color" value="#ffffff">
+                                <div class="input-group">
+                                    <input type="color" id="prehovering-color" value="#ffffff">
+                                    <input type="range" id="prehovering-color-opacity" min="0" max="1" step="0.1" value="1">
+                                </div>
                                 <button id="reset-prehovering-color">↻</button>
                             </div>
-                            <input type="range" id="white-square-opacity" min="0" max="1" step="0.1" value="1">
                         </div>
                         <div class="input-group">
                             <label for="disabled-color">Disabled</label>
                             <div class="input-group--horizontal">
-                                <input type="color" id="disabled-color" value="#ffffff">
+                                <div class="input-group">
+                                    <input type="color" id="disabled-color" value="#ffffff">
+                                    <input type="range" id="disabled-color-opacity" min="0" max="1" step="0.1" value="1">
+                                </div>
                                 <button id="reset-disabled-color">↻</button>
                             </div>
                         </div>
@@ -165,26 +194,32 @@ export class AppearanceMenu extends NavbarComponent{
                         <div class="input-group">
                             <label for="promotion-option-color">Background</label>
                             <div class="input-group--horizontal">
-                                <input type="color" id="promotion-option-color" value="#ffffff">
+                                <div class="input-group">
+                                    <input type="color" id="promotion-option-color" value="#ffffff">
+                                    <input type="range" id="promotion-option-color-opacity" min="0" max="1" step="0.1" value="1">
+                                </div>
                                 <button id="reset-promotion-option-color">↻</button>
                             </div>
-                            <input type="range" id="white-square-opacity" min="0" max="1" step="0.1" value="1">
                         </div>
                         <div class="input-group">
                             <label for="promotion-option-outline-color">Outline</label>
                             <div class="input-group--horizontal">
-                                <input type="color" id="promotion-option-outline-color" value="#ffffff">
+                                <div class="input-group">
+                                    <input type="color" id="promotion-option-outline-color" value="#ffffff">
+                                    <input type="range" id="promotion-option-outline-color-opacity" min="0" max="1" step="0.1" value="1">
+                                </div>
                                 <button id="reset-promotion-option-outline-color">↻</button>
                             </div>
-                            <input type="range" id="white-square-opacity" min="0" max="1" step="0.1" value="1">
                         </div>
                         <div class="input-group">
                             <label for="promotion-option-box-shadow-color">Box Shadow</label>
                             <div class="input-group--horizontal">
-                                <input type="color" id="promotion-option-box-shadow-color" value="#ffffff">
-                                <button id="reset-promotion-option-box-shadow-color">↻</button>
+                                <div class="input-group">
+                                     <input type="color" id="promotion-option-box-shadow-color" value="#ffffff">
+                                    <input type="range" id="promotion-option-box-shadow-color-opacity" min="0" max="1" step="0.1" value="1">
+                                </div>
+                                 <button id="reset-promotion-option-box-shadow-color">↻</button>
                             </div>
-                            <input type="range" id="white-square-opacity" min="0" max="1" step="0.1" value="1">
                         </div>
                     </div>
                 </fieldset>

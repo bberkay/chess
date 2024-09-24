@@ -7,16 +7,22 @@
     border:1px solid var(--appearance-menu-border-color);
     color: var(--appearance-menu-text-color);
     font-size: var(--appearance-menu-font-size);
+    resize: horizontal;
 }
 
 #appearance-body{
     padding: 10px;
+    height: calc(var(--chessboard-board-size) - 15px);
+    width:auto;
+    overflow-y: scroll;
+    overflow-x: hidden;
 
     & fieldset{
         border: 1px solid var(--appearance-menu-fieldset-border-color);
-        padding: 10px 10px;
-        padding-bottom: 5px;
+        padding: 9px 10px;
+        padding-bottom: 14px;
         margin: 15px 0;
+        background-color: var(--appearance-menu-fieldset-bg-color);
 
         & legend{
             font-weight: bold;
@@ -33,7 +39,37 @@
         gap: 10px;
         width: 100%;
         
-        & div.input-group{
+        & .input-group--horizontal{
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+            margin-top: 3px;
+
+            & input{
+                width: 100%;
+                padding: 0;
+                box-sizing: border-box;
+                border:2px solid var(--appearance-menu-color-picker-border-color);
+                border-right: none;
+            }
+
+            & input[type="color"]{
+                height: 20px;
+            }
+
+            & input[type="range"]{
+                border-top: none;
+                height: 15px;
+            }
+
+            & button{
+                padding:0 4px 0 6px;
+                background-color: var(--appearance-menu-button-bg-color);
+                border-left:none;
+            }
+        };
+
+        & .input-group{
             display: flex;
             flex-direction: column;
             flex-grow: 1;
@@ -44,31 +80,12 @@
             & label{
                 margin-left:2px;
             }
-
-            & .input-group--horizontal{
-                display: flex;
-                flex-direction: row;
-                width: 100%;
-                margin-top: 3px;
-
-                & input{
-                    width: 100%;
-                    padding: 0;
-                    box-sizing: border-box;
-                    border:2px solid var(--appearance-menu-color-picker-border-color);
-                }
-
-                & button{
-                    padding:0 7px;
-                    background-color: var(--appearance-menu-button-bg-color);
-                }
-            }
         }
     }
 
 
     & .separator{
-        margin:15px 0;
+        margin:12px 0;
     }
 
     & .appearance-utilities{
