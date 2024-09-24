@@ -62,54 +62,6 @@
     --navigator-modal-z-index:15; /* Higher than everything */
     --navigator-modal-bgicon-z-index: 14; /* Higher than everything except navigator-modal-z-index */
     --navigator-modal-backdrop-z-index: 13; /* Higher than everything except navigator-modal-bgicon-z-index */
-}
-
-/* ------------------- Themes ------------------- */
-body{
-    /* Colors */
-
-    /* Theme colors, change these to change the theme */
-    --bg-color: #F5F5F5;
-    --text-color: #141414;
-    --accent-color: #FFF;
-    --accent-opaque-color: #FFFFFFC5;
-    --component-color: #EAEAEA;
-    --component-opaque-color: #EAEAEAEA;
-    --component-active-color: #D5D5D5; 
-    --border-color: #CCC;
-
-    /* Standard colors, avoid changing */
-    --white-color: #FFF;
-    --black-color: #000;
-    --black-opaque-color: #000000AD;
-    --light-gray-color: #999;
-    --gray-color: #808080;
-    --dark-gray-color: #666;
-    --dark-gray-opaque-color: #666666B3;
-    --online-color: #6EAF23;
-    --offline-color: #C2091F;
-    --backdrop-bg-color: #0000005C;
-    --glass-bg-color: #FFFFFF1A;
-    --glass-border-color:#FFFFFF4D;
-    --glass-box-shadow-color: #0000001A;
-    --glass-error-bg-color: #9B040475;
-    --glass-error-border-color: #FF010133;
-    --glass-component-bg-color: hsla(0,0%,100%,.2);
-    --glass-component-active-bg-color: hsla(0,0%,100%,.4);
-}
-
-body.dark-mode{
-    /* Colors */
-
-    /* Theme colors, change these to change the theme */
-    --bg-color: #141414;
-    --text-color: #F5F5F5;
-    --accent-color: #111;
-    --accent-opaque-color: #111111C5;
-    --component-color: #222;
-    --component-opaque-color: #222222EE;
-    --component-active-color: #333;
-    --border-color: #2A2A2A;
 
     /* Standard colors, avoid changing */
     --white-color: #FFF;
@@ -130,6 +82,33 @@ body.dark-mode{
     --glass-error-border-color: #FF010133;
     --glass-component-bg-color: hsla(0,0%,100%,.2);
     --glass-component-active-bg-color: hsla(0,0%,100%,.4);
+}
+
+/* ------------------- Themes ------------------- */
+body{
+    /* Light, Change the colors for light mode */
+    --bg-color: #F5F5F5;
+    --text-color: #141414;
+    --light-color: #EAEAEA;
+    --accent-color: #FFF;
+    --accent-opaque-color: #FFFFFFC5;
+    --component-color: #EAEAEA;
+    --component-opaque-color: #EAEAEAEA;
+    --component-active-color: #D5D5D5; 
+    --border-color: #CCC;
+}
+
+body.dark-mode{
+    /* Dark, Change the colors for dark mode */
+    --bg-color: #141414;
+    --text-color: #F5F5F5;
+    --light-color: #F5F5F5;
+    --accent-color: #111;
+    --accent-opaque-color: #111111C5;
+    --component-color: #222;
+    --component-opaque-color: #222222EE;
+    --component-active-color: #333;
+    --border-color: #2A2A2A;
 }
 
 body{
@@ -336,7 +315,7 @@ button{
     border-left:none;
 }
 
-.input-group input{
+.input-group input:not(input[type="range"]){
     border-top-right-radius: 0!important;
     border-bottom-right-radius: 0!important;
 }
@@ -400,6 +379,71 @@ button{
 
 ::-webkit-scrollbar-thumb {
     background: var(--scrollbar-thumb-color);
+}
+
+/* Color Picker */
+input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+input[type="color"]::-webkit-color-swatch{
+    border-color: none;
+}
+
+input[type="color"]::-moz-color-swatch {
+    border-color: transparent;
+}
+
+/* Range */
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+    width: 100%;
+    padding: 0;
+    background-color: transparent;
+}
+
+input[type="range"]::-webkit-slider-runnable-track{
+    background-color: var(--light-gray-color);
+    border-radius: 0.5rem;
+    height: 5px;
+    margin-top:7px;
+}
+
+input[type="range"]::-moz-range-track{
+    background-color: var(--light-gray-color);
+    border-radius: 0.5rem;
+    height: 5px;
+}
+
+input[type="range"]::-webkit-slider-thumb{
+    -webkit-appearance: none;
+    appearance: none;
+    border: 1px solid var(--border-color);
+    background-color: var(--light-color);
+    width: 10px;
+    height: 10px;
+    margin-top: -3px;
+    border-radius: 50%;
+}
+
+input[type="range"]::-moz-range-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    border: 1px solid var(--border-color);
+    background-color: var(--light-color);
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+body.dark-mode input[type="range"]::-moz-range-thumb{
+    border: none;
+}
+
+body.dark-mode input[type="range"]::-webkit-slider-thumb{
+    border: none;
 }
 
 /* Utility */

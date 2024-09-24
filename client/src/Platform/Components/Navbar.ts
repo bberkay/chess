@@ -67,10 +67,5 @@ export class Navbar extends Component{
      */
     public handleOperation(operation: NavbarOperation): void
     {
-        switch(operation)
-        {
-            default:
-                throw new Error("The given operation is not supported.");
-        }
     }
 }

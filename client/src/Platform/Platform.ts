@@ -325,13 +325,10 @@ export class Platform{
                 break;
             case NavbarOperation.ShowAppearance:
                 this.navbar.showComponent(this.appearanceMenu);
+                this.appearanceMenu.showLastColorPalette();
                 break;
             case NavbarOperation.ShowAbout:
                 this.navbar.showComponent(this.aboutMenu);
-                break;
-            case NavbarOperation.ShowAppearance:
-                this.navbar.showComponent(this.appearanceMenu);
-                this.appearanceMenu.showLastColorPalette();
                 break;
         }
     }
