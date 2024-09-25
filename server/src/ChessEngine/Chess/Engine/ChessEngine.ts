@@ -140,7 +140,7 @@ export class ChessEngine extends BoardManager {
          * there is no moves for the given square.
          * @see getMoves function.
          */
-        if(!this.currentMoves.hasOwnProperty(square)){
+        if(!Object.hasOwn(this.currentMoves, square)){
             this.logger.save("Move type is not found because there is no selected square");
             return null;
         }
@@ -168,23 +168,31 @@ export class ChessEngine extends BoardManager {
     /**
      * This function returns the moves of the given square with move engine.
      */
-    public getMoves(square: Square): Moves | null
+    public getMoves(square: Square, isPreCalculation: boolean = false): Moves | null
     {
+        if(isPreCalculation){
+            this.changeTurnColor(BoardQuerier.getColorOfOpponent());
+            this.logger.save("Move calculation set to pre calculation mode");
+        }
+
         if(!this.isBoardPlayable || !BoardQuerier.isSquareSelectable(square)){
             this.logger.save(`Moves of the square is not found because ${!this.isBoardPlayable ? `board is not playable` : ` square[${square}] is not selectable`}`);
             return null;
         }
 
-        /**
-         * Get the moves of square with move engine. If the moves of the square
-         * is already calculated then get the moves from the calculatedMoves.
-         * Otherwise, calculate the moves with move engine and save the moves
-         */
+        if(isPreCalculation){
+            const moves = this.moveEngine.getMoves(square);
+            this.logger.save(`Moves of the pre selected square[${square}] is calculated by move engine`);
+            this.changeTurnColor(BoardQuerier.getColorOfOpponent());
+            this.logger.save("Move calculation set to normal calculation mode");
+            return moves;
+        }
+
         this.currentMoves[square] = this.currentMoves[square] ?? this.moveEngine.getMoves(square);
         this.logger.save(this.currentMoves.hasOwnProperty(square)
             ? `Moves of the square[${square}] is found from calculated moves[${JSON.stringify(this.currentMoves)}]`
             : `Moves of the square[${square}] is calculated by move engine`);
-
+        
         // Save the moves to the calculatedMoves.
         this.logger.save(`Moves of the square is saved to calculated moves(or updated)[${JSON.stringify(this.currentMoves)}]`);
 
@@ -212,7 +220,7 @@ export class ChessEngine extends BoardManager {
             this.logger.save("Game status set to in play because game is started");
         }
 
-        if(!this.currentMoves.hasOwnProperty(from)){
+        if(!this.currentMoves || !Object.hasOwn(this.currentMoves, from)){
             this.currentMoves[from] = this.getMoves(from);
             this.logger.save("Moves of the square is not calculated so calculate the moves");
         }
@@ -478,29 +486,16 @@ export class ChessEngine extends BoardManager {
      */
     private finishTurn(): void
     {
-        /**
-         * Order of the functions is important.
-         *
-         * Example scenario for White:
-         * 1- Clear current moves and board playable status for the next turn.
-         * 2- Change the turn(White -> Black)
-         * 3- Check the game is finished or not for Black
-         * 4- Set move notation of white player's move.
-         * 4.1- Check en passant move for update the fen notation.
-         *      - This function must be called after the saveMoveNotation function because moveEngine calculate en passant
-         *      move by checking the last two moves with BoardQueyer.
-         * 5- Clear the moveNotation for black player's turn.
-         */
+        // Order of the operations is important.
         this.currentMoves = {};
         this.isBoardPlayable = false;
         this.changeTurn();
         this.checkGameStatus();
         this.saveMoveNotation(this.moveNotation);
-        if([
-            GameStatus.InPlay,
+        if([GameStatus.InPlay,
             GameStatus.WhiteInCheck,
-            GameStatus.BlackInCheck].includes(BoardQuerier.getBoardStatus())
-        ){
+            GameStatus.BlackInCheck
+        ].includes(BoardQuerier.getBoardStatus())){
             this.checkEnPassant();
             this.checkCastling();
         }
@@ -720,7 +715,7 @@ export class ChessEngine extends BoardManager {
             this.logger.save("Not enough moves for possible en passant move");
             return;
         }
-
+    
         // Get the last two moves and check the last move is pawn move or not.
         const lastTwoMove: Square[] = this.getNotation().slice(-2).map(move => Converter.squareToSquareID(move));
         const lastPlayerMove: Square = lastTwoMove[0];
@@ -734,21 +729,17 @@ export class ChessEngine extends BoardManager {
             return;
         }
 
-        /**
-         * Last player's move could be calculated in the current moves at
-         * the checkGameStatus function and this function is called after
-         * the checkGameStatus function so check the last player's move
-         * is in the current moves or not.
-         */
-        if(this.currentMoves.hasOwnProperty(lastPlayerMove) && this.currentMoves[lastPlayerMove]![MoveType.EnPassant] && this.currentMoves[lastPlayerMove]![MoveType.EnPassant]!.length > 0){
+        if(this.currentMoves.hasOwnProperty(lastPlayerMove) 
+            && this.currentMoves[lastPlayerMove]![MoveType.EnPassant] 
+            && this.currentMoves[lastPlayerMove]![MoveType.EnPassant]!.length > 0){
             this.setEnPassant(this.currentMoves[lastPlayerMove]![MoveType.EnPassant]![0]!);
             this.logger.save(`En passant move[${this.currentMoves[lastPlayerMove]![MoveType.EnPassant]![0]!}] is found and set on fen notation`);
             return;
         }
 
-        // If the last player's move is not in the current moves then calculate the moves of the last player's move.
         const lastPlayerMoves: Moves = this.moveEngine.getMoves(lastPlayerMove)!;
-        if(lastPlayerMoves.hasOwnProperty(MoveType.EnPassant) && lastPlayerMoves[MoveType.EnPassant]!.length > 0){
+        if(lastPlayerMoves && lastPlayerMoves.hasOwnProperty(MoveType.EnPassant) 
+            && lastPlayerMoves[MoveType.EnPassant]!.length > 0){
             this.setEnPassant(lastPlayerMoves[MoveType.EnPassant]![0]!);
             this.logger.save(`En passant move[${lastPlayerMoves[MoveType.EnPassant]![0]!}] is calculated and set on fen notation`);
         }

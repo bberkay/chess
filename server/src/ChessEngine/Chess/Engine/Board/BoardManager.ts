@@ -118,12 +118,21 @@ export class BoardManager extends Board{
     }
 
     /**
-     * Change turn(change current player's color to enemy color)
+     * Change color to oppenent's color and increase move count
      */
     protected changeTurn(): void
     {
         Board.currentTurn = BoardQuerier.getColorOfOpponent();
         Board.moveCount += Board.currentTurn === Color.White ? 1 : 0;
+    }
+
+    /**
+     * Change turn color to the given color. This is mostly
+     * used for precalculations of the moves.
+     */
+    protected changeTurnColor(color: Color): void
+    {
+        Board.currentTurn = color;
     }
 
     /**

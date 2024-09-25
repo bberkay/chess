@@ -113,7 +113,8 @@ export class MoveExtender{
          * 2. The enemy pawn must be on an adjacent square to the moving pawn.
          * 3. The enemy pawn must have just moved two squares in a single move.
          * 4. The en passant capture must be made on the very next turn.
-         *
+         * 5. The enemy pawn must moved two squares in the last move.
+         * 
          * @see for more information about en passant https://en.wikipedia.org/wiki/En_passant
          */
 
@@ -127,28 +128,29 @@ export class MoveExtender{
         const enPassantMove: Square = direction == EnPassantDirection.Left
             ? (color == Color.White ? square - 9 : square + 7)
             : (color == Color.White ? square - 7 : square + 9); // back diagonal square of the enemy pawn.
-
+        
         // Target square of the enemy pawn for en passant.
         const enemyPawn: number = direction == EnPassantDirection.Left ? square - 1 : square + 1;
+        const moveHistory = BoardQuerier.getMoveHistory();
 
         /**
          * Search if the enemy pawn moved one square forward previously in
          * the move history. If it is not found in the move history, it means
          * that the enemy pawn moved two squares, or it is not moved yet.
          */
-        const isEnemyPawnMovedTwoSquares: boolean = !BoardQuerier.getMoveHistory().includes(
+        const isEnemyPawnMovedTwoSquares: boolean = !moveHistory.includes(
             Converter.squareIDToSquare((enemyPawn) + (color == Color.White ? -8 : 8))
         );
 
         // Check fen notation for en passant availability when the game is loaded from fen notation.
-        if(BoardQuerier.getMoveHistory().length == 0 && BoardQuerier.getGame().enPassant == enPassantMove)
+        if(moveHistory.length == 0 && BoardQuerier.getGame().enPassant == enPassantMove)
             return enPassantMove;
 
-        // Check all rules.
         if(pawnRow != enPassantRow // First rule.
             || !BoardQuerier.isSquareHasPiece(enemyPawn, color == Color.White ? Color.Black : Color.White, [PieceType.Pawn]) // Second rule.
-            || BoardQuerier.getMoveHistory()[BoardQuerier.getMoveHistory().length - 2] != Converter.squareIDToSquare(square) // Fourth rule.
+            || moveHistory[moveHistory.length - 2] != Converter.squareIDToSquare(square) // Fourth rule.
             || !(BoardQuerier.getPieceOnSquare(enemyPawn) && isEnemyPawnMovedTwoSquares) // Third rule.
+            || moveHistory[moveHistory.length - 1] != Converter.squareIDToSquare(enemyPawn) // Fifth rule.
         ) return null;
 
         return enPassantMove;
