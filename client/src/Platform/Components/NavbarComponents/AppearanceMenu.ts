@@ -12,6 +12,7 @@ enum Theme{
  */
 export class AppearanceMenu extends NavbarComponent{
     private currentTheme: string = Theme.Dark;
+    private readonly rootComputedStyle = getComputedStyle(document.documentElement);
 
     /**
      * Constructor of the AppearanceMenu class.
@@ -19,6 +20,7 @@ export class AppearanceMenu extends NavbarComponent{
     constructor() {
         super();
         this.renderComponent();
+        this.createStyleElement();
         this.addEventListeners();
     }
 
@@ -225,6 +227,8 @@ export class AppearanceMenu extends NavbarComponent{
                         </div>
                     </div>
                 </fieldset>
+            </div>
+            <div id="appearance-footer">
                 <div class="appearance-utilities">
                     <button data-menu-operation="${AppearanceMenuOperation.Reset}">Reset to Default</button>
                     <button data-menu-operation="${AppearanceMenuOperation.ChangeTheme}">Light Mode</button>
@@ -232,6 +236,38 @@ export class AppearanceMenu extends NavbarComponent{
             </div>
         `);
         this.loadCSS("appearance-menu.css");
+    }
+
+    /**
+     * This function creates the style element for custom appearance styles.
+     */
+    private createStyleElement(): void
+    {
+        if(document.getElementById("appearance-menu-style"))
+            throw new Error("Style element for custom appearance already exists.");
+
+        const styleElement = document.createElement("style");
+        styleElement.id = "appearance-menu-style";
+        document.head.appendChild(styleElement);
+        styleElement.innerHTML = `:root{}`;
+    }
+
+    /**
+     * Get the style element for custom appearance styles.
+     */
+    private getStyleElement(): HTMLStyleElement
+    {
+        if(document.getElementById("appearance-menu-style"))
+            return document.getElementById("appearance-menu-style") as HTMLStyleElement;
+        else
+            throw new Error("Style element for custom appearance does not exist.");
+    }
+
+    /**
+     * This function returns the default hex code of the color.
+     */
+    private getDefaultHexCode(colorId: string): string {
+        return this.rootComputedStyle.getPropertyValue(`--chessboard-default-${colorId}`);
     }
 
     /**
@@ -255,61 +291,88 @@ export class AppearanceMenu extends NavbarComponent{
     }
 
     /**
+     * Add custom appearance style to the style element.
+     */
+    private addCustomAppearanceStyle(varName: string, value: string): void
+    {
+        const styleElement = this.getStyleElement();
+
+        const isExist = styleElement.innerHTML.includes(`--chessboard-${varName}`);
+        styleElement.innerHTML = styleElement.innerHTML.replace(
+            isExist ? new RegExp(`--chessboard-${varName}: .+?;`) : `}`, 
+            `--chessboard-${varName}: ${value};` + (isExist ? "" : "}")
+        );
+
+        LocalStorage.save(
+            LocalStorageKey.CustomAppearance, 
+            {
+                ...LocalStorage.load(LocalStorageKey.CustomAppearance), 
+                [varName]: value
+            }
+        );
+    }
+
+    /**
      * This function adds event listeners to the appearance menu.
      */
     private addEventListeners(): void
     {
-        const rootComputedStyle = getComputedStyle(document.documentElement);
         document.querySelectorAll("#appearance-menu .color-picker").forEach((colorPicker) => {
             const colorInput = colorPicker.querySelector("input[type='color']") as HTMLInputElement;
             const opacityInput = colorPicker.querySelector("input[type='range']") as HTMLInputElement;
             const resetButton = colorPicker.querySelector(".reset-button") as HTMLButtonElement;
 
             colorInput.addEventListener("input", () => {
-                document.documentElement.style.setProperty(`--chessboard-${colorInput.id}`, colorInput.value);
-
-                LocalStorage.save(
-                    LocalStorageKey.CustomAppearance, 
-                    {
-                        ...LocalStorage.load(LocalStorageKey.CustomAppearance), 
-                        [`--chessboard-${colorInput.id}`]: colorInput.value
-                    }
-                );
+                this.addCustomAppearanceStyle(colorInput.id, colorInput.value);
             });
 
             opacityInput.addEventListener("change", () => {
                 colorInput.style.opacity = opacityInput.value;
 
-                const colorHexCode = this.getHexCodeFromColorAndOpacity(colorInput.value, opacityInput.value);
-                document.documentElement.style.setProperty(`--chessboard-${colorInput.id}`, colorHexCode);
-
-                LocalStorage.save(
-                    LocalStorageKey.CustomAppearance, 
-                    {
-                        ...LocalStorage.load(LocalStorageKey.CustomAppearance), 
-                        [`--chessboard-${colorInput.id}`]: colorHexCode
-                    }
+                this.addCustomAppearanceStyle(
+                    colorInput.id, 
+                    this.getHexCodeFromColorAndOpacity(colorInput.value, opacityInput.value)
                 );
             });
 
             resetButton.addEventListener("click", () => {
-                const defaultColor = rootComputedStyle.getPropertyValue(`--chessboard-default-${colorInput.id}`);
-                document.documentElement.style.setProperty(`--chessboard-${colorInput.id}`, defaultColor);
+                const defaultColor = this.getDefaultHexCode(colorInput.id);
+                this.addCustomAppearanceStyle(colorInput.id, defaultColor);
 
                 const { color, opacity } = this.getColorAndOpacityFromHexCode(defaultColor);
                 colorInput.value = color;
                 opacityInput.value = opacity;
                 colorInput.style.opacity = opacity;
-
-                LocalStorage.save(
-                    LocalStorageKey.CustomAppearance, 
-                    {
-                        ...LocalStorage.load(LocalStorageKey.CustomAppearance), 
-                        [`--chessboard-${colorInput.id}`]: defaultColor
-                    }
-                );
             });
         });
+    }
+
+    /**
+     * This function shows the last saved if exist, otherwise default color palette.
+     */
+    public initColorPalette(): void
+    {
+        let customAppearance;
+        if(LocalStorage.isExist(LocalStorageKey.CustomAppearance))
+            customAppearance = LocalStorage.load(LocalStorageKey.CustomAppearance);
+
+        for(const colorPicker of document.querySelectorAll("#appearance-menu .color-picker") as NodeListOf<HTMLInputElement>){
+            const colorInput = colorPicker.querySelector("input[type='color']") as HTMLInputElement;
+            const opacityInput = colorPicker.querySelector("input[type='range']") as HTMLInputElement;
+
+            let colorHex;
+            if(customAppearance && Object.hasOwn(customAppearance, colorInput.id))
+                colorHex = customAppearance[colorInput.id];
+            else
+                colorHex = this.getDefaultHexCode(colorInput.id);
+
+            const { color, opacity } = this.getColorAndOpacityFromHexCode(colorHex);
+            colorInput.value = color;
+            opacityInput.value = opacity;
+            colorInput.style.opacity = opacity;
+
+            this.addCustomAppearanceStyle(colorInput.id, colorHex);
+        }
     }
 
     /**
@@ -348,35 +411,6 @@ export class AppearanceMenu extends NavbarComponent{
         }
 
         LocalStorage.save(LocalStorageKey.Theme, this.currentTheme);
-    }
-
-    /**
-     * This function shows the last saved if exist, otherwise default color palette.
-     */
-    public initColorPalette(): void
-    {
-        let customAppearance;
-        if(LocalStorage.isExist(LocalStorageKey.CustomAppearance))
-            customAppearance = LocalStorage.load(LocalStorageKey.CustomAppearance);
-
-        const rootComputedStyle = getComputedStyle(document.documentElement);;
-        for(const colorPicker of document.querySelectorAll("#appearance-menu .color-picker") as NodeListOf<HTMLInputElement>){
-            const colorInput = colorPicker.querySelector("input[type='color']") as HTMLInputElement;
-            const opacityInput = colorPicker.querySelector("input[type='range']") as HTMLInputElement;
-
-            let colorHex;
-            if(customAppearance && customAppearance[`--chessboard-${colorInput.id}`])
-                colorHex = customAppearance[`--chessboard-${colorInput.id}`];
-            else
-                colorHex = rootComputedStyle.getPropertyValue(`--chessboard-default-${colorInput.id}`);
-
-            const { color, opacity } = this.getColorAndOpacityFromHexCode(colorHex);
-            colorInput.value = color;
-            opacityInput.value = opacity;
-            colorInput.style.opacity = opacity;
-
-            document.documentElement.style.setProperty(`--chessboard-${colorInput.id}`, colorHex);
-        }
     }
 
     /**

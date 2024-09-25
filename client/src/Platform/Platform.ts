@@ -144,7 +144,7 @@ export class Platform{
          * Load the settings from the local storage and 
          * apply them to the platform.
          */
-        const applyLocalStorageSettings = () => {
+        const applyCachedPlatformSettings = () => {
             // Welcome message
             this.navbar.hideComponents();
             if(LocalStorage.isExist(LocalStorageKey.WelcomeShown))
@@ -161,7 +161,7 @@ export class Platform{
             }
 
             // Last Board
-            if(!this.checkAndLoadGameFromCache()) 
+            if(!this.checkAndLoadBoardFromCache()) 
                 this.boardEditor.createBoard();
 
             // Board Editor
@@ -179,7 +179,7 @@ export class Platform{
          * Initialize the platform components.
          */
         document.addEventListener("DOMContentLoaded", () => {
-            applyLocalStorageSettings();
+            applyCachedPlatformSettings();
             bindMenuOperations();
             listenBoardChanges();
             this.updateComponents();
@@ -193,12 +193,21 @@ export class Platform{
      * @returns Returns true if there is a game in the cache, otherwise returns false.
      * @see For more information about cache management check src/Services/LocalStorage.ts
      */
-    private checkAndLoadGameFromCache(): boolean
+    private checkAndLoadBoardFromCache(): boolean
     {
         // If there is a game in the cache, load it.
         if(LocalStorage.isExist(LocalStorageKey.LastBoard)){
+            const lastBoard = LocalStorage.load(LocalStorageKey.LastBoard);
+            if([GameStatus.BlackVictory, 
+                GameStatus.WhiteVictory, 
+                GameStatus.Draw
+            ].includes(lastBoard.gameStatus))
+            {
+                this.logger.save("Last game is over, loading a new game...");
+                return false;
+            }
             this.logger.save("Game loading from cache...");
-            this.boardEditor.createBoard(LocalStorage.load(LocalStorageKey.LastBoard));
+            this.boardEditor.createBoard(lastBoard);
             this.logger.save("Game loaded from cache");
             return true;
         }

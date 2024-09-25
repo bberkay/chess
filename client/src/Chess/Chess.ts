@@ -7,7 +7,7 @@
  * @license MIT
  */
 
-import {JsonNotation, PieceType, Square, Color, StartPosition, ChessEvent} from "./Types";
+import {JsonNotation, PieceType, Square, Color, StartPosition, ChessEvent, GameStatus} from "./Types";
 import {ChessEngine, MoveValidationError} from "./Engine/ChessEngine";
 import {ChessBoard} from "./Board/ChessBoard";
 import {SquareClickMode} from "./Board/Types";
@@ -43,6 +43,17 @@ export class Chess{
     }
 
     /**
+     * This function resets the properties of the Chess class.
+     */
+    private resetProperties(): void
+    {
+        this._selectedSquare = null;
+        this._isPromotionScreenOpen = false;
+        this._preSelectedSquare = null;
+        this._preMove = null;
+    }
+    
+    /**
      * This function checks the cache and loads the game from the cache if there is a game in the cache.
      * @returns Returns true if there is a game in the cache, otherwise returns false.
      * @see For more information about cache management check src/Services/LocalStorage.ts
@@ -68,7 +79,8 @@ export class Chess{
     public createGame(position: JsonNotation | StartPosition | string = StartPosition.Standard): void
     {
         LocalStorage.clear(LocalStorageKey.LastBoard);
-        this.logger.save("Cache cleared before creating a new game");
+        this.resetProperties();
+        this.logger.save("Cache cleared and properties reset before creating a new game");
 
         if(typeof position === "string"){
             position = Converter.fenToJson(position);
@@ -210,8 +222,8 @@ export class Chess{
         }
         this.board.playMove(from, to);
         setTimeout(() => {
-            this.finishTurn();   
             this.logger.save(`Move[${JSON.stringify({from, to})}] played on board and engine`);
+            this.finishTurn();   
             document.dispatchEvent(new CustomEvent(ChessEvent.OnPieceMoved, {detail: {from: from, to: to}}));
         }, 100);
     }
@@ -238,12 +250,24 @@ export class Chess{
      */
     public finishTurn(): void
     {
+        const gameStatus = this.engine.getGameStatus();
+        this.board.showStatus(gameStatus);
+
+        if([GameStatus.BlackVictory, 
+            GameStatus.WhiteVictory, 
+            GameStatus.Draw
+        ].includes(gameStatus))
+        {
+            this.logger.save("Game updated in cache after move");
+            LocalStorage.save(LocalStorageKey.LastBoard, this.engine.getGameAsJsonNotation());
+            return;
+        }
+
         this._selectedSquare = this._isPromotionScreenOpen ? this._selectedSquare : null;
-        this.board.showStatus(this.engine.getGameStatus());
         if(!this._isPromotionScreenOpen){
             this.board.setTurnColor(this.engine.getTurnColor());
-            this.logger.save("Game updated in cache after move");
             this.playPreMoveIfExist();
+            this.logger.save("Game updated in cache after move");
             LocalStorage.save(LocalStorageKey.LastBoard, this.engine.getGameAsJsonNotation());
         } 
     }

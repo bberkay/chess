@@ -51,33 +51,34 @@ export class NavigatorModal extends Component{
     /**
      * Show the modal with the given title and content.
      */
-    public show(title: string, content: string, closeable: boolean = false): void
+    private show(title: string, content: string, closeable: boolean = false, backdrop: boolean = true): void
     {
         this.loadHTML("navigator-modal", `
-            <div class="navigator-modal navigator-modal--glass">
-                <div class="navigator-modal-bg">
-                    <img src="./assets/images/result-screen-bg-icon.png" alt="Chessboard">
-                </div>
+            <div class="navigator-modal ${backdrop ? "navigator-modal--glass" : ""}">
+                <div class="navigator-modal-bg"></div>
                 <div class="navigator-modal-title">${title}</div>
                 <div class="navigator-modal-content">${content}</div>
             </div>
         `);
-
-        if(closeable) document.querySelector('.navigator-modal')!.classList.add("closeable");
-
-        let modalBgLayer = document.querySelector(".navigator-modal-bg-layer")!
-        if(!modalBgLayer){
-            modalBgLayer = document.createElement("div");
-            modalBgLayer.classList.add("navigator-modal-bg-layer");
-            document.body.appendChild(modalBgLayer);
-        }
-
+                
         if(!document.querySelector(".navigator-modal-content #confirmation")){
             this.lastNavigatorModalTitle = title;
             this.lastNavigatorModalContent = content;
         }
 
-        modalBgLayer.addEventListener("click", (event) => {
+        if(closeable) 
+            document.querySelector('.navigator-modal')!.classList.add("closeable");
+
+        if(backdrop){
+            let modalBgLayer = document.querySelector(".navigator-modal-bg-layer")!
+            if(!modalBgLayer){
+                modalBgLayer = document.createElement("div");
+                modalBgLayer.classList.add("navigator-modal-bg-layer");
+                document.body.appendChild(modalBgLayer);
+            }
+        }
+
+        document.addEventListener("click", (event) => {
             if(!(event.target as HTMLElement).closest(".navigator-modal")){
                 if(document.querySelector(".closeable"))
                     this.hide();
@@ -130,7 +131,9 @@ export class NavigatorModal extends Component{
             status === GameStatus.WhiteVictory ? "White Wins" : (status === GameStatus.BlackVictory ? "Black Wins" : "Stalemate"),
             `<div class="btn-group-vertical">
                 <button data-menu-operation="${NavigatorModalOperation.ShowGameCreator}">Play Again</button>
-            </div>`
+            </div>`,
+            true,
+            false
         );
     }
 

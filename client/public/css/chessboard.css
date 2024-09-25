@@ -341,9 +341,16 @@
         left: 50%;
         width:calc((var(--chessboard-board-size) - 2px) / 8);
         height:calc((var(--chessboard-board-size) - 2px) / 8);
-        background-color: transparent;
         box-shadow: none;
         transform: translate(-50%, -50%);
+    }
+
+    & .square-effect--killable .square-effect-icon::before{
+        background-color: var(--chessboard-playable-color);
+    }
+
+    & .square-effect--prekillable .square-effect-icon::before{
+        background-color: var(--chessboard-preplayable-color);
     }
 
     & .square-effect--killable .square-effect-icon::after,
@@ -355,7 +362,6 @@
         left: 50%;
         width:calc((var(--chessboard-board-size) - 2px) / 8);
         height:calc((var(--chessboard-board-size) - 2px) / 8);
-        background-color: transparent;
         border-radius: 50%;
         transform: translate(-50%, -50%);
     }

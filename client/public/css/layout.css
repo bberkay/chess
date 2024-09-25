@@ -77,6 +77,7 @@
     --no-status-color: #666;
     --backdrop-bg-color: #0000005C;
     --glass-bg-color: #FFFFFF1A;
+    --glass-text-color: #FFFFFF;
     --glass-border-color:#FFFFFF4D;
     --glass-box-shadow-color: #0000001A;
     --glass-error-bg-color: #9B040475;
@@ -212,11 +213,12 @@ body{
     --navigator-modal-button-bg-color: var(--accent-color);
     --navigator-modal-text-button-color: var(--text-color);
     --navigator-modal-glass-bg-color: var(--glass-bg-color);
+    --navigator-modal-glass-text-color: var(--glass-text-color);
     --navigator-modal-glass-border-color: var(--glass-border-color);
     --navigator-modal-glass-box-shadow-color: var(--glass-box-shadow-color);
     --navigator-modal-glass-button-bg-color: var(--glass-component-bg-color);
     --navigator-modal-glass-button-border-color: var(--glass-component-bg-color);
-    --navigator-modal-glass-button-text-color: var(--text-color);
+    --navigator-modal-glass-button-text-color: var(--glass-text-color);
     --navigator-modal-glass-input-bg-color: var(--glass-component-bg-color);
     --navigator-modal-glass-input-border-color: var(--glass-component-bg-color);
     --navigator-modal-glass-input-text-color: var(--text-color);

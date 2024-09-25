@@ -76,21 +76,20 @@ export class ChessPlatform{
         }
 
         /**
+         * Connect to the last connection if exists.
+         */
+        const connectToLastConnection = () => {
+            if(LocalStorage.isExist(LocalStorageKey.LastLobbyConnection))
+                this.reconnectLobby();
+            else if(this.checkAndGetLobbyIdFromUrl())
+                this.platform.navigatorModal.showJoinLobby();
+        }
+
+        /**
          * Initialize the chess platform.
          */
-        if(!LocalStorage.isExist(LocalStorageKey.WelcomeShown))
-        {
-            this.platform.navigatorModal.showWelcome();
-            LocalStorage.save(LocalStorageKey.WelcomeShown, true);
-        }  
-
-        if(LocalStorage.isExist(LocalStorageKey.LastLobbyConnection))
-            this.reconnectLobby();
-        else if(this.checkAndGetLobbyIdFromUrl())
-            this.platform.navigatorModal.showJoinLobby();
-
+        connectToLastConnection();
         bindSocketOperations();
-       
         this.logger.save("Chess platform is initialized.");
     }
 
