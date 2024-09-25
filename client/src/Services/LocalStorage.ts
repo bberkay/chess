@@ -9,6 +9,8 @@ export enum LocalStorageKey{
     LobbyConnections = "LobbyConnections",
     LastLobbyConnection = "LastLobbyConnection",
     BoardEditorEnabled = "boardEditorEnabled",
+    CustomAppearance = "customAppearance",
+    Theme = "theme",
 }
 
 /**

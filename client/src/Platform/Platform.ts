@@ -145,7 +145,14 @@ export class Platform{
          */
         document.addEventListener("DOMContentLoaded", () => {
             this.navbar.hideComponents();
-            this.navbar.showComponent(this.logConsole);
+            if(LocalStorage.isExist(LocalStorageKey.WelcomeShown))
+                this.navbar.showComponent(this.logConsole);
+            else
+            {
+                this.navbar.showComponent(this.aboutMenu);
+                LocalStorage.save(LocalStorageKey.WelcomeShown, true);
+            }
+                
 
             if(!this.checkAndLoadGameFromCache()) 
                 this.boardEditor.createBoard();
@@ -154,7 +161,10 @@ export class Platform{
                 this.notationMenu.hidePlayerCards();
                 this._enableBoardEditor();
             }
-                
+            
+            if(LocalStorage.isExist(LocalStorageKey.CustomAppearance))
+                this.appearanceMenu.initColorPalette();
+
             bindMenuOperations();
             listenBoardChanges();
             this.updateComponents();
@@ -325,7 +335,7 @@ export class Platform{
                 break;
             case NavbarOperation.ShowAppearance:
                 this.navbar.showComponent(this.appearanceMenu);
-                this.appearanceMenu.showLastColorPalette();
+                this.appearanceMenu.initColorPalette();
                 break;
             case NavbarOperation.ShowAbout:
                 this.navbar.showComponent(this.aboutMenu);
