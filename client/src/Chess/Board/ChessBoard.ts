@@ -289,6 +289,7 @@ export class ChessBoard {
         if([SquareClickMode.PreSelect, SquareClickMode.Select].includes(squareClickMode)){
             const isPreSelect = squareClickMode == SquareClickMode.PreSelect;
             if(isPreSelect) this.addSquareEffects(square, SquareEffect.PreSelected);
+            else this.removeEffectFromAllSquares([SquareEffect.PreSelected]);
             this.selectPiece(squareId, isPreSelect);
             onPieceSelected(squareId, isPreSelect);
         }
