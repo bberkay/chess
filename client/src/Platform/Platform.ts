@@ -141,9 +141,11 @@ export class Platform{
         }
 
         /**
-         * Initialize the platform components.
+         * Load the settings from the local storage and 
+         * apply them to the platform.
          */
-        document.addEventListener("DOMContentLoaded", () => {
+        const applyLocalStorageSettings = () => {
+            // Welcome message
             this.navbar.hideComponents();
             if(LocalStorage.isExist(LocalStorageKey.WelcomeShown))
                 this.navbar.showComponent(this.logConsole);
@@ -152,19 +154,32 @@ export class Platform{
                 this.navbar.showComponent(this.aboutMenu);
                 LocalStorage.save(LocalStorageKey.WelcomeShown, true);
             }
-                
 
+            // Theme
+            if(LocalStorage.isExist(LocalStorageKey.Theme)){
+                this.appearanceMenu.changeTheme(LocalStorage.load(LocalStorageKey.Theme));
+            }
+
+            // Last Board
             if(!this.checkAndLoadGameFromCache()) 
                 this.boardEditor.createBoard();
 
+            // Board Editor
             if(LocalStorage.isExist(LocalStorageKey.BoardEditorEnabled)){
                 this.notationMenu.hidePlayerCards();
                 this._enableBoardEditor();
             }
-            
+
+            // Custom Appearance
             if(LocalStorage.isExist(LocalStorageKey.CustomAppearance))
                 this.appearanceMenu.initColorPalette();
+        }
 
+        /**
+         * Initialize the platform components.
+         */
+        document.addEventListener("DOMContentLoaded", () => {
+            applyLocalStorageSettings();
             bindMenuOperations();
             listenBoardChanges();
             this.updateComponents();

@@ -331,17 +331,17 @@ export class AppearanceMenu extends NavbarComponent{
     /**
      * Change the theme of the app.
      */
-    private changeTheme(): void
+    public changeTheme(theme: Theme = Theme.Dark): void
     {
         const changeThemeButton = document.querySelector(`
             [data-menu-operation="${AppearanceMenuOperation.ChangeTheme}"]
         `) as HTMLButtonElement;
 
-        if(this.currentTheme === Theme.Dark){
+        if(theme === Theme.Light){
             this.currentTheme = Theme.Light;
             document.body.classList.remove(Theme.Dark);
             changeThemeButton.innerText = "Dark Mode";
-        }else{
+        }else if(theme === Theme.Dark){
             this.currentTheme = Theme.Dark;
             document.body.classList.add(Theme.Dark);
             changeThemeButton.innerText = "Light Mode";
@@ -385,12 +385,12 @@ export class AppearanceMenu extends NavbarComponent{
     public handleOperation(operation: AppearanceMenuOperation): void
     {
         switch(operation){
+            case AppearanceMenuOperation.ChangeTheme:
+                this.changeTheme(this.currentTheme === Theme.Dark ? Theme.Light : Theme.Dark);
+                break;
             case AppearanceMenuOperation.Reset:
                 LocalStorage.clear(LocalStorageKey.CustomAppearance);
                 this.initColorPalette();
-                break;
-            case AppearanceMenuOperation.ChangeTheme:
-                this.changeTheme();
                 break;
         }
     }
