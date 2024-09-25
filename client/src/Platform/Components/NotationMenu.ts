@@ -324,7 +324,7 @@ export class NotationMenu extends Component{
     /**
      * Display the white player duration on the notation menu.
      */
-    private displayPlayerDurations(duration: [number, number]): void
+    public showPlayerDurations(duration: [number, number]): void
     {
         (document.querySelectorAll(".duration") as NodeListOf<HTMLElement>).forEach((durationItem) => {
             durationItem.classList.remove("hidden");

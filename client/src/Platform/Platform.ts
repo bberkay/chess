@@ -424,8 +424,7 @@ export class Platform{
         this.notationMenu.displayLobbyUtilityMenu();
         this.notationMenu.updatePlayerCards(game.whitePlayer, game.blackPlayer, game.duration);
         this.notationMenu.changeTurnIndicator(this.chess.engine.getTurnColor());
-        //this.notationMenu.displayWhitePlayerDuration(wsData.duration[0].toString());
-        //this.notationMenu.displayBlackPlayerDuration(wsData.duration[0].toString());
+        this.notationMenu.showPlayerDurations(game.duration);
         if(playerColor === Color.Black) this._flipBoard();
         if(playerColor !== this.chess.engine.getTurnColor()) this.chess.board.lock(false);
         else this.chess.board.unlock();
