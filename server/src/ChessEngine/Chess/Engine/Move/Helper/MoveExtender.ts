@@ -42,7 +42,7 @@ export class MoveExtender{
         // notation for castling availability when the game is loaded from fen notation.
         if(!BoardQuerier.isSquareHasPiece(kingSquare, color, [PieceType.King])
             || (BoardQuerier.getBoardStatus() == (color == Color.White ? GameStatus.WhiteInCheck : GameStatus.BlackInCheck))
-            || (BoardQuerier.getMoveHistory().length == 0 && !(
+            || (BoardQuerier.getAlgebraicNotation().length == 0 && !(
                 (chosenRookSquare == Square.a8 && BoardQuerier.getCastling().BlackLong)
                 || (chosenRookSquare == Square.h8 && BoardQuerier.getCastling().BlackShort)
                 || (chosenRookSquare == Square.a1 && BoardQuerier.getCastling().WhiteLong)
@@ -57,7 +57,7 @@ export class MoveExtender{
             : (color == Color.White ? [Square.f1, Square.g1] : [Square.f8, Square.g8]);
 
         // Check second rule.
-        for(const notation of BoardQuerier.getMoveHistory()){
+        for(const notation of BoardQuerier.getAlgebraicNotation()){
             if(notation.includes(kingIcon)
                 || (notation.includes(rookIcon + "a") && castlingType == "Long") // Vertical moves of the rook.
                 || (notation.includes(rookIcon + "h") && castlingType == "Short")  // Same as above.
@@ -131,26 +131,26 @@ export class MoveExtender{
         
         // Target square of the enemy pawn for en passant.
         const enemyPawn: number = direction == EnPassantDirection.Left ? square - 1 : square + 1;
-        const moveHistory = BoardQuerier.getMoveHistory();
+        const algebraicNotation = BoardQuerier.getAlgebraicNotation();
 
         /**
          * Search if the enemy pawn moved one square forward previously in
          * the move history. If it is not found in the move history, it means
          * that the enemy pawn moved two squares, or it is not moved yet.
          */
-        const isEnemyPawnMovedTwoSquares: boolean = !moveHistory.includes(
+        const isEnemyPawnMovedTwoSquares: boolean = !algebraicNotation.includes(
             Converter.squareIDToSquare((enemyPawn) + (color == Color.White ? -8 : 8))
         );
 
         // Check fen notation for en passant availability when the game is loaded from fen notation.
-        if(moveHistory.length == 0 && BoardQuerier.getGame().enPassant == enPassantMove)
+        if(algebraicNotation.length == 0 && BoardQuerier.getGame().enPassant == enPassantMove)
             return enPassantMove;
 
         if(pawnRow != enPassantRow // First rule.
             || !BoardQuerier.isSquareHasPiece(enemyPawn, color == Color.White ? Color.Black : Color.White, [PieceType.Pawn]) // Second rule.
-            || moveHistory[moveHistory.length - 2] != Converter.squareIDToSquare(square) // Fourth rule.
+            || algebraicNotation[algebraicNotation.length - 2] != Converter.squareIDToSquare(square) // Fourth rule.
             || !(BoardQuerier.getPieceOnSquare(enemyPawn) && isEnemyPawnMovedTwoSquares) // Third rule.
-            || moveHistory[moveHistory.length - 1] != Converter.squareIDToSquare(enemyPawn) // Fifth rule.
+            || algebraicNotation[algebraicNotation.length - 1] != Converter.squareIDToSquare(enemyPawn) // Fifth rule.
         ) return null;
 
         return enPassantMove;

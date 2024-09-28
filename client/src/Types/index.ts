@@ -20,6 +20,42 @@ export enum WsCommand {
 export type WsMessage = [WsCommand, any];
 
 /**
+ * 
+ */
+export interface WsConnectedData{
+}
+
+/**
+ * 
+ */
+export interface WsStartedData{
+}
+
+/**
+ * 
+ */
+export interface WsMovedData{
+}
+
+/**
+ * 
+ */
+export interface WsReconnectedData{
+}
+
+/**
+ * 
+ */
+export interface WsDisconnectedData{
+}
+
+/**
+ * 
+ */
+export interface WsErrorData{
+}
+
+/**
  * SocketOperation enum for the types 
  * of operations that can be done in/by 
  * the socket.

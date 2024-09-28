@@ -73,23 +73,61 @@ export enum EnPassantDirection{
 }
 
 /**
- * Moves type for the moves.
+ * Moves type for the moves of the pieces.
  * @see For more information, check src/Chess.ts
  */
 export type Moves = {[key in MoveType]?: Array<Square>};
 
 /**
+ * Duration type mostly for the initial duration of the players.
+ * @see For more information, check src/Chess.ts
+ */
+export type Duration = {remaining: number, increment: number};
+
+/**
+ * Durations type for the durations of the players.
+ * @see For more information, check src/Chess.ts
+ */
+export type Durations = Record<Color, Duration>;
+
+/**
+ * Scores type for the scores of the players.
+ * @see For more information, check src/Chess.ts
+ */
+export type Scores = Record<Color, {score: number, pieces: PieceType[]}>;
+
+/**
+ * Move type for the player moves.
+ * @see For more information, check src/Chess.ts
+ */
+export type Move = {from: Square, to: Square};
+
+/**
+ * Pieces type for the pieces of the board.
+ * @see For more information, check src/Chess.ts
+ */
+export type Pieces = {color: Color, type: PieceType, square: Square}[];
+
+/**
+ * Castling type for the castling status of the players.
+ * @see For more information, check src/Chess.ts
+ */
+export type Castling = Record<CastlingType, boolean>;
+
+/**
  * Json notation for is alternative notation for the FEN notation.
  */
 export interface JsonNotation{
-    board: Array<{color: Color, type:PieceType, square:Square}>;
+    board: Pieces;
     turn: Color;
-    castling: Record<CastlingType, boolean>;
+    castling: Castling;
     enPassant: Square | null;
     halfMoveClock: number | 0;
     fullMoveNumber: number | 0;
-    moveHistory?: string[]; // Algebraic notation
-    scores?: Record<Color, {score: number, pieces: PieceType[]}>;
+    algebraicNotation?: string[]; 
+    moveHistory?: Move[];
+    durations?: Durations;
+    scores?:  Scores;
     gameStatus?: GameStatus;
 }
 
@@ -187,4 +225,10 @@ export enum ChessEvent {
      * @param {Square} to - The ending square of the move.
      */
     onPieceMovedByOpponent = "onPieceMovedByOpponent",
+
+    /**
+     * Triggered when the game is over.
+     * @Event
+     */
+    onGameOver = "onGameOver",
 }

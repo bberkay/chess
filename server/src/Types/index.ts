@@ -8,6 +8,15 @@ export type Player = {
     userToken: string;
 }
 
+export type WebSocketParams = { 
+    name: string | null,
+    lobbyId: string | null,
+    userToken: string | null,
+    board: string | null,
+    remaining: string | number | null,
+    increment: string | number | null,
+} 
+
 export type WebSocketData = {
     lobbyId: string;
     player: Player;

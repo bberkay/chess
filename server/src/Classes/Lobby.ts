@@ -1,22 +1,24 @@
 import type { Player } from "../Types";
-import { Color, GameStatus, JsonNotation, Square, StartPosition } from '@Chess/Types';
+import { Color, Duration, Durations, GameStatus, JsonNotation, Square, StartPosition } from '@Chess/Types';
 import { ChessEngine } from '@Chess/Engine/ChessEngine';
+import { Converter } from "@Chess/Utils/Converter";
 
 /**
  * This class represents the lobby of the game.
  */
 export class Lobby{
-    private readonly lobbyId: string;
+    public readonly lobbyId: string;
+    public readonly createdAt: number = Date.now();
+
     private whitePlayer: Player | null = null;
     private blackPlayer: Player | null = null;
+    
     private chessEngine: ChessEngine = new ChessEngine();
     private isGameStarted: boolean = false;
 
-    // total time(in minutes), increment time(in seconds)
-    private readonly duration: [number, number]; 
-
-    // initial board position
+    // Inital values
     private readonly board: StartPosition | JsonNotation | string; 
+    private readonly durations: Durations;
 
     /**
      * Constructor of the Lobby class.
@@ -24,19 +26,11 @@ export class Lobby{
     public constructor(
         lobbyId: string, 
         board: StartPosition | JsonNotation | string = StartPosition.Standard,
-        duration: [number, number]
+        initialDuration: Duration
     ){
         this.lobbyId = lobbyId;
-        this.duration = duration;
+        this.durations = {[Color.White]: initialDuration, [Color.Black]: initialDuration};
         this.board = board;
-    }
-
-    /**
-     * Get the id of the lobby.
-     */
-    public getId(): string
-    {
-        return this.lobbyId;
     }
 
     /**
@@ -86,9 +80,19 @@ export class Lobby{
     /**
      * Get the duration of the game.
      */
-    public getDuration(): [number, number]
+    public getCurrentDurations(): Durations
     {
-        return this.duration;
+        const currentRemaining = this.chessEngine.getPlayersRemainingTime();
+        return {
+            [Color.White]: {
+                remaining: currentRemaining[Color.White],
+                increment: this.durations[Color.White].increment
+            }, 
+            [Color.Black]: {
+                remaining: currentRemaining[Color.Black],
+                increment: this.durations[Color.Black].increment
+            },
+        };
     }
 
     /**
@@ -97,6 +101,14 @@ export class Lobby{
     public getCurrentBoard(): string | JsonNotation
     {
         return this.isGameAlreadyStarted() ? this.chessEngine.getGameAsJsonNotation() : this.getInitialBoard();
+    }
+
+    /**
+     * Get the initial durations of the game.
+     */
+    public getInitialDurations(): Durations
+    {
+        return this.durations;
     }
 
     /**
@@ -264,7 +276,9 @@ export class Lobby{
     {
         if(this.isGameAlreadyStarted()) return false;
         if(!this.board) return false;
-        if(this.duration[0] <= 0 || this.duration[1] <= 0) return false;
+        if(this.durations[Color.White].remaining <= 0 || this.durations[Color.White].increment < 0
+            || this.durations[Color.Black].remaining <= 0 || this.durations[Color.Black].increment < 0) 
+            return false;
 
         const whitePlayer = this.getWhitePlayer();
         const blackPlayer = this.getBlackPlayer();
@@ -307,10 +321,14 @@ export class Lobby{
      */
     public startGame(): void
     {
-        if(this.isGameAlreadyStarted() || !this.isGameReadyToStart()) return;
+        if(this.isGameAlreadyStarted() || !this.isGameReadyToStart()) 
+            return;
 
         try{
-            this.chessEngine.createGame(this.board);
+            this.chessEngine.createGame({
+                ...(typeof this.board === "string" ? Converter.fenToJson(this.board) : this.board),
+                durations: this.durations
+            });
             if(this.chessEngine.getGameStatus() == GameStatus.ReadyToStart)
                 this.isGameStarted = true;
         }catch(e){

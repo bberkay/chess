@@ -1,5 +1,5 @@
 import type { Player, RWebSocket } from "../Types";
-import { JsonNotation, StartPosition, Color } from "@Chess/Types";
+import { JsonNotation, StartPosition, Color, Durations, Duration } from "@Chess/Types";
 import { Lobby } from "./Lobby";
 
 /**
@@ -29,13 +29,13 @@ export class LobbyManager{
      */
     static createLobby(
         board: StartPosition | JsonNotation | string,
-        duration: [number, number],
+        initialDuration: Duration
     ): string
     {
         const lobbyId = Math.floor(100000 + Math.random() * 900000).toString();
-        if(this.isLobbyExist(lobbyId)) return this.createLobby(board, duration);
+        if(this.isLobbyExist(lobbyId)) return this.createLobby(board, initialDuration);
 
-        LobbyManager.lobbies.set(lobbyId, new Lobby(lobbyId, board, duration));
+        LobbyManager.lobbies.set(lobbyId, new Lobby(lobbyId, board, initialDuration));
         return lobbyId;
     }
 

@@ -3,7 +3,7 @@
  * @description This module provides users to create and manage a chess game(does not include board or other ui components).
  * @version 1.0.0
  * @author Berkay Kaya <berkaykayaforbusiness@outlook.com> (https://bberkay.github.io)
- * @url https://github.com/bberkay/chess-platform
+ * @url https://github.com/bberkay/chess
  * @license MIT
  */
 
@@ -12,12 +12,15 @@ import {
     Color,
     GameStatus,
     JsonNotation,
+    Move,
     Moves,
     MoveType,
     PieceType,
+    Scores,
     Square,
     StartPosition
 } from "../Types";
+import {Timer} from "./Utils/Timer.ts";
 import {NotationSymbol, Piece} from "./Types";
 import {MoveEngine} from "./Move/MoveEngine.ts";
 import {BoardManager} from "./Board/BoardManager.ts";
@@ -50,6 +53,7 @@ export class ChessEngine extends BoardManager {
     private isPromotionMenuOpen: boolean = false;
     private isBoardPlayable: boolean = false;
     private boardHistory: Array<string> = [];
+    private timerMap: Record<Color, {intervalId: number | null, timer: Timer}> | null = null;
     public readonly logger: Logger = new Logger("src/Chess/Engine/ChessEngine.ts");
 
     /**
@@ -67,7 +71,9 @@ export class ChessEngine extends BoardManager {
     {
         this.clearProperties();
         this.createBoard(typeof position !== "string" ? position : Converter.fenToJson(position));
+        this.createTimers();
         this.checkGameStatus();
+        this.handleTimers();
     }
 
     /**
@@ -113,10 +119,30 @@ export class ChessEngine extends BoardManager {
     }
 
     /**
+     * This function returns the remaining time of the players
+     * in milliseconds.
+     */
+    public getPlayersRemainingTime(): Record<Color, number>
+    {
+        if(!BoardQuerier.getDurations())
+            throw new Error("Durations are not set");
+
+        if(!this.timerMap)
+            throw new Error("Timers are not created");
+
+        return {
+            [Color.White]: this.timerMap.White.timer.get(), 
+            [Color.Black]: this.timerMap.Black.timer.get()
+        };
+    }
+
+    /**
      * This function turn properties to their default values.
      */
     private clearProperties(): void
     {
+        this.destroyTimers();
+        this.setGameStatus(GameStatus.NotReady);
         this.playedFrom = null;
         this.playedTo = null;
         this.moveNotation = "";
@@ -124,8 +150,55 @@ export class ChessEngine extends BoardManager {
         this.currentMoves = {};
         this.isPromotionMenuOpen = false;
         this.isBoardPlayable = false;
-        this.setGameStatus(GameStatus.NotReady);
         this.logger.save("Game properties set to default on ChessEngine");
+    }
+
+    /**
+     * Create timer for the players if the durations are set.
+     */
+    private createTimers(): void
+    {
+        const durations = BoardQuerier.getDurations();
+        if(!durations) return;
+
+        this.timerMap = {
+            [Color.White]: {
+                timer: new Timer(
+                    durations[Color.White].remaining, 
+                    durations[Color.White].increment
+                ),
+                intervalId: null
+            },
+            [Color.Black]: {
+                timer: new Timer(
+                    durations[Color.Black].remaining, 
+                    durations[Color.Black].increment
+                ),
+                intervalId: null
+            }
+        };
+
+        this.logger.save(`White and Black timers are started`);
+    }
+
+    /**
+     * Stop and destroy the timers if they are created.
+     */
+    private destroyTimers(): void
+    {
+        if(!this.timerMap) 
+            return;    
+
+        this.timerMap.White.timer.destroy();
+        this.timerMap.Black.timer.destroy();
+
+        if(this.timerMap.White.intervalId) 
+            clearInterval(this.timerMap.White.intervalId);
+        if(this.timerMap.Black.intervalId) 
+            clearInterval(this.timerMap.Black.intervalId);
+
+        this.timerMap = null;
+        this.logger.save("White and Black timers are destroyed");
     }
 
     /**
@@ -487,11 +560,39 @@ export class ChessEngine extends BoardManager {
     private finishTurn(): void
     {
         // Order of the operations is important.
+        console.log("finishTurn: ", BoardQuerier.getBoardStatus());
+        // Disable board and clear the calculated moves.
+        // and check the game is finished(if game is finished here
+        // then it must be a timeover).
         this.currentMoves = {};
-        this.isBoardPlayable = false;
+        this.isBoardPlayable = false;        
+        if([GameStatus.WhiteVictory,
+            GameStatus.BlackVictory,
+            GameStatus.Draw
+        ].includes(BoardQuerier.getBoardStatus()))
+        {
+            // Timeover situation comes here.
+            this.saveAlgebraicNotation(this.moveNotation);
+            this.saveMoveHistory(this.playedFrom as Square, this.playedTo as Square);
+            this.logger.save(`Turn[${BoardQuerier.getColorOfTurn()}] is finished`);
+            return;    
+        }
+
         this.changeTurn();
         this.checkGameStatus();
-        this.saveMoveNotation(this.moveNotation);
+
+        // After the turn is changed and game status is checked, 
+        // save the move history and algebraic notation. Why after?
+        // Because, checkGameStatus function is checking the game
+        // for "enemy" player and changes the algebraic notation
+        // according to it.
+        this.saveAlgebraicNotation(this.moveNotation);
+        this.saveMoveHistory(this.playedFrom as Square, this.playedTo as Square);
+
+        // Check the en passant and castling status after the
+        // algebraic notation is saved because these statuses
+        // are checking the last move that is saved to the
+        // algebraic notation.
         if([GameStatus.InPlay,
             GameStatus.WhiteInCheck,
             GameStatus.BlackInCheck
@@ -499,8 +600,72 @@ export class ChessEngine extends BoardManager {
             this.checkEnPassant();
             this.checkCastling();
         }
+
+        // Game might be playing without timers
+        if(this.timerMap)
+            this.handleTimers();
+
+        // Clear the move notation for the next turn.
         this.moveNotation = "";
-        this.logger.save(`Turn[${BoardQuerier.getColorOfTurn()}] is finished`);
+        this.logger.save(`Turn controls done. Turn[${BoardQuerier.getColorOfTurn()}] is finished`);
+    }
+
+    /**
+     * Handle the timers of the players if they are created. Start the timer 
+     * of the player and pause the timer of the opponent. If the player's time
+     * is over then handle the timeover situation.
+     */
+    public handleTimers(): void 
+    {
+        if(!this.timerMap) return;
+
+        if(BoardQuerier.getMoveCount() < 2){
+            this.logger.save("Timers are not handled because move count is less than 2");
+            return;
+        }
+
+        const playerColor: Color = BoardQuerier.getColorOfTurn();
+        const opponentColor: Color = BoardQuerier.getColorOfOpponent();
+        
+        if(this.timerMap[opponentColor].timer.isStarted()){
+            this.timerMap[opponentColor].timer.increase();
+            this.timerMap[opponentColor].timer.pause();
+            if(this.timerMap[opponentColor].intervalId) 
+                clearInterval(this.timerMap[opponentColor].intervalId);
+        }
+
+        this.timerMap[playerColor].timer.start();
+        if(this.timerMap[playerColor].intervalId)
+            window.clearInterval(this.timerMap![playerColor].intervalId);
+
+        const intervalId = window.setInterval(() => {
+            if(!this.timerMap) 
+                return;
+
+            if(this.timerMap[playerColor].timer.get() <= 0)
+                this.handleTimeover();
+        }, 100);
+
+        this.timerMap![playerColor].intervalId = intervalId;
+        this.logger.save(`Timers are handled. Player[${playerColor}] timer is started and opponent[${opponentColor}] timer is paused`);
+    }
+
+    /**
+     * Handle the timeover situation. Destroys the timers and
+     * set the game status to the opponent's victory then
+     * finish the turn.
+     */
+    private handleTimeover(): void
+    {
+        this.destroyTimers();
+        
+        const winner = BoardQuerier.getColorOfOpponent() == Color.White 
+            ? GameStatus.WhiteVictory
+            : GameStatus.BlackVictory;
+        this.setGameStatus(winner);     
+        
+        this.logger.save(`Player[${BoardQuerier.getColorOfTurn()}] is timeover and game status is set to ${winner}`);
+        this.finishTurn();   
     }
 
     /**
@@ -529,14 +694,21 @@ export class ChessEngine extends BoardManager {
         this.isBoardPlayable = BoardQuerier.isBoardPlayable();
         if(this.isBoardPlayable){
             this.setGameStatus(
-                BoardQuerier.getBoardStatus() != GameStatus.NotReady ? BoardQuerier.getBoardStatus() : GameStatus.ReadyToStart
+                BoardQuerier.getBoardStatus() != GameStatus.NotReady 
+                    ? BoardQuerier.getBoardStatus() 
+                    : GameStatus.ReadyToStart
             );
             this.logger.save(`Game status set ${BoardQuerier.getBoardStatus()} because board is playable.`);
         }
         else{
             this.setGameStatus(
-                [GameStatus.InPlay, GameStatus.WhiteInCheck, GameStatus.BlackInCheck].includes(BoardQuerier.getBoardStatus()) 
-                    ? GameStatus.Draw : GameStatus.NotReady
+                [
+                    GameStatus.InPlay, 
+                    GameStatus.WhiteInCheck, 
+                    GameStatus.BlackInCheck
+                ].includes(BoardQuerier.getBoardStatus()) 
+                    ? GameStatus.Draw 
+                    : GameStatus.NotReady
             );
             this.isBoardPlayable = false;
             this.logger.save(`Game status is not checked because board is not playable so checkGameStatus calculation is unnecessary.`);
@@ -583,7 +755,11 @@ export class ChessEngine extends BoardManager {
          */
         if(threateningSquares.length > 0)
             this.setGameStatus(checkEnum);
-        else if([GameStatus.InPlay, GameStatus.WhiteInCheck, GameStatus.BlackInCheck].includes(this.getGameStatus()))
+        else if([
+            GameStatus.InPlay, 
+            GameStatus.WhiteInCheck, 
+            GameStatus.BlackInCheck
+        ].includes(this.getGameStatus()))
             this.setGameStatus(GameStatus.InPlay);
 
         // Calculate the moves of the king and save the moves to the calculatedMoves.
@@ -677,7 +853,7 @@ export class ChessEngine extends BoardManager {
         if(this.boardHistory.length > 15)
             this.boardHistory.shift();
 
-        const notations: Array<string> = BoardQuerier.getMoveHistory().slice(-14).concat(this.moveNotation);
+        const notations: Array<string> = BoardQuerier.getAlgebraicNotation().slice(-14).concat(this.moveNotation);
         const currentBoard: string = this.getGameAsFenNotation().split(" ")[0];
         if(notations.filter(notation => notation == this.moveNotation).length > 2 && this.boardHistory.filter(notation => notation == currentBoard).length > 2)
         {
@@ -710,14 +886,14 @@ export class ChessEngine extends BoardManager {
      */
     private checkEnPassant(): void
     {
-        if(this.getNotation().length < 2)
+        if(BoardQuerier.getAlgebraicNotation().length < 2)
         {
             this.logger.save("Not enough moves for possible en passant move");
             return;
         }
     
         // Get the last two moves and check the last move is pawn move or not.
-        const lastTwoMove: Square[] = this.getNotation().slice(-2).map(move => Converter.squareToSquareID(move));
+        const lastTwoMove: Square[] = BoardQuerier.getAlgebraicNotation().slice(-2).map(move => Converter.squareToSquareID(move));
         const lastPlayerMove: Square = lastTwoMove[0];
         if(
             BoardQuerier.getPieceOnSquare(lastPlayerMove)?.getType() != PieceType.Pawn
@@ -806,7 +982,15 @@ export class ChessEngine extends BoardManager {
     /**
      * This function returns the algebraic notation of the game.
      */
-    public getNotation(): ReadonlyArray<string>
+    public getAlgebraicNotation(): ReadonlyArray<string>
+    {
+        return Object.freeze([...BoardQuerier.getAlgebraicNotation()]);
+    }
+
+    /**
+     * This function returns the move history of the game.
+     */
+    public getMoveHistory(): ReadonlyArray<Move>
     {
         return Object.freeze([...BoardQuerier.getMoveHistory()]);
     }
@@ -814,7 +998,7 @@ export class ChessEngine extends BoardManager {
     /**
      * This function returns the scores of the players.
      */
-    public getScores(): Readonly<Record<Color, {score: number, pieces: PieceType[]}>>
+    public getScores(): Readonly<Scores>
     {
         return Object.freeze({...BoardQuerier.getScores()});
     }

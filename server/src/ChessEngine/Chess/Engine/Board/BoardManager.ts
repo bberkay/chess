@@ -1,5 +1,5 @@
 import {Board} from "./Board.ts";
-import {CastlingType, Color, JsonNotation, PieceType, Square, GameStatus} from "../../Types";
+import {CastlingType, Color, JsonNotation, PieceType, Square, GameStatus, Pieces} from "../../Types";
 import {BoardQuerier} from "./BoardQuerier.ts";
 import {PieceModel} from "../Models/PieceModel.ts";
 import {Piece} from "../Types";
@@ -37,8 +37,10 @@ export class BoardManager extends Board{
         Board.halfMoveCount = jsonNotation.halfMoveClock;
         Board.castling = jsonNotation.castling;
         Board.enPassant = jsonNotation.enPassant;
-        Board.moveHistory = jsonNotation.moveHistory ?? [];
+        Board.algebraicNotation = jsonNotation.algebraicNotation ?? [];
         Board.scores = jsonNotation.scores ?? {[Color.White]: {score: 0, pieces: []}, [Color.Black]: {score: 0, pieces: []}};
+        Board.moveHistory = jsonNotation.moveHistory ?? [];
+        Board.durations = jsonNotation.durations ?? null;
         Board.gameStatus = jsonNotation.gameStatus ?? Board.gameStatus;
     }
 
@@ -48,7 +50,7 @@ export class BoardManager extends Board{
      * {"color":Color.White, "type":PieceType.Pawn, "square":Square.b2}]); This will create two
      * white pawns on a2 and b2.
      */
-    protected createPieces(pieces:Array<{color: Color, type:PieceType, square:Square}>): void
+    protected createPieces(pieces:Pieces): void
     {
         for(let piece of pieces){
             this.createPieceModel(piece.color, piece.type, piece.square);
@@ -174,11 +176,19 @@ export class BoardManager extends Board{
     }
 
     /**
-     * Add move to history
+     * Add move to algebraic notation
      */
-    protected saveMoveNotation(moveNotation: string): void
+    protected saveAlgebraicNotation(move: string): void
     {
-        Board.moveHistory.push(moveNotation);
+        Board.algebraicNotation.push(move);
+    }
+
+    /**
+     * Add move to move history
+     */
+    protected saveMoveHistory(from: Square, to: Square): void
+    {
+        Board.moveHistory.push({from: from, to: to});
     }
 
     /**
@@ -188,4 +198,5 @@ export class BoardManager extends Board{
     {
         Board.gameStatus = gameStatus;
     }
+
 }

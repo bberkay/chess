@@ -38,12 +38,11 @@
  */
 
 import type { Server, ServerWebSocket } from "bun";
-import type { RWebSocket, WebSocketData } from "./Types";
-import type { JsonNotation, Square, StartPosition } from "@Chess/Types";
+import type { RWebSocket, WebSocketData, WebSocketParams } from "./Types";
+import type { Durations, JsonNotation, Square, StartPosition } from "@Chess/Types";
 import { Color } from "@Chess/Types";
 import { MoveValidationError } from "@Chess/Engine/ChessEngine";
 import { LobbyManager } from "./Classes/LobbyManager";
-import { WsCommand, WsCommandTitle } from "./Classes/WsCommand";
 import { createRandomId } from "./Classes/Helper";
 import { MAX_PAYLOAD_LENGTH, SERVER_PORT } from "./Consts";
 import { ALLOWED_ORIGINS } from "./Consts";
@@ -56,6 +55,12 @@ import {
     MIN_INCREMENT_TIME
 } from "./Consts";
 import { SocketManager } from "./Classes/SocketManager";
+import { 
+    WsCommand, 
+    WsCommandTitle,
+    WsMovedData,
+    type WsStartedData
+} from "./Classes/WsCommand";
 
 /**
  * Check if the origin is allowed to connect.
@@ -69,22 +74,16 @@ function isOriginAllowed(req: Request): boolean {
 /**
  * Check if the parameters are valid.
  */
-function areParametersValid(req: Request): Response | { 
-    name: string | null, 
-    lobbyId: string | null, 
-    userToken: string | null, 
-    board: string | null, 
-    totalTime: string | null, 
-    incrementTime: string | null } 
+function areParametersValid(req: Request): Response | WebSocketParams
 {
     const url = new URL(req.url);
     const name = url.searchParams.get("name");
     const lobbyId = url.searchParams.get("lobbyId");
     const userToken = url.searchParams.get("userToken");
     const board = url.searchParams.get("board");
-    const totalTime = url.searchParams.get("totalTime");
-    const incrementTime = url.searchParams.get("incrementTime");
-    console.log("Parameters: ", name, lobbyId, userToken, board, totalTime, incrementTime);
+    const remaining = url.searchParams.get("remaining");
+    const increment = url.searchParams.get("increment");
+    console.log("Parameters: ", name, lobbyId, userToken, board, remaining, increment);
     if(name && userToken)
         return new Response(
             "Invalid request. name and userToken cannot be used together.", 
@@ -121,15 +120,15 @@ function areParametersValid(req: Request): Response | {
             {status: 400}
         );
 
-    if((board || totalTime || incrementTime) && (!name || lobbyId || userToken))
+    if((board || remaining || increment) && (!name || lobbyId || userToken))
         return new Response(
-            "Invalid request. board, totalTime, incrementTime can only be used when creating a new lobby.", 
+            "Invalid request. board, remaining, increment can only be used when creating a new lobby.", 
             {status: 400}
         );
 
-    if((name && !lobbyId) && (!board || !totalTime || !incrementTime))
+    if((name && !lobbyId) && (!board || !remaining || !increment))
         return new Response(
-            "Invalid request. board, totalTime, incrementTime must be provided when creating a new lobby.", 
+            "Invalid request. board, remaining, increment must be provided when creating a new lobby.", 
             {status: 400}
         );
 
@@ -139,24 +138,24 @@ function areParametersValid(req: Request): Response | {
             {status: 400}
         );
 
-    if(totalTime){
-        const totalTimeNumber = parseFloat(totalTime);
+    if(remaining){
+        const totalTimeNumber = parseFloat(remaining);
         if(isNaN(totalTimeNumber) 
             || totalTimeNumber < MIN_TOTAL_TIME 
                 || totalTimeNumber > MAX_TOTAL_TIME)
             return new Response(
-                "Invalid request. totalTime must be a number between 0.1 and 60.", 
+                "Invalid request. remaining must be a number between 0.1 and 60.", 
                 {status: 400}
             );
     }
 
-    if(incrementTime){
-        const incrementTimeNumber = parseInt(incrementTime);
+    if(increment){
+        const incrementTimeNumber = parseInt(increment);
         if(isNaN(incrementTimeNumber) 
             || incrementTimeNumber < MIN_INCREMENT_TIME 
                 || incrementTimeNumber > MAX_INCREMENT_TIME)
             return new Response(
-                "Invalid request. incrementTime must be a number between 0 and 30.", 
+                "Invalid request. increment must be a number between 0 and 30.", 
                 {status: 400}
             );
     }
@@ -164,7 +163,7 @@ function areParametersValid(req: Request): Response | {
     if(lobbyId && !LobbyManager.isLobbyExist(lobbyId))
         return new Response("Lobby not found.", {status: 404});
 
-    return { name, lobbyId, userToken, board, totalTime, incrementTime };
+    return { name, lobbyId, userToken, board, remaining, increment };
 }
 
 /**
@@ -174,11 +173,11 @@ function areParametersValid(req: Request): Response | {
 function handlePlayerNameProcess(
     lobbyId: string | null, 
     board: string | JsonNotation | StartPosition, 
-    duration: [number, number]
+    initialDuration: { remaining: number, increment: number }
 ): Response | { lobbyId: string, userToken: string }
 {
     if(!lobbyId)
-        lobbyId = LobbyManager.createLobby(board, duration);
+        lobbyId = LobbyManager.createLobby(board, initialDuration);
     else{
         const lobby = LobbyManager.getLobby(lobbyId)!;
         if(lobby.isGameAlreadyStarted())
@@ -213,22 +212,17 @@ function handleUserTokenProcess(
  * or name(name of the player). If the parameters are
  * incorrect, it will return a response.
  */
-function handleParameters(params: any): 
-    Response | { 
-        lobbyId: string, 
-        name: string, 
-        userToken: string, 
-        board: string, 
-        totalTime: string, 
-        incrementTime: string 
-    }
+function handleParameters(params: any): Response | WebSocketParams
 {   
     let handledParams: Response | { lobbyId: string, name: string} | { lobbyId: string, userToken: string };
     if(params && params.name)
         handledParams = handlePlayerNameProcess(
             params.lobbyId, 
             params.board as string, 
-            [parseInt(params.totalTime!), parseInt(params.incrementTime!)]
+            {
+                remaining: parseInt(params.remaining!), 
+                increment: parseInt(params.increment!)
+            }
         );
     else
         handledParams = handleUserTokenProcess(
@@ -266,8 +260,8 @@ const server = Bun.serve<WebSocketData>({
             userToken,
             name,
             board,
-            totalTime,
-            incrementTime
+            remaining,
+            increment
         } = finalParameters;
 
         // upgrade the connection.
@@ -281,8 +275,8 @@ const server = Bun.serve<WebSocketData>({
                     color: null 
                 },
                 board: board,
-                totalTime: totalTime,
-                incrementTime: incrementTime
+                remaining: remaining,
+                increment: increment
             } 
         });
         if(success) return;
@@ -319,7 +313,7 @@ function joinLobby(ws: RWebSocket){
     const lobby = LobbyManager.joinLobby(lobbyId, player);
     if(lobby){
         ws.subscribe(lobbyId);
-        ws.send(WsCommand.connected(lobbyId, player));
+        ws.send(WsCommand.connected({lobbyId, player}));
         SocketManager.addSocket(ws.data.lobbyId, ws.data.player.userToken, ws);
         console.log("Lobby Join: ", lobbyId, player.color, player.name);
 
@@ -332,8 +326,8 @@ function joinLobby(ws: RWebSocket){
                 whitePlayer: {name: whitePlayer.name, isOnline: whitePlayer.isOnline},
                 blackPlayer: {name: blackPlayer.name, isOnline: blackPlayer.isOnline},
                 board: lobby.getCurrentBoard(),
-                duration: lobby.getDuration()
-            });
+                durations: lobby.getCurrentDurations()
+            }) as WsStartedData;
 
             if(isGameReadyToStart){
                 lobby.startGame();
@@ -341,7 +335,10 @@ function joinLobby(ws: RWebSocket){
             }
             else if(isGameAlreadyStarted){
                 ws.send(WsCommand.started(startedData));
-                server.publish(lobbyId, WsCommand.reconnected(lobbyId, player.name, player.color!));
+                server.publish(lobbyId, WsCommand.reconnected({
+                    lobbyId: lobbyId,
+                    reconnectedPlayer: {name: player.name, color: player.color}
+                }));
             }
         }
     }
@@ -355,7 +352,10 @@ function leaveLobby(ws: RWebSocket){
     const player = ws.data.player;
     if(!LobbyManager.leaveLobby(lobbyId, player)) return;
         
-    server.publish(lobbyId, WsCommand.disconnected(lobbyId, player.name, player.color!));
+    server.publish(lobbyId, WsCommand.disconnected({
+        lobbyId: lobbyId,
+        disconnectedPlayer: {name: player.name, color: player.color}
+    }));
     ws.unsubscribe(lobbyId);
     SocketManager.removeSocket(lobbyId, player.userToken);
 
@@ -369,7 +369,7 @@ function handleMessage(ws: RWebSocket, message: string){
     const [command, data] = WsCommand.parse(message);
     switch(command){
         case WsCommandTitle.Moved:
-            movePiece(ws, data.from, data.to);
+            movePiece(ws, (data as WsMovedData).from, (data as WsMovedData).to);
             break;
     }
 }
@@ -397,11 +397,11 @@ function movePiece(ws: RWebSocket, from: Square, to: Square){
                 opponentPlayer.userToken
             )!;
             if(!opponentPlayerWs) return;
-            opponentPlayerWs.send(WsCommand.moved(from, to));
+            opponentPlayerWs.send(WsCommand.moved({from, to}));
         }
         catch(e){
             if(e instanceof MoveValidationError)
-                ws.send(WsCommand.error(e.message));
+                ws.send(WsCommand.error({message: e.message}));
             return;
         }
     }
