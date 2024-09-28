@@ -92,7 +92,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            width: 25%;
+            width: 27%;
             border: 1px solid var(--notation-menu-player-name-border-color);
             height: 86%;
             padding-top: 3px;
@@ -107,13 +107,22 @@
                 user-select: none;
             }
             
-            & .milliseconds{
-                font-size: var(--notation-menu-milliseconds-font-size);
+            & .decisecond{
+                font-size: var(--notation-menu-decisecond-font-size);
                 margin-left: 2px;
                 margin-top: -5px;
                 padding-top: 0;
-                margin-bottom: 2px;
+                margin-bottom: 3px;
+                display:none;
+
+                &.active{
+                    display: inline;
+                }
             }
+        }
+
+        & .duration:has(.decisecond.active){
+            background-color: var(--notation-menu-decisecond-bg-color);
         }
 
         & .player-status{

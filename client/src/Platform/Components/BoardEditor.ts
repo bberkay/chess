@@ -1,6 +1,6 @@
 import { PlatformEvent, BoardEditorOperation, NavigatorModalOperation } from "../Types";
 import { Chess } from "@Chess/Chess";
-import { Color, GameStatus, JsonNotation, PieceType, Square, StartPosition } from "@Chess/Types";
+import { Color, Durations, GameStatus, JsonNotation, PieceType, Square, StartPosition } from "@Chess/Types";
 import { Component } from "./Component";
 
 enum BoardCreatorMode {
@@ -376,9 +376,12 @@ export class BoardEditor extends Component{
     /**
      * This function creates a new board with the board creator.
      */
-    private _createBoard(notation: string | JsonNotation): void
+    private _createBoard(
+        notation: string | StartPosition | JsonNotation, 
+        durations: Durations| null = null
+    ): void
     {
-        this.chess.createGame(notation);
+        this.chess.createGame(notation, durations);
         if(BoardEditor.isEditorModeEnable()){
             this.chess.board.lock();
             this.chess.board.removeEffectFromAllSquares();
@@ -395,9 +398,12 @@ export class BoardEditor extends Component{
     /**
      * This function creates a new board with the board creator.
      */
-    public createBoard(fenNotation: string | StartPosition | JsonNotation | null = null): void
+    public createBoard(
+        fenNotation: string | StartPosition | JsonNotation | null = null,
+        durations: Durations | null = null
+    ): void
     {
-        this._createBoard(fenNotation || this.getFen());
+        this._createBoard(fenNotation || this.getFen(), durations);
     }
 
     /**

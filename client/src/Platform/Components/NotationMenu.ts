@@ -1,4 +1,4 @@
-import { Color, PieceType } from "@Chess/Types";
+import { ChessEvent, Color, Durations, GameStatus, PieceType, Scores } from "@Chess/Types";
 import { Component } from "./Component.ts";
 import { Chess } from "@Chess/Chess.ts";
 import { BoardEditorOperation, NavigatorModalOperation, NotationMenuOperation } from "../Types";
@@ -10,6 +10,7 @@ export class NotationMenu extends Component{
     private readonly chess: Chess;
     private moveCount: number = 0;
     private lastScore: Record<Color, number> = {[Color.White]: 0, [Color.Black]: 0};
+    private activeIntervalId: number = -1;
 
     /**
      * Constructor of the LogConsole class.
@@ -37,7 +38,7 @@ export class NotationMenu extends Component{
                         </div> 
                         <div class="duration hidden" id="black-player-duration">
                             <div style="display: flex;align-items: end;">
-                                <span class="minute-second">00:00</span> <small class="milliseconds">.00</small>
+                                <span class="minute-second">00:00</span> <small class="decisecond">.00</small>
                             </div>
                         </div>
                         <div class="player-status">
@@ -83,7 +84,7 @@ export class NotationMenu extends Component{
                         </div> 
                         <div class="duration hidden" id="white-player-duration">
                             <div style="display: flex;align-items: end;">
-                                <span class="minute-second">00:00</span> <small class="milliseconds">.00</small>
+                                <span class="minute-second">00:00</span> <small class="decisecond">.00</small>
                             </div>
                         </div>
                         <div class="player-status">
@@ -145,7 +146,7 @@ export class NotationMenu extends Component{
     /**
      * This function shows the score of the players top and bottom of the table.
      */
-    private setScore(scores: Record<Color, {score: number, pieces: PieceType[]}>): void
+    private setScore(scores: Scores): void
     {
         if(this.lastScore.White == scores.White.score && this.lastScore.Black == scores.Black.score)
             return;
@@ -229,21 +230,6 @@ export class NotationMenu extends Component{
     }
 
     /**
-     * Update the notation table and the score of the players.
-     * @param force If force is true then the notation table will be updated
-     * even if the notation is not changed.
-     */
-    public update(force: boolean = false): void
-    {
-        if(!force && this.chess.engine.getNotation().length == this.moveCount)
-            return;
-
-        this.setScore(this.chess.engine.getScores());
-        this.addNotation(this.chess.engine.getNotation());
-        this.changeIndicator();
-    }
-
-    /**
      * This function opens/closes the utility menu.
      */
     private toggleUtilityMenu(): void
@@ -324,12 +310,39 @@ export class NotationMenu extends Component{
     /**
      * Display the white player duration on the notation menu.
      */
-    public showPlayerDurations(duration: [number, number]): void
+    public showPlayerDurations(durations: Durations): void
     {
-        (document.querySelectorAll(".duration") as NodeListOf<HTMLElement>).forEach((durationItem) => {
-            durationItem.classList.remove("hidden");
-            durationItem.textContent = duration[0].toString().concat(":", duration[1].toString());
-        });
+        const whitePlayerDuration = document.getElementById("white-player-duration")!;
+        whitePlayerDuration.classList.remove("hidden");
+        whitePlayerDuration.querySelector(".minute-second")!.textContent = `${durations[Color.White].remaining.toString()}:00`;
+
+        const blackPlayerDuration = document.getElementById("black-player-duration")!;
+        blackPlayerDuration.classList.remove("hidden");
+        blackPlayerDuration.querySelector(".minute-second")!.textContent = `${durations[Color.Black].remaining.toString()}:00`;
+    }
+
+    /**
+     * Update the notation table and the score of the players.
+     * @param force If force is true then the notation table will be updated
+     * even if the notation is not changed.
+     */
+    public update(force: boolean = false): void
+    {
+        const moveCount = this.chess.engine.getMoveHistory().length;
+
+        if(!force && moveCount == 0 || moveCount == this.moveCount)
+            return;
+
+        this.setScore(this.chess.engine.getScores());
+        this.addNotation(this.chess.engine.getAlgebraicNotation());
+        this.changeIndicator();
+
+        if([
+            GameStatus.WhiteInCheck, 
+            GameStatus.BlackInCheck,
+            GameStatus.InPlay
+        ].includes(this.chess.engine.getGameStatus()) && moveCount >= 2)
+            this.startOrUpdateTimers();
     }
 
     /**
@@ -338,17 +351,21 @@ export class NotationMenu extends Component{
     public updatePlayerCards(
         whitePlayer: {name: string, isOnline: boolean}, 
         blackPlayer: {name: string, isOnline: boolean}, 
-        duration: [number, number] | null = null
+        durations: Durations | null = null
     ): void
     {
         this.showPlayerCards();
         this.displayWhitePlayerName(whitePlayer.name);
         this.displayBlackPlayerName(blackPlayer.name);
+
         if(whitePlayer.isOnline) this.updatePlayerAsOnline(Color.White);
         else this.updatePlayerAsOffline(Color.White);
+
         if(blackPlayer.isOnline) this.updatePlayerAsOnline(Color.Black);
         else this.updatePlayerAsOffline(Color.Black);
-        //if(duration) this.displayPlayerDurations(duration);
+
+        if(durations) 
+            this.showPlayerDurations(durations);
     }
 
     /**
@@ -372,27 +389,66 @@ export class NotationMenu extends Component{
     }
 
     /**
-     * Start the given player duration.
+     * Start/Update the timers by starting the timer of the player
+     * and stopping the timer of the opponent.
      */
-    public startPlayerDuration(color: Color): void
+    public startOrUpdateTimers(): void
     {
-        const playerDuration = document.getElementById(`${color.toLowerCase()}-player-duration`)!;
-        playerDuration.classList.add("running");
+        this.startPlayerTimer(this.chess.engine.getTurnColor());
     }
 
     /**
-     * Stop the given player duration.
+     * Stop the timer of the both players.
      */
-    public stopPlayerDuration(color: Color): void
-    {
-        const playerDuration = document.getElementById(`${color.toLowerCase()}-player-duration`)!;
-        playerDuration.classList.remove("running");
+    public stopTimers(){
+        this.stopOpponentTimerIfActive();
     }
 
     /**
-     * Change the turn indicator to the given color.
+     * Start the given player's timer by checking the remaining time
+     * of the player in every 100 milliseconds from the engine.
      */
-    public changeTurnIndicator(color: Color): void
+    private startPlayerTimer(color: Color): void
+    {
+        this.stopOpponentTimerIfActive();
+        const playerTimer = document.getElementById(`${color.toLowerCase()}-player-duration`)!;
+        const playerMinuteSecond = playerTimer.querySelector(".minute-second")!;
+        const playerDecisecond = playerTimer.querySelector(".decisecond")!;
+        this.activeIntervalId = window.setInterval(() => {
+            const milliseconds = Math.round(this.chess.engine.getPlayersRemainingTime()[color]);
+            const totalDeciseconds = Math.floor(milliseconds / 100);
+            const totalSeconds = Math.floor(totalDeciseconds / 10); 
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            const deciseconds = totalDeciseconds % 10;
+            
+            // mm:ss
+            playerMinuteSecond.textContent = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+            
+            // if the remaining time is less than 10 seconds then show the deciseconds
+            // mm:ss.d
+            if(minutes <= 0 && seconds <= 10){
+                playerDecisecond.classList.add("active");
+                playerDecisecond.textContent = "." + deciseconds;
+            }
+        }, 100)
+    }
+
+    /**
+     * Stop the oppenent's timer. Clearing the active
+     * interval id is enough to stop the timer because
+     * only one timer/interval can be active at a time.
+     */
+    private stopOpponentTimerIfActive(): void
+    {
+        if(this.activeIntervalId != -1) 
+            clearInterval(this.activeIntervalId);
+    }
+
+    /**
+     * Set the turn indicator to the given color.
+     */
+    public setTurnIndicator(color: Color): void
     {
         document.querySelector(`.your-turn-effect`)?.classList.remove("your-turn-effect");
         document.getElementById(`${color.toLowerCase()}-player-section`)!.classList.add("your-turn-effect");

@@ -58,8 +58,8 @@
                             border: 1px solid var(--connections-menu-border-color);
                             padding: 2px 5px;
 
-                            & .milliseconds{
-                                font-size: var(--connections-menu-player-duration-milliseconds-font-size);
+                            & .decisecond{
+                                font-size: var(--connections-menu-player-duration-decisecond-font-size);
                             }
                         }
                     

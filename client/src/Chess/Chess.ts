@@ -7,7 +7,7 @@
  * @license MIT
  */
 
-import {JsonNotation, PieceType, Square, Color, StartPosition, ChessEvent, GameStatus} from "./Types";
+import {JsonNotation, PieceType, Square, Color, StartPosition, ChessEvent, GameStatus, Durations} from "./Types";
 import {ChessEngine, MoveValidationError} from "./Engine/ChessEngine";
 import {ChessBoard} from "./Board/ChessBoard";
 import {SquareClickMode} from "./Board/Types";
@@ -73,10 +73,21 @@ export class Chess{
     }
 
     /**
-     * This function creates a new game with the given position(fen notation, json notation or StartPosition enum).
-     * @see For more information about StartPosition enum check src/Chess/Types/index.ts
+     * This function creates a new game with the given position(fen notation/string, 
+     * StartPosition/string or JsonNotation). 
+     * 
+     * If "position" is JsonNotation and includes "durations" but also "durations" parameter 
+     * is given then "durations" in theJsonNotation will be OVERRIDEN by the "durations" 
+     * parameter. If position is string/fen/StartPosition then it will be converted to 
+     * JsonNotation and if "durations" parameter is given then "durations" will be ADDED 
+     * to the created JsonNotation that is converted from the string/fen/StartPosition.
+     * 
+     * @see For more information about StartPosition and JsonNotation check src/Chess/Types/index.ts
      */
-    public createGame(position: JsonNotation | StartPosition | string = StartPosition.Standard): void
+    public createGame(
+        position: JsonNotation | StartPosition | string = StartPosition.Standard,
+        durations: Durations | null = null
+    ): void
     {
         LocalStorage.clear(LocalStorageKey.LastBoard);
         this.resetProperties();
@@ -86,6 +97,9 @@ export class Chess{
             position = Converter.fenToJson(position);
             this.logger.save(`Given position converted to json notation.`);
         }
+
+        if(durations) 
+            position.durations = durations;
 
         this.engine.createGame(position);
         this.logger.save(`Game successfully created on ChessEngine`);
@@ -102,6 +116,7 @@ export class Chess{
         // Initialize the listener for moves because the game is 
         // created from scratch and the listener is not initialized.
         this.initBoardListener();
+        this.initEngineListener();
     }
 
     /**
@@ -151,7 +166,29 @@ export class Chess{
                 this.logger.save("Pre-move canceled");
             }
         });
+
         this.logger.save("Moves listener initialized");
+    }
+
+    /**
+     * This function initializes the listener for engine's
+     * actions on chessboard to make a move on engine and board.
+     */
+    private initEngineListener(): void
+    {
+        const interval = setInterval(() => {
+            if([
+                GameStatus.BlackVictory, 
+                GameStatus.WhiteVictory, 
+                GameStatus.Draw
+            ].includes(this.engine.getGameStatus())){
+                clearInterval(interval);
+                this.finishTurn();
+                this.logger.save("Game finished because of one of the player has no more time");
+            }
+        }, 1000);
+
+        this.logger.save("Engine listener initialized");
     }
 
     /**
@@ -260,6 +297,7 @@ export class Chess{
         {
             this.logger.save("Game updated in cache after move");
             LocalStorage.save(LocalStorageKey.LastBoard, this.engine.getGameAsJsonNotation());
+            document.dispatchEvent(new Event(ChessEvent.onGameOver));
             return;
         }
 

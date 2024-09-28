@@ -71,7 +71,7 @@ export class ConnectionsMenu extends NavbarComponent{
                         <div class="player-match-info">
                             <div class="indicator">
                                 <div class="player-duration">
-                                    <span class="minute-second">05:10</span><span class="milliseconds">.01</span>
+                                    <span class="minute-second">05:10</span><span class="decisecond">.01</span>
                                 </div>
                                 <div class="player-color"></div>
                             </div>
@@ -99,7 +99,7 @@ export class ConnectionsMenu extends NavbarComponent{
                         <div class="player-match-info">
                             <div class="indicator">
                                 <div class="player-duration">
-                                    <span class="minute-second">05:10</span><span class="milliseconds">.01</span>
+                                    <span class="minute-second">05:10</span><span class="decisecond">.01</span>
                                 </div>
                                 <div class="player-color"></div>
                             </div>

@@ -28,7 +28,7 @@
     --connections-menu-player-info-font-size: 0.95rem;
     --connections-menu-move-history-font-size: 0.9rem;
     --connections-menu-player-duration-font-size: 0.8rem;
-    --connections-menu-player-duration-milliseconds-font-size: 0.7rem;
+    --connections-menu-player-duration-decisecond-font-size: 0.7rem;
     
     /* Board Editor */
     --board-editor-table-height: 240px; 
@@ -39,8 +39,8 @@
     --notation-table-width: 300px;
     --notation-table-font-size: 15px;
     --notation-menu-player-name-font-size: 13px;
-    --notation-menu-duration-font-size: 18px;
-    --notation-menu-milliseconds-font-size: 12px;
+    --notation-menu-duration-font-size: 20px;
+    --notation-menu-decisecond-font-size: 12px;
     --score-table-piece-icons-size: 23px;
     --score-table-score-font-size: 15px;
 
@@ -72,8 +72,9 @@
     --dark-gray-color: #666;
     --dark-gray-opaque-color: #666666B3;
     --darker-gray-color: #444444;
-    --online-status-color: #6EAF23;
-    --offline-status-color: #C2091F;
+    --danger-color: #7C2926;
+    --online-status-color: #77C71C;
+    --offline-status-color: #A50417;
     --no-status-color: #666;
     --backdrop-bg-color: #0000005C;
     --glass-bg-color: #FFFFFF1A;
@@ -200,6 +201,7 @@ body{
     --notation-menu-player-name-bg-color: var(--accent-color);
     --notation-menu-player-name-inner-bg-color: var(--component-color);
     --notation-menu-player-name-border-color: var(--border-color);
+    --notation-menu-decisecond-bg-color: var(--danger-color);
 
     /* Utility Menu */
     --utility-menu-bg-color: var(--accent-color);
@@ -574,7 +576,7 @@ main{
         & .right { 
             order:2;
 
-            & #notation-menu, & #piece-creator{
+            & #notation-menu, & #piece-creator:has(#piece-table){
                 margin-top: 55px;
             }
         }
