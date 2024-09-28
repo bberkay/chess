@@ -12,7 +12,7 @@ import { Platform } from "@Platform/Platform.ts";
 import { Logger } from "@Services/Logger";
 import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage.ts";
 import { WsMessage, WsCommand, SocketOperation } from "./Types";
-import { ChessEvent, Color, Square, StartPosition } from '@Chess/Types';
+import { ChessEvent, Color, Duration, Square, StartPosition } from '@Chess/Types';
 import { DEFULT_PLAYER_NAME, DEFAULT_TOTAL_TIME, DEFAULT_INCREMENT_TIME } from "@Platform/Consts";
 import { PlatformEvent } from '@Platform/Types';
 
@@ -78,17 +78,17 @@ export class ChessPlatform{
         /**
          * Connect to the last connection if exists.
          */
-        const connectToLastConnection = () => {
-            if(LocalStorage.isExist(LocalStorageKey.LastLobbyConnection))
-                this.reconnectLobby();
-            else if(this.checkAndGetLobbyIdFromUrl())
+        const connectToLastConnectionOrLobbyUrl = () => {
+            if(this.checkAndGetLobbyIdFromUrl())
                 this.platform.navigatorModal.showJoinLobby();
+            else if(LocalStorage.isExist(LocalStorageKey.LastLobbyConnection))
+                this.reconnectLobby();
         }
 
         /**
          * Initialize the chess platform.
          */
-        connectToLastConnection();
+        connectToLastConnectionOrLobbyUrl();
         bindSocketOperations();
         this.logger.save("Chess platform is initialized.");
     }
@@ -138,13 +138,13 @@ export class ChessPlatform{
     /**
      * Create a new lobby with the given player name
      */
-    private createLobby(playerName: string, board: string, duration: [number, number]): void
+    private createLobby(playerName: string, board: string, initialDuration: Duration): void
     {  
         this.createAndHandleWebSocket(new URLSearchParams({
             name: (playerName || DEFULT_PLAYER_NAME),
             board: board || StartPosition.Standard,
-            totalTime: (duration[0] || DEFAULT_TOTAL_TIME).toString(),
-            incrementTime: (duration[1] || DEFAULT_INCREMENT_TIME).toString()
+            remaining: (initialDuration.remaining || DEFAULT_TOTAL_TIME).toString(),
+            increment: (initialDuration.increment || DEFAULT_INCREMENT_TIME).toString()
         }).toString());
     }
 
@@ -259,10 +259,10 @@ export class ChessPlatform{
                     ));
                     break;
                 case WsCommand.Disconnected:
-                    this.platform.notationMenu.updatePlayerAsOffline(wsData.player.color);
+                    this.platform.notationMenu.updatePlayerAsOffline(wsData.disconnectedPlayer.color);
                     break;
                 case WsCommand.Reconnected:
-                    this.platform.notationMenu.updatePlayerAsOnline(wsData.player.color);
+                    this.platform.notationMenu.updatePlayerAsOnline(wsData.reconnectedPlayer.color);
                     break;
                 case WsCommand.Error:
                     this.platform.navigatorModal.showError(wsData.message);
@@ -281,5 +281,4 @@ export class ChessPlatform{
             //    LocalStorage.clear(LocalStorageKey.LastLobbyConnection);
         };
     }
-
 }

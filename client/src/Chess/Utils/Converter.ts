@@ -1,4 +1,4 @@
-import { Color, PieceType, Square, StartPosition, JsonNotation, CastlingType } from "../Types";
+import { Color, PieceType, Square, StartPosition, JsonNotation, CastlingType, Castling } from "../Types";
 
 /**
  * This class is used to convert data from one type to another.
@@ -114,7 +114,7 @@ export class Converter{
         if(splitFen.length >= 6)
         {
             // Find castling availability from the fen notation
-            const castlingAvailability: Record<CastlingType, boolean> = {
+            const castlingAvailability: Castling = {
                 [CastlingType.WhiteLong] : splitFen[2].includes("Q"),
                 [CastlingType.WhiteShort] : splitFen[2].includes("K"),
                 [CastlingType.BlackLong] : splitFen[2].includes("q"),

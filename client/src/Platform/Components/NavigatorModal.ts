@@ -2,7 +2,7 @@ import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage";
 import { SocketOperation } from "../../Types";
 import { BoardEditorOperation, NavigatorModalOperation } from "../Types";
 import { Component } from "./Component";
-import { GameStatus, StartPosition } from "@Chess/Types";
+import { Duration, GameStatus, StartPosition } from "@Chess/Types";
 import { 
     DEFULT_PLAYER_NAME,
     MAX_PLAYER_NAME_LENGTH,
@@ -22,7 +22,10 @@ export class NavigatorModal extends Component{
     private lastNavigatorModalTitle: string = "";
     private lastNavigatorModalContent: string = "";
     private lastCreatedBoard: string = StartPosition.Standard;
-    private lastSelectedDuration: [number, number] = [DEFAULT_TOTAL_TIME, DEFAULT_INCREMENT_TIME];
+    private lastSelectedDuration: Duration = {
+        remaining: DEFAULT_TOTAL_TIME,
+        increment: DEFAULT_INCREMENT_TIME
+    };
     
     /**
      * Constructor of the NavigatorModal class.
@@ -53,41 +56,50 @@ export class NavigatorModal extends Component{
      */
     private show(title: string, content: string, closeable: boolean = false, backdrop: boolean = true): void
     {
+        window.scrollTo(0, 0);
+
         this.loadHTML("navigator-modal", `
-            <div class="navigator-modal ${backdrop ? "navigator-modal--glass" : ""}">
+            <div class="navigator-modal ${backdrop ? "navigator-modal--glass" : ""} ${closeable ? "closeable" : ""}">
                 <div class="navigator-modal-bg"></div>
                 <div class="navigator-modal-title">${title}</div>
                 <div class="navigator-modal-content">${content}</div>
             </div>
         `);
-                
-        if(!document.querySelector(".navigator-modal-content #confirmation")){
-            this.lastNavigatorModalTitle = title;
-            this.lastNavigatorModalContent = content;
-        }
 
-        if(closeable) 
-            document.querySelector('.navigator-modal')!.classList.add("closeable");
+        const modal = document.querySelector('.navigator-modal')! as HTMLElement;
 
+        let modalBgLayer;
         if(backdrop){
-            let modalBgLayer = document.querySelector(".navigator-modal-bg-layer")!
+            modalBgLayer = document.querySelector(".navigator-modal-bg-layer")!
             if(!modalBgLayer){
                 modalBgLayer = document.createElement("div");
                 modalBgLayer.classList.add("navigator-modal-bg-layer");
                 document.body.appendChild(modalBgLayer);
             }
         }
+        else{
+            // Center modal to the chessboard when the backdrop is not available.
+            const chessboard = document.getElementById('chessboard');
+            if(chessboard){ 
+                modal.style.top = `${chessboard.offsetTop + chessboard.clientHeight / 2 - modal.clientHeight / 2}px`;
+                modal.style.left = `${chessboard.offsetLeft + chessboard.clientWidth / 2 - modal.clientWidth / 2}px`;
+            }
+        }
 
-        document.addEventListener("click", (event) => {
+        (modalBgLayer || document).addEventListener("click", (event) => {
             if(!(event.target as HTMLElement).closest(".navigator-modal")){
-                if(document.querySelector(".closeable"))
+                if(modal.classList.contains("closeable"))
                     this.hide();
                 else
                     this.bounce();
             }   
         });
 
-        window.scrollTo(0, 0);
+        // For go back to the previous state of the modal.
+        if(!modal.querySelector(".navigator-modal-content #confirmation")){
+            this.lastNavigatorModalTitle = title;
+            this.lastNavigatorModalContent = content;
+        }
     }
 
     /**
@@ -447,7 +459,7 @@ export class NavigatorModal extends Component{
      * seconds for increment time. If not, it will be DEFAULT_TOTAL_TIME
      * and DEFAULT_INCREMENT_TIME.
      */
-    public getSelectedGameDuration(): [number, number]
+    public getSelectedGameDuration(): Duration
     {
         const isCustomDurationModalOpen = document.querySelector(
             `[data-menu-operation="${NavigatorModalOperation.ShowSelectDurationCustom}"]
@@ -468,22 +480,28 @@ export class NavigatorModal extends Component{
             }
         }
 
-        totalTime = !totalTime && this.lastSelectedDuration[0] ? this.lastSelectedDuration[0] : totalTime;
+        totalTime = !totalTime && this.lastSelectedDuration.remaining 
+            ? this.lastSelectedDuration.remaining 
+            : totalTime;
         totalTime = (!totalTime || totalTime < MIN_TOTAL_TIME || totalTime > MAX_TOTAL_TIME) 
-            ? DEFAULT_TOTAL_TIME : totalTime;
+            ? DEFAULT_TOTAL_TIME 
+            : totalTime;
 
-        incrementTime = !incrementTime && this.lastSelectedDuration[1] ? this.lastSelectedDuration[1] : incrementTime;
+        incrementTime = !incrementTime && this.lastSelectedDuration.increment 
+            ? this.lastSelectedDuration.increment 
+            : incrementTime;
         incrementTime = (!incrementTime || incrementTime < MIN_INCREMENT_TIME || incrementTime > MAX_INCREMENT_TIME) 
-            ? DEFAULT_INCREMENT_TIME : incrementTime;
+            ? DEFAULT_INCREMENT_TIME 
+            : incrementTime;
 
-        this.lastSelectedDuration = [totalTime, incrementTime];
-        return [totalTime, incrementTime];
+        this.lastSelectedDuration = {remaining: totalTime, increment: incrementTime};
+        return {remaining: totalTime, increment: incrementTime};
     }
 
     /**
      * Get the created lobby settings from the modal. 
      */
-    public getCreatedLobbySettings(): {playerName: string, board: string, duration: [number, number]}
+    public getCreatedLobbySettings(): {playerName: string, board: string, duration: Duration}
     {
         return {
             playerName: this.getEnteredPlayerName(),

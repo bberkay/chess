@@ -1,5 +1,5 @@
 import {Board} from "./Board.ts";
-import {CastlingType, Color, GameStatus, JsonNotation, PieceType, Square} from "../../Types";
+import {Castling, CastlingType, Color, Durations, GameStatus, JsonNotation, Move, PieceType, Scores, Square} from "../../Types";
 import {MoveRoute, Piece, Route} from "../Types";
 import {RouteCalculator} from "../Move/Calculator/RouteCalculator.ts";
 import {Extractor} from "../Move/Utils/Extractor.ts";
@@ -35,12 +35,14 @@ export class BoardQuerier extends Board{
             enPassant: BoardQuerier.getEnPassant(),
             halfMoveClock: BoardQuerier.getHalfMoveCount(),
             fullMoveNumber: BoardQuerier.getMoveCount(),
+            algebraicNotation: BoardQuerier.getAlgebraicNotation(),
             moveHistory: BoardQuerier.getMoveHistory(),
+            durations: BoardQuerier.getDurations() || undefined,
             scores: BoardQuerier.getScores(),
             gameStatus: BoardQuerier.getBoardStatus()
         }
     }
-
+    
     /**
      * Get current board
      */
@@ -84,7 +86,7 @@ export class BoardQuerier extends Board{
     /**
      * Get castling availability
      */
-    public static getCastling(): Record<CastlingType, boolean>
+    public static getCastling(): Castling
     {
         return Board.castling;
     }
@@ -98,17 +100,33 @@ export class BoardQuerier extends Board{
     }
 
     /**
+     * Get algebraic notation
+     */
+    public static getAlgebraicNotation(): string[]
+    {
+        return Board.algebraicNotation || [];
+    }
+
+    /**
      * Get move history
      */
-    public static getMoveHistory(): string[]
+    public static getMoveHistory(): Move[]
     {
-        return Board.moveHistory;
+        return Board.moveHistory || [];
+    }
+
+    /**
+     * Get durations
+     */
+    public static getDurations(): Durations | null
+    {
+        return Board.durations;
     }
 
     /**
      * Get scores
      */
-    public static getScores(): Record<Color, {score: number, pieces: PieceType[]}>
+    public static getScores(): Scores
     {
         return Board.scores;
     }

@@ -1,4 +1,4 @@
-import { Square, Color, CastlingType, PieceType, GameStatus } from "../../Types";
+import { Square, Color, CastlingType,GameStatus, Castling, Scores, Move, Durations } from "../../Types";
 import { Piece } from "../Types";
 
 /**
@@ -23,16 +23,18 @@ export class Board {
     protected static moveCount: number = 0;
     protected static halfMoveCount: number = 0;
     protected static enPassant: Square | null = null;
-    protected static castling: Record<CastlingType, boolean> = {
+    protected static castling: Castling = {
         [CastlingType.WhiteLong]: true,
         [CastlingType.WhiteShort]: true,
         [CastlingType.BlackLong]: true,
         [CastlingType.BlackShort]: true
     };
-    protected static scores: Record<Color, {score: number, pieces: PieceType[]}> = {
+    protected static scores: Scores = {
         [Color.White]: {score: 0, pieces: []},
         [Color.Black]: {score: 0, pieces: []}
     }
-    protected static moveHistory: string[] = [];
+    protected static algebraicNotation: string[] = [];
+    protected static moveHistory: Move[] = [];
+    protected static durations: Durations | null = null;
     protected static gameStatus: GameStatus = GameStatus.NotReady;
 }
