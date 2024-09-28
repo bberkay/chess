@@ -116,6 +116,7 @@ body.dark-mode .navigator-modal .navigator-modal-bg,
         color: var(--navigator-modal-glass-button-text-color);
         transition: background-color .15s ease;
         border-radius: 5px;
+        width: fit-content;
     }
 }
 
@@ -157,5 +158,23 @@ body.dark-mode .navigator-modal:not(.navigator-modal--glass){
 
     .navigator-modal-bg-layer{
         position: absolute;
+    }
+}
+
+@media screen and (max-width: 550px) {
+    .navigator-modal--glass{
+        margin: 1rem;
+        top: 40%;
+        left: 5%;
+        right: 5%;
+        transform: scale(1);
+
+        & .navigator-modal-bg{
+            left: -10%;
+        }
+
+        &.bounce{
+            transform: scale(1.01);
+        }
     }
 }
