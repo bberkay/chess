@@ -1,13 +1,11 @@
 import { LogConsoleOperation } from "../../Types";
-import { Logger } from "@Services/Logger"; 
+import { Logger, LoggerEvent } from "@Services/Logger"; 
 import { NavbarComponent } from "./NavbarComponent";
 
 /**
  * This class provide a menu to show the logs.
  */
 export class LogConsole extends NavbarComponent{
-    private logCounter: number = 0;
-
     /**
      * Constructor of the LogConsole class.
      */
@@ -16,6 +14,7 @@ export class LogConsole extends NavbarComponent{
         this.renderComponent();
         document.addEventListener("DOMContentLoaded", () => {
             this.stream();
+            document.addEventListener(LoggerEvent.LogAdded, () => this.stream());
         });
     }
 
@@ -49,7 +48,7 @@ export class LogConsole extends NavbarComponent{
      * Return: <span class = "variable-tooltip" data-tooltip-value="[WhiteInCheck, BlackVictory]>Enums</span>
      * are found by player's <span class = "variable-tooltip" data-tooltip-value="[White]">color</span>
      */
-    private _createLogMessages(logs: Array<{source: string, message: string}>): void
+    private _createLogMessage(log: {source: string, message: string}): void
     {
         /**
          * This function parses and stringifies the value, if
@@ -65,52 +64,46 @@ export class LogConsole extends NavbarComponent{
         }
 
         const logListElement: HTMLElement = document.getElementById("log-list")!;
-        for(const log of logs){
-            const words: string[] = log.message.split(" ");
-            for(let i = 0; i < words.length; i++){
-                const originalWord: string = words[i];
-
-                /**
-                 * When we split the log message with " " character, the values between "[]" will be split.
-                 * So we need to merge the split values. For example, if the log message is:
-                 * Enums[WhiteInCheck, BlackVictory] are found by player's color[White].
-                 * The words array will be:
-                 * ["Enums[WhiteInCheck,", "BlackVictory]", "are", "found", "by", "player's", "color[White]."]
-                 * So we need to merge "Enums[WhiteInCheck," and "BlackVictory]" to "Enums[WhiteInCheck, BlackVictory]".
-                 * And we need to remove the "BlackVictory]" from the array.
-                 */
-                if(words[i].includes("[") && !words[i].includes("]")){
-                    words[i] += " " + words[i + 1];
-                    log.message = log.message.replace(words[i + 1], "");
-                }
-
-                // Convert the values between "[]" to tooltips.
-                if(words[i].includes("[") && words[i].includes("]")){
-                    words[i] = words[i].replace(words[i].slice(0, words[i].indexOf("[") + 1), "");
-                    words[i] = words[i].slice(0, words[i].lastIndexOf("]"));
-                    const tooltipVariable: string = 
-                    `<div class = "tooltip-container"><div class = "tooltip-text"><pre>${parseAndStringify(words[i])}</pre></div></div>`;
-                    log.message = log.message.replace(
-                        originalWord,
-                        `<div class = 'tooltip-toggle'>${originalWord.replace(`[${words[i]}]`, "")} ${tooltipVariable}</div>`
-                    );
-                }
+        const words: string[] = log.message.split(" ");
+        for(let i = 0; i < words.length; i++){
+            const originalWord: string = words[i];
+            /**
+             * When we split the log message with " " character, the values between "[]" will be split.
+             * So we need to merge the split values. For example, if the log message is:
+             * Enums[WhiteInCheck, BlackVictory] are found by player's color[White].
+             * The words array will be:
+             * ["Enums[WhiteInCheck,", "BlackVictory]", "are", "found", "by", "player's", "color[White]."]
+             * So we need to merge "Enums[WhiteInCheck," and "BlackVictory]" to "Enums[WhiteInCheck, BlackVictory]".
+             * And we need to remove the "BlackVictory]" from the array.
+             */
+            if(words[i].includes("[") && !words[i].includes("]")){
+                words[i] += " " + words[i + 1];
+                log.message = log.message.replace(words[i + 1], "");
             }
 
-            const logElement = document.createElement("li");
-            logElement.innerHTML = `&#x2022 <strong data-log-source="${log.source}">[${log.source.replace(".ts", "").split("/").pop()}] </strong><span>${log.message}</span>`;
-            logListElement.appendChild(logElement);
+            // Convert the values between "[]" to tooltips.
+            if(words[i].includes("[") && words[i].includes("]")){
+                words[i] = words[i].replace(words[i].slice(0, words[i].indexOf("[") + 1), "");
+                words[i] = words[i].slice(0, words[i].lastIndexOf("]"));
+                const tooltipVariable: string = 
+                `<div class = "tooltip-container"><div class = "tooltip-text"><pre>${parseAndStringify(words[i])}</pre></div></div>`;
+                log.message = log.message.replace(
+                    originalWord,
+                    `<div class = 'tooltip-toggle'>${originalWord.replace(`[${words[i]}]`, "")} ${tooltipVariable}</div>`
+                );
+            }
         }
 
-        logListElement!.innerHTML += "<hr>";
+        const logElement = document.createElement("li");
+        logElement.innerHTML = `&#x2022 <strong data-log-source="${log.source}">[${log.source.replace(".ts", "").split("/").pop()}] </strong><span>${log.message}</span>`;
+            logListElement.appendChild(logElement);
+
         document.getElementById("log-console-body")!.scrollTop = logListElement!.scrollHeight;
     }
 
     /**
-     * This function adds event listeners to the log messages.
-     * Why this function separated from the _createLogMessages function?
-     * Since the tooltip toggles are created dynamically, we need to add event listeners
-     * to the tooltip toggles after the tooltip toggles are created.
+     * This function makes the last added log message 
+     * interactive.
      */
     private _createLogMessagesEventListeners(): void
     {
@@ -138,9 +131,11 @@ export class LogConsole extends NavbarComponent{
             return openingLocation;
         }
 
-        // Add event listeners to the tooltip toggles.
+        const lastLog: HTMLElement = document.getElementById("log-list")!.lastElementChild as HTMLElement;
         const squares: NodeListOf<HTMLElement> = document.querySelectorAll(".square");
-        document.querySelectorAll(".tooltip-toggle").forEach((tooltip_toggle) => {
+
+        // Tooltipts
+        lastLog.querySelectorAll(".tooltip-toggle").forEach((tooltip_toggle) => {
             // square ids and tooltip location added when the mouse is over the tooltip.
             tooltip_toggle.addEventListener("mouseover", () => {
                 squares.forEach((square: HTMLElement) => {
@@ -163,12 +158,14 @@ export class LogConsole extends NavbarComponent{
             });
         });
 
-        // Add event listeners to the log sources.
+        // Log source address bar
         const logSourceAddressBar: HTMLElement = document.getElementById("log-file")!;
-        document.querySelectorAll("[data-log-source]").forEach((logSource) => {
-            logSource.parentElement!.addEventListener("mouseover", () => {
-                logSourceAddressBar.innerHTML = logSource.getAttribute("data-log-source")!
-            });
+        const logSource: HTMLElement = lastLog.querySelector("[data-log-source]") as HTMLElement;
+        if(!logSource)
+            return;
+
+        lastLog.addEventListener("mouseover", () => {
+            logSourceAddressBar.innerHTML = logSource.getAttribute("data-log-source")!
         });
     }
 
@@ -177,18 +174,15 @@ export class LogConsole extends NavbarComponent{
      */
     public stream(): void
     {
-        const lastLogs: Array<{source: string, message: string}> = Logger.messages().slice(this.logCounter);
-        if(lastLogs.length == 0) return;
+        const newAddedLog: {source: string, message: string} = Logger.messages()[Logger.messages().length - 1];
+        if(newAddedLog === undefined)
+            return;
 
-        this._createLogMessages(lastLogs);
+        this._createLogMessage(newAddedLog);
         this._createLogMessagesEventListeners();
-
-        this.logCounter += lastLogs.length;
         
-        if(this.logCounter > 1000){
+        if(Logger.messages().length > 1000)
             this.clear();
-            this.logCounter = 0
-        }
     }
 
     /**
@@ -197,9 +191,6 @@ export class LogConsole extends NavbarComponent{
     public clear(): void
     {
         Logger.clear();
-
-        // Clear the log count.
-        this.logCounter = 0;
 
         // Clear the log list.
         document.getElementById("log-list")!.innerHTML = "";

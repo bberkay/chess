@@ -388,7 +388,6 @@ export class Platform{
      * console after the move is made.
      */
     private updateComponents(): void {
-        this.logConsole.stream();
         this.boardEditor.updateFen();
 
         if(!BoardEditor.isEditorModeEnable()){
