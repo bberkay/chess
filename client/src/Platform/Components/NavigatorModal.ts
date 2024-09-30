@@ -77,14 +77,6 @@ export class NavigatorModal extends Component{
                 document.body.appendChild(modalBgLayer);
             }
         }
-        else{
-            // Center modal to the chessboard when the backdrop is not available.
-            const chessboard = document.getElementById('chessboard');
-            if(chessboard){ 
-                modal.style.top = `${chessboard.offsetTop + chessboard.clientHeight / 2 - modal.clientHeight / 2}px`;
-                modal.style.left = `${chessboard.offsetLeft + chessboard.clientWidth / 2 - modal.clientWidth / 2}px`;
-            }
-        }
 
         (modalBgLayer || document).addEventListener("click", (event) => {
             if(!(event.target as HTMLElement).closest(".navigator-modal")){
