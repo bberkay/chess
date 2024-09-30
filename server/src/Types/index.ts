@@ -8,14 +8,25 @@ export type Player = {
     userToken: string;
 }
 
-export type WebSocketParams = { 
-    name: string | null,
-    lobbyId: string | null,
-    userToken: string | null,
-    board: string | null,
-    remaining: string | number | null,
-    increment: string | number | null,
+export interface CreateLobbyReqParams{
+    name: string;
+    board: string;
+    remaining: string;
+    increment: string;
 } 
+
+export interface JoinLobbyReqParams{
+    name: string;
+    lobbyId: string;
+}
+
+export interface ReconnectLobbyReqParams{
+    lobbyId: string;
+    userToken: string;
+}
+
+export interface BaseWebSocketReqParams extends CreateLobbyReqParams, JoinLobbyReqParams, ReconnectLobbyReqParams {}
+export type WebSocketReqParams = CreateLobbyReqParams | JoinLobbyReqParams | ReconnectLobbyReqParams;
 
 export type WebSocketData = {
     lobbyId: string;
@@ -26,3 +37,5 @@ export type WebSocketData = {
 }
 
 export type RWebSocket = ServerWebSocket<WebSocketData>;
+
+export const ID_LENGTH = 6;

@@ -7,6 +7,7 @@ import { NavbarComponent } from "./NavbarComponents/NavbarComponent";
  */
 export class Navbar extends Component{
     private readonly navbarComponents: NavbarComponent[];
+    private currentlyShownComponent: NavbarComponent | null = null;
 
     /**
      * Constructor of the Navbar class.
@@ -42,6 +43,9 @@ export class Navbar extends Component{
         if(!(navbarComponent instanceof NavbarComponent))
             throw new Error("The given component is not a NavbarComponent.");
         
+        if(this.currentlyShownComponent === navbarComponent)
+            return;
+
         if(!this.navbarComponents.includes(navbarComponent))
             throw new Error("The given component is not in the components list.");
 
@@ -50,6 +54,7 @@ export class Navbar extends Component{
         });
 
         navbarComponent.show();
+        this.currentlyShownComponent = navbarComponent;
     }
 
     /**

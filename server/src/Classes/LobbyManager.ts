@@ -1,6 +1,8 @@
 import type { Player, RWebSocket } from "../Types";
 import { JsonNotation, StartPosition, Color, Durations, Duration } from "@Chess/Types";
 import { Lobby } from "./Lobby";
+import { createRandomId } from "./Helper";
+import { ID_LENGTH } from "../Types";
 
 /**
  * This class manages the lobbies of the game.
@@ -32,7 +34,7 @@ export class LobbyManager{
         initialDuration: Duration
     ): string
     {
-        const lobbyId = Math.floor(100000 + Math.random() * 900000).toString();
+        const lobbyId = createRandomId(ID_LENGTH);
         if(this.isLobbyExist(lobbyId)) return this.createLobby(board, initialDuration);
 
         LobbyManager.lobbies.set(lobbyId, new Lobby(lobbyId, board, initialDuration));
@@ -47,12 +49,10 @@ export class LobbyManager{
         player: Player
     ): Lobby | false
     {
-        if (!this.isLobbyExist(lobbyId)){
-            console.log("Lobby not found.");
+        const lobby = this.getLobby(lobbyId);
+        if (!lobby)
             return false;
-        }
 
-        const lobby = this.getLobby(lobbyId)!;
         if(lobby.addPlayer(player))
             return lobby;
 
@@ -75,10 +75,15 @@ export class LobbyManager{
     }
 
     /**
-     * Delete the empty lobbies.
+     * Delete the lobby with the given id if the both players 
+     * are offline and the game is finished or not started.
      */
-    static deleteEmptyLobbies(): void
+    static deleteLobbyIfDead(lobbyId: string): void
     {
-        
+        const lobby = this.getLobby(lobbyId);
+        if (!lobby) return;
+
+        if (lobby.isBothPlayersOffline() && (lobby.isGameFinished() || !lobby.isGameStarted()))
+            this.lobbies.delete(lobbyId);
     }
 }

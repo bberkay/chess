@@ -8,13 +8,12 @@ import { Converter } from "@Chess/Utils/Converter";
  */
 export class Lobby{
     public readonly lobbyId: string;
-    public readonly createdAt: number = Date.now();
 
     private whitePlayer: Player | null = null;
     private blackPlayer: Player | null = null;
     
     private chessEngine: ChessEngine = new ChessEngine();
-    private isGameStarted: boolean = false;
+    private _isGameStarted: boolean = false;
 
     // Inital values
     private readonly board: StartPosition | JsonNotation | string; 
@@ -100,7 +99,7 @@ export class Lobby{
      */
     public getCurrentBoard(): string | JsonNotation
     {
-        return this.isGameAlreadyStarted() ? this.chessEngine.getGameAsJsonNotation() : this.getInitialBoard();
+        return this.isGameStarted() ? this.chessEngine.getGameAsJsonNotation() : this.getInitialBoard();
     }
 
     /**
@@ -117,6 +116,26 @@ export class Lobby{
     public getInitialBoard(): StartPosition | JsonNotation | string
     {
         return this.board;
+    }
+
+    /**
+     * Check if both players are online.
+     */
+    public isBothPlayersOnline(): boolean
+    {
+        const whitePlayer = this.getWhitePlayer();
+        const blackPlayer = this.getBlackPlayer();
+        return whitePlayer !== null && whitePlayer.isOnline && blackPlayer !== null && blackPlayer.isOnline;
+    }
+
+    /**
+     * Check if both players are offline.
+     */
+    public isBothPlayersOffline(): boolean
+    {
+        const whitePlayer = this.getWhitePlayer();
+        const blackPlayer = this.getBlackPlayer();
+        return whitePlayer !== null && !whitePlayer.isOnline && blackPlayer !== null && !blackPlayer.isOnline;
     }
 
     /**
@@ -274,7 +293,7 @@ export class Lobby{
      */
     public isGameReadyToStart(): boolean
     {
-        if(this.isGameAlreadyStarted()) return false;
+        if(this.isGameStarted()) return false;
         if(!this.board) return false;
         if(this.durations[Color.White].remaining <= 0 || this.durations[Color.White].increment < 0
             || this.durations[Color.Black].remaining <= 0 || this.durations[Color.Black].increment < 0) 
@@ -291,17 +310,38 @@ export class Lobby{
     /**
      * Check if the game is already started.
      */
-    public isGameAlreadyStarted(): boolean
+    public isGameStarted(): boolean
     {
-        return this.isGameStarted;
+        return this._isGameStarted;
     }
 
     /**
-     * Is player's turn?
+     * Check if the game is finished.
      */
-    public isPlayerTurn(player: Player): boolean
+    public isGameFinished(): boolean
     {
-        if(!this.isGameAlreadyStarted()) return false;
+        return [
+            GameStatus.BlackVictory, 
+            GameStatus.WhiteVictory, 
+            GameStatus.Draw
+        ].includes(this.chessEngine.getGameStatus());
+    }
+
+    /**
+     * Get the game status.
+     */
+    public getGameStatus(): GameStatus
+    {
+        return this.chessEngine.getGameStatus();
+    }
+    
+    /**
+     * Check if the player can make a move.
+     */
+    public canPlayerMakeMove(player: Player): boolean
+    {
+        if(!this.isGameStarted()) return false;
+        if(this.isGameFinished()) return false;
         if(!this.isPlayerInLobby(player)) return false;
         if(!player.color) return false;
         return this.chessEngine.getTurnColor() == player.color;
@@ -312,7 +352,7 @@ export class Lobby{
      */
     public makeMove(from: Square, to: Square): void
     {
-        if(!this.isGameAlreadyStarted()) return;
+        if(!this.isGameStarted()) return;
         this.chessEngine.playMove(from, to);
     }
 
@@ -321,7 +361,7 @@ export class Lobby{
      */
     public startGame(): void
     {
-        if(this.isGameAlreadyStarted() || !this.isGameReadyToStart()) 
+        if(this.isGameStarted() || !this.isGameReadyToStart()) 
             return;
 
         try{
@@ -330,7 +370,7 @@ export class Lobby{
                 durations: this.durations
             });
             if(this.chessEngine.getGameStatus() == GameStatus.ReadyToStart)
-                this.isGameStarted = true;
+                this._isGameStarted = true;
         }catch(e){
             console.log("There was an error while playing the game on engine.");
             return;
