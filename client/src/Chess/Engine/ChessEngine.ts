@@ -10,6 +10,7 @@
 import {
     CastlingType,
     Color,
+    Durations,
     GameStatus,
     JsonNotation,
     Move,
@@ -116,6 +117,14 @@ export class ChessEngine extends BoardManager {
     public getGameAsASCII(): string
     {
         return Converter.jsonToASCII(BoardQuerier.getGame());
+    }
+
+    /**
+     * Get initial durations of the players.
+     */
+    public getInitialDurations(): Durations | null
+    {
+        return BoardQuerier.getDurations();
     }
 
     /**
@@ -560,7 +569,7 @@ export class ChessEngine extends BoardManager {
     private finishTurn(): void
     {
         // Order of the operations is important.
-        console.log("finishTurn: ", BoardQuerier.getBoardStatus());
+        
         // Disable board and clear the calculated moves.
         // and check the game is finished(if game is finished here
         // then it must be a timeover).
@@ -615,7 +624,7 @@ export class ChessEngine extends BoardManager {
      * of the player and pause the timer of the opponent. If the player's time
      * is over then handle the timeover situation.
      */
-    public handleTimers(): void 
+    private handleTimers(): void 
     {
         if(!this.timerMap) return;
 
@@ -634,17 +643,17 @@ export class ChessEngine extends BoardManager {
                 clearInterval(this.timerMap[opponentColor].intervalId);
         }
 
-        this.timerMap[playerColor].timer.start();
         if(this.timerMap[playerColor].intervalId)
-            window.clearInterval(this.timerMap![playerColor].intervalId);
+            clearInterval(this.timerMap![playerColor].intervalId);
 
-        const intervalId = window.setInterval(() => {
+        this.timerMap![playerColor].timer.start();
+        const intervalId = setInterval(() => {
             if(!this.timerMap) 
                 return;
 
             if(this.timerMap[playerColor].timer.get() <= 0)
                 this.handleTimeover();
-        }, 100);
+        }, 100) as unknown as number;
 
         this.timerMap![playerColor].intervalId = intervalId;
         this.logger.save(`Timers are handled. Player[${playerColor}] timer is started and opponent[${opponentColor}] timer is paused`);

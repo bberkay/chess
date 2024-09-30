@@ -11,30 +11,16 @@ export class Timer{
 
     /**
      * Constructor for the Timer class.
-     * @param remaining The remaining time in minutes.
-     * @param increment The increment time in seconds.
+     * @param remaining The remaining time in milliseconds.
+     * @param increment The increment time in milliseconds.
      */
     constructor(remaining: number, increment: number){
-        this.remaining = this.minutesToMilliseconds(remaining);
-        this.increment = this.secondsToMilliseconds(increment);
+        this.remaining = remaining;
+        this.increment = increment;
         this._isStarted = false;
         this._isPaused = false;
         this.expected = -1;
         this.pausedTime = 0;
-    }
-
-    /**
-     * Convert minutes to milliseconds.
-     */
-    public minutesToMilliseconds(minutes: number): number { 
-        return minutes * 60000;
-    }
-
-    /**
-     * Convert seconds to milliseconds.
-     */
-    public secondsToMilliseconds(seconds: number): number {
-        return seconds * 1000;
     }
   
     /**
@@ -109,7 +95,7 @@ export class Timer{
      * Get the remaining time in milliseconds.
      */
     public get(): number {
-        if (!this._isStarted || this.expected === -1)
+        if (!this._isStarted || this.expected === -1) 
             return this.remaining;
 
         if (this._isPaused)

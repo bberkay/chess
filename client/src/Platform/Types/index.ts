@@ -1,5 +1,6 @@
 /**
- * BoardEditorEvent enum for board editor related events.
+ * PlatformEvent  enum is used to define the events 
+ * that are triggered by the platform.
  * @enum {string}
  */
 export enum PlatformEvent {

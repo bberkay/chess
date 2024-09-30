@@ -14,7 +14,7 @@ export class LogConsole extends NavbarComponent{
         this.renderComponent();
         document.addEventListener("DOMContentLoaded", () => {
             this.stream();
-            document.addEventListener(LoggerEvent.LogAdded, () => this.stream());
+            document.addEventListener(LoggerEvent.LogAdded, this.stream.bind(this));
         });
     }
 
@@ -172,7 +172,7 @@ export class LogConsole extends NavbarComponent{
     /**
      * This function adds a log to the log console.
      */
-    public stream(): void
+    private stream(): void
     {
         const newAddedLog: {source: string, message: string} = Logger.messages()[Logger.messages().length - 1];
         if(newAddedLog === undefined)

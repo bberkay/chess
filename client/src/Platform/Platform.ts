@@ -102,6 +102,8 @@ export class Platform{
 
             updateFenTriggers.forEach((trigger) => {
                 document.addEventListener(trigger, () => {
+                    if(trigger == ChessEvent.OnPieceSelected || trigger == ChessEvent.OnPieceMoved)
+                        this.navbar.showComponent(this.logConsole);
                     this.updateComponents();
                 });
             });
@@ -327,22 +329,24 @@ export class Platform{
      * Handle the board editor operations.
      */
     private handleBoardEditorOperation(menuOperation: BoardEditorOperation, menuItem: HTMLElement): void
-    {
-        // TODO: Mobil için touchup, touchmove, touchstart eventleri eklenebilir chessboard 
-        // altında ki mouseup a gibi.
-        
-        // TODO: WsData, SocketData. vs server dan çekilsin ve bir dosyaya yazılsın. type kontrolü 
-        // TODO: yapılmalı ws den gelen data için mesela WsMoved şöyle bir data gibi
-        
-        // TODO: Geri alma, resign, draw, next move yapılır.
-        // TODO: multiple pre move ancak geri alma yapıldıktan sonra eklenebilir.
-        // TODO: Moved from to efektleri geri alma da sonra yapılacak çünkü geri alma 
-        // TODO: da moves kaydedilecek cache.
+    {        
+        // TODO: Resign, draw
+        // TODO: Bot
 
-        // TODO: Multiple lobby, cache ve arayüzü
-        // TODO: Multiple lobby den sonra chess platform switch case dan handling yapılmalı.
-        // TODO: handleWsConnected gibi
-        
+        // TODO: Multiple Lobby, Cache, Arayüz
+        // TODO: Geri hamle
+        // TODO: Moved from to efekt problemi
+        // TODO: Multiple pre move
+        // TODO: Switch case yapısı handling socket
+
+        // TODO: Server Uploading and supabase duruma göre
+        // TODO: Mobil için touchup
+        // function isTouchDevice() {
+        //  return window.matchMedia('(hover: none)').matches || window.matchMedia('(pointer: coarse)').matches;
+        // }
+
+        // TODO: Readme
+
         switch(menuOperation){
             case BoardEditorOperation.Enable:
                 this.navigatorModal.hide();
@@ -433,7 +437,7 @@ export class Platform{
     public createOnlineGame(game: { 
         whitePlayer: {name: string, isOnline: boolean},
         blackPlayer: {name: string, isOnline: boolean},
-        board: string, 
+        board: string | JsonNotation,
         durations: Durations
     }, playerColor: Color): void
     {

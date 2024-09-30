@@ -366,15 +366,13 @@ export class NavigatorModal extends Component{
     /**
      * Show error screen.
      */
-    public showError(message: string): void
+    public showError(message: string, okButton: boolean = true): void
     {
         this.show(
             "Something Went Wrong",
             `<span>${message}</span>
             <div style="text-align:center;margin-top:10px;">
-                <button data-menu-operation="${NavigatorModalOperation.Hide}">
-                    Ok
-                </button>
+                ${okButton ? `<button data-menu-operation="${NavigatorModalOperation.Hide}">Ok</button>` : ""}
             </div>
             `
         );
@@ -461,12 +459,25 @@ export class NavigatorModal extends Component{
      */
     public getSelectedGameDuration(): Duration
     {
+        /**
+         * Convert minutes to milliseconds.
+         */
+        const minutesToMilliseconds = (minutes: number) => { 
+            return minutes * 60000;
+        }
+
+        /**
+         * Convert seconds to milliseconds.
+         */
+        const secondsToMilliseconds = (seconds: number) => {
+            return seconds * 1000;
+        }
+
         const isCustomDurationModalOpen = document.querySelector(
             `[data-menu-operation="${NavigatorModalOperation.ShowSelectDurationCustom}"]
         `) ? false : true;
 
-        let totalTime;
-        let incrementTime;
+        let totalTime, incrementTime;
         if(isCustomDurationModalOpen){
             const totalTimeInput = document.querySelector("#navigator-modal #total-time") as HTMLInputElement;
             const incrementTimeInput = (document.querySelector("#navigator-modal #increment-time") as HTMLInputElement);
@@ -480,22 +491,23 @@ export class NavigatorModal extends Component{
             }
         }
 
+        // Check the validity of the entered values in mm:ss format.
         totalTime = !totalTime && this.lastSelectedDuration.remaining 
             ? this.lastSelectedDuration.remaining 
-            : totalTime;
+            : minutesToMilliseconds(totalTime!);
         totalTime = (!totalTime || totalTime < MIN_TOTAL_TIME || totalTime > MAX_TOTAL_TIME) 
             ? DEFAULT_TOTAL_TIME 
             : totalTime;
 
         incrementTime = !incrementTime && this.lastSelectedDuration.increment 
             ? this.lastSelectedDuration.increment 
-            : incrementTime;
+            : secondsToMilliseconds(incrementTime!);
         incrementTime = (!incrementTime || incrementTime < MIN_INCREMENT_TIME || incrementTime > MAX_INCREMENT_TIME) 
             ? DEFAULT_INCREMENT_TIME 
             : incrementTime;
 
         this.lastSelectedDuration = {remaining: totalTime, increment: incrementTime};
-        return {remaining: totalTime, increment: incrementTime};
+        return this.lastSelectedDuration;
     }
 
     /**

@@ -57,6 +57,7 @@ export enum LoggerEvent{
  */
 export class Logger{
     private logName: string;
+    private isWindowAndDomAvailable: boolean = true;
 
     /**
      * Constructor
@@ -71,7 +72,12 @@ export class Logger{
     public save(message: string): void
     {
         LogStore.logs.push({source: this.logName, message: message[message.length - 1] != "." ? message + "." : message}); 
-        if (typeof window !== "undefined") window.dispatchEvent(new Event(LoggerEvent.LogAdded));
+        try{
+            if (this.isWindowAndDomAvailable && typeof window !== "undefined" && document) 
+                document.dispatchEvent(new Event(LoggerEvent.LogAdded));
+        }catch(e){
+            this.isWindowAndDomAvailable = false;
+        }
     }
 
     /**
