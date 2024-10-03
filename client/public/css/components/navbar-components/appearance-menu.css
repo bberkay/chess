@@ -11,84 +11,54 @@
 }
 
 #appearance-body{
-    padding: 10px;
-    height: calc(var(--chessboard-board-size) - 75px);
+    padding: 1rem;
+    padding-top: 1.25rem;
+    height: calc(var(--chessboard-board-size) - 95px);
     width:auto;
     overflow-y: scroll;
     overflow-x: hidden;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
 
-    & fieldset{
-        border: 1px solid var(--appearance-menu-fieldset-border-color);
-        padding: 9px 10px;
-        padding-bottom: 14px;
-        margin: 15px 0;
-        background-color: var(--appearance-menu-fieldset-bg-color);
-
-        & legend{
-            font-weight: bold;
-            margin-left: 0px;
-        }
-    }
-
-    & fieldset:nth-child(1){
-        margin-top: 0;
-    }
-
-    & fieldset:last-child{
-        margin-bottom: 0;
-    }
-
-    & div.form-group{
+    & .input-group--horizontal{
         display: flex;
-        gap: 20px;
+        flex-direction: row;
         width: 100%;
-        
-        & .input-group--horizontal{
-            display: flex;
-            flex-direction: row;
+        margin-top: 3px;
+
+        & input{
             width: 100%;
-            margin-top: 3px;
-
-            & input{
-                width: 100%;
-                padding: 0;
-                box-sizing: border-box;
-                border:2px solid var(--appearance-menu-color-picker-border-color);
-                border-right: none;
-            }
-
-            & input[type="color"]{
-                height: 25px;
-            }
-
-            & input[type="range"]{
-                border-top: none;
-                height: 15px;
-            }
-
-            & button{
-                padding:0 4px 0 6px;
-                background-color: var(--appearance-menu-button-bg-color);
-                border-left:none;
-            }
-        };
-
-        & .input-group{
-            display: flex;
-            flex-direction: column;
-            flex-grow: 1;
+            padding: 0;
             box-sizing: border-box;
-            align-items: flex-start;
-            width: 33%;
-
-            & label{
-                margin-left:2px;
-            }
+            border:2px solid var(--appearance-menu-color-picker-border-color);
+            border-right: none;
         }
-    }
 
-    & .separator{
-        margin:20px 0;
+        & input[type="color"]{
+            height: 25px;
+        }
+
+        & input[type="range"]{
+            border-top: none;
+            height: 15px;
+        }
+
+        & button{
+            padding:0 4px 0 6px;
+            background-color: var(--appearance-menu-button-bg-color);
+            border-left:none;
+        }
+    };
+
+    & .input-group{
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+
+        & label{
+            margin-left:2px;
+        }
     }
 }
 

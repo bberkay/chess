@@ -200,6 +200,16 @@
     & button{
         padding:7px 10px;
         font-size: var(--utility-menu-font-size);
+
+        &.hidden{
+            display: none;
+        }
+    }
+}
+
+#notation-menu .utility-menu:has(.utility-toggle-menu-section.confirmation.active){
+    & button {
+        border: 1px solid var(--utility-menu-confirmation-bg-color);
     }
 }
 
@@ -219,6 +229,30 @@
         
         &.active{
             display: flex;
+        }
+    }
+
+    & .utility-toggle-menu-section#offer-utility-menu{
+        flex-direction: column;
+        text-align: center;
+
+        & .offer-buttons{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            gap: 5px;
+
+            & button{
+                flex-grow: 1;
+            }
+        }
+
+        & .offer-message{
+            font-size: var(--utility-menu-offer-message-font-size);
+            font-weight: bold;
+            color: var(--utility-menu-offer-message-text-color);
+            padding: 7px 0 5px 0;
         }
     }
 

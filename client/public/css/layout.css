@@ -54,6 +54,7 @@
 
     /* Utility Menu */
     --utility-menu-font-size: 14px;
+    --utility-menu-offer-message-font-size: 14px;
 
     /* Z-Index, avoid changing */
     --tooltip-z-index: 5;
@@ -73,6 +74,7 @@
     --dark-gray-opaque-color: #666666B3;
     --darker-gray-color: #444444;
     --danger-color: #7C2926;
+    --warning-color: #D66700;
     --online-status-color: #77C71C;
     --offline-status-color: #A50417;
     --no-status-color: #666;
@@ -206,6 +208,8 @@ body{
     /* Utility Menu */
     --utility-menu-bg-color: var(--accent-color);
     --utility-menu-border-color: var(--border-color);
+    --utility-menu-confirmation-bg-color: var(--warning-color);
+    --utility-menu-offer-message-text-color: var(--text-color);
 
     /* Navigator Modal */
     --navigator-modal-bg-color: var(--accent-opaque-color);
@@ -567,7 +571,7 @@ main{
                 margin-bottom: 0.5rem;
             }
 
-            & #log-console{
+            & #navbar{
                 margin-right: 0;
                 margin-top: 0.5rem;
             }
@@ -585,7 +589,7 @@ main{
 
 @media screen and (min-width: 700px) and (max-width: 900px) {
     main{
-        padding: 2rem;
+        padding: 1.75rem;
         margin-right:0;
     }
 }

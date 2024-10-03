@@ -9,8 +9,6 @@
     color: var(--navigator-modal-text-color);
     border: 1px solid var(--navigator-modal-bg-color);
     position: absolute;
-    top: 50%;
-    left: 50%;
     text-align: center;
     display: flex;
     justify-content: center;
@@ -19,8 +17,8 @@
     z-index:var(--navigator-modal-z-index)!important;
     overflow: hidden; 
     padding: 2rem;
-    transform: translate(-50%, -50%) scale(1);
     transition: all 0.1s ease-in;
+    transform: scale(1);
 
     & button{
         border:1px solid var(--navigator-modal-button-bg-color);
@@ -47,10 +45,10 @@
 
     & .navigator-modal-content{
         font-size: var(--navigator-modal-content-font-size);
-        margin-top: 25px;
         z-index:var(--navigator-modal-z-index)!important;
         
         & button, & span{
+            margin-top: 25px;
             font-size: var(--navigator-modal-content-small-font-size);
         }
     }
@@ -93,6 +91,17 @@ body.dark-mode .navigator-modal .navigator-modal-bg,
     background: var(--navigator-modal-glass-bg-color);
     border-radius: 10px;
     color: var(--navigator-modal-glass-text-color);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    & .navigator-modal-content{
+        margin-top: 25px;
+
+        & button, & span{
+            margin-top: 0px;
+        }
+    }
 
     & button{
         background: var(--navigator-modal-glass-button-bg-color);

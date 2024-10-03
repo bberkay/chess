@@ -37,63 +37,75 @@ window.addEventListener("resize", function() {
 
 function reOrderLayoutForMobile(){
     document.querySelector(".right").append(
-        document.querySelector("#board-editor")
+        document.getElementById("board-editor")
     );
 
     document.querySelector(".left").append(
-        document.querySelector("#log-console")
+        document.getElementById("navbar"),
+        document.getElementById("log-console"),
+        document.getElementById("connections-menu"),
+        document.getElementById("appearance-menu"),
+        document.getElementById("about-menu")
     );
 
-    if(document.querySelector("#piece-creator").innerHTML)
+    if(document.getElementById("piece-creator").innerHTML)
         return;
 
-    document.querySelector("#chessboard").before(
+    document.getElementById("chessboard").before(
         document.querySelector(".player-section")
     );
 
-    document.querySelector("#chessboard").after(
+    document.getElementById("chessboard").after(
         document.querySelector(".player-section:not(:first-of-type)")
     );
 }
 
 function reOrderLayoutForTablet(){
     document.querySelector(".center").append(
-        document.querySelector("#log-console")
+        document.getElementById("navbar"),
+        document.getElementById("log-console"),
+        document.getElementById("connections-menu"),
+        document.getElementById("appearance-menu"),
+        document.getElementById("about-menu")
     );
 
     document.querySelector(".center").prepend(
-        document.querySelector("#board-editor")
+        document.getElementById("board-editor")
     );
 
     if(document.querySelector("#notation-menu .player-section"))
         return;
     
-    document.querySelector("#notation-menu").prepend(
+    document.getElementById("notation-menu").prepend(
         document.querySelector(".player-section")
     );
 
-    document.querySelector("#notation-menu").append(
+    document.getElementById("notation-menu").append(
         document.querySelector(".player-section")
     );
 }
 
 function reOrderLayoutForDesktop(){
     document.querySelector(".center").append(
-        document.querySelector("#board-editor")
+        document.getElementById("board-editor")
     );
 
     document.querySelector(".left").append(
-        document.querySelector("#log-console")
+        document.getElementById("navbar"),
+        document.getElementById("log-console"),
+        document.getElementById("connections-menu"),
+        document.getElementById("appearance-menu"),
+        document.getElementById("about-menu")
     );
     
-    if(document.querySelector("#piece-creator").innerHTML || document.querySelector("#notation-menu .player-section"))
+    if(document.getElementById("piece-creator").innerHTML || document.querySelector("#notation-menu .player-section"))
         return;
 
-    document.querySelector("#notation-menu").prepend(
+    document.getElementById("notation-menu").prepend(
         document.querySelector(".player-section")
     );
 
-    document.querySelector("#notation-menu").append(
+    document.getElementById("notation-menu").append(
         document.querySelector(".player-section")
     );
 }
