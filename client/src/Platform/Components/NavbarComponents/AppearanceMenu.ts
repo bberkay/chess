@@ -64,7 +64,9 @@ export class AppearanceMenu extends NavbarComponent{
             <div id="appearance-footer">
                 <div class="appearance-utilities">
                     <button data-menu-operation="${AppearanceMenuOperation.Reset}">Reset to Default</button>
-                    <button data-menu-operation="${AppearanceMenuOperation.ChangeTheme}">Light Mode</button>
+                    <button data-menu-operation="${AppearanceMenuOperation.ChangeTheme}">${
+                        this.currentTheme === Theme.Dark ? "Light Mode" : "Dark Mode"
+                    }</button>
                 </div>
             </div>
         `);
@@ -255,11 +257,11 @@ export class AppearanceMenu extends NavbarComponent{
         if(theme === Theme.Light){
             this.currentTheme = Theme.Light;
             document.body.classList.remove(Theme.Dark);
-            changeThemeButton.innerText = "Dark Mode";
+            if(changeThemeButton) changeThemeButton.innerText = "Dark Mode";
         }else if(theme === Theme.Dark){
             this.currentTheme = Theme.Dark;
             document.body.classList.add(Theme.Dark);
-            changeThemeButton.innerText = "Light Mode";
+            if(changeThemeButton) changeThemeButton.innerText = "Light Mode";
         }
 
         LocalStorage.save(LocalStorageKey.Theme, this.currentTheme);
