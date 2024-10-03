@@ -175,7 +175,7 @@ body{
     --log-console-border-color: var(--border-color);
     --log-console-input-bg-color: var(--button-bg-color);
     --log-console-tooltip-bg-color: var(--component-opaque-color);
-    --log-console-tooltip-text-color: var(--white-color);
+    --log-console-tooltip-text-color: var(--text-color);
     --log-console-tooltip-underline-color: var(--text-color);
     --log-console-tooltip-hover-bg-color: var(--dark-gray-opaque-color);
     --square-id-bg-color: var(--black-opaque-color);
