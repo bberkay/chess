@@ -42,7 +42,7 @@ export abstract class Component{
         this.createSelectableButtons(componentId);
         document.dispatchEvent(new CustomEvent(PlatformEvent.OnOperationMounted, {detail: {selector: "#" + componentId}}));
     }
-
+    
     /**
      * Create tooltips of the component by data-tooltip-text 
      * attribute.
@@ -107,21 +107,32 @@ export abstract class Component{
         if(!submitButton) return;
 
         let allValid = false;
-        submitButton.setAttribute("disabled", "true");
         const inputs = component.querySelectorAll("input");
+        
+        /**
+         * Check all inputs if they are valid.
+         */
+        const checkInputs = () => {
+            for(const input of inputs){
+                if(!isValid(input)){
+                    allValid = false;
+                    break;
+                }
+                allValid = true;
+            }
+            
+            if(allValid) submitButton.removeAttribute("disabled");
+            else submitButton.setAttribute("disabled", "true");
+        }
+
+        // Check inputs on load.
+        checkInputs();
+
+        // Add event listener to check every input.
         inputs.forEach((input: HTMLInputElement) => {
             if(!input) return;
             input.addEventListener("input", () => {
-                for(const input of inputs){
-                    if(!isValid(input)){
-                        allValid = false;
-                        break;
-                    }
-                    allValid = true;
-                }
-
-                if(allValid) submitButton.removeAttribute("disabled");
-                else submitButton.setAttribute("disabled", "true");
+                checkInputs();
             });
         });
     }
@@ -157,7 +168,7 @@ export abstract class Component{
         if(!component) return;
 
         const buttons = component.querySelectorAll(`button[data-selected="false"]`) as NodeListOf<HTMLButtonElement>;
-        if(!buttons) return;
+        if(!buttons || buttons.length === 0) return;
 
         const submitButton = component.querySelector("button[type='submit']");
         if(submitButton) submitButton?.setAttribute("disabled", "true");

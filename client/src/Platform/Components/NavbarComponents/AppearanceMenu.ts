@@ -12,16 +12,15 @@ enum Theme{
  */
 export class AppearanceMenu extends NavbarComponent{
     private currentTheme: string = Theme.Dark;
-    private readonly rootComputedStyle = getComputedStyle(document.documentElement);
+    private rootComputedStyle = getComputedStyle(document.documentElement);
+    private isChessboardCssLoaded = false;
 
     /**
      * Constructor of the AppearanceMenu class.
      */
     constructor() {
         super();
-        this.renderComponent();
         this.createStyleElement();
-        this.addEventListeners();
     }
 
     /**
@@ -29,204 +28,38 @@ export class AppearanceMenu extends NavbarComponent{
      */
     protected renderComponent(): void
     {
+        const getTitleOfCssProp = (str: string) => {
+            str = str.replace("-color", "");
+            str = str.replace(/-/g, " ");
+            return str
+                .split(" ")
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(" ")
+        };
+
         this.loadHTML("appearance-menu", `
             <div id="appearance-body">
-                <fieldset>
-                    <legend>Board</legend>
-                    <div class="form-group">
-                        <div class="input-group color-picker">
-                            <label for="white-square-color">White</label>
-                            <div class="input-group--horizontal">
-                                <div class="input-group">
-                                    <input type="color" id="white-square-color" value="#ffffff">
-                                    <input type="range" id="white-square-color-opacity" min="0" max="1" step="0.1" value="1">
+                ${
+                    Array.from(this.rootComputedStyle).filter((property) => 
+                        property.startsWith("--chessboard-") &&
+                        property.endsWith("-color") &&
+                        !property.startsWith("--chessboard-default-")
+                    ).reverse().map((property) => {
+                        const colorId = property.replace("--chessboard-", "");
+                        return `
+                            <div class="input-group color-picker">
+                                <label for="${colorId}">${getTitleOfCssProp(colorId)}</label>
+                                <div class="input-group--horizontal">
+                                    <div class="input-group">
+                                        <input type="color" id="${colorId}" value="#ffffff">
+                                        <input type="range" id="${colorId}-opacity" min="0" max="1" step="0.1" value="1">
+                                    </div>
+                                    <button class="reset-button" id="reset-${colorId}">↻</button>
                                 </div>
-                                <button class="reset-button" id="reset-white-square-color">↻</button>
                             </div>
-                        </div>
-                        <div class="input-group color-picker">
-                            <label for="black-square-color">Black</label>
-                            <div class="input-group--horizontal">
-                                <div class="input-group">
-                                    <input type="color" id="black-square-color" value="#ffffff">
-                                    <input type="range" id="black-square-color-opacity" min="0" max="1" step="0.1" value="1">
-                                </div>
-                                <button class="reset-button" id="reset-black-square-color">↻</button>
-                            </div>
-                        </div>
-                        <div class="input-group color-picker">
-                            <label for="border-color">Border</label>
-                            <div class="input-group--horizontal">
-                                <div class="input-group">
-                                    <input type="color" id="border-color" value="#ffffff">
-                                    <input type="range" id="border-color-opacity" min="0" max="1" step="0.1" value="1">
-                                </div>
-                                <button class="reset-button" id="reset-border-color">↻</button>
-                            </div>
-                        </div>
-                    </div>
-                </fieldset>
-                <fieldset>
-                    <legend>Piece Effects</legend>
-                    <div class="form-group">
-                        <div class="input-group color-picker">
-                            <label for="selected-color">Selected</label>
-                            <div class="input-group--horizontal">
-                                <div class="input-group">
-                                    <input type="color" id="selected-color" value="#ffffff">
-                                    <input type="range" id="selected-color-opacity" min="0" max="1" step="0.1" value="1">
-                                </div>
-                                <button class="reset-button" id="reset-selected-color">↻</button>
-                            </div>
-                        </div>
-                        <div class="input-group color-picker">
-                            <label for="playable-color">Playable</label>
-                            <div class="input-group--horizontal">
-                                <div class="input-group">
-                                    <input type="color" id="playable-color" value="#ffffff">
-                                    <input type="range" id="playable-color-opacity" min="0" max="1" step="0.1" value="1">
-                                </div>
-                                <button class="reset-button" id="reset-playable-color">↻</button>
-                            </div>
-                        </div>
-                        <div class="input-group color-picker">
-                            <label for="checked-color">Checked</label>
-                            <div class="input-group--horizontal">
-                                <div class="input-group">
-                                    <input type="color" id="checked-color" value="#ffffff">
-                                    <input type="range" id="checked-color-opacity" min="0" max="1" step="0.1" value="1">
-                                </div>
-                                <button class="reset-button" id="reset-checked-color">↻</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="separator"></div>
-                    <div class="form-group">
-                        <div class="input-group color-picker">
-                            <label for="from-color">From</label>
-                            <div class="input-group--horizontal">
-                                <div class="input-group">
-                                    <input type="color" id="from-color" value="#ffffff">
-                                    <input type="range" id="from-color-opacity" min="0" max="1" step="0.1" value="1">
-                                </div>
-                                <button class="reset-button" id="reset-from-color">↻</button>
-                            </div>
-                        </div>
-                         <div class="input-group color-picker">
-                            <label for="to-color">To</label>
-                            <div class="input-group--horizontal">
-                                <div class="input-group">
-                                    <input type="color" id="to-color" value="#ffffff">
-                                    <input type="range" id="to-color-opacity" min="0" max="1" step="0.1" value="1">
-                                </div>
-                               <button class="reset-button" id="reset-to-color">↻</button>
-                            </div>
-                        </div>
-                        <div class="input-group color-picker">
-                            <label for="hovering-color">Hovering</label>
-                            <div class="input-group--horizontal">
-                                <div class="input-group">
-                                    <input type="color" id="hovering-color" value="#ffffff">
-                                    <input type="range" id="hovering-color-opacity" min="0" max="1" step="0.1" value="1">
-                                </div>
-                                <button class="reset-button" id="reset-hovering-color">↻</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="separator"></div>
-                    <div class="form-group">
-                        <div class="input-group color-picker">
-                            <label for="preselected-color">Preselected</label>
-                            <div class="input-group--horizontal">
-                                <div class="input-group">
-                                    <input type="color" id="preselected-color" value="#ffffff">
-                                    <input type="range" id="preselected-color-opacity" min="0" max="1" step="0.1" value="1">
-                                </div>
-                                <button class="reset-button" id="reset-preselected-color">↻</button>
-                            </div>
-                        </div>
-                         <div class="input-group color-picker">
-                            <label for="preplayable-color">Preplayable</label>
-                            <div class="input-group--horizontal">
-                                <div class="input-group">
-                                    <input type="color" id="preplayable-color" value="#ffffff">
-                                    <input type="range" id="preplayable-color-opacity" min="0" max="1" step="0.1" value="1">
-                                </div>
-                                <button class="reset-button" id="reset-preplayable-color">↻</button>
-                            </div>
-                        </div>
-                        <div class="input-group color-picker">
-                            <label for="preplayed-color">Preplayed</label>
-                            <div class="input-group--horizontal">
-                                <div class="input-group">
-                                    <input type="color" id="preplayed-color" value="#ffffff">
-                                    <input type="range" id="preplayed-color-opacity" min="0" max="1" step="0.1" value="1">
-                                </div>
-                                <button class="reset-button" id="reset-preplayed-color">↻</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="separator"></div>
-                    <div class="form-group">
-                        <div class="input-group color-picker">
-                            <label for="prehovering-color">Prehovering</label>
-                            <div class="input-group--horizontal">
-                                <div class="input-group">
-                                    <input type="color" id="prehovering-color" value="#ffffff">
-                                    <input type="range" id="prehovering-color-opacity" min="0" max="1" step="0.1" value="1">
-                                </div>
-                                <button class="reset-button" id="reset-prehovering-color">↻</button>
-                            </div>
-                        </div>
-                        <div class="input-group color-picker">
-                            <label for="disabled-color">Disabled</label>
-                            <div class="input-group--horizontal">
-                                <div class="input-group">
-                                    <input type="color" id="disabled-color" value="#ffffff">
-                                    <input type="range" id="disabled-color-opacity" min="0" max="1" step="0.1" value="1">
-                                </div>
-                                <button class="reset-button" id="reset-disabled-color">↻</button>
-                            </div>
-                        </div>
-                        <div class="input-group">
-                        </div>
-                    </div>
-                </fieldset>
-                <fieldset>
-                    <legend>Promotion Option</legend>
-                    <div class="form-group">
-                        <div class="input-group color-picker">
-                            <label for="promotion-option-color">Background</label>
-                            <div class="input-group--horizontal">
-                                <div class="input-group">
-                                    <input type="color" id="promotion-option-color" value="#ffffff">
-                                    <input type="range" id="promotion-option-color-opacity" min="0" max="1" step="0.1" value="1">
-                                </div>
-                                <button class="reset-button" id="reset-promotion-option-color">↻</button>
-                            </div>
-                        </div>
-                        <div class="input-group color-picker">
-                            <label for="promotion-option-outline-color">Outline</label>
-                            <div class="input-group--horizontal">
-                                <div class="input-group">
-                                    <input type="color" id="promotion-option-outline-color" value="#ffffff">
-                                    <input type="range" id="promotion-option-outline-color-opacity" min="0" max="1" step="0.1" value="1">
-                                </div>
-                                <button class="reset-button" id="reset-promotion-option-outline-color">↻</button>
-                            </div>
-                        </div>
-                        <div class="input-group color-picker">
-                            <label for="promotion-option-box-shadow-color">Box Shadow</label>
-                            <div class="input-group--horizontal">
-                                <div class="input-group">
-                                     <input type="color" id="promotion-option-box-shadow-color" value="#ffffff">
-                                    <input type="range" id="promotion-option-box-shadow-color-opacity" min="0" max="1" step="0.1" value="1">
-                                </div>
-                                <button class="reset-button" id="reset-promotion-option-box-shadow-color">↻</button>
-                            </div>
-                        </div>
-                    </div>
-                </fieldset>
+                        `;
+                    }).join("")
+                }
             </div>
             <div id="appearance-footer">
                 <div class="appearance-utilities">
@@ -235,7 +68,24 @@ export class AppearanceMenu extends NavbarComponent{
                 </div>
             </div>
         `);
+
         this.loadCSS("appearance-menu.css");
+    }
+
+    /**
+     * Check the chessboard css is loaded. If it is loaded, 
+     * render the component and add event listeners.
+     */
+    private checkChessboardCss(): void
+    {
+        if(this.isChessboardCssLoaded) return;
+
+        this.rootComputedStyle = getComputedStyle(document.documentElement);
+        if(Array.from(this.rootComputedStyle).find((property) => property.startsWith("--chessboard-"))){
+            this.renderComponent();
+            this.addEventListeners();
+            this.isChessboardCssLoaded = true;
+        }
     }
 
     /**
@@ -351,7 +201,9 @@ export class AppearanceMenu extends NavbarComponent{
      * This function shows the last saved if exist, otherwise default color palette.
      */
     public initColorPalette(): void
-    {
+    {        
+        this.checkChessboardCss();
+
         let customAppearance;
         if(LocalStorage.isExist(LocalStorageKey.CustomAppearance))
             customAppearance = LocalStorage.load(LocalStorageKey.CustomAppearance);
