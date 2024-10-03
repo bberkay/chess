@@ -434,8 +434,8 @@ export class Platform{
      * Prepare the platform components for the online game.
      */
     public createOnlineGame(createdGame: { 
-        whitePlayer: {name: string, isOnline: boolean},
-        blackPlayer: {name: string, isOnline: boolean},
+        whitePlayer: {id: string, name: string, isOnline: boolean},
+        blackPlayer: {id: string, name: string, isOnline: boolean},
         game: string | JsonNotation
     }, playerColor: Color): void
     {

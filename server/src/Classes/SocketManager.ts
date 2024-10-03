@@ -5,34 +5,34 @@ import { RWebSocket } from "../Types";
  */
 export class SocketManager{
     private static sockets: Map<string, {
-        [userToken: string]: RWebSocket;
+        [token: string]: RWebSocket;
     }> = new Map();
 
     /**
      * Add a new socket to the manager.
      */
-    static addSocket(lobbyId: string, userToken:string, socket: RWebSocket): void
+    static addSocket(lobbyId: string, token:string, socket: RWebSocket): void
     {
         this.sockets.set(lobbyId, {
             ...this.sockets.get(lobbyId),
-            [userToken]: socket
+            [token]: socket
         });
     }
 
     /**
      * Get the socket of the user.
      */
-    static getSocket(lobbyId: string, userToken: string): RWebSocket | null
+    static getSocket(lobbyId: string, token: string): RWebSocket | null
     {
-        return this.sockets.get(lobbyId)?.[userToken] || null;
+        return this.sockets.get(lobbyId)?.[token] || null;
     }
 
     /**
      * Remove the socket from the manager.
      */
-    static removeSocket(lobbyId: string, userToken: string): void
+    static removeSocket(lobbyId: string, token: string): void
     {
         if(this.sockets.has(lobbyId))
-            delete this.sockets.get(lobbyId)![userToken];
+            delete this.sockets.get(lobbyId)![token];
     }
 }

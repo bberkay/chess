@@ -1,16 +1,6 @@
 import { Color, Durations, GameStatus, JsonNotation, Square } from '@Chess/Types';
 
 /**
- * Player interface for the player data.
- */
-export interface Player {
-    name: string;
-    color: Color;
-    isOnline: boolean;
-    userToken: string;
-}
-
-/**
  * SocketOperation enum for the types 
  * of operations that can be done in/by 
  * the socket.
@@ -27,6 +17,16 @@ export enum SocketOperation{
     AcceptPlayAgainOffer = "AcceptPlayAgainOffer",
     DeclineSentOffer = "DeclineSentOffer",
     CancelOffer = "CancelOffer"
+}
+
+/**
+ * Player interface for the player data.
+ */
+export interface Player{
+    id: string;
+    name: string;
+    isOnline: boolean;
+    token: string;
 }
 
 /**
@@ -67,10 +67,12 @@ export interface WsConnectedData{
  */
 export interface WsStartedData{
     whitePlayer: {
+        id: string,
         name: string, 
         isOnline: boolean
     }, 
     blackPlayer: {
+        id: string,
         name: string, 
         isOnline: boolean
     }, 
@@ -106,10 +108,7 @@ export interface WsMovedData{
  */
 export interface WsDisconnectedData{
     lobbyId: string,
-    disconnectedPlayer: {
-        name: string, 
-        color: Color
-    }
+    color: Color
 }
 
 /**
@@ -119,10 +118,7 @@ export interface WsDisconnectedData{
  */
 export interface WsReconnectedData{
     lobbyId: string,
-    reconnectedPlayer: {
-        name: string,
-        color: Color
-    }
+    color: Color
 }
 
 /**
@@ -176,7 +172,7 @@ export interface JoinLobbyReqParams{
  */
 export interface ReconnectLobbyReqParams{
     lobbyId: string;
-    userToken: string;
+    token: string;
 }
 
 /**

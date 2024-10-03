@@ -1,12 +1,13 @@
 import type { ServerWebSocket } from "bun";
-import type { Color } from "@Chess/Types";
 
-export type Player = {
+/**
+ * Player interface for the player data.
+ */
+export interface Player{
+    id: string;
     name: string;
-    color: Color;
     isOnline: boolean;
-    userToken: string;
-    isOnOfferCooldown: boolean;
+    token: string;
 }
 
 export interface CreateLobbyReqParams{
@@ -23,13 +24,13 @@ export interface JoinLobbyReqParams{
 
 export interface ReconnectLobbyReqParams{
     lobbyId: string;
-    userToken: string;
+    token: string;
 }
 
 export interface BaseWebSocketReqParams extends CreateLobbyReqParams, JoinLobbyReqParams, ReconnectLobbyReqParams {}
 export type WebSocketReqParams = CreateLobbyReqParams | JoinLobbyReqParams | ReconnectLobbyReqParams;
 
-export type WebSocketData = {
+export interface WebSocketData{
     lobbyId: string;
     player: Player;
     board: string;

@@ -12,55 +12,55 @@
  * 
  * Creating Lobby:
  * ws://localhost:3000?name=Player1&board=pppppppprnbqkbnr/8/8/8/8/8/PPPPPPPPRNBQKBNR%20w%20KQkq%20-%200%201&totalTime=5&incrementTime=0
- * lobbyId and userToken will be created randomly by server
+ * lobbyId and token will be created randomly by server
  * and sent to client with connected WsCommand. Example:
  * CONNECTED JSON.stringify({
  *  "lobbyId":"123456",
- *  "userToken":"123456", 
+ *  "token":"123456", 
  *  "color":"White", 
  *  "name":"Player1"
  * })
  * 
  * Connection to the lobby:
  * ws://localhost:3000?name=Player1&lobbyId=123456
- * userToken will be created randomly by server and sent to 
+ * token will be created randomly by server and sent to 
  * client with connected WsCommand.
  *
  * Reconneting to the lobby:
- * ws://localhost:3000?userToken=123456&lobbyId=123456 
- * name will be taken from the server by userToken
+ * ws://localhost:3000?token=123456&lobbyId=123456 
+ * name will be taken from the server by token
  * and sent to client with connected WsCommand.
  * Note: name will be taken from the server 
- * by userToken for preventing the user to reconnect
+ * by token for preventing the user to reconnect
  * lobby with different name.
  * 
  * *************************************************
  */
 
 import type { Server, ServerWebSocket } from "bun";
-import type { 
-    CreateLobbyReqParams, 
-    JoinLobbyReqParams, 
-    ReconnectLobbyReqParams, 
-    RWebSocket, 
-    WebSocketData, 
-    WebSocketReqParams, 
-    BaseWebSocketReqParams, 
+import type {
+    CreateLobbyReqParams,
+    JoinLobbyReqParams,
+    ReconnectLobbyReqParams,
+    RWebSocket,
+    WebSocketData,
+    WebSocketReqParams,
+    BaseWebSocketReqParams,
     Player
 } from "./Types";
 import type { Durations, JsonNotation, Square, StartPosition } from "@Chess/Types";
 import { Color } from "@Chess/Types";
 import { MoveValidationError } from "@Chess/Engine/ChessEngine";
 import { LobbyManager } from "./Classes/LobbyManager";
-import { 
+import {
     createRandomId,
     isValidLength,
-    isInRange, 
+    isInRange,
     updateKeys
 } from "./Classes/Helper";
-import { MAX_PAYLOAD_LENGTH, SERVER_PORT } from "./Consts";
+import { CORS_HEADERS, MAX_PAYLOAD_LENGTH, SERVER_PORT } from "./Consts";
 import { ALLOWED_ORIGINS } from "./Consts";
-import { 
+import {
     ID_LENGTH,
     MAX_PLAYER_NAME_LENGTH,
     MIN_PLAYER_NAME_LENGTH,
@@ -70,8 +70,8 @@ import {
     MIN_INCREMENT_TIME
 } from "./Consts";
 import { SocketManager } from "./Classes/SocketManager";
-import { 
-    WsCommand, 
+import {
+    WsCommand,
     WsTitle,
     WsMovedData,
     type WsStartedData
@@ -83,19 +83,18 @@ import { Lobby } from "./Classes/Lobby";
  */
 function isOriginAllowed(req: Request): boolean {
     const origin = req.headers.get("origin") || "";
-    if(!origin) return false;
+    if (!origin) return false;
     return ALLOWED_ORIGINS.includes(origin);
 }
 
 /**
  * 
  */
-function validate(params: BaseWebSocketReqParams): Response | boolean 
-{
+function validate(params: BaseWebSocketReqParams): Response | boolean {
     const validations: Record<string, boolean> = {
         name: params.name === "" || isInRange(params.name.length, MIN_PLAYER_NAME_LENGTH, MAX_PLAYER_NAME_LENGTH),
         lobbyId: params.lobbyId === "" || isValidLength(params.lobbyId, ID_LENGTH) && LobbyManager.isLobbyExist(params.lobbyId),
-        userToken: params.userToken === "" || isValidLength(params.userToken, ID_LENGTH),
+        token: params.token === "" || isValidLength(params.token, ID_LENGTH),
         board: params.board === "" || params.board.length <= 100,
         remaining: params.remaining === "" || isInRange(parseInt(params.remaining as string), MIN_TOTAL_TIME, MAX_TOTAL_TIME),
         increment: params.increment === "" || isInRange(parseInt(params.increment as string), MIN_INCREMENT_TIME, MAX_INCREMENT_TIME)
@@ -105,15 +104,15 @@ function validate(params: BaseWebSocketReqParams): Response | boolean
     const errors: Record<string, string> = {
         name: `Invalid request. playerName length must be between ${MIN_PLAYER_NAME_LENGTH} and ${MAX_PLAYER_NAME_LENGTH}.`,
         lobbyId: `Invalid request. lobbyId length must be ${ID_LENGTH} length and lobby must be exist.`,
-        userToken: `Invalid request. userToken length must be ${ID_LENGTH}.`,
+        token: `Invalid request. token length must be ${ID_LENGTH}.`,
         board: "Invalid request. board length must be less than 100.",
         remaining: `Invalid request. remaining must be a number between ${MIN_TOTAL_TIME} and ${MAX_TOTAL_TIME}.`,
         increment: `Invalid request. increment must be a number between ${MIN_INCREMENT_TIME} and ${MAX_INCREMENT_TIME}.`
     };
-    
-    for(const key in validations){
-        if(!validations[key])
-            return new Response(errors[key], {status: 400});
+
+    for (const key in validations) {
+        if (!validations[key])
+            return new Response(errors[key], { status: 400 });
     }
 
     return true;
@@ -122,18 +121,17 @@ function validate(params: BaseWebSocketReqParams): Response | boolean
 /**
  * 
  */
-function validateCombination(params: BaseWebSocketReqParams): Response | boolean
-{
-    if (params.name && params.userToken)
-        return new Response("Invalid request. name and userToken cannot be used together.", { status: 400 });
+function validateCombination(params: BaseWebSocketReqParams): Response | boolean {
+    if (params.name && params.token)
+        return new Response("Invalid request. name and token cannot be used together.", { status: 400 });
 
-    if (!params.name && !params.userToken)
-        return new Response("Invalid request. name or userToken must be provided.", { status: 400 });
+    if (!params.name && !params.token)
+        return new Response("Invalid request. name or token must be provided.", { status: 400 });
 
-    if (params.userToken && !params.lobbyId)
-        return new Response("Invalid request. userToken must be used with lobbyId.", { status: 400 });
+    if (params.token && !params.lobbyId)
+        return new Response("Invalid request. token must be used with lobbyId.", { status: 400 });
 
-    if ((params.board || params.remaining || params.increment) && (!params.name || params.lobbyId || params.userToken))
+    if ((params.board || params.remaining || params.increment) && (!params.name || params.lobbyId || params.token))
         return new Response("Invalid request. board, remaining, increment can only be used when creating a new lobby.", { status: 400 });
 
     if (params.name && !params.lobbyId && (!params.board || !params.remaining || !params.increment))
@@ -145,16 +143,15 @@ function validateCombination(params: BaseWebSocketReqParams): Response | boolean
 /**
  * 
  */
-function findWebSocketReqParams(params: BaseWebSocketReqParams): Response | WebSocketReqParams
-{
-    if(params.name && params.board && params.remaining && params.increment)
+function findWebSocketReqParams(params: BaseWebSocketReqParams): Response | WebSocketReqParams {
+    if (params.name && params.board && params.remaining && params.increment)
         return { name: params.name, board: params.board, remaining: params.remaining, increment: params.increment } as CreateLobbyReqParams;
 
-    if(params.name && params.lobbyId)
+    if (params.name && params.lobbyId)
         return { name: params.name, lobbyId: params.lobbyId } as JoinLobbyReqParams;
 
-    if(params.userToken && params.lobbyId)
-        return { userToken: params.userToken, lobbyId: params.lobbyId } as ReconnectLobbyReqParams;
+    if (params.token && params.lobbyId)
+        return { token: params.token, lobbyId: params.lobbyId } as ReconnectLobbyReqParams;
 
     return new Response("Invalid request.", { status: 400 });
 }
@@ -162,136 +159,149 @@ function findWebSocketReqParams(params: BaseWebSocketReqParams): Response | WebS
 /**
  * Check if the parameters are valid.
  */
-function areParametersValid(req: Request): Response | WebSocketReqParams
-{
+function areParametersValid(req: Request): Response | WebSocketReqParams {
     const url = new URL(req.url);
     const params: BaseWebSocketReqParams = {
         name: url.searchParams.get("name") || "",
         lobbyId: url.searchParams.get("lobbyId") || "",
-        userToken: url.searchParams.get("userToken") || "",
+        token: url.searchParams.get("token") || "",
         board: url.searchParams.get("board") || "",
         remaining: url.searchParams.get("remaining") || "",
         increment: url.searchParams.get("increment") || ""
     }
     console.log("Params: ", params);
     let validation = validate(params);
-    if(validation instanceof Response)
+    if (validation instanceof Response)
         return validation;
 
     validation = validateCombination(params);
-    if(validation instanceof Response)
+    if (validation instanceof Response)
         return validation;
 
     const webSocketReqParams = findWebSocketReqParams(params);
-    if(webSocketReqParams instanceof Response)
+    if (webSocketReqParams instanceof Response)
         return webSocketReqParams;
-    
+
     return webSocketReqParams;
 }
 
 /**
  * 
  */
-function createLobbyAndGetLobbyJoiningData(createLobbyReqParams: CreateLobbyReqParams): Response | { lobbyId: string, userToken: string }
-{
+function createLobbyAndGetLobbyJoiningData(createLobbyReqParams: CreateLobbyReqParams): Response | { lobbyId: string, token: string } {
     const lobbyId = LobbyManager.createLobby(
-        createLobbyReqParams.board, 
+        createLobbyReqParams.board,
         {
-            remaining: typeof createLobbyReqParams.remaining === "string" 
-                ? parseInt(createLobbyReqParams.remaining) 
+            remaining: typeof createLobbyReqParams.remaining === "string"
+                ? parseInt(createLobbyReqParams.remaining)
                 : createLobbyReqParams.remaining,
-            increment: typeof createLobbyReqParams.increment === "string" 
-                ? parseInt(createLobbyReqParams.increment) 
+            increment: typeof createLobbyReqParams.increment === "string"
+                ? parseInt(createLobbyReqParams.increment)
                 : createLobbyReqParams.increment
         }
     );
 
-    return { lobbyId, userToken: createRandomId(ID_LENGTH) };
+    return { lobbyId, token: createRandomId(ID_LENGTH) };
 }
 
 /**
  * 
  */
-function getLobbyJoiningData(joinLobbyReqParams: JoinLobbyReqParams): Response | { lobbyId: string, userToken: string }
-{
+function getLobbyJoiningData(joinLobbyReqParams: JoinLobbyReqParams): Response | { lobbyId: string, token: string } {
     const lobby = LobbyManager.getLobby(joinLobbyReqParams.lobbyId);
-    if(!lobby)
-        return new Response("Lobby not found.", {status: 404});
+    if (!lobby)
+        return new Response("Lobby not found.", { status: 404 });
 
-    if(lobby.isGameStarted())
-        return new Response("Lobby is already started to play or finished.", {status: 400});
+    if (lobby.isGameStarted())
+        return new Response("Lobby is already started to play or finished.", { status: 400 });
 
-    return { lobbyId: joinLobbyReqParams.lobbyId, userToken: createRandomId(ID_LENGTH) };
+    return { 
+        lobbyId: joinLobbyReqParams.lobbyId, 
+        token: createRandomId(
+            ID_LENGTH, 
+            lobby.getWhitePlayer()?.token || lobby.getBlackPlayer()?.token
+        ) 
+    };
 }
 
 /**
  * 
  */
-function getReconnectingLobbyData(reconnectLobbyReqParams: ReconnectLobbyReqParams): Response | { lobbyId: string, name: string }
-{
+function getReconnectingLobbyData(reconnectLobbyReqParams: ReconnectLobbyReqParams): Response | { lobbyId: string, name: string, id: string } {
     const lobby = LobbyManager.getLobby(reconnectLobbyReqParams.lobbyId);
-    if(!lobby)
-        return new Response("Lobby not found.", {status: 404});
+    if (!lobby)
+        return new Response("Lobby not found.", { status: 404 });
 
-    const name = lobby.getTokenName(reconnectLobbyReqParams.userToken);
-    if(!name)
-        return new Response("Invalid user token.", {status: 401});
-    if(lobby.isTokenOnline(reconnectLobbyReqParams.userToken))
-        return new Response("User is already online.", {status: 400});
+    const name = lobby.getTokenName(reconnectLobbyReqParams.token);
+    const id = lobby.getTokenId(reconnectLobbyReqParams.token);
+    if (!name || !id)
+        return new Response("Invalid user token.", { status: 401 });
+    if (lobby.isTokenOnline(reconnectLobbyReqParams.token))
+        return new Response("User is already online.", { status: 400 });
 
-    return { lobbyId: reconnectLobbyReqParams.lobbyId, name };
+    return { lobbyId: reconnectLobbyReqParams.lobbyId, name, id };
 }
 
 /**
  * 
  */
-function handleParameters(req: Request): Response | { lobbyId: string, userToken: string, name: string }
-{
+function handleParameters(req: Request): Response | { lobbyId: string, token: string, name: string, id?: string } {
     // Check if the parameters are valid.
     let params = areParametersValid(req);
-    if(params instanceof Response)
+    if (params instanceof Response)
         return params;
 
-    let neededParams = updateKeys({lobbyId: "", userToken: "", name: ""}, params);
-    if((params as CreateLobbyReqParams).board !== undefined)
+    let neededParams = updateKeys({ lobbyId: "", token: "", name: "" }, params);
+    if ((params as CreateLobbyReqParams).board !== undefined)
         neededParams = updateKeys(neededParams, createLobbyAndGetLobbyJoiningData(params as CreateLobbyReqParams));
-    else if((params as ReconnectLobbyReqParams).userToken !== undefined)
+    else if ((params as ReconnectLobbyReqParams).token !== undefined)
         neededParams = updateKeys(neededParams, getReconnectingLobbyData(params as ReconnectLobbyReqParams));
-    else if((params as JoinLobbyReqParams).lobbyId !== undefined)
+    else if ((params as JoinLobbyReqParams).lobbyId !== undefined)
         neededParams = updateKeys(neededParams, getLobbyJoiningData(params as JoinLobbyReqParams));
 
-    return neededParams as { lobbyId: string, userToken: string, name: string };
+    return neededParams as { lobbyId: string, token: string, name: string, id?: string };
 }
 
-function isHttpRequest(req: Request): boolean
-{
+function isHttpRequest(req: Request): boolean {
     return req.headers.get("upgrade") === null;
 }
 
-function handleHttpRequest(req: Request): Response
-{
-    if(req.method !== "GET")
-        return new Response("Only GET method is allowed.", {status: 405});
+function handleHttpRequest(req: Request): CORSResponse {
+    if (req.method !== "GET")
+        return new CORSResponse("Only GET method is allowed.", { status: 405 });
 
-    if(req.url === "/")
-        return new Response("Chess server is running.", {status: 200});
+    if (req.url === "/")
+        return new CORSResponse("Chess server is running.", { status: 200 });
 
     const url = new URL(req.url);
 
     // Parameters:
-    if(url.searchParams.has("lobbyId")){
+    if (url.searchParams.has("lobbyId")) {
         const lobbyId = url.searchParams.get("lobbyId") as string;
-        if(LobbyManager.isLobbyExist(lobbyId))
-            return new Response("Lobby is exist.", {status: 200});
-        return new Response("Lobby not found.", {status: 404});
+        if (LobbyManager.isLobbyExist(lobbyId)) {
+            return new CORSResponse("Lobby is exist.", { status: 200 });
+        } else {
+            return new CORSResponse("Lobby not found.", { status: 404 });
+        }
     }
 
-    return new Response("Invalid request.", {status: 400});
+    return new CORSResponse("Invalid request.", { status: 400 });
 }
 
-function isWebSocketRequest(req: Request): boolean
-{
+function isWebSocketRequest(req: Request): boolean {
     return req.headers.get("upgrade") === "websocket";
+}
+
+/**
+ * Response class with CORS headers.
+ */
+class CORSResponse extends Response {
+    constructor(body: BodyInit | null, init?: ResponseInit) {
+        super(body, init);
+        for (const key in CORS_HEADERS) {
+            this.headers.set(key, CORS_HEADERS[key]);
+        }
+    }
 }
 
 /**
@@ -300,40 +310,42 @@ function isWebSocketRequest(req: Request): boolean
 const server = Bun.serve<WebSocketData>({
     port: SERVER_PORT,
     fetch(req: Request, server: Server) {
-        if(!isOriginAllowed(req))
-            return new Response("Invalid origin.", {status: 403});
-        
-        if(isHttpRequest(req))
+        if (!isOriginAllowed(req))
+            return new Response("Invalid origin.", { status: 403 });
+
+        if (isHttpRequest(req))
             return handleHttpRequest(req);
 
-        if(!isWebSocketRequest(req))
-            return new Response("Only websocket or http GET requests are allowed.", {status: 400});
+        if (!isWebSocketRequest(req))
+            return new CORSResponse("Only websocket or http GET requests are allowed.", { status: 400 });
 
         // Handle the parameters and get 
-        // lobbyId and (userToken or name).
+        // lobbyId and (token or name).
         const params = handleParameters(req);
-        if(params instanceof Response)
+        console.log("Params: ", params);
+        if (params instanceof Response)
             return params;
 
-        const { 
-            lobbyId, 
-            userToken,
-            name
+        const {
+            lobbyId,
+            token,
+            name,
+            id
         } = params;
 
         // upgrade the connection.
         const success = server.upgrade(req, {
             data: {
-                lobbyId: lobbyId, 
-                player: { 
-                    name: name, 
-                    userToken: userToken,
-                    isOnline: true,
-                    color: null 
+                lobbyId: lobbyId,
+                player: {
+                    name: name,
+                    token: token,
+                    id: id,
+                    isOnline: true
                 }
-            } 
+            }
         });
-        if(success) return;
+        if (success) return;
 
         return undefined;
     },
@@ -342,35 +354,35 @@ const server = Bun.serve<WebSocketData>({
             joinLobby(ws);
         },
         message(ws: RWebSocket, message: string) {
-            console.log("Ws:", ws.data.player.name, ws.data.player.color, "Message: ", message);
-            if(SocketManager.getSocket(ws.data.lobbyId, ws.data.player.userToken) === ws)
+            console.log("Ws:", ws.data.player.name, "Message: ", message);
+            if (SocketManager.getSocket(ws.data.lobbyId, ws.data.player.token) === ws)
                 handleMessage(ws, message);
         },
         close(ws: RWebSocket) {
-            if(SocketManager.getSocket(ws.data.lobbyId, ws.data.player.userToken) === ws)
+            if (SocketManager.getSocket(ws.data.lobbyId, ws.data.player.token) === ws)
                 leaveLobby(ws);
         },
         maxPayloadLength: MAX_PAYLOAD_LENGTH,
         idleTimeout: 960,
     }
 });
-  
+
 console.log(`Listening on http://localhost:${server.port} ...`);
 
 /**
  * Join the lobby and start the game if the lobby is ready.
  * Send connected command to the client.
  */
-function joinLobby(ws: RWebSocket): void
-{
+function joinLobby(ws: RWebSocket): void {
     const lobbyId = ws.data.lobbyId;
     const player = ws.data.player;
     const lobby = LobbyManager.joinLobby(lobbyId, player);
-    if(lobby){
+    console.log("Lobby Join: ", lobbyId, player.name);
+    if (lobby) {
         ws.subscribe(lobbyId);
-        ws.send(WsCommand.connected({lobbyId, player}));
-        SocketManager.addSocket(ws.data.lobbyId, ws.data.player.userToken, ws);
-        console.log("Lobby Join: ", lobbyId, player.color, player.name);
+        ws.send(WsCommand.connected({ lobbyId, player }));
+        SocketManager.addSocket(ws.data.lobbyId, ws.data.player.token, ws);
+        console.log("Lobby Join: ", lobbyId, player.name);
         startGame(lobby);
     }
 }
@@ -378,96 +390,108 @@ function joinLobby(ws: RWebSocket): void
 /**
  * Leave the lobby and send disconnected command to the client.
  */
-function leaveLobby(ws: RWebSocket): void
-{
-    const lobbyId = ws.data.lobbyId;
+function leaveLobby(ws: RWebSocket): void {
     const player = ws.data.player;
-    if(!LobbyManager.leaveLobby(lobbyId, player)) return;
-        
-    server.publish(lobbyId, WsCommand.disconnected({
-        lobbyId: lobbyId,
-        disconnectedPlayer: {name: player.name, color: player.color}
+    const lobby = LobbyManager.getLobby(ws.data.lobbyId);
+    if(!lobby) return;
+
+    const color = lobby.getTokenColor(player.token) as Color;
+    if (!LobbyManager.leaveLobby(lobby.id, player)) 
+        return;
+
+    server.publish(lobby.id, WsCommand.disconnected({
+        lobbyId: lobby.id,
+        color: color
     }));
-    ws.unsubscribe(lobbyId);
-    SocketManager.removeSocket(lobbyId, player.userToken);
-    console.log("Connection closed: ", lobbyId, player.color, player.name);
-    LobbyManager.deleteLobbyIfDead(lobbyId);
+
+    ws.unsubscribe(lobby.id);
+    SocketManager.removeSocket(lobby.id, player.token);
+    console.log("Connection closed: ", lobby.id, player.name);
+    LobbyManager.deleteLobbyIfDead(lobby.id);
 }
 
 /**
  * Start the game of the given lobby id if 
  * it is ready.
  */
-function startGame(lobby: Lobby): void
-{
+function startGame(lobby: Lobby): void {
     const isGameReadyToStart = lobby.isGameReadyToStart();
     const isGameAlreadyStarted = lobby.isGameStarted();
-    if(isGameReadyToStart || isGameAlreadyStarted){
+    if (isGameReadyToStart) 
+    {
+        // Both players are online and the game is not started yet.
+
+        // Start the game and send the started command to the clients.
+        lobby.startGame();
+
         const whitePlayer = lobby.getWhitePlayer()!;
         const blackPlayer = lobby.getBlackPlayer()!;
 
-        if(isGameReadyToStart)
-        {
-            // Both players are online and the game isn't started yet.
-            // so start the game.
-            lobby.startGame();
-            server.publish(lobby.id, WsCommand.started(({
-                whitePlayer: {
-                    name: whitePlayer.name, 
-                    isOnline: whitePlayer.isOnline
-                },
-                blackPlayer: {
-                    name: blackPlayer.name, 
-                    isOnline: blackPlayer.isOnline
-                },
-                game: lobby.getCurrentGame()
-            }) as WsStartedData));
-            monitorGameTimeExpiration(lobby);
-        }
-        else if(isGameAlreadyStarted)
-        {
-            // One of the players is should be reconnected to the game.
-            // send current board and durations to the reconnected player.
-            const reconnectedPlayer = lobby.getLastConnectedPlayer();
-            if(!reconnectedPlayer) return;
+        server.publish(lobby.id, WsCommand.started(({
+            whitePlayer: {
+                id: whitePlayer.id,
+                name: whitePlayer.name,
+                isOnline: whitePlayer.isOnline
+            },
+            blackPlayer: {
+                id: blackPlayer.id,
+                name: blackPlayer.name,
+                isOnline: blackPlayer.isOnline
+            },
+            game: lobby.getCurrentGame()
+        }) as WsStartedData));
 
-            const reconnectedPlayerWs = SocketManager.getSocket(
-                lobby.id, 
-                reconnectedPlayer.userToken
-            )!;
-            if(!reconnectedPlayerWs) return;
+        monitorGameTimeExpiration(lobby);
+    }
+    else if (isGameAlreadyStarted) 
+    {
+        // One of the players is should be reconnected to the game.
+        // send current board and durations to the reconnected player.
 
-            reconnectedPlayerWs.send(WsCommand.started(({
-                whitePlayer: {
-                    name: whitePlayer.name, 
-                    isOnline: whitePlayer.isOnline
-                },
-                blackPlayer: {
-                    name: blackPlayer.name, 
-                    isOnline: blackPlayer.isOnline
-                },
-                game: lobby.getCurrentGame()
-            }) as WsStartedData));
+        // Send the current game to the reconnected player.
+        const reconnectedPlayer = lobby.getLastConnectedPlayer();
+        if (!reconnectedPlayer) return;
 
-            const opponentPlayer = reconnectedPlayer.color === Color.White
-                ? lobby.getBlackPlayer()
-                : lobby.getWhitePlayer();
-            if(!opponentPlayer) return;
+        const reconnectedPlayerWs = SocketManager.getSocket(
+            lobby.id,
+            reconnectedPlayer.token
+        )!;
+        if (!reconnectedPlayerWs) return;
 
-            const opponentPlayerWs = SocketManager.getSocket(
-                lobby.id, 
-                opponentPlayer.userToken
-            )!;
-            if(!opponentPlayerWs) return;
+        const whitePlayer = lobby.getWhitePlayer()!;
+        const blackPlayer = lobby.getBlackPlayer()!;
 
-            opponentPlayerWs.send(WsCommand.reconnected({
-                lobbyId: lobby.id,
-                reconnectedPlayer: {
-                    name: reconnectedPlayer.name, 
-                    color: reconnectedPlayer.color
-                }
-            }));
-        }
+        reconnectedPlayerWs.send(WsCommand.started(({
+            whitePlayer: {
+                id: whitePlayer.id,
+                name: whitePlayer.name,
+                isOnline: whitePlayer.isOnline
+            },
+            blackPlayer: {
+                id: blackPlayer.id,
+                name: blackPlayer.name,
+                isOnline: blackPlayer.isOnline
+            },
+            game: lobby.getCurrentGame()
+        }) as WsStartedData));
+
+        // Send reconnected player's color to the opponent player.
+        const reconnectedPlayerColor = lobby.getLastConnectedPlayerColor() as Color;
+        const opponentPlayer = reconnectedPlayerColor === Color.White
+            ? lobby.getBlackPlayer()
+            : lobby.getWhitePlayer();
+        if (!opponentPlayer) return;
+
+        const opponentPlayerWs = SocketManager.getSocket(
+            lobby.id,
+            opponentPlayer.token
+        )!;
+        if (!opponentPlayerWs) return;
+
+        opponentPlayerWs.send(WsCommand.reconnected({
+            lobbyId: lobby.id,
+            color: reconnectedPlayerColor
+        }));
     }
 }
 
@@ -475,10 +499,9 @@ function startGame(lobby: Lobby): void
  * Monitor and check if the game is finished because 
  * one of the players' time has expired.
  */
-function monitorGameTimeExpiration(lobby: Lobby): void
-{
+function monitorGameTimeExpiration(lobby: Lobby): void {
     const interval = setInterval(() => {
-        if(lobby.isGameFinished()){
+        if (lobby.isGameFinished()) {
             finishGame(lobby);
         }
     }, 1000);
@@ -489,19 +512,17 @@ function monitorGameTimeExpiration(lobby: Lobby): void
 /**
  * Handle the messages from the client.
  */
-function handleMessage(ws: RWebSocket, message: string): void
-{
+function handleMessage(ws: RWebSocket, message: string): void {
     const [command, data] = WsCommand.parse(message);
-    if(!command || !data) return;
+    if (!command) return;
 
     const lobby = LobbyManager.getLobby(ws.data.lobbyId);
     const player = ws.data.player;
-    if(!lobby || !lobby.canPlayerParticipate(player, (command !== WsTitle.PlayAgainOffered)))
+    if (!lobby || !lobby.canPlayerParticipate(player, (![WsTitle.PlayAgainOffered, WsTitle.PlayAgainAccepted].includes(command))))
         return;
 
-    console.log("Command: ", command, "Data: ", data);
-    try{
-        switch(command){
+    try {
+        switch (command) {
             case WsTitle.Moved:
                 movePiece(lobby, player, (data as WsMovedData).from, (data as WsMovedData).to);
                 break;
@@ -519,7 +540,7 @@ function handleMessage(ws: RWebSocket, message: string): void
                 break;
             case WsTitle.PlayAgainAccepted:
                 playAgain(lobby);
-                break;        
+                break;
             case WsTitle.OfferCancelled:
                 cancelOffer(lobby, player);
                 break;
@@ -528,8 +549,8 @@ function handleMessage(ws: RWebSocket, message: string): void
                 break;
         }
     }
-    catch(e: any){
-        ws.send(WsCommand.error({message: e.message}));
+    catch (e: any) {
+        ws.send(WsCommand.error({ message: e.message }));
         return;
     }
 }
@@ -538,24 +559,27 @@ function handleMessage(ws: RWebSocket, message: string): void
  * Move the piece on the board as the player wants
  * then send to the other player.
  */
-function movePiece(lobby: Lobby, player: Player, from: Square, to: Square): void
-{
-    if(lobby.canPlayerMakeMove(player)){
+function movePiece(lobby: Lobby, player: Player, from: Square, to: Square): void {
+    if (lobby.canPlayerMakeMove(player)) {
         lobby.makeMove(from, to);
-            
-        const opponentPlayer = player.color === Color.White 
-            ? lobby.getBlackPlayer() 
+
+        const playerColor = lobby.getTokenColor(player.token) as Color;
+        console.log("Player Color: ", playerColor);
+        const opponentPlayer = playerColor === Color.White
+            ? lobby.getBlackPlayer()
             : lobby.getWhitePlayer();
-        if(!opponentPlayer) return;
+        console.log("Opponent Player: ", opponentPlayer);
+        if (!opponentPlayer) return;
 
         const opponentPlayerWs = SocketManager.getSocket(
-            lobby.id, 
-            opponentPlayer.userToken
+            lobby.id,
+            opponentPlayer.token
         )!;
-        if(!opponentPlayerWs) return;
+        console.log("Opponent Player WS: ", opponentPlayerWs);
+        if (!opponentPlayerWs) return;
 
-        opponentPlayerWs.send(WsCommand.moved({from, to}));
-        if(lobby.isGameFinished())
+        opponentPlayerWs.send(WsCommand.moved({ from, to }));
+        if (lobby.isGameFinished())
             finishGame(lobby);
     }
 }
@@ -563,35 +587,31 @@ function movePiece(lobby: Lobby, player: Player, from: Square, to: Square): void
 /**
  * Offer play again to the opponent player.
  */
-function offerPlayAgain(lobby: Lobby, player: Player): void
-{
+function offerPlayAgain(lobby: Lobby, player: Player): void {
     _offer(lobby, player, WsCommand.playAgainOffered);
 }
 
 /**
  * Offer draw to the opponent player.
  */
-function offerDraw(lobby: Lobby, player: Player): void
-{
+function offerDraw(lobby: Lobby, player: Player): void {
     _offer(lobby, player, WsCommand.drawOffered);
 }
 
 /**
  * Cancel the offer and send the offer cancelled command to the client.
  */
-function cancelOffer(lobby: Lobby, player: Player): void
-{
+function cancelOffer(lobby: Lobby, player: Player): void {
     _offer(lobby, player, WsCommand.sentOfferCancelled);
-    lobby.resetOfferCooldowns();
+    lobby.disableOfferCooldown();
 }
 
 /**
  * Decline the sent offer and send the declined command to the client.
  */
-function declineSentOffer(lobby: Lobby, player: Player): void
-{
+function declineSentOffer(lobby: Lobby, player: Player): void {
     _offer(lobby, player, WsCommand.sentOfferDeclined);
-    lobby.resetOfferCooldowns();
+    lobby.disableOfferCooldown();
 }
 
 /**
@@ -599,46 +619,43 @@ function declineSentOffer(lobby: Lobby, player: Player): void
  * @param {WsCommand.function} offer WsCommand function to send the offer
  * like WsCommand.playAgainOffered or WsCommand.drawOffered.
  */
-function _offer(lobby: Lobby, player: Player, offer: () => string): void
-{
-    const opponentPlayer = player.color === Color.White 
-        ? lobby.getBlackPlayer() 
+function _offer(lobby: Lobby, player: Player, offer: () => string): void {
+    const playerColor = lobby.getTokenColor(player.token) as Color;
+    const opponentPlayer = playerColor === Color.White
+        ? lobby.getBlackPlayer()
         : lobby.getWhitePlayer();
-    if(!opponentPlayer) return;
+    if (!opponentPlayer) return;
 
     const opponentPlayerWs = SocketManager.getSocket(
-        lobby.id, 
-        opponentPlayer.userToken
+        lobby.id,
+        opponentPlayer.token
     )!;
-    if(!opponentPlayerWs) return;
+    if (!opponentPlayerWs) return;
 
     opponentPlayerWs.send(offer());
-    lobby.setOfferCooldown(player);
+    lobby.enableOfferCooldown();
 }
 
 /**
  * Accept the play again offer and send the started command to the client.
  */
-function playAgain(lobby: Lobby): void
-{
+function playAgain(lobby: Lobby): void {
     startGame(lobby);
 }
 
 /**
  * Resign the game and send the finished command to the client.
  */
-function resign(lobby: Lobby, player: Player): void
-{
+function resign(lobby: Lobby, player: Player): void {
     lobby.clearGameTimeMonitorInterval();
     lobby.resign(player);
-    _finishGame(lobby, false, true, player.color);
+    _finishGame(lobby, false, true, lobby.getTokenColor(player.token) as Color);
 }
 
 /**
  * Accept the draw offer and send the finished command to the client.
  */
-function draw(lobby: Lobby): void
-{
+function draw(lobby: Lobby): void {
     lobby.clearGameTimeMonitorInterval();
     lobby.draw();
     _finishGame(lobby, true);
@@ -648,8 +665,7 @@ function draw(lobby: Lobby): void
  * Finish the game and send the finished command 
  * to the client.
  */
-function finishGame(lobby: Lobby): void
-{
+function finishGame(lobby: Lobby): void {
     lobby.clearGameTimeMonitorInterval();
     _finishGame(lobby);
 }
@@ -659,37 +675,34 @@ function finishGame(lobby: Lobby): void
  */
 function _finishGame(
     lobby: Lobby,
-    isDraw: boolean = false, 
-    isResigned: boolean = false, 
+    isDraw: boolean = false,
+    isResigned: boolean = false,
     resignColor: Color | null = null
-): void
-{
-    if(lobby.isGameFinished()) return;
-    
-    if(isDraw && (isResigned || resignColor))
+): void {
+    if (isDraw && (isResigned || resignColor))
         throw new Error("isDraw and isResigned or resignColor cannot be used together.");
 
-    if((isResigned && !resignColor) || (!isResigned && resignColor))
+    if ((isResigned && !resignColor) || (!isResigned && resignColor))
         throw new Error("isResigned and resignColor must be used together.");
 
-    if(isResigned){
+    if (isResigned) {
         server.publish(lobby.id, WsCommand.finished({
             gameStatus: lobby.getGameStatus(),
             isResigned: true,
             resignColor: resignColor as Color
         }));
     }
-    else if (isDraw){
+    else if (isDraw) {
         server.publish(lobby.id, WsCommand.finished({
             gameStatus: lobby.getGameStatus(),
             isDrawOffered: true
         }));
-    } 
+    }
     else {
         server.publish(lobby.id, WsCommand.finished({
             gameStatus: lobby.getGameStatus()
         }));
     }
 
-    lobby.resetOfferCooldowns();
+    lobby.disableOfferCooldown();
 }

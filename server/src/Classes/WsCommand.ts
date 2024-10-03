@@ -1,4 +1,4 @@
-import { Color, JsonNotation, Square, Durations, GameStatus } from "@Chess/Types";
+import { Color, JsonNotation, Square, GameStatus } from "@Chess/Types";
 import type { Player } from "../Types";
 
 /**
@@ -75,10 +75,7 @@ export interface WsMovedData{
  */
 export interface WsDisconnectedData{
     lobbyId: string,
-    disconnectedPlayer: {
-        name: string, 
-        color: Color
-    }
+    color: Color
 }
 
 /**
@@ -87,10 +84,7 @@ export interface WsDisconnectedData{
  */
 export interface WsReconnectedData{
     lobbyId: string,
-    reconnectedPlayer: {
-        name: string,
-        color: Color
-    }
+    color: Color
 }
 
 /**
@@ -142,7 +136,7 @@ export class WsCommand{
      * @example [Connected, {lobbyId: "1234", player: {name: "Player1", color: "white"}}]
      */
     static connected(connectedData: WsConnectedData): string {
-        return this._wsCommand(WsTitle.Connected, connectedData);
+        return WsCommand._wsCommand(WsTitle.Connected, connectedData);
     }
 
     /**
@@ -151,7 +145,7 @@ export class WsCommand{
      */
     static started(startedData: WsStartedData): string 
     {
-        return this._wsCommand(WsTitle.Started, startedData);
+        return WsCommand._wsCommand(WsTitle.Started, startedData);
     }
 
     /**
@@ -160,7 +154,7 @@ export class WsCommand{
      */
     static finished(finishedData: WsFinishedData): string
     {
-        return this._wsCommand(WsTitle.Finished, finishedData);
+        return WsCommand._wsCommand(WsTitle.Finished, finishedData);
     }
 
     /**
@@ -169,7 +163,7 @@ export class WsCommand{
      */
     static moved(moveData: WsMovedData): string 
     {
-        return this._wsCommand(WsTitle.Moved, moveData);
+        return WsCommand._wsCommand(WsTitle.Moved, moveData);
     }
 
     /**
@@ -177,7 +171,7 @@ export class WsCommand{
      */
     static drawOffered(): string
     {
-        return this._wsCommand(WsTitle.DrawOffered);
+        return WsCommand._wsCommand(WsTitle.DrawOffered);
     }
     
     /**
@@ -185,7 +179,7 @@ export class WsCommand{
      */
     static playAgainOffered(): string
     {
-        return this._wsCommand(WsTitle.PlayAgainOffered);
+        return WsCommand._wsCommand(WsTitle.PlayAgainOffered);
     }
 
     /**
@@ -193,7 +187,7 @@ export class WsCommand{
      */
     static sentOfferCancelled(): string
     {
-        return this._wsCommand(WsTitle.SentOfferCancelled);
+        return WsCommand._wsCommand(WsTitle.SentOfferCancelled);
     }
 
     /**
@@ -201,7 +195,7 @@ export class WsCommand{
      */
     static sentOfferDeclined(): string
     {
-        return this._wsCommand(WsTitle.SentOfferDeclined);
+        return WsCommand._wsCommand(WsTitle.SentOfferDeclined);
     }
 
     /**
@@ -210,7 +204,7 @@ export class WsCommand{
      */
     static disconnected(disconnectedData: WsDisconnectedData): string 
     {
-        return this._wsCommand(WsTitle.Disconnected, disconnectedData);
+        return WsCommand._wsCommand(WsTitle.Disconnected, disconnectedData);
     }
 
     /**
@@ -219,7 +213,7 @@ export class WsCommand{
      */
     static reconnected(reconnectData: WsReconnectedData): string 
     {
-        return this._wsCommand(WsTitle.Reconnected, reconnectData);
+        return WsCommand._wsCommand(WsTitle.Reconnected, reconnectData);
     }
     
     /**
@@ -228,7 +222,7 @@ export class WsCommand{
      */
     static error(errorData: WsErrorData): string
     {
-        return this._wsCommand(WsTitle.Error, errorData);
+        return WsCommand._wsCommand(WsTitle.Error, errorData);
     }
 
     /**

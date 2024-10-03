@@ -2,12 +2,21 @@
  * Create a random id that consist of numbers with the 
  * given length
  */
-export function createRandomId(length: number): string {
+export function createRandomId(length: number, notThis: string | string[] | null = null): string {
     let result = '';
     const characters = '0123456789';
     for (let i = 0; i < length; i++) {
         result += characters.charAt(Math.floor(Math.random() * characters.length));
     }
+
+    if(notThis){
+        if(typeof notThis === "string")
+            notThis = [notThis];
+
+        if(notThis.includes(result))
+            return createRandomId(length, notThis);
+    }
+
     return result;
 }
 

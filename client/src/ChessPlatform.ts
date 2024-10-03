@@ -11,7 +11,7 @@ import { Chess } from '@Chess/Chess';
 import { Platform } from "@Platform/Platform.ts";
 import { Logger } from "@Services/Logger";
 import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage.ts";
-import { ChessEvent, GameStatus, StartPosition } from '@Chess/Types';
+import { ChessEvent, Color, GameStatus, StartPosition } from '@Chess/Types';
 import { DEFULT_PLAYER_NAME, DEFAULT_TOTAL_TIME, DEFAULT_INCREMENT_TIME } from "@Platform/Consts";
 import { PlatformEvent } from '@Platform/Types';
 import type {
@@ -44,7 +44,6 @@ export class ChessPlatform{
 
     private socket: WebSocket | null = null;
     private reconnectionAttemptRemaining: number = RECONNECTION_ATTEMPT_LIMIT;
-    private currentLobbyId: string | null = null;
 
     /**
      * Constructor of the ChessPlatform class.
@@ -97,12 +96,16 @@ export class ChessPlatform{
          * Connect to the last connection if exists.
          */
         const connectToLastConnectionOrLobbyUrl = async () => {
-            this.currentLobbyId = await this.getAndCheckLobbyIdOnUrl();
-            if (this.currentLobbyId && this.currentLobbyId !== LocalStorage.load(LocalStorageKey.LastLobbyConnection)?.lobbyId) {
-                this.platform.navigatorModal.showJoinLobby();
-            } else if (LocalStorage.isExist(LocalStorageKey.LastLobbyConnection)) {
+            const lobbyId = this.getLobbyIdFromUrl() || LocalStorage.load(LocalStorageKey.LastLobbyConnection)?.lobbyId;
+            if(!lobbyId) return;
+
+            const isLobbyIdValid = await this.checkLobbyId(lobbyId);
+            if(!isLobbyIdValid) return;
+            
+            if(lobbyId === this.getLobbyIdFromUrl())
+                this.platform.navigatorModal.showJoinLobby();                
+            else
                 this.reconnectLobby();
-            }
         };        
 
         /**
@@ -160,26 +163,32 @@ export class ChessPlatform{
      * Check the lobby id from the URL and return it if it exists
      * and is valid.
      */
-    private async getAndCheckLobbyIdOnUrl(): Promise<string | null> {
-        const lobbyId = window.location.pathname.split("/").pop();
-        if (!lobbyId) return null;
-
+    private async checkLobbyId(lobbyId: string, showAsError: boolean = true): Promise<string | null>
+    {
         try {
             const response = await fetch(import.meta.env.VITE_SERVER_ADDRESS + "?lobbyId=" + lobbyId);
             console.log("response", response);
             if (!response.ok) {
-                this.platform.navigatorModal.showError("The lobby id is invalid.");
+                if(showAsError) this.platform.navigatorModal.showError("The lobby id is invalid.");
                 this.forceClearLastConnection();
                 return null;
             }
         } catch (error) {
             console.log("error", error);
-            this.platform.navigatorModal.showError("The lobby id cannot be checked.");
+            if(showAsError) this.platform.navigatorModal.showError("The lobby id cannot be checked.");
             this.forceClearLastConnection();
             return null;
         }
 
         return lobbyId;
+    }
+
+    /**
+     * Get the lobby id from the URL if exists.
+     */
+    private getLobbyIdFromUrl(): string | null
+    {
+        return window.location.pathname.split("/").pop() || null;
     }
 
     /**
@@ -239,13 +248,13 @@ export class ChessPlatform{
      */
     private joinLobby(): void
     {
-        if(!this.currentLobbyId) 
-            return;
+        const lobbyId = this.getLobbyIdFromUrl();
+        if(!lobbyId) return;
 
         const playerName = this.platform.navigatorModal.getEnteredPlayerName();
         this._joinLobby({
             name: playerName || DEFULT_PLAYER_NAME, 
-            lobbyId: this.currentLobbyId
+            lobbyId: lobbyId
         } as JoinLobbyReqParams);
     }
 
@@ -269,7 +278,7 @@ export class ChessPlatform{
         const lastLobbyConnection = LocalStorage.load(LocalStorageKey.LastLobbyConnection);
         this._reconnectLobby({
             lobbyId: lastLobbyConnection.lobbyId,
-            userToken: lastLobbyConnection.player.userToken
+            token: lastLobbyConnection.player.token
         } as ReconnectLobbyReqParams);
     }
 
@@ -404,11 +413,12 @@ export class ChessPlatform{
 
                     LocalStorage.save(LocalStorageKey.LastLobbyConnection, wsData);
                     LocalStorage.save(LocalStorageKey.LastPlayerName, player.name);
-                    this.logger.save(`Connected to the lobby[${lobbyId}] as ${player.name}[${player.color}].`);
+                    this.logger.save(`Connected to the lobby[${lobbyId}] as ${player.name}.`);
                     break;
                 case WsTitle.Started:
                     this.platform.navigatorModal.hide();
-                    this.platform.createOnlineGame(wsData as WsStartedData, player!.color);
+                    const playerColor = (wsData as WsStartedData).whitePlayer.id === player!.id ? Color.White : Color.Black;
+                    this.platform.createOnlineGame(wsData as WsStartedData, playerColor);
                     document.addEventListener(ChessEvent.onPieceMovedByPlayer, ((event: CustomEvent) => {
                         if(!this.socket) return;
                         const { from, to } = event.detail;
@@ -468,12 +478,12 @@ export class ChessPlatform{
                     break;
                 case WsTitle.Disconnected:
                     this.platform.notationMenu.updatePlayerAsOffline(
-                        (wsData as WsDisconnectedData).disconnectedPlayer.color
+                        (wsData as WsDisconnectedData).color
                     );
                     break;
                 case WsTitle.Reconnected:
                     this.platform.notationMenu.updatePlayerAsOnline(
-                        (wsData as WsReconnectedData).reconnectedPlayer.color
+                        (wsData as WsReconnectedData).color
                     );
                     break;
                 case WsTitle.Error:

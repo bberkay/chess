@@ -1,5 +1,5 @@
-import type { Player, RWebSocket } from "../Types";
-import { JsonNotation, StartPosition, Color, Durations, Duration } from "@Chess/Types";
+import type { Player } from "../Types";
+import { JsonNotation, StartPosition, Duration } from "@Chess/Types";
 import { Lobby } from "./Lobby";
 import { createRandomId } from "./Helper";
 import { ID_LENGTH } from "../Consts";
@@ -34,9 +34,7 @@ export class LobbyManager{
         initialDuration: Duration
     ): string
     {
-        const lobbyId = createRandomId(ID_LENGTH);
-        if(this.isLobbyExist(lobbyId)) return this.createLobby(board, initialDuration);
-
+        const lobbyId = createRandomId(ID_LENGTH, [...LobbyManager.lobbies.keys()]);
         LobbyManager.lobbies.set(lobbyId, new Lobby(lobbyId, board, initialDuration));
         return lobbyId;
     }

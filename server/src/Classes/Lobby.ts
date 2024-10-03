@@ -2,6 +2,8 @@ import type { Player } from "../Types";
 import { Color, Duration, Durations, GameStatus, JsonNotation, Square, StartPosition } from '@Chess/Types';
 import { ChessEngine } from '@Chess/Engine/ChessEngine';
 import { Converter } from "@Chess/Utils/Converter";
+import { ID_LENGTH } from "src/Consts";
+import { createRandomId } from "./Helper";
 
 /**
  * This class represents the lobby of the game.
@@ -13,7 +15,8 @@ export class Lobby{
     private blackPlayer: Player | null = null;
     private lastConnectedPlayerColor: Color | null = null;
     private gameTimeMonitorInterval: number | null = null;
-    
+    private isThereAnyOffer: boolean = false;
+
     private readonly chessEngine: ChessEngine = new ChessEngine();
 
     // Inital values
@@ -29,8 +32,11 @@ export class Lobby{
         initialDuration: Duration
     ){
         this.id = id;
-        this.durations = {[Color.White]: initialDuration, [Color.Black]: initialDuration};
         this.board = board;
+        this.durations = {
+            [Color.White]: initialDuration,
+            [Color.Black]: initialDuration
+        };
     }
 
     /**
@@ -62,19 +68,13 @@ export class Lobby{
     }
 
     /**
-     * Get the white player's name.
+     * Get the player id by color.
      */
-    public getWhitePlayerName(): string | null
+    private getPlayerIdByColor(color: Color): string | null
     {
-        return this.getPlayerNameByColor(Color.White);
-    }
-
-    /**
-     * Get the black player's name.
-     */
-    public getBlackPlayerName(): string | null
-    {
-        return this.getPlayerNameByColor(Color.Black);
+        return color === Color.White && this.whitePlayer !== null ? this.whitePlayer.id
+            : color === Color.Black && this.blackPlayer !== null ? this.blackPlayer.id
+                : null;
     }
 
     /**
@@ -88,7 +88,7 @@ export class Lobby{
     /**
      * Get the initial durations of the game.
      */
-    public getInitialDurations(): Durations
+    public getInitialDurations(): Readonly<Durations>
     {
         return this.durations;
     }
@@ -107,8 +107,14 @@ export class Lobby{
     public isBothPlayersOnline(): boolean
     {
         const whitePlayer = this.getWhitePlayer();
+        if(whitePlayer === null || !whitePlayer.isOnline)
+            return false;
+
         const blackPlayer = this.getBlackPlayer();
-        return whitePlayer !== null && whitePlayer.isOnline && blackPlayer !== null && blackPlayer.isOnline;
+        if(blackPlayer === null || !blackPlayer.isOnline)
+            return false;
+
+        return true;
     }
 
     /**
@@ -117,8 +123,14 @@ export class Lobby{
     public isBothPlayersOffline(): boolean
     {
         const whitePlayer = this.getWhitePlayer();
+        if(whitePlayer === null || whitePlayer.isOnline)
+            return false;
+
         const blackPlayer = this.getBlackPlayer();
-        return whitePlayer !== null && !whitePlayer.isOnline && blackPlayer !== null && !blackPlayer.isOnline;
+        if(blackPlayer === null || blackPlayer.isOnline)
+            return false;
+
+        return true;
     }
 
     /**
@@ -126,14 +138,12 @@ export class Lobby{
      */
     public isPlayerInLobby(player: Player): boolean
     {
-        const whitePlayer = this.getWhitePlayer();
-        const blackPlayer = this.getBlackPlayer();
-        if(whitePlayer && whitePlayer.name === player.name 
-            && whitePlayer.color === player.color && whitePlayer.userToken === player.userToken) 
+        const whitePlayer = this.getWhitePlayer();        
+        if(whitePlayer && whitePlayer.name === player.name && whitePlayer.token === player.token) 
             return true;
 
-        if(blackPlayer && blackPlayer.name === player.name
-                && blackPlayer.color === player.color && blackPlayer.userToken === player.userToken) 
+        const blackPlayer = this.getBlackPlayer();
+        if(blackPlayer && blackPlayer.name === player.name && blackPlayer.token === player.token) 
             return true;
 
         return false;
@@ -142,50 +152,67 @@ export class Lobby{
     /**
      * Is there a player in the lobby that has the given user token?
      */
-    public isTokenInLobby(userToken: string): boolean
+    public isTokenInLobby(token: string): boolean
     {
         const whitePlayer = this.getWhitePlayer();
+        if(whitePlayer && whitePlayer.token === token) 
+            return true;
+
         const blackPlayer = this.getBlackPlayer();
-        if(whitePlayer && whitePlayer.userToken === userToken) return true;
-        if(blackPlayer && blackPlayer.userToken === userToken) return true;
+        if(blackPlayer && blackPlayer.token === token) 
+            return true;
+
         return false;
     }
 
     /**
      * Is there a online player that has the given user token?
      */
-    public isTokenOnline(userToken: string): boolean
+    public isTokenOnline(token: string): boolean
     {
         const whitePlayer = this.getWhitePlayer();
-        const blackPlayer = this.getBlackPlayer();
-        if(whitePlayer && whitePlayer.userToken === userToken) 
+        if(whitePlayer && whitePlayer.token === token) 
             return whitePlayer.isOnline;
-        if(blackPlayer && blackPlayer.userToken === userToken) 
+
+        const blackPlayer = this.getBlackPlayer();
+        if(blackPlayer && blackPlayer.token === token) 
             return blackPlayer.isOnline;
+
         return false;
     }
 
     /**
      * Get the color of the player that has the given user token(if exists).
      */
-    public getTokenColor(userToken: string): Color | null
+    public getTokenColor(token: string): Color | null
     {
         const whitePlayer = this.getWhitePlayer();
-        const blackPlayer = this.getBlackPlayer();
-        if(whitePlayer !== null && whitePlayer.userToken === userToken) 
+        if(whitePlayer !== null && whitePlayer.token === token) 
             return Color.White;
-        if(blackPlayer !== null && blackPlayer.userToken === userToken) 
+
+        const blackPlayer = this.getBlackPlayer();
+        if(blackPlayer !== null && blackPlayer.token === token) 
             return Color.Black;
+
         return null;
     }
 
     /**
      * Get the name of the player that has the given user token(if exists).
      */
-    public getTokenName(userToken: string): string | null
+    public getTokenName(token: string): string | null
     {
-        const color = this.getTokenColor(userToken);
+        const color = this.getTokenColor(token);
         return color !== null ? this.getPlayerNameByColor(color) : null;
+    }
+
+    /**
+     * Get the id of the player that has the given user token(if exists).
+     */
+    public getTokenId(token: string): string | null
+    {
+        const color = this.getTokenColor(token);
+        return color !== null ? this.getPlayerIdByColor(color) : null;
     }
 
     /**
@@ -200,17 +227,25 @@ export class Lobby{
     }
 
     /**
+     * Get the last connected player color if there is any.
+     */
+    public getLastConnectedPlayerColor(): Color | null
+    {
+        return this.lastConnectedPlayerColor;
+    }
+
+    /**
      * Add the player to the lobby.
      */
     public addPlayer(player: Player): boolean
     {
-        if(this.isTokenInLobby(player.userToken))
+        if(this.isTokenInLobby(player.token))
         {
             // Reconnect the player with the same color
-            if(this.isTokenOnline(player.userToken))
+            if(this.isTokenOnline(player.token))
                 return false;
 
-            const color = this.getTokenColor(player.userToken);
+            const color = this.getTokenColor(player.token) as Color;
             if(color === Color.White) 
                 this.setWhitePlayer(player);
             else if(color === Color.Black) 
@@ -227,13 +262,13 @@ export class Lobby{
             if(whitePlayer && blackPlayer)
                 return false;   
 
-            if(whitePlayer)
+            if(whitePlayer) {
                 this.setBlackPlayer(player);
-            else if(blackPlayer)
+            } else if(blackPlayer) {
                 this.setWhitePlayer(player);
-            else
-            {
-                let randomColor = Math.random() > 0.5 ? Color.White : Color.Black;
+            }
+            else {
+                const randomColor = Math.random() > 0.5 ? Color.White : Color.Black;
                 if(randomColor == Color.White)
                     this.setWhitePlayer(player);
                 else if(randomColor == Color.Black)
@@ -251,8 +286,10 @@ export class Lobby{
      */
     private setWhitePlayer(player: Player): void
     {
+        if(!player.id)
+            player.id = createRandomId(ID_LENGTH, this.getPlayerIdByColor(Color.Black));
+
         this.whitePlayer = player;
-        this.whitePlayer.color = Color.White;
     }
 
     /**
@@ -260,8 +297,23 @@ export class Lobby{
      */
     private setBlackPlayer(player: Player): void
     {
+        if(!player.id)
+            player.id = createRandomId(ID_LENGTH, this.getPlayerIdByColor(Color.White));
+
         this.blackPlayer = player;
-        this.blackPlayer.color = Color.Black;
+    }
+
+    /**
+     * Flip the colors of the players.
+     */
+    private flipColors(): void
+    {
+        if(this.getWhitePlayer() && this.getBlackPlayer())
+        {
+            const temp = {...this.whitePlayer};
+            this.setWhitePlayer(this.blackPlayer!);
+            this.setBlackPlayer(temp as Player);
+        }
     }
 
     /**
@@ -271,7 +323,7 @@ export class Lobby{
     {
         if(this.isPlayerInLobby(player)){
             player.isOnline = true;
-            this.lastConnectedPlayerColor = player.color;
+            this.lastConnectedPlayerColor = this.getTokenColor(player.token) as Color;
         }
     }
 
@@ -362,7 +414,7 @@ export class Lobby{
     public canPlayerMakeMove(player: Player): boolean
     {
         this.canPlayerParticipate(player);
-        return this.chessEngine.getTurnColor() == player.color;
+        return this.chessEngine.getTurnColor() == this.getTokenColor(player.token);
     }
 
     /**
@@ -370,42 +422,37 @@ export class Lobby{
      */
     public canPlayerParticipate(player: Player, isGameShouldBeInPlay: boolean = true): boolean
     {
-        if(!this.isGameStarted()) return false;
+        if(isGameShouldBeInPlay && !this.isGameStarted()) return false;
         if(isGameShouldBeInPlay && this.isGameFinished()) return false;
         if(!this.isPlayerInLobby(player)) return false;
-        if(!player.color) return false;
+        if(!this.getTokenColor(player.token)) return false;
         return true;
     }
 
     /**
-     * Check if any player is on offer cooldown.
+     * Check if there is any offer in the lobby.
      */
     public isOffersOnCooldown(): boolean
     {
-        const whitePlayer = this.getWhitePlayer();
-        const blackPlayer = this.getBlackPlayer();
-        return (whitePlayer !== null && whitePlayer.isOnOfferCooldown)
-            || (blackPlayer !== null && blackPlayer.isOnOfferCooldown);
+        return this.isThereAnyOffer;
     }
 
     /**
-     * Set the player's offer cooldown.
+     * Enable the offer cooldown to prevent the 
+     * players to offer something again.
      */
-    public setOfferCooldown(player: Player): void
+    public enableOfferCooldown(): void
     {
-        if(this.isPlayerInLobby(player))
-            player.isOnOfferCooldown = true;
+        this.isThereAnyOffer = true;
     }
 
     /**
-     * Reset the players' offer cooldowns.
+     * Disable the offer cooldown to allow the
+     * players to offer something.
      */
-    public resetOfferCooldowns(): void
+    public disableOfferCooldown(): void
     {
-        if(this.whitePlayer !== null)
-            this.whitePlayer.isOnOfferCooldown = false;
-        if(this.blackPlayer !== null)
-            this.blackPlayer.isOnOfferCooldown = false;
+        this.isThereAnyOffer = false;
     }
 
     /**
@@ -413,7 +460,10 @@ export class Lobby{
      */
     public resign(player: Player): void
     {
-        this.chessEngine.setGameStatus(player.color == Color.White 
+        const color = this.getTokenColor(player.token);
+        if(!color) return;
+
+        this.chessEngine.setGameStatus(color == Color.White 
             ? GameStatus.BlackVictory 
             : GameStatus.WhiteVictory
         );
@@ -446,15 +496,11 @@ export class Lobby{
         if(!this.isGameReadyToStart()) 
             return;
 
-        this.resetOfferCooldowns();
-        try{
-            this.chessEngine.createGame({
-                ...(typeof this.board === "string" ? Converter.fenToJson(this.board) : this.board),
-                durations: this.durations
-            });
-        }catch(e){
-            console.log("There was an error while playing the game on engine.");
-            return;
-        }
+        this.disableOfferCooldown();
+        this.flipColors();
+        this.chessEngine.createGame({
+            ...(typeof this.board === "string" ? Converter.fenToJson(this.board) : this.board),
+            durations: JSON.parse(JSON.stringify(this.getInitialDurations())) 
+        });
     }
 }
