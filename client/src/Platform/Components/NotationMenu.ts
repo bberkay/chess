@@ -1,7 +1,8 @@
-import { ChessEvent, Color, Durations, GameStatus, PieceType, Scores } from "@Chess/Types";
+import { Color, Durations, GameStatus, PieceType, Scores } from "@Chess/Types";
 import { Component } from "./Component.ts";
 import { Chess } from "@Chess/Chess.ts";
 import { BoardEditorOperation, NavigatorModalOperation, NotationMenuOperation } from "../Types";
+import { SocketOperation } from "../../Types";
 
 /**
  * This class provide a table to show the notation.
@@ -23,6 +24,58 @@ export class NotationMenu extends Component {
         document.addEventListener("DOMContentLoaded", () => {
             this.update(true);
         });
+    }
+
+    /**
+     * Get default new game utility menu content.
+     */
+    private getNewGameUtilityMenuContent(): string {
+        return `<button class="menu-item" data-menu-operation="${NavigatorModalOperation.ShowGameCreator}" data-tooltip-text="Create New Game">+ New Game</button>`;
+    }
+
+    /**
+     * Get default lobby utility menu content.
+     */
+    private getLobbyUtilityMenuContent(): string {
+        return `
+            <button class="menu-item" data-menu-operation="${NotationMenuOperation.SendUndoOffer}" data-tooltip-text="Send Undo Offer">↺ Undo</button>
+            <button class="menu-item" data-menu-operation="${NotationMenuOperation.SendDrawOffer}" data-tooltip-text="Send Draw Offer">Draw</button>
+            <button class="menu-item" data-menu-operation="${NotationMenuOperation.Resign}" data-tooltip-text="Resign From Game">⚐ Resign</button>
+        `;
+    }
+
+    /**
+     * Get default play again utility menu content.
+     */
+    private getPlayAgainUtilityMenuContent(): string {
+        return `
+            <button data-menu-operation="${NotationMenuOperation.SendPlayAgainOffer}">Play Again</button>
+            <button class="menu-item" data-menu-operation="${NavigatorModalOperation.ShowGameCreator}" data-tooltip-text="Create New Game">+ New Game</button>
+        `;
+    }
+
+    /**
+     * Get default confirmation utility menu content.
+     */
+    private getConfirmationUtilityMenuContent(): string {
+        return `
+            <button class="menu-item hidden" data-socket-operation="${SocketOperation.CancelOffer}" data-tooltip-text="Cancel Offer">Cancel</button>
+            <button class="menu-item" data-menu-operation="${NotationMenuOperation.GoBack}" data-tooltip-text="Go Back">Back</button>
+            <button class="menu-item" id="confirm-button" data-socket-operation="" data-tooltip-text=""></button>
+        `;
+    }
+
+    /**
+     * Get default offer utility menu content.
+     */
+    private getOfferUtilityMenuContent(): string {
+        return `
+            <span class="offer-message"></span>
+            <div class="offer-buttons">
+                <button class="menu-item" data-socket-operation="${SocketOperation.DeclineSentOffer}" data-tooltip-text="Decline Offer">Decline</button>
+                <button class="menu-item" id="accept-button" data-socket-operation="" data-tooltip-text=""></button>
+            </div>
+        `;
     }
 
     /**
@@ -63,16 +116,23 @@ export class NotationMenu extends Component {
                         <button class="menu-item" data-menu-operation="${NotationMenuOperation.PreviousMove}" disabled="true" data-tooltip-text="Go Previous Move">❮</button>
                         <button class="menu-item" data-menu-operation="${NotationMenuOperation.NextMove}" disabled="true" data-tooltip-text="Go Next Move">❯</button>
                         <button class="menu-item" data-menu-operation="${NotationMenuOperation.LastMove}" disabled="true" data-tooltip-text="Go Last Move">⟫</button>
-                        <button class="menu-item" data-menu-operation="${NotationMenuOperation.ToggleNotationMenuUtilityMenu}">☰</button>
+                        <button class="menu-item" data-menu-operation="${NotationMenuOperation.ToggleUtilityMenu}">☰</button>
                     </div>
                     <div class="utility-menu utility-toggle-menu visible">
                         <div class="utility-toggle-menu-section active" id="new-game-utility-menu">
-                            <button class="menu-item" data-menu-operation="${NavigatorModalOperation.ShowGameCreator}" data-tooltip-text="Create New Game">+ New Game</button>
+                            ${this.getNewGameUtilityMenuContent()}
                         </div>
                         <div class="utility-toggle-menu-section" id="lobby-utility-menu">
-                            <button class="menu-item" data-menu-operation="${NotationMenuOperation.SendUndoOffer}" data-tooltip-text="Send Undo Offer">↺ Undo</button>
-                            <button class="menu-item" data-menu-operation="${NotationMenuOperation.SendDrawOffer}" data-tooltip-text="Send Draw Offer">Draw</button>
-                            <button class="menu-item" data-menu-operation="${NotationMenuOperation.Resign}" data-tooltip-text="Resign From Game">⚐ Resign</button>
+                            ${this.getLobbyUtilityMenuContent()}
+                        </div>
+                        <div class="utility-toggle-menu-section" id="play-again-utility-menu">
+                            ${this.getPlayAgainUtilityMenuContent()}
+                        </div>
+                        <div class="utility-toggle-menu-section confirmation" id="confirmation-utility-menu">
+                            ${this.getConfirmationUtilityMenuContent()}
+                        </div>
+                        <div class="utility-toggle-menu-section confirmation" id="offer-utility-menu">
+                            ${this.getOfferUtilityMenuContent()}
                         </div>
                     </div>
                 </div>
@@ -232,11 +292,8 @@ export class NotationMenu extends Component {
      * new game and info buttons.
      */
     public displayNewGameUtilityMenu(): void {
-        const utilityMenuSections = document.querySelectorAll(".utility-toggle-menu-section") as NodeListOf<HTMLElement>;
-        utilityMenuSections.forEach((section: HTMLElement) => {
-            section.classList.remove("active");
-        });
-
+        document.querySelector(".utility-toggle-menu-section.active")!.classList.remove("active");
+        this.loadHTML("new-game-utility-menu", this.getNewGameUtilityMenuContent());
         document.getElementById(`new-game-utility-menu`)!.classList.add("active");
     }
 
@@ -245,12 +302,20 @@ export class NotationMenu extends Component {
      * undo, draw and resign buttons.
      */
     public displayLobbyUtilityMenu(): void {
-        const utilityMenuSections = document.querySelectorAll(".utility-toggle-menu-section") as NodeListOf<HTMLElement>;
-        utilityMenuSections.forEach((section: HTMLElement) => {
-            section.classList.remove("active");
-        });
-
+        document.querySelector(".utility-toggle-menu-section.active")!.classList.remove("active");
+        this.loadHTML("lobby-utility-menu", this.getLobbyUtilityMenuContent());
         document.getElementById(`lobby-utility-menu`)!.classList.add("active");
+    }
+
+    /**
+     * Show the new game utility menu section. This menu contains
+     * new game and play again buttons. This menu is shown when the
+     * online game is finished.
+     */
+    public displayPlayAgainUtilityMenu(): void {
+        document.querySelector(".utility-toggle-menu-section.active")!.classList.remove("active");
+        this.loadHTML("play-again-utility-menu", this.getPlayAgainUtilityMenuContent());
+        document.getElementById(`play-again-utility-menu`)!.classList.add("active");
     }
 
     /**
@@ -260,6 +325,15 @@ export class NotationMenu extends Component {
      */
     public update(force: boolean = false): void {
         const moveCount = this.chess.engine.getMoveHistory().length;
+
+        if ([
+            GameStatus.WhiteVictory,
+            GameStatus.BlackVictory,
+            GameStatus.Draw
+        ].includes(this.chess.engine.getGameStatus())){
+            this.stopTimers();
+            this.displayPlayAgainUtilityMenu();
+        }
 
         if (!force && moveCount == 0 || moveCount == this.moveCount)
             return;
@@ -274,14 +348,8 @@ export class NotationMenu extends Component {
             GameStatus.InPlay
         ].includes(this.chess.engine.getGameStatus())
             && moveCount >= 2
-            && this.chess.engine.getInitialDurations())
+            && this.chess.engine.getDurations())
             this.startOrUpdateTimers();
-        else if ([
-            GameStatus.WhiteVictory,
-            GameStatus.BlackVictory,
-            GameStatus.Draw
-        ].includes(this.chess.engine.getGameStatus()))
-            this.stopTimers();
     }
 
     /**
@@ -289,8 +357,7 @@ export class NotationMenu extends Component {
      */
     public updatePlayerCards(
         whitePlayer: { name: string, isOnline: boolean },
-        blackPlayer: { name: string, isOnline: boolean },
-        durations: Durations | null = null
+        blackPlayer: { name: string, isOnline: boolean }
     ): void {
         this.showPlayerCards();
         this.displayWhitePlayerName(whitePlayer.name);
@@ -302,8 +369,7 @@ export class NotationMenu extends Component {
         if (blackPlayer.isOnline) this.updatePlayerAsOnline(Color.Black);
         else this.updatePlayerAsOffline(Color.Black);
 
-        if (durations)
-            this.showPlayerDurations();
+        this.showPlayerDurations();
     }
 
     /**
@@ -348,7 +414,7 @@ export class NotationMenu extends Component {
      * Display the white player duration on the notation menu.
      */
     private showPlayerDurations(): void {
-        if (!this.chess.engine.getInitialDurations()) return;
+        if (!this.chess.engine.getDurations()) return;
 
         // White
         let milliseconds = Math.round(this.chess.engine.getPlayersRemainingTime()[Color.White]);
@@ -469,12 +535,155 @@ export class NotationMenu extends Component {
     }
 
     /**
+     * Ask for confirmation before resigning or sending draw offer.
+     */
+    private showConfirmation(
+        confirmationOperation: NotationMenuOperation.Resign 
+        | NotationMenuOperation.SendDrawOffer 
+        | NotationMenuOperation.SendPlayAgainOffer
+    ): void {
+        document.querySelector(".utility-toggle-menu-section.active")!.classList.remove("active");
+        this.loadHTML("confirmation-utility-menu", this.getConfirmationUtilityMenuContent());
+
+        const confirmationMenu = document.getElementById(`confirmation-utility-menu`)!;
+        confirmationMenu.classList.add("active");
+
+        const textContent = document.querySelector(`[data-menu-operation="${confirmationOperation}"]`)!.textContent;
+        const tooltipText = document.querySelector(`[data-menu-operation="${confirmationOperation}"]`)!.getAttribute("data-tooltip-text")!;
+
+        const confirmButton = confirmationMenu.querySelector("#confirm-button")!;
+        confirmButton.textContent = textContent;
+        confirmButton.setAttribute("data-tooltip-text", tooltipText);
+
+        // This is a hacky way to set the operation to the button.
+        // Since the operation is not a socket operation, but has
+        // same value with the "correct" socket operation, we can
+        // set the operation to the button and use it as a socket
+        // operation. For example, SocketOperation.Resign="Resign" 
+        // is equal to NotationMenuOperation.Resign="Resign" so we
+        // can set the operation to the button and use it as a socket
+        // operation.
+        confirmButton.setAttribute("data-socket-operation", confirmationOperation);
+    }
+
+    /**
+     * Show the offer menu with the given message and operation.
+     */
+    private _showOffer(
+        offerMessage: string, 
+        offerOperation: SocketOperation.AcceptDrawOffer | SocketOperation.AcceptPlayAgainOffer
+    ): void {
+        document.querySelector(".utility-toggle-menu-section.active")!.classList.remove("active");
+        this.loadHTML("offer-utility-menu", this.getOfferUtilityMenuContent());
+
+        const offerMenu = document.getElementById(`offer-utility-menu`)!;
+        offerMenu.classList.add("active");
+
+        offerMenu.querySelector(".offer-message")!.textContent = offerMessage;
+
+        const acceptButton = offerMenu.querySelector("#accept-button")!;
+        acceptButton.textContent = "Accept";
+        acceptButton.setAttribute("data-tooltip-text", "Accept Offer");
+        acceptButton.setAttribute("data-socket-operation", offerOperation);
+    }
+
+    /**
+     * Show the draw offer from the opponent. If the player accepts,
+     * client will send the accepted message to the server. If the player
+     * declines, client will send the declined message to the server. Shouldn't
+     * be called without the offer coming from the server.
+     */
+    public showDrawOffer(): void {
+        this._showOffer(
+            "Opponent has offered a draw.",
+            SocketOperation.AcceptDrawOffer
+        );
+    }
+
+    /**
+     * Show the play again offer screen that has 2 options to 
+     * accept or decline. If the player accepts, client will send
+     * the accepted message to the server. If the player declines,
+     * client will send the declined message to the server. Shouldn't
+     * be called without the offer coming from the server.
+     */
+    public showPlayAgainOffer(): void
+    {
+        this._showOffer(
+            "Your opponet has offered to play again.",
+            SocketOperation.AcceptPlayAgainOffer
+        );
+    }
+
+    /**
+     * Show the given message on the information menu.
+     */
+    public _showSentRequest(sentRequestButton: HTMLElement): void {
+        if(!sentRequestButton) return;
+        sentRequestButton.textContent = "Offered";
+        sentRequestButton.setAttribute("disabled", "true");
+        sentRequestButton.setAttribute("data-tooltip-text", "Opponent waiting...");
+        
+        const confirmationMenu = document.getElementById(`confirmation-utility-menu`)!;
+        confirmationMenu.querySelector(`[data-menu-operation="${NotationMenuOperation.GoBack}"]`)!.classList.add("hidden");
+        confirmationMenu.querySelector(`[data-socket-operation="${SocketOperation.CancelOffer}"]`)!.classList.remove("hidden");
+    }
+
+    /**
+     * Show the given message on the information menu. This function
+     * is a feedback for the player that the play again offer is sent.
+     * This function should be called after the play again offer is sent.
+     */
+    public showPlayAgainOfferSent(): void {
+        this._showSentRequest(document.querySelector(`[data-socket-operation="${SocketOperation.SendPlayAgainOffer}"]`)!);
+    }
+
+    /**
+     * Show the given message on the information menu. This function
+     * is a feedback for the player that the draw offer is sent.
+     * This function should be called after the draw offer is sent.
+     */
+    public showDrawOfferSent(): void {
+        this._showSentRequest(document.querySelector(`[data-socket-operation="${NotationMenuOperation.SendDrawOffer}"]`)!);
+    }
+
+    /**
+     * Back to the previous menu. This function should be called
+     * after the offer menu is opened and the player declines 
+     * the offer or sender cancels the offer.
+     */
+    public goBack(): void {
+        if(![GameStatus.BlackVictory, 
+            GameStatus.WhiteVictory, 
+            GameStatus.Draw
+        ].includes(this.chess.engine.getGameStatus()))
+            this.displayLobbyUtilityMenu();
+        else 
+            this.displayNewGameUtilityMenu();
+    }
+
+    /**
      * Handle the notation menu operation.
      */
     public handleOperation(operation: NotationMenuOperation): void {
         switch (operation) {
-            case NotationMenuOperation.ToggleNotationMenuUtilityMenu:
+            case NotationMenuOperation.ToggleUtilityMenu:
                 this.toggleUtilityMenu();
+                break;
+            case NotationMenuOperation.ShowLobbyUtilityMenu:
+                this.displayLobbyUtilityMenu();
+                break;
+            case NotationMenuOperation.Resign:
+                this.showConfirmation(NotationMenuOperation.Resign);
+                break;
+            case NotationMenuOperation.SendDrawOffer:
+                this.showConfirmation(NotationMenuOperation.SendDrawOffer);
+                break;
+            case NotationMenuOperation.SendPlayAgainOffer:
+                this.showConfirmation(NotationMenuOperation.SendPlayAgainOffer);
+                break;
+            case NotationMenuOperation.GoBack:
+                this.goBack();
                 break;
         }
     }

@@ -4,7 +4,7 @@ export const ALLOWED_ORIGINS = [
 ];
 
 export const SERVER_PORT = 3000;
-export const MAX_PAYLOAD_LENGTH = 1024 * 1024; // 1MB
+export const MAX_PAYLOAD_LENGTH = 1024 * 25; // 25 KB
 
 // Game limits
 export const MAX_PLAYER_NAME_LENGTH = 25;

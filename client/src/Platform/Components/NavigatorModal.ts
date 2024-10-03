@@ -2,7 +2,7 @@ import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage";
 import { SocketOperation } from "../../Types";
 import { BoardEditorOperation, NavigatorModalOperation } from "../Types";
 import { Component } from "./Component";
-import { Duration, GameStatus, StartPosition } from "@Chess/Types";
+import { Color, Duration, GameStatus, StartPosition } from "@Chess/Types";
 import { 
     DEFULT_PLAYER_NAME,
     MAX_PLAYER_NAME_LENGTH,
@@ -77,6 +77,12 @@ export class NavigatorModal extends Component{
                 document.body.appendChild(modalBgLayer);
             }
         }
+        else{
+            // center the modal to the chessboard if it is not backdrop.
+            const chessboard = document.getElementById("chessboard") as HTMLElement;
+            modal.style.left = `${chessboard.offsetLeft + chessboard.offsetWidth / 2 - modal.offsetWidth / 2}px`;
+            modal.style.top = `${chessboard.offsetTop + chessboard.offsetWidth / 2 - modal.offsetHeight / 2}px`;
+        }
 
         (modalBgLayer || document).addEventListener("click", (event) => {
             if(!(event.target as HTMLElement).closest(".navigator-modal")){
@@ -131,14 +137,44 @@ export class NavigatorModal extends Component{
      */
     public showGameOver(status: GameStatus): void
     {
+        const gameOverMessage = document.querySelector('.navigator-modal .game-over-message');
+        
         this.show(
-            status === GameStatus.WhiteVictory ? "White Wins" : (status === GameStatus.BlackVictory ? "Black Wins" : "Stalemate"),
-            `<div class="btn-group-vertical">
-                <button data-menu-operation="${NavigatorModalOperation.ShowGameCreator}">Play Again</button>
-            </div>`,
+            status === GameStatus.WhiteVictory 
+                ? "White Wins" 
+                : (status === GameStatus.BlackVictory ? "Black Wins" : "Stalemate"),
+            `
+            <span class="game-over-message">${gameOverMessage ? gameOverMessage.textContent : ""}</span>
+            `,
             true,
             false
         );
+
+        if(gameOverMessage) 
+            gameOverMessage.textContent = "";
+    }
+
+    /**
+     * Show the game over screen when one of the players
+     * resigned. This is going to modify the content of the
+     * game over screen to show the resigned player.
+     */
+    public showGameOverAsResigned(resignColor: Color): void 
+    {
+        document.querySelector('.navigator-modal .game-over-message')!.textContent = `
+            ${resignColor === Color.White ? Color.White : Color.Black} has resigned
+        `;
+    }
+
+    /**
+     * Show the game over screen when both players
+     * accepted the draw. This is going to modify the 
+     * content of the game over screen to show the draw 
+     * accepted message.
+     */
+    public showGameOverAsDrawAccepted(): void
+    {
+        document.querySelector('.navigator-modal .game-over-message')!.textContent = `Draw accepted`;
     }
 
     /**
@@ -240,10 +276,10 @@ export class NavigatorModal extends Component{
         this.show(
             "Enter Game Duration",
             `<span>Enter the total and increment time:</span>
-            <div class="btn-group-horizontal" style="padding-top:5px;padding-bottom:15px;">
-                <input type="number" id="total-time" placeholder="Min" min="${MIN_TOTAL_TIME}" max="${MAX_TOTAL_TIME}" required>
+            <div class="btn-group-horizontal" style="padding-top:5px;padding-bottom:15px;justify-content:center;">
+                <input type="number" id="total-time" placeholder="Min" min="${MIN_TOTAL_TIME / 60000}" max="${MAX_TOTAL_TIME / 60000}" required>
                 <span style="font-size:var(--navigator-modal-content-duration-separator-font-size);padding:0 10px;">+</span>
-                <input type="number" id="increment-time" placeholder="Sec" value="${MIN_INCREMENT_TIME}" min="${MIN_INCREMENT_TIME}" max="${MAX_INCREMENT_TIME}" required>
+                <input type="number" id="increment-time" placeholder="Sec" value="${MIN_INCREMENT_TIME / 1000}" min="${MIN_INCREMENT_TIME / 1000}" max="${MAX_INCREMENT_TIME / 1000}" required>
             </div>
             <button type="submit" data-menu-operation="${NavigatorModalOperation.ShowCreateLobby}">Next</button>
             <div style="text-align:center;margin-top:10px;">
@@ -265,7 +301,11 @@ export class NavigatorModal extends Component{
             "Create a Lobby",
             `<span>Enter your name: </span>
             <div class="input-group" style="padding-top:5px;padding-bottom:5px;">
-                <input type="text" id="player-name" placeholder="Your Name" maxlength="${MAX_PLAYER_NAME_LENGTH}" minlength="${MIN_PLAYER_NAME_LENGTH}" required>
+                <input type="text" id="player-name" placeholder="Your Name" value="${
+                    LocalStorage.isExist(LocalStorageKey.LastPlayerName) 
+                        ? LocalStorage.load(LocalStorageKey.LastPlayerName) 
+                        : ""
+                }" maxlength="${MAX_PLAYER_NAME_LENGTH}" minlength="${MIN_PLAYER_NAME_LENGTH}" required>
                 <button type="submit" data-socket-operation="${SocketOperation.CreateLobby}">Create</button>
             </div>
             <div style="text-align:center;margin-top:10px;">
@@ -285,7 +325,11 @@ export class NavigatorModal extends Component{
             "Join a Lobby",
             `<span>Enter your name: </span>
             <div class="input-group" style="padding-top:5px;padding-bottom:5px;">
-                <input type="text" id="player-name" placeholder="Your Name" maxlength="${MAX_PLAYER_NAME_LENGTH}" minlength="${MIN_PLAYER_NAME_LENGTH}" required>
+                <input type="text" id="player-name" placeholder="Your Name" value="${
+                    LocalStorage.isExist(LocalStorageKey.LastPlayerName) 
+                        ? LocalStorage.load(LocalStorageKey.LastPlayerName) 
+                        : ""
+                }" maxlength="${MAX_PLAYER_NAME_LENGTH}" minlength="${MIN_PLAYER_NAME_LENGTH}" required>
                 <button type="submit" data-socket-operation="${SocketOperation.JoinLobby}">Play</button>
             </div>
             <div style="text-align:center;margin-top:10px;">
@@ -372,60 +416,6 @@ export class NavigatorModal extends Component{
     }
 
     /**
-     * Handle the operation of the navigator modal.
-     */
-    public handleOperation(operation: NavigatorModalOperation): void
-    {
-        switch(operation){
-            case NavigatorModalOperation.Hide:
-                this.hide();
-                break;
-            case NavigatorModalOperation.Undo:
-                this.undo();
-                break;
-            case NavigatorModalOperation.AskConfirmation:
-                this.showConfirmation();
-                break;
-            case NavigatorModalOperation.ShowGameCreator:
-                this.showGameCreator();
-                break;
-            case NavigatorModalOperation.ShowSelectDuration:
-                this.showSelectDuration();
-                break;
-            case NavigatorModalOperation.ShowSelectDurationCustom:
-                this.showSelectDurationCustom();
-                break
-            case NavigatorModalOperation.ShowPlayAgainstBot:
-                this.showPlayAgainstBot();
-                break;
-            case NavigatorModalOperation.ShowCreateLobby:
-                if(LocalStorage.isExist(LocalStorageKey.LastPlayerName))
-                    this.setPlayerNameInputValue(LocalStorage.load(LocalStorageKey.LastPlayerName));
-                this.showCreateLobby();
-                break
-            case NavigatorModalOperation.ShowJoinLobby:
-                if(LocalStorage.isExist(LocalStorageKey.LastPlayerName))
-                    this.setPlayerNameInputValue(LocalStorage.load(LocalStorageKey.LastPlayerName));
-                this.showJoinLobby();
-                break;
-        }
-    }
-
-    /**
-     * Set the input value of the player name.
-     * If the player name modal is open.
-     * 
-     * @param value Must be between MIN_PLAYER_NAME_LENGTH and MAX_PLAYER_NAME_LENGTH
-     * characters. If not, it will be set to DEFULT_PLAYER_NAME.
-     */
-    private setPlayerNameInputValue(value: string): void
-    {
-        if(value.length < MIN_PLAYER_NAME_LENGTH || value.length > MAX_PLAYER_NAME_LENGTH)
-            value = DEFULT_PLAYER_NAME;
-        (document.querySelector("#navigator-modal #player-name") as HTMLInputElement).value = value;
-    }
-
-    /**
      * Get the entered player name from the 
      * modal. If the player name modal is open.
      * 
@@ -434,7 +424,7 @@ export class NavigatorModal extends Component{
      */
     public getEnteredPlayerName(): string
     {
-        let playerName = (document.querySelector("#navigator-modal #player-name") as HTMLInputElement).value;
+        let playerName = (document.getElementById("navigator-modal")!.querySelector("#player-name") as HTMLInputElement).value;
         if(playerName.length < MIN_PLAYER_NAME_LENGTH || playerName.length > MAX_PLAYER_NAME_LENGTH)
             playerName = DEFULT_PLAYER_NAME;
         return playerName;
@@ -512,5 +502,41 @@ export class NavigatorModal extends Component{
             board: this.lastCreatedBoard || StartPosition.Standard,
             duration: this.getSelectedGameDuration()
         };
+    }
+
+    /**
+     * Handle the operation of the navigator modal.
+     */
+    public handleOperation(operation: NavigatorModalOperation): void
+    {
+        switch(operation){
+            case NavigatorModalOperation.Hide:
+                this.hide();
+                break;
+            case NavigatorModalOperation.Undo:
+                this.undo();
+                break;
+            case NavigatorModalOperation.AskConfirmation:
+                this.showConfirmation();
+                break;
+            case NavigatorModalOperation.ShowGameCreator:
+                this.showGameCreator();
+                break;
+            case NavigatorModalOperation.ShowSelectDuration:
+                this.showSelectDuration();
+                break;
+            case NavigatorModalOperation.ShowSelectDurationCustom:
+                this.showSelectDurationCustom();
+                break
+            case NavigatorModalOperation.ShowPlayAgainstBot:
+                this.showPlayAgainstBot();
+                break;
+            case NavigatorModalOperation.ShowCreateLobby:
+                this.showCreateLobby();
+                break
+            case NavigatorModalOperation.ShowJoinLobby:
+                this.showJoinLobby();
+                break;
+        }
     }
 }

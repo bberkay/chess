@@ -11,6 +11,14 @@ export enum WsTitle {
     Disconnected="DISCONNECTED",
     Reconnected="RECONNECTED",
     Moved="MOVED",
+    Resigned="RESIGNED",
+    DrawOffered="DRAW_OFFERED",
+    DrawAccepted="DRAW_ACCEPTED",
+    PlayAgainOffered="PLAY_AGAIN_OFFERED",
+    PlayAgainAccepted="PLAY_AGAIN_ACCEPTED",
+    OfferCancelled="OFFER_CANCELLED",
+    SentOfferCancelled="SENT_OFFER_CANCELLED",
+    SentOfferDeclined="SENT_OFFER_DECLINED",
     Error="ERROR",
 };
 
@@ -37,8 +45,7 @@ export interface WsStartedData{
         name: string, 
         isOnline: boolean
     }, 
-    board: string | JsonNotation,
-    durations: Durations
+    game: string | JsonNotation
 }
 
 /**
@@ -47,6 +54,9 @@ export interface WsStartedData{
  */
 export interface WsFinishedData{
     gameStatus: GameStatus
+    isDrawOffered?: boolean
+    isResigned?: boolean
+    resignColor?: Color
 }
 
 /**
@@ -120,11 +130,11 @@ export class WsCommand{
      * Create a WebSocket command with the given command and data.
      * @example [Connected, {lobbyId: "1234", ...}]
      */
-    private static _wsCommand(title: WsTitle, data: WsData): string {
+    private static _wsCommand(title: WsTitle, data: WsData | null = null): string {
         if(Object.values(WsTitle).indexOf(title) === -1) 
             throw new Error("Invalid command.");
 
-        return JSON.stringify([title, data]);
+        return data ? JSON.stringify([title, data]) : JSON.stringify([title]);
     }
 
     /**
@@ -160,6 +170,38 @@ export class WsCommand{
     static moved(moveData: WsMovedData): string 
     {
         return this._wsCommand(WsTitle.Moved, moveData);
+    }
+
+    /**
+     * Send draw offered command to the client.
+     */
+    static drawOffered(): string
+    {
+        return this._wsCommand(WsTitle.DrawOffered);
+    }
+    
+    /**
+     * Send play again offered command to the server.
+     */
+    static playAgainOffered(): string
+    {
+        return this._wsCommand(WsTitle.PlayAgainOffered);
+    }
+
+    /**
+     * Send sent offer cancelled command to the client.
+     */
+    static sentOfferCancelled(): string
+    {
+        return this._wsCommand(WsTitle.SentOfferCancelled);
+    }
+
+    /**
+     * Send offer declined command to the client.
+     */
+    static sentOfferDeclined(): string
+    {
+        return this._wsCommand(WsTitle.SentOfferDeclined);
     }
 
     /**

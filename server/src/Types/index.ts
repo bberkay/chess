@@ -6,6 +6,7 @@ export type Player = {
     color: Color;
     isOnline: boolean;
     userToken: string;
+    isOnOfferCooldown: boolean;
 }
 
 export interface CreateLobbyReqParams{
@@ -37,5 +38,3 @@ export type WebSocketData = {
 }
 
 export type RWebSocket = ServerWebSocket<WebSocketData>;
-
-export const ID_LENGTH = 6;

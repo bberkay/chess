@@ -20,6 +20,13 @@ export enum SocketOperation{
     CreateLobby = "CreateLobby",
     JoinLobby = "JoinLobby",
     CancelLobby = "CancelLobby",
+    Resign = "Resign",
+    SendDrawOffer = "SendDrawOffer",
+    AcceptDrawOffer = "AcceptDrawOffer",
+    SendPlayAgainOffer = "SendPlayAgainOffer",
+    AcceptPlayAgainOffer = "AcceptPlayAgainOffer",
+    DeclineSentOffer = "DeclineSentOffer",
+    CancelOffer = "CancelOffer"
 }
 
 /**
@@ -32,6 +39,14 @@ export enum WsTitle {
     Disconnected="DISCONNECTED",
     Reconnected="RECONNECTED",
     Moved="MOVED",
+    Resigned="RESIGNED",
+    DrawOffered="DRAW_OFFERED",
+    DrawAccepted="DRAW_ACCEPTED",
+    PlayAgainOffered="PLAY_AGAIN_OFFERED",
+    PlayAgainAccepted="PLAY_AGAIN_ACCEPTED",
+    SentOfferDeclined="SENT_OFFER_DECLINED",
+    OfferCancelled="OFFER_CANCELLED",
+    SentOfferCancelled="SENT_OFFER_CANCELLED",
     Error="ERROR",
 };
 
@@ -59,8 +74,7 @@ export interface WsStartedData{
         name: string, 
         isOnline: boolean
     }, 
-    board: string | JsonNotation,
-    durations: Durations
+    game: string | JsonNotation
 }
 
 /**
@@ -69,7 +83,10 @@ export interface WsStartedData{
  * WebSocket.
  */
 export interface WsFinishedData{
-    gameStatus: GameStatus
+    gameStatus: GameStatus,
+    isDrawOffered?: boolean
+    isResigned?: boolean
+    resignColor?: Color
 }
 
 /**

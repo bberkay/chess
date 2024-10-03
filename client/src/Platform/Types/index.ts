@@ -24,12 +24,17 @@ export enum PlatformEvent {
 export enum NotationMenuOperation{
     SendDrawOffer = "SendDrawOffer",
     SendUndoOffer = "SendUndoOffer",
+    SendPlayAgainOffer = "SendPlayAgainOffer",
     Resign = "Resign",
     PreviousMove = "PreviousMove",
     NextMove = "NextMove",
     LastMove = "LastMove",
     FirstMove = "FirstMove",
-    ToggleNotationMenuUtilityMenu = "ToggleNotationMenuUtilityMenu",
+    GoBack = "GoBack",
+    ShowLobbyUtilityMenu = "ShowLobbyUtilityMenu",
+    ShowNewGameUtilityMenu = "ShowNewGameUtilityMenu",
+    ShowPlayAgainUtilityMenu = "ShowPlayAgainUtilityMenu",
+    ToggleUtilityMenu = "ToggleUtilityMenu",
 }
 
 export enum NavigatorModalOperation{

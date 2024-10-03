@@ -2,7 +2,7 @@ import type { Player, RWebSocket } from "../Types";
 import { JsonNotation, StartPosition, Color, Durations, Duration } from "@Chess/Types";
 import { Lobby } from "./Lobby";
 import { createRandomId } from "./Helper";
-import { ID_LENGTH } from "../Types";
+import { ID_LENGTH } from "../Consts";
 
 /**
  * This class manages the lobbies of the game.

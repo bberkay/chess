@@ -11,7 +11,7 @@ import { Chess } from '@Chess/Chess';
 import { Platform } from "@Platform/Platform.ts";
 import { Logger } from "@Services/Logger";
 import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage.ts";
-import { ChessEvent, StartPosition } from '@Chess/Types';
+import { ChessEvent, GameStatus, StartPosition } from '@Chess/Types';
 import { DEFULT_PLAYER_NAME, DEFAULT_TOTAL_TIME, DEFAULT_INCREMENT_TIME } from "@Platform/Consts";
 import { PlatformEvent } from '@Platform/Types';
 import type {
@@ -44,6 +44,7 @@ export class ChessPlatform{
 
     private socket: WebSocket | null = null;
     private reconnectionAttemptRemaining: number = RECONNECTION_ATTEMPT_LIMIT;
+    private currentLobbyId: string | null = null;
 
     /**
      * Constructor of the ChessPlatform class.
@@ -95,12 +96,14 @@ export class ChessPlatform{
         /**
          * Connect to the last connection if exists.
          */
-        const connectToLastConnectionOrLobbyUrl = () => {
-            if(this.checkAndGetLobbyIdFromUrl())
+        const connectToLastConnectionOrLobbyUrl = async () => {
+            this.currentLobbyId = await this.getAndCheckLobbyIdOnUrl();
+            if (this.currentLobbyId && this.currentLobbyId !== LocalStorage.load(LocalStorageKey.LastLobbyConnection)?.lobbyId) {
                 this.platform.navigatorModal.showJoinLobby();
-            else if(LocalStorage.isExist(LocalStorageKey.LastLobbyConnection))
+            } else if (LocalStorage.isExist(LocalStorageKey.LastLobbyConnection)) {
                 this.reconnectLobby();
-        }
+            }
+        };        
 
         /**
          * Initialize the chess platform.
@@ -129,16 +132,54 @@ export class ChessPlatform{
             case SocketOperation.CancelLobby:
                 this.cancelLobby();
                 break;
+            case SocketOperation.Resign:
+                this.resign();
+                break;
+            case SocketOperation.SendPlayAgainOffer:
+                this.sendPlayAgainOffer();
+                break;
+            case SocketOperation.SendDrawOffer:
+                this.sendDrawOffer();
+                break;
+            case SocketOperation.AcceptDrawOffer:
+                this.acceptDrawOffer();
+                break;
+            case SocketOperation.AcceptPlayAgainOffer:
+                this.acceptPlayAgainOffer();
+                break
+            case SocketOperation.DeclineSentOffer:
+                this.declineSentOffer();
+                break;
+            case SocketOperation.CancelOffer:
+                this.cancelOffer();
+                break;
         }
     }
 
     /**
-     * Check the lobby id from the url and return it if exists.
+     * Check the lobby id from the URL and return it if it exists
+     * and is valid.
      */
-    private checkAndGetLobbyIdFromUrl(): string | null
-    {
-        const lobbyId = window.location.pathname.split("/").pop(); 
-        return lobbyId || null;
+    private async getAndCheckLobbyIdOnUrl(): Promise<string | null> {
+        const lobbyId = window.location.pathname.split("/").pop();
+        if (!lobbyId) return null;
+
+        try {
+            const response = await fetch(import.meta.env.VITE_SERVER_ADDRESS + "?lobbyId=" + lobbyId);
+            console.log("response", response);
+            if (!response.ok) {
+                this.platform.navigatorModal.showError("The lobby id is invalid.");
+                this.forceClearLastConnection();
+                return null;
+            }
+        } catch (error) {
+            console.log("error", error);
+            this.platform.navigatorModal.showError("The lobby id cannot be checked.");
+            this.forceClearLastConnection();
+            return null;
+        }
+
+        return lobbyId;
     }
 
     /**
@@ -151,6 +192,20 @@ export class ChessPlatform{
         window.history.pushState({}, "", url.toString());
     }
 
+    /**
+     * Remove the lobby id from the url.
+     */
+    private removeLobbyIdFromUrl(): void
+    {
+        const url = new URL(window.location.href);
+        url.pathname = "/";
+        window.history.pushState({}, "", url.toString());
+    }
+
+    /**
+     * Establishes a WebSocket connection for creating a new lobby.
+     * It sends the necessary parameters like player name, board settings, and time control.
+     */
     private _createLobby(createLobbyReqParams: CreateLobbyReqParams): void
     {
         this.createAndHandleWebSocket(new URLSearchParams(Object.entries(createLobbyReqParams)).toString());
@@ -162,7 +217,6 @@ export class ChessPlatform{
     private createLobby(): void
     {  
         const { playerName, board, duration } = this.platform.navigatorModal.getCreatedLobbySettings();
-        console.log("create lobby:", playerName, board, duration);
         this._createLobby({
             name: playerName || DEFULT_PLAYER_NAME, 
             board: board || StartPosition.Standard,
@@ -171,6 +225,10 @@ export class ChessPlatform{
         } as CreateLobbyReqParams);
     }
 
+    /**
+     * Establishes a WebSocket connection for joining an existing lobby.
+     * It sends the necessary parameters like player name and lobby ID.
+     */
     private _joinLobby(joinLobbyReqParams: JoinLobbyReqParams): void
     {
         this.createAndHandleWebSocket(new URLSearchParams(Object.entries(joinLobbyReqParams)).toString());
@@ -181,16 +239,20 @@ export class ChessPlatform{
      */
     private joinLobby(): void
     {
-        const lobbyId = this.checkAndGetLobbyIdFromUrl();
-        if(!lobbyId) return;
+        if(!this.currentLobbyId) 
+            return;
 
         const playerName = this.platform.navigatorModal.getEnteredPlayerName();
         this._joinLobby({
             name: playerName || DEFULT_PLAYER_NAME, 
-            lobbyId: lobbyId
+            lobbyId: this.currentLobbyId
         } as JoinLobbyReqParams);
     }
 
+    /**
+     * Establishes a WebSocket connection to reconnect to a previously joined lobby.
+     * It uses the saved lobby ID and user token to restore the connection.
+     */
     private _reconnectLobby(reconnectLobbyReqParams: ReconnectLobbyReqParams): void
     {
         this.createAndHandleWebSocket(new URLSearchParams(Object.entries(reconnectLobbyReqParams)).toString());
@@ -201,7 +263,8 @@ export class ChessPlatform{
      */
     private reconnectLobby(): void
     {
-        if(!LocalStorage.isExist(LocalStorageKey.LastLobbyConnection)) return;
+        if(!LocalStorage.isExist(LocalStorageKey.LastLobbyConnection)) 
+            return;
 
         const lastLobbyConnection = LocalStorage.load(LocalStorageKey.LastLobbyConnection);
         this._reconnectLobby({
@@ -220,6 +283,81 @@ export class ChessPlatform{
         this.socket?.close();
         this.platform.notationMenu.displayNewGameUtilityMenu();
         this.chess.board.lock();
+    }
+
+    /**
+     * Resign the game and send the resign command to the server.
+     */
+    private resign(): void
+    {
+        this.socket?.send(WsCommand.resigned());
+    }
+
+    /**
+     * Send the play again offer to the opponent.
+     */
+    private sendPlayAgainOffer(): void
+    {
+        this.platform.navigatorModal.hide();
+        this.platform.notationMenu.showPlayAgainOfferSent();
+        this.socket?.send(WsCommand.playAgainOffered());
+    }
+
+    /**
+     * Send the draw offer to the opponent.
+     */
+    private sendDrawOffer(): void
+    {
+        this.platform.notationMenu.showDrawOfferSent();
+        this.socket?.send(WsCommand.drawOffered());
+    }
+
+    /**
+     * Accept the draw offer from the opponent.
+     */
+    private acceptDrawOffer(): void
+    {
+        this.socket?.send(WsCommand.drawAccepted());
+    }
+
+    /**
+     * Accept the play again offer from the opponent.
+     */
+    private acceptPlayAgainOffer(): void
+    {
+        this.socket?.send(WsCommand.playAgainAccepted());
+    }
+
+    /**
+     * Cancel the offer that sent to the opponent.
+     */
+    private cancelOffer(): void
+    {
+        this.socket?.send(WsCommand.offerCanceled());
+        this.platform.notationMenu.goBack();
+    }
+
+    /**
+     * Decline the sent offer from the opponent.
+     */
+    private declineSentOffer(): void
+    {
+        this.socket?.send(WsCommand.sentOfferDeclined());
+        this.platform.notationMenu.goBack();
+    }
+
+    /**
+     * Clear the last connection completely and display the 
+     * new game utility menu.
+     */
+    private forceClearLastConnection(): void
+    {
+        this.socket?.close();
+        this.socket = null;
+        LocalStorage.clear(LocalStorageKey.LastBoard);
+        LocalStorage.clear(LocalStorageKey.LastLobbyConnection);
+        this.removeLobbyIdFromUrl();        
+        this.platform.notationMenu.displayNewGameUtilityMenu();
     }
 
     /**
@@ -250,24 +388,26 @@ export class ChessPlatform{
         };
 
         this.socket.onmessage = (event) => {
+            console.log("message:", event.data);
             const [wsCommand, wsData] = WsCommand.parse(event.data);
             switch(wsCommand){
                 case WsTitle.Connected:
                     lobbyId = (wsData as WsConnectedData).lobbyId;
                     player = (wsData as WsConnectedData).player;
-                    if(!this.checkAndGetLobbyIdFromUrl()){
-                        this.platform.navigatorModal.showLobbyInfo(window.location.origin + "/" + lobbyId);
-                        this.displayLobbyIdOnUrl(lobbyId);
-                    }
+                    this.platform.navigatorModal.showLobbyInfo(window.location.origin + "/" + lobbyId);
+                    this.displayLobbyIdOnUrl(lobbyId);
+
                     /*LocalStorage.save(
                         LocalStorageKey.LobbyConnections, 
                         (LocalStorage.load(LocalStorageKey.LobbyConnections) || []).concat(wsData)
                     );*/
 
                     LocalStorage.save(LocalStorageKey.LastLobbyConnection, wsData);
+                    LocalStorage.save(LocalStorageKey.LastPlayerName, player.name);
                     this.logger.save(`Connected to the lobby[${lobbyId}] as ${player.name}[${player.color}].`);
                     break;
                 case WsTitle.Started:
+                    this.platform.navigatorModal.hide();
                     this.platform.createOnlineGame(wsData as WsStartedData, player!.color);
                     document.addEventListener(ChessEvent.onPieceMovedByPlayer, ((event: CustomEvent) => {
                         if(!this.socket) return;
@@ -292,14 +432,39 @@ export class ChessPlatform{
                     ));
                     break;
                 case WsTitle.Finished:
-                    if(this.chess.engine.getGameStatus() !== (wsData as WsFinishedData).gameStatus){
-                        this.chess.board.lock();
-                        this.platform.notationMenu.stopTimers();
+                    if((wsData as WsFinishedData).isResigned || (wsData as WsFinishedData).isDrawOffered){
+                        this.chess.engine.setGameStatus((wsData as WsFinishedData).gameStatus);
+                        this.chess.finishTurn();
+                        if((wsData as WsFinishedData).isResigned)
+                            this.platform.navigatorModal.showGameOverAsResigned((wsData as WsFinishedData).resignColor!);
+                        else if((wsData as WsFinishedData).isDrawOffered)
+                            this.platform.navigatorModal.showGameOverAsDrawAccepted();
+                    }
+                    else if(this.chess.engine.getGameStatus() !== (wsData as WsFinishedData).gameStatus){
+                        this.chess.engine.setGameStatus((wsData as WsFinishedData).gameStatus);
+                        this.chess.finishTurn();
                         this.platform.navigatorModal.showError("Unexpected game status. Game status is not equal to the server's game status.");
                         this.logger.save(`Game finished with the status: ${(wsData as WsFinishedData).gameStatus}.`);
                     }
                     closeConnectionOnFinish = true;
-                    this.socket!.close();
+                    break;
+                case WsTitle.DrawOffered:
+                    this.platform.notationMenu.showDrawOffer();
+                    break;
+                case WsTitle.PlayAgainOffered:
+                    this.platform.notationMenu.showPlayAgainOffer();
+                    break;
+                case WsTitle.SentOfferCancelled:
+                    if(![GameStatus.BlackVictory, 
+                        GameStatus.WhiteVictory, 
+                        GameStatus.Draw
+                    ].includes(this.chess.engine.getGameStatus()))
+                        this.platform.notationMenu.displayLobbyUtilityMenu();
+                    else 
+                        this.platform.notationMenu.displayNewGameUtilityMenu();
+                    break;
+                case WsTitle.SentOfferDeclined:
+                    this.platform.notationMenu.displayLobbyUtilityMenu();
                     break;
                 case WsTitle.Disconnected:
                     this.platform.notationMenu.updatePlayerAsOffline(
@@ -323,8 +488,6 @@ export class ChessPlatform{
         this.socket.onerror = (event) => {
             this.platform.navigatorModal.showError(`An error occurred on the WebSocket connection. Retrying in <span id='reconnection-counter'></span> seconds...`, false);
             this.logger.save("An error occurred on the WebSocket connection. Retrying...");
-            this.chess.board.lock();
-            this.platform.notationMenu.stopTimers();
 
             // Retry the connection
             let remainingTime = RECONNECTION_TIMEOUT;
@@ -343,6 +506,7 @@ export class ChessPlatform{
                         else{
                             this.platform.navigatorModal.showError("There is a problem with the WebSocket connection. Please try again later.");
                             this.logger.save("There is a problem with the WebSocket connection. Please try again later.");
+                            this.forceClearLastConnection();
                         }
                         clearTimeout(timeout);
                     }, RECONNECTION_TIMEOUT);
@@ -354,8 +518,7 @@ export class ChessPlatform{
         
         this.socket.onclose = (event) => {
             if(closeConnectionOnFinish){
-                LocalStorage.clear(LocalStorageKey.LastBoard);
-                LocalStorage.clear(LocalStorageKey.LastLobbyConnection);
+                this.forceClearLastConnection();
                 closeConnectionOnFinish = false;
             }
         };
@@ -370,12 +533,13 @@ class WsCommand{
     /**
      * Create a WebSocket command with the given command and data.
      * @example [Moved, {from: Square.a2, to: Square.a4}]
+     * @example [Resigned]
      */
-    private static _wsCommand(title: WsTitle, data: WsData): string {
+    private static _wsCommand(title: WsTitle, data: WsData | null = null): string {
         if(Object.values(WsTitle).indexOf(title) === -1) 
             throw new Error("Invalid command.");
 
-        return JSON.stringify([title, data]);
+        return data ? JSON.stringify([title, data]) : JSON.stringify([title]);
     }
 
     /**
@@ -385,6 +549,67 @@ class WsCommand{
     static moved(moveData: WsMovedData): string 
     {
         return this._wsCommand(WsTitle.Moved, moveData);
+    }
+
+    /**
+     * Send resigned command to the server.
+     * @example [RESIGNED, {}]
+     */
+    static resigned(): string
+    {
+        return this._wsCommand(WsTitle.Resigned);
+    }
+
+    /**
+     * Send draw offered command to the server.
+     */
+    static drawOffered(): string
+    {
+        return this._wsCommand(WsTitle.DrawOffered);
+    }
+
+    /**
+     * Send draw accepted command to the server.
+     */
+    static drawAccepted(): string
+    {
+        return this._wsCommand(WsTitle.DrawAccepted);
+    }
+
+    /**
+     * Send play again offered command to the server.
+     */
+    static playAgainOffered(): string
+    {
+        return this._wsCommand(WsTitle.PlayAgainOffered);
+    }
+    
+    /**
+     * Send play again accepted command to the server.
+     */
+    static playAgainAccepted(): string
+    {
+        return this._wsCommand(WsTitle.PlayAgainAccepted);
+    }
+
+    /**
+     * Send cancel offer command to the server. This command 
+     * is used when the user cancels the sent offer like draw
+     * or undo move offer.
+     */
+    static offerCanceled(): string
+    {
+        return this._wsCommand(WsTitle.OfferCancelled);
+    }
+
+    /**
+     * Send offer declined command to the server.
+     * This command is used when the user declines the
+     * sent offer like draw or undo move offer.
+     */
+    static sentOfferDeclined(): string
+    {
+        return this._wsCommand(WsTitle.SentOfferDeclined);
     }
 
     /**
