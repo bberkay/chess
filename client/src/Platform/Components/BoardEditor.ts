@@ -377,11 +377,10 @@ export class BoardEditor extends Component{
      * This function creates a new board with the board creator.
      */
     private _createBoard(
-        notation: string | StartPosition | JsonNotation, 
-        durations: Durations| null = null
+        notation: string | StartPosition | JsonNotation,
     ): void
     {
-        this.chess.createGame(notation, durations);
+        this.chess.createGame(notation);
         if(BoardEditor.isEditorModeEnable()){
             this.chess.board.lock();
             this.chess.board.removeEffectFromAllSquares();
@@ -399,11 +398,10 @@ export class BoardEditor extends Component{
      * This function creates a new board with the board creator.
      */
     public createBoard(
-        fenNotation: string | StartPosition | JsonNotation | null = null,
-        durations: Durations | null = null
+        fenNotation: string | StartPosition | JsonNotation | null = null
     ): void
     {
-        this._createBoard(fenNotation || this.getFen(), durations);
+        this._createBoard(fenNotation || this.getFen());
     }
 
     /**

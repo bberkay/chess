@@ -301,14 +301,9 @@ export class Platform{
     private handleNotationMenuOperation(menuOperation: NotationMenuOperation, menuItem: HTMLElement): void
     {
         switch(menuOperation){
-            /*case NotationMenuOperation.SendDrawOffer:
-                this.chess.sendDrawOffer();
-                break;
-            case NotationMenuOperation.SendUndoOffer:
+            
+            /*case NotationMenuOperation.SendUndoOffer:
                 this.chess.sendUndoOffer();
-                break;
-            case NotationMenuOperation.Resign:
-                this.chess.resign();
                 break;
             case NotationMenuOperation.PreviousMove:
                 this.chess.previousMove();
@@ -330,13 +325,15 @@ export class Platform{
      */
     private handleBoardEditorOperation(menuOperation: BoardEditorOperation, menuItem: HTMLElement): void
     {        
-        // TODO: Resign, draw
+        // TODO: Test
+
         // TODO: Bot
 
-        // TODO: Multiple Lobby, Cache, Arayüz
-        // TODO: Geri hamle
+        // TODO: Geri hamle, Undo
         // TODO: Moved from to efekt problemi
         // TODO: Multiple pre move
+
+        // TODO: Multiple Lobby, Cache, Arayüz
         // TODO: Switch case yapısı handling socket
 
         // TODO: Server Uploading and supabase duruma göre
@@ -345,6 +342,8 @@ export class Platform{
         //  return window.matchMedia('(hover: none)').matches || window.matchMedia('(pointer: coarse)').matches;
         // }
 
+        // TODO: Belki language eklenmese bile eklenecek altyapı kurulabilir.
+        // TODO: Mesele, tüm stringlerin bir objede tutulması ve bu objenin diline göre değişmesi.
         // TODO: Readme
 
         switch(menuOperation){
@@ -434,17 +433,16 @@ export class Platform{
     /**
      * Prepare the platform components for the online game.
      */
-    public createOnlineGame(game: { 
+    public createOnlineGame(createdGame: { 
         whitePlayer: {name: string, isOnline: boolean},
         blackPlayer: {name: string, isOnline: boolean},
-        board: string | JsonNotation,
-        durations: Durations
+        game: string | JsonNotation
     }, playerColor: Color): void
     {
-        this._createBoard(game.board, game.durations);
+        this._createBoard(createdGame.game);
         this.chess.board.disablePreSelectionFor(playerColor === Color.White ? Color.Black : Color.White);
         this.notationMenu.displayLobbyUtilityMenu();
-        this.notationMenu.updatePlayerCards(game.whitePlayer, game.blackPlayer, game.durations);
+        this.notationMenu.updatePlayerCards(createdGame.whitePlayer, createdGame.blackPlayer);
         this.notationMenu.setTurnIndicator(this.chess.engine.getTurnColor());
         if(playerColor === Color.Black) this._flipBoard();
         if(playerColor !== this.chess.engine.getTurnColor()) this.chess.board.lock(false);
@@ -455,14 +453,13 @@ export class Platform{
      * Create a new game and update the components of the menu.
      */
     private _createBoard(
-        notation: string | StartPosition | JsonNotation | null = null,
-        durations: Durations | null = null
+        notation: string | StartPosition | JsonNotation | null = null
     ): void 
     {
         this.navigatorModal.hide();
         this.navbar.showComponent(this.logConsole);
         this.clearComponents();
-        this.boardEditor.createBoard(notation, durations);
+        this.boardEditor.createBoard(notation);
         this.logger.save(`Board is created and components are updated.`);
     }
 
