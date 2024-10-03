@@ -96,6 +96,13 @@ export class ChessEngine extends BoardManager {
     }
 
     /**
+     * Set the game status to the given status.
+     */
+    public setGameStatus(gameStatus: GameStatus): void {
+        super.setGameStatus(gameStatus);
+    }
+    
+    /**
      * This function returns the current game as fen notation.
      */
     public getGameAsFenNotation(): string
@@ -122,7 +129,7 @@ export class ChessEngine extends BoardManager {
     /**
      * Get initial durations of the players.
      */
-    public getInitialDurations(): Durations | null
+    public getDurations(): Durations | null
     {
         return BoardQuerier.getDurations();
     }
@@ -650,7 +657,8 @@ export class ChessEngine extends BoardManager {
         const intervalId = setInterval(() => {
             if(!this.timerMap) 
                 return;
-
+            
+            this.updateRemainingTime(playerColor, this.timerMap[playerColor].timer.get());
             if(this.timerMap[playerColor].timer.get() <= 0)
                 this.handleTimeover();
         }, 100) as unknown as number;
@@ -668,6 +676,12 @@ export class ChessEngine extends BoardManager {
     {
         this.destroyTimers();
         
+        if([GameStatus.WhiteVictory,
+            GameStatus.BlackVictory,
+            GameStatus.Draw
+        ].includes(BoardQuerier.getBoardStatus()))
+            return;
+            
         const winner = BoardQuerier.getColorOfOpponent() == Color.White 
             ? GameStatus.WhiteVictory
             : GameStatus.BlackVictory;

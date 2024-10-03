@@ -176,6 +176,17 @@ export class BoardManager extends Board{
     }
 
     /**
+     * Update remaining time of the player.
+     */
+    protected updateRemainingTime(player: Color, remainingTime: number): void
+    {
+        if(!Board.durations)
+            return;
+
+        Board.durations[player].remaining = remainingTime;
+    }
+
+    /**
      * Add move to algebraic notation
      */
     protected saveAlgebraicNotation(move: string): void

@@ -32,6 +32,7 @@ export class Chess{
     private _isPromotionScreenOpen: boolean = false;
     private _preSelectedSquare: Square | null = null;
     private _preMove: {from: Square, to: Square} | null = null;
+    private _isGameOver: boolean = false;
 
     public readonly logger: Logger = new Logger("src/Chess/Chess.ts");
     
@@ -181,7 +182,7 @@ export class Chess{
                 GameStatus.BlackVictory, 
                 GameStatus.WhiteVictory, 
                 GameStatus.Draw
-            ].includes(this.engine.getGameStatus())){
+            ].includes(this.engine.getGameStatus()) && !this._isGameOver){
                 clearInterval(interval);
                 this.finishTurn();
                 this.logger.save("Game finished because of one of the player has no more time");
@@ -296,8 +297,9 @@ export class Chess{
         ].includes(gameStatus))
         {
             this.logger.save("Game updated in cache after move");
-            LocalStorage.save(LocalStorageKey.LastBoard, this.engine.getGameAsJsonNotation());
+            LocalStorage.clear(LocalStorageKey.LastBoard);
             document.dispatchEvent(new Event(ChessEvent.onGameOver));
+            this._isGameOver = true;
             return;
         }
 
