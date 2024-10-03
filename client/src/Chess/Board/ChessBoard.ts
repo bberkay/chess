@@ -840,17 +840,37 @@ export class ChessBoard {
     {
         if(status == GameStatus.WhiteInCheck || status == GameStatus.BlackInCheck)
         {
-            const color: Color = status == GameStatus.WhiteInCheck ? Color.White : Color.Black;
-            const king: HTMLDivElement = document.querySelector(
-                `.piece[data-piece="${PieceType.King}"][data-color="${color}"]`) as HTMLDivElement;
-            const kingSquare = this.getSquareElementOfPiece(king);
-            this.addSquareEffects(kingSquare as HTMLDivElement, SquareEffect.Checked);
+            const checkedColor: Color = status == GameStatus.WhiteInCheck ? Color.White : Color.Black;
+            const checkedKingSquare = this.getSquareElementOfPiece(document.querySelector(
+                `.piece[data-piece="${PieceType.King}"][data-color="${checkedColor}"]`
+            )!);
+            this.addSquareEffects(checkedKingSquare as HTMLDivElement, SquareEffect.Checked);
             this.playSound(SoundEffect.Check);
-            this.logger.save(`King's square[${this.getSquareId(kingSquare)}] found on DOM and Checked effect added`);
+            this.logger.save(`King's square[${this.getSquareId(checkedKingSquare)}] found on DOM and Checked effect added`);
         }
         else if(status == GameStatus.WhiteVictory || status == GameStatus.BlackVictory || status == GameStatus.Draw)
         {
             this.lock();
+            let winnerSquares: HTMLElement[] = [];
+            if(status === GameStatus.Draw){
+                winnerSquares.push(this.getSquareElementOfPiece(document.querySelector(
+                    `[data-color="${Color.White}"][data-piece="${PieceType.King}"]`
+                )!)!);
+                winnerSquares.push(this.getSquareElementOfPiece(document.querySelector(
+                    `[data-color="${Color.Black}"][data-piece="${PieceType.King}"]`
+                )!));
+            } 
+            else {
+                winnerSquares.push(this.getSquareElementOfPiece(document.querySelector(
+                    `[data-color="${status == GameStatus.WhiteVictory 
+                        ? Color.White 
+                        : Color.Black
+                    }"][data-piece="${PieceType.King}"]`
+                )!)!);
+            }
+            winnerSquares.forEach(winnerKingSquare => {
+                this.addSquareEffects(winnerKingSquare, SquareEffect.Winner);
+            });
             this.playSound(SoundEffect.End);
             this.logger.save("Game ended. Board locked.");
         }

@@ -6,8 +6,9 @@
 :root{
     /**
      * All sizes are will be calculated based on the board size.
-     * For example, if the board size is 800px, the square size will be 100px(1/8 of the board size),
-     * font size will be 16px(1/50 of the board size), and the piece size will be 80px(1/10 of the board size).
+     * For example, if the board size is 800px, the square size 
+     * will be 100px(1/8 of the board size), font size will be 16px(1/50 of
+      the board size), and the piece size will be 80px(1/10 of the board size).
      */
     --chessboard-board-size: 70vh;
 
@@ -18,14 +19,6 @@
     --chessboard-white-square-color: #879A86;
     --chessboard-black-square-color: #647A65;
     --chessboard-border-color: #FFFFFFBB;
-
-    /* Promotion Menu, use hex code */
-    --chessboard-default-promotion-option-color: #D3D3D3;
-    --chessboard-default-promotion-option-outline-color: #B7B7B7;
-    --chessboard-default-promotion-option-box-shadow-color: #000;
-    --chessboard-promotion-option-color: #D3D3D3;
-    --chessboard-promotion-option-outline-color: #B7B7B7;
-    --chessboard-promotion-option-box-shadow-color: #000;
 
     /* Effects, use hex code */
     --chessboard-default-selected-color: #57CE9240;
@@ -39,17 +32,27 @@
     --chessboard-default-prehovering-color: #888888;
     --chessboard-default-from-color: #45C9FF63;
     --chessboard-default-to-color: #45C9FF63;
+    --chessboard-default-winner-color: #FFD900;
     --chessboard-selected-color: #57CE9240;
     --chessboard-preselected-color: #888888;
+    --chessboard-winner-color: #FFD900;
     --chessboard-playable-color: #57CE92;
     --chessboard-preplayable-color: #888888;
     --chessboard-preplayed-color: #888888;
-    --chessboard-checked-color: #DF3030;
-    --chessboard-disabled-color: #0000004F;
-    --chessboard-hovering-color: #246D49;
-    --chessboard-prehovering-color: #888888;
     --chessboard-from-color: #45C9FF63;
     --chessboard-to-color: #45C9FF63;
+    --chessboard-checked-color: #DF3030;
+    --chessboard-hovering-color: #246D49;
+    --chessboard-prehovering-color: #888888;
+    --chessboard-disabled-color: #0000004F;
+
+    /* Promotion Menu, use hex code */
+    --chessboard-default-promotion-option-color: #D3D3D3;
+    --chessboard-default-promotion-option-outline-color: #B7B7B7;
+    --chessboard-default-promotion-option-shadow-color: #000;
+    --chessboard-promotion-option-color: #D3D3D3;
+    --chessboard-promotion-option-outline-color: #B7B7B7;
+    --chessboard-promotion-option-shadow-color: #000;
 
     /* White Pieces */
     --chessboard-white-pawn-image: url("../assets/pieces/white_pawn.svg");
@@ -399,8 +402,104 @@
     & .square:has(.square-effect--selected span){
         opacity: 0.2;
     }
+
+    & .square:has(.square-effect--winner .square-effect-layer){
+        & .piece{
+            width:calc(var(--chessboard-board-size) / 11);
+            height:calc(var(--chessboard-board-size) / 11);
+            left:14%;
+            top:8%;
+            animation: piece-idle 2.5s infinite;
+        }
+
+        & .square-effect-icon::before{
+            content: '';
+            position: absolute;
+            top: 70%;
+            left: 22.5%;
+            width: calc((var(--chessboard-board-size) - 2px) / 14);
+            height: calc((var(--chessboard-board-size) - 2px) / 35);
+            border-radius: 50%;
+            transform: scale(1);
+            background-color: black;
+            opacity: 0.3;
+            animation: shadow-idle 2.5s infinite;
+        }
+
+        & .square-effect-icon::after{
+            content: '';
+            position: absolute;
+            width: calc((var(--chessboard-board-size) - 2px) / 14);
+            height: calc((var(--chessboard-board-size) - 2px) / 35);
+            left: 22.5%;
+            top: 35%;
+            border-radius: 50%;
+            background-color: transparent;
+            box-shadow: 0 0 12px 6px #FFF, 
+                        0 0 20px 10px var(--chessboard-winner-color);
+            animation: glow 2.5s infinite, glow-idle 2.5s infinite; 
+        } 
+    }
 }
 
+/* Animation for winner effect, 
+avoid changing */
+@keyframes glow {
+    0% {
+        box-shadow: 0 0 12px 6px #FFF, 
+                    0 0 20px 10px var(--chessboard-winner-color);
+    }
+    50% {
+        box-shadow: 0 0 10px 5px #FFF, 
+                    0 0 15px 7px var(--chessboard-winner-color);
+    }
+    100% {
+        box-shadow: 0 0 12px 6px #FFF, 
+                    0 0 20px 10px var(--chessboard-winner-color);
+    }
+}
+
+/* Animation for piece's idle 
+movement, avoid changing */
+@keyframes piece-idle{
+    0% {
+        transform: translateY(-15%);
+    } 
+    50% {
+        transform: translateY(0);
+    }
+    100% {
+        transform: translateY(-15%);
+    }
+}
+
+/* Animation for glowing effect's 
+idle movement, avoid changing */
+@keyframes glow-idle {
+    0% {
+        transform: translateY(-40%);
+    }
+    50% {
+        transform: translateY(0%);
+    }
+    100% {
+        transform: translateY(-40%);
+    }
+}
+
+/* Animation for shadow's idle movement,
+avoid changing */
+@keyframes shadow-idle{
+    0% {
+        transform: scale(0.8);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(0.8);
+    }
+}
 
 /** 
  * ------------------ Responsive ------------------- 
