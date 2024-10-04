@@ -12,6 +12,7 @@ export class NotationMenu extends Component {
     private moveCount: number = 0;
     private lastScore: Record<Color, number> = { [Color.White]: 0, [Color.Black]: 0 };
     private activeIntervalId: number = -1;
+    private activeUtilityMenu: string = "new-game-utility-menu";
 
     /**
      * Constructor of the LogConsole class.
@@ -49,7 +50,7 @@ export class NotationMenu extends Component {
      */
     private getPlayAgainUtilityMenuContent(): string {
         return `
-            <button data-menu-operation="${NotationMenuOperation.SendPlayAgainOffer}">Play Again</button>
+            <button class="menu-item" data-menu-operation="${NotationMenuOperation.SendPlayAgainOffer}">Play Again</button>
             <button class="menu-item" data-menu-operation="${NavigatorModalOperation.ShowGameCreator}" data-tooltip-text="Create New Game">+ New Game</button>
         `;
     }
@@ -295,6 +296,7 @@ export class NotationMenu extends Component {
         document.querySelector(".utility-toggle-menu-section.active")!.classList.remove("active");
         this.loadHTML("new-game-utility-menu", this.getNewGameUtilityMenuContent());
         document.getElementById(`new-game-utility-menu`)!.classList.add("active");
+        this.activeUtilityMenu = "new-game-utility-menu";
     }
 
     /**
@@ -305,6 +307,7 @@ export class NotationMenu extends Component {
         document.querySelector(".utility-toggle-menu-section.active")!.classList.remove("active");
         this.loadHTML("lobby-utility-menu", this.getLobbyUtilityMenuContent());
         document.getElementById(`lobby-utility-menu`)!.classList.add("active");
+        this.activeUtilityMenu = "lobby-utility-menu";
     }
 
     /**
@@ -316,6 +319,7 @@ export class NotationMenu extends Component {
         document.querySelector(".utility-toggle-menu-section.active")!.classList.remove("active");
         this.loadHTML("play-again-utility-menu", this.getPlayAgainUtilityMenuContent());
         document.getElementById(`play-again-utility-menu`)!.classList.add("active");
+        this.activeUtilityMenu = "play-again-utility-menu";
     }
 
     /**
@@ -483,7 +487,7 @@ export class NotationMenu extends Component {
         const playerDecisecond = playerTimer.querySelector(".decisecond")!;
 
         let isDecisecondActive = false;
-        this.activeIntervalId = window.setInterval(() => {
+        this.activeIntervalId = setInterval(() => {
             const [minutes, seconds, deciseconds] = this.formatRemainingTimeForTimer(
                 Math.round(this.chess.engine.getPlayersRemainingTime()[color])
             );
@@ -497,7 +501,8 @@ export class NotationMenu extends Component {
                 }
                 playerDecisecond.textContent = "." + deciseconds;
             }
-        }, 100)
+        }, 100) as unknown as number;
+        console.log("startPlayerTimer: ", this.activeIntervalId);
     }
 
     /**
@@ -653,13 +658,17 @@ export class NotationMenu extends Component {
      * the offer or sender cancels the offer.
      */
     public goBack(): void {
-        if(![GameStatus.BlackVictory, 
-            GameStatus.WhiteVictory, 
-            GameStatus.Draw
-        ].includes(this.chess.engine.getGameStatus()))
-            this.displayLobbyUtilityMenu();
-        else 
-            this.displayNewGameUtilityMenu();
+        switch (this.activeUtilityMenu) {
+            case "new-game-utility-menu":
+                this.displayNewGameUtilityMenu();
+                break;
+            case "lobby-utility-menu":
+                this.displayLobbyUtilityMenu();
+                break;
+            case "play-again-utility-menu":
+                this.displayPlayAgainUtilityMenu();
+                break;
+        }
     }
 
     /**

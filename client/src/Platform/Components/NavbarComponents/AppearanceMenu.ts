@@ -46,9 +46,10 @@ export class AppearanceMenu extends NavbarComponent{
                         !property.startsWith("--chessboard-default-")
                     ).reverse().map((property) => {
                         const colorId = property.replace("--chessboard-", "");
+                        const colorTitle = getTitleOfCssProp(colorId);
                         return `
                             <div class="input-group color-picker">
-                                <label for="${colorId}">${getTitleOfCssProp(colorId)}</label>
+                                <label for="${colorId}" data-tooltip-text="${colorTitle}" data-shortened-parent=".color-picker" data-shortened-length="15">${colorTitle}</label>
                                 <div class="input-group--horizontal">
                                     <div class="input-group">
                                         <input type="color" id="${colorId}" value="#ffffff">

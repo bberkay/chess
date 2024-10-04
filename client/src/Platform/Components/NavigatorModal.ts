@@ -57,7 +57,7 @@ export class NavigatorModal extends Component{
     private show(title: string, content: string, closeable: boolean = false, backdrop: boolean = true): void
     {
         window.scrollTo(0, 0);
-
+        console.log("title", title);
         this.loadHTML("navigator-modal", `
             <div class="navigator-modal ${backdrop ? "navigator-modal--glass" : ""} ${closeable ? "closeable" : ""}">
                 <div class="navigator-modal-bg"></div>
@@ -509,6 +509,7 @@ export class NavigatorModal extends Component{
      */
     public handleOperation(operation: NavigatorModalOperation): void
     {
+        console.log("NavigatorModalOperation: ", operation);
         switch(operation){
             case NavigatorModalOperation.Hide:
                 this.hide();

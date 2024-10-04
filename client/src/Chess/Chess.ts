@@ -49,6 +49,7 @@ export class Chess{
     private resetProperties(): void
     {
         this._selectedSquare = null;
+        this._isGameOver = false;
         this._isPromotionScreenOpen = false;
         this._preSelectedSquare = null;
         this._preMove = null;

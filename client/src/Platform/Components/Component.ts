@@ -51,35 +51,52 @@ export abstract class Component{
     {
         const component = document.getElementById(componentId);
         if(!component) return;
-        for(const menuItem of component.querySelectorAll("[data-tooltip-text]")){
-            const tooltipText = menuItem.getAttribute("data-tooltip-text");
-            if(!tooltipText) continue;
 
-            const tooltipElement = document.createElement("div");
-            tooltipElement.classList.add("tooltip");
-            menuItem.append(tooltipElement);
-
-            let tooltipTimeout: number | Timer | undefined;
-            menuItem.addEventListener("mouseover", function() {
-                tooltipTimeout = setTimeout(() => {
-                    tooltipElement.classList.add("active");
-                    tooltipElement.textContent = tooltipText;
-                }, 500);
-            });
-
-            menuItem.addEventListener("mouseout", function() {
-                clearTimeout(tooltipTimeout);
-                tooltipElement.classList.remove("active");
-                tooltipElement.textContent = "";
-            });
-
-            menuItem.addEventListener("mousedown", function(e) {
-                e.preventDefault();
-                clearTimeout(tooltipTimeout);
-                tooltipElement.classList.remove("active");
-                tooltipElement.textContent = "";
-            });
-        }
+        // A quite unsettling way to wait for the component's corrent(last) width to 
+        // be calculated before checking if the text fits in the parent element.
+        setTimeout(() => {
+            for(const menuItem of component.querySelectorAll("[data-tooltip-text]")){
+                const tooltipText = menuItem.getAttribute("data-tooltip-text");
+                if(!tooltipText) continue;
+                
+                const shortenedParent = menuItem.getAttribute("data-shortened-parent");
+                const shortenedLength = parseInt(menuItem.getAttribute("data-shortened-length") || "0");
+                if(shortenedParent && shortenedLength > 0 && menuItem.textContent){
+                    const parentElementWidth = menuItem.closest(shortenedParent)?.clientWidth || 0;
+                    const textWidth = menuItem.getBoundingClientRect().width;
+                    if(textWidth + shortenedLength > parentElementWidth){
+                        menuItem.textContent = menuItem.textContent.slice(0, shortenedLength) + "...";
+                    } else {
+                        continue;
+                    }
+                }
+                
+                const tooltipElement = document.createElement("div");
+                tooltipElement.classList.add("tooltip");
+                menuItem.append(tooltipElement);
+    
+                let tooltipTimeout: number | Timer | undefined;
+                menuItem.addEventListener("mouseover", function() {
+                    tooltipTimeout = setTimeout(() => {
+                        tooltipElement.classList.add("active");
+                        tooltipElement.textContent = tooltipText;
+                    }, 500);
+                });
+    
+                menuItem.addEventListener("mouseout", function() {
+                    clearTimeout(tooltipTimeout);
+                    tooltipElement.classList.remove("active");
+                    tooltipElement.textContent = "";
+                });
+    
+                menuItem.addEventListener("mousedown", function(e) {
+                    e.preventDefault();
+                    clearTimeout(tooltipTimeout);
+                    tooltipElement.classList.remove("active");
+                    tooltipElement.textContent = "";
+                });            
+            }
+        }, 100);
     }
 
     /**
