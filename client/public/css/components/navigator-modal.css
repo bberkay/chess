@@ -144,6 +144,7 @@ body.dark-mode .navigator-modal:not(.navigator-modal--glass){
 }
 
 .navigator-modal-bg-layer{
+    display: none;
     overflow: hidden;
     z-index:var(--navigator-modal-backdrop-z-index);
     position: fixed;
@@ -154,6 +155,10 @@ body.dark-mode .navigator-modal:not(.navigator-modal--glass){
     background: var(--navigator-modal-backdrop-bg-color);
     backdrop-filter: blur(1px);
     -webkit-backdrop-filter: blur(1px);
+
+    &.show{
+        display: block;
+    }
 }
 
 /** 
