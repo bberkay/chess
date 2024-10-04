@@ -67,7 +67,7 @@ export class NavigatorModal extends Component{
             document.body.appendChild(modalBgLayer);
         }
 
-        (modalBgLayer || document).addEventListener("click", (event) => {
+        document.addEventListener("click", (event) => {
             const activeModal = document.querySelector('.navigator-modal')! as HTMLElement;
             if(!activeModal) 
                 return;
@@ -123,11 +123,9 @@ export class NavigatorModal extends Component{
     public hide(): void
     {
         const navigatorModal = document.querySelector('.navigator-modal');
-        if(!navigatorModal) 
-            return;
+        if(!navigatorModal) return;
 
-        navigatorModal.className = "navigator-modal";
-        navigatorModal.innerHTML = "";
+        navigatorModal.remove();
 
         const modalBgLayer = document.querySelector('.navigator-modal-bg-layer');
         if(modalBgLayer) modalBgLayer.classList.remove("show");
