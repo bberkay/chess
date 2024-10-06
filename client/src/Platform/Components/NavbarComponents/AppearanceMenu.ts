@@ -13,14 +13,31 @@ enum Theme{
 export class AppearanceMenu extends NavbarComponent{
     private currentTheme: string = Theme.Dark;
     private rootComputedStyle = getComputedStyle(document.documentElement);
-    private isChessboardCssLoaded = false;
 
     /**
      * Constructor of the AppearanceMenu class.
      */
     constructor() {
         super();
-        this.createStyleElement();
+        this.loadAppearanceMenu();
+    }
+
+    /**
+     * This function loads the appearance menu. Waits
+     * until the chessboard.css variables are loaded.
+     */
+    public loadAppearanceMenu(): void {
+        const interval = setInterval(() => {
+            if(Array.from(this.rootComputedStyle).find((property) => property.startsWith("--chessboard-"))){
+                this.createStyleElement();
+                this.renderComponent();
+                this.addEventListeners();
+                if(LocalStorage.isExist(LocalStorageKey.CustomAppearance))
+                    this.initColorPalette();
+
+                clearInterval(interval);
+            }    
+        }, 100);
     }
 
     /**
@@ -36,7 +53,7 @@ export class AppearanceMenu extends NavbarComponent{
                 .map(word => word.charAt(0).toUpperCase() + word.slice(1))
                 .join(" ")
         };
-
+    
         this.loadHTML("appearance-menu", `
             <div id="appearance-body">
                 ${
@@ -73,22 +90,6 @@ export class AppearanceMenu extends NavbarComponent{
         `);
 
         this.loadCSS("appearance-menu.css");
-    }
-
-    /**
-     * Check the chessboard css is loaded. If it is loaded, 
-     * render the component and add event listeners.
-     */
-    private checkChessboardCss(): void
-    {
-        if(this.isChessboardCssLoaded) return;
-
-        this.rootComputedStyle = getComputedStyle(document.documentElement);
-        if(Array.from(this.rootComputedStyle).find((property) => property.startsWith("--chessboard-"))){
-            this.renderComponent();
-            this.addEventListeners();
-            this.isChessboardCssLoaded = true;
-        }
     }
 
     /**
@@ -203,10 +204,8 @@ export class AppearanceMenu extends NavbarComponent{
     /**
      * This function shows the last saved if exist, otherwise default color palette.
      */
-    public initColorPalette(): void
+    private initColorPalette(): void
     {        
-        this.checkChessboardCss();
-
         let customAppearance;
         if(LocalStorage.isExist(LocalStorageKey.CustomAppearance))
             customAppearance = LocalStorage.load(LocalStorageKey.CustomAppearance);

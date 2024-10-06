@@ -175,8 +175,8 @@ export class Platform{
             }
 
             // Custom Appearance
-            if(LocalStorage.isExist(LocalStorageKey.CustomAppearance))
-                this.appearanceMenu.initColorPalette();
+            //if(LocalStorage.isExist(LocalStorageKey.CustomAppearance))
+            //    this.appearanceMenu.initColorPalette();
         }
 
         /**
@@ -384,7 +384,7 @@ export class Platform{
                 break;
             case NavbarOperation.ShowAppearance:
                 this.navbar.showComponent(this.appearanceMenu);
-                this.appearanceMenu.initColorPalette();
+                //this.appearanceMenu.initColorPalette();
                 break;
             case NavbarOperation.ShowAbout:
                 this.navbar.showComponent(this.aboutMenu);
