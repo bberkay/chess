@@ -63,6 +63,10 @@ export class BoardEditor extends Component{
             <div class = "border-inset"><button data-menu-operation="${BoardEditorOperation.CreateBoard}" disabled="true">Load</button></div>
           </div>
         `);
+
+        document.getElementById("fen-notation")!.addEventListener("focus", (e) => {
+            (e.target as HTMLInputElement).select();
+        });
     }
 
     /**

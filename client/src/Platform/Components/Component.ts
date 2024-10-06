@@ -36,7 +36,6 @@ export abstract class Component{
             throw new Error(`${componentId} element is not initialized. Please add it to the html file.`);
 
         component.innerHTML = html;
-        console.log(`Component ${componentId} is loaded.`);
         this.createTooltips(componentId);
         this.createValidations(componentId);
         this.createCopyToClipboard(componentId);

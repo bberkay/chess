@@ -448,7 +448,8 @@ function startGame(lobby: Lobby): void {
         // One of the players is should be reconnected to the game.
         // send current board and durations to the reconnected player.
 
-        // Send the current game to the reconnected player.
+        // Send the current game to the reconnected 
+        //yplayer.
         const reconnectedPlayer = lobby.getLastConnectedPlayer();
         if (!reconnectedPlayer) return;
 
@@ -475,7 +476,8 @@ function startGame(lobby: Lobby): void {
             game: lobby.getCurrentGame()
         }) as WsStartedData));
 
-        // Send reconnected player's color to the opponent player.
+        // Send reconnected player's color to the 
+        // opponent player.
         const reconnectedPlayerColor = lobby.getLastConnectedPlayerColor() as Color;
         const opponentPlayer = reconnectedPlayerColor === Color.White
             ? lobby.getBlackPlayer()

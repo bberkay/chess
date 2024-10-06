@@ -58,3 +58,22 @@ export function updateKeys(dict1: {[key: string]: any}, dict2: {[key: string]: a
 
     return dict1;
 }
+
+/**
+ * Freeze the given object deeply so that it cannot be modified.
+ * @param {Object|Array} obj - The object to freeze.
+ * @returns 
+ */
+export function deepFreeze(obj: any): any {
+    if (Array.isArray(obj)) {
+        obj.forEach(item => deepFreeze(item));
+    } else {
+        Object.keys(obj).forEach(key => {
+            if (typeof obj[key] === 'object' && obj[key] !== null) {
+                deepFreeze(obj[key]);
+            }
+        });
+    }
+
+    return Object.freeze(obj);
+}

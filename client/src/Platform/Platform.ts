@@ -37,6 +37,7 @@ import { ConnectionsMenu } from "./Components/NavbarComponents/ConnectionsMenu.t
 import { AppearanceMenu } from "./Components/NavbarComponents/AppearanceMenu.ts";
 import { Logger } from "@Services/Logger";
 import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage.ts";
+import { BotColor } from "@Chess/Bot/index.ts";
 
 /**
  * This class is the main class of the chess platform menu.
@@ -292,6 +293,12 @@ export class Platform{
                 this.navigatorModal.hide();
                 this._playBoard();
                 break;
+            case NavigatorModalOperation.PlayAgainstBot:
+                const { botColor, botDifficulty } = this.navigatorModal.getCreatedBotSettings();
+                this.navigatorModal.hide();
+                this._playBoard();
+                this.chess.addBotToGame(botColor, botDifficulty);
+                break;
         }
     }
 
@@ -468,12 +475,16 @@ export class Platform{
      */
     private _playBoard(fenNotation: string | null = null): void 
     {
-        this.boardEditor.disableEditorMode();
+        if(!BoardEditor.isEditorModeEnable()) 
+            fenNotation = StartPosition.Standard;
+        else 
+            this.boardEditor.disableEditorMode();
+
         this.logConsole.clear();
         this.notationMenu.clear();
+        this.boardEditor.createBoard(fenNotation);
         this.notationMenu.showPlayerCards();
         this.notationMenu.setTurnIndicator(this.chess.engine.getTurnColor());
-        this.boardEditor.createBoard(fenNotation);
         LocalStorage.clear(LocalStorageKey.BoardEditorEnabled);
         this.logger.save(`Editor mode is disabled and board is now playable.`);
     }

@@ -65,16 +65,19 @@ export class ChessEngine extends BoardManager {
     }
 
     /**
-     * This function creates a new game with the given position(fen notation, json notation or StartPosition enum).
+     * This function creates a new game that can be played by two players.
+     * 
+     * @param {JsonNotation|StartPosition|string} position The position of the game. 
+     * 
      * @see For more information about StartPosition enum check src/Chess/Types/index.ts
      */
     public createGame(position: JsonNotation | StartPosition | string = StartPosition.Standard): void
     {
         this.clearProperties();
         this.createBoard(typeof position !== "string" ? position : Converter.fenToJson(position));
-        this.createTimers();
+        this.createTimersIfGiven();
         this.checkGameStatus();
-        this.handleTimers();
+        this.handleTimersIfExists();
     }
 
     /**
@@ -157,7 +160,7 @@ export class ChessEngine extends BoardManager {
      */
     private clearProperties(): void
     {
-        this.destroyTimers();
+        this.destroyTimersIfExist();
         this.setGameStatus(GameStatus.NotReady);
         this.playedFrom = null;
         this.playedTo = null;
@@ -166,13 +169,13 @@ export class ChessEngine extends BoardManager {
         this.currentMoves = {};
         this.isPromotionMenuOpen = false;
         this.isBoardPlayable = false;
-        this.logger.save("Game properties set to default on ChessEngine");
+        this.logger.save("Game properties set to default on ChessEngine, timers and bot are destroyed if they are created");
     }
 
     /**
      * Create timer for the players if the durations are set.
      */
-    private createTimers(): void
+    private createTimersIfGiven(): void
     {
         const durations = BoardQuerier.getDurations();
         if(!durations) return;
@@ -200,7 +203,7 @@ export class ChessEngine extends BoardManager {
     /**
      * Stop and destroy the timers if they are created.
      */
-    private destroyTimers(): void
+    private destroyTimersIfExist(): void
     {
         if(!this.timerMap) 
             return;    
@@ -619,7 +622,7 @@ export class ChessEngine extends BoardManager {
 
         // Game might be playing without timers
         if(this.timerMap)
-            this.handleTimers();
+            this.handleTimersIfExists();
 
         // Clear the move notation for the next turn.
         this.moveNotation = "";
@@ -631,7 +634,7 @@ export class ChessEngine extends BoardManager {
      * of the player and pause the timer of the opponent. If the player's time
      * is over then handle the timeover situation.
      */
-    private handleTimers(): void 
+    private handleTimersIfExists(): void 
     {
         if(!this.timerMap) return;
 
@@ -674,7 +677,7 @@ export class ChessEngine extends BoardManager {
      */
     private handleTimeover(): void
     {
-        this.destroyTimers();
+        this.destroyTimersIfExist();
         
         if([GameStatus.WhiteVictory,
             GameStatus.BlackVictory,

@@ -29,8 +29,14 @@ import type {
     ReconnectLobbyReqParams,
     WsFinishedData
 } from "./Types";
+import { 
+    RECONNECTION_ATTEMPT_LIMIT, 
+    RECONNECTION_TIMEOUT,
+    SERVER_ADDRESS,
+    WS_ADDRESS,
+    WS_ENDPOINT_MAX_LENGTH
+} from "./Consts";
 import { SocketOperation, WsTitle } from "./Types";
-import { RECONNECTION_ATTEMPT_LIMIT, RECONNECTION_TIMEOUT } from "./Consts";
 
 /**
  * This class is the main class of the chess platform.
@@ -96,13 +102,14 @@ export class ChessPlatform{
          * Connect to the last connection if exists.
          */
         const connectToLastConnectionOrLobbyUrl = async () => {
-            const lobbyId = this.getLobbyIdFromUrl() || LocalStorage.load(LocalStorageKey.LastLobbyConnection)?.lobbyId;
+            const lsLobbyId = LocalStorage.load(LocalStorageKey.LastLobbyConnection)?.lobbyId;
+            const lobbyId = this.getLobbyIdFromUrl() || lsLobbyId;
             if(!lobbyId) return;
 
-            const isLobbyIdValid = await this.checkLobbyId(lobbyId);
+            const isLobbyIdValid = await this.checkLobbyId(lobbyId, !lsLobbyId);
             if(!isLobbyIdValid) return;
             
-            if(lobbyId === this.getLobbyIdFromUrl())
+            if(!lsLobbyId)
                 this.platform.navigatorModal.showJoinLobby();                
             else
                 this.reconnectLobby();
@@ -166,8 +173,7 @@ export class ChessPlatform{
     private async checkLobbyId(lobbyId: string, showAsError: boolean = true): Promise<string | null>
     {
         try {
-            const response = await fetch(import.meta.env.VITE_SERVER_ADDRESS + "?lobbyId=" + lobbyId);
-            console.log("response", response);
+            const response = await fetch(SERVER_ADDRESS + "?lobbyId=" + lobbyId);
             if (!response.ok) {
                 if(showAsError) this.platform.navigatorModal.showError("The lobby id is invalid.");
                 this.forceClearLastConnection();
@@ -375,7 +381,7 @@ export class ChessPlatform{
      */
     private createAndHandleWebSocket(webSocketEndpoint: string): void
     {
-        if(webSocketEndpoint.length > Number(import.meta.env.VITE_WS_ENDPOINT_MAX_LENGTH))
+        if(webSocketEndpoint.length > Number(WS_ENDPOINT_MAX_LENGTH))
             throw new Error("The WebSocket URL is too long.");
 
         if(this.socket){
@@ -383,7 +389,7 @@ export class ChessPlatform{
             this.socket = null;
         }
 
-        const webSocketUrl = import.meta.env.VITE_WS_ADDRESS + (webSocketEndpoint ? "?" + webSocketEndpoint : "");
+        const webSocketUrl = WS_ADDRESS + (webSocketEndpoint ? "?" + webSocketEndpoint : "");
         this.socket = new WebSocket(webSocketUrl);
         
         let lobbyId: string | null = null;
@@ -405,12 +411,6 @@ export class ChessPlatform{
                     player = (wsData as WsConnectedData).player;
                     this.platform.navigatorModal.showLobbyInfo(window.location.origin + "/" + lobbyId);
                     this.displayLobbyIdOnUrl(lobbyId);
-
-                    /*LocalStorage.save(
-                        LocalStorageKey.LobbyConnections, 
-                        (LocalStorage.load(LocalStorageKey.LobbyConnections) || []).concat(wsData)
-                    );*/
-
                     LocalStorage.save(LocalStorageKey.LastLobbyConnection, wsData);
                     LocalStorage.save(LocalStorageKey.LastPlayerName, player.name);
                     this.logger.save(`Connected to the lobby[${lobbyId}] as ${player.name}.`);

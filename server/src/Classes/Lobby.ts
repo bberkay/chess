@@ -3,7 +3,7 @@ import { Color, Duration, Durations, GameStatus, JsonNotation, Square, StartPosi
 import { ChessEngine } from '@Chess/Engine/ChessEngine';
 import { Converter } from "@Chess/Utils/Converter";
 import { ID_LENGTH } from "src/Consts";
-import { createRandomId } from "./Helper";
+import { createRandomId, deepFreeze } from "./Helper";
 
 /**
  * This class represents the lobby of the game.
@@ -45,7 +45,7 @@ export class Lobby{
     public getWhitePlayer(): Readonly<Player | null>
     {
         if(this.whitePlayer === null) return null;
-        return Object.freeze({ ...this.whitePlayer });
+        return deepFreeze({ ...this.whitePlayer });
     }
 
     /**
@@ -54,7 +54,7 @@ export class Lobby{
     public getBlackPlayer(): Readonly<Player | null>
     {
         if(this.blackPlayer === null) return null;
-        return Object.freeze({ ...this.blackPlayer });
+        return deepFreeze({ ...this.blackPlayer });
     }
 
     /**

@@ -48,7 +48,9 @@ export enum NavigatorModalOperation{
     ShowCreateLobby = "ShowCreateLobby",
     ShowJoinLobby = "ShowJoinLobby",
     ShowPlayAgainstBot = "ShowPlayAgainstBot",
-    PlayByYourself = "PlayByYourself"
+    ShowSelectColorAgainsBot = "ShowSelectColorAgainsBot",
+    PlayByYourself = "PlayByYourself",
+    PlayAgainstBot = "PlayAgainstBot",
 }
 
 export enum LogConsoleOperation{

@@ -6,7 +6,6 @@ export enum LocalStorageKey{
     WelcomeShown = "welcomeShown",
     LastBoard = "lastBoard",
     LastPlayerName = "lastPlayerName",
-    LobbyConnections = "LobbyConnections",
     LastLobbyConnection = "LastLobbyConnection",
     BoardEditorEnabled = "boardEditorEnabled",
     CustomAppearance = "customAppearance",

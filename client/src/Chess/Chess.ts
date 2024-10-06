@@ -7,13 +7,14 @@
  * @license MIT
  */
 
-import {JsonNotation, PieceType, Square, Color, StartPosition, ChessEvent, GameStatus, Durations} from "./Types";
+import {JsonNotation, PieceType, Square, Color, StartPosition, ChessEvent, GameStatus, Durations, Move} from "./Types";
 import {ChessEngine, MoveValidationError} from "./Engine/ChessEngine";
 import {ChessBoard} from "./Board/ChessBoard";
 import {SquareClickMode} from "./Board/Types";
 import {LocalStorage, LocalStorageKey} from "@Services/LocalStorage.ts";
 import {Converter} from "./Utils/Converter.ts";
 import {Logger} from "@Services/Logger.ts";
+import {Bot, BotColor, BotDifficulty} from "./Bot";
 
 /**
  * This class provides users to a playable chess game on the web by connecting ChessEngine and ChessBoard. Also,
@@ -28,6 +29,7 @@ export class Chess{
     public readonly engine: ChessEngine = new ChessEngine();
     public readonly board: ChessBoard = new ChessBoard();
 
+    private _bot: Bot | null = null;
     private _selectedSquare: Square | null = null;
     private _isPromotionScreenOpen: boolean = false;
     private _preSelectedSquare: Square | null = null;
@@ -53,6 +55,8 @@ export class Chess{
         this._isPromotionScreenOpen = false;
         this._preSelectedSquare = null;
         this._preMove = null;
+        this.terminateBotIfExist();
+        this.logger.save("Properties reset");
     }
     
     /**
@@ -119,6 +123,37 @@ export class Chess{
         // created from scratch and the listener is not initialized.
         this.initBoardListener();
         this.initEngineListener();
+    }
+
+    /**
+     * This function creates a new game against the bot with the 
+     * given position(fen notation/string, StartPosition/string or 
+     * JsonNotation).
+     */
+    public addBotToGame(botColor: BotColor | Color, botDifficulty: BotDifficulty): void
+    {
+        this._bot = new Bot(botColor, botDifficulty);
+        this._bot.start();
+        this.logger.save(`Bot[${this._bot.color}] created with difficulty[${this._bot.difficulty}]`);
+        
+        // First move
+        if(botColor == this.engine.getTurnColor()){
+            this.board.lock();
+            this.playBotIfExist();
+        }
+    }
+
+    /**
+     * This function terminates the bot if it exists.
+     */
+    private terminateBotIfExist(): void
+    {
+        if(!this._bot) 
+            return;
+
+        this._bot.terminate();
+        this._bot = null;
+        this.logger.save("Bot terminated");
     }
 
     /**
@@ -229,6 +264,7 @@ export class Chess{
         {
             this._isPromotionScreenOpen = squareClickMode == SquareClickMode.Promotion;
             this.playMove(this._selectedSquare!, squareId);
+            if(this._bot) this.board.lock();
             document.dispatchEvent(new CustomEvent(
                 ChessEvent.onPieceMovedByPlayer, {detail: {from: this._selectedSquare!, to: squareId}}
             ));
@@ -244,6 +280,30 @@ export class Chess{
             this.logger.save(`Pre-move[${JSON.stringify({from: this._preSelectedSquare!, to: squareId})}] saved`);
             document.dispatchEvent(new CustomEvent(ChessEvent.OnPieceSelected, {detail: {square: squareId}}));
         }
+    }
+
+    /**
+     * Play the bot's move if it exists and it is 
+     * bot's turn.
+     */
+    private playBotIfExist(): void
+    {
+        if(!this._bot || this.engine.getTurnColor() != this._bot.color)
+            return;
+
+        this._bot.getMove(this.engine.getGameAsFenNotation()).then((move) => {
+            // If found move is promotion then move will be Move[].
+            // Check _doPromote() function in ChessEngine.ts for more 
+            // information.
+            if(!Array.isArray(move))
+                move = [move];
+            
+            move.forEach((moveObject: Move) => {
+                this.playMove(moveObject.from, moveObject.to);
+            });
+
+            this.board.unlock();
+        });
     }
 
     /**
@@ -299,6 +359,7 @@ export class Chess{
         {
             this.logger.save("Game updated in cache after move");
             LocalStorage.clear(LocalStorageKey.LastBoard);
+            this.terminateBotIfExist();
             document.dispatchEvent(new Event(ChessEvent.onGameOver));
             this._isGameOver = true;
             return;
@@ -307,6 +368,7 @@ export class Chess{
         this._selectedSquare = this._isPromotionScreenOpen ? this._selectedSquare : null;
         if(!this._isPromotionScreenOpen){
             this.board.setTurnColor(this.engine.getTurnColor());
+            this.playBotIfExist();
             this.playPreMoveIfExist();
             this.logger.save("Game updated in cache after move");
             LocalStorage.save(LocalStorageKey.LastBoard, this.engine.getGameAsJsonNotation());

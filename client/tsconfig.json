@@ -6,6 +6,7 @@
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "skipLibCheck": true,
     "experimentalDecorators": true,
+    "allowJs": true,
     
     /* Bundler mode */
     "moduleResolution": "bundler",

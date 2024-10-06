@@ -3,6 +3,7 @@ import { SocketOperation } from "../../Types";
 import { BoardEditorOperation, NavigatorModalOperation } from "../Types";
 import { Component } from "./Component";
 import { Color, Duration, GameStatus, StartPosition } from "@Chess/Types";
+import { BotColor, BotDifficulty } from "@Chess/Bot";
 import { 
     DEFULT_PLAYER_NAME,
     MAX_PLAYER_NAME_LENGTH,
@@ -22,6 +23,9 @@ export class NavigatorModal extends Component{
     private lastNavigatorModalTitle: string = "";
     private lastNavigatorModalContent: string = "";
     private lastCreatedBoard: string = StartPosition.Standard;
+    private lastEnteredPlayerName: string = DEFULT_PLAYER_NAME;
+    private lastSelectedBotDifficulty: BotDifficulty = BotDifficulty.Easy;
+    private lastSelectedBotColor: BotColor = BotColor.Black;
     private lastSelectedDuration: Duration = {
         remaining: DEFAULT_TOTAL_TIME,
         increment: DEFAULT_INCREMENT_TIME
@@ -268,7 +272,7 @@ export class NavigatorModal extends Component{
         this.show(
             "Select Game Duration",
             `<span>Select the total and increment time:</span>
-            <div class="btn-group-grid" style="padding-top:5px;padding-bottom:15px;">
+            <div class="btn-group-grid" id="select-duration" style="padding-top:5px;padding-bottom:15px;">
                 <button data-selected="false"><span class="total-time">1</span> + <span class="increment-time">0</span></button>
                 <button data-selected="false"><span class="total-time">1</span> + <span class="increment-time">1</span></button>
                 <button data-selected="false"><span class="total-time">2</span> + <span class="increment-time">1</span></button>
@@ -317,7 +321,6 @@ export class NavigatorModal extends Component{
      */
     private showCreateLobby(): void
     {
-        this.lastSelectedDuration = this.getSelectedGameDuration();
         this.show(
             "Create a Lobby",
             `<span>Enter your name: </span>
@@ -383,18 +386,44 @@ export class NavigatorModal extends Component{
     }
 
     /**
-     * Show the play against bot screen.
+     * Show the play against bot screen. This screen
+     * will allow the user to select the difficulty level
+     * of the bot.
      */
     private showPlayAgainstBot(): void
     {
         this.show(
             "Play against Bot",
             `<span>Select the difficulty level of the bot:</span>
-            <div class="btn-group-horizontal btn-group-horizontal--triple" style="padding-top:5px;padding-bottom:5px;">
-                <button onclick="ChessPlatform.chess.engine.playAgainstBot()">Easy</button>
-                <button onclick="ChessPlatform.chess.engine.playAgainstBot()">Normal</button>
-                <button onclick="ChessPlatform.chess.engine.playAgainstBot()">Hard</button>
+            <div class="btn-group-horizontal btn-group-horizontal--triple" style="padding-top:5px;padding-bottom:15px;">
+                <button data-selected="false" data-bot-difficulty="${BotDifficulty.Easy}">Easy</button>
+                <button data-selected="false" data-bot-difficulty="${BotDifficulty.Medium}">Medium</button>
+                <button data-selected="false" data-bot-difficulty="${BotDifficulty.Hard}">Hard</button>
             </div>
+            <button type="submit" data-menu-operation="${NavigatorModalOperation.ShowSelectColorAgainsBot}">Next</button>
+            <div style="text-align:center;margin-top:10px;">
+                <button class="button--text" data-menu-operation="${NavigatorModalOperation.ShowGameCreator}">
+                    Cancel
+                </button>
+            </div>
+            `
+        );
+    }
+
+    /**
+     * Show the select color against bot screen.
+     */
+    private showSelectColorAgainstBot(): void
+    {
+        this.show(
+            "Play against Bot",
+            `<span>Select the color of the bot:</span>
+            <div class="btn-group-horizontal btn-group-horizontal--triple" style="padding-top:5px;padding-bottom:15px;">
+                <button data-selected="false" data-bot-color="${BotColor.Black}">Black</button>
+                <button data-selected="false" data-bot-color="${BotColor.Random}">Random</button>
+                <button data-selected="false" data-bot-color="${BotColor.White}">White</button>
+            </div>
+            <button type="submit" data-menu-operation="${NavigatorModalOperation.PlayAgainstBot}">Play</button>
             <div style="text-align:center;margin-top:10px;">
                 <button class="button--text" data-menu-operation="${NavigatorModalOperation.ShowGameCreator}">
                     Cancel
@@ -437,6 +466,41 @@ export class NavigatorModal extends Component{
     }
 
     /**
+     * Get the selected difficulty level of the bot.
+     * If the play against bot modal is open.
+     */
+    private saveSelectedBotDifficulty(): void
+    {
+        const selectedButton = document.querySelector(".navigator-modal button[data-selected='true'][data-bot-difficulty]");
+        if(!selectedButton) return;
+        this.lastSelectedBotDifficulty = parseInt(selectedButton.getAttribute("data-bot-difficulty")!) as BotDifficulty;
+    }
+
+    /**
+     * Get the selected color of the bot.
+     * If the play against bot modal is open.
+     */
+    private saveSelectedBotColor(): void
+    {
+        const selectedButton = document.querySelector(".navigator-modal button[data-selected='true'][data-bot-color]");
+        if(!selectedButton) return;
+        this.lastSelectedBotColor = selectedButton.getAttribute("data-bot-color")! as BotColor
+    }
+
+    /**
+     * Get the created bot settings from the modal.
+     */
+    public getCreatedBotSettings(): {botColor: BotColor, botDifficulty: BotDifficulty}
+    {
+        this.saveSelectedBotColor();
+        
+        return {
+            botColor: this.lastSelectedBotColor,
+            botDifficulty: this.lastSelectedBotDifficulty
+        };
+    }
+
+    /**
      * Get the entered player name from the 
      * modal. If the player name modal is open.
      * 
@@ -447,8 +511,9 @@ export class NavigatorModal extends Component{
     {
         let playerName = (document.getElementById("navigator-modal")!.querySelector("#player-name") as HTMLInputElement).value;
         if(playerName.length < MIN_PLAYER_NAME_LENGTH || playerName.length > MAX_PLAYER_NAME_LENGTH)
-            playerName = DEFULT_PLAYER_NAME;
-        return playerName;
+            this.lastEnteredPlayerName = DEFULT_PLAYER_NAME;
+
+        return this.lastEnteredPlayerName;
     }
 
     /**
@@ -460,7 +525,7 @@ export class NavigatorModal extends Component{
      * seconds for increment time. If not, it will be DEFAULT_TOTAL_TIME
      * and DEFAULT_INCREMENT_TIME.
      */
-    public getSelectedGameDuration(): Duration
+    private saveSelectedGameDuration(): void
     {
         /**
          * Convert minutes to milliseconds.
@@ -487,7 +552,7 @@ export class NavigatorModal extends Component{
             if(totalTimeInput) totalTime = totalTimeInput.valueAsNumber;
             if(incrementTimeInput) incrementTime = incrementTimeInput.valueAsNumber;
         }else{
-            const selectedButton = document.querySelector("#navigator-modal .btn-group-grid button[data-selected='true']") as HTMLElement;
+            const selectedButton = document.querySelector("#navigator-modal #select-duration button[data-selected='true']") as HTMLElement;
             if(selectedButton){
                 totalTime = parseInt(selectedButton.querySelector(".total-time")!.textContent!);
                 incrementTime = parseInt(selectedButton.querySelector(".increment-time")!.textContent!);
@@ -510,7 +575,6 @@ export class NavigatorModal extends Component{
             : incrementTime;
 
         this.lastSelectedDuration = {remaining: totalTime, increment: incrementTime};
-        return this.lastSelectedDuration;
     }
 
     /**
@@ -519,9 +583,9 @@ export class NavigatorModal extends Component{
     public getCreatedLobbySettings(): {playerName: string, board: string, duration: Duration}
     {
         return {
-            playerName: this.getEnteredPlayerName(),
+            playerName: this.lastEnteredPlayerName,
             board: this.lastCreatedBoard || StartPosition.Standard,
-            duration: this.getSelectedGameDuration()
+            duration: this.lastSelectedDuration
         };
     }
 
@@ -530,7 +594,6 @@ export class NavigatorModal extends Component{
      */
     public handleOperation(operation: NavigatorModalOperation): void
     {
-        console.log("NavigatorModalOperation: ", operation);
         switch(operation){
             case NavigatorModalOperation.Hide:
                 this.hide();
@@ -554,10 +617,15 @@ export class NavigatorModal extends Component{
                 this.showPlayAgainstBot();
                 break;
             case NavigatorModalOperation.ShowCreateLobby:
+                this.saveSelectedGameDuration();
                 this.showCreateLobby();
                 break
             case NavigatorModalOperation.ShowJoinLobby:
                 this.showJoinLobby();
+                break;
+            case NavigatorModalOperation.ShowSelectColorAgainsBot:
+                this.saveSelectedBotDifficulty();
+                this.showSelectColorAgainstBot();
                 break;
         }
     }
