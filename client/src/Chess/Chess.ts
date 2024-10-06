@@ -130,7 +130,7 @@ export class Chess{
      * given position(fen notation/string, StartPosition/string or 
      * JsonNotation).
      */
-    public addBotToGame(botColor: BotColor | Color, botDifficulty: BotDifficulty): void
+    public addBotToCurrentGame(botColor: BotColor | Color, botDifficulty: BotDifficulty): void
     {
         this._bot = new Bot(botColor, botDifficulty);
         this._bot.start();

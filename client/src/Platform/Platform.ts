@@ -297,7 +297,7 @@ export class Platform{
                 const { botColor, botDifficulty } = this.navigatorModal.getCreatedBotSettings();
                 this.navigatorModal.hide();
                 this._playBoard();
-                this.chess.addBotToGame(botColor, botDifficulty);
+                this.chess.addBotToCurrentGame(botColor, botDifficulty);
                 break;
         }
     }
@@ -342,6 +342,7 @@ export class Platform{
 
         // TODO: Multiple Lobby, Cache, Arayüz
         // TODO: Switch case yapısı handling socket
+            // Object.freeze: deep copy, shallow copy, deep freeze
 
         // TODO: Server Uploading and supabase duruma göre
         // TODO: Mobil için touchup
