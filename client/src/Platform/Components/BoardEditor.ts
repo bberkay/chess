@@ -2,6 +2,7 @@ import { PlatformEvent, BoardEditorOperation, NavigatorModalOperation } from "..
 import { Chess } from "@Chess/Chess";
 import { Color, Durations, GameStatus, JsonNotation, PieceType, Square, StartPosition } from "@Chess/Types";
 import { Component } from "./Component";
+import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage";
 
 enum BoardCreatorMode {
     Custom = "custom-board-creator-mode",
@@ -44,6 +45,7 @@ export class BoardEditor extends Component{
         this.chess = chess;
         this.loadCSS("board-editor.css");
         this.renderComponent();
+        this.loadLocalStorage();
     }
 
     /**
@@ -67,6 +69,28 @@ export class BoardEditor extends Component{
         document.getElementById("fen-notation")!.addEventListener("focus", (e) => {
             (e.target as HTMLInputElement).select();
         });
+    }
+
+    /**
+     * This function checks the cache and loads the game from the cache 
+     * if there is a game in the cache.
+     */
+    private loadLocalStorage(): void
+    {
+        // If there is a game in the cache, load it.
+        if(LocalStorage.isExist(LocalStorageKey.LastBoard)){
+            const lastBoard = LocalStorage.load(LocalStorageKey.LastBoard);
+            if(lastBoard && [GameStatus.BlackVictory, 
+                GameStatus.WhiteVictory, 
+                GameStatus.Draw
+            ].includes(lastBoard.gameStatus))
+                this.createBoard();
+            else
+                this.createBoard(lastBoard);
+        }
+
+        if(LocalStorage.isExist(LocalStorageKey.BoardEditorEnabled))
+            this.enableEditorMode();
     }
 
     /**
@@ -224,6 +248,8 @@ export class BoardEditor extends Component{
         this.enableBoardCreator();
         this.createBoard();
         this.enableBoardObserver();
+        LocalStorage.clear(LocalStorageKey.LastLobbyConnection);
+        LocalStorage.save(LocalStorageKey.BoardEditorEnabled, true);
     }
 
     /**

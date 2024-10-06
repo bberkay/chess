@@ -3,6 +3,7 @@ import { Component } from "./Component.ts";
 import { Chess } from "@Chess/Chess.ts";
 import { BoardEditorOperation, NavigatorModalOperation, NotationMenuOperation } from "../Types";
 import { SocketOperation } from "../../Types";
+import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage.ts";
 
 /**
  * This class provide a table to show the notation.
@@ -22,9 +23,18 @@ export class NotationMenu extends Component {
         this.chess = chess;
         this.loadCSS("notation-menu.css");
         this.renderComponent();
+        this.loadLocalStorage();
         document.addEventListener("DOMContentLoaded", () => {
             this.update(true);
         });
+    }
+
+    /**
+     * Load the local storage data.
+     */
+    private loadLocalStorage(): void {
+        if(LocalStorage.isExist(LocalStorageKey.BoardEditorEnabled))
+            this.hidePlayerCards();
     }
 
     /**

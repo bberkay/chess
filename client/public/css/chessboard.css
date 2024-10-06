@@ -30,8 +30,8 @@
     --chessboard-default-disabled-color: #0000004F;
     --chessboard-default-hovering-color: #246D49;
     --chessboard-default-prehovering-color: #888888;
-    --chessboard-default-from-color: #57cdfc63;
-    --chessboard-default-to-color: #26a5d885;
+    --chessboard-default-from-color: #367B96;
+    --chessboard-default-to-color: #26AED885;
     --chessboard-default-winner-color: #FFD900;
     --chessboard-selected-color: #57CE9240;
     --chessboard-preselected-color: #888888;
@@ -39,7 +39,7 @@
     --chessboard-playable-color: #57CE92;
     --chessboard-preplayable-color: #888888;
     --chessboard-preplayed-color: #888888;
-    --chessboard-from-color: #57CDFC63;
+    --chessboard-from-color: #367B96;
     --chessboard-to-color: #26A5D885;
     --chessboard-checked-color: #DF3030;
     --chessboard-hovering-color: #246D49;

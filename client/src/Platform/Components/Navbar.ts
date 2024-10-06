@@ -1,6 +1,18 @@
 import { NavbarOperation } from "@Platform/Types";
 import { Component } from "./Component";
 import { NavbarComponent } from "./NavbarComponents/NavbarComponent";
+import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage";
+
+/**
+ * This enum represents the different types of components 
+ * that can be shown in the navbar.
+ */
+enum NavbarComponentType {
+    LogConsole,
+    Connections,
+    AppearanceMenu,
+    AboutMenu
+}
 
 /**
  * This class provide a navbar to navigate between components.
@@ -17,6 +29,32 @@ export class Navbar extends Component{
         super();
         this.renderComponent();
         this.navbarComponents = navbarComponents;
+        this.hideComponents();
+        this.loadLocalStorage();
+    }
+
+    /**
+     * Load the local storage.
+     */
+    private loadLocalStorage(): void
+    {
+        // Welcome message
+        if(LocalStorage.isExist(LocalStorageKey.WelcomeShown))
+            this.showComponent(this.getComponentByType(NavbarComponentType.LogConsole)!);
+        else{
+            this.showComponent(this.getComponentByType(NavbarComponentType.AboutMenu)!);
+            LocalStorage.save(LocalStorageKey.WelcomeShown, true);
+        }
+    }
+
+    /**
+     * Get the component by type.
+     */
+    private getComponentByType(type: NavbarComponentType): NavbarComponent | null
+    {
+        return this.navbarComponents.find(
+            instance => instance.constructor.name === NavbarComponentType[type]
+        ) || null;
     }
 
     /**

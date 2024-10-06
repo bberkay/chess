@@ -20,6 +20,19 @@ export class AppearanceMenu extends NavbarComponent{
     constructor() {
         super();
         this.loadAppearanceMenu();
+        this.loadLocalStorage();    
+    }
+
+    /**
+     * Load the local storage data.
+     */
+    private loadLocalStorage(): void
+    {
+        if(LocalStorage.isExist(LocalStorageKey.Theme))
+            this.changeTheme(LocalStorage.load(LocalStorageKey.Theme));
+
+        if(LocalStorage.isExist(LocalStorageKey.CustomAppearance))
+            this.initColorPalette();
     }
 
     /**
@@ -32,8 +45,7 @@ export class AppearanceMenu extends NavbarComponent{
                 this.createStyleElement();
                 this.renderComponent();
                 this.addEventListeners();
-                if(LocalStorage.isExist(LocalStorageKey.CustomAppearance))
-                    this.initColorPalette();
+                this.loadLocalStorage();
 
                 clearInterval(interval);
             }    

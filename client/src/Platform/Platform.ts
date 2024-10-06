@@ -37,7 +37,6 @@ import { ConnectionsMenu } from "./Components/NavbarComponents/ConnectionsMenu.t
 import { AppearanceMenu } from "./Components/NavbarComponents/AppearanceMenu.ts";
 import { Logger } from "@Services/Logger";
 import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage.ts";
-import { BotColor } from "@Chess/Bot/index.ts";
 
 /**
  * This class is the main class of the chess platform menu.
@@ -146,78 +145,15 @@ export class Platform{
         }
 
         /**
-         * Load the settings from the local storage and 
-         * apply them to the platform.
-         */
-        const applyCachedPlatformSettings = () => {
-            this.navbar.hideComponents();
-
-            // Welcome message
-            if(LocalStorage.isExist(LocalStorageKey.WelcomeShown))
-                this.navbar.showComponent(this.logConsole);
-            else{
-                this.navbar.showComponent(this.aboutMenu);
-                LocalStorage.save(LocalStorageKey.WelcomeShown, true);
-            }
-
-            // Theme
-            if(LocalStorage.isExist(LocalStorageKey.Theme))
-                this.appearanceMenu.changeTheme(LocalStorage.load(LocalStorageKey.Theme));
-
-            // Last Board
-            if(!this.checkAndLoadBoardFromCache()) 
-                this.boardEditor.createBoard();
-
-            // Board Editor
-            if(LocalStorage.isExist(LocalStorageKey.BoardEditorEnabled)){
-                this.notationMenu.hidePlayerCards();
-                this._enableBoardEditor();
-            }
-
-            // Custom Appearance
-            //if(LocalStorage.isExist(LocalStorageKey.CustomAppearance))
-            //    this.appearanceMenu.initColorPalette();
-        }
-
-        /**
          * Initialize the platform components.
          */
         document.addEventListener("DOMContentLoaded", () => {
-            applyCachedPlatformSettings();
             bindMenuOperations();
             listenBoardChanges();
             this.updateComponents();
         });
         
         this.logger.save("Cache is checked, last game/lobby is loaded if exists. Menu operations are binded.");
-    }
-
-    /**
-     * This function checks the cache and loads the game from the cache if there is a game in the cache.
-     * @returns Returns true if there is a game in the cache, otherwise returns false.
-     * @see For more information about cache management check src/Services/LocalStorage.ts
-     */
-    private checkAndLoadBoardFromCache(): boolean
-    {
-        // If there is a game in the cache, load it.
-        if(LocalStorage.isExist(LocalStorageKey.LastBoard)){
-            const lastBoard = LocalStorage.load(LocalStorageKey.LastBoard);
-            if([GameStatus.BlackVictory, 
-                GameStatus.WhiteVictory, 
-                GameStatus.Draw
-            ].includes(lastBoard.gameStatus))
-            {
-                this.logger.save("Last game is over, loading a new game...");
-                return false;
-            }
-            this.logger.save("Game loading from cache...");
-            this.boardEditor.createBoard(lastBoard);
-            this.logger.save("Game loaded from cache");
-            return true;
-        }
-
-        this.logger.save("No games found in cache");
-        return false;
     }
 
     /**
@@ -357,7 +293,8 @@ export class Platform{
         switch(menuOperation){
             case BoardEditorOperation.Enable:
                 this.navigatorModal.hide();
-                this._enableBoardEditor();
+                this.logConsole.clear();
+                this.boardEditor.enableEditorMode();
                 break;
             case BoardEditorOperation.FlipBoard:
                 this._flipBoard();
@@ -385,7 +322,6 @@ export class Platform{
                 break;
             case NavbarOperation.ShowAppearance:
                 this.navbar.showComponent(this.appearanceMenu);
-                //this.appearanceMenu.initColorPalette();
                 break;
             case NavbarOperation.ShowAbout:
                 this.navbar.showComponent(this.aboutMenu);
@@ -423,19 +359,6 @@ export class Platform{
     private clearComponents(){
         this.logConsole.clear();
         if(!BoardEditor.isEditorModeEnable()) this.notationMenu.clear();
-    }
-    
-    /**
-     * Enable the board editor and clear the components of the menu.
-     */
-    private _enableBoardEditor(): void
-    {
-        if(BoardEditor.isEditorModeEnable()) return;
-        this.clearComponents();
-        this.boardEditor.enableEditorMode();
-        LocalStorage.clear(LocalStorageKey.LastLobbyConnection);
-        LocalStorage.save(LocalStorageKey.BoardEditorEnabled, true);
-        this.logger.save("Board editor is enabled.");
     }
 
     /**
