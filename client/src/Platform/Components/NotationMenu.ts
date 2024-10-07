@@ -222,20 +222,63 @@ export class NotationMenu extends Component {
         if (this.lastScore.White == scores.White.score && this.lastScore.Black == scores.Black.score)
             return;
 
-        document.getElementById("white-captured-pieces")!.innerHTML = '<span class="piece-icons"></span><span></span>';
-        document.getElementById("black-captured-pieces")!.innerHTML = '<span class="piece-icons"></span><span></span>';
+        /**
+         * Piece Icons
+         */
+        const blackCapturedPieces = document.getElementById("black-captured-pieces")!;
+        blackCapturedPieces.innerHTML = "";
 
-        scores[Color.White].pieces.forEach((piece: PieceType) => {
-            document.querySelector("#black-captured-pieces .piece-icons")!.innerHTML += " " + this.getPieceUnicode(piece);
-        });
-        scores[Color.Black].pieces.forEach((piece: PieceType) => {
-            document.querySelector("#white-captured-pieces .piece-icons")!.innerHTML += " " + this.getPieceUnicode(piece);
-        });
+        const whiteCapturedPieces = document.getElementById("white-captured-pieces")!;
+        whiteCapturedPieces.innerHTML = "";
 
+        /**
+         * This function adds the piece icon to the captured pieces section
+         * by sorting the pieces according to their unicode code.
+         * For example, if the pieces are [Pawn, Rook, Queen] then the
+         * order of the pieces will be Queen, Rook, Pawn.
+         */
+        const addPieceIconSorted = (pieces: PieceType[], color: Color) => {
+            if (pieces.length === 0)
+                return;
+
+            const capturedPieces = color == Color.White ? whiteCapturedPieces : blackCapturedPieces;
+            pieces.sort((a, b) => this.getPieceUnicode(a).localeCompare(this.getPieceUnicode(b)));
+            pieces.forEach((piece) => {
+                const pieceUnicodeIcon = this.getPieceUnicode(piece);
+                if (capturedPieces.querySelectorAll(".piece-icon").length === 0) {
+                    capturedPieces.innerHTML = `<div class="piece-icon">${pieceUnicodeIcon}</div>`
+                } else {
+                    capturedPieces.innerHTML += `<div class="piece-icon">${pieceUnicodeIcon}</div>`;
+                }
+            });
+        }
+
+        addPieceIconSorted(scores[Color.White].pieces, Color.White);
+        addPieceIconSorted(scores[Color.Black].pieces, Color.Black);
+
+        /**
+         * Scores
+         */
         const whiteScore = scores[Color.White].score;
         const blackScore = scores[Color.Black].score;
-        document.querySelector("#black-captured-pieces :not(.piece-icons)")!.innerHTML += whiteScore <= 0 ? "" : " +" + whiteScore;
-        document.querySelector("#white-captured-pieces :not(.piece-icons)")!.innerHTML += blackScore <= 0 ? "" : " +" + blackScore;
+
+        const blackScoreElement = blackCapturedPieces.querySelector(".score");
+        const whiteScoreElement = whiteCapturedPieces.querySelector(".score");
+
+        /**
+         * This function adds the score to the score table.
+         */
+        const addScore = (score: number, color: Color) => {
+            const capturedPieces = color == Color.White ? whiteCapturedPieces : blackCapturedPieces;
+            const scoreElement = color == Color.White ? whiteScoreElement : blackScoreElement;
+            if (!scoreElement)
+                capturedPieces.innerHTML += score <= 0 ? "" : " " + `<div class="score">+${score}</div>`;
+            else 
+                scoreElement.textContent = `+${score}`;
+        }
+
+        addScore(whiteScore, Color.White);
+        addScore(blackScore, Color.Black);
 
         this.lastScore = { [Color.White]: whiteScore, [Color.Black]: blackScore };
     }

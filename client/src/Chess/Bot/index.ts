@@ -3,13 +3,11 @@ import { Converter } from "@Chess/Utils/Converter";
 
 /**
  * Default difficulty multiplier is 5.
- * Default depth multiplier is 3.
  * 
  * For more information about depth:
  * https://official-stockfish.github.io/docs/stockfish-wiki/UCI-&-Commands.html#go
  */
-const DIFFICULTY_MULTIPLIER = 5;
-const DEPTH_MULTIPLIER = 3;
+const DIFFICULTY_MULTIPLIER = 3;
 
 /**
  * Difficulty levels for the bot.
@@ -51,7 +49,6 @@ export enum BotColor{
 export class Bot{
     public readonly color: Color;
     public readonly difficulty: BotDifficulty;
-    private readonly depth: number;
 
     private stockfish: any;
     public readonly isWasmSupported: boolean = typeof WebAssembly === 'object' 
@@ -83,7 +80,6 @@ export class Bot{
         
         this.color = color as Color;
         this.difficulty = difficulty * DIFFICULTY_MULTIPLIER;
-        this.depth = difficulty * DEPTH_MULTIPLIER;
     }
 
     /**

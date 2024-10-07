@@ -174,14 +174,14 @@
         align-items: center;
         gap: 3px;
 
-        & .piece-icons{
+        & .piece-icon{
             font-size: var(--score-table-piece-icons-size);
             font-weight: normal;
         }
 
-        & :not(.piece-icons){
+        & .score{
             font-size: var(--score-table-score-font-size);
-            margin-top: 1px;
+            margin-top: 2px;
         }
     }
 }
