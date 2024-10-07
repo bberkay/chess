@@ -1,6 +1,6 @@
 import { PlatformEvent, BoardEditorOperation, NavigatorModalOperation } from "../Types";
 import { Chess } from "@Chess/Chess";
-import { Color, Durations, GameStatus, JsonNotation, PieceType, Square, StartPosition } from "@Chess/Types";
+import { ChessEvent, Color, Durations, GameStatus, JsonNotation, PieceType, Square, StartPosition } from "@Chess/Types";
 import { Component } from "./Component";
 import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage";
 
@@ -77,16 +77,9 @@ export class BoardEditor extends Component{
      */
     private loadLocalStorage(): void
     {
-        // If there is a game in the cache, load it.
-        if(LocalStorage.isExist(LocalStorageKey.LastBoard)){
-            const lastBoard = LocalStorage.load(LocalStorageKey.LastBoard);
-            if(lastBoard && [GameStatus.BlackVictory, 
-                GameStatus.WhiteVictory, 
-                GameStatus.Draw
-            ].includes(lastBoard.gameStatus))
-                this.createBoard();
-            else
-                this.createBoard(lastBoard);
+        if(LocalStorage.isExist(LocalStorageKey.LastAddedBot)){
+            const {color, _} = LocalStorage.load(LocalStorageKey.LastAddedBot);
+            if(color === Color.White) this.flip();
         }
 
         if(LocalStorage.isExist(LocalStorageKey.BoardEditorEnabled))
@@ -404,13 +397,15 @@ export class BoardEditor extends Component{
     }
 
     /**
-     * This function creates a new board with the board creator.
+     * This function prepares the board editor for the 
+     * created game. Checks if the editor mode is 
+     * enabled or not, adds the drag and drop event
+     * listeners to the pieces and squares, and enables
+     * the move piece cursor mode. If the current mode is
+     * template mode, it changes the mode to custom mode.
      */
-    private _createBoard(
-        notation: string | StartPosition | JsonNotation,
-    ): void
+    private _prepareBoardEditorForGame(): void
     {
-        this.chess.createGame(notation);
         if(BoardEditor.isEditorModeEnable()){
             this.chess.board.lock();
             this.chess.board.removeEffectFromAllSquares();
@@ -420,8 +415,6 @@ export class BoardEditor extends Component{
         
         if(this._currentBoardCreatorMode == BoardCreatorMode.Template)
           this.changeBoardCreatorMode();
-
-        document.dispatchEvent(new Event(PlatformEvent.OnBoardCreated));
     }
 
     /**
@@ -431,7 +424,8 @@ export class BoardEditor extends Component{
         fenNotation: string | StartPosition | JsonNotation | null = null
     ): void
     {
-        this._createBoard(fenNotation || this.getFen());
+        this.chess.createGame(fenNotation || this.getFen());
+        this._prepareBoardEditorForGame();
     }
 
     /**
@@ -560,13 +554,13 @@ export class BoardEditor extends Component{
     @isEditorModeEnable()
     private clearBoard(): void
     {
-        this._createBoard(StartPosition.Empty);
+        this.createBoard(StartPosition.Empty);
     }
     
     /**
      * This function flips the board.
      */
-    public flipBoard(): void
+    public flip(): void
     {
         this.chess.board.flip();
     }
@@ -576,7 +570,7 @@ export class BoardEditor extends Component{
      */
     public resetBoard(): void
     {
-        this._createBoard(this._lastLoadedFenNotation);
+        this.createBoard(this._lastLoadedFenNotation);
     }
 
     /**

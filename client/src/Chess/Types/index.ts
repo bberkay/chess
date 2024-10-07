@@ -181,25 +181,31 @@ export enum GameStatus{
  */
 export enum ChessEvent {
     /**
+     * Triggered when the game is created.
+     * @Event
+     */
+    onGameCreated = "onGameCreated",
+
+    /**
      * Triggered when a piece is created.
      * @CustomEvent
      * @param {Square} square - The square where the piece is created.
      */
-    OnPieceCreated = "OnPieceCreated",
+    onPieceCreated = "OnPieceCreated",
 
     /**
      * Triggered when a piece is removed.
      * @CustomEvent
      * @param {Square} square - The square where the piece is removed.
      */
-    OnPieceRemoved = "OnPieceRemoved",
+    onPieceRemoved = "OnPieceRemoved",
 
     /**
      * Triggered when a piece is selected.
      * @CustomEvent
      * @param {Square} square - The square where the piece is selected.
      */
-    OnPieceSelected = "OnPieceSelected",
+    onPieceSelected = "OnPieceSelected",
 
     /**
      * Triggered when a piece is moved.
@@ -207,7 +213,7 @@ export enum ChessEvent {
      * @param {Square} from - The starting square of the move.
      * @param {Square} to - The ending square of the move.
      */
-    OnPieceMoved = "OnPieceMoved",
+    onPieceMoved = "OnPieceMoved",
 
     /**
      * Triggered when a piece is moved by the player
@@ -226,6 +232,13 @@ export enum ChessEvent {
      */
     onPieceMovedByOpponent = "onPieceMovedByOpponent",
 
+    /**
+     * On bot added to the game.
+     * @CustomEvent
+     * @param {Color} color - The color of the bot.
+     */
+    onBotAdded = "onBotAdded",
+    
     /**
      * Triggered when the game is over.
      * @Event

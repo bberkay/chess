@@ -49,7 +49,7 @@ export enum BotColor{
  * https://github.com/lichess-org/stockfish.js
  */
 export class Bot{
-    public readonly color: BotColor | Color;
+    public readonly color: Color;
     public readonly difficulty: BotDifficulty;
     private readonly depth: number;
 
@@ -79,11 +79,11 @@ export class Bot{
             throw new Error("Color must be BotColor.Random, BotColor.White/Color.White, or BotColor.Black/Color.Black");
 
         if(color === BotColor.Random)
-            this.color = Math.random() < 0.5 ? BotColor.White : BotColor.Black;
+            color = Math.random() < 0.5 ? Color.White : Color.Black;
         
-        this.color = color;
-        this.difficulty = difficulty * 5;
-        this.depth = difficulty * 3;
+        this.color = color as Color;
+        this.difficulty = difficulty * DIFFICULTY_MULTIPLIER;
+        this.depth = difficulty * DEPTH_MULTIPLIER;
     }
 
     /**
@@ -106,7 +106,7 @@ export class Bot{
     public async getMove(fen: string): Promise<Move | Move[]> {
         return new Promise((resolve) => {
             this.stockfish.postMessage("position fen " + fen);
-            this.stockfish.postMessage("go depth " + this.depth);
+            this.stockfish.postMessage("go movetime 500");
 
             const listener = (event: MessageEvent) => {
                 const line = event.data;

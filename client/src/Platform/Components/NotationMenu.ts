@@ -1,4 +1,4 @@
-import { Color, Durations, GameStatus, PieceType, Scores } from "@Chess/Types";
+import { ChessEvent, Color, Durations, GameStatus, PieceType, Scores } from "@Chess/Types";
 import { Component } from "./Component.ts";
 import { Chess } from "@Chess/Chess.ts";
 import { BoardEditorOperation, NavigatorModalOperation, NotationMenuOperation } from "../Types";
@@ -35,6 +35,11 @@ export class NotationMenu extends Component {
     private loadLocalStorage(): void {
         if(LocalStorage.isExist(LocalStorageKey.BoardEditorEnabled))
             this.hidePlayerCards();
+
+        if(LocalStorage.isExist(LocalStorageKey.LastAddedBot)){
+            const {color, _} = LocalStorage.load(LocalStorageKey.LastAddedBot);
+            if(color === Color.White) this.flip();
+        }
     }
 
     /**

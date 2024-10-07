@@ -92,17 +92,17 @@ export class Platform{
             this.boardEditor.updateFen();
 
             const updateFenTriggers = [
-                PlatformEvent.OnBoardCreated,
-                ChessEvent.OnPieceCreated,
-                ChessEvent.OnPieceRemoved,
-                ChessEvent.OnPieceSelected,
-                ChessEvent.OnPieceMoved,
+                ChessEvent.onGameCreated,
+                ChessEvent.onPieceCreated,
+                ChessEvent.onPieceRemoved,
+                ChessEvent.onPieceSelected,
+                ChessEvent.onPieceMoved,
                 ChessEvent.onGameOver,
             ]
 
             updateFenTriggers.forEach((trigger) => {
                 document.addEventListener(trigger, () => {
-                    if(trigger == ChessEvent.OnPieceSelected || trigger == ChessEvent.OnPieceMoved)
+                    if(trigger == ChessEvent.onPieceSelected || trigger == ChessEvent.onPieceMoved)
                         this.navbar.showComponent(this.logConsole);
                     this.updateComponents();
                 });
@@ -233,6 +233,10 @@ export class Platform{
                 const { botColor, botDifficulty } = this.navigatorModal.getCreatedBotSettings();
                 this.navigatorModal.hide();
                 this._playBoard();
+                document.addEventListener(ChessEvent.onBotAdded, ((event: CustomEvent) => {
+                    if(event.detail.color === Color.White) 
+                        this._flipBoard();
+                }) as EventListener);
                 this.chess.addBotToCurrentGame(botColor, botDifficulty);
                 break;
         }
@@ -418,7 +422,7 @@ export class Platform{
      */
     private _flipBoard(): void
     {
-        this.boardEditor.flipBoard();
+        this.boardEditor.flip();
         if(!BoardEditor.isEditorModeEnable())
             this.notationMenu.flip();
     }

@@ -43,6 +43,7 @@ export class Chess{
      */
     constructor(){
         this.logger.save("Chess class initialized");
+        this.checkAndLoadGameFromCache();
     }
 
     /**
@@ -64,18 +65,22 @@ export class Chess{
      * @returns Returns true if there is a game in the cache, otherwise returns false.
      * @see For more information about cache management check src/Services/LocalStorage.ts
      */
-    public checkAndLoadGameFromCache(): boolean
+    public checkAndLoadGameFromCache(): void
     {
         // If there is a game in the cache, load it.
         if(LocalStorage.isExist(LocalStorageKey.LastBoard)){
             this.logger.save("Game loading from cache...");
             this.createGame(LocalStorage.load(LocalStorageKey.LastBoard));
+            if(LocalStorage.isExist(LocalStorageKey.LastAddedBot)){
+                const {color, difficulty} = LocalStorage.load(LocalStorageKey.LastAddedBot);
+                this.addBotToCurrentGame(color, difficulty);
+                this.logger.save(`Bot[${JSON.stringify({color, difficulty})}] found in cache and added to the game`);
+            }
             this.logger.save("Game loaded from cache");
-            return true;
+        } else {
+            this.createGame();
+            this.logger.save("No game found in cache, created a standard game");
         }
-
-        this.logger.save("No games found in cache");
-        return false;
     }
 
     /**
@@ -112,17 +117,15 @@ export class Chess{
         
         this.board.createGame(position);
         this.board.setTurnColor(this.engine.getTurnColor());
-        this.logger.save(`Game successfully created on Chessboard`);
+        this.board.showStatus(this.engine.getGameStatus());
+        this.logger.save(`Game successfully created on Chessboard and status[${this.engine.getGameStatus()}] shown`);
+
+        this.initBoardListener();
+        this.initEngineListener();
 
         LocalStorage.save(LocalStorageKey.LastBoard, position);
         this.logger.save(`Game saved to cache as json notation[${JSON.stringify(position)}]`);
-
-        this.board.showStatus(this.engine.getGameStatus());
-
-        // Initialize the listener for moves because the game is 
-        // created from scratch and the listener is not initialized.
-        this.initBoardListener();
-        this.initEngineListener();
+        document.dispatchEvent(new Event(ChessEvent.onGameCreated));
     }
 
     /**
@@ -134,13 +137,17 @@ export class Chess{
     {
         this._bot = new Bot(botColor, botDifficulty);
         this._bot.start();
-        this.logger.save(`Bot[${this._bot.color}] created with difficulty[${this._bot.difficulty}]`);
+        this.board.disablePreSelectionFor(this._bot.color);
+        this.logger.save(`Bot[${this._bot.color}] created with difficulty[${botDifficulty}]`);
         
         // First move
         if(botColor == this.engine.getTurnColor()){
-            this.board.lock();
+            this.board.lock(false);
             this.playBotIfExist();
         }
+
+        LocalStorage.save(LocalStorageKey.LastAddedBot, {color: this._bot.color, difficulty: botDifficulty});
+        document.dispatchEvent(new CustomEvent(ChessEvent.onBotAdded, {detail: {color: this._bot.color}}));
     }
 
     /**
@@ -153,6 +160,7 @@ export class Chess{
 
         this._bot.terminate();
         this._bot = null;
+        LocalStorage.clear(LocalStorageKey.LastAddedBot);
         this.logger.save("Bot terminated");
     }
 
@@ -165,7 +173,7 @@ export class Chess{
         this.engine.createPiece(color, pieceType, square);
         this.logger.save(`Piece[${JSON.stringify({color, pieceType, square})}] created on board and engine`);
         document.dispatchEvent(new CustomEvent(
-            ChessEvent.OnPieceCreated, {detail: {square: square}}
+            ChessEvent.onPieceCreated, {detail: {square: square}}
         ));
         LocalStorage.save(LocalStorageKey.LastBoard, this.engine.getGameAsJsonNotation());
     }
@@ -179,7 +187,7 @@ export class Chess{
         this.engine.removePiece(square);
         this.logger.save(`Piece[${square}] removed from board and engine`);
         document.dispatchEvent(new CustomEvent(
-            ChessEvent.OnPieceRemoved, {detail: {square: square}}
+            ChessEvent.onPieceRemoved, {detail: {square: square}}
         ));
         LocalStorage.save(LocalStorageKey.LastBoard, this.engine.getGameAsJsonNotation());
     }
@@ -247,7 +255,7 @@ export class Chess{
             isPreSelected
         );
         this.logger.save(`Piece[${squareId}] selected on the board`);
-        document.dispatchEvent(new CustomEvent(ChessEvent.OnPieceSelected, {detail: {square: squareId}}));
+        document.dispatchEvent(new CustomEvent(ChessEvent.onPieceSelected, {detail: {square: squareId}}));
     }
 
     /**
@@ -264,7 +272,7 @@ export class Chess{
         {
             this._isPromotionScreenOpen = squareClickMode == SquareClickMode.Promotion;
             this.playMove(this._selectedSquare!, squareId);
-            if(this._bot) this.board.lock();
+            if(this._bot) this.board.lock(false);
             document.dispatchEvent(new CustomEvent(
                 ChessEvent.onPieceMovedByPlayer, {detail: {from: this._selectedSquare!, to: squareId}}
             ));
@@ -278,7 +286,7 @@ export class Chess{
         {
             this._preMove = {from: this._preSelectedSquare!, to: squareId}
             this.logger.save(`Pre-move[${JSON.stringify({from: this._preSelectedSquare!, to: squareId})}] saved`);
-            document.dispatchEvent(new CustomEvent(ChessEvent.OnPieceSelected, {detail: {square: squareId}}));
+            document.dispatchEvent(new CustomEvent(ChessEvent.onPieceSelected, {detail: {square: squareId}}));
         }
     }
 
@@ -323,7 +331,7 @@ export class Chess{
         setTimeout(() => {
             this.logger.save(`Move[${JSON.stringify({from, to})}] played on board and engine`);
             this.finishTurn();   
-            document.dispatchEvent(new CustomEvent(ChessEvent.OnPieceMoved, {detail: {from: from, to: to}}));
+            document.dispatchEvent(new CustomEvent(ChessEvent.onPieceMoved, {detail: {from: from, to: to}}));
         }, 100);
     }
 
