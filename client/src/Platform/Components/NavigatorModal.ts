@@ -79,8 +79,6 @@ export class NavigatorModal extends Component{
             if(!(event.target as HTMLElement).closest(".navigator-modal")){
                 if(activeModal.classList.contains("closeable"))
                     this.hide();
-                else
-                    this.bounce();
             }   
         });
     }
@@ -142,19 +140,6 @@ export class NavigatorModal extends Component{
     {
         document.querySelector('.navigator-modal-title')!.innerHTML = this.lastNavigatorModalTitle;
         document.querySelector('.navigator-modal-content')!.innerHTML = this.lastNavigatorModalContent;
-    }
-
-    /**
-     * This function bounce the current navigator modal
-     */
-    private bounce(): void
-    {
-        const modal = document.querySelector('.navigator-modal')!;
-        if(!modal) return;
-        modal.classList.add("bounce");
-        setTimeout(() => {
-            modal.classList.remove("bounce");
-        }, 500);
     }
 
     /**

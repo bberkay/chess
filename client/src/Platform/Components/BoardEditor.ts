@@ -282,7 +282,7 @@ export class BoardEditor extends Component{
             mutations.forEach((mutation: MutationRecord) => {
                 if((mutation.target as HTMLElement).hasAttribute("data-menu-operation")){
                     document.dispatchEvent(new CustomEvent(
-                        PlatformEvent.OnOperationMounted, 
+                        PlatformEvent.onOperationMounted, 
                         { detail: { selector: mutation.target } }
                     ));
                 }

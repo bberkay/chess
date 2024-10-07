@@ -40,7 +40,7 @@ export abstract class Component{
         this.createValidations(componentId);
         this.createCopyToClipboard(componentId);
         this.createSelectableButtons(componentId);
-        document.dispatchEvent(new CustomEvent(PlatformEvent.OnOperationMounted, {detail: {selector: "#" + componentId}}));
+        document.dispatchEvent(new CustomEvent(PlatformEvent.onOperationMounted, {detail: {selector: "#" + componentId}}));
     }
     
     /**

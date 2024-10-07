@@ -77,7 +77,7 @@ export class ChessPlatform{
                 });
             });
 
-            document.addEventListener(PlatformEvent.OnOperationMounted, ((event: CustomEvent) => {
+            document.addEventListener(PlatformEvent.onOperationMounted, ((event: CustomEvent) => {
                 if(typeof event.detail.selector === "string"){
                     const socketOperations = document.querySelectorAll(`${event.detail.selector} [data-socket-operation]`);
                     if(!socketOperations) return;
@@ -114,6 +114,11 @@ export class ChessPlatform{
             else
                 this.reconnectLobby();
         };        
+
+        // If user creates single player game:
+        document.addEventListener(PlatformEvent.onBoardCreated, (() => {
+            this.forceClearLastConnection();
+        }) as EventListener);
 
         /**
          * Initialize the chess platform.
@@ -418,7 +423,7 @@ export class ChessPlatform{
                 case WsTitle.Started:
                     this.platform.navigatorModal.hide();
                     const playerColor = (wsData as WsStartedData).whitePlayer.id === player!.id ? Color.White : Color.Black;
-                    this.platform.createOnlineGame(wsData as WsStartedData, playerColor);
+                    this.platform.preparePlatformForOnlineGame(wsData as WsStartedData, playerColor);
                     document.addEventListener(ChessEvent.onPieceMovedByPlayer, ((event: CustomEvent) => {
                         if(!this.socket) return;
                         const { from, to } = event.detail;

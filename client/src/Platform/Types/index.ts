@@ -5,10 +5,10 @@
  */
 export enum PlatformEvent {
     /**
-     * Triggered when a board is created by the board editor.
+     * Triggered when a new board is created by the board editor.
      * @event
      */
-    OnBoardCreated = "OnBoardCreated",
+    onBoardCreated = "OnBoardCreated",
 
     /**
      * Triggered when a component that has a data-menu-operation or 
@@ -18,7 +18,7 @@ export enum PlatformEvent {
      * the selector will be used as querySelectorAll(selector + data-menu/socket-operation).
      * If an HTMLElement is passed, the element directly will be used as data-menu/socket-operation.
      */
-    OnOperationMounted = "OnOperationMounted",
+    onOperationMounted = "onOperationMounted",
 }
 
 export enum NotationMenuOperation{

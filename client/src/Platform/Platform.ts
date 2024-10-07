@@ -123,7 +123,7 @@ export class Platform{
                 });
             });
 
-            document.addEventListener(PlatformEvent.OnOperationMounted, ((event: CustomEvent) => {
+            document.addEventListener(PlatformEvent.onOperationMounted, ((event: CustomEvent) => {
                 if(typeof event.detail.selector === "string"){
                     const menuOperations = document.querySelectorAll(`${event.detail.selector} [data-menu-operation]`);
                     if(!menuOperations) return;
@@ -140,9 +140,15 @@ export class Platform{
                     });
                 }
             }) as EventListener);
+            
 
             this.logger.save("Menu operations are binded to loaded components.");
         }
+
+        document.addEventListener(ChessEvent.onBotAdded, ((event: CustomEvent) => {
+            if(event.detail.color === Color.White) 
+                this._flipBoardAndComponents();
+        }) as EventListener);
 
         /**
          * Initialize the platform components.
@@ -226,18 +232,10 @@ export class Platform{
                 this.navigatorModal.showStartPlayingBoard(this.boardEditor.getFen());
                 break;
             case NavigatorModalOperation.PlayByYourself:
-                this.navigatorModal.hide();
-                this._playBoard();
+                this.preparePlatformForSingleplayerGame();
                 break;
             case NavigatorModalOperation.PlayAgainstBot:
-                const { botColor, botDifficulty } = this.navigatorModal.getCreatedBotSettings();
-                this.navigatorModal.hide();
-                this._playBoard();
-                document.addEventListener(ChessEvent.onBotAdded, ((event: CustomEvent) => {
-                    if(event.detail.color === Color.White) 
-                        this._flipBoard();
-                }) as EventListener);
-                this.chess.addBotToCurrentGame(botColor, botDifficulty);
+                this.preparePlatformForSingleplayerGame();
                 break;
         }
     }
@@ -299,15 +297,16 @@ export class Platform{
                 this.navigatorModal.hide();
                 this.logConsole.clear();
                 this.boardEditor.enableEditorMode();
+                document.dispatchEvent(new Event(PlatformEvent.onBoardCreated));
                 break;
             case BoardEditorOperation.FlipBoard:
-                this._flipBoard();
+                this._flipBoardAndComponents();
                 break;
             case BoardEditorOperation.ResetBoard:
-                this._resetBoard();
+                this._resetBoardAndComponents();
                 break;
             case BoardEditorOperation.CreateBoard:
-                this._createBoard();
+                this._createBoardAndHandleComponents();
                 break;
         }
     }
@@ -366,28 +365,9 @@ export class Platform{
     }
 
     /**
-     * Prepare the platform components for the online game.
-     */
-    public createOnlineGame(createdGame: { 
-        whitePlayer: {id: string, name: string, isOnline: boolean},
-        blackPlayer: {id: string, name: string, isOnline: boolean},
-        game: string | JsonNotation
-    }, playerColor: Color): void
-    {
-        this._createBoard(createdGame.game);
-        this.chess.board.disablePreSelectionFor(playerColor === Color.White ? Color.Black : Color.White);
-        this.notationMenu.displayLobbyUtilityMenu();
-        this.notationMenu.updatePlayerCards(createdGame.whitePlayer, createdGame.blackPlayer);
-        this.notationMenu.setTurnIndicator(this.chess.engine.getTurnColor());
-        if(playerColor === Color.Black) this._flipBoard();
-        if(playerColor !== this.chess.engine.getTurnColor()) this.chess.board.lock(false);
-        else this.chess.board.unlock();
-    }
-
-    /**
      * Create a new game and update the components of the menu.
      */
-    private _createBoard(
+    private _createBoardAndHandleComponents(
         notation: string | StartPosition | JsonNotation | null = null
     ): void 
     {
@@ -399,10 +379,34 @@ export class Platform{
     }
 
     /**
+     * Prepare the platform components for the online game.
+     */
+    public preparePlatformForOnlineGame(createdGame: { 
+        whitePlayer: {id: string, name: string, isOnline: boolean},
+        blackPlayer: {id: string, name: string, isOnline: boolean},
+        game: string | JsonNotation
+    }, playerColor: Color): void
+    {
+        this._createBoardAndHandleComponents(createdGame.game);
+        this.chess.board.disablePreSelectionFor(playerColor === Color.White ? Color.Black : Color.White);
+        this.notationMenu.displayLobbyUtilityMenu();
+        this.notationMenu.updatePlayerCards(createdGame.whitePlayer, createdGame.blackPlayer);
+        this.notationMenu.setTurnIndicator(this.chess.engine.getTurnColor());
+        if(playerColor === Color.Black) this._flipBoardAndComponents();
+        if(playerColor !== this.chess.engine.getTurnColor()) this.chess.board.lock(false);
+        else this.chess.board.unlock();
+    }
+
+    /**
      * Create a new game and update the components of the menu.
      */
-    private _playBoard(fenNotation: string | null = null): void 
+    private preparePlatformForSingleplayerGame(
+        fenNotation: string | null = null
+    ): void 
     {
+        const { botColor, botDifficulty } = this.navigatorModal.getCreatedBotSettings();
+        this.navigatorModal.hide();
+
         if(!BoardEditor.isEditorModeEnable()) 
             fenNotation = StartPosition.Standard;
         else 
@@ -413,14 +417,19 @@ export class Platform{
         this.boardEditor.createBoard(fenNotation);
         this.notationMenu.showPlayerCards();
         this.notationMenu.setTurnIndicator(this.chess.engine.getTurnColor());
-        LocalStorage.clear(LocalStorageKey.BoardEditorEnabled);
+
+        if(botColor && botDifficulty)
+            this.chess.addBotToCurrentGame(botColor, botDifficulty);
+
         this.logger.save(`Editor mode is disabled and board is now playable.`);
+        LocalStorage.clear(LocalStorageKey.BoardEditorEnabled);
+        document.dispatchEvent(new Event(PlatformEvent.onBoardCreated));
     }
 
     /**
      * Flip the board and notation menu.
      */
-    private _flipBoard(): void
+    private _flipBoardAndComponents(): void
     {
         this.boardEditor.flip();
         if(!BoardEditor.isEditorModeEnable())
@@ -430,7 +439,7 @@ export class Platform{
     /**
      * Reset the board and update the components of the menu.
      */
-    private _resetBoard(): void
+    private _resetBoardAndComponents(): void
     {
         this.logConsole.clear();
         this.boardEditor.resetBoard();
