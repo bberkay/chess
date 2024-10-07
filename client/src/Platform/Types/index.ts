@@ -31,7 +31,7 @@ export enum NotationMenuOperation{
     LastMove = "LastMove",
     FirstMove = "FirstMove",
     GoBack = "GoBack",
-    ShowLobbyUtilityMenu = "ShowLobbyUtilityMenu",
+    ShowInPlayUtilityMenu = "ShowInPlayUtilityMenu",
     ShowNewGameUtilityMenu = "ShowNewGameUtilityMenu",
     ShowPlayAgainUtilityMenu = "ShowPlayAgainUtilityMenu",
     ToggleUtilityMenu = "ToggleUtilityMenu",

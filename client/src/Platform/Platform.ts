@@ -246,22 +246,22 @@ export class Platform{
     private handleNotationMenuOperation(menuOperation: NotationMenuOperation, menuItem: HTMLElement): void
     {
         switch(menuOperation){
-            
-            /*case NotationMenuOperation.SendUndoOffer:
-                this.chess.sendUndoOffer();
-                break;
             case NotationMenuOperation.PreviousMove:
-                this.chess.previousMove();
+                this.chess.takeBack();
                 break;
             case NotationMenuOperation.NextMove:
-                this.chess.nextMove();
+                this.chess.takeForward();
                 break;
-            case NotationMenuOperation.FirstMove:
+            /*case NotationMenuOperation.FirstMove:
                 this.chess.firstMove();
                 break;
             case NotationMenuOperation.LastMove:
                 this.chess.lastMove();
                 break;*/
+            /*case NotationMenuOperation.SendUndoOffer:
+                this.chess.sendUndoOffer();
+                break;
+            */
         }
     }
 
@@ -389,7 +389,7 @@ export class Platform{
     {
         this._createBoardAndHandleComponents(createdGame.game);
         this.chess.board.disablePreSelectionFor(playerColor === Color.White ? Color.Black : Color.White);
-        this.notationMenu.displayLobbyUtilityMenu();
+        this.notationMenu.displayInPlayUtilityMenu();
         this.notationMenu.updatePlayerCards(createdGame.whitePlayer, createdGame.blackPlayer);
         this.notationMenu.setTurnIndicator(this.chess.engine.getTurnColor());
         if(playerColor === Color.Black) this._flipBoardAndComponents();
@@ -415,6 +415,7 @@ export class Platform{
         this.logConsole.clear();
         this.notationMenu.clear();
         this.boardEditor.createBoard(fenNotation);
+        this.notationMenu.displayInPlayUtilityMenu();
         this.notationMenu.showPlayerCards();
         this.notationMenu.setTurnIndicator(this.chess.engine.getTurnColor());
 

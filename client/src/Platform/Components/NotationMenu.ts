@@ -39,6 +39,7 @@ export class NotationMenu extends Component {
         if(LocalStorage.isExist(LocalStorageKey.LastAddedBot)){
             const {color, _} = LocalStorage.load(LocalStorageKey.LastAddedBot);
             if(color === Color.White) this.flip();
+            this.displayInPlayUtilityMenu();
         }
     }
 
@@ -50,9 +51,9 @@ export class NotationMenu extends Component {
     }
 
     /**
-     * Get default lobby utility menu content.
+     * Get default in play utility menu content.
      */
-    private getLobbyUtilityMenuContent(): string {
+    private getInPlayUtilityMenuContent(): string {
         return `
             <button class="menu-item" data-menu-operation="${NotationMenuOperation.SendUndoOffer}" data-tooltip-text="Send Undo Offer">↺ Undo</button>
             <button class="menu-item" data-menu-operation="${NotationMenuOperation.SendDrawOffer}" data-tooltip-text="Send Draw Offer">Draw</button>
@@ -128,18 +129,18 @@ export class NotationMenu extends Component {
                     </table>
                     <div class="utility-menu">
                         <button class="menu-item" data-menu-operation="${BoardEditorOperation.FlipBoard}" data-tooltip-text="Flip Board">F</button>
-                        <button class="menu-item" data-menu-operation="${NotationMenuOperation.FirstMove}" disabled="true" data-tooltip-text="Go First Move">⟪</button>
-                        <button class="menu-item" data-menu-operation="${NotationMenuOperation.PreviousMove}" disabled="true" data-tooltip-text="Go Previous Move">❮</button>
-                        <button class="menu-item" data-menu-operation="${NotationMenuOperation.NextMove}" disabled="true" data-tooltip-text="Go Next Move">❯</button>
-                        <button class="menu-item" data-menu-operation="${NotationMenuOperation.LastMove}" disabled="true" data-tooltip-text="Go Last Move">⟫</button>
+                        <button class="menu-item" data-menu-operation="${NotationMenuOperation.FirstMove}" data-tooltip-text="Go First Move">⟪</button>
+                        <button class="menu-item" data-menu-operation="${NotationMenuOperation.PreviousMove}" data-tooltip-text="Go Previous Move">❮</button>
+                        <button class="menu-item" data-menu-operation="${NotationMenuOperation.NextMove}" data-tooltip-text="Go Next Move">❯</button>
+                        <button class="menu-item" data-menu-operation="${NotationMenuOperation.LastMove}" data-tooltip-text="Go Last Move">⟫</button>
                         <button class="menu-item" data-menu-operation="${NotationMenuOperation.ToggleUtilityMenu}">☰</button>
                     </div>
                     <div class="utility-menu utility-toggle-menu visible">
                         <div class="utility-toggle-menu-section active" id="new-game-utility-menu">
                             ${this.getNewGameUtilityMenuContent()}
                         </div>
-                        <div class="utility-toggle-menu-section" id="lobby-utility-menu">
-                            ${this.getLobbyUtilityMenuContent()}
+                        <div class="utility-toggle-menu-section" id="in-play-utility-menu">
+                            ${this.getInPlayUtilityMenuContent()}
                         </div>
                         <div class="utility-toggle-menu-section" id="play-again-utility-menu">
                             ${this.getPlayAgainUtilityMenuContent()}
@@ -358,14 +359,14 @@ export class NotationMenu extends Component {
     }
 
     /**
-     * Show the lobby utility menu section. This menu contains
+     * Show the in play utility menu section. This menu contains
      * undo, draw and resign buttons.
      */
-    public displayLobbyUtilityMenu(): void {
+    public displayInPlayUtilityMenu(): void {
         document.querySelector(".utility-toggle-menu-section.active")!.classList.remove("active");
-        this.loadHTML("lobby-utility-menu", this.getLobbyUtilityMenuContent());
-        document.getElementById(`lobby-utility-menu`)!.classList.add("active");
-        this.activeUtilityMenu = "lobby-utility-menu";
+        this.loadHTML("in-play-utility-menu", this.getInPlayUtilityMenuContent());
+        document.getElementById(`in-play-utility-menu`)!.classList.add("active");
+        this.activeUtilityMenu = "in-play-utility-menu";
     }
 
     /**
@@ -720,8 +721,8 @@ export class NotationMenu extends Component {
             case "new-game-utility-menu":
                 this.displayNewGameUtilityMenu();
                 break;
-            case "lobby-utility-menu":
-                this.displayLobbyUtilityMenu();
+            case "in-play-utility-menu":
+                this.displayInPlayUtilityMenu();
                 break;
             case "play-again-utility-menu":
                 this.displayPlayAgainUtilityMenu();
@@ -737,8 +738,8 @@ export class NotationMenu extends Component {
             case NotationMenuOperation.ToggleUtilityMenu:
                 this.toggleUtilityMenu();
                 break;
-            case NotationMenuOperation.ShowLobbyUtilityMenu:
-                this.displayLobbyUtilityMenu();
+            case NotationMenuOperation.ShowInPlayUtilityMenu:
+                this.displayInPlayUtilityMenu();
                 break;
             case NotationMenuOperation.Resign:
                 this.showConfirmation(NotationMenuOperation.Resign);

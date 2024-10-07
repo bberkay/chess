@@ -500,14 +500,16 @@ export class ChessBoard {
     /**
      * This function moves the piece from the given square to the given square on the chess board.
      */
-    public playMove(from:Square, to:Square): void
+    public playMove(from:Square, to:Square, isTakeBack: boolean = false): void
     {
         this.removeEffectFromAllSquares();
         this.logger.save(`From[${from}], To[${to}] and Checked Square's(if exits) effects are cleaned.`);
         const fromSquare: HTMLDivElement = this.getSquareElement(from);
         const toSquare: HTMLDivElement = this.getSquareElement(to);
-        this.addSquareEffects(fromSquare, SquareEffect.From);
-        this.addSquareEffects(toSquare, SquareEffect.To);
+        if(!isTakeBack){
+            this.addSquareEffects(fromSquare, SquareEffect.From);
+            this.addSquareEffects(toSquare, SquareEffect.To);
+        }
         this.logger.save(`Moved From and Moved To effects given the From[${from}] and To[${from}] squares.`);
 
         const moveType: SquareClickMode = this.getSquareClickMode(toSquare);
@@ -525,7 +527,7 @@ export class ChessBoard {
                 this._doPromote(toSquare);
                 break;
             default:
-                this._doNormalMove(fromSquare, toSquare);
+                this._doNormalMove(fromSquare, toSquare, !isTakeBack);
                 break;
         }
     }
