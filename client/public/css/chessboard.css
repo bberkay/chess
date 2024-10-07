@@ -271,8 +271,8 @@
 #chessboard {
     & .square-effect-layer{
         position: absolute;
-        width:calc((var(--chessboard-board-size) - 2px) / 8);
-        height:calc((var(--chessboard-board-size) - 2px) / 8);
+        width:100%;
+        height:100%;
         box-shadow: inset 0 0 0 1px var(--chessboard-square-shadow-color);
         text-align: center;
         margin:0!important;
@@ -342,8 +342,8 @@
         position: absolute;
         top: 50%;
         left: 50%;
-        width:calc((var(--chessboard-board-size) - 2px) / 8);
-        height:calc((var(--chessboard-board-size) - 2px) / 8);
+        width:calc(100% + 1px);
+        height:calc(100% + 1px);
         box-shadow: none;
         transform: translate(-50%, -50%);
     }
@@ -363,8 +363,8 @@
         position: absolute;
         top: 50%;
         left: 50%;
-        width:calc((var(--chessboard-board-size) - 2px) / 8);
-        height:calc((var(--chessboard-board-size) - 2px) / 8);
+        width:100%;
+        height:100%;
         border-radius: 50%;
         transform: translate(-50%, -50%);
     }
