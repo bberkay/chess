@@ -42,11 +42,20 @@
         & td{
             text-align: center;
             padding:5px;
+            cursor: pointer;
         }
 
-        &:nth-child(odd) td{
+        &:nth-child(odd) td:has(span){
             background-color: var(--notation-menu-odd-row-bg-color);
             border:1px solid var(--notation-menu-odd-row-border-color);
+        }
+
+        & td.current-move{
+            background-color: var(--notation-menu-current-move-bg-color)!important;
+        }
+
+        & td:hover{
+            background-color: var(--notation-menu-hover-bg-color)!important;
         }
     }
 }
@@ -173,6 +182,8 @@
         display: flex;
         align-items: center;
         gap: 3px;
+        height: var(--score-table-piece-icons-size);
+        padding: 2px 0;
 
         & .piece-icon{
             font-size: var(--score-table-piece-icons-size);

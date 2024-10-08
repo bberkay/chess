@@ -204,6 +204,8 @@ body{
     --notation-menu-player-name-inner-bg-color: var(--component-color);
     --notation-menu-player-name-border-color: var(--border-color);
     --notation-menu-decisecond-bg-color: var(--danger-color);
+    --notation-menu-hover-bg-color: var(--component-active-color);
+    --notation-menu-current-move-bg-color: var(--component-active-color);
 
     /* Utility Menu */
     --utility-menu-bg-color: var(--accent-color);

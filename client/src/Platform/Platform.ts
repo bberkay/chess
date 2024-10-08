@@ -173,11 +173,19 @@ export class Platform{
             this.logConsole.handleOperation(
                 menuOperation as LogConsoleOperation
             );
+            this.handleLogConsoleOperation(
+                menuOperation as LogConsoleOperation, 
+                menuItem
+            );
         }
         else if(Object.hasOwn(AppearanceMenuOperation, menuOperation))
         {
             this.appearanceMenu.handleOperation(
                 menuOperation as AppearanceMenuOperation
+            );
+            this.handleAppearanceMenuOperation(
+                menuOperation as AppearanceMenuOperation, 
+                menuItem
             );
         }
         else if(Object.hasOwn(NavigatorModalOperation, menuOperation))
@@ -223,6 +231,33 @@ export class Platform{
     }
     
     /**
+     * Handle the log console operations.
+     */
+    private handleLogConsoleOperation(menuOperation: LogConsoleOperation, menuItem: HTMLElement): void
+    {
+        switch(menuOperation){
+        }
+    }
+    
+    /**
+     * Handle the appearance menu operations.
+     */
+    private handleAppearanceMenuOperation(menuOperation: AppearanceMenuOperation, menuItem: HTMLElement): void
+    {
+        switch(menuOperation){
+        }
+    }
+
+    /**
+     * Handle the notation menu operations.
+     */
+    private handleNotationMenuOperation(menuOperation: NotationMenuOperation, menuItem: HTMLElement): void
+    {
+        switch(menuOperation){
+        }
+    }
+
+    /**
      * Handle the navigator modal operations.
      */
     private handleNavigatorModalOperation(menuOperation: NavigatorModalOperation, menuItem: HTMLElement): void
@@ -237,31 +272,6 @@ export class Platform{
             case NavigatorModalOperation.PlayAgainstBot:
                 this.preparePlatformForSingleplayerGame();
                 break;
-        }
-    }
-
-    /**
-     * Handle the notation menu operations.
-     */
-    private handleNotationMenuOperation(menuOperation: NotationMenuOperation, menuItem: HTMLElement): void
-    {
-        switch(menuOperation){
-            case NotationMenuOperation.PreviousMove:
-                this.chess.takeBack();
-                break;
-            case NotationMenuOperation.NextMove:
-                this.chess.takeForward();
-                break;
-            /*case NotationMenuOperation.FirstMove:
-                this.chess.firstMove();
-                break;
-            case NotationMenuOperation.LastMove:
-                this.chess.lastMove();
-                break;*/
-            /*case NotationMenuOperation.SendUndoOffer:
-                this.chess.sendUndoOffer();
-                break;
-            */
         }
     }
 

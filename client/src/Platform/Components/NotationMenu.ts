@@ -24,6 +24,7 @@ export class NotationMenu extends Component {
         this.loadCSS("notation-menu.css");
         this.renderComponent();
         this.loadLocalStorage();
+        this.addShortcutListeners();
         document.addEventListener("DOMContentLoaded", () => {
             this.update(true);
         });
@@ -93,6 +94,43 @@ export class NotationMenu extends Component {
                 <button class="menu-item" id="accept-button" data-socket-operation="" data-tooltip-text=""></button>
             </div>
         `;
+    }
+
+    /**
+     * Adds keyboard shortcuts for navigating the chess game.
+     * - "ArrowRight" moves the game forward.
+     * - "ArrowLeft" moves the game backward.
+     * - "ArrowUp" jumps to the first move.
+     * - "ArrowDown" jumps to the last move.
+     */
+    private addShortcutListeners(): void {
+        // when the user press "->" key, the game will go forward.
+        document.addEventListener("keydown", (e) => {
+            if (e.key == "ArrowRight") {
+                this.chess.takeForward();
+            }
+        });
+
+        // when the user press "<-" key, the game will go back.
+        document.addEventListener("keydown", (e) => {
+            if (e.key == "ArrowLeft") {
+                this.chess.takeBack();
+            }
+        });
+
+        // when the user press up arrow key, the game will go forward to the specific move.
+        document.addEventListener("keydown", (e) => {
+            if (e.key == "ArrowUp") {
+                this.chess.goToSpecificMove(0);
+            }
+        });
+
+        // when the user press down arrow key, the game will go back to the specific move.
+        document.addEventListener("keydown", (e) => {
+            if (e.key == "ArrowDown") {
+                this.chess.goToSpecificMove(this.chess.engine.getMoveHistory().length - 1);
+            }
+        });
     }
 
     /**
@@ -177,43 +215,99 @@ export class NotationMenu extends Component {
      */
     private addNotation(notations: ReadonlyArray<string>): void {
         /**
+         * This function formats the unicode notation for adding to 
+         * the table notation. For example, if the notation is "&#9812;f3"
+         * then the function will return "<span class="piece-icon">&#9812;</span><span class="move">f3</span>".
+         * If the notation is "f3" then the function will return "<span class="move">f3</span>".
+         */
+        const formatUnicodeNotation = (notation: string): string => {
+            if (notation.startsWith("&")) {
+                return `<span class="piece-icon">${notation.slice(0, 7)}</span><span class="move">${notation.slice(7)}</span>`;
+            }
+
+            return `<span class="move">${notation}</span>`;
+        }
+
+        /**
          * If notation is white then create new notation row/tr and add as td,
          * otherwise add the notation to the last row as td.
          */
         const notationMenu: HTMLElement = document.getElementById("notations")!;
         if (notationMenu.innerHTML == "") {
             for (let i = 0; i < notations.length; i += 1) {
-                const notationUnicoded = this.convertStringNotationToUnicodedNotation(notations[i]);
+                const notationUnicoded = formatUnicodeNotation(
+                    this.convertStringNotationToUnicodedNotation(notations[i])
+                );
                 if (i % 2 == 0) {
                     notationMenu.innerHTML +=
                         `
                         <tr>
-                            <td>${(i / 2) + 1}</td>
+                            <td><span>${(i / 2) + 1}</span></td>
                             <td>${notationUnicoded}</td>
                             <td></td>
                         </tr>
                     `;
                 } else {
-                    notationMenu.lastElementChild!.innerHTML = notationMenu.lastElementChild!.innerHTML.replace("<td></td>", "<td>" + notationUnicoded + "</td>");
+                    notationMenu.lastElementChild!.innerHTML = notationMenu.lastElementChild!.innerHTML.replace("<td></td>", `<td>${notationUnicoded}</td>`);
                 }
             }
+
+            notationMenu.addEventListener("click", (event) => {
+                if(event.target instanceof HTMLElement && event.target.closest("td")) {
+                    const clickedNotation = event.target.closest("td") as HTMLTableCellElement;
+                    this.chess.goToSpecificMove(
+                        Array.from(
+                            notationMenu.querySelectorAll("td:not(td:first-child)")
+                        ).indexOf(clickedNotation)
+                    );
+                    this.showNotationAsCurrent(clickedNotation);
+                }
+            });
         }
         else {
-            const lastNotation: string = this.convertStringNotationToUnicodedNotation(notations[notations.length - 1]);
+            const lastNotation: string = formatUnicodeNotation(
+                this.convertStringNotationToUnicodedNotation(notations[notations.length - 1])
+            );
             const lastRow: HTMLElement = notationMenu.lastElementChild as HTMLElement;
             if (notations.length % 2 == 0)
                 lastRow.innerHTML = lastRow.innerHTML.replace(`<td></td>`, `<td>${lastNotation}</td>`);
             else
                 lastRow.insertAdjacentHTML(
                     "afterend",
-                    `<tr><td>${Math.ceil(notations.length / 2)}</td><td>${lastNotation}</td><td></td></tr>`
+                    `<tr><td><span>${Math.ceil(notations.length / 2)}</span></td><td>${lastNotation}</td><td></td></tr>`
                 );
         }
 
-        const notationTable: HTMLElement = document.querySelector("#notation-table tbody")!;
+        this.showNotationAsCurrent();
+
+        const notationTable: HTMLElement = document.getElementById("notation-table")!.querySelector("tbody")!;
         notationTable.scrollTop = notationTable.scrollHeight;
 
         this.moveCount = notations.length;
+    }
+
+    /**
+     * This function shows the last notation that has a move 
+     * as the current move if the notationTd is not given. If 
+     * the notationTd is given then the given notationTd will be 
+     * shown as the current move.
+     */
+    private showNotationAsCurrent(notationTd: HTMLElement | null = null): void {
+        const notationMenu: HTMLElement = document.getElementById("notations")!;
+        document.querySelector(".current-move")?.classList.remove("current-move");
+
+        // Add current move effect to the last notation.
+        // First td is the move number, second td is the white move,
+        // and the last td is the black move. Since there is 3 td 
+        // in the row, and the last td that has a move must be the 
+        // current/last move.
+        if(!notationTd) {
+            ((notationMenu.querySelector("tr:last-child td:last-child:has(.move)")
+                || notationMenu.querySelector("tr:last-child td:nth-child(2):has(.move)")
+            ) as HTMLElement).classList.add("current-move");
+        } else {
+            notationTd.classList.add("current-move");
+        }
     }
 
     /**
@@ -735,6 +829,22 @@ export class NotationMenu extends Component {
      */
     public handleOperation(operation: NotationMenuOperation): void {
         switch (operation) {
+            case NotationMenuOperation.PreviousMove:
+                this.chess.takeBack();
+                break;
+            case NotationMenuOperation.NextMove:
+                this.chess.takeForward();
+                break;
+            /*case NotationMenuOperation.FirstMove:
+                this.chess.firstMove();
+                break;
+            case NotationMenuOperation.LastMove:
+                this.chess.lastMove();
+                break;*/
+            /*case NotationMenuOperation.SendUndoOffer:
+                this.chess.sendUndoOffer();
+                break;
+            */
             case NotationMenuOperation.ToggleUtilityMenu:
                 this.toggleUtilityMenu();
                 break;

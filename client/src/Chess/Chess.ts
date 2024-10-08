@@ -130,7 +130,7 @@ export class Chess {
 
         LocalStorage.save(LocalStorageKey.LastBoard, position);
         this.logger.save(`Game saved to cache as json notation[${JSON.stringify(position)}]`);
-        
+
         document.dispatchEvent(new Event(ChessEvent.onGameCreated));
     }
 
@@ -379,14 +379,14 @@ export class Chess {
     /**
      * 
      */
-    public takeBackToSpecificMove(moveIndex: number): void {
+    public goToSpecificMove(moveIndex: number): void {
+        if (moveIndex < 0 || moveIndex >= this.engine.getMoveHistory().length)
+            return;
 
-    }
-
-    /**
-     * 
-     */
-    public takeForwardToSpecificMove(moveIndex: number): void {
+        const lastMove = this.engine.getMoveHistory()[moveIndex];
+        console.log(lastMove);
+        //this.board.playMove(lastMove.from, lastMove.to);
+        //this._currentTakeBackCount = this.engine.getMoveHistory().length - moveIndex - 1;
     }
 
     /**
