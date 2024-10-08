@@ -291,6 +291,7 @@ export class NotationMenu extends Component {
             notationMenu.addEventListener("click", (event) => {
                 if(event.target instanceof HTMLElement && event.target.closest("td")) {
                     const clickedNotation = event.target.closest("td") as HTMLTableCellElement;
+                    if(!clickedNotation.querySelector(".move")) return;
                     this.chess.goToSpecificMove(
                         Array.from(
                             notationMenu.querySelectorAll("td:not(td:first-child)")
@@ -317,7 +318,9 @@ export class NotationMenu extends Component {
         this.showNotationAsCurrent();
 
         const notationTable: HTMLElement = document.getElementById("notation-table")!.querySelector("tbody")!;
-        notationTable.scrollTop = notationTable.scrollHeight;
+        setTimeout(() => {
+            notationTable.scrollTop = notationTable.scrollHeight;
+        }, 0);
 
         this.moveCount = notations.length;
     }
@@ -387,7 +390,6 @@ export class NotationMenu extends Component {
      * shown as the current move.
      */
     private showNotationAsCurrent(notationTd: HTMLElement | null = null): void {
-        const notationMenu: HTMLElement = document.getElementById("notations")!;
         document.querySelector(".current-move")?.classList.remove("current-move");
 
         // Add current move effect to the last notation.

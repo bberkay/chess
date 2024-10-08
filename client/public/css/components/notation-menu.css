@@ -21,7 +21,6 @@
         max-height: var(--notation-table-height);
         overflow-y: scroll;
         overflow-x: hidden;
-        scrollbar-width: thin;
         width:100%;
         height: var(--notation-table-height);
         display:block;
@@ -54,7 +53,7 @@
             background-color: var(--notation-menu-current-move-bg-color)!important;
         }
 
-        & td:hover{
+        & td:has(.move):hover{
             background-color: var(--notation-menu-hover-bg-color)!important;
         }
     }

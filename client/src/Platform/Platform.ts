@@ -267,10 +267,10 @@ export class Platform{
                 this.navigatorModal.showStartPlayingBoard(this.boardEditor.getFen());
                 break;
             case NavigatorModalOperation.PlayByYourself:
-                this.preparePlatformForSingleplayerGame();
+                this.preparePlatformForSingleplayerGameByYourself();
                 break;
             case NavigatorModalOperation.PlayAgainstBot:
-                this.preparePlatformForSingleplayerGame();
+                this.preparePlatformForSingleplayerGameAgainstBot();
                 break;
         }
     }
@@ -381,6 +381,8 @@ export class Platform{
         notation: string | StartPosition | JsonNotation | null = null
     ): void 
     {
+        if(!BoardEditor.isEditorModeEnable()) 
+            this.boardEditor.disableEditorMode();
         this.navigatorModal.hide();
         this.navbar.showComponent(this.logConsole);
         this.clearComponents();
@@ -411,30 +413,47 @@ export class Platform{
      * Create a new game and update the components of the menu.
      */
     private preparePlatformForSingleplayerGame(
-        fenNotation: string | null = null
+        fenNotation: string | null,
+        againstBot: boolean
     ): void 
     {
         const { botColor, botDifficulty } = this.navigatorModal.getCreatedBotSettings();
-        this.navigatorModal.hide();
 
         if(!BoardEditor.isEditorModeEnable()) 
             fenNotation = StartPosition.Standard;
-        else 
-            this.boardEditor.disableEditorMode();
 
-        this.logConsole.clear();
-        this.notationMenu.clear();
-        this.boardEditor.createBoard(fenNotation);
+        this._createBoardAndHandleComponents(fenNotation);
         this.notationMenu.displayInPlayUtilityMenu();
-        this.notationMenu.showPlayerCards();
-        this.notationMenu.setTurnIndicator(this.chess.engine.getTurnColor());
 
-        if(botColor && botDifficulty)
+        if(againstBot && botColor && botDifficulty)
             this.chess.addBotToCurrentGame(botColor, botDifficulty);
 
+        this.notationMenu.showPlayerCards();
+        this.notationMenu.setTurnIndicator(this.chess.engine.getTurnColor());
+        
         this.logger.save(`Editor mode is disabled and board is now playable.`);
         LocalStorage.clear(LocalStorageKey.BoardEditorEnabled);
         document.dispatchEvent(new Event(PlatformEvent.onBoardCreated));
+    }
+
+    /**
+     * Create a new game and update the components of the menu.
+     */
+    private preparePlatformForSingleplayerGameByYourself(
+        fenNotation: string | null = null
+    ): void 
+    {
+       this.preparePlatformForSingleplayerGame(fenNotation, false);
+    }
+
+    /**
+     * Create a new game and update the components of the menu.
+     */
+    private preparePlatformForSingleplayerGameAgainstBot(
+        fenNotation: string | null = null
+    ): void 
+    {
+        this.preparePlatformForSingleplayerGame(fenNotation, true);
     }
 
     /**

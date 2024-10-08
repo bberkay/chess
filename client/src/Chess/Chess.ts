@@ -99,6 +99,8 @@ export class Chess {
         position: JsonNotation | StartPosition | string = StartPosition.Standard,
         durations: Durations | null = null
     ): void {
+        LocalStorage.clear(LocalStorageKey.LastAddedBot);
+        LocalStorage.clear(LocalStorageKey.LastBoard);
         this.resetProperties();
         this.logger.save("Cache cleared and properties reset before creating a new game");
 
@@ -383,10 +385,22 @@ export class Chess {
         if (moveIndex < 0 || moveIndex >= this.engine.getMoveHistory().length)
             return;
 
+        const newTakeBackCount = this.engine.getMoveHistory().length - 1 - moveIndex;
+        this._currentTakeBackCount = newTakeBackCount;
+
+        this.board.removePieces();
+        this.board.removeEffectFromAllSquares();
+        this.board.createPieces(
+            Converter.fenToJson(moveIndex == 0
+                ? StartPosition.Standard
+                : this.engine.getFenHistory()[moveIndex - 1]
+            ).board
+        );
+
         const lastMove = this.engine.getMoveHistory()[moveIndex];
-        console.log(lastMove);
-        //this.board.playMove(lastMove.from, lastMove.to);
-        //this._currentTakeBackCount = this.engine.getMoveHistory().length - moveIndex - 1;
+        this.board.playMove(lastMove.from, lastMove.to);
+        
+        // this.board.showStatus(this.engine.getGameStatus());
     }
 
     /**

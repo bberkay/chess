@@ -167,6 +167,14 @@ export class ChessBoard {
     }
 
     /**
+     * This function removes all pieces from the chess board.
+     */
+    public removePieces(): void
+    {
+        this.getAllPieces().forEach((piece) => piece.remove());
+    }
+    
+    /**
      * This function creates a piece on the chess board.
      */
     public createPiece(color: Color, type:PieceType, square:Square): void

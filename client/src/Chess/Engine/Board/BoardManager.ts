@@ -40,6 +40,7 @@ export class BoardManager extends Board{
         Board.algebraicNotation = jsonNotation.algebraicNotation ?? [];
         Board.scores = jsonNotation.scores ?? {[Color.White]: {score: 0, pieces: []}, [Color.Black]: {score: 0, pieces: []}};
         Board.moveHistory = jsonNotation.moveHistory ?? [];
+        Board.fenHistory = jsonNotation.fenHistory ?? [];
         Board.durations = jsonNotation.durations ?? null;
         Board.gameStatus = jsonNotation.gameStatus ?? Board.gameStatus;
     }
@@ -197,9 +198,17 @@ export class BoardManager extends Board{
     /**
      * Add move to move history
      */
-    protected saveMoveHistory(from: Square, to: Square): void
+    protected saveMove(from: Square, to: Square): void
     {
         Board.moveHistory.push({from: from, to: to});
+    }
+
+    /**
+     * Save fen to fen history
+     */
+    protected saveFen(fen: string): void
+    {
+        Board.fenHistory.push(fen);
     }
 
     /**

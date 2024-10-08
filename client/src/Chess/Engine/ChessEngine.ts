@@ -592,7 +592,7 @@ export class ChessEngine extends BoardManager {
         {
             // Timeover situation comes here.
             this.saveAlgebraicNotation(this.moveNotation);
-            this.saveMoveHistory(this.playedFrom as Square, this.playedTo as Square);
+            this.saveMove(this.playedFrom as Square, this.playedTo as Square);
             this.logger.save(`Turn[${BoardQuerier.getColorOfTurn()}] is finished`);
             return;    
         }
@@ -606,7 +606,8 @@ export class ChessEngine extends BoardManager {
         // for "enemy" player and changes the algebraic notation
         // according to it.
         this.saveAlgebraicNotation(this.moveNotation);
-        this.saveMoveHistory(this.playedFrom as Square, this.playedTo as Square);
+        this.saveMove(this.playedFrom as Square, this.playedTo as Square);
+        this.saveFen(this.getGameAsFenNotation());
 
         // Check the en passant and castling status after the
         // algebraic notation is saved because these statuses
@@ -1019,6 +1020,15 @@ export class ChessEngine extends BoardManager {
     public getMoveHistory(): ReadonlyArray<Move>
     {
         return Object.freeze([...BoardQuerier.getMoveHistory()]);
+    }
+
+    /**
+     * This function returns the fen notation history of 
+     * the game. After every move, the fen notation is saved.
+     */
+    public getFenHistory(): ReadonlyArray<string>
+    {
+        return Object.freeze([...BoardQuerier.getFenHistory()]);
     }
 
     /**

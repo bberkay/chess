@@ -37,6 +37,7 @@ export class BoardQuerier extends Board{
             fullMoveNumber: BoardQuerier.getMoveCount(),
             algebraicNotation: BoardQuerier.getAlgebraicNotation(),
             moveHistory: BoardQuerier.getMoveHistory(),
+            fenHistory: BoardQuerier.getFenHistory(),
             durations: BoardQuerier.getDurations() || undefined,
             scores: BoardQuerier.getScores(),
             gameStatus: BoardQuerier.getBoardStatus()
@@ -115,6 +116,14 @@ export class BoardQuerier extends Board{
         return Board.moveHistory || [];
     }
 
+    /**
+     * Get fen history
+     */
+    public static getFenHistory(): string[]
+    {
+        return Board.fenHistory || [];
+    }
+    
     /**
      * Get durations
      */

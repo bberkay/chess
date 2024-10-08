@@ -37,4 +37,5 @@ export class Board {
     protected static moveHistory: Move[] = [];
     protected static durations: Durations | null = null;
     protected static gameStatus: GameStatus = GameStatus.NotReady;
+    protected static fenHistory: string[] = [];
 }

@@ -126,6 +126,7 @@ export interface JsonNotation{
     fullMoveNumber: number | 0;
     algebraicNotation?: string[]; 
     moveHistory?: Move[];
+    fenHistory?: string[];
     durations?: Durations;
     scores?:  Scores;
     gameStatus?: GameStatus;
