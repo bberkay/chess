@@ -96,7 +96,7 @@ export abstract class Component{
                     tooltipElement.textContent = "";
                 });            
             }
-        }, 0);
+        }, 50);
     }
 
     /**

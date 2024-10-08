@@ -19,7 +19,6 @@ export class AppearanceMenu extends NavbarComponent{
      */
     constructor() {
         super();
-        this.loadAppearanceMenu();
     }
 
     /**
@@ -35,7 +34,7 @@ export class AppearanceMenu extends NavbarComponent{
      * This function loads the appearance menu. Waits
      * until the chessboard.css variables are loaded.
      */
-    public loadAppearanceMenu(): void {
+    private loadAppearanceMenu(): void {
         const interval = setInterval(() => {
             if(Array.from(this.rootComputedStyle).find((property) => property.startsWith("--chessboard-"))){
                 this.createStyleElement();
@@ -107,7 +106,7 @@ export class AppearanceMenu extends NavbarComponent{
     private createStyleElement(): void
     {
         if(document.getElementById("appearance-menu-style"))
-            throw new Error("Style element for custom appearance already exists.");
+            return;
 
         const styleElement = document.createElement("style");
         styleElement.id = "appearance-menu-style";
@@ -243,7 +242,7 @@ export class AppearanceMenu extends NavbarComponent{
      */
     public hide(): void
     {
-        document.getElementById("appearance-menu")!.style.display = "none";
+        document.getElementById("appearance-menu")!.innerHTML = "";
     }
 
     /**
@@ -251,7 +250,7 @@ export class AppearanceMenu extends NavbarComponent{
      */
     public show(): void
     {
-        document.getElementById("appearance-menu")!.style.display = "block";
+        this.loadAppearanceMenu();
     }
 
     /**

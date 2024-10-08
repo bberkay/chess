@@ -9,7 +9,6 @@ export class AboutMenu extends NavbarComponent{
      */
     constructor() {
         super();
-        this.renderComponent();
     }
 
     /**
@@ -40,7 +39,7 @@ export class AboutMenu extends NavbarComponent{
      */
     public hide(): void
     {
-        document.getElementById("about-menu")!.style.display = "none";
+        document.getElementById("about-menu")!.innerHTML = "";
     }
 
     /**
@@ -48,6 +47,6 @@ export class AboutMenu extends NavbarComponent{
      */
     public show(): void
     {
-        document.getElementById("about-menu")!.style.display = "block";
+        this.renderComponent();
     }
 }
