@@ -104,31 +104,20 @@ export class NotationMenu extends Component {
      * - "ArrowDown" jumps to the last move.
      */
     private addShortcutListeners(): void {
-        // when the user press "->" key, the game will go forward.
         document.addEventListener("keydown", (e) => {
-            if (e.key == "ArrowRight") {
-                this.chess.takeForward();
-            }
-        });
-
-        // when the user press "<-" key, the game will go back.
-        document.addEventListener("keydown", (e) => {
-            if (e.key == "ArrowLeft") {
-                this.chess.takeBack();
-            }
-        });
-
-        // when the user press up arrow key, the game will go forward to the specific move.
-        document.addEventListener("keydown", (e) => {
-            if (e.key == "ArrowUp") {
-                this.chess.goToSpecificMove(0);
-            }
-        });
-
-        // when the user press down arrow key, the game will go back to the specific move.
-        document.addEventListener("keydown", (e) => {
-            if (e.key == "ArrowDown") {
-                this.chess.goToSpecificMove(this.chess.engine.getMoveHistory().length - 1);
+            switch (e.key) {
+                case "ArrowRight":
+                    this.takeForward();
+                    break;
+                case "ArrowLeft":
+                    this.takeBack();
+                    break;
+                case "ArrowUp":
+                    this.goToFirstMove();
+                    break;
+                case "ArrowDown":
+                    this.goToLastMove();
+                    break;
             }
         });
     }
@@ -211,6 +200,53 @@ export class NotationMenu extends Component {
     }
 
     /**
+     * This function returns the adjacent move of the given move.
+     * 
+     * @param {number} increment The increment value. 
+     * If the current notation element is given then the function
+     * returns the adjacent move of the given notation element by
+     * using the increment value. If the current notation element
+     * is not given then the function returns the last move if the
+     * increment value is < 0, or the first move if the increment value 
+     * is >= 0. 
+     * 
+     * @param {HTMLElement|null} currentNotationElement The current notation element.
+     * If the current notation element is given then the function
+     * returns the adjacent move of the given notation element by
+     * using the increment value. If the current notation element
+     * is not given then the function returns the last move or the
+     * first move according to the increment value. If there is no adjacent 
+     * move then the function returns null.
+     */
+    private getAdjacentMove(
+        increment: number, 
+        currentNotationElement: HTMLElement | null = null
+    ): HTMLElement | null {
+        const notations = document.getElementById("notations")!;
+        if(increment < 0 && !currentNotationElement) {
+            return notations.querySelector("tr:last-child td:last-child:has(.move)")
+                || notations.querySelector("tr:last-child td:nth-child(2):has(.move)");
+        } else if(increment >= 0 && !currentNotationElement) {
+            return document.querySelector("#notations tr:first-child td:nth-child(2)");
+        }
+
+        if(!currentNotationElement)
+            return null;
+
+        const moves = Array.from(
+            document.getElementById("notations")!.querySelectorAll("td:has(.move)")
+        );
+        if(moves.length == 0) return null;
+
+        const index = moves.indexOf(currentNotationElement);
+        if(index == -1) return null;
+
+        return (index + increment >= 0 && moves.length > index + increment) 
+            ? (moves[index + increment] as HTMLElement)
+            : null;
+    }
+
+    /**
      * This function adds a row/notation to the table.
      */
     private addNotation(notations: ReadonlyArray<string>): void {
@@ -287,6 +323,64 @@ export class NotationMenu extends Component {
     }
 
     /**
+     * This function takes one move back from the current move. Only
+     * on the board doesn't affect the game state.
+     */
+    private takeBack(): void {
+        const previousMoveElement = this.getAdjacentMove(-1, document.querySelector(".current-move") as HTMLElement);
+        if(previousMoveElement) {
+            this.showNotationAsCurrent(previousMoveElement);
+            const notationTable: HTMLElement = document.getElementById("notation-table")!.querySelector("tbody")!;
+            const previousMoveElementRect = previousMoveElement.getBoundingClientRect();
+            if(previousMoveElementRect.top <= notationTable.getBoundingClientRect().top) {
+                notationTable.scrollTop -= previousMoveElementRect.height;
+            }
+            this.chess.takeBack();
+        }
+    }
+
+    /**
+     * This function takes one move forward from the current move. Only
+     * on the board doesn't affect the game state.
+     */
+    private takeForward(): void {
+        const nextMoveElement = this.getAdjacentMove(1, document.querySelector(".current-move") as HTMLElement);
+        if(nextMoveElement) {
+            this.showNotationAsCurrent(nextMoveElement);
+            const notationTable: HTMLElement = document.getElementById("notation-table")!.querySelector("tbody")!;
+            const nextMoveElementRect = nextMoveElement.getBoundingClientRect();
+            if(nextMoveElementRect.top + nextMoveElementRect.height > notationTable.getBoundingClientRect().bottom) {
+                notationTable.scrollTop += nextMoveElementRect.height;
+            }
+            this.chess.takeForward();
+        }
+    }
+
+    /**
+     * This function goes to the first move of the game. Only
+     * on the board doesn't affect the game state.
+     */
+    private goToFirstMove(): void {
+        this.showNotationAsCurrent(this.getAdjacentMove(0));
+        document.getElementById("notation-table")!.querySelector("tbody")!.scrollTop = 0;
+        this.chess.goToSpecificMove(0);
+    }
+
+    /**
+     * This function goes to the last move of the game. Only
+     * on the board doesn't affect the game state.
+     */
+    private goToLastMove(): void {
+        this.showNotationAsCurrent();
+        const notationTable: HTMLElement = document.getElementById("notation-table")!.querySelector("tbody")!;
+        notationTable.scrollTop = notationTable.scrollHeight;
+        this.chess.goToSpecificMove(this.chess.engine.getMoveHistory().length - 1);
+    }
+
+    /**
+     * This function shows the given notation as the current move.
+     * 
+     * @param {HTMLElement|null} notationTd The notation td element.
      * This function shows the last notation that has a move 
      * as the current move if the notationTd is not given. If 
      * the notationTd is given then the given notationTd will be 
@@ -302,9 +396,7 @@ export class NotationMenu extends Component {
         // in the row, and the last td that has a move must be the 
         // current/last move.
         if(!notationTd) {
-            ((notationMenu.querySelector("tr:last-child td:last-child:has(.move)")
-                || notationMenu.querySelector("tr:last-child td:nth-child(2):has(.move)")
-            ) as HTMLElement).classList.add("current-move");
+            this.getAdjacentMove(-1)!.classList.add("current-move");
         } else {
             notationTd.classList.add("current-move");
         }
@@ -830,17 +922,17 @@ export class NotationMenu extends Component {
     public handleOperation(operation: NotationMenuOperation): void {
         switch (operation) {
             case NotationMenuOperation.PreviousMove:
-                this.chess.takeBack();
+                this.takeBack();
                 break;
             case NotationMenuOperation.NextMove:
-                this.chess.takeForward();
+                this.takeForward();
                 break;
-            /*case NotationMenuOperation.FirstMove:
-                this.chess.firstMove();
+            case NotationMenuOperation.FirstMove:
+                this.goToFirstMove();
                 break;
             case NotationMenuOperation.LastMove:
-                this.chess.lastMove();
-                break;*/
+                this.goToLastMove();
+                break;
             /*case NotationMenuOperation.SendUndoOffer:
                 this.chess.sendUndoOffer();
                 break;
