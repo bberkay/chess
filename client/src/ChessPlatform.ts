@@ -117,7 +117,7 @@ export class ChessPlatform{
 
         // If user creates single player game:
         document.addEventListener(PlatformEvent.onBoardCreated, (() => {
-            this.forceClearLastConnection();
+            this.forceClearLastConnection(false);
         }) as EventListener);
 
         /**
@@ -369,15 +369,21 @@ export class ChessPlatform{
     /**
      * Clear the last connection completely and display the 
      * new game utility menu.
+     * 
+     * @param resetPlatform If true, it will make the platform ready 
+     * for a new game by clearing the last board and displaying the
+     * new game utility menu.
      */
-    private forceClearLastConnection(): void
+    private forceClearLastConnection(resetPlatform: boolean = true): void
     {
         this.socket?.close();
         this.socket = null;
-        LocalStorage.clear(LocalStorageKey.LastBoard);
         LocalStorage.clear(LocalStorageKey.LastLobbyConnection);
         this.removeLobbyIdFromUrl();        
-        this.platform.notationMenu.displayNewGameUtilityMenu();
+        if(resetPlatform){
+            LocalStorage.clear(LocalStorageKey.LastBoard);
+            this.platform.notationMenu.displayNewGameUtilityMenu();
+        }
     }
 
     /**
@@ -474,12 +480,12 @@ export class ChessPlatform{
                         GameStatus.WhiteVictory, 
                         GameStatus.Draw
                     ].includes(this.chess.engine.getGameStatus()))
-                        this.platform.notationMenu.displayLobbyUtilityMenu();
+                        this.platform.notationMenu.displayInPlayUtilityMenu();
                     else 
                         this.platform.notationMenu.displayNewGameUtilityMenu();
                     break;
                 case WsTitle.SentOfferDeclined:
-                    this.platform.notationMenu.displayLobbyUtilityMenu();
+                    this.platform.notationMenu.displayInPlayUtilityMenu();
                     break;
                 case WsTitle.Disconnected:
                     this.platform.notationMenu.updatePlayerAsOffline(
