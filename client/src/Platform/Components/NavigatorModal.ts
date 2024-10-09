@@ -13,7 +13,8 @@ import {
     MIN_TOTAL_TIME,
     DEFAULT_INCREMENT_TIME,
     MAX_INCREMENT_TIME,
-    MIN_INCREMENT_TIME
+    MIN_INCREMENT_TIME,
+    NAVIGATOR_MODAL_ID
 } from "@Platform/Consts";
 
 /**
@@ -45,7 +46,7 @@ export class NavigatorModal extends Component{
      */
     protected renderComponent(): void
     {
-        this.loadHTML("navigator-modal", `
+        this.loadHTML(NAVIGATOR_MODAL_ID, `
             <div class="navigator-modal navigator-modal--glass">
                 <div class="navigator-modal-bg">
                     <img src="./assets/images/result-screen-bg-icon.png" alt="Chessboard">
@@ -91,7 +92,7 @@ export class NavigatorModal extends Component{
         this.hide();
         window.scrollTo(0, 0);
     
-        this.loadHTML("navigator-modal", `
+        this.loadHTML(NAVIGATOR_MODAL_ID, `
             <div class="navigator-modal ${backdrop ? "navigator-modal--glass" : ""} ${closeable ? "closeable" : ""}">
                 <div class="navigator-modal-bg"></div>
                 <div class="navigator-modal-title">${title}</div>
@@ -532,12 +533,12 @@ export class NavigatorModal extends Component{
 
         let totalTime, incrementTime;
         if(isCustomDurationModalOpen){
-            const totalTimeInput = document.querySelector("#navigator-modal #total-time") as HTMLInputElement;
-            const incrementTimeInput = (document.querySelector("#navigator-modal #increment-time") as HTMLInputElement);
+            const totalTimeInput = document.querySelector(".navigator-modal #total-time") as HTMLInputElement;
+            const incrementTimeInput = (document.querySelector(".navigator-modal #increment-time") as HTMLInputElement);
             if(totalTimeInput) totalTime = totalTimeInput.valueAsNumber;
             if(incrementTimeInput) incrementTime = incrementTimeInput.valueAsNumber;
         }else{
-            const selectedButton = document.querySelector("#navigator-modal #select-duration button[data-selected='true']") as HTMLElement;
+            const selectedButton = document.querySelector(".navigator-modal #select-duration button[data-selected='true']") as HTMLElement;
             if(selectedButton){
                 totalTime = parseInt(selectedButton.querySelector(".total-time")!.textContent!);
                 incrementTime = parseInt(selectedButton.querySelector(".increment-time")!.textContent!);

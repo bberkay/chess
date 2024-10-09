@@ -10,6 +10,12 @@
     min-width: var(--navbar-component-width);
     max-width: calc(var(--chessboard-board-size) - 50px);
     color: var(--navbar-component-text-color);
+    visibility: visible;
+    
+    &.hidden{
+        visibility: hidden;
+        height: 0;
+    }
 }
 
  /** 

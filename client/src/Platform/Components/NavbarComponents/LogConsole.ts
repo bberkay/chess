@@ -1,6 +1,7 @@
 import { LogConsoleOperation } from "../../Types";
 import { Logger, LoggerEvent } from "@Services/Logger"; 
 import { NavbarComponent } from "./NavbarComponent";
+import { LOG_CONSOLE_ID } from "@Platform/Consts";
 
 /**
  * This class provide a menu to show the logs.
@@ -23,7 +24,7 @@ export class LogConsole extends NavbarComponent{
      */
     protected renderComponent(): void
     {
-        this.loadHTML("log-console", `
+        this.loadHTML(LOG_CONSOLE_ID, `
             <div class="log-console-header-body-separator"></div>
             <div id="log-console-body">
                 <ul id = "log-list"></ul>
@@ -204,7 +205,7 @@ export class LogConsole extends NavbarComponent{
      */
     public hide(): void
     {
-        document.getElementById("log-console")!.style.display = "none";
+        document.getElementById(LOG_CONSOLE_ID)!.style.display = "none";
     }
 
     /**
@@ -212,7 +213,7 @@ export class LogConsole extends NavbarComponent{
      */
     public show(): void
     {
-        document.getElementById("log-console")!.style.display = "block";
+        document.getElementById(LOG_CONSOLE_ID)!.style.display = "block";
     }
 
     /**

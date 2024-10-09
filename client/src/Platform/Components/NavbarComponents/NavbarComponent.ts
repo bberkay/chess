@@ -27,7 +27,6 @@ export abstract class NavbarComponent extends Component{
     protected loadHTML(componentId: string, html: string): void
     {
         super.loadHTML(componentId, html);
-        document.getElementById(componentId)!.classList.add("navbar-component");
     }
 
     /**

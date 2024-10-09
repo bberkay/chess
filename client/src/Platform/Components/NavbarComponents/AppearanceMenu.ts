@@ -1,6 +1,7 @@
 import { NavbarComponent } from "./NavbarComponent";
 import { AppearanceMenuOperation } from "../../Types";
 import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage";
+import { APPEARANCE_MENU_ID } from "@Platform/Consts";
 
 enum Theme{
     Dark = "dark-mode",
@@ -62,7 +63,7 @@ export class AppearanceMenu extends NavbarComponent{
                 .join(" ")
         };
     
-        this.loadHTML("appearance-menu", `
+        this.loadHTML(APPEARANCE_MENU_ID, `
             <div id="appearance-body">
                 ${
                     Array.from(this.rootComputedStyle).filter((property) => 
@@ -179,7 +180,7 @@ export class AppearanceMenu extends NavbarComponent{
      */
     private addEventListeners(): void
     {
-        document.querySelectorAll("#appearance-menu .color-picker").forEach((colorPicker) => {
+        document.querySelectorAll(`#${APPEARANCE_MENU_ID} .color-picker`).forEach((colorPicker) => {
             const colorInput = colorPicker.querySelector("input[type='color']") as HTMLInputElement;
             const opacityInput = colorPicker.querySelector("input[type='range']") as HTMLInputElement;
             const resetButton = colorPicker.querySelector(".reset-button") as HTMLButtonElement;
@@ -218,7 +219,7 @@ export class AppearanceMenu extends NavbarComponent{
         if(LocalStorage.isExist(LocalStorageKey.CustomAppearance))
             customAppearance = LocalStorage.load(LocalStorageKey.CustomAppearance);
 
-        for(const colorPicker of document.querySelectorAll("#appearance-menu .color-picker") as NodeListOf<HTMLInputElement>){
+        for(const colorPicker of document.querySelectorAll(`#${APPEARANCE_MENU_ID} .color-picker`) as NodeListOf<HTMLInputElement>){
             const colorInput = colorPicker.querySelector("input[type='color']") as HTMLInputElement;
             const opacityInput = colorPicker.querySelector("input[type='range']") as HTMLInputElement;
 
@@ -242,7 +243,9 @@ export class AppearanceMenu extends NavbarComponent{
      */
     public hide(): void
     {
-        document.getElementById("appearance-menu")!.innerHTML = "";
+        const appearanceMenu = document.getElementById(APPEARANCE_MENU_ID)!;
+        appearanceMenu!.innerHTML = "";
+        appearanceMenu!.classList.add("hidden");
     }
 
     /**
@@ -250,6 +253,7 @@ export class AppearanceMenu extends NavbarComponent{
      */
     public show(): void
     {
+        document.getElementById(APPEARANCE_MENU_ID)!.classList.remove("hidden");
         this.loadAppearanceMenu();
     }
 

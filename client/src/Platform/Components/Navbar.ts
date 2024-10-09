@@ -2,16 +2,16 @@ import { NavbarOperation } from "@Platform/Types";
 import { Component } from "./Component";
 import { NavbarComponent } from "./NavbarComponents/NavbarComponent";
 import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage";
+import { ABOUT_MENU_ID, APPEARANCE_MENU_ID, LOG_CONSOLE_ID } from "@Platform/Consts";
 
 /**
  * This enum represents the different types of components 
  * that can be shown in the navbar.
  */
 enum NavbarComponentType {
-    LogConsole,
-    Connections,
-    AppearanceMenu,
-    AboutMenu
+    LogConsole = "LogConsole",
+    AppearanceMenu = "AppearanceMenu",
+    AboutMenu = "AboutMenu"
 }
 
 /**
@@ -29,8 +29,23 @@ export class Navbar extends Component{
         super();
         this.renderComponent();
         this.navbarComponents = navbarComponents;
+        this.addNavbarComponentClass();
         this.hideComponents();
         this.loadLocalStorage();
+    }
+
+    /**
+     * Add the navbar component class to the components.
+     */
+    private addNavbarComponentClass(): void { 
+        const aboutMenu = document.getElementById(ABOUT_MENU_ID);
+        if(aboutMenu) aboutMenu.classList.add("navbar-component");
+
+        const appearanceMenu = document.getElementById(APPEARANCE_MENU_ID);
+        if(appearanceMenu) appearanceMenu.classList.add("navbar-component");
+
+        const logConsole = document.getElementById(LOG_CONSOLE_ID);
+        if(logConsole) logConsole.classList.add("navbar-component");
     }
 
     /**
@@ -65,7 +80,7 @@ export class Navbar extends Component{
         this.loadHTML("navbar", `
             <div class="navbar-buttons">
                 <button data-menu-operation="${NavbarOperation.ShowLogConsole}">Stream</button>
-                <button data-menu-operation="${NavbarOperation.ShowConnections}">Connections</button>
+                <button data-menu-operation="${NavbarOperation.ShowConnections}" disabled="true">Connections</button>
                 <button data-menu-operation="${NavbarOperation.ShowAppearance}">Appearance</button>
                 <button data-menu-operation="${NavbarOperation.ShowAbout}">About</button>
             </div>

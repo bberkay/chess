@@ -4,6 +4,7 @@ import { Chess } from "@Chess/Chess.ts";
 import { BoardEditorOperation, NavigatorModalOperation, NotationMenuOperation } from "../Types";
 import { SocketOperation } from "../../Types";
 import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage.ts";
+import { NOTATION_MENU_ID } from "@Platform/Consts";
 
 /**
  * This class provide a table to show the notation.
@@ -126,7 +127,7 @@ export class NotationMenu extends Component {
      * This function render the notation table.
      */
     protected renderComponent(): void {
-        this.loadHTML("notation-menu", `
+        this.loadHTML(NOTATION_MENU_ID, `
                 <div class="player-section your-turn-effect" id="black-player-section">
                     <div class="player-name-container">
                         <div class="player-name" id="black-player-name">
@@ -532,7 +533,7 @@ export class NotationMenu extends Component {
      * This function opens/closes the utility menu.
      */
     private toggleUtilityMenu(): void {
-        document.querySelector(`#notation-menu .utility-toggle-menu`)!.classList.toggle("visible");
+        document.querySelector(`#${NOTATION_MENU_ID} .utility-toggle-menu`)!.classList.toggle("visible");
     }
 
     /**

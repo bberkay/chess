@@ -1,4 +1,5 @@
 import { NavbarComponent } from "./NavbarComponent";
+import { ABOUT_MENU_ID } from "@Platform/Consts";
 
 /**
  * This class provide a menu to show the about information.
@@ -16,7 +17,7 @@ export class AboutMenu extends NavbarComponent{
      */
     protected renderComponent(): void
     {
-        this.loadHTML("about-menu", `
+        this.loadHTML(ABOUT_MENU_ID, `
             <div id="about-body">
                 <h1>Chess Game</h1>
                 <p>Chess Game is a web application that allows you to play chess with your friends online.</p>
@@ -39,7 +40,9 @@ export class AboutMenu extends NavbarComponent{
      */
     public hide(): void
     {
-        document.getElementById("about-menu")!.innerHTML = "";
+        const aboutMenu = document.getElementById(ABOUT_MENU_ID)!;
+        aboutMenu.innerHTML = "";
+        aboutMenu.classList.add("hidden");
     }
 
     /**
@@ -47,6 +50,7 @@ export class AboutMenu extends NavbarComponent{
      */
     public show(): void
     {
+        document.getElementById(ABOUT_MENU_ID)!.classList.remove("hidden");
         this.renderComponent();
     }
 }

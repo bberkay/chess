@@ -3,6 +3,7 @@ import { Chess } from "@Chess/Chess";
 import { ChessEvent, Color, Durations, GameStatus, JsonNotation, PieceType, Square, StartPosition } from "@Chess/Types";
 import { Component } from "./Component";
 import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage";
+import { BOARD_EDITOR_ID, PIECE_CREATOR_ID, NOTATION_MENU_ID } from "@Platform/Consts";
 
 enum BoardCreatorMode {
     Custom = "custom-board-creator-mode",
@@ -53,7 +54,7 @@ export class BoardEditor extends Component{
      */
     protected renderComponent(): void
     {
-        this.loadHTML("board-editor", `
+        this.loadHTML(BOARD_EDITOR_ID, `
           <div class = "board-creator ${BoardCreatorMode.Template}">
               <div class = "border-inset"><button data-menu-operation="${BoardEditorOperation.ChangeBoardCreatorMode}" disabled="true">Custom</button></div>
               <select disabled="true">${this.getTemplateOptions()}</select>
@@ -92,11 +93,11 @@ export class BoardEditor extends Component{
     public createPieceEditor(): void
     {
         if(!BoardEditor.isEditorModeEnable()) return;
-        document.getElementById("notation-menu")!.style.display = "none";
+        document.getElementById(NOTATION_MENU_ID)!.style.display = "none";
         document.querySelector("#black-score-section")?.remove();
         document.querySelector("#white-score-section")?.remove();
 
-        this.loadHTML("piece-creator", `
+        this.loadHTML(PIECE_CREATOR_ID, `
             <table id = "piece-table">
                 <thead>
                     <tr>
@@ -222,8 +223,8 @@ export class BoardEditor extends Component{
     @isEditorModeEnable()
     private removePieceEditor(): void
     {
-        document.getElementById("piece-creator")!.innerHTML = "";
-        document.getElementById("notation-menu")!.style.display = "flex";
+        document.getElementById(PIECE_CREATOR_ID)!.innerHTML = "";
+        document.getElementById(NOTATION_MENU_ID)!.style.display = "flex";
     }
 
     /**
@@ -318,7 +319,7 @@ export class BoardEditor extends Component{
     {
         // Drag event listeners for the pieces.
         (document.querySelectorAll(`
-            #chessboard .piece, #piece-creator .piece
+            #chessboard .piece, #${PIECE_CREATOR_ID} .piece
         `) as NodeListOf<HTMLElement>)
             .forEach((piece: HTMLElement) => {
                 this.makePieceSelectable(piece);
@@ -367,7 +368,7 @@ export class BoardEditor extends Component{
      */
     private toggleUtilityMenu(): void
     {
-        document.querySelector(`#piece-creator .utility-toggle-menu`)!.classList.toggle("visible");
+        document.querySelector(`#${PIECE_CREATOR_ID} .utility-toggle-menu`)!.classList.toggle("visible");
     }
 
     /**
