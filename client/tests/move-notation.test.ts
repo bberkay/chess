@@ -84,15 +84,17 @@ test('Algebraic Notation Test', () => {
     console.log("Initial Board:  " + game.board);
     engine.createGame(game.board);
 
-    for(const move of game.moves!) {
-        engine.playMove(move.from, move.to);
+    try{
+        for(const move of game.moves!) {
+            engine.playMove(move.from, move.to);
+        }
+    }catch(e){
+        console.log("Final Notation: " + engine.getAlgebraicNotation());
+        console.log("Final Board:    " + engine.getGameAsFenNotation());
     }
 
-    console.log("Final Notation: " + engine.getNotation());
-    console.log("Final Board:    " + engine.getGameAsFenNotation());
-
     // Check the notation is equal to the expectation.
-    expect(engine.getNotation()).toEqual(game.expectation);
+    expect(engine.getAlgebraicNotation()).toEqual(game.expectation);
     
     console.log("--------------------------------------------------");
 });

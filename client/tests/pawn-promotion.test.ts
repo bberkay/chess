@@ -75,7 +75,7 @@ test('Promote pawn to the every promotion option', () => {
             engine.playMove(move.from, move.to);
         }
 
-        console.log("Final Notation: " + engine.getNotation());
+        console.log("Final Notation: " + engine.getAlgebraicNotation());
         console.log("Final Board:    " + engine.getGameAsFenNotation());
 
         // Check the pawn is promoted to the current type of promotion.

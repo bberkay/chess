@@ -81,7 +81,7 @@ test(`Random Games`, () => {
             engine.playMove(move.from, move.to);
         }
 
-        console.log("Final Notation: " + engine.getNotation());
+        console.log("Final Notation: " + engine.getAlgebraicNotation());
         console.log("Final Board:    " + engine.getGameAsFenNotation());
         console.log("Final Status:   " + engine.getGameStatus());
 

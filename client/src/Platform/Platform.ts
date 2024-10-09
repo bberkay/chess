@@ -91,7 +91,7 @@ export class Platform{
             // First time update
             this.boardEditor.updateFen();
 
-            const updateFenTriggers = [
+            const updateComponentTriggers = [
                 ChessEvent.onGameCreated,
                 ChessEvent.onPieceCreated,
                 ChessEvent.onPieceRemoved,
@@ -100,7 +100,7 @@ export class Platform{
                 ChessEvent.onGameOver,
             ]
 
-            updateFenTriggers.forEach((trigger) => {
+            updateComponentTriggers.forEach((trigger) => {
                 document.addEventListener(trigger, () => {
                     if(trigger == ChessEvent.onPieceSelected || trigger == ChessEvent.onPieceMoved)
                         this.navbar.showComponent(this.logConsole);
@@ -279,18 +279,29 @@ export class Platform{
      * Handle the board editor operations.
      */
     private handleBoardEditorOperation(menuOperation: BoardEditorOperation, menuItem: HTMLElement): void
-    {        
-        // TODO: Test
+    {   
+        // TODO: Board editor start da bir problem var.
+        // TODO: Cache kaydetmiyor nedense? hatta in play utility menu de gelmiyor nednese?
 
-        // TODO: Bot
+        // TODO: Geri hamle, Undo, MEVCUT YAPI TEST EDİLECEK.
+            // Castling, promotion
+            // Skorlar vs. de gözükmeli.
 
-        // TODO: Geri hamle, Undo
-        // TODO: Moved from to efekt problemi
+        // TODO: Coverage test
+
+        // TODO: Long algebraic notation
+        // TODO: Bot için resign, draw, play again, promotion, castling, undo test edilmeli.
+        // TODO: Board settings chess.com dan bakılabilir. Connections menu kaldırılmalı.
+        
         // TODO: Multiple pre move
-
-        // TODO: Multiple Lobby, Cache, Arayüz
         // TODO: Switch case yapısı handling socket
-            // Object.freeze: deep copy, shallow copy, deep freeze
+            // addEventListener onPieceMovedByPlayer
+        // TODO: Component fonksiyonları toplanabilir
+            // Mesela preparePlatformForSingleplayerGame preparePlatformForOnlineGame birleştiriilebilir.
+            // NotationMenu.prepareForGame gibi fonksiyonlar oluşturulabilir ve diğer fonksiyon private hale getirilir.
+            // Bu kadar detaylı erişlmemeli component methodlara daha genel itibari ile yukarıda ki gibi prepareForGame
+            // gibi basitçe methodlar olsun.
+            // TODO: Public ve private 
 
         // TODO: Server Uploading and supabase duruma göre
         // TODO: Mobil için touchup
@@ -300,7 +311,10 @@ export class Platform{
 
         // TODO: Belki language eklenmese bile eklenecek altyapı kurulabilir.
         // TODO: Mesele, tüm stringlerin bir objede tutulması ve bu objenin diline göre değişmesi.
-        // TODO: Readme
+        // TODO: Son bir test farklı tarayıcılar ile(özellikle connection testi, reload testleri) ve Readme
+            // TODO: Board editor ile oyun yaratıp bot ve online oynama ve play again testleri de var aynı yaratılan
+            // oyun ile başlamalı.
+            // TODO: fixme ve todoları araştır.
 
         switch(menuOperation){
             case BoardEditorOperation.Enable:
@@ -381,8 +395,6 @@ export class Platform{
         notation: string | StartPosition | JsonNotation | null = null
     ): void 
     {
-        if(!BoardEditor.isEditorModeEnable()) 
-            this.boardEditor.disableEditorMode();
         this.navigatorModal.hide();
         this.navbar.showComponent(this.logConsole);
         this.clearComponents();
@@ -399,6 +411,7 @@ export class Platform{
         game: string | JsonNotation
     }, playerColor: Color): void
     {
+        if(BoardEditor.isEditorModeEnable()) this.boardEditor.disableEditorMode();
         this._createBoardAndHandleComponents(createdGame.game);
         this.chess.board.disablePreSelectionFor(playerColor === Color.White ? Color.Black : Color.White);
         this.notationMenu.displayInPlayUtilityMenu();
@@ -407,6 +420,7 @@ export class Platform{
         if(playerColor === Color.Black) this._flipBoardAndComponents();
         if(playerColor !== this.chess.engine.getTurnColor()) this.chess.board.lock(false);
         else this.chess.board.unlock();
+        this.logger.save(`Online game is created and components are updated.`);
     }
 
     /**
@@ -421,7 +435,9 @@ export class Platform{
 
         if(!BoardEditor.isEditorModeEnable()) 
             fenNotation = StartPosition.Standard;
-
+        else
+            this.boardEditor.disableEditorMode();
+        
         this._createBoardAndHandleComponents(fenNotation);
         this.notationMenu.displayInPlayUtilityMenu();
 
@@ -443,7 +459,7 @@ export class Platform{
         fenNotation: string | null = null
     ): void 
     {
-       this.preparePlatformForSingleplayerGame(fenNotation, false);
+        this.preparePlatformForSingleplayerGame(fenNotation, false);
     }
 
     /**

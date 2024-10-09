@@ -130,7 +130,7 @@ test('Castling Moves', () => {
             }
         }
 
-        console.log("Final Notation: " + engine.getNotation());
+        console.log("Final Notation: " + engine.getAlgebraicNotation());
         console.log("Final Board:    " + engine.getGameAsFenNotation());
 
         /**

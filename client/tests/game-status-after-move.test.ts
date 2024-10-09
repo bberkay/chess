@@ -93,7 +93,7 @@ test(`Game Status After Move`, () => {
             engine.playMove(move.from, move.to);
         }
 
-        console.log("Final Notation: " + engine.getNotation());
+        console.log("Final Notation: " + engine.getAlgebraicNotation());
         console.log("Final Board:    " + engine.getGameAsFenNotation());
 
         // Check if the game status is the expected

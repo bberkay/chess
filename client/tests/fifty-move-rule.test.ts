@@ -59,7 +59,7 @@ test('Fifty Move Rule Test', () => {
             engine.playMove(move.from, move.to);
         }
 
-        console.log("Final Notation: " + engine.getNotation());
+        console.log("Final Notation: " + engine.getAlgebraicNotation());
         console.log("Final Board:    " + engine.getGameAsFenNotation());
 
         /**

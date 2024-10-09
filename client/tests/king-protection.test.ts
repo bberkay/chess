@@ -45,6 +45,14 @@ const games: TestGame[] = [
             from: Square.d4, // Square of Piece(Black Pawn) that protect the king
             to: [Square.d3] // Expected moves for the black pawn
         }
+    },
+    {
+        title: "Black Queen on e5 Doesn't Need to Protect the King on e8 because of White Pawn on e7",
+        board: 'rnb1k2r/pp1pP2p/7P/4q3/B1p5/2P1Qp2/PP6/RN2K2R b KQkq - 3 20',
+        expectation: {
+            from: Square.e5, // Square of Black Queen on e5
+            to: [30, 31, 32, 28, 27, 26, 25, 37, 45, 21, 13, 38, 47, 56, 22, 15, 20, 11, 36, 43] // Expected moves
+        }
     }
 ]
 

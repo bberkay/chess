@@ -608,7 +608,7 @@ export class BoardEditor extends Component{
         inputElement.value = this.chess.engine.getGameAsFenNotation();
         
         if(BoardEditor.isEditorModeEnable()){
-            if(this.chess.engine.getGameStatus() == GameStatus.ReadyToStart) 
+            if([GameStatus.ReadyToStart, GameStatus.InPlay].includes(this.chess.engine.getGameStatus()))
                 this.enableStartGameButton();
             else 
                 this.disableStartGameButton();
