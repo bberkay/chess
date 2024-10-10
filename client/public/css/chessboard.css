@@ -27,7 +27,7 @@
     --chessboard-default-preplayable-color: #888888;
     --chessboard-default-preplayed-color: #888888;
     --chessboard-default-checked-color: #DF3030;
-    --chessboard-default-disabled-color: #0000004F;
+    --chessboard-default-disabled-color: #000000AD;
     --chessboard-default-hovering-color: #246D49;
     --chessboard-default-prehovering-color: #888888;
     --chessboard-default-from-color: #367B96;
@@ -44,7 +44,7 @@
     --chessboard-checked-color: #DF3030;
     --chessboard-hovering-color: #246D49;
     --chessboard-prehovering-color: #888888;
-    --chessboard-disabled-color: #0000004F;
+    --chessboard-disabled-color: #000000AD;
 
     /* Promotion Menu, use hex code */
     --chessboard-default-promotion-option-color: #D3D3D3;
@@ -200,7 +200,7 @@
         border:1px solid var(--chessboard-border-color);
 
         &:hover{
-            box-shadow: 0 5px 15px var(--chessboard-promotion-option-box-shadow-color);
+            box-shadow: 0 5px 15px var(--chessboard-promotion-option-shadow-color);
         }
     }
 }
@@ -392,7 +392,11 @@
     }
     
     & .square:has(.square-effect--disabled .square-effect-layer){
-        background-color: var(--chessboard-disabled-color);
+        box-shadow:inset 0 0 100px var(--chessboard-disabled-color);
+
+        & .piece{
+            opacity: 0.5;
+        }
     }
 
     & .square:has(.square-effect--selected .piece){

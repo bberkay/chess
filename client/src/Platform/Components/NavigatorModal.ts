@@ -67,10 +67,8 @@ export class NavigatorModal extends Component{
             return;
 
         if(!(event.target as HTMLElement).closest(".navigator-modal")){
-            if(activeModal.classList.contains("closeable")){
+            if(activeModal.classList.contains("closeable"))
                 this.hide();
-                document.removeEventListener("click", this._boundClose);
-            }
         }   
     }
 
@@ -140,6 +138,7 @@ export class NavigatorModal extends Component{
      */
     public hide(): void
     {
+        document.removeEventListener("click", this._boundClose);
         const navigatorModal = document.querySelector('.navigator-modal');
         if(!navigatorModal) return;
         navigatorModal.remove();

@@ -194,44 +194,19 @@ export class MoveEngine{
 
         /**
          * Add promotion capability to the pawn. For example,
-         * if the pawn is white and is on the seventh row,
-         * then add the top square(current square id + 8) to the pawn's
-         * moves. Also, if the pawn is black and is on the second row,
-         * then add the bottom square(current square id - 8) to the pawn's moves.
+         * if the pawn is white and is on the second row or black
+         * and is on the seventh row. Change normal moves to promotion
+         * moves.
          *
          * @see for more information about square id check Square enum in src/Chess/Types/index.ts
          * @see for more information about promotion check src/Chess/Engine/Move/Helper/MoveExtender.ts
          */
 
-        /**
-         * Delete given move from normal moves.
-         */
-        function deleteMoveFromNormalMoves(move: Square){
-            if(moves[MoveType.Normal]!.includes(move))
-                moves[MoveType.Normal]!.splice(moves[MoveType.Normal]!.indexOf(move), 1);
+        if(Locator.getRow(this.pieceSquare!) == (color == Color.White ? 2 : 7)){
+            moves[MoveType.Promotion] = moves[MoveType.Normal];
+            moves[MoveType.Normal] = [];
         }
-
-        // Add promotion moves to the pawn's moves.
-        const promotionMoves: Square[] | null = this.moveExtender.getPromotionMove(this.pieceSquare!);
-        if(promotionMoves){
-            route[moveDirection.vertical]!.push(promotionMoves[0]);
-            deleteMoveFromNormalMoves(route[moveDirection.vertical]![0]);
-
-            // Add diagonal(capture move) promotion moves to the pawn's moves.
-            if(promotionMoves[1]){
-                route[moveDirection.leftDiagonal]!.push(promotionMoves[1]);
-                deleteMoveFromNormalMoves(route[moveDirection.leftDiagonal]![0]);
-            }
-            if(promotionMoves[2]){
-                route[moveDirection.rightDiagonal]!.push(promotionMoves[2]);
-                deleteMoveFromNormalMoves(route[moveDirection.rightDiagonal]![0]);
-            }
-        }
-
-        // Add filtered(for king's safety) promotion moves to the pawn's moves.
-        moves[MoveType.Promotion] = Extractor.extractSquares(this.moveFilterer.filterForKingSafety(this.pieceSquare!, this.piece!.getColor(), route)!);
-
-        // Return the moves of the pawn.
+        
         return moves;
     }
 
