@@ -236,10 +236,10 @@ export class ChessPlatform{
      */
     private createLobby(): void
     {  
-        const { playerName, board, duration } = this.platform.navigatorModal.getCreatedLobbySettings();
+        const { playerName, duration } = this.platform.navigatorModal.getCreatedLobbySettings();
         this._createLobby({
             name: playerName || DEFULT_PLAYER_NAME, 
-            board: board || StartPosition.Standard,
+            board: this.platform.boardEditor.getSavedFen() || StartPosition.Standard,
             remaining: (duration.remaining || DEFAULT_TOTAL_TIME).toString(),
             increment: (duration.increment || DEFAULT_INCREMENT_TIME).toString()
         } as CreateLobbyReqParams);

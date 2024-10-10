@@ -23,7 +23,6 @@ import {
 export class NavigatorModal extends Component{
     private lastNavigatorModalTitle: string = "";
     private lastNavigatorModalContent: string = "";
-    private lastCreatedBoard: string = StartPosition.Standard;
     private lastEnteredPlayerName: string = DEFULT_PLAYER_NAME;
     private lastSelectedBotDifficulty: BotDifficulty = BotDifficulty.Easy;
     private lastSelectedBotColor: BotColor = BotColor.Black;
@@ -217,7 +216,6 @@ export class NavigatorModal extends Component{
      */
     public showGameCreator(): void
     {
-        this.lastCreatedBoard = StartPosition.Standard;
         this.show(
             "Create New Game",
             `
@@ -238,9 +236,8 @@ export class NavigatorModal extends Component{
     /**
      * Show the play the board screen.
      */
-    public showStartPlayingBoard(board: string): void
+    public showStartPlayingBoard(): void
     {
-        this.lastCreatedBoard = board;
         this.show(
             "Start Playing the Board",
             `
@@ -574,11 +571,10 @@ export class NavigatorModal extends Component{
     /**
      * Get the created lobby settings from the modal. 
      */
-    public getCreatedLobbySettings(): {playerName: string, board: string, duration: Duration}
+    public getCreatedLobbySettings(): {playerName: string, duration: Duration}
     {
         return {
             playerName: this.lastEnteredPlayerName,
-            board: this.lastCreatedBoard || StartPosition.Standard,
             duration: this.lastSelectedDuration
         };
     }

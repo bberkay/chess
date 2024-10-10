@@ -34,6 +34,7 @@ export class BoardEditor extends Component{
     private readonly chess: Chess;
 
     private static _isEditorModeEnable: boolean = false;
+    private _savedFenNotation: string = StartPosition.Standard;
     private _boardEditorObserver: MutationObserver | null = null;
     private _currentBoardCreatorMode: BoardCreatorMode = BoardCreatorMode.Custom
     private _lastLoadedFenNotation: string = StartPosition.Standard;
@@ -425,7 +426,7 @@ export class BoardEditor extends Component{
         fenNotation: string | StartPosition | JsonNotation | null = null
     ): void
     {
-        this.chess.createGame(fenNotation || this.getFen());
+        this.chess.createGame(fenNotation || this.getCurrentFen());
         this._prepareBoardEditorForGame();
     }
 
@@ -585,7 +586,7 @@ export class BoardEditor extends Component{
     /**
      * Get the form value of the custom or template mode.
      */
-    public getFen(): string
+    public getCurrentFen(): string
     {
         let formValue: string;
         
@@ -599,9 +600,26 @@ export class BoardEditor extends Component{
     }
 
     /**
+     * Save the FEN form value to use it later.
+     */
+    public saveFen(): void
+    {
+        console.log("Save FEN: ", this.getCurrentFen());
+        this._savedFenNotation = this.getCurrentFen();
+    }
+
+    /**
+     * Load the saved FEN form value.
+     */
+    public getSavedFen(): string
+    {
+        return this._savedFenNotation;
+    }
+
+    /**
      * This function shows the FEN notation on the form.
      */
-    public updateFen(): void
+    public updateFenOnForm(): void
     {
         if(!this.isBoardCreatorModeCustom()) this.changeBoardCreatorMode();
         const inputElement = document.querySelector(`.${BoardCreatorMode.Custom} input`) as HTMLInputElement;
@@ -613,15 +631,6 @@ export class BoardEditor extends Component{
             else 
                 this.disableStartGameButton();
         }
-    }
-
-    /**
-     * This function clears the form.
-     */
-    private clearFen(): void
-    {
-        (document.querySelector(`.${BoardCreatorMode.Custom} input`) as HTMLInputElement).value = "";
-        (document.querySelector(`.${BoardCreatorMode.Template} select`) as HTMLSelectElement).selectedIndex = 0;
     }
 
     /**
