@@ -21,8 +21,11 @@ import {
  * This class provide a menu to show the logs.
  */
 export class NavigatorModal extends Component{
+    private readonly _boundClose: ((event: MouseEvent) => void) = this.close.bind(this);
+
     private lastNavigatorModalTitle: string = "";
     private lastNavigatorModalContent: string = "";
+    
     private lastEnteredPlayerName: string = DEFULT_PLAYER_NAME;
     private lastSelectedBotDifficulty: BotDifficulty = BotDifficulty.Easy;
     private lastSelectedBotColor: BotColor = BotColor.Black;
@@ -64,8 +67,10 @@ export class NavigatorModal extends Component{
             return;
 
         if(!(event.target as HTMLElement).closest(".navigator-modal")){
-            if(activeModal.classList.contains("closeable"))
+            if(activeModal.classList.contains("closeable")){
                 this.hide();
+                document.removeEventListener("click", this._boundClose);
+            }
         }   
     }
 
@@ -117,10 +122,10 @@ export class NavigatorModal extends Component{
             const chessboard = document.getElementById("chessboard") as HTMLElement;
             modal.style.left = `${chessboard.offsetLeft + chessboard.offsetWidth / 2 - modal.offsetWidth / 2}px`;
             modal.style.top = `${chessboard.offsetTop + chessboard.offsetWidth / 2 - modal.offsetHeight / 2}px`;
-        }
+        }   
 
         setTimeout(() => {
-            document.addEventListener("click", this.close.bind(this));
+            document.addEventListener("click", this._boundClose);
         }, 0);  
 
         // For go back to the previous state of the modal.

@@ -604,7 +604,6 @@ export class BoardEditor extends Component{
      */
     public saveFen(): void
     {
-        console.log("Save FEN: ", this.getCurrentFen());
         this._savedFenNotation = this.getCurrentFen();
     }
 
