@@ -89,7 +89,7 @@ export class Platform{
          */
         const listenBoardChanges = () => {
             // First time update
-            this.boardEditor.updateFen();
+            this.boardEditor.updateFenOnForm();
 
             const updateComponentTriggers = [
                 ChessEvent.onGameCreated,
@@ -270,7 +270,8 @@ export class Platform{
     {
         switch(menuOperation){
             case NavigatorModalOperation.ShowStartPlayingBoard:
-                this.navigatorModal.showStartPlayingBoard(this.boardEditor.getFen());
+                this.boardEditor.saveFen();
+                this.navigatorModal.showStartPlayingBoard();
                 break;
             case NavigatorModalOperation.PlayByYourself:
                 this.preparePlatformForSingleplayerGameByYourself();
@@ -377,7 +378,7 @@ export class Platform{
      * console after the move is made.
      */
     private updateComponents(): void {
-        this.boardEditor.updateFen();
+        this.boardEditor.updateFenOnForm();
         if(!BoardEditor.isEditorModeEnable()){
             this.notationMenu.update();
 
@@ -448,20 +449,18 @@ export class Platform{
      * If the boolean is false, the game will be created without bot.
      */
     private preparePlatformForSingleplayerGame(
-        fenNotation: string | null,
         bot: boolean | { botColor: Color, botDifficulty: number } = false
     ): void 
     {
+        let fenNotation = this.boardEditor.getSavedFen();
+        if(BoardEditor.isEditorModeEnable()) 
+            this.boardEditor.disableEditorMode();
+    
         let { botColor, botDifficulty } = bot && typeof bot === "object" ? bot : this.navigatorModal.getCreatedBotSettings(); 
 
-        if(!BoardEditor.isEditorModeEnable()) 
-            fenNotation = StartPosition.Standard;
-        else
-            this.boardEditor.disableEditorMode();
-        
         this._createBoardAndHandleComponents(fenNotation);
         this.notationMenu.displaySingleplayerGameUtilityMenu();
-
+        
         if(bot){
             ({ botColor, botDifficulty } = { botColor, botDifficulty } || this.chess.getBotSettings());
             if(!botColor || !botDifficulty) return;
@@ -479,21 +478,17 @@ export class Platform{
     /**
      * Create a new game and update the components of the menu.
      */
-    private preparePlatformForSingleplayerGameByYourself(
-        fenNotation: string | null = null
-    ): void 
+    private preparePlatformForSingleplayerGameByYourself(): void 
     {
-        this.preparePlatformForSingleplayerGame(fenNotation, false);
+        this.preparePlatformForSingleplayerGame(false);
     }
 
     /**
      * Create a new game and update the components of the menu.
      */
-    private preparePlatformForSingleplayerGameAgainstBot(
-        fenNotation: string | null = null
-    ): void 
+    private preparePlatformForSingleplayerGameAgainstBot(): void 
     {
-        this.preparePlatformForSingleplayerGame(fenNotation, true);
+        this.preparePlatformForSingleplayerGame(true);
     }
 
     /**
@@ -551,8 +546,7 @@ export class Platform{
         let { botColor, botDifficulty } = this.chess.getBotSettings() || {};
         if(botColor) botColor = botColor == Color.White ? Color.Black : Color.White;
         this.preparePlatformForSingleplayerGame(
-            null, 
-            botColor && botDifficulty ? {botColor, botDifficulty} : true
+            botColor && botDifficulty ? {botColor, botDifficulty} : false
         );
         this.notationMenu.clearConfirmedOperation();
     }
