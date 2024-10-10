@@ -269,6 +269,10 @@ export class Platform{
     private handleNavigatorModalOperation(menuOperation: NavigatorModalOperation, menuItem: HTMLElement): void
     {
         switch(menuOperation){
+            case NavigatorModalOperation.ShowGameCreator:
+                this.boardEditor.saveFen(StartPosition.Standard);
+                this.navigatorModal.showGameCreator();
+                break;
             case NavigatorModalOperation.ShowStartPlayingBoard:
                 this.boardEditor.saveFen();
                 this.navigatorModal.showStartPlayingBoard();
@@ -545,6 +549,7 @@ export class Platform{
     {
         let { botColor, botDifficulty } = this.chess.getBotSettings() || {};
         if(botColor) botColor = botColor == Color.White ? Color.Black : Color.White;
+        console.log(botColor, botDifficulty);
         this.preparePlatformForSingleplayerGame(
             botColor && botDifficulty ? {botColor, botDifficulty} : false
         );

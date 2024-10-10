@@ -601,10 +601,12 @@ export class BoardEditor extends Component{
 
     /**
      * Save the FEN form value to use it later.
+     * @param {string} fen - The FEN notation to save if it is 
+     * not given then it saves the current FEN form value.
      */
-    public saveFen(): void
+    public saveFen(fen: string | null = null): void
     {
-        this._savedFenNotation = this.getCurrentFen();
+        this._savedFenNotation = fen ? fen : this.getCurrentFen();
     }
 
     /**

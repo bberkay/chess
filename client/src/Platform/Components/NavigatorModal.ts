@@ -598,9 +598,6 @@ export class NavigatorModal extends Component{
             case NavigatorModalOperation.AskConfirmation:
                 this.showConfirmation();
                 break;
-            case NavigatorModalOperation.ShowGameCreator:
-                this.showGameCreator();
-                break;
             case NavigatorModalOperation.ShowSelectDuration:
                 this.showSelectDuration();
                 break;
