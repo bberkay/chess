@@ -38,13 +38,16 @@ export class NotationMenu extends Component {
         if(LocalStorage.isExist(LocalStorageKey.BoardEditorEnabled))
             this.hidePlayerCards();
 
-        if(LocalStorage.isExist(LocalStorageKey.LastBoard))
-            this.displayOnlineGameUtilityMenu();
+        if(LocalStorage.isExist(LocalStorageKey.LastBoard)){
+            if(LocalStorage.isExist(LocalStorageKey.LastLobbyConnection))
+                this.displayOnlineGameUtilityMenu();
+            else
+                this.displaySingleplayerGameUtilityMenu();
+        }
 
         if(LocalStorage.isExist(LocalStorageKey.LastBot)){
             const {color, _} = LocalStorage.load(LocalStorageKey.LastBot);
             if(color === Color.White) this.flip();
-            this.displaySingleplayerGameUtilityMenu();
         }
     }
 
