@@ -38,7 +38,6 @@ export class NavigatorModal extends Component{
     constructor() {
         super();
         this.loadCSS("navigator-modal.css");
-        this.addModalBgLayerAndEvents();
     }
 
     /**
@@ -58,30 +57,40 @@ export class NavigatorModal extends Component{
     }
 
     /**
-     * This function adds the modal background layer as hidden
-     * and adds the click event to hide the active modal when 
-     * the user clicks outside of the active modal or bounce 
-     * the active modal if it is not closeable.
+     * Close the modal when the user clicks outside of the active modal.
      */
-    private addModalBgLayerAndEvents(): void
+    private close(event: MouseEvent): void {
+        const activeModal = document.querySelector('.navigator-modal')! as HTMLElement;
+        if(!activeModal) 
+            return;
+
+        if(!(event.target as HTMLElement).closest(".navigator-modal")){
+            if(activeModal.classList.contains("closeable"))
+                this.hide();
+        }   
+    }
+
+    /**
+     * Add the backdrop to the modal.
+     */
+    private showModalBackdrop(): void
     {
         let modalBgLayer = document.querySelector(".navigator-modal-bg-layer")!
         if(!modalBgLayer){
             modalBgLayer = document.createElement("div");
             modalBgLayer.classList.add("navigator-modal-bg-layer");
             document.body.appendChild(modalBgLayer);
+            modalBgLayer.classList.add("show");
         }
+    }
 
-        document.addEventListener("click", (event) => {
-            const activeModal = document.querySelector('.navigator-modal')! as HTMLElement;
-            if(!activeModal) 
-                return;
-
-            if(!(event.target as HTMLElement).closest(".navigator-modal")){
-                if(activeModal.classList.contains("closeable"))
-                    this.hide();
-            }   
-        });
+    /**
+     * Remove the backdrop from the modal.
+     */
+    private hideModalBackdrop(): void
+    {
+        const modalBgLayer = document.querySelector(".navigator-modal-bg-layer");
+        if(modalBgLayer) modalBgLayer.remove();
     }
     
     /**
@@ -91,7 +100,7 @@ export class NavigatorModal extends Component{
     {
         this.hide();
         window.scrollTo(0, 0);
-    
+
         this.loadHTML(NAVIGATOR_MODAL_ID, `
             <div class="navigator-modal ${backdrop ? "navigator-modal--glass" : ""} ${closeable ? "closeable" : ""}">
                 <div class="navigator-modal-bg"></div>
@@ -103,15 +112,17 @@ export class NavigatorModal extends Component{
         const modal = document.querySelector('.navigator-modal')! as HTMLElement;
 
         if(backdrop){
-            const modalBgLayer = document.querySelector('.navigator-modal-bg-layer')!;
-            modalBgLayer.classList.add("show");           
-        }
-        else{
+            this.showModalBackdrop();
+        } else {
             // center the modal to the chessboard if it is not backdrop.
             const chessboard = document.getElementById("chessboard") as HTMLElement;
             modal.style.left = `${chessboard.offsetLeft + chessboard.offsetWidth / 2 - modal.offsetWidth / 2}px`;
             modal.style.top = `${chessboard.offsetTop + chessboard.offsetWidth / 2 - modal.offsetHeight / 2}px`;
         }
+
+        setTimeout(() => {
+            document.addEventListener("click", this.close.bind(this));
+        }, 0);  
 
         // For go back to the previous state of the modal.
         if(!modal.querySelector(".navigator-modal-content #confirmation")){
@@ -127,11 +138,8 @@ export class NavigatorModal extends Component{
     {
         const navigatorModal = document.querySelector('.navigator-modal');
         if(!navigatorModal) return;
-
         navigatorModal.remove();
-
-        const modalBgLayer = document.querySelector('.navigator-modal-bg-layer');
-        if(modalBgLayer) modalBgLayer.classList.remove("show");
+        this.hideModalBackdrop();
     }
 
     /**

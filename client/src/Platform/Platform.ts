@@ -254,6 +254,9 @@ export class Platform{
     private handleNotationMenuOperation(menuOperation: NotationMenuOperation, menuItem: HTMLElement): void
     {
         switch(menuOperation){
+            case NotationMenuOperation.Resign:
+                this._resignFromSingleplayerGame();
+                break;
         }
     }
 
@@ -318,10 +321,7 @@ export class Platform{
 
         switch(menuOperation){
             case BoardEditorOperation.Enable:
-                this.navigatorModal.hide();
-                this.logConsole.clear();
-                this.boardEditor.enableEditorMode();
-                document.dispatchEvent(new Event(PlatformEvent.onBoardCreated));
+                this._enableBoardEditorAndHanleComponents();
                 break;
             case BoardEditorOperation.FlipBoard:
                 this._flipBoardAndComponents();
@@ -357,13 +357,24 @@ export class Platform{
     }
 
     /**
+     * Enable the board editor and handle the components 
+     * of the platform by hiding the navigator modal, clearing
+     * the log console and etc.
+     */
+    private _enableBoardEditorAndHanleComponents(): void {
+        this.navigatorModal.hide();
+        this.logConsole.clear();
+        this.boardEditor.enableEditorMode();
+        document.dispatchEvent(new Event(PlatformEvent.onBoardCreated));
+    }
+
+    /**
      * Update the components of the menu, for example
      * update the notation menu and print the logs of the game on log
      * console after the move is made.
      */
     private updateComponents(): void {
         this.boardEditor.updateFen();
-
         if(!BoardEditor.isEditorModeEnable()){
             this.notationMenu.update();
 
@@ -490,5 +501,31 @@ export class Platform{
         this.logConsole.clear();
         this.boardEditor.resetBoard();
         this.logger.save("Board is reset.");
+    }
+
+    /**
+     * Resign from the singleplayer game and show the 
+     * game over modal.
+     */
+    private _resignFromSingleplayerGame(): void
+    {
+        if(!this.notationMenu.isOperationConfirmed(NotationMenuOperation.Resign))
+            return;
+
+        const currentBot = this.chess.getBot();
+        const resignColor = currentBot 
+            ? (currentBot.color == Color.White 
+                ? Color.Black 
+                : Color.White) 
+            : this.chess.engine.getTurnColor();
+        this.chess.engine.setGameStatus(
+            resignColor == Color.White
+                ? GameStatus.BlackVictory
+                : GameStatus.WhiteVictory
+        );
+        this.chess.finishTurn();
+        this.navigatorModal.showGameOverAsResigned(resignColor);
+        this.notationMenu.displayPlayAgainUtilityMenu();
+        this.notationMenu.clearConfirmedOperation();
     }
 }
