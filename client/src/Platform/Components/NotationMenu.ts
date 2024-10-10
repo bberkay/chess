@@ -7,6 +7,18 @@ import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage.ts";
 import { NOTATION_MENU_ID } from "@Platform/Consts";
 
 /**
+ * This enum provides the utility menu types.
+ */
+enum UtilityMenuType{
+    OnlineGame="online-game-utility-menu",
+    SingleplayerGame="singleplayer-game-utility-menu",
+    NewGame="new-game-utility-menu",
+    PlayAgain="play-again-utility-menu",
+    Confirmation="confirmation-utility-menu",
+    Offer="offer-utility-menu"
+}
+
+/**
  * This class provide a table to show the notation.
  */
 export class NotationMenu extends Component {
@@ -14,7 +26,8 @@ export class NotationMenu extends Component {
     private moveCount: number = 0;
     private lastScore: Record<Color, number> = { [Color.White]: 0, [Color.Black]: 0 };
     private activeIntervalId: number = -1;
-    private activeUtilityMenu: string = "new-game-utility-menu";
+    private activeUtilityMenu: UtilityMenuType = UtilityMenuType.NewGame;
+    private confirmedOperation: NotationMenuOperation | null = null;
 
     /**
      * Constructor of the LogConsole class.
@@ -96,7 +109,7 @@ export class NotationMenu extends Component {
         return `
             <button class="menu-item hidden" data-socket-operation="${SocketOperation.CancelOffer}" data-tooltip-text="Cancel Offer">Cancel</button>
             <button class="menu-item" data-menu-operation="${NotationMenuOperation.GoBack}" data-tooltip-text="Go Back">Back</button>
-            <button class="menu-item" id="confirm-button" data-socket-operation="" data-tooltip-text=""></button>
+            <button class="menu-item" id="confirm-button" data-socket-operation="" data-menu-operation="" data-tooltip-text=""></button>
         `;
     }
 
@@ -180,22 +193,22 @@ export class NotationMenu extends Component {
                         <button class="menu-item" data-menu-operation="${NotationMenuOperation.ToggleUtilityMenu}">☰</button>
                     </div>
                     <div class="utility-menu utility-toggle-menu visible">
-                        <div class="utility-toggle-menu-section active" id="new-game-utility-menu">
+                        <div class="utility-toggle-menu-section active" id="${UtilityMenuType.NewGame}">
                             ${this.getNewGameUtilityMenuContent()}
                         </div>
-                        <div class="utility-toggle-menu-section" id="online-game-utility-menu">
+                        <div class="utility-toggle-menu-section" id="${UtilityMenuType.OnlineGame}">
                             ${this.getOnlineGameUtilityMenuContent()}
                         </div>
-                         <div class="utility-toggle-menu-section" id="singleplayer-game-utility-menu">
+                         <div class="utility-toggle-menu-section" id="${UtilityMenuType.SingleplayerGame}">
                             ${this.getSingleplayerGameUtilityMenuContent()}
                         </div>
-                        <div class="utility-toggle-menu-section" id="play-again-utility-menu">
+                        <div class="utility-toggle-menu-section" id="${UtilityMenuType.PlayAgain}">
                             ${this.getPlayAgainUtilityMenuContent()}
                         </div>
-                        <div class="utility-toggle-menu-section confirmation" id="confirmation-utility-menu">
+                        <div class="utility-toggle-menu-section confirmation" id="${UtilityMenuType.Confirmation}">
                             ${this.getConfirmationUtilityMenuContent()}
                         </div>
-                        <div class="utility-toggle-menu-section confirmation" id="offer-utility-menu">
+                        <div class="utility-toggle-menu-section confirmation" id="${UtilityMenuType.Offer}">
                             ${this.getOfferUtilityMenuContent()}
                         </div>
                     </div>
@@ -562,9 +575,9 @@ export class NotationMenu extends Component {
      */
     public displayNewGameUtilityMenu(): void {
         document.querySelector(".utility-toggle-menu-section.active")!.classList.remove("active");
-        this.loadHTML("new-game-utility-menu", this.getNewGameUtilityMenuContent());
-        document.getElementById(`new-game-utility-menu`)!.classList.add("active");
-        this.activeUtilityMenu = "new-game-utility-menu";
+        this.loadHTML(UtilityMenuType.NewGame, this.getNewGameUtilityMenuContent());
+        document.getElementById(UtilityMenuType.NewGame)!.classList.add("active");
+        this.activeUtilityMenu = UtilityMenuType.NewGame;
     }
 
     /**
@@ -573,9 +586,9 @@ export class NotationMenu extends Component {
      */
     public displayOnlineGameUtilityMenu(): void {
         document.querySelector(".utility-toggle-menu-section.active")!.classList.remove("active");
-        this.loadHTML("online-game-utility-menu", this.getOnlineGameUtilityMenuContent());
-        document.getElementById(`online-game-utility-menu`)!.classList.add("active");
-        this.activeUtilityMenu = "online-game-utility-menu";
+        this.loadHTML(UtilityMenuType.OnlineGame, this.getOnlineGameUtilityMenuContent());
+        document.getElementById(UtilityMenuType.OnlineGame)!.classList.add("active");
+        this.activeUtilityMenu = UtilityMenuType.OnlineGame;
     }
 
     /**
@@ -584,9 +597,9 @@ export class NotationMenu extends Component {
      */
     public displaySingleplayerGameUtilityMenu(): void {
         document.querySelector(".utility-toggle-menu-section.active")!.classList.remove("active");
-        this.loadHTML("singleplayer-game-utility-menu", this.getSingleplayerGameUtilityMenuContent());
-        document.getElementById(`singleplayer-game-utility-menu`)!.classList.add("active");
-        this.activeUtilityMenu = "singleplayer-game-utility-menu";
+        this.loadHTML(UtilityMenuType.SingleplayerGame, this.getSingleplayerGameUtilityMenuContent());
+        document.getElementById(UtilityMenuType.SingleplayerGame)!.classList.add("active");
+        this.activeUtilityMenu = UtilityMenuType.SingleplayerGame;
     }
     
     /**
@@ -596,9 +609,9 @@ export class NotationMenu extends Component {
      */
     public displayPlayAgainUtilityMenu(): void {
         document.querySelector(".utility-toggle-menu-section.active")!.classList.remove("active");
-        this.loadHTML("play-again-utility-menu", this.getPlayAgainUtilityMenuContent());
-        document.getElementById(`play-again-utility-menu`)!.classList.add("active");
-        this.activeUtilityMenu = "play-again-utility-menu";
+        this.loadHTML(UtilityMenuType.PlayAgain, this.getPlayAgainUtilityMenuContent());
+        document.getElementById(UtilityMenuType.PlayAgain)!.classList.add("active");
+        this.activeUtilityMenu = UtilityMenuType.PlayAgain;
     }
 
     /**
@@ -819,6 +832,27 @@ export class NotationMenu extends Component {
     }
 
     /**
+     * Set the given operation as the confirmed operation.
+     */
+    private confirmOperation(operation: NotationMenuOperation): void {
+        this.confirmedOperation = operation;
+    }
+
+    /**
+     * Check if the given operation is confirmed.
+     */
+    public isOperationConfirmed(operation: NotationMenuOperation): boolean {
+        return this.confirmedOperation === operation;
+    }
+
+    /**
+     * Clear the confirmed operation.
+     */
+    public clearConfirmedOperation(): void {
+        this.confirmedOperation = null;
+    }
+
+    /**
      * Ask for confirmation before resigning or sending draw offer.
      */
     private showConfirmation(
@@ -826,10 +860,13 @@ export class NotationMenu extends Component {
         | NotationMenuOperation.SendDrawOffer 
         | NotationMenuOperation.SendPlayAgainOffer
     ): void {
+        if(this.isOperationConfirmed(confirmationOperation))
+            return;
+        
         document.querySelector(".utility-toggle-menu-section.active")!.classList.remove("active");
-        this.loadHTML("confirmation-utility-menu", this.getConfirmationUtilityMenuContent());
-
-        const confirmationMenu = document.getElementById(`confirmation-utility-menu`)!;
+        this.loadHTML(UtilityMenuType.Confirmation, this.getConfirmationUtilityMenuContent());
+    
+        const confirmationMenu = document.getElementById(UtilityMenuType.Confirmation)!;
         confirmationMenu.classList.add("active");
 
         const textContent = document.querySelector(`[data-menu-operation="${confirmationOperation}"]`)!.textContent;
@@ -847,7 +884,15 @@ export class NotationMenu extends Component {
         // is equal to NotationMenuOperation.Resign="Resign" so we
         // can set the operation to the button and use it as a socket
         // operation.
-        confirmButton.setAttribute("data-socket-operation", confirmationOperation);
+        setTimeout(() => {
+            confirmButton.setAttribute(
+                this.activeUtilityMenu === UtilityMenuType.OnlineGame 
+                    ? "data-socket-operation"
+                    : "data-menu-operation",
+                confirmationOperation
+            );
+            this.confirmOperation(confirmationOperation);
+        }, 0);
     }
 
     /**
@@ -858,9 +903,9 @@ export class NotationMenu extends Component {
         offerOperation: SocketOperation.AcceptDrawOffer | SocketOperation.AcceptPlayAgainOffer
     ): void {
         document.querySelector(".utility-toggle-menu-section.active")!.classList.remove("active");
-        this.loadHTML("offer-utility-menu", this.getOfferUtilityMenuContent());
+        this.loadHTML(UtilityMenuType.Offer, this.getOfferUtilityMenuContent());
 
-        const offerMenu = document.getElementById(`offer-utility-menu`)!;
+        const offerMenu = document.getElementById(UtilityMenuType.Offer)!;
         offerMenu.classList.add("active");
 
         offerMenu.querySelector(".offer-message")!.textContent = offerMessage;
@@ -868,7 +913,12 @@ export class NotationMenu extends Component {
         const acceptButton = offerMenu.querySelector("#accept-button")!;
         acceptButton.textContent = "Accept";
         acceptButton.setAttribute("data-tooltip-text", "Accept Offer");
-        acceptButton.setAttribute("data-socket-operation", offerOperation);
+        acceptButton.setAttribute(
+            this.activeUtilityMenu === UtilityMenuType.OnlineGame 
+                ? "data-socket-operation"
+                : "data-menu-operation", 
+            offerOperation
+        );
     }
 
     /**
@@ -908,7 +958,7 @@ export class NotationMenu extends Component {
         sentRequestButton.setAttribute("disabled", "true");
         sentRequestButton.setAttribute("data-tooltip-text", "Opponent waiting...");
         
-        const confirmationMenu = document.getElementById(`confirmation-utility-menu`)!;
+        const confirmationMenu = document.getElementById(UtilityMenuType.Confirmation)!;
         confirmationMenu.querySelector(`[data-menu-operation="${NotationMenuOperation.GoBack}"]`)!.classList.add("hidden");
         confirmationMenu.querySelector(`[data-socket-operation="${SocketOperation.CancelOffer}"]`)!.classList.remove("hidden");
     }
@@ -938,16 +988,21 @@ export class NotationMenu extends Component {
      */
     public goBack(): void {
         switch (this.activeUtilityMenu) {
-            case "new-game-utility-menu":
+            case UtilityMenuType.NewGame:
                 this.displayNewGameUtilityMenu();
                 break;
-            case "online-game-utility-menu":
+            case UtilityMenuType.SingleplayerGame:
+                this.displaySingleplayerGameUtilityMenu();
+                break;
+            case UtilityMenuType.OnlineGame:
                 this.displayOnlineGameUtilityMenu();
                 break;
-            case "play-again-utility-menu":
+            case UtilityMenuType.PlayAgain:
                 this.displayPlayAgainUtilityMenu();
                 break;
         }
+        
+        this.clearConfirmedOperation();
     }
 
     /**
