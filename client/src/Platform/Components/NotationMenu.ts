@@ -38,10 +38,13 @@ export class NotationMenu extends Component {
         if(LocalStorage.isExist(LocalStorageKey.BoardEditorEnabled))
             this.hidePlayerCards();
 
-        if(LocalStorage.isExist(LocalStorageKey.LastAddedBot)){
-            const {color, _} = LocalStorage.load(LocalStorageKey.LastAddedBot);
+        if(LocalStorage.isExist(LocalStorageKey.LastBoard))
+            this.displayOnlineGameUtilityMenu();
+
+        if(LocalStorage.isExist(LocalStorageKey.LastBot)){
+            const {color, _} = LocalStorage.load(LocalStorageKey.LastBot);
             if(color === Color.White) this.flip();
-            this.displayInPlayUtilityMenu();
+            this.displaySingleplayerGameUtilityMenu();
         }
     }
 
@@ -53,12 +56,22 @@ export class NotationMenu extends Component {
     }
 
     /**
-     * Get default in play utility menu content.
+     * Get default lobby utility menu content.
      */
-    private getInPlayUtilityMenuContent(): string {
+    private getOnlineGameUtilityMenuContent(): string {
         return `
             <button class="menu-item" data-menu-operation="${NotationMenuOperation.SendUndoOffer}" data-tooltip-text="Send Undo Offer">↺ Undo</button>
             <button class="menu-item" data-menu-operation="${NotationMenuOperation.SendDrawOffer}" data-tooltip-text="Send Draw Offer">Draw</button>
+            <button class="menu-item" data-menu-operation="${NotationMenuOperation.Resign}" data-tooltip-text="Resign From Game">⚐ Resign</button>
+        `;
+    }
+
+    /**
+     * Get default single player game utility menu content.
+     */
+    private getSingleplayerGameUtilityMenuContent(): string {
+        return `
+            <button class="menu-item" data-menu-operation="${NotationMenuOperation.SendUndoOffer}" data-tooltip-text="Send Undo Offer">↺ Undo</button>
             <button class="menu-item" data-menu-operation="${NotationMenuOperation.Resign}" data-tooltip-text="Resign From Game">⚐ Resign</button>
         `;
     }
@@ -167,8 +180,11 @@ export class NotationMenu extends Component {
                         <div class="utility-toggle-menu-section active" id="new-game-utility-menu">
                             ${this.getNewGameUtilityMenuContent()}
                         </div>
-                        <div class="utility-toggle-menu-section" id="in-play-utility-menu">
-                            ${this.getInPlayUtilityMenuContent()}
+                        <div class="utility-toggle-menu-section" id="online-game-utility-menu">
+                            ${this.getOnlineGameUtilityMenuContent()}
+                        </div>
+                         <div class="utility-toggle-menu-section" id="singleplayer-game-utility-menu">
+                            ${this.getSingleplayerGameUtilityMenuContent()}
                         </div>
                         <div class="utility-toggle-menu-section" id="play-again-utility-menu">
                             ${this.getPlayAgainUtilityMenuContent()}
@@ -299,6 +315,7 @@ export class NotationMenu extends Component {
                         ).indexOf(clickedNotation)
                     );
                     this.showNotationAsCurrent(clickedNotation);
+                    this.setScore(this.chess.getScores());
                 }
             });
         }
@@ -443,8 +460,8 @@ export class NotationMenu extends Component {
             });
         }
 
-        addPieceIconSorted(scores[Color.White].pieces, Color.White);
-        addPieceIconSorted(scores[Color.Black].pieces, Color.Black);
+        addPieceIconSorted(scores[Color.White].pieces, Color.Black);
+        addPieceIconSorted(scores[Color.Black].pieces, Color.White);
 
         /**
          * Scores
@@ -467,8 +484,8 @@ export class NotationMenu extends Component {
                 scoreElement.textContent = `+${score}`;
         }
 
-        addScore(whiteScore, Color.White);
-        addScore(blackScore, Color.Black);
+        addScore(whiteScore, Color.Black);
+        addScore(blackScore, Color.White);
 
         this.lastScore = { [Color.White]: whiteScore, [Color.Black]: blackScore };
     }
@@ -548,16 +565,27 @@ export class NotationMenu extends Component {
     }
 
     /**
-     * Show the in play utility menu section. This menu contains
+     * Show the online game utility menu section. This menu contains
      * undo, draw and resign buttons.
      */
-    public displayInPlayUtilityMenu(): void {
+    public displayOnlineGameUtilityMenu(): void {
         document.querySelector(".utility-toggle-menu-section.active")!.classList.remove("active");
-        this.loadHTML("in-play-utility-menu", this.getInPlayUtilityMenuContent());
-        document.getElementById(`in-play-utility-menu`)!.classList.add("active");
-        this.activeUtilityMenu = "in-play-utility-menu";
+        this.loadHTML("online-game-utility-menu", this.getOnlineGameUtilityMenuContent());
+        document.getElementById(`online-game-utility-menu`)!.classList.add("active");
+        this.activeUtilityMenu = "online-game-utility-menu";
     }
 
+    /**
+     * Show the single player game utility menu section. This menu contains
+     * undo and resign buttons.
+     */
+    public displaySingleplayerGameUtilityMenu(): void {
+        document.querySelector(".utility-toggle-menu-section.active")!.classList.remove("active");
+        this.loadHTML("singleplayer-game-utility-menu", this.getSingleplayerGameUtilityMenuContent());
+        document.getElementById(`singleplayer-game-utility-menu`)!.classList.add("active");
+        this.activeUtilityMenu = "singleplayer-game-utility-menu";
+    }
+    
     /**
      * Show the new game utility menu section. This menu contains
      * new game and play again buttons. This menu is shown when the
@@ -910,8 +938,8 @@ export class NotationMenu extends Component {
             case "new-game-utility-menu":
                 this.displayNewGameUtilityMenu();
                 break;
-            case "in-play-utility-menu":
-                this.displayInPlayUtilityMenu();
+            case "online-game-utility-menu":
+                this.displayOnlineGameUtilityMenu();
                 break;
             case "play-again-utility-menu":
                 this.displayPlayAgainUtilityMenu();
@@ -943,8 +971,11 @@ export class NotationMenu extends Component {
             case NotationMenuOperation.ToggleUtilityMenu:
                 this.toggleUtilityMenu();
                 break;
-            case NotationMenuOperation.ShowInPlayUtilityMenu:
-                this.displayInPlayUtilityMenu();
+            case NotationMenuOperation.ShowOnlineGameUtilityMenu:
+                this.displayOnlineGameUtilityMenu();
+                break;
+            case NotationMenuOperation.ShowSingleplayerGameUtilityMenu:
+                this.displaySingleplayerGameUtilityMenu();
                 break;
             case NotationMenuOperation.Resign:
                 this.showConfirmation(NotationMenuOperation.Resign);

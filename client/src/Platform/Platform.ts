@@ -414,7 +414,7 @@ export class Platform{
         if(BoardEditor.isEditorModeEnable()) this.boardEditor.disableEditorMode();
         this._createBoardAndHandleComponents(createdGame.game);
         this.chess.board.disablePreSelectionFor(playerColor === Color.White ? Color.Black : Color.White);
-        this.notationMenu.displayInPlayUtilityMenu();
+        this.notationMenu.displayOnlineGameUtilityMenu();
         this.notationMenu.updatePlayerCards(createdGame.whitePlayer, createdGame.blackPlayer);
         this.notationMenu.setTurnIndicator(this.chess.engine.getTurnColor());
         if(playerColor === Color.Black) this._flipBoardAndComponents();
@@ -439,7 +439,7 @@ export class Platform{
             this.boardEditor.disableEditorMode();
         
         this._createBoardAndHandleComponents(fenNotation);
-        this.notationMenu.displayInPlayUtilityMenu();
+        this.notationMenu.displaySingleplayerGameUtilityMenu();
 
         if(againstBot && botColor && botDifficulty)
             this.chess.addBotToCurrentGame(botColor, botDifficulty);

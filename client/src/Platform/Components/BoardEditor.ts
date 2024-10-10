@@ -78,8 +78,8 @@ export class BoardEditor extends Component{
      */
     private loadLocalStorage(): void
     {
-        if(LocalStorage.isExist(LocalStorageKey.LastAddedBot)){
-            const {color, _} = LocalStorage.load(LocalStorageKey.LastAddedBot);
+        if(LocalStorage.isExist(LocalStorageKey.LastBot)){
+            const {color, _} = LocalStorage.load(LocalStorageKey.LastBot);
             if(color === Color.White) this.flip();
         }
 
