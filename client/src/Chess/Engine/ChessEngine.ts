@@ -597,17 +597,11 @@ export class ChessEngine extends BoardManager {
             return;    
         }
 
+        this.saveMove(this.playedFrom!, this.playedTo!, this.moveType);
         this.changeTurn();
+        
         this.checkGameStatus();
-
-        // After the turn is changed and game status is checked, 
-        // save the move history and algebraic notation. Why after?
-        // Because, checkGameStatus function is checking the game
-        // for "enemy" player and changes the algebraic notation
-        // according to it.
         this.saveAlgebraicNotation(this.moveNotation);
-        this.saveMove(this.playedFrom as Square, this.playedTo as Square);
-        this.saveFen(this.getGameAsFenNotation());
 
         // Check the en passant and castling status after the
         // algebraic notation is saved because these statuses

@@ -48,6 +48,17 @@ const enPassantTestGames: TestGame[] = [
         expectation: {from: Square.d5, to: []}
     },
     {
+        title: "En passant move but reaching fifth rank by capturing piece also an edge case",
+        board: StartPosition.Standard,
+        moves: [
+            {from: Square.g2, to: Square.g4},
+            {from: Square.h7, to: Square.h5},
+            {from: Square.g4, to: Square.h5},
+            {from: Square.g7, to: Square.g5}
+        ],
+        expectation: {from: Square.h5, to: [Square.g6]}
+    },
+    {
         title: "Missed En Passant Left Because of One Turn Limit",
         board: StartPosition.EnPassantLeft,
         moves: [
