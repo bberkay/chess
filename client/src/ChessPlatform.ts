@@ -480,12 +480,12 @@ export class ChessPlatform{
                         GameStatus.WhiteVictory, 
                         GameStatus.Draw
                     ].includes(this.chess.engine.getGameStatus()))
-                        this.platform.notationMenu.displayInPlayUtilityMenu();
+                        this.platform.notationMenu.displayOnlineGameUtilityMenu();
                     else 
                         this.platform.notationMenu.displayNewGameUtilityMenu();
                     break;
                 case WsTitle.SentOfferDeclined:
-                    this.platform.notationMenu.displayInPlayUtilityMenu();
+                    this.platform.notationMenu.displayOnlineGameUtilityMenu();
                     break;
                 case WsTitle.Disconnected:
                     this.platform.notationMenu.updatePlayerAsOffline(
