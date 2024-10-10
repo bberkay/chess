@@ -355,11 +355,13 @@ export class Chess {
 
         const { from, to } = this._preMove;
         this._preMove = null;
-        this.playMove(from, to);
-        this.logger.save(`Pre-move[${JSON.stringify(this._preMove)}] played`);
-        document.dispatchEvent(new CustomEvent(
-            ChessEvent.onPieceMovedByPlayer, { detail: { from: from, to: to } }
-        ));
+        setTimeout(() => {
+            this.playMove(from, to);
+            this.logger.save(`Pre-move[${JSON.stringify({from, to})}] played`);
+            document.dispatchEvent(new CustomEvent(
+                ChessEvent.onPieceMovedByPlayer, { detail: { from: from, to: to } }
+            ));
+        }, 100);
     }
 
     /**
