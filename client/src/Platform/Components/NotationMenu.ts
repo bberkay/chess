@@ -97,7 +97,11 @@ export class NotationMenu extends Component {
      */
     private getPlayAgainUtilityMenuContent(): string {
         return `
-            <button class="menu-item" data-menu-operation="${NotationMenuOperation.SendPlayAgainOffer}">Play Again</button>
+            <button class="menu-item" data-menu-operation="${
+                this.activeUtilityMenu === UtilityMenuType.OnlineGame 
+                    ? NotationMenuOperation.SendPlayAgainOffer 
+                    : NotationMenuOperation.PlayAgain
+                }" data-tooltip-text="Play Again from Same Start">Play Again</button>
             <button class="menu-item" data-menu-operation="${NavigatorModalOperation.ShowGameCreator}" data-tooltip-text="Create New Game">+ New Game</button>
         `;
     }

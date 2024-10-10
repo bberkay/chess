@@ -257,6 +257,9 @@ export class Platform{
             case NotationMenuOperation.Resign:
                 this._resignFromSingleplayerGame();
                 break;
+            case NotationMenuOperation.PlayAgain:
+                this._playAgainSingleplayerGame();
+                break;
         }
     }
 
@@ -436,13 +439,20 @@ export class Platform{
 
     /**
      * Create a new game and update the components of the menu.
+     * @param fenNotation The FEN notation of the game.
+     * @param {boolean|{botColor: Color, botDifficulty: number}} bot 
+     * If the boolean is true, the settings will be taken from the navigator modal
+     * or this.chess.getBotSettings() method(the last bot created bot's settings if exists).
+     * If the object is provided, the bot will be added to the game with the given color 
+     * and difficulty.
+     * If the boolean is false, the game will be created without bot.
      */
     private preparePlatformForSingleplayerGame(
         fenNotation: string | null,
-        againstBot: boolean
+        bot: boolean | { botColor: Color, botDifficulty: number } = false
     ): void 
     {
-        const { botColor, botDifficulty } = this.navigatorModal.getCreatedBotSettings();
+        let { botColor, botDifficulty } = bot && typeof bot === "object" ? bot : this.navigatorModal.getCreatedBotSettings(); 
 
         if(!BoardEditor.isEditorModeEnable()) 
             fenNotation = StartPosition.Standard;
@@ -452,8 +462,11 @@ export class Platform{
         this._createBoardAndHandleComponents(fenNotation);
         this.notationMenu.displaySingleplayerGameUtilityMenu();
 
-        if(againstBot && botColor && botDifficulty)
+        if(bot){
+            ({ botColor, botDifficulty } = { botColor, botDifficulty } || this.chess.getBotSettings());
+            if(!botColor || !botDifficulty) return;
             this.chess.addBotToCurrentGame(botColor, botDifficulty);
+        }
 
         this.notationMenu.showPlayerCards();
         this.notationMenu.setTurnIndicator(this.chess.engine.getTurnColor());
@@ -512,9 +525,9 @@ export class Platform{
         if(!this.notationMenu.isOperationConfirmed(NotationMenuOperation.Resign))
             return;
 
-        const currentBot = this.chess.getBot();
-        const resignColor = currentBot 
-            ? (currentBot.color == Color.White 
+        const { botColor } = this.chess.getBotSettings() || {};
+        const resignColor = botColor ?  
+            (botColor == Color.White 
                 ? Color.Black 
                 : Color.White) 
             : this.chess.engine.getTurnColor();
@@ -526,6 +539,21 @@ export class Platform{
         this.chess.finishTurn();
         this.navigatorModal.showGameOverAsResigned(resignColor);
         this.notationMenu.displayPlayAgainUtilityMenu();
+        this.notationMenu.clearConfirmedOperation();
+    }
+
+    /**
+     * Play again the singleplayer game and 
+     * update the components.
+     */
+    private _playAgainSingleplayerGame(): void
+    {
+        let { botColor, botDifficulty } = this.chess.getBotSettings() || {};
+        if(botColor) botColor = botColor == Color.White ? Color.Black : Color.White;
+        this.preparePlatformForSingleplayerGame(
+            null, 
+            botColor && botDifficulty ? {botColor, botDifficulty} : true
+        );
         this.notationMenu.clearConfirmedOperation();
     }
 }
