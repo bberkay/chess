@@ -30,6 +30,7 @@ export class Chess {
     public readonly board: ChessBoard = new ChessBoard();
 
     private _bot: Bot | null = null;
+    private _lastCreatedBotSettings: { botColor: Color, botDifficulty: number } | null = null;
     private _selectedSquare: Square | null = null;
     private _isPromotionScreenOpen: boolean = false;
     private _preSelectedSquare: Square | null = null;
@@ -53,6 +54,7 @@ export class Chess {
     private resetProperties(): void {
         this._selectedSquare = null;
         this._isGameOver = false;
+        this._lastCreatedBotSettings = null;
         this._isPromotionScreenOpen = false;
         this._preSelectedSquare = null;
         this._preMove = null;
@@ -71,8 +73,8 @@ export class Chess {
         if (LocalStorage.isExist(LocalStorageKey.LastBoard)) {
             this.logger.save("Game loading from cache...");
             this.createGame(LocalStorage.load(LocalStorageKey.LastBoard));
-            if (LocalStorage.isExist(LocalStorageKey.LastAddedBot)) {
-                const { color, difficulty } = LocalStorage.load(LocalStorageKey.LastAddedBot);
+            if (LocalStorage.isExist(LocalStorageKey.LastBot)) {
+                const { color, difficulty } = LocalStorage.load(LocalStorageKey.LastBot);
                 this.addBotToCurrentGame(color, difficulty);
                 this.logger.save(`Bot[${JSON.stringify({ color, difficulty })}] found in cache and added to the game`);
             }
@@ -99,7 +101,7 @@ export class Chess {
         position: JsonNotation | StartPosition | string = StartPosition.Standard,
         durations: Durations | null = null
     ): void {
-        LocalStorage.clear(LocalStorageKey.LastAddedBot);
+        LocalStorage.clear(LocalStorageKey.LastBot);
         LocalStorage.clear(LocalStorageKey.LastBoard);
         this.resetProperties();
         this.logger.save("Cache cleared and properties reset before creating a new game");
@@ -144,6 +146,8 @@ export class Chess {
     public addBotToCurrentGame(botColor: BotColor | Color, botDifficulty: BotDifficulty): void {
         this._bot = new Bot(botColor, botDifficulty);
         this._bot.start();
+
+        this._lastCreatedBotSettings = { botColor: this._bot.color, botDifficulty };
         this.board.disablePreSelectionFor(this._bot.color);
         this.logger.save(`Bot[${this._bot.color}] created with difficulty[${botDifficulty}]`);
 
@@ -153,8 +157,18 @@ export class Chess {
             this.playBotIfExist();
         }
 
-        LocalStorage.save(LocalStorageKey.LastAddedBot, { color: this._bot.color, difficulty: botDifficulty });
+        LocalStorage.save(LocalStorageKey.LastBot, { color: this._bot.color, difficulty: botDifficulty });
         document.dispatchEvent(new CustomEvent(ChessEvent.onBotAdded, { detail: { color: this._bot.color } }));
+    }
+
+    /**
+     * This function returns the bot if it exists.
+     */
+    public getBotSettings(): {botColor: Color, botDifficulty: number} | null {
+        if(!this._bot)
+            return this._lastCreatedBotSettings;
+
+        return { botColor: this._bot.color, botDifficulty: this._bot.difficulty };
     }
 
     /**
@@ -166,7 +180,7 @@ export class Chess {
 
         this._bot.terminate();
         this._bot = null;
-        LocalStorage.clear(LocalStorageKey.LastAddedBot);
+        LocalStorage.clear(LocalStorageKey.LastBot);
         this.logger.save("Bot terminated");
     }
 
@@ -323,6 +337,7 @@ export class Chess {
                 throw e;
             }
         }
+
         this.board.playMove(from, to);
         setTimeout(() => {
             this.logger.save(`Move[${JSON.stringify({ from, to })}] played on board and engine`);
@@ -417,6 +432,7 @@ export class Chess {
             this.logger.save("Game updated in cache after move");
             LocalStorage.clear(LocalStorageKey.LastBoard);
             this.terminateBotIfExist();
+            this.logger.save("Game over");
             document.dispatchEvent(new Event(ChessEvent.onGameOver));
             this._isGameOver = true;
             return;
