@@ -465,11 +465,11 @@ export class ChessBoard {
         const selectedSquare = this.getSelectedSquareElement();
         if (!selectedSquare) return;
 
-        const squareModeMoveTypeMap: Record<MoveType, SquareClickMode> = {
+        const squareModeMoveTypeMap: Partial<Record<MoveType, SquareClickMode>> = {
             [MoveType.Normal]: isPreMove ? SquareClickMode.PrePlay : SquareClickMode.Play,
             [MoveType.Castling]: isPreMove ? SquareClickMode.PreCastling : SquareClickMode.Castling,
             [MoveType.EnPassant]: isPreMove ? SquareClickMode.PreEnPassant : SquareClickMode.EnPassant,
-            [MoveType.Promotion]: isPreMove ? SquareClickMode.PrePromotion : SquareClickMode.Promotion,
+            [MoveType.Promotion]: isPreMove ? SquareClickMode.PrePromotion : SquareClickMode.Promotion
         };
 
         for (let moveType in moves) {
@@ -486,7 +486,7 @@ export class ChessBoard {
                         : (isPreMove ? SquareEffect.PrePlayable : SquareEffect.Playable)
                 );
 
-                this.setSquareClickMode(move, squareModeMoveTypeMap[moveType as MoveType]);
+                this.setSquareClickMode(move, squareModeMoveTypeMap[moveType as MoveType]!);
             }
         }
 
@@ -495,19 +495,22 @@ export class ChessBoard {
 
     /**
      * This function moves the piece from the given square to the given square on the chess board.
+     * @param {boolean} isTakeBack - Is move is a take back move or not.
+     * @param {MoveType|null} takeBackMoveType - Type of the take back move.
      */
-    public playMove(from: Square, to: Square, isTakeBack: boolean = false): void {
+    private _playMove(from: Square, to: Square, isTakeBack: boolean = false, takeBackMoveType: MoveType | null = null): void {
+        if((isTakeBack && !takeBackMoveType) || (!isTakeBack && takeBackMoveType))
+            throw Error("isTakeBack and takeBackMoveType must be used together.");
+
         this.removeEffectFromAllSquares();
         this.logger.save(`From[${from}], To[${to}] and Checked Square's(if exits) effects are cleaned.`);
         const fromSquare: HTMLDivElement = this.getSquareElement(from);
         const toSquare: HTMLDivElement = this.getSquareElement(to);
-        if (!isTakeBack) { // FIXME: Burası kaldırılabilir
-            this.addSquareEffects(fromSquare, SquareEffect.From);
-            this.addSquareEffects(toSquare, SquareEffect.To);
-        }
+        this.addSquareEffects(fromSquare, SquareEffect.From);
+        this.addSquareEffects(toSquare, SquareEffect.To);
         this.logger.save(`Moved From and Moved To effects given the From[${from}] and To[${from}] squares.`);
 
-        const moveType: SquareClickMode = this.getSquareClickMode(toSquare);
+        const moveType: MoveType | SquareClickMode = takeBackMoveType ?? this.getSquareClickMode(toSquare);
         switch (moveType) {
             case SquareClickMode.Castling:
                 this._doCastling(fromSquare, toSquare);
@@ -522,9 +525,23 @@ export class ChessBoard {
                 this._doPromote(toSquare);
                 break;
             default:
-                this._doNormalMove(fromSquare, toSquare, !isTakeBack);
+                this._doNormalMove(fromSquare, toSquare);
                 break;
         }
+    }
+
+    /**
+     * Play the given move on the chess board.
+     */
+    public playMove(from: Square, to: Square): void {
+        this._playMove(from, to);
+    }
+
+    /**
+     * Take back the played move on the chess board.
+     */
+    public takeBackMove(from: Square, to: Square, type: MoveType): void {
+        this._playMove(from, to, true, type);
     }
 
     /**
@@ -679,7 +696,6 @@ export class ChessBoard {
         firstRowOfSquare = Converter.squareToSquareID(
             firstRowOfSquare.replace(firstRowOfSquare.slice(-1), (color == Color.White ? "8" : "1"))
         );
-        // this.removePiece(firstRowOfSquare);
         this.createPiece(color, pieceType, firstRowOfSquare);
         this._closePromotions();
 
@@ -872,7 +888,7 @@ export class ChessBoard {
          * Disable the board. We don't want to allow player to
          * move pieces while choosing promotion piece.
          */
-        this.lock(true, false);
+        this.lock(true, true);
         this.logger.save("Board locked for promotion screen");
 
         const PROMOTION_TYPES: Array<string> = [PieceType.Queen, PieceType.Rook, PieceType.Bishop, PieceType.Knight];

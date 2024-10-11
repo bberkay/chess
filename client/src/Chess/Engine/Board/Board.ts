@@ -1,4 +1,4 @@
-import { Square, Color, CastlingType,GameStatus, Castling, Scores, Move, Durations } from "../../Types";
+import { Square, Color, CastlingType,GameStatus, Castling, Scores, Move, Durations, JsonNotation } from "../../Types";
 import { Piece } from "../Types";
 
 /**
@@ -37,5 +37,5 @@ export class Board {
     protected static moveHistory: Move[] = [];
     protected static durations: Durations | null = null;
     protected static gameStatus: GameStatus = GameStatus.NotReady;
-    protected static fenHistory: string[] = [];
+    protected static boardHistory: JsonNotation[] = [];
 }

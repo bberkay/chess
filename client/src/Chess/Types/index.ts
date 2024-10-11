@@ -60,6 +60,7 @@ export enum MoveType {
     EnPassant = "EnPassant",
     Castling = "Castling",
     Promotion = "Promotion", // Move pawn to the promotion square.
+    Promote = "Promote", // Promote the pawn to the selected piece.
 }
 
 /**
@@ -100,7 +101,7 @@ export type Scores = Record<Color, {score: number, pieces: PieceType[]}>;
  * Move type for the player moves.
  * @see For more information, check src/Chess.ts
  */
-export type Move = {from: Square, to: Square};
+export type Move = {from: Square, to: Square, type?: MoveType};
 
 /**
  * Pieces type for the pieces of the board.
@@ -120,16 +121,16 @@ export type Castling = Record<CastlingType, boolean>;
 export interface JsonNotation{
     board: Pieces;
     turn: Color;
-    castling: Castling;
+    fullMoveNumber: number;
+    halfMoveClock: number;
+    gameStatus?: GameStatus;
     enPassant: Square | null;
-    halfMoveClock: number | 0;
-    fullMoveNumber: number | 0;
+    castling: Castling;
+    scores:  Scores;
+    durations?: Durations | null;
     algebraicNotation?: string[]; 
     moveHistory?: Move[];
-    fenHistory?: string[];
-    durations?: Durations;
-    scores?:  Scores;
-    gameStatus?: GameStatus;
+    boardHistory?: JsonNotation[];
 }
 
 /**

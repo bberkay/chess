@@ -48,8 +48,7 @@ export enum SquareClickMode{
  */
 export enum SoundEffect{
     Start = "Start",
-    WhiteMove = "WhiteMove",
-    BlackMove = "BlackMove",
+    Move = "Move",
     Capture = "Capture",
     Castle = "Castle",
     Check = "Check",

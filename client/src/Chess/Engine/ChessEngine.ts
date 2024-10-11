@@ -49,11 +49,12 @@ export class ChessEngine extends BoardManager {
     private readonly moveEngine: MoveEngine = new MoveEngine();
     private playedFrom: Square | null = null;
     private playedTo: Square | null = null;
+    private moveType: MoveType | null = null;
     private moveNotation: string = "";
     private currentMoves: {[key in Square]?: Moves | null} = {};
     private isPromotionMenuOpen: boolean = false;
     private isBoardPlayable: boolean = false;
-    private boardHistory: Array<string> = [];
+    private threefoldRepetitionHistory: Array<string> = [];
     private timerMap: Record<Color, {intervalId: number | null, timer: Timer}> | null = null;
     public readonly logger: Logger = new Logger("src/Chess/Engine/ChessEngine.ts");
 
@@ -164,11 +165,12 @@ export class ChessEngine extends BoardManager {
         this.setGameStatus(GameStatus.NotReady);
         this.playedFrom = null;
         this.playedTo = null;
+        this.moveType = null;
         this.moveNotation = "";
-        this.boardHistory = [];
         this.currentMoves = {};
         this.isPromotionMenuOpen = false;
         this.isBoardPlayable = false;
+        this.threefoldRepetitionHistory = [];
         this.logger.save("Game properties set to default on ChessEngine, timers and bot are destroyed if they are created");
     }
 
@@ -330,10 +332,12 @@ export class ChessEngine extends BoardManager {
              * @see _doPromote function.
              */
             this._doPromote(to);
+            this.moveType = MoveType.Promote;
         }
         else{
             const move: MoveType | null = this.checkAndFindMoveType(from);
             if(!move) throw new MoveValidationError("Move is not valid");
+            this.moveType = move;
 
             switch(move){
                 case MoveType.Castling:
@@ -621,6 +625,7 @@ export class ChessEngine extends BoardManager {
 
         // Clear the move notation for the next turn.
         this.moveNotation = "";
+        this.saveCurrentBoard();
         this.logger.save(`Turn controls done. Turn[${BoardQuerier.getColorOfTurn()}] is finished`);
     }
 
@@ -719,7 +724,7 @@ export class ChessEngine extends BoardManager {
                     ? BoardQuerier.getBoardStatus() 
                     : GameStatus.ReadyToStart
             );
-            this.logger.save(`Game status set ${BoardQuerier.getBoardStatus()} because board is playable.`);
+            this.logger.save(`Game status set to ${BoardQuerier.getBoardStatus()} because board is playable.`);
         }
         else{
             this.setGameStatus(
@@ -854,7 +859,7 @@ export class ChessEngine extends BoardManager {
 
         if (BoardQuerier.getBoardStatus() === checkmateEnum)
             this.moveNotation += NotationSymbol.Checkmate;
-        else if (BoardQuerier.getBoardStatus() === checkEnum)
+        else if (BoardQuerier.getBoardStatus() === checkEnum && this.moveNotation !== "")
             this.moveNotation += NotationSymbol.Check;
     }
 
@@ -870,13 +875,13 @@ export class ChessEngine extends BoardManager {
          *
          * @see For more information about threefold repetition rule, see https://en.wikipedia.org/wiki/Threefold_repetition
          */
-        this.boardHistory.push(this.getGameAsFenNotation().split(" ")[0]);
-        if(this.boardHistory.length > 15)
-            this.boardHistory.shift();
+        this.threefoldRepetitionHistory.push(this.getGameAsFenNotation().split(" ")[0]);
+        if(this.threefoldRepetitionHistory.length > 15)
+            this.threefoldRepetitionHistory.shift();
 
         const notations: Array<string> = BoardQuerier.getAlgebraicNotation().slice(-14).concat(this.moveNotation);
         const currentBoard: string = this.getGameAsFenNotation().split(" ")[0];
-        if(notations.filter(notation => notation == this.moveNotation).length > 2 && this.boardHistory.filter(notation => notation == currentBoard).length > 2)
+        if(notations.filter(notation => notation == this.moveNotation).length > 2 && this.threefoldRepetitionHistory.filter(notation => notation == currentBoard).length > 2)
         {
             // When the threefold repetition rule is satisfied then set the game status to draw.
             this.setGameStatus(GameStatus.Draw);
@@ -1005,7 +1010,7 @@ export class ChessEngine extends BoardManager {
      */
     public getAlgebraicNotation(): ReadonlyArray<string>
     {
-        return Object.freeze([...BoardQuerier.getAlgebraicNotation()]);
+        return BoardQuerier.getAlgebraicNotation();
     }
 
     /**
@@ -1013,16 +1018,16 @@ export class ChessEngine extends BoardManager {
      */
     public getMoveHistory(): ReadonlyArray<Move>
     {
-        return Object.freeze([...BoardQuerier.getMoveHistory()]);
+        return BoardQuerier.getMoveHistory();
     }
 
     /**
-     * This function returns the fen notation history of 
-     * the game. After every move, the fen notation is saved.
+     * This function returns the board history of the game.
+     * After every move, the board is saved.
      */
-    public getFenHistory(): ReadonlyArray<string>
+    public getBoardHistory(): ReadonlyArray<JsonNotation>
     {
-        return Object.freeze([...BoardQuerier.getFenHistory()]);
+        return BoardQuerier.getBoardHistory();
     }
 
     /**
@@ -1030,6 +1035,6 @@ export class ChessEngine extends BoardManager {
      */
     public getScores(): Readonly<Scores>
     {
-        return Object.freeze({...BoardQuerier.getScores()});
+        return BoardQuerier.getScores();
     }
 }

@@ -7,7 +7,7 @@
  * @license MIT
  */
 
-import { JsonNotation, PieceType, Square, Color, StartPosition, ChessEvent, GameStatus, Durations, Move } from "./Types";
+import { JsonNotation, PieceType, Square, Color, StartPosition, ChessEvent, GameStatus, Durations, Move, Scores, MoveType } from "./Types";
 import { ChessEngine, MoveValidationError } from "./Engine/ChessEngine";
 import { ChessBoard } from "./Board/ChessBoard";
 import { SquareClickMode, SquareEffect } from "./Board/Types";
@@ -66,7 +66,7 @@ export class Chess {
     /**
      * This function checks the cache and loads the game from the cache if there is a game in the cache.
      * @returns Returns true if there is a game in the cache, otherwise returns false.
-     * @see For more information about cache management check src/Services/LocalStorage.ts
+     * @see For more information about cache management check `src/Services/LocalStorage.ts`
      */
     public checkAndLoadGameFromCache(): void {
         // If there is a game in the cache, load it.
@@ -89,13 +89,13 @@ export class Chess {
      * This function creates a new game with the given position(fen notation/string, 
      * StartPosition/string or JsonNotation). 
      * 
-     * If "position" is JsonNotation and includes "durations" but also "durations" parameter 
-     * is given then "durations" in theJsonNotation will be OVERRIDEN by the "durations" 
-     * parameter. If position is string/fen/StartPosition then it will be converted to 
-     * JsonNotation and if "durations" parameter is given then "durations" will be ADDED 
+     * If `position` is JsonNotation and includes `durations` but also `durations` parameter 
+     * is given then `durations` in the JsonNotation will be OVERRIDEN by the `durations` 
+     * parameter. If `position` is string/fen/StartPosition then it will be converted to 
+     * JsonNotation and if `durations` parameter is given then `durations` will be ADDED 
      * to the created JsonNotation that is converted from the string/fen/StartPosition.
      * 
-     * @see For more information about StartPosition and JsonNotation check src/Chess/Types/index.ts
+     * @see For more information about `StartPosition` and `JsonNotation` check `src/Chess/Types/index.ts`
      */
     public createGame(
         position: JsonNotation | StartPosition | string = StartPosition.Standard,
@@ -140,8 +140,8 @@ export class Chess {
 
     /**
      * This function creates a new game against the bot with the 
-     * given position(fen notation/string, StartPosition/string or 
-     * JsonNotation).
+     * given position(fen notation/string, `StartPosition/string` or 
+     * `JsonNotation`).
      */
     public addBotToCurrentGame(botColor: BotColor | Color, botDifficulty: BotDifficulty): void {
         this._bot = new Bot(botColor, botDifficulty);
@@ -365,59 +365,81 @@ export class Chess {
     }
 
     /**
-     * 
+     * Go back to the previous move. 
+     * @param {boolean} onEngine - If it is true then it 
+     * will go back to the previous move on the engine not
+     * just on the board.
      */
     public takeBack(onEngine: boolean = false): void {
-        const lastMove = this.engine.getMoveHistory()[this.engine.getMoveHistory().length - 1 - this._currentTakeBackCount];
-        if (!lastMove)
-            return;
-
-        this.board.playMove(lastMove.to, lastMove.from, true);
-        if (onEngine) {
-            this.engine.playMove(lastMove.to, lastMove.from);
-        } else {
-            this.board.lock(true);
-            this._currentTakeBackCount++;
-        }
+        this._currentTakeBackCount++;
+        this.goToSpecificMove((this.engine.getMoveHistory().length - 1) - this._currentTakeBackCount);
     }
 
     /**
-     * 
+     * Go forward to the next move. 
      */
     public takeForward(): void {
-        const lastMove = this.engine.getMoveHistory()[this.engine.getMoveHistory().length - this._currentTakeBackCount];
-        if (!lastMove) {
-            this.board.unlock();
-            return;
-        }
-
-        this.board.playMove(lastMove.from, lastMove.to);
         this._currentTakeBackCount--;
+        this.goToSpecificMove((this.engine.getMoveHistory().length - 1) - this._currentTakeBackCount);
     }
 
     /**
-     * 
+     * Go to the specific move by the given move index.
      */
     public goToSpecificMove(moveIndex: number): void {
-        if (moveIndex < 0 || moveIndex >= this.engine.getMoveHistory().length)
+        if (moveIndex < 0 || moveIndex > this.engine.getMoveHistory().length)
             return;
 
-        const newTakeBackCount = this.engine.getMoveHistory().length - 1 - moveIndex;
-        this._currentTakeBackCount = newTakeBackCount;
-
+        if (moveIndex == this.engine.getMoveHistory().length - 1)
+            this.board.unlock();
+        else
+            this.board.lock(true);
+        
+        let snapshotMove = this.engine.getMoveHistory()[moveIndex];
+        let snapshot = this.engine.getBoardHistory()[moveIndex + (snapshotMove.type == MoveType.Promote ? 1 : 0)];
         this.board.removePieces();
         this.board.removeEffectFromAllSquares();
         this.board.createPieces(
-            Converter.fenToJson(moveIndex == 0
-                ? StartPosition.Standard
-                : this.engine.getFenHistory()[moveIndex - 1]
-            ).board
+            snapshot.board
         );
 
-        const lastMove = this.engine.getMoveHistory()[moveIndex];
-        this.board.playMove(lastMove.from, lastMove.to);
-        
-        // this.board.showStatus(this.engine.getGameStatus());
+        if(snapshotMove.type !== MoveType.Promote){
+            this.board.takeBackMove(snapshotMove.from, snapshotMove.to, snapshotMove.type!);
+            snapshot = this.engine.getBoardHistory()[moveIndex == 0 ? 0 : moveIndex + 1];
+        }
+
+        this.board.showStatus(snapshot.gameStatus!);
+        this._currentTakeBackCount = (this.engine.getMoveHistory().length - 1) - moveIndex;
+    }
+
+    /**
+     * Retrieves the scores of the current board, even if it reflects
+     * a previous state. For instance, if the player has taken back
+     * 2 moves, this method will return the scores of the board 
+     * after those 2 moves have been undone. If you want to get the 
+     * scores of the latest move without considering any undo actions, 
+     * use `chess.engine.getScores()`.
+     */
+    public getScores(): Scores {
+        /**
+         * Other board properties(except `boardHistory`, because
+         * `boardHistory` also includes the board properties so 
+         * storing `boardHistory` in board history will be infinite
+         * loop) can be implemented like this(Scores). But currently, 
+         * they are not needed.
+         * 
+         * Implementation pseudo code:
+         * public getProperty(): Property {
+         *   if(this._currentTakeBackCount == 0)
+         *     return this.engine.getProperty();
+         *  
+         *   return this.engine.getBoardHistory()[this.engine.getMoveHistory().length - 1 - this._currentTakeBackCount].property!;
+         * }
+         */
+        if (this._currentTakeBackCount == 0)
+            return this.engine.getScores();
+
+        return this.engine.getBoardHistory()[this.engine.getMoveHistory().length - 1 - this._currentTakeBackCount].scores!;
     }
 
     /**

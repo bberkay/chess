@@ -1,4 +1,4 @@
-import {Color, EnPassantDirection, GameStatus, PieceType, Square} from "../../../Types";
+import {Color, EnPassantDirection, GameStatus, Move, PieceType, Square} from "../../../Types";
 import {Piece} from "../../Types";
 import {BoardQuerier} from "../../Board/BoardQuerier.ts";
 import {Locator} from "../Utils/Locator.ts";
@@ -113,7 +113,6 @@ export class MoveExtender{
          * 2. The enemy pawn must be on an adjacent square to the moving pawn.
          * 3. The enemy pawn must have just moved two squares in a single move.
          * 4. The en passant capture must be made on the very next turn.
-         * 5. The enemy pawn must moved two squares in the last move.
          * 
          * @see for more information about en passant https://en.wikipedia.org/wiki/En_passant
          */
@@ -121,6 +120,10 @@ export class MoveExtender{
         const pawn: Piece | null = BoardQuerier.getPieceOnSquare(square);
         if(!pawn || pawn.getType() != PieceType.Pawn) return null;
 
+        const pawnColumn = Locator.getColumn(square);
+        if(pawnColumn == 1 && direction == EnPassantDirection.Left || pawnColumn == 8 && direction == EnPassantDirection.Right)
+            return null;
+        
         // Find needed information for checking rules.
         const color: Color = pawn.getColor();
         const pawnRow: number = Locator.getRow(square);
@@ -129,29 +132,34 @@ export class MoveExtender{
             ? (color == Color.White ? square - 9 : square + 7)
             : (color == Color.White ? square - 7 : square + 9); // back diagonal square of the enemy pawn.
         
-        // Target square of the enemy pawn for en passant.
-        const enemyPawn: number = direction == EnPassantDirection.Left ? square - 1 : square + 1;
-        const algebraicNotation = BoardQuerier.getAlgebraicNotation();
-
-        /**
-         * Search if the enemy pawn moved one square forward previously in
-         * the move history. If it is not found in the move history, it means
-         * that the enemy pawn moved two squares, or it is not moved yet.
-         */
-        const isEnemyPawnMovedTwoSquares: boolean = !algebraicNotation.includes(
-            Converter.squareIDToSquare((enemyPawn) + (color == Color.White ? -8 : 8))
-        );
-
         // Check fen notation for en passant availability when the game is loaded from fen notation.
-        if(algebraicNotation.length == 0 && BoardQuerier.getGame().enPassant == enPassantMove)
+        if(BoardQuerier.getAlgebraicNotation().length == 0 && BoardQuerier.getGame().enPassant == enPassantMove)
             return enPassantMove;
 
-        if(pawnRow != enPassantRow // First rule.
-            || !BoardQuerier.isSquareHasPiece(enemyPawn, color == Color.White ? Color.Black : Color.White, [PieceType.Pawn]) // Second rule.
-            || algebraicNotation[algebraicNotation.length - 2] != Converter.squareIDToSquare(square) // Fourth rule.
-            || !(BoardQuerier.getPieceOnSquare(enemyPawn) && isEnemyPawnMovedTwoSquares) // Third rule.
-            || algebraicNotation[algebraicNotation.length - 1] != Converter.squareIDToSquare(enemyPawn) // Fifth rule.
-        ) return null;
+        const pawnOnItsFifthRank = pawnRow == enPassantRow;
+        if(!pawnOnItsFifthRank) 
+            return null;
+
+        const enemyPawn: number = direction == EnPassantDirection.Left ? square - 1 : square + 1;
+        const enemyPawnOnAdjacentSquare = BoardQuerier.isSquareHasPiece(
+            enemyPawn, 
+            color == Color.White ? Color.Black : Color.White, 
+            [PieceType.Pawn]
+        );
+        if(!enemyPawnOnAdjacentSquare) 
+            return null;
+
+        const moveHistory: Array<Move> = BoardQuerier.getMoveHistory();
+        const enemyPawnMovedTwoSquares = moveHistory.filter(move => 
+            move.from == (enemyPawn + (color == Color.White ? -16 : +16)) 
+            && move.to === (enemyPawn + (color == Color.White ? -8 : +8))
+        ).length == 0;
+        if(!enemyPawnMovedTwoSquares) 
+            return null;
+
+        const enPassantCaptureOnNextTurn = moveHistory[moveHistory.length - 1].to === enemyPawn;
+        if(!enPassantCaptureOnNextTurn) 
+            return null;
 
         return enPassantMove;
     }
@@ -172,65 +180,5 @@ export class MoveExtender{
     public getRightEnPassantMove(square: Square): Square | null
     {
         return this.calculateEnPassantMove(square, EnPassantDirection.Right);
-    }
-
-    /**
-     * @description Check if the promotion is available for the given square.
-     */
-    public getPromotionMove(square: Square): Array<Square> | null
-    {
-        /**
-         * Rules for promotion:
-         * 1. The pawn must be on its last rank.
-         *
-         * @see for more information about promotion https://en.wikipedia.org/wiki/Promotion_(chess)
-         */
-
-            // Find the pawn by the given square.
-        const pawn: Piece = BoardQuerier.getPieceOnSquare(square)!;
-
-        /**
-         * Find last rank for black and white pawns.
-         */
-        const BLACK_PROMOTION_ROW: number = 8;
-        const WHITE_PROMOTION_ROW: number = 1;
-
-        // Find the pawn's color and row.
-        const color: Color = pawn.getColor();
-        const row: number = Locator.getRow(square);
-
-        /**
-         * Check first rule. For example, if white pawn is not on the
-         * 7th row, return null. If black pawn is not on the 2nd row,
-         * return null.
-         *
-         * @see for more information about row calculation src/Chess/Engine/Move/Utils/Locator.ts
-         */
-        if((color == Color.Black && row != BLACK_PROMOTION_ROW - 1) || (color == Color.White && row != WHITE_PROMOTION_ROW + 1))
-            return null;
-
-        /**
-         * If all rules are passed, then find vertical move, left diagonal capture move
-         * (because pawn only go left diagonal when it is capturing) and right diagonal
-         * capture move (because pawn only go right diagonal when it is capturing).
-         */
-        const verticalMove: number = square + (color == Color.White ? -8 : 8);
-        const leftDiagonalMove: number = square + (color == Color.White ? -9 : 9);
-        const rightDiagonalMove: number = square + (color == Color.White ? -7 : 7);
-        const enemyColor: Color = color == Color.White ? Color.Black : Color.White;
-
-        let promotionMoves: Array<Square> = [
-            verticalMove
-        ];
-
-        // If there is a piece on the left diagonal square, add this square to the promotion moves.
-        if(BoardQuerier.isSquareHasPiece(leftDiagonalMove, enemyColor))
-            promotionMoves.push(leftDiagonalMove);
-
-        // If there is a piece on the right diagonal square, add this square to the promotion moves.
-        if(BoardQuerier.isSquareHasPiece(rightDiagonalMove, enemyColor))
-            promotionMoves.push(rightDiagonalMove);
-
-        return promotionMoves;
     }
 }

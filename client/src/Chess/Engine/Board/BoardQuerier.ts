@@ -37,7 +37,7 @@ export class BoardQuerier extends Board{
             fullMoveNumber: BoardQuerier.getMoveCount(),
             algebraicNotation: BoardQuerier.getAlgebraicNotation(),
             moveHistory: BoardQuerier.getMoveHistory(),
-            fenHistory: BoardQuerier.getFenHistory(),
+            boardHistory: BoardQuerier.getBoardHistory(),
             durations: BoardQuerier.getDurations() || undefined,
             scores: BoardQuerier.getScores(),
             gameStatus: BoardQuerier.getBoardStatus()
@@ -49,7 +49,7 @@ export class BoardQuerier extends Board{
      */
     public static getBoard(): Record<Square, Piece | null>
     {
-        return Board.currentBoard;
+        return JSON.parse(JSON.stringify(Board.currentBoard));
     }
 
     /**
@@ -81,7 +81,7 @@ export class BoardQuerier extends Board{
      */
     public static getEnPassant(): Square | null
     {
-        return Board.enPassant;
+        return JSON.parse(JSON.stringify(Board.enPassant));
     }
 
     /**
@@ -89,7 +89,7 @@ export class BoardQuerier extends Board{
      */
     public static getCastling(): Castling
     {
-        return Board.castling;
+        return JSON.parse(JSON.stringify(Board.castling));
     }
 
     /**
@@ -113,15 +113,15 @@ export class BoardQuerier extends Board{
      */
     public static getMoveHistory(): Move[]
     {
-        return Board.moveHistory || [];
+        return JSON.parse(JSON.stringify(Board.moveHistory || []));
     }
 
     /**
-     * Get fen history
+     * Get board history
      */
-    public static getFenHistory(): string[]
+    public static getBoardHistory(): JsonNotation[]
     {
-        return Board.fenHistory || [];
+        return JSON.parse(JSON.stringify(Board.boardHistory || []));
     }
     
     /**
@@ -129,7 +129,7 @@ export class BoardQuerier extends Board{
      */
     public static getDurations(): Durations | null
     {
-        return Board.durations;
+        return JSON.parse(JSON.stringify(Board.durations));
     }
 
     /**
@@ -137,7 +137,7 @@ export class BoardQuerier extends Board{
      */
     public static getScores(): Scores
     {
-        return Board.scores;
+        return JSON.parse(JSON.stringify(Board.scores));
     }
 
     /**
@@ -145,7 +145,7 @@ export class BoardQuerier extends Board{
      */
     public static getBoardStatus(): GameStatus
     {
-        return Board.gameStatus;
+        return JSON.parse(JSON.stringify(Board.gameStatus));
     }
 
     /**
