@@ -1,4 +1,4 @@
-import { Color, PieceType, Square, StartPosition, JsonNotation, CastlingType, Castling } from "../Types";
+import { Color, PieceType, Square, StartPosition, JsonNotation, CastlingType, Castling, Move } from "../Types";
 
 /**
  * This class is used to convert data from one type to another.
@@ -76,6 +76,20 @@ export class Converter{
         // 8 - rank because the rank starts from 8
         square += (9 - rank).toString();
         return square;
+    }
+
+    /**
+     * Convert Long Algebraic Notation to Move object.
+     * @example Converter.lanToMove("e2e4"), return {from: Square.e2, to: Square.e4}
+     * @example Converter.lanToMove("e7e8q"), return [{from: Square.e7, to: Square.e8}, {from: Square.e8, to: Square.e8}]
+     */
+    static lanToMove(uci: string): Move | Move[]
+    {
+        const from: Square = Square[uci.slice(0, 2) as keyof typeof Square];
+        const to: Square = Square[uci.slice(2, 4) as keyof typeof Square];
+        const promotion: Square | null = uci.length > 4 ? Square[uci.slice(4, 5) as keyof typeof Square] : null;
+
+        return promotion ? [{from, to}, {from: to, to: promotion}] : {from, to};
     }
 
     /**

@@ -60,6 +60,7 @@ export enum MoveType {
     EnPassant = "EnPassant",
     Castling = "Castling",
     Promotion = "Promotion", // Move pawn to the promotion square.
+    Promote = "Promote", // Promote the pawn to the selected piece.
 }
 
 /**
@@ -100,7 +101,7 @@ export type Scores = Record<Color, {score: number, pieces: PieceType[]}>;
  * Move type for the player moves.
  * @see For more information, check src/Chess.ts
  */
-export type Move = {from: Square, to: Square};
+export type Move = {from: Square, to: Square, type?: MoveType};
 
 /**
  * Pieces type for the pieces of the board.
@@ -120,15 +121,16 @@ export type Castling = Record<CastlingType, boolean>;
 export interface JsonNotation{
     board: Pieces;
     turn: Color;
-    castling: Castling;
+    fullMoveNumber: number;
+    halfMoveClock: number;
+    gameStatus?: GameStatus;
     enPassant: Square | null;
-    halfMoveClock: number | 0;
-    fullMoveNumber: number | 0;
+    castling: Castling;
+    scores:  Scores;
+    durations?: Durations | null;
     algebraicNotation?: string[]; 
     moveHistory?: Move[];
-    durations?: Durations;
-    scores?:  Scores;
-    gameStatus?: GameStatus;
+    boardHistory?: JsonNotation[];
 }
 
 /**
@@ -181,25 +183,31 @@ export enum GameStatus{
  */
 export enum ChessEvent {
     /**
+     * Triggered when the game is created.
+     * @Event
+     */
+    onGameCreated = "onGameCreated",
+
+    /**
      * Triggered when a piece is created.
      * @CustomEvent
      * @param {Square} square - The square where the piece is created.
      */
-    OnPieceCreated = "OnPieceCreated",
+    onPieceCreated = "OnPieceCreated",
 
     /**
      * Triggered when a piece is removed.
      * @CustomEvent
      * @param {Square} square - The square where the piece is removed.
      */
-    OnPieceRemoved = "OnPieceRemoved",
+    onPieceRemoved = "OnPieceRemoved",
 
     /**
      * Triggered when a piece is selected.
      * @CustomEvent
      * @param {Square} square - The square where the piece is selected.
      */
-    OnPieceSelected = "OnPieceSelected",
+    onPieceSelected = "OnPieceSelected",
 
     /**
      * Triggered when a piece is moved.
@@ -207,7 +215,7 @@ export enum ChessEvent {
      * @param {Square} from - The starting square of the move.
      * @param {Square} to - The ending square of the move.
      */
-    OnPieceMoved = "OnPieceMoved",
+    onPieceMoved = "OnPieceMoved",
 
     /**
      * Triggered when a piece is moved by the player
@@ -226,6 +234,13 @@ export enum ChessEvent {
      */
     onPieceMovedByOpponent = "onPieceMovedByOpponent",
 
+    /**
+     * On bot added to the game.
+     * @CustomEvent
+     * @param {Color} color - The color of the bot.
+     */
+    onBotAdded = "onBotAdded",
+    
     /**
      * Triggered when the game is over.
      * @Event

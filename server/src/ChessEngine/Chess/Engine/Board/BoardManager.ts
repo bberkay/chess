@@ -1,8 +1,9 @@
 import {Board} from "./Board.ts";
-import {CastlingType, Color, JsonNotation, PieceType, Square, GameStatus, Pieces} from "../../Types";
+import {CastlingType, Color, JsonNotation, PieceType, Square, GameStatus, Pieces, MoveType, Move} from "../../Types";
 import {BoardQuerier} from "./BoardQuerier.ts";
 import {PieceModel} from "../Models/PieceModel.ts";
 import {Piece} from "../Types";
+import { Converter } from "@Chess/Utils/Converter.ts";
 
 /**
  * This class provides the board management of the game.
@@ -40,8 +41,11 @@ export class BoardManager extends Board{
         Board.algebraicNotation = jsonNotation.algebraicNotation ?? [];
         Board.scores = jsonNotation.scores ?? {[Color.White]: {score: 0, pieces: []}, [Color.Black]: {score: 0, pieces: []}};
         Board.moveHistory = jsonNotation.moveHistory ?? [];
+        Board.boardHistory = jsonNotation.boardHistory ?? [];
         Board.durations = jsonNotation.durations ?? null;
         Board.gameStatus = jsonNotation.gameStatus ?? Board.gameStatus;
+        if(!jsonNotation.moveHistory || jsonNotation.moveHistory.length == 0)
+            this.saveCurrentBoard();
     }
 
     /**
@@ -197,9 +201,21 @@ export class BoardManager extends Board{
     /**
      * Add move to move history
      */
-    protected saveMoveHistory(from: Square, to: Square): void
+    protected saveMove(from: Square, to: Square, type: MoveType | null = null): void
     {
-        Board.moveHistory.push({from: from, to: to});
+        const move: Move = {from: from, to: to};
+        if(type) move.type = type
+        Board.moveHistory.push(move);
+    }
+
+    /**
+     * Save board to history
+     */
+    protected saveCurrentBoard(): void
+    {
+        const game = BoardQuerier.getGame();
+        delete game.boardHistory;
+        Board.boardHistory.push(game);
     }
 
     /**

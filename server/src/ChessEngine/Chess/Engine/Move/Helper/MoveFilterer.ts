@@ -139,15 +139,24 @@ export class MoveFilterer{
          * routes that doesn't protect the king from the dangerous pieces.
          */
         const allRoutes: Route = RouteCalculator.getAllRoutes(pieceSquare);
-
+        
         /**
-         * First check is there a piece between king and piece, if there is then piece doesn't have to
-         * protect the king.
+         * Is there a piece between king and piece or even king is behind 
+         * of the piece?
          */
         if(!BoardQuerier.isSquareHasPiece(Locator.getNext(allRoutes[relativeRoute]!, relativeRoute, pieceSquare), pieceColor, [PieceType.King]))
             return moveRoute;
 
-        // If there is no piece between king and piece, then check the dangerous pieces.
+        for(const square of allRoutes[relativeRoute]!){
+            if(BoardQuerier.isSquareHasPiece(
+                square, 
+                enemyColor, 
+                [PieceType.Pawn, PieceType.Knight, PieceType.Bishop, PieceType.Rook, PieceType.Queen, PieceType.King]
+            ))
+                return moveRoute;
+        }
+
+        // If there is no piece between king and piece, and king is behind of the piece:
         for(const square of allRoutes[dangerousRoute]!){
             // If route has any dangerous piece, then(next step)
             if(BoardQuerier.isSquareHasPiece(square, enemyColor, dangerousPieces)){
