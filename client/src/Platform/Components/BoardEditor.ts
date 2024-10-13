@@ -241,7 +241,7 @@ export class BoardEditor extends Component{
         
         this.createPieceEditor();
         this.enableBoardCreator();
-        this.createBoard();
+        this.createBoardForBoardEditor();
         this.enableBoardObserver();
         LocalStorage.clear(LocalStorageKey.LastLobbyConnection);
         LocalStorage.save(LocalStorageKey.BoardEditorEnabled, true);
@@ -417,6 +417,20 @@ export class BoardEditor extends Component{
         
         if(this._currentBoardCreatorMode == BoardCreatorMode.Template)
           this.changeBoardCreatorMode();
+    }
+
+    /**
+     * This function creates a new board with the board creator.
+     */
+    private createBoardForBoardEditor(
+        fenNotation: string | StartPosition | null = null
+    ): void
+    {
+        fenNotation = fenNotation || this.getCurrentFen();
+        fenNotation = fenNotation.replace(" b ", " w ");
+        fenNotation = fenNotation.replace(/\d+ \d+$/, "0 1");
+        this.chess.createGame();
+        this._prepareBoardEditorForGame();
     }
 
     /**

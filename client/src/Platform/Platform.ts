@@ -333,7 +333,7 @@ export class Platform{
         // TODO: Bot için resign, draw, play again, promotion, castling, undo test edilmeli.
         // TODO: Board settings chess.com dan bakılabilir. Connections menu kaldırılmalı.
         
-        // TODO: Multiple pre move
+        // TODO: Pre move sorunları çözülecek ve Multiple pre move
         // TODO: Switch case yapısı handling socket
             // addEventListener onPieceMovedByPlayer
         // TODO: Component fonksiyonları toplanabilir
@@ -343,6 +343,7 @@ export class Platform{
             // gibi basitçe methodlar olsun.
             // TODO: Public ve private 
 
+        // TODO: Board settings chess.com dan bakılabilir. Connections menu kaldırılmalı.
         // TODO: Server Uploading and supabase duruma göre
         // TODO: Mobil için touchup
         // function isTouchDevice() {
@@ -350,10 +351,8 @@ export class Platform{
         // }
 
         // TODO: Belki language eklenmese bile eklenecek altyapı kurulabilir.
-        // TODO: Mesele, tüm stringlerin bir objede tutulması ve bu objenin diline göre değişmesi.
+            // TODO: Mesele, tüm stringlerin bir objede tutulması ve bu objenin diline göre değişmesi.
         // TODO: Son bir test farklı tarayıcılar ile(özellikle connection testi, reload testleri) ve Readme
-            // TODO: Board editor ile oyun yaratıp bot ve online oynama ve play again testleri de var aynı yaratılan
-            // oyun ile başlamalı.
             // TODO: fixme ve todoları araştır.
 
         switch(menuOperation){

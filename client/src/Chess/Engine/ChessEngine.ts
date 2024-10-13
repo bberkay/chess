@@ -746,12 +746,30 @@ export class ChessEngine extends BoardManager {
          * First, check the board is on the standard position because if the board is on the
          * standard position then continue is unnecessary.
          */
-        if(Converter.jsonToFen(BoardQuerier.getGame()) == StartPosition.Standard)
-        {
+        if (Converter.jsonToFen(BoardQuerier.getGame()) == StartPosition.Standard) {
             this.logger.save("Game status will not be checked because board is the standard position.");
             this.setGameStatus(GameStatus.ReadyToStart);
             this.isBoardPlayable = true;
             return;
+        }
+
+        /**
+         * Set game status to not ready if there is a pawn on the promotion row at the
+         * start of the game.
+         */
+        if(this.getMoveHistory().length == 0){
+            const whitePawnOnPromotionRow = [1, 2, 3, 4, 5, 6, 7, 8].filter(
+                square => BoardQuerier.isSquareHasPiece(square, Color.White, PieceType.Pawn)
+            );
+            const blackPawnOnPromotionRow = [57, 58, 59, 60, 61, 62, 63, 64].filter(
+                square => BoardQuerier.isSquareHasPiece(square, Color.Black, PieceType.Pawn)
+            );
+            if (whitePawnOnPromotionRow.length > 0  || blackPawnOnPromotionRow.length > 0) {
+                this.logger.save("Game status set to not ready because there is a pawn on the promotion row.");
+                this.setGameStatus(GameStatus.NotReady);
+                this.isBoardPlayable = false;
+                return;
+            }
         }
 
         /**
