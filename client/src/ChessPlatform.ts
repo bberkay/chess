@@ -27,7 +27,10 @@ import type {
     WsStartedData,
     JoinLobbyReqParams,
     ReconnectLobbyReqParams,
-    WsFinishedData
+    WsFinishedData,
+    WsResignedData,
+    WsUndoData,
+    WsCreatedData
 } from "./Types";
 import { 
     RECONNECTION_ATTEMPT_LIMIT, 
@@ -153,11 +156,17 @@ export class ChessPlatform{
             case SocketOperation.SendPlayAgainOffer:
                 this.sendPlayAgainOffer();
                 break;
+            case SocketOperation.SendUndoOffer:
+                this.sendUndoOffer();
+                break;
             case SocketOperation.SendDrawOffer:
                 this.sendDrawOffer();
                 break;
             case SocketOperation.AcceptDrawOffer:
                 this.acceptDrawOffer();
+                break;
+            case SocketOperation.AcceptUndoOffer:
+                this.acceptUndoOffer();
                 break;
             case SocketOperation.AcceptPlayAgainOffer:
                 this.acceptPlayAgainOffer();
@@ -333,6 +342,15 @@ export class ChessPlatform{
     }
 
     /**
+     * Send the undo move offer to the opponent.
+     */
+    private sendUndoOffer(): void
+    {
+        this.platform.notationMenu.showUndoOfferSent();
+        this.socket?.send(WsCommand.undoOffered());
+    }
+
+    /**
      * Accept the draw offer from the opponent.
      */
     private acceptDrawOffer(): void
@@ -346,6 +364,14 @@ export class ChessPlatform{
     private acceptPlayAgainOffer(): void
     {
         this.socket?.send(WsCommand.playAgainAccepted());
+    }
+    
+    /**
+     * Accept the undo move offer from the opponent.
+     */
+    private acceptUndoOffer(): void
+    {
+        this.socket?.send(WsCommand.undoAccepted());
     }
 
     /**
@@ -417,15 +443,24 @@ export class ChessPlatform{
             console.log("message:", event.data);
             const [wsCommand, wsData] = WsCommand.parse(event.data);
             switch(wsCommand){
+                case WsTitle.Created:
+                    lobbyId = (wsData as WsCreatedData).lobbyId;
+                    player = (wsData as WsCreatedData).player;
+                    this.platform.navigatorModal.showLobbyInfo(window.location.origin + "/" + lobbyId);
+                    this.displayLobbyIdOnUrl(lobbyId);
+                    LocalStorage.save(LocalStorageKey.LastLobbyConnection, wsData);
+                    LocalStorage.save(LocalStorageKey.LastPlayerName, player.name);
+                    this.logger.save(`Lobby created and connected [${lobbyId}] as ${player.name}.`);
+                    break;
                 case WsTitle.Connected:
                     lobbyId = (wsData as WsConnectedData).lobbyId;
                     player = (wsData as WsConnectedData).player;
-                    this.platform.navigatorModal.showLobbyInfo(window.location.origin + "/" + lobbyId);
                     this.displayLobbyIdOnUrl(lobbyId);
                     LocalStorage.save(LocalStorageKey.LastLobbyConnection, wsData);
                     LocalStorage.save(LocalStorageKey.LastPlayerName, player.name);
                     this.logger.save(`Connected to the lobby[${lobbyId}] as ${player.name}.`);
                     break;
+                case WsTitle.PlayAgainAccepted:
                 case WsTitle.Started:
                     this.platform.navigatorModal.hide();
                     const playerColor = (wsData as WsStartedData).whitePlayer.id === player!.id ? Color.White : Color.Black;
@@ -452,25 +487,44 @@ export class ChessPlatform{
                         }
                     ));
                     break;
+                case WsTitle.DrawAccepted:
+                    this.chess.engine.setGameStatus(GameStatus.Draw);
+                    this.chess.finishTurn();
+                    this.platform.navigatorModal.showGameOverAsDrawAccepted();
+                    closeConnectionOnFinish = true;
+                    break;
+                case WsTitle.Resigned:
+                    this.chess.engine.setGameStatus((wsData as WsResignedData).gameStatus);
+                    this.chess.finishTurn();
+                    this.platform.navigatorModal.showGameOverAsResigned(
+                        (wsData as WsResignedData).gameStatus === GameStatus.WhiteVictory 
+                            ? Color.Black 
+                            : Color.White
+                    );
+                    closeConnectionOnFinish = true;
+                    break;
                 case WsTitle.Finished:
-                    if((wsData as WsFinishedData).isResigned || (wsData as WsFinishedData).isDrawOffered){
-                        this.chess.engine.setGameStatus((wsData as WsFinishedData).gameStatus);
-                        this.chess.finishTurn();
-                        if((wsData as WsFinishedData).isResigned)
-                            this.platform.navigatorModal.showGameOverAsResigned((wsData as WsFinishedData).resignColor!);
-                        else if((wsData as WsFinishedData).isDrawOffered)
-                            this.platform.navigatorModal.showGameOverAsDrawAccepted();
-                    }
-                    else if(this.chess.engine.getGameStatus() !== (wsData as WsFinishedData).gameStatus){
-                        this.chess.engine.setGameStatus((wsData as WsFinishedData).gameStatus);
-                        this.chess.finishTurn();
+                    // When the game is finished on the server, also should be finished on the client.
+                    // If there is a mismatch, then make client's game status equal to the server's game status.
+                    if(this.chess.getGameStatus() !== (wsData as WsFinishedData).gameStatus){
+                        // reset page
+                        location.reload();
                         this.platform.navigatorModal.showError("Unexpected game status. Game status is not equal to the server's game status.");
-                        this.logger.save(`Game finished with the status: ${(wsData as WsFinishedData).gameStatus}.`);
                     }
                     closeConnectionOnFinish = true;
                     break;
+                case WsTitle.UndoAccepted:
+                    this.chess.takeBack(true);
+                    if ((wsData as WsUndoData).board !== this.chess.getGameAsFenNotation() ) {
+                        location.reload();
+                        this.platform.navigatorModal.showError("Unexpected game status. Game status is not equal to the server's game status. The game created again according to the server's game status.");
+                    }
+                    break;
                 case WsTitle.DrawOffered:
                     this.platform.notationMenu.showDrawOffer();
+                    break;
+                case WsTitle.UndoOffered:
+                    this.platform.notationMenu.showUndoOffer();
                     break;
                 case WsTitle.PlayAgainOffered:
                     this.platform.notationMenu.showPlayAgainOffer();
@@ -479,7 +533,7 @@ export class ChessPlatform{
                     if(![GameStatus.BlackVictory, 
                         GameStatus.WhiteVictory, 
                         GameStatus.Draw
-                    ].includes(this.chess.engine.getGameStatus()))
+                    ].includes(this.chess.getGameStatus()))
                         this.platform.notationMenu.displayOnlineGameUtilityMenu();
                     else 
                         this.platform.notationMenu.displayNewGameUtilityMenu();
@@ -590,11 +644,27 @@ class WsCommand{
     }
 
     /**
+     * Send undo offered command to the server.
+     */
+    static undoOffered(): string
+    {
+        return this._wsCommand(WsTitle.UndoOffered);
+    }
+
+    /**
      * Send draw accepted command to the server.
      */
     static drawAccepted(): string
     {
         return this._wsCommand(WsTitle.DrawAccepted);
+    }
+
+    /**
+     * Send undo accepted command to the server.
+     */
+    static undoAccepted(): string
+    {
+        return this._wsCommand(WsTitle.UndoAccepted);
     }
 
     /**
