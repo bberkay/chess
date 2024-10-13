@@ -92,6 +92,12 @@ export type Duration = {remaining: number, increment: number};
 export type Durations = Record<Color, Duration>;
 
 /**
+ * RemainingTimes type for the remaining times of the players.
+ * @see For more information, check src/Chess.ts
+ */
+export type RemainingTimes = Record<Color, number>;
+
+/**
  * Scores type for the scores of the players.
  * @see For more information, check src/Chess.ts
  */
@@ -126,7 +132,7 @@ export interface JsonNotation{
     gameStatus?: GameStatus;
     enPassant: Square | null;
     castling: Castling;
-    scores:  Scores;
+    scores?:  Scores;
     durations?: Durations | null;
     algebraicNotation?: string[]; 
     moveHistory?: Move[];

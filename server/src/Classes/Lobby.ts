@@ -80,9 +80,15 @@ export class Lobby{
     /**
      * Get the current board of the game.
      */
-    public getCurrentGame(): string | JsonNotation
+    public getCurrentGame(asFen: boolean = false): string | JsonNotation
     {
-        return this.isGameStarted() ? this.chessEngine.getGameAsJsonNotation() : this.getInitialBoard();
+        return this.isGameStarted() 
+            ? (
+                asFen 
+                ? this.chessEngine.getGameAsFenNotation() 
+                : this.chessEngine.getGameAsJsonNotation()
+            ) 
+            : this.getInitialBoard() as string;
     }
 
     /**
@@ -358,10 +364,12 @@ export class Lobby{
 
     /**
      * Check if the game is ready to start.
+     * @param {boolean} fromStart - If game needs to be started 
+     * from the beginning.
      */
-    public isGameReadyToStart(): boolean
+    public isGameReadyToStart(fromStart: boolean = false): boolean
     {
-        if(this.isGameStarted()) return false;
+        if((fromStart && this.chessEngine.getGameStatus() !== GameStatus.ReadyToStart) || this.isGameStarted()) return false;
         if(!this.board) return false;
         if(this.durations[Color.White].remaining <= 0 || this.durations[Color.White].increment < 0
             || this.durations[Color.Black].remaining <= 0 || this.durations[Color.Black].increment < 0) 
@@ -380,11 +388,10 @@ export class Lobby{
      */
     public isGameStarted(): boolean
     {
-        return ![
-            GameStatus.NotReady, 
-            GameStatus.BlackVictory, 
-            GameStatus.WhiteVictory,
-            GameStatus.Draw
+        return [
+            GameStatus.WhiteInCheck, 
+            GameStatus.BlackInCheck,
+            GameStatus.InPlay, 
         ].includes(this.chessEngine.getGameStatus());
     }
 
@@ -470,13 +477,21 @@ export class Lobby{
     }
 
     /**
-     * Finish the game as draw. This method is used when
+     * Finish the game as draw. This method should be used when
      * both players agree to finish the game as draw.
-     * (WsCommand.Finished.isDrawOffered is set to true).
      */
     public draw(): void
     {
         this.chessEngine.setGameStatus(GameStatus.Draw);
+    }
+
+    /**
+     * Take back the last move. This method should be used when
+     * both players agree to take back the last move.
+     */
+    public undo(): void
+    {
+        this.chessEngine.takeBack();
     }
 
     /**

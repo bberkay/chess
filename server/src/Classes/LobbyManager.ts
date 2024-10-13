@@ -45,14 +45,14 @@ export class LobbyManager{
     static joinLobby(
         lobbyId: string, 
         player: Player
-    ): Lobby | false
+    ): boolean
     {
         const lobby = this.getLobby(lobbyId);
         if (!lobby)
             return false;
 
         if(lobby.addPlayer(player))
-            return lobby;
+            return true;
 
         return false;
     }

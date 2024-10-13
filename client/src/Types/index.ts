@@ -1,4 +1,4 @@
-import { Color, Durations, GameStatus, JsonNotation, Square } from '@Chess/Types';
+import { Color, GameStatus, JsonNotation, Square } from '@Chess/Types';
 
 /**
  * SocketOperation enum for the types 
@@ -12,7 +12,9 @@ export enum SocketOperation{
     CancelLobby = "CancelLobby",
     Resign = "Resign",
     SendDrawOffer = "SendDrawOffer",
+    SendUndoOffer = "SendUndoOffer",
     AcceptDrawOffer = "AcceptDrawOffer",
+    AcceptUndoOffer = "AcceptUndoOffer",
     SendPlayAgainOffer = "SendPlayAgainOffer",
     AcceptPlayAgainOffer = "AcceptPlayAgainOffer",
     DeclineSentOffer = "DeclineSentOffer",
@@ -33,6 +35,7 @@ export interface Player{
  * WebSocket command types.
  */
 export enum WsTitle {
+    Created="CREATED",
     Connected="CONNECTED",
     Started="STARTED",
     Finished="FINISHED",
@@ -42,6 +45,8 @@ export enum WsTitle {
     Resigned="RESIGNED",
     DrawOffered="DRAW_OFFERED",
     DrawAccepted="DRAW_ACCEPTED",
+    UndoOffered="UNDO_OFFERED",
+    UndoAccepted="UNDO_ACCEPTED",
     PlayAgainOffered="PLAY_AGAIN_OFFERED",
     PlayAgainAccepted="PLAY_AGAIN_ACCEPTED",
     SentOfferDeclined="SENT_OFFER_DECLINED",
@@ -49,6 +54,16 @@ export enum WsTitle {
     SentOfferCancelled="SENT_OFFER_CANCELLED",
     Error="ERROR",
 };
+
+/**
+ * WsCreatedData interface for the 
+ * created command to receive from the 
+ * WebSocket.
+ */
+export interface WsCreatedData{
+    lobbyId: string,
+    player: Player
+}
 
 /**
  * WsConnectedData interface for the 
@@ -85,10 +100,24 @@ export interface WsStartedData{
  * WebSocket.
  */
 export interface WsFinishedData{
-    gameStatus: GameStatus,
-    isDrawOffered?: boolean
-    isResigned?: boolean
-    resignColor?: Color
+    gameStatus: GameStatus
+}
+
+/**
+ * WsResignedData interface for the
+ * resigned command to receive from the 
+ * WebSocket.
+ */
+export interface WsResignedData{
+    gameStatus: GameStatus
+}
+
+/**
+ * WsUndoData interface for the
+ * undo command to send to the client.
+ */
+export interface WsUndoData{
+    board: string
 }
 
 /**
@@ -134,9 +163,12 @@ export interface WsErrorData{
  * WsData type for the data that can be
  * received from the WebSocket.
  */
-export type WsData = WsConnectedData 
+export type WsData = WsCreatedData
+    | WsConnectedData 
     | WsStartedData 
     | WsFinishedData
+    | WsResignedData
+    | WsUndoData
     | WsMovedData 
     | WsReconnectedData 
     | WsDisconnectedData 

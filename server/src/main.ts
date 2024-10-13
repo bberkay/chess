@@ -376,14 +376,24 @@ console.log(`Listening on http://localhost:${server.port} ...`);
 function joinLobby(ws: RWebSocket): void {
     const lobbyId = ws.data.lobbyId;
     const player = ws.data.player;
-    const lobby = LobbyManager.joinLobby(lobbyId, player);
-    console.log("Lobby Join: ", lobbyId, player.name);
-    if (lobby) {
+
+    let isLobbyJustCreated = false;
+    const lobby = LobbyManager.getLobby(lobbyId);
+    if(!lobby) {
+        ws.send(WsCommand.error({ message: "Lobby not found." }));
+        return;
+    }
+    isLobbyJustCreated = lobby.isBothPlayersOffline() && (lobby.isGameFinished() || !lobby.isGameStarted());
+    console.log("Lobby Join: ", lobbyId, player.name, lobby.isBothPlayersOffline(), lobby.isGameFinished(), lobby.isGameStarted());
+    if (LobbyManager.joinLobby(lobbyId, player)) {
         ws.subscribe(lobbyId);
-        ws.send(WsCommand.connected({ lobbyId, player }));
+        ws.send(
+            isLobbyJustCreated 
+                ? WsCommand.created({ lobbyId, player }) 
+                : WsCommand.connected({ lobbyId, player })
+        );
         SocketManager.addSocket(ws.data.lobbyId, ws.data.player.token, ws);
-        console.log("Lobby Join: ", lobbyId, player.name);
-        startGame(lobby);
+        startGame(lobby!);
     }
 }
 
@@ -415,7 +425,7 @@ function leaveLobby(ws: RWebSocket): void {
  * it is ready.
  */
 function startGame(lobby: Lobby): void {
-    const isGameReadyToStart = lobby.isGameReadyToStart();
+    const isGameReadyToStart = lobby.isGameReadyToStart(true);
     const isGameAlreadyStarted = lobby.isGameStarted();
     if (isGameReadyToStart) 
     {
@@ -537,6 +547,12 @@ function handleMessage(ws: RWebSocket, message: string): void {
             case WsTitle.DrawAccepted:
                 draw(lobby);
                 break;
+            case WsTitle.UndoOffered:
+                offerUndo(lobby, player);
+                break;
+            case WsTitle.UndoAccepted:
+                undo(lobby);
+                break;
             case WsTitle.PlayAgainOffered:
                 offerPlayAgain(lobby, player);
                 break;
@@ -601,6 +617,13 @@ function offerDraw(lobby: Lobby, player: Player): void {
 }
 
 /**
+ * Offer undo to the opponent player.
+ */
+function offerUndo(lobby: Lobby, player: Player): void {
+    _offer(lobby, player, WsCommand.undoOffered);
+}
+
+/**
  * Cancel the offer and send the offer cancelled command to the client.
  */
 function cancelOffer(lobby: Lobby, player: Player): void {
@@ -655,12 +678,22 @@ function resign(lobby: Lobby, player: Player): void {
 }
 
 /**
- * Accept the draw offer and send the finished command to the client.
+ * Accept and handle the draw offer and send the 
+ * finished command to the client.
  */
 function draw(lobby: Lobby): void {
     lobby.clearGameTimeMonitorInterval();
     lobby.draw();
     _finishGame(lobby, true);
+}
+
+/**
+ * Accept and handle the undo offer and send the 
+ * undo accepted command to the client.
+ */
+function undo(lobby: Lobby): void {
+    lobby.undo();
+    server.publish(lobby.id, WsCommand.undoAccepted({board: lobby.getCurrentGame(true) as string}));
 }
 
 /**
@@ -688,17 +721,12 @@ function _finishGame(
         throw new Error("isResigned and resignColor must be used together.");
 
     if (isResigned) {
-        server.publish(lobby.id, WsCommand.finished({
-            gameStatus: lobby.getGameStatus(),
-            isResigned: true,
-            resignColor: resignColor as Color
+        server.publish(lobby.id, WsCommand.resigned({
+            gameStatus: lobby.getGameStatus()
         }));
     }
     else if (isDraw) {
-        server.publish(lobby.id, WsCommand.finished({
-            gameStatus: lobby.getGameStatus(),
-            isDrawOffered: true
-        }));
+        server.publish(lobby.id, WsCommand.drawAccepted());
     }
     else {
         server.publish(lobby.id, WsCommand.finished({

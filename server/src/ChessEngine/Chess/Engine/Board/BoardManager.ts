@@ -215,7 +215,7 @@ export class BoardManager extends Board{
     {
         const game = BoardQuerier.getGame();
         delete game.boardHistory;
-        Board.boardHistory.push(game);
+        Board.boardHistory.push(JSON.parse(JSON.stringify(game)));
     }
 
     /**
