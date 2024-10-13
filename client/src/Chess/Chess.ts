@@ -101,8 +101,6 @@ export class Chess {
         position: JsonNotation | StartPosition | string = StartPosition.Standard,
         durations: Durations | null = null
     ): void {
-        LocalStorage.clear(LocalStorageKey.LastBot);
-        LocalStorage.clear(LocalStorageKey.LastBoard);
         this.resetProperties();
         this.logger.save("Cache cleared and properties reset before creating a new game");
 
@@ -132,7 +130,7 @@ export class Chess {
         this.initBoardListener();
         this.initEngineListener();
 
-        LocalStorage.save(LocalStorageKey.LastBoard, position);
+        LocalStorage.save(LocalStorageKey.LastBoard, this.getGameAsJsonNotation());
         this.logger.save(`Game saved to cache as json notation[${JSON.stringify(position)}]`);
 
         document.dispatchEvent(new Event(ChessEvent.onGameCreated));

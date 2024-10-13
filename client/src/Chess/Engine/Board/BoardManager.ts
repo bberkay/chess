@@ -163,11 +163,11 @@ export class BoardManager extends Board{
         }
         
         const scoreDifference = Board.scores[Color.White].score - Board.scores[Color.Black].score;
-        const scoreDifferenceWinner = scoreDifference > 0 ? Color.White : Color.Black;
-        const scoreDifferenceLoser = scoreDifferenceWinner == Color.White ? Color.Black : Color.White;
-        if(scoreDifference > 0) {
-            Board.scores[scoreDifferenceWinner].score += scoreDifference;
-            Board.scores[scoreDifferenceLoser].score -= scoreDifference;
+        if(scoreDifference !== 0) {
+            const scoreDifferenceWinner = scoreDifference > 0 ? Color.White : Color.Black;
+            const scoreDifferenceLoser = scoreDifferenceWinner == Color.White ? Color.Black : Color.White;
+            Board.scores[scoreDifferenceWinner].score -= Board.scores[scoreDifferenceLoser].score;
+            Board.scores[scoreDifferenceLoser].score = -Board.scores[scoreDifferenceWinner].score;
         }
     }
 

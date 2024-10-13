@@ -469,6 +469,7 @@ export class NotationMenu extends Component {
                 return;
 
             const capturedPieces = color == Color.White ? whiteCapturedPieces : blackCapturedPieces;
+            // sort the pieces according to their unicode code.
             pieces.sort((a, b) => this.getPieceUnicode(a).localeCompare(this.getPieceUnicode(b)));
             pieces.forEach((piece) => {
                 const pieceUnicodeIcon = this.getPieceUnicode(piece);
@@ -652,11 +653,12 @@ export class NotationMenu extends Component {
             this.displayPlayAgainUtilityMenu();
         }
 
-        if (!force && moveCount == 0 || moveCount == this.moveCount)
+        this.setScore(this.chess.getScores());
+
+        if (!force && (moveCount == 0 || moveCount == this.moveCount))
             return;
 
         this.activateUndoButtonAfterFirstMove();
-        this.setScore(this.chess.getScores());
         this.addNotation(this.chess.getAlgebraicNotation());
         this.changeIndicator();
 
