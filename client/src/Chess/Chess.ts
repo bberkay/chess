@@ -7,7 +7,7 @@
  * @license MIT
  */
 
-import { JsonNotation, PieceType, Square, Color, StartPosition, ChessEvent, GameStatus, Durations, Move, Scores, MoveType } from "./Types";
+import { JsonNotation, PieceType, Square, Color, StartPosition, ChessEvent, GameStatus, Durations, Move, Scores, MoveType, RemainingTimes } from "./Types";
 import { ChessEngine, MoveValidationError } from "./Engine/ChessEngine";
 import { ChessBoard } from "./Board/ChessBoard";
 import { SquareClickMode, SquareEffect } from "./Board/Types";
@@ -371,22 +371,41 @@ export class Chess {
      * just on the board.
      */
     public takeBack(onEngine: boolean = false): void {
+        if(this.engine.getMoveHistory().length == 0)
+            return;
+
         this._currentTakeBackCount++;
-        this.goToSpecificMove((this.engine.getMoveHistory().length - 1) - this._currentTakeBackCount);
+        if (onEngine) {
+            this.goToSpecificMove(this.engine.getBoardHistory().length - 2, false);
+            this.engine.takeBack();
+            this._currentTakeBackCount = 0;
+            LocalStorage.save(LocalStorageKey.LastBoard, this.engine.getGameAsJsonNotation());
+        } else {
+            this.goToSpecificMove((this.engine.getMoveHistory().length - 1) - this._currentTakeBackCount);
+        }
     }
 
     /**
      * Go forward to the next move. 
      */
     public takeForward(): void {
+        if(this.engine.getMoveHistory().length == 0 || this._currentTakeBackCount == 0)
+            return;
+
         this._currentTakeBackCount--;
         this.goToSpecificMove((this.engine.getMoveHistory().length - 1) - this._currentTakeBackCount);
     }
 
     /**
      * Go to the specific move by the given move index.
+     * @param {number} moveIndex - The index of the move
+     * @param {boolean} showMoveReanimation - If it is true
+     * then it will create the pieces on the board by the
+     * given `move index - 1` and reanimate the `move index` board
+     * 's last move. If it is false then it will just create the
+     * pieces on the board by the given `move index`.
      */
-    public goToSpecificMove(moveIndex: number): void {
+    public goToSpecificMove(moveIndex: number, showMoveReanimation: boolean = true): void {
         if (moveIndex < 0 || moveIndex > this.engine.getMoveHistory().length)
             return;
 
@@ -395,51 +414,23 @@ export class Chess {
         else
             this.board.lock(true);
         
-        let snapshotMove = this.engine.getMoveHistory()[moveIndex];
-        let snapshot = this.engine.getBoardHistory()[moveIndex + (snapshotMove.type == MoveType.Promote ? 1 : 0)];
+        let snapshotMove = showMoveReanimation ? this.engine.getMoveHistory()[moveIndex] : null;
+        let snapshot = this.engine.getBoardHistory()[
+            moveIndex + (snapshotMove ? (snapshotMove.type == MoveType.Promote ? 1 : 0) : 0)
+        ];
         this.board.removePieces();
         this.board.removeEffectFromAllSquares();
         this.board.createPieces(
             snapshot.board
         );
 
-        if(snapshotMove.type !== MoveType.Promote){
+        if(snapshotMove && snapshotMove.type !== MoveType.Promote){
             this.board.takeBackMove(snapshotMove.from, snapshotMove.to, snapshotMove.type!);
             snapshot = this.engine.getBoardHistory()[moveIndex == 0 ? 0 : moveIndex + 1];
         }
 
         this.board.showStatus(snapshot.gameStatus!);
         this._currentTakeBackCount = (this.engine.getMoveHistory().length - 1) - moveIndex;
-    }
-
-    /**
-     * Retrieves the scores of the current board, even if it reflects
-     * a previous state. For instance, if the player has taken back
-     * 2 moves, this method will return the scores of the board 
-     * after those 2 moves have been undone. If you want to get the 
-     * scores of the latest move without considering any undo actions, 
-     * use `chess.engine.getScores()`.
-     */
-    public getScores(): Scores {
-        /**
-         * Other board properties(except `boardHistory`, because
-         * `boardHistory` also includes the board properties so 
-         * storing `boardHistory` in board history will be infinite
-         * loop) can be implemented like this(Scores). But currently, 
-         * they are not needed.
-         * 
-         * Implementation pseudo code:
-         * public getProperty(): Property {
-         *   if(this._currentTakeBackCount == 0)
-         *     return this.engine.getProperty();
-         *  
-         *   return this.engine.getBoardHistory()[this.engine.getMoveHistory().length - 1 - this._currentTakeBackCount].property!;
-         * }
-         */
-        if (this._currentTakeBackCount == 0)
-            return this.engine.getScores();
-
-        return this.engine.getBoardHistory()[this.engine.getMoveHistory().length - 1 - this._currentTakeBackCount].scores!;
     }
 
     /**
@@ -470,5 +461,135 @@ export class Chess {
             this.logger.save("Game updated in cache after move");
             LocalStorage.save(LocalStorageKey.LastBoard, this.engine.getGameAsJsonNotation());
         }
+    }
+
+    /**
+     * Get scores of the current board.
+     * 
+     * @param {boolean} shownScores Retrieves the scores of the current board, 
+     * even if it reflects a previous state. For instance, if the player has 
+     * taken back 2 moves, this method will return the scores of the board 
+     * after those 2 moves have been undone. If `shownScores` is false, it
+     * will return the scores of the latest board.
+     */
+    public getScores(shownScores: boolean = false): Scores {
+        if (!shownScores || this._currentTakeBackCount == 0)
+            return this.engine.getScores();
+
+        return this.engine.getBoardHistory()[this.engine.getMoveHistory().length - 1 - this._currentTakeBackCount].scores!;
+    }
+    
+    /**
+     * Get the turn color of current board.
+     * 
+     * @param {boolean} shownColor Retrieves the color of the current turn,
+     * even if it reflects a previous state. For instance, if the player has
+     * taken back 2 moves, this method will return the color of the board
+     * after those 2 moves have been undone. If `shownColor` is false, it
+     * will return the color of the latest board.
+     */
+    public getTurnColor(shownColor: boolean = false): Color {
+        if (!shownColor || this._currentTakeBackCount == 0)
+            return this.engine.getTurnColor();
+
+        return this.engine.getBoardHistory()[this.engine.getMoveHistory().length - 1 - this._currentTakeBackCount].turn!;
+    }
+
+    /**
+     * Get the game status of the current board.
+     * 
+     * @param {boolean} shownStatus Retrieves the game status of the current board,
+     * even if it reflects a previous state. For instance, if the player has taken
+     * back 2 moves, this method will return the game status of the board after
+     * those 2 moves have been undone. If `shownStatus` is false, it will return
+     * the game status of the latest board.
+     */
+    public getGameStatus(shownStatus: boolean = false): GameStatus {
+        if (!shownStatus || this._currentTakeBackCount == 0)
+            return this.engine.getGameStatus();
+
+        return this.engine.getBoardHistory()[this.engine.getMoveHistory().length - 1 - this._currentTakeBackCount].gameStatus!;
+    }
+
+    /**
+     * Get algebraic notation of the current board.
+     * 
+     * @param {boolean} shownNotation Retrieves the algebraic notation of the current
+     * board, even if it reflects a previous state. For instance, if the player has 
+     * taken back 2 moves, this method will return the algebraic notation of the board 
+     * after those 2 moves have been undone. If `shownNotation` is false, it will return 
+     * the algebraic notation of the latest board.
+     */
+    public getAlgebraicNotation(shownNotation: boolean = false): ReadonlyArray<string> {
+        if (!shownNotation || this._currentTakeBackCount == 0)
+            return this.engine.getAlgebraicNotation();
+
+        return this.engine.getBoardHistory()[this.engine.getMoveHistory().length - 1 - this._currentTakeBackCount].algebraicNotation!;
+    }
+
+    /**
+     * Get the move history of the current board.
+     * 
+     * @param {boolean} shownHistory Retrieves the move history of the current board,
+     * even if it reflects a previous state. For instance, if the player has taken back
+     * 2 moves, this method will return the move history of the board after those 2 moves
+     * have been undone. If `shownHistory` is false, it will return the move history of
+     * the latest board.
+     */
+    public getMoveHistory(shownHistory: boolean = false): ReadonlyArray<Move> {
+        if (!shownHistory || this._currentTakeBackCount == 0)
+            return this.engine.getMoveHistory();
+
+        return this.engine.getBoardHistory()[this.engine.getMoveHistory().length - 1 - this._currentTakeBackCount].moveHistory!;
+    }
+
+    /**
+     * This function returns the board history of the game.
+     * After every move, the board is saved.
+     */
+    public getBoardHistory(): ReadonlyArray<JsonNotation>
+    {
+        return this.engine.getBoardHistory();
+    }
+
+        /**
+     * This function returns the current game as fen notation.
+     */
+    public getGameAsFenNotation(): string
+    {
+        return this.engine.getGameAsFenNotation();
+    }
+
+    /**
+     * This function returns the current game as json notation.
+     */
+    public getGameAsJsonNotation(): JsonNotation
+    {
+        return this.engine.getGameAsJsonNotation();
+    }
+
+    /**
+     * This function returns the current game as ascii notation.
+     */
+    public getGameAsASCII(): string
+    {
+        return this.engine.getGameAsASCII();
+    }
+
+    /**
+     * Get initial durations of the players.
+     */
+    public getDurations(): Durations | null
+    {
+        return this.engine.getDurations();
+    }
+
+    /**
+     * This function returns the remaining time of the players
+     * in milliseconds.
+     */
+    public getPlayersRemainingTime(): RemainingTimes
+    {
+        return this.engine.getPlayersRemainingTime();
     }
 }
