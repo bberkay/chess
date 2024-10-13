@@ -436,7 +436,8 @@ export class NotationMenu extends Component {
         // in the row, and the last td that has a move must be the 
         // current/last move.
         if(!notationTd) {
-            this.getAdjacentMove(-1)!.classList.add("current-move");
+            const adjacentMove = this.getAdjacentMove(-1);
+            if(adjacentMove) adjacentMove.classList.add("current-move");
         } else {
             notationTd.classList.add("current-move");
         }

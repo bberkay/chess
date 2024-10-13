@@ -17,6 +17,7 @@ import {
     Moves,
     MoveType,
     PieceType,
+    RemainingTimes,
     Scores,
     Square,
     StartPosition
@@ -79,6 +80,7 @@ export class ChessEngine extends BoardManager {
         this.createTimersIfGiven();
         this.checkGameStatus();
         this.handleTimersIfExists();
+        this.logger.save("Game is created");
     }
 
     /**
@@ -142,7 +144,7 @@ export class ChessEngine extends BoardManager {
      * This function returns the remaining time of the players
      * in milliseconds.
      */
-    public getPlayersRemainingTime(): Record<Color, number>
+    public getPlayersRemainingTime(): RemainingTimes
     {
         if(!BoardQuerier.getDurations())
             throw new Error("Durations are not set");
@@ -296,6 +298,21 @@ export class ChessEngine extends BoardManager {
     }
 
     /**
+     * This function undoes the last move by taking the last - 1 board
+     * from the board history and creating the board with it.
+     */
+    public takeBack(): void
+    {
+        this.createBoard(BoardQuerier.getBoardHistory().length > 1 ? {
+            ...BoardQuerier.getBoardHistory().slice(0, -1).pop()!,
+            boardHistory: BoardQuerier.getBoardHistory().slice(0, -2)
+        } : {
+            ...BoardQuerier.getBoardHistory().pop()!,
+            boardHistory: []
+        });
+    }
+
+    /**
      * This function plays the given move.
      */
     public playMove(from: Square, to: Square): void
@@ -381,35 +398,59 @@ export class ChessEngine extends BoardManager {
             if(piece?.getType() != PieceType.Pawn)
                 this.moveNotation += Converter.pieceTypeToPieceName(piece.getType(), piece.getColor());
 
-            // If the move kill a piece then add "x" to the current move.
-            if(BoardQuerier.isSquareHasPiece(to)){
-                // If the piece is pawn then add the column of the pawn to the current move.
-                if(piece?.getType() == PieceType.Pawn)
-                    this.moveNotation += Converter.squareIDToSquare(from)[0];
-                this.moveNotation += NotationSymbol.Capture;
-            }
-
             /**
              * Check if there is another piece that can move to the target square with the same type
              * and color then add the column of the piece to the current move. For example, from is
              * knight on d3 and to is e5 normally the current move is "Ne5" but if there is another
              * knight that can go to e5 then the current move is "Nde5" for distinguish the pieces.
              *
-             * Note: Bishop, pawn and king can't be distinguished because they can't move to the same square.
+             * Pawn and king doesn't need to distinguish and bishop can only go to the same color
+             * if there is more than one bishop with the same color(this situation can be only happen
+             * if the player has promoted a pawn to a bishop in general).
+             * @see For more https://en.wikipedia.org/wiki/Algebraic_notation_(chess)#Disambiguating_moves
              */
-            if([PieceType.Rook, PieceType.Knight, PieceType.Queen].includes(piece!.getType())){
+            if([PieceType.Knight, PieceType.Bishop, PieceType.Rook, PieceType.Queen].includes(piece!.getType())){
                 const sameTypePieces: Array<Piece> = BoardQuerier.getPiecesWithFilter(piece?.getColor(), [piece?.getType()]);
                 if(sameTypePieces.length > 1){
                     for(const pieceItem of sameTypePieces){
-                        const squareOfPiece: Square = BoardQuerier.getSquareOfPiece(pieceItem)!;
+                        const pieceItemSquare: Square = BoardQuerier.getSquareOfPiece(pieceItem)!;
+                        if(!Object.hasOwn(this.currentMoves, pieceItemSquare))
+                            this.currentMoves[pieceItemSquare] = this.moveEngine.getMoves(pieceItemSquare);
 
-                        if ((this.currentMoves[squareOfPiece]?.[MoveType.Normal]?.includes(to) || this.moveEngine.getMoves(squareOfPiece)?.[MoveType.Normal]?.includes(to))
-                            && from != squareOfPiece) {
-                            this.moveNotation += Converter.squareIDToSquare(from)[0];
-                            break;
+                        if (from != pieceItemSquare && (this.currentMoves[pieceItemSquare]?.[MoveType.Normal]?.includes(to))) {
+                            const onSameRow: boolean = Locator.getRow(from) == Locator.getRow(pieceItemSquare);
+                            const onSameColumn: boolean = Locator.getColumn(from) == Locator.getColumn(pieceItemSquare);
+                            if(onSameRow)
+                                this.moveNotation += Converter.squareIDToSquare(from)[0];
+                            if(onSameColumn)
+                                this.moveNotation += Converter.squareIDToSquare(from)[1];
+                            if(!onSameRow && !onSameColumn && this.moveNotation.length == 1 && sameTypePieces.length < 3)
+                                this.moveNotation += Converter.squareIDToSquare(from)[0];
                         }
                     }
+
+                    /**
+                     * Summary: This fixes a bug with incorrent ordering in moveNotation that relevant to for 
+                     * loop's reading board from top to bottom.
+                     *
+                     * Detailed:
+                     * This bug occurs when there is a third same type piece(e.g., d3, h3, h7) and there is a 
+                     * pieces that are on the same column and row(row d3 and column h7) as the moved piece(h3) 
+                     * and piece(h7, row 7) on the same row's value is bigger than the moved piece's row 
+                     * value(h3, row 3). For example, the above code should produce bh3f5 but if produce something 
+                     * like b3hf5 because of this problem. This code will convert it to bh3f5. 
+                     */
+                    const rowColumnIncorrectOrderPattern = /^([rnbqRNBQ])([1-8])([a-h])$/;
+                    this.moveNotation = this.moveNotation.replace(rowColumnIncorrectOrderPattern, "$1$3$2");
                 }
+            }
+
+            // If the move kill a piece then add "x" to the current move.
+            if(BoardQuerier.isSquareHasPiece(to)){
+                // If the piece is pawn then add the column of the pawn to the current move.
+                if(piece?.getType() == PieceType.Pawn)
+                    this.moveNotation += Converter.squareIDToSquare(from)[0];
+                this.moveNotation += NotationSymbol.Capture;
             }
 
             // Add the target square to the current move.

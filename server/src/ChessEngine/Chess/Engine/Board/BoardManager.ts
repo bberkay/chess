@@ -44,6 +44,7 @@ export class BoardManager extends Board{
         Board.boardHistory = jsonNotation.boardHistory ?? [];
         Board.durations = jsonNotation.durations ?? null;
         Board.gameStatus = jsonNotation.gameStatus ?? Board.gameStatus;
+        this.calculateScores();
         if(!jsonNotation.moveHistory || jsonNotation.moveHistory.length == 0)
             this.saveCurrentBoard();
     }
@@ -139,6 +140,35 @@ export class BoardManager extends Board{
     protected changeTurnColor(color: Color): void
     {
         Board.currentTurn = color;
+    }
+
+    /**
+     * Calculate the scores of the players by checking the pieces of the players.
+     * 
+     * @see for more information about piece scores https://en.wikipedia.org/wiki/Chess_piece_relative_value
+     */
+    protected calculateScores(): void 
+    {
+        Board.scores = {[Color.White]: {score: 0, pieces: []}, [Color.Black]: {score: 0, pieces: []}};
+        for(const pieceType of [PieceType.Pawn, PieceType.Knight, PieceType.Bishop, PieceType.Rook, PieceType.Queen]) {
+            const whitePieces = BoardQuerier.getPiecesWithFilter(Color.White, [pieceType]);
+            const blackPieces = BoardQuerier.getPiecesWithFilter(Color.Black, [pieceType]);
+            const whiteDifference = whitePieces.length - blackPieces.length;
+            const winnerDifference = whiteDifference > 0 ? whiteDifference : Math.abs(whiteDifference);
+            const winnerColor = whiteDifference > 0 ? Color.White : Color.Black;
+            Board.scores[winnerColor].score += (winnerDifference) * (new PieceModel(winnerColor, pieceType)).getScore();
+            for(let i = 0; i < winnerDifference; i++) {
+                Board.scores[winnerColor].pieces.push(pieceType);
+            }
+        }
+        
+        const scoreDifference = Board.scores[Color.White].score - Board.scores[Color.Black].score;
+        if(scoreDifference !== 0) {
+            const scoreDifferenceWinner = scoreDifference > 0 ? Color.White : Color.Black;
+            const scoreDifferenceLoser = scoreDifferenceWinner == Color.White ? Color.Black : Color.White;
+            Board.scores[scoreDifferenceWinner].score -= Board.scores[scoreDifferenceLoser].score;
+            Board.scores[scoreDifferenceLoser].score = -Board.scores[scoreDifferenceWinner].score;
+        }
     }
 
     /**
