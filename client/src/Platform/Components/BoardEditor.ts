@@ -453,13 +453,14 @@ export class BoardEditor extends Component{
     private makePieceSelectable(piece: HTMLElement): void
     {
         if(piece.classList.contains("piece")){
+            piece.parentElement!.setAttribute("data-menu-operation", BoardEditorOperation.CreatePiece);
             piece.setAttribute("draggable", "true");
             piece.parentElement!.addEventListener("dragstart", () => { 
                 if(piece.parentElement) this.selectOption(piece.parentElement!);
             });
-            piece.parentElement!.addEventListener("dragend", () => {
-                if(piece.parentElement && piece.parentElement.classList.contains("square"))
-                    this.removePiece(piece.parentElement);
+            piece.parentElement!.addEventListener("dragend", (e: DragEvent) => {
+                if(e.dataTransfer!.dropEffect === "none")
+                    this.removePiece(piece.parentElement!);
             });
             if(!piece.closest("#chessboard")){
                 piece.parentElement!.addEventListener("click", () => {
