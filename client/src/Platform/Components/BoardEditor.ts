@@ -624,10 +624,10 @@ export class BoardEditor extends Component{
     {
         if(!this.isBoardCreatorModeCustom()) this.changeBoardCreatorMode();
         const inputElement = document.querySelector(`.${BoardCreatorMode.Custom} input`) as HTMLInputElement;
-        inputElement.value = this.chess.engine.getGameAsFenNotation();
+        inputElement.value = this.chess.getGameAsFenNotation();
         
         if(BoardEditor.isEditorModeEnable()){
-            if([GameStatus.ReadyToStart, GameStatus.InPlay].includes(this.chess.engine.getGameStatus()))
+            if([GameStatus.ReadyToStart, GameStatus.InPlay].includes(this.chess.getGameStatus()))
                 this.enableStartGameButton();
             else 
                 this.disableStartGameButton();

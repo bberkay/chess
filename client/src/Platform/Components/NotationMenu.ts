@@ -76,7 +76,7 @@ export class NotationMenu extends Component {
      */
     private getOnlineGameUtilityMenuContent(): string {
         return `
-            <button class="menu-item" data-menu-operation="${NotationMenuOperation.SendUndoOffer}" data-tooltip-text="Send Undo Offer">↺ Undo</button>
+            <button class="menu-item" data-menu-operation="${NotationMenuOperation.SendUndoOffer}" ${this.chess.getMoveHistory().length < 1 ? `disabled="true"` : ``} data-tooltip-text="Send Undo Offer">↺ Undo</button>
             <button class="menu-item" data-menu-operation="${NotationMenuOperation.SendDrawOffer}" data-tooltip-text="Send Draw Offer">Draw</button>
             <button class="menu-item" data-menu-operation="${NotationMenuOperation.Resign}" data-tooltip-text="Resign From Game">⚐ Resign</button>
         `;
@@ -87,7 +87,7 @@ export class NotationMenu extends Component {
      */
     private getSingleplayerGameUtilityMenuContent(): string {
         return `
-            <button class="menu-item" data-menu-operation="${NotationMenuOperation.SendUndoOffer}" data-tooltip-text="Send Undo Offer">↺ Undo</button>
+            <button class="menu-item" data-menu-operation="${NotationMenuOperation.UndoMove}" ${this.chess.getMoveHistory().length < 1 ? `disabled="true"` : ``} data-tooltip-text="Take Back Last Move">↺ Undo</button>
             <button class="menu-item" data-menu-operation="${NotationMenuOperation.Resign}" data-tooltip-text="Resign From Game">⚐ Resign</button>
         `;
     }
@@ -415,7 +415,7 @@ export class NotationMenu extends Component {
         this.showNotationAsCurrent();
         const notationTable: HTMLElement = document.getElementById("notation-table")!.querySelector("tbody")!;
         notationTable.scrollTop = notationTable.scrollHeight;
-        this.chess.goToSpecificMove(this.chess.engine.getMoveHistory().length - 1);
+        this.chess.goToSpecificMove(this.chess.getMoveHistory().length - 1);
     }
 
     /**
@@ -549,7 +549,7 @@ export class NotationMenu extends Component {
      * This function changes the indicator of the turn.
      */
     private changeIndicator(): void {
-        const current_player_color = this.chess.engine.getTurnColor();
+        const current_player_color = this.chess.getTurnColor();
         const previous_player_color = current_player_color == Color.White ? Color.Black : Color.White
         document.getElementById(`${previous_player_color.toLowerCase()}-player-section`)!.classList.remove("your-turn-effect");
         document.getElementById(`${current_player_color.toLowerCase()}-player-section`)!.classList.add("your-turn-effect");
@@ -619,18 +619,35 @@ export class NotationMenu extends Component {
     }
 
     /**
+     * Activate the undo button if the move history is not empty.
+     */
+    private activateUndoButtonAfterFirstMove(): void {
+        if(this.chess.getMoveHistory().length < 1)
+            return;
+        
+        const undoButton = document.querySelector(`
+            .utility-toggle-menu-section.active [data-menu-operation="${
+                this.activeUtilityMenu === UtilityMenuType.OnlineGame 
+                ? NotationMenuOperation.SendUndoOffer
+                : NotationMenuOperation.UndoMove
+            }"]
+        `);
+        if(undoButton && undoButton.getAttribute("disabled")) undoButton.removeAttribute("disabled");
+    }
+
+    /**
      * Update the notation table and the score of the players.
      * @param force If force is true then the notation table will be updated
      * even if the notation is not changed.
      */
     public update(force: boolean = false): void {
-        const moveCount = this.chess.engine.getMoveHistory().length;
+        const moveCount = this.chess.getMoveHistory().length;
 
         if ([
             GameStatus.WhiteVictory,
             GameStatus.BlackVictory,
             GameStatus.Draw
-        ].includes(this.chess.engine.getGameStatus())){
+        ].includes(this.chess.getGameStatus())){
             this.stopTimers();
             this.displayPlayAgainUtilityMenu();
         }
@@ -638,17 +655,18 @@ export class NotationMenu extends Component {
         if (!force && moveCount == 0 || moveCount == this.moveCount)
             return;
 
-        this.setScore(this.chess.engine.getScores());
-        this.addNotation(this.chess.engine.getAlgebraicNotation());
+        this.activateUndoButtonAfterFirstMove();
+        this.setScore(this.chess.getScores());
+        this.addNotation(this.chess.getAlgebraicNotation());
         this.changeIndicator();
 
         if ([
             GameStatus.WhiteInCheck,
             GameStatus.BlackInCheck,
             GameStatus.InPlay
-        ].includes(this.chess.engine.getGameStatus())
+        ].includes(this.chess.getGameStatus())
             && moveCount >= 2
-            && this.chess.engine.getDurations())
+            && this.chess.getDurations())
             this.startOrUpdateTimers();
     }
 
@@ -714,10 +732,10 @@ export class NotationMenu extends Component {
      * Display the white player duration on the notation menu.
      */
     private showPlayerDurations(): void {
-        if (!this.chess.engine.getDurations()) return;
+        if (!this.chess.getDurations()) return;
 
         // White
-        let milliseconds = Math.round(this.chess.engine.getPlayersRemainingTime()[Color.White]);
+        let milliseconds = Math.round(this.chess.getPlayersRemainingTime()[Color.White]);
         let [minutes, seconds, _] = this.formatRemainingTimeForTimer(milliseconds);
 
         const whitePlayerDuration = document.getElementById("white-player-duration")!;
@@ -725,7 +743,7 @@ export class NotationMenu extends Component {
         whitePlayerDuration.querySelector(".minute-second")!.textContent = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
 
         // Black
-        milliseconds = Math.round(this.chess.engine.getPlayersRemainingTime()[Color.Black]);
+        milliseconds = Math.round(this.chess.getPlayersRemainingTime()[Color.Black]);
         [minutes, seconds, _] = this.formatRemainingTimeForTimer(milliseconds);
 
         const blackPlayerDuration = document.getElementById("black-player-duration")!;
@@ -757,7 +775,7 @@ export class NotationMenu extends Component {
      */
     private startOrUpdateTimers(): void {
         this.stopOpponentTimerIfActive();
-        this.startPlayerTimer(this.chess.engine.getTurnColor());
+        this.startPlayerTimer(this.chess.getTurnColor());
     }
 
     /**
@@ -785,7 +803,7 @@ export class NotationMenu extends Component {
         let isDecisecondActive = false;
         this.activeIntervalId = setInterval(() => {
             const [minutes, seconds, deciseconds] = this.formatRemainingTimeForTimer(
-                Math.round(this.chess.engine.getPlayersRemainingTime()[color])
+                Math.round(this.chess.getPlayersRemainingTime()[color])
             );
 
             playerMinuteSecond.textContent = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
@@ -861,15 +879,18 @@ export class NotationMenu extends Component {
      */
     private showConfirmation(
         confirmationOperation: NotationMenuOperation.Resign 
+        | NotationMenuOperation.UndoMove
         | NotationMenuOperation.SendDrawOffer 
+        | NotationMenuOperation.SendUndoOffer
         | NotationMenuOperation.SendPlayAgainOffer
     ): void {
         if(this.isOperationConfirmed(confirmationOperation))
             return;
         
         document.querySelector(".utility-toggle-menu-section.active")!.classList.remove("active");
+        
         this.loadHTML(UtilityMenuType.Confirmation, this.getConfirmationUtilityMenuContent());
-    
+        
         const confirmationMenu = document.getElementById(UtilityMenuType.Confirmation)!;
         confirmationMenu.classList.add("active");
 
@@ -904,7 +925,9 @@ export class NotationMenu extends Component {
      */
     private _showOffer(
         offerMessage: string, 
-        offerOperation: SocketOperation.AcceptDrawOffer | SocketOperation.AcceptPlayAgainOffer
+        offerOperation: SocketOperation.AcceptDrawOffer 
+        | SocketOperation.AcceptPlayAgainOffer 
+        | SocketOperation.AcceptUndoOffer
     ): void {
         document.querySelector(".utility-toggle-menu-section.active")!.classList.remove("active");
         this.loadHTML(UtilityMenuType.Offer, this.getOfferUtilityMenuContent());
@@ -935,6 +958,19 @@ export class NotationMenu extends Component {
         this._showOffer(
             "Opponent has offered a draw.",
             SocketOperation.AcceptDrawOffer
+        );
+    }
+
+    /**
+     * Show the undo offer from the opponent. If the player accepts,
+     * client will send the accepted message to the server. If the player
+     * declines, client will send the declined message to the server. Shouldn't
+     * be called without the offer coming from the server.
+     */
+    public showUndoOffer(): void {
+        this._showOffer(
+            "Opponent has offered to undo the last move.",
+            SocketOperation.AcceptUndoOffer
         );
     }
 
@@ -986,6 +1022,15 @@ export class NotationMenu extends Component {
     }
 
     /**
+     * Show the given message on the information menu. This function
+     * is a feedback for the player that the undo offer is sent.
+     * This function should be called after the undo offer is sent.
+     */
+    public showUndoOfferSent(): void {
+        this._showSentRequest(document.querySelector(`[data-socket-operation="${NotationMenuOperation.SendUndoOffer}"]`)!);
+    }
+
+    /**
      * Back to the previous menu. This function should be called
      * after the offer menu is opened and the player declines 
      * the offer or sender cancels the offer.
@@ -1026,10 +1071,6 @@ export class NotationMenu extends Component {
             case NotationMenuOperation.LastMove:
                 this.goToLastMove();
                 break;
-            /*case NotationMenuOperation.SendUndoOffer:
-                this.chess.sendUndoOffer();
-                break;
-            */
             case NotationMenuOperation.ToggleUtilityMenu:
                 this.toggleUtilityMenu();
                 break;
@@ -1042,8 +1083,14 @@ export class NotationMenu extends Component {
             case NotationMenuOperation.Resign:
                 this.showConfirmation(NotationMenuOperation.Resign);
                 break;
+            case NotationMenuOperation.UndoMove:
+                this.showConfirmation(NotationMenuOperation.UndoMove);
+                break;
             case NotationMenuOperation.SendDrawOffer:
                 this.showConfirmation(NotationMenuOperation.SendDrawOffer);
+                break;
+            case NotationMenuOperation.SendUndoOffer:
+                this.showConfirmation(NotationMenuOperation.SendUndoOffer);
                 break;
             case NotationMenuOperation.SendPlayAgainOffer:
                 this.showConfirmation(NotationMenuOperation.SendPlayAgainOffer);

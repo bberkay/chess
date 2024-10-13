@@ -167,7 +167,29 @@ export class Platform{
      */
     private handleMenuOperation(menuItem: HTMLElement): void
     {
+        /**
+         * Ensures that the provided menu operation exists in only one enum.
+         * 
+         * @param {MenuOperation} menuOperation - The operation to check for uniqueness.
+         * @throws Will throw an error if the same menu operation appears in more than one enum.
+         */
+        const ensureUniqueMenuOperation = (menuOperation: MenuOperation) => {
+            const allMenuOperations = [
+                ...Object.values(BoardEditorOperation),
+                ...Object.values(NavigatorModalOperation),
+                ...Object.values(NotationMenuOperation),
+                ...Object.values(LogConsoleOperation),
+                ...Object.values(NavbarOperation),
+                ...Object.values(AppearanceMenuOperation)
+            ];
+
+            if (allMenuOperations.filter(operation => operation === menuOperation).length > 1) {
+                throw new Error(`The menu operation "${menuOperation}" appears in more than one enum.`);
+            }
+        }
+
         const menuOperation = menuItem.getAttribute("data-menu-operation") as MenuOperation;
+        ensureUniqueMenuOperation(menuOperation);
         if(Object.hasOwn(LogConsoleOperation, menuOperation))
         {
             this.logConsole.handleOperation(
@@ -260,6 +282,9 @@ export class Platform{
             case NotationMenuOperation.PlayAgain:
                 this._playAgainSingleplayerGame();
                 break;
+            case NotationMenuOperation.UndoMove:
+                this._undoMoveAndHandleComponents();
+                break;
         }
     }
 
@@ -269,6 +294,10 @@ export class Platform{
     private handleNavigatorModalOperation(menuOperation: NavigatorModalOperation, menuItem: HTMLElement): void
     {
         switch(menuOperation){
+            case NavigatorModalOperation.Hide:
+                this.boardEditor.saveFen();
+                this.navigatorModal.hide();
+                break;
             case NavigatorModalOperation.ShowGameCreator:
                 this.boardEditor.saveFen(StartPosition.Standard);
                 this.navigatorModal.showGameCreator();
@@ -386,7 +415,7 @@ export class Platform{
         if(!BoardEditor.isEditorModeEnable()){
             this.notationMenu.update();
 
-            const gameStatus = this.chess.engine.getGameStatus();
+            const gameStatus = this.chess.getGameStatus();
             if([
                 GameStatus.BlackVictory, 
                 GameStatus.WhiteVictory,
@@ -435,9 +464,9 @@ export class Platform{
         this.chess.board.disablePreSelectionFor(playerColor === Color.White ? Color.Black : Color.White);
         this.notationMenu.displayOnlineGameUtilityMenu();
         this.notationMenu.updatePlayerCards(createdGame.whitePlayer, createdGame.blackPlayer);
-        this.notationMenu.setTurnIndicator(this.chess.engine.getTurnColor());
+        this.notationMenu.setTurnIndicator(this.chess.getTurnColor());
         if(playerColor === Color.Black) this._flipBoardAndComponents();
-        if(playerColor !== this.chess.engine.getTurnColor()) this.chess.board.lock(false);
+        if(playerColor !== this.chess.getTurnColor()) this.chess.board.lock(false);
         else this.chess.board.unlock();
         this.logger.save(`Online game is created and components are updated.`);
     }
@@ -466,13 +495,13 @@ export class Platform{
         this.notationMenu.displaySingleplayerGameUtilityMenu();
         
         if(bot){
-            ({ botColor, botDifficulty } = { botColor, botDifficulty } || this.chess.getBotSettings());
-            if(!botColor || !botDifficulty) return;
+            if((!botColor || !botDifficulty) && this.chess.getBotSettings())
+                ({ botColor, botDifficulty } = this.chess.getBotSettings()!);
             this.chess.addBotToCurrentGame(botColor, botDifficulty);
         }
 
         this.notationMenu.showPlayerCards();
-        this.notationMenu.setTurnIndicator(this.chess.engine.getTurnColor());
+        this.notationMenu.setTurnIndicator(this.chess.getTurnColor());
         
         this.logger.save(`Editor mode is disabled and board is now playable.`);
         LocalStorage.clear(LocalStorageKey.BoardEditorEnabled);
@@ -493,6 +522,17 @@ export class Platform{
     private preparePlatformForSingleplayerGameAgainstBot(): void 
     {
         this.preparePlatformForSingleplayerGame(true);
+    }
+
+    /**
+     * Undo the last move and update the components of the menu.
+     */
+    private _undoMoveAndHandleComponents(): void
+    {
+        if(this.notationMenu.isOperationConfirmed(NotationMenuOperation.UndoMove)){
+            this.chess.takeBack(true);
+            this.notationMenu.goBack();
+        }
     }
 
     /**
@@ -529,7 +569,7 @@ export class Platform{
             (botColor == Color.White 
                 ? Color.Black 
                 : Color.White) 
-            : this.chess.engine.getTurnColor();
+            : this.chess.getTurnColor();
         this.chess.engine.setGameStatus(
             resignColor == Color.White
                 ? GameStatus.BlackVictory
@@ -549,7 +589,6 @@ export class Platform{
     {
         let { botColor, botDifficulty } = this.chess.getBotSettings() || {};
         if(botColor) botColor = botColor == Color.White ? Color.Black : Color.White;
-        console.log(botColor, botDifficulty);
         this.preparePlatformForSingleplayerGame(
             botColor && botDifficulty ? {botColor, botDifficulty} : false
         );

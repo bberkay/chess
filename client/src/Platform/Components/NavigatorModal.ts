@@ -472,7 +472,7 @@ export class NavigatorModal extends Component{
     }
 
     /**
-     * Get the selected color of the bot.
+     * Save the selected color of the bot.
      * If the play against bot modal is open.
      */
     private saveSelectedBotColor(): void
@@ -480,19 +480,6 @@ export class NavigatorModal extends Component{
         const selectedButton = document.querySelector(".navigator-modal button[data-selected='true'][data-bot-color]");
         if(!selectedButton) return;
         this.lastSelectedBotColor = selectedButton.getAttribute("data-bot-color")! as BotColor
-    }
-
-    /**
-     * Get the created bot settings from the modal.
-     */
-    public getCreatedBotSettings(): {botColor: BotColor, botDifficulty: BotDifficulty}
-    {
-        this.saveSelectedBotColor();
-        
-        return {
-            botColor: this.lastSelectedBotColor,
-            botDifficulty: this.lastSelectedBotDifficulty
-        };
     }
 
     /**
@@ -504,11 +491,21 @@ export class NavigatorModal extends Component{
      */
     public getEnteredPlayerName(): string
     {
-        let playerName = (document.getElementById("navigator-modal")!.querySelector("#player-name") as HTMLInputElement).value;
-        if(playerName.length < MIN_PLAYER_NAME_LENGTH || playerName.length > MAX_PLAYER_NAME_LENGTH)
-            this.lastEnteredPlayerName = DEFULT_PLAYER_NAME;
-
+        if(document.getElementById("navigator-modal")!.querySelector("#player-name")) 
+            this.saveEnteredPlayerName();
         return this.lastEnteredPlayerName;
+    }
+
+    /**
+     * Save the entered player name. If the player name
+     * modal is open.
+     */
+    private saveEnteredPlayerName(): void
+    {
+        let playerName = (document.getElementById("navigator-modal")!.querySelector("#player-name") as HTMLInputElement).value;
+        this.lastEnteredPlayerName = (playerName.length < MIN_PLAYER_NAME_LENGTH || playerName.length > MAX_PLAYER_NAME_LENGTH) 
+            ? DEFULT_PLAYER_NAME
+            : playerName;
     }
 
     /**
@@ -573,10 +570,25 @@ export class NavigatorModal extends Component{
     }
 
     /**
+     * Get the created bot settings from the modal.
+     */
+    public getCreatedBotSettings(): {botColor: BotColor, botDifficulty: BotDifficulty}
+    {
+        this.saveSelectedBotColor();
+        
+        return {
+            botColor: this.lastSelectedBotColor,
+            botDifficulty: this.lastSelectedBotDifficulty
+        };
+    }
+
+    /**
      * Get the created lobby settings from the modal. 
      */
     public getCreatedLobbySettings(): {playerName: string, duration: Duration}
     {
+        this.saveEnteredPlayerName();
+
         return {
             playerName: this.lastEnteredPlayerName,
             duration: this.lastSelectedDuration
@@ -589,9 +601,6 @@ export class NavigatorModal extends Component{
     public handleOperation(operation: NavigatorModalOperation): void
     {
         switch(operation){
-            case NavigatorModalOperation.Hide:
-                this.hide();
-                break;
             case NavigatorModalOperation.Undo:
                 this.undo();
                 break;
