@@ -458,15 +458,23 @@ export class Platform{
         game: string | JsonNotation
     }, playerColor: Color): void
     {
-        if(BoardEditor.isEditorModeEnable()) this.boardEditor.disableEditorMode();
+        if(BoardEditor.isEditorModeEnable()) 
+            this.boardEditor.disableEditorMode();
+
         this._createBoardAndHandleComponents(createdGame.game);
         this.chess.board.disablePreSelectionFor(playerColor === Color.White ? Color.Black : Color.White);
         this.notationMenu.displayOnlineGameUtilityMenu();
         this.notationMenu.updatePlayerCards(createdGame.whitePlayer, createdGame.blackPlayer);
         this.notationMenu.setTurnIndicator(this.chess.getTurnColor());
-        if(playerColor === Color.Black) this._flipBoardAndComponents();
-        if(playerColor !== this.chess.getTurnColor()) this.chess.board.lock(false);
-        else this.chess.board.unlock();
+
+        if(playerColor === Color.Black) 
+            this._flipBoardAndComponents();
+
+        if(playerColor !== this.chess.getTurnColor()) 
+            this.chess.board.lock(false);
+        else 
+            this.chess.board.unlock();
+        
         this.logger.save(`Online game is created and components are updated.`);
     }
 
@@ -530,6 +538,7 @@ export class Platform{
     {
         if(this.notationMenu.isOperationConfirmed(NotationMenuOperation.UndoMove)){
             this.chess.takeBack(true);
+            this.notationMenu.deleteLastNotation();
             this.notationMenu.goBack();
         }
     }

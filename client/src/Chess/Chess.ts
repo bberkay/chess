@@ -316,7 +316,7 @@ export class Chess {
                 move = [move];
 
             move.forEach((moveObject: Move) => {
-                this.playMove(moveObject.from, moveObject.to);
+                this.playMove(moveObject.from, moveObject.to, Object.hasOwn(moveObject, "type") ? moveObject.type : null);
             });
 
             this.board.unlock();
@@ -325,8 +325,11 @@ export class Chess {
 
     /**
      * Play a move on the board and engine.
+     * @param {MoveType|null} moveType - If it is not given the function will determine the 
+     * move type by checking the square click mode of the target square(`to`). Mostly, this 
+     * parameter is used by the bot/system/server etc. so try to avoid using it.
      */
-    public playMove(from: Square, to: Square): void {
+    public playMove(from: Square, to: Square, moveType: MoveType | null = null): void {
         try {
             this.engine.playMove(from, to);
             this._preSelectedSquare = null;
@@ -336,7 +339,7 @@ export class Chess {
             }
         }
 
-        this.board.playMove(from, to);
+        this.board.playMove(from, to, moveType);
         setTimeout(() => {
             this.logger.save(`Move[${JSON.stringify({ from, to })}] played on board and engine`);
             this.finishTurn();
@@ -354,12 +357,15 @@ export class Chess {
         const { from, to } = this._preMove;
         this._preMove = null;
         setTimeout(() => {
+            // TODO: Bot da kullanılan promotion/promote burada da kullanılabilir.
+            // TODO: Direk queen verilebilir ama prePromotionOption gibi bir şey lazım
+            // TODO: Queen çıkacağını göstermek için.
             this.playMove(from, to);
             this.logger.save(`Pre-move[${JSON.stringify({from, to})}] played`);
             document.dispatchEvent(new CustomEvent(
                 ChessEvent.onPieceMovedByPlayer, { detail: { from: from, to: to } }
             ));
-        }, 100);
+        }, 250); // When this is less than 250, the sound of the move is not heard.
     }
 
     /**

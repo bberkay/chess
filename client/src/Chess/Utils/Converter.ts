@@ -1,4 +1,4 @@
-import { Color, PieceType, Square, StartPosition, JsonNotation, CastlingType, Castling, Move } from "../Types";
+import { Color, PieceType, Square, StartPosition, JsonNotation, CastlingType, Castling, Move, PromotionPieceType, MoveType } from "../Types";
 
 /**
  * This class is used to convert data from one type to another.
@@ -87,9 +87,21 @@ export class Converter{
     {
         const from: Square = Square[uci.slice(0, 2) as keyof typeof Square];
         const to: Square = Square[uci.slice(2, 4) as keyof typeof Square];
-        const promotion: Square | null = uci.length > 4 ? Square[uci.slice(4, 5) as keyof typeof Square] : null;
+        if(uci.length > 4)
+        {
+            if(!(to <= 8 || to >= 57))
+                throw new Error("Invalid promotion square");
 
-        return promotion ? [{from, to}, {from: to, to: promotion}] : {from, to};
+            const promotionType = uci.slice(4, 5) as PromotionPieceType;
+            const promotionPieceRow: Record<PromotionPieceType, number> = {"n": 3, "b": 2, "r": 1, "q": 0};
+            const promotion: Square = to <= 8 
+                ? promotionPieceRow[promotionType] * 8 + to // white promotion
+                : to - promotionPieceRow[promotionType] * 8  // black promotion
+                    
+            return [{from, to}, {from: to, to: promotion, type: MoveType.Promote}];
+        }
+
+        return {from, to};
     }
 
     /**

@@ -172,18 +172,23 @@ export class BoardManager extends Board{
     }
 
     /**
-     * Find the score of the piece if the move is a capture move, add the score to the
-     * current player's score. Also, calculate the pieces of the player by checking the
-     * enemy player's pieces.
+     * Find the score of the piece if the move is a capture or promote move, add the score to the
+     * current player's score. 
      *
      * @see for more information about piece scores https://en.wikipedia.org/wiki/Chess_piece_relative_value
      */
-    protected updateScores(capturedSquare: Square): void
+    protected updateScores(capturedOrPromotedSquare: Square): void
     {
         const enemyColor: Color = Board.currentTurn == Color.White ? Color.Black : Color.White;
-        const capturedPiece: Piece = BoardQuerier.getPieceOnSquare(capturedSquare)!;
-        if(!capturedPiece && capturedSquare != Board.enPassant)
+        const capturedOrPromotedPiece: Piece = BoardQuerier.getPieceOnSquare(capturedOrPromotedSquare)!;
+        if(!capturedOrPromotedPiece && capturedOrPromotedSquare != Board.enPassant)
             return;
+        
+        if(capturedOrPromotedPiece.getColor() == Board.currentTurn) {
+            Board.scores[Board.currentTurn].score -= 1; 
+            const pawnIndex = Board.scores[Board.currentTurn].pieces.indexOf(PieceType.Pawn);
+            Board.scores[Board.currentTurn].pieces.splice(pawnIndex, 1);
+        }
 
         /**
          * Increase the score of the current player and decrease the score of the enemy
@@ -191,8 +196,8 @@ export class BoardManager extends Board{
          * then increase the score of the white player by 1 and decrease the score of the
          * black player by 1.
          */
-        Board.scores[Board.currentTurn].score += Board.enPassant == capturedSquare ? 1 : capturedPiece.getScore();
-        Board.scores[enemyColor].score -= Board.enPassant == capturedSquare ? 1 : capturedPiece.getScore();
+        Board.scores[Board.currentTurn].score += Board.enPassant == capturedOrPromotedSquare ? 1 : capturedOrPromotedPiece.getScore();
+        Board.scores[enemyColor].score -= Board.enPassant == capturedOrPromotedSquare ? 1 : capturedOrPromotedPiece.getScore();
 
         /**
          * Add captured piece to the current player's pieces if the piece is not in the
@@ -202,7 +207,7 @@ export class BoardManager extends Board{
          * player has no pawn then add the pawn to the white player's pieces.
          */
         const enemyPlayersPieces: Array<PieceType> = Board.scores[enemyColor].pieces;
-        const capturedPieceType: PieceType = Board.enPassant == capturedSquare ? PieceType.Pawn : capturedPiece.getType();
+        const capturedPieceType: PieceType = Board.enPassant == capturedOrPromotedSquare ? PieceType.Pawn : capturedOrPromotedPiece.getType();
         if(enemyPlayersPieces.includes(capturedPieceType))
             enemyPlayersPieces.splice(enemyPlayersPieces.indexOf(capturedPieceType), 1);
         else

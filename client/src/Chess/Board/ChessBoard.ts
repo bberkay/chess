@@ -189,7 +189,8 @@ export class ChessBoard {
     public removePiece(square: HTMLDivElement | HTMLElement | Element | Square): void {
         if (typeof square == "number")
             square = this.getSquareElement(square);
-        square.querySelector('[class="piece"]')?.remove();
+        const piece = square.querySelector(".piece");
+        if(piece) piece.remove();
     }
 
     /**
@@ -496,11 +497,14 @@ export class ChessBoard {
     /**
      * This function moves the piece from the given square to the given square on the chess board.
      * @param {boolean} isTakeBack - Is move is a take back move or not.
-     * @param {MoveType|null} takeBackMoveType - Type of the take back move.
+     * @param {MoveType|null} moveType - Type of the move if the move is a take back move it must be provided,
+     * otherwise it is optional and if it is not given the function will determine the move type by checking the
+     * square click mode of the target square(`to`). Mostly, this parameter is used for the take back moves
+     * or the moves that are not determined by the player but by the bot/system/server etc.
      */
-    private _playMove(from: Square, to: Square, isTakeBack: boolean = false, takeBackMoveType: MoveType | null = null): void {
-        if((isTakeBack && !takeBackMoveType) || (!isTakeBack && takeBackMoveType))
-            throw Error("isTakeBack and takeBackMoveType must be used together.");
+    private _playMove(from: Square, to: Square, isTakeBack: boolean = false, moveType: MoveType | null = null): void {
+        if((isTakeBack && !moveType))
+            throw Error("moveType must be provided for the take back moves.");
 
         this.removeEffectFromAllSquares();
         this.logger.save(`From[${from}], To[${to}] and Checked Square's(if exits) effects are cleaned.`);
@@ -510,8 +514,8 @@ export class ChessBoard {
         this.addSquareEffects(toSquare, SquareEffect.To);
         this.logger.save(`Moved From and Moved To effects given the From[${from}] and To[${from}] squares.`);
 
-        const moveType: MoveType | SquareClickMode = takeBackMoveType ?? this.getSquareClickMode(toSquare);
-        switch (moveType) {
+        const finalMoveType: MoveType | SquareClickMode = moveType ?? this.getSquareClickMode(toSquare);
+        switch (finalMoveType) {
             case SquareClickMode.Castling:
                 this._doCastling(fromSquare, toSquare);
                 break;
@@ -532,9 +536,12 @@ export class ChessBoard {
 
     /**
      * Play the given move on the chess board.
+     * @param {MoveType|null} moveType - If it is not given the function will determine the 
+     * move type by checking the square click mode of the target square(`to`). Mostly, this 
+     * parameter is used by the bot/system/server etc.
      */
-    public playMove(from: Square, to: Square): void {
-        this._playMove(from, to);
+    public playMove(from: Square, to: Square, moveType: MoveType | null = null): void {
+        this._playMove(from, to, false, moveType);
     }
 
     /**
@@ -681,28 +688,64 @@ export class ChessBoard {
      * Do the promote move on the chess board.
      */
     private _doPromote(selectedSquare: HTMLDivElement): void {
-        const selectedOption: HTMLDivElement = this.getPieceElementOnSquare(selectedSquare);
-        const color: Color = this.getPieceColor(selectedSquare);
-        const pieceType: PieceType = this.getPieceType(selectedOption);
+        const squareId = this.getSquareId(selectedSquare);
+        const color = squareId < 33 ? Color.White : Color.Black;
 
         /**
          * Example: Promoted pawn is white and on the "a8" square. Promotion options are
          * queen(on a8), rook(on b8), bishop(on c8), knight(on d8). If the player selects
          * other than queen the piece must be created not on the clicked square(if the player
          * selects rook the selected square will be "b8" not "a8"). So, we need to find the
-         * first row of the square to create piece on the "a8" square.
+         * first square of row to create piece on the "a8" square.
          */
-        let firstRowOfSquare: string | Square = Converter.squareIDToSquare(this.getSquareId(selectedSquare));
-        firstRowOfSquare = Converter.squareToSquareID(
-            firstRowOfSquare.replace(firstRowOfSquare.slice(-1), (color == Color.White ? "8" : "1"))
+        let firstSquareOfRow: string | Square = Converter.squareIDToSquare(squareId);
+        firstSquareOfRow = Converter.squareToSquareID(
+            firstSquareOfRow.replace(firstSquareOfRow.slice(-1), (color == Color.White ? "8" : "1"))
         );
-        this.createPiece(color, pieceType, firstRowOfSquare);
-        this._closePromotions();
+        
+        let pieceType: PieceType;
+        switch(Math.round(squareId / 8)) {
+            case 1:
+            case 8:
+                pieceType = PieceType.Queen;
+                break;
+            case 2:
+            case 7:
+                pieceType = PieceType.Rook;
+                break;
+            case 3:
+            case 6:
+                pieceType = PieceType.Bishop;
+                break;
+            case 4:
+            case 5:
+                pieceType = PieceType.Knight;
+                break;
+            default:
+                throw Error("Promotion type is not found. There was an error while promoting the piece on the board.");
+        }
+
+        /**
+         * This function creates the piece on the board and 
+         * closes the promotion options.
+         */
+        const promote = (color: Color, pieceType: PieceType, square: Square) => {
+            this.createPiece(color, pieceType, square);
+            this.playSound(SoundEffect.Promote);
+            this._closePromotions();
+        };
+
+        if(!selectedSquare.querySelector(".piece")) {
+            setTimeout(() => {
+                promote(color, pieceType, firstSquareOfRow);
+            }, 150);
+        } else {
+            promote(color, pieceType, firstSquareOfRow);
+        }
 
         // Set the square effect of the promoted square on the last row.
-        this.addSquareEffects(firstRowOfSquare, SquareEffect.To);
-        this.playSound(SoundEffect.Promote);
-        this.logger.save(`Player's[${color}] Piece[${pieceType}] created on square[${firstRowOfSquare}] on board`);
+        this.addSquareEffects(firstSquareOfRow, SquareEffect.To);
+        this.logger.save(`Player's[${color}] Piece[${pieceType}] created on square[${firstSquareOfRow}] on board`);
     }
 
     /**
@@ -919,8 +962,12 @@ export class ChessBoard {
      */
     private _closePromotions(): void {
         let promotionOptions: NodeListOf<Element> = document.querySelectorAll(".promotion-option");
-        for (let i = 0; i < 4; i++)
-            promotionOptions[i].remove();
+        if(promotionOptions.length === 0) 
+            return;
+        
+        promotionOptions.forEach(promotionOption => {
+            promotionOption.remove();
+        });
 
         this.logger.save("Promotion screen closed.");
 

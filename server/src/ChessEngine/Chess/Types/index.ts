@@ -37,6 +37,17 @@ export enum PieceType{
     Queen = "Queen",
     King = "King"
 }
+/**
+ * PromotionPieceType enum for the promotion piece types.
+ * @enum {string}
+ * @see For more information, check src/Utils/Converter.ts
+ */
+export enum PromotionPieceType{
+    Knight = "n",
+    Bishop = "b",
+    Rook = "r",
+    Queen = "q",
+}
 
 /**
  * CastlingType enum for the castling types.

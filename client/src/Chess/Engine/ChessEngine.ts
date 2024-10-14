@@ -564,12 +564,12 @@ export class ChessEngine extends BoardManager {
     {
         /**
          * Calculate the square that promoted piece will be created(first row for white, last row for black).
-         * For example, if to is Square.d7(white rook, also square id is 12) then the first row of the square is 4.
+         * For example, if to is Square.d7(white rook, also square id is 12) then the first square of the row is 4.
          */
-        const firstRowOfSquare: Square = to > 8 && to < 32 ? to - ((Locator.getRow(to) - 1) * 8) : to > 32 && to < 57 ? to + ((8 - Locator.getRow(to)) * 8) : to;
+        const firstSquareOfRow: Square = to > 8 && to < 32 ? to - ((Locator.getRow(to) - 1) * 8) : to > 32 && to < 57 ? to + ((8 - Locator.getRow(to)) * 8) : to;
 
         // Remove the pawn.
-        this.removePiece(firstRowOfSquare);
+        this.removePiece(firstSquareOfRow);
         this.logger.save(`Promoted Pawn is removed from square[${to}] on engine`);
 
         /**
@@ -606,8 +606,8 @@ export class ChessEngine extends BoardManager {
         const playerColor: Color = BoardQuerier.getColorOfTurn();
 
         // Create the new piece and increase the score of the player.
-        this.createPiece(playerColor, selectedPromote as PieceType, firstRowOfSquare);
-        this.updateScores(firstRowOfSquare);
+        this.createPiece(playerColor, selectedPromote as PieceType, firstSquareOfRow);
+        this.updateScores(firstSquareOfRow);
         this.logger.save(`Player's[${playerColor}] Piece[${selectedPromote}] created on square[${to}] on engine`);
 
         // Finish the promotion.
