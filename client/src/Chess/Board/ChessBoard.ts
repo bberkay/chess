@@ -589,13 +589,13 @@ export class ChessBoard {
             const marginTop = Math.abs(pieceSquare.getBoundingClientRect().top - pieceRect.top);
 
             document.body.appendChild(piece);
-            piece.style.top = `${pieceRect.top}px`;
-            piece.style.left = `${pieceRect.left}px`;
+            piece.style.top = `${pieceRect.top + window.scrollY}px`;
+            piece.style.left = `${pieceRect.left + window.scrollX}px`;
             piece.style.animation = "move 0.15s ease-in-out forwards";
-            piece.style.setProperty("--chessboard-move-from-left", `${pieceRect.left}px`);
-            piece.style.setProperty("--chessboard-move-from-top", `${pieceRect.top}px`);
-            piece.style.setProperty("--chessboard-move-to-left", `calc(${marginLeft}px + ${square.getBoundingClientRect().left}px)`);
-            piece.style.setProperty("--chessboard-move-to-top", `calc(${marginTop}px + ${square.getBoundingClientRect().top}px)`);
+            piece.style.setProperty("--chessboard-move-from-left", `${pieceRect.left + window.scrollX}px`);
+            piece.style.setProperty("--chessboard-move-from-top", `${pieceRect.top + window.scrollY}px`);
+            piece.style.setProperty("--chessboard-move-to-left", `calc(${marginLeft}px + ${square.getBoundingClientRect().left + window.scrollX}px)`);
+            piece.style.setProperty("--chessboard-move-to-top", `calc(${marginTop}px + ${square.getBoundingClientRect().top + window.scrollY}px)`);
 
             piece.addEventListener("animationend", () => {
                 if (toSquareContent) this.removePiece(this.getSquareElementOfPiece(toSquareContent));
