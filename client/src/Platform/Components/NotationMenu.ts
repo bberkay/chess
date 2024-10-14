@@ -376,7 +376,7 @@ export class NotationMenu extends Component {
             lastRow.remove();
         } else {
             const lastMove = lastRow.querySelector("td:last-child")!;
-            if(lastMove) lastMove.remove();
+            if (lastMove && lastMove.querySelector(".move")) lastMove.innerHTML = "";
         }
         
         this.highlightNotation();

@@ -357,9 +357,6 @@ export class Chess {
         const { from, to } = this._preMove;
         this._preMove = null;
         setTimeout(() => {
-            // TODO: Bot da kullanılan promotion/promote burada da kullanılabilir.
-            // TODO: Direk queen verilebilir ama prePromotionOption gibi bir şey lazım
-            // TODO: Queen çıkacağını göstermek için.
             this.playMove(from, to);
             this.logger.save(`Pre-move[${JSON.stringify({from, to})}] played`);
             document.dispatchEvent(new CustomEvent(

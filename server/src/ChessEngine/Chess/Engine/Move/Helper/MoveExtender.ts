@@ -1,4 +1,4 @@
-import {Color, EnPassantDirection, GameStatus, Move, PieceType, Square} from "../../../Types";
+import {CastlingSide, Color, EnPassantDirection, GameStatus, Move, PieceIcon, PieceType, Square} from "../../../Types";
 import {Piece} from "../../Types";
 import {BoardQuerier} from "../../Board/BoardQuerier.ts";
 import {Locator} from "../Utils/Locator.ts";
@@ -17,7 +17,7 @@ export class MoveExtender{
      * @description Check if the castling is available for the given king, rook and squares between king and rook.
      * @see src/Chess/Engine/Move/Helper/MoveExtender.ts For more information.
      */
-    private calculateCastlingMove(color: Color, castlingType: "Long" | "Short"): Square | null
+    private calculateCastlingMove(color: Color, castlingSide: CastlingSide): Square | null
     {
         /**
          * Rules for castling:
@@ -34,9 +34,9 @@ export class MoveExtender{
          * @see for more information icon of the piece https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
          */
         const kingSquare: Square = color == Color.White ? Square.e1 : Square.e8;
-        const chosenRookSquare: Square = castlingType == "Long" ? (color == Color.White ? Square.a1 : Square.a8) : (color == Color.White ? Square.h1 : Square.h8);
-        const kingIcon: string = color == Color.White ? "K" : "k";
-        const rookIcon: string = color == Color.White ? "R" : "r";
+        const chosenRookSquare: Square = castlingSide == CastlingSide.Long ? (color == Color.White ? Square.a1 : Square.a8) : (color == Color.White ? Square.h1 : Square.h8);
+        const kingIcon: string = color == Color.White ? PieceIcon.WhiteKing : PieceIcon.BlackKing;
+        const rookIcon: string = color == Color.White ? PieceIcon.WhiteRook : PieceIcon.BlackRook;
 
         // Check first rule and third rule. Also, check the fen 
         // notation for castling availability when the game is loaded from fen notation.
@@ -52,15 +52,15 @@ export class MoveExtender{
             return null;
 
         // For fourth rule.
-        const betweenSquares: Array<Square> = castlingType == "Long"
+        const betweenSquares: Array<Square> = castlingSide == CastlingSide.Long
             ? (color == Color.White ? [Square.b1, Square.c1, Square.d1] : [Square.b8, Square.c8, Square.d8])
             : (color == Color.White ? [Square.f1, Square.g1] : [Square.f8, Square.g8]);
 
         // Check second rule.
         for(const notation of BoardQuerier.getAlgebraicNotation()){
             if(notation.includes(kingIcon)
-                || (notation.includes(rookIcon + "a") && castlingType == "Long") // Vertical moves of the rook.
-                || (notation.includes(rookIcon + "h") && castlingType == "Short")  // Same as above.
+                || (notation.includes(rookIcon + "a") && castlingSide == CastlingSide.Long) // Vertical moves of the rook.
+                || (notation.includes(rookIcon + "h") && castlingSide == CastlingSide.Short)  // Same as above.
             ) return null;
 
             // For horizontal moves of the rook.
@@ -89,7 +89,7 @@ export class MoveExtender{
      */
     public getLongCastlingMove(color: Color): Square | null
     {
-        return this.calculateCastlingMove(color, "Long");
+        return this.calculateCastlingMove(color, CastlingSide.Long);
     }
 
     /**
@@ -98,7 +98,7 @@ export class MoveExtender{
      */
     public getShortCastlingMove(color: Color): Square | null
     {
-        return this.calculateCastlingMove(color, "Short");
+        return this.calculateCastlingMove(color, CastlingSide.Short);
     }
 
     /**

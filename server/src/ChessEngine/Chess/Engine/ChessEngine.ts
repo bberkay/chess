@@ -8,6 +8,7 @@
  */
 
 import {
+    CastlingSide,
     CastlingType,
     Color,
     Durations,
@@ -475,16 +476,26 @@ export class ChessEngine extends BoardManager {
          * @see For more information about castling, see https://en.wikipedia.org/wiki/Castling
          * @see For more information about square ids, see src/Chess/Types/index.ts
          */
-        const castlingType: "Long" | "Short" = Number(this.playedFrom) - Number(this.playedTo) > 3
-            ? "Long" : "Short";
-        this.logger.save(`Castling type determined[${castlingType}] on engine`);
+        const castlingSide: CastlingSide = Number(this.playedFrom) > Number(this.playedTo) 
+            ? CastlingSide.Long 
+            : CastlingSide.Short;
+        this.logger.save(`Castling type determined[${castlingSide}] on engine`);
 
+        // Find the target rook square if it is clicked two square left or right of the king
+        // instead of the rook square itself.
+        if(castlingSide == CastlingSide.Long && Locator.getColumn(Number(this.playedTo)) !== 1)
+            this.playedTo = Number(this.playedTo) - 2 as Square;
+        else if(castlingSide == CastlingSide.Short && Locator.getColumn(Number(this.playedTo)) !== 8)
+            this.playedTo = Number(this.playedTo) + 1 as Square;
+        
         /**
          * If the castling is long then the king's new square is
          * 2 squares left of the "from" otherwise 2 squares
          * right of the "from".
          */
-        const kingNewSquare: number = castlingType == "Long" ? Number(this.playedFrom) - 2 : Number(this.playedFrom) + 2;
+        const kingNewSquare: number = castlingSide == CastlingSide.Long 
+            ? Number(this.playedFrom) - 2 
+            : Number(this.playedFrom) + 2;
         this._doNormalMove(this.playedFrom as Square, kingNewSquare as Square);
         this.logger.save(`King moved to target square[${kingNewSquare}] on engine`);
 
@@ -498,17 +509,17 @@ export class ChessEngine extends BoardManager {
          * is "e1" then the rook's current square is "a1" and rook's new square
          * is "d1".
          */
-        const rook: number = castlingType == "Long" ? Number(this.playedFrom) - 4 : Number(this.playedFrom) + 3;
-        const rookNewSquare: number = castlingType == "Long" ? kingNewSquare + 1 : kingNewSquare - 1;
+        const rook: number = castlingSide == CastlingSide.Long ? Number(this.playedFrom) - 4 : Number(this.playedFrom) + 3;
+        const rookNewSquare: number = castlingSide == CastlingSide.Long ? kingNewSquare + 1 : kingNewSquare - 1;
         this._doNormalMove(rook, rookNewSquare as Square);
 
         // Disable the castling.
-        this.disableCastling((BoardQuerier.getColorOfTurn() + "Short") as CastlingType);
-        this.disableCastling((BoardQuerier.getColorOfTurn() + "Long") as CastlingType);
-        this.logger.save(`Rook moved to target square and castling[${castlingType}] move is saved.`);
+        this.disableCastling((BoardQuerier.getColorOfTurn() + CastlingSide.Short) as CastlingType);
+        this.disableCastling((BoardQuerier.getColorOfTurn() + CastlingSide.Long) as CastlingType);
+        this.logger.save(`Rook moved to target square and castling[${castlingSide}] move is saved.`);
 
         // Set the current move for the move history.
-        this.moveNotation += castlingType == "Short" ? NotationSymbol.ShortCastling : NotationSymbol.LongCastling;
+        this.moveNotation += castlingSide == CastlingSide.Short ? NotationSymbol.ShortCastling : NotationSymbol.LongCastling;
     }
 
     /**
@@ -1018,8 +1029,8 @@ export class ChessEngine extends BoardManager {
         }
 
         const color = BoardQuerier.getColorOfTurn() == Color.White ? Color.Black : Color.White;
-        const shortCastling: CastlingType = color + "Short" as CastlingType;
-        const longCastling: CastlingType = color + "Long" as CastlingType;
+        const shortCastling: CastlingType = color + CastlingSide.Short as CastlingType;
+        const longCastling: CastlingType = color + CastlingSide.Long as CastlingType;
         if(!BoardQuerier.getCastling()[shortCastling] && !BoardQuerier.getCastling()[longCastling]){
             this.logger.save("Castling moves are already disabled");
             return; 

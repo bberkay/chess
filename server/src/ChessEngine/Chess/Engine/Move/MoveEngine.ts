@@ -320,12 +320,16 @@ export class MoveEngine{
         for(let path in route) route[path as MoveRoute] = [];
 
         const longCastling: Square | null = this.moveExtender.getLongCastlingMove(color);
-        if(longCastling)
+        if(longCastling) {
             route[MoveRoute.Left]!.push(longCastling);
+            route[MoveRoute.Left]!.push(longCastling + 2);
+        }
 
         const shortCastling: Square | null = this.moveExtender.getShortCastlingMove(color);
-        if(shortCastling)
+        if(shortCastling) {
             route[MoveRoute.Right]!.push(shortCastling);
+            route[MoveRoute.Right]!.push(shortCastling - 1);
+        }
 
         // Get castling moves of the king. Also, 
         // castling doesn't need king safety filter because it is already filtered.

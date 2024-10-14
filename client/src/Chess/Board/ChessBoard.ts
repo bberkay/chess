@@ -7,7 +7,7 @@
  * @license MIT
  */
 
-import { Color, GameStatus, JsonNotation, Moves, MoveType, PieceType, Square, StartPosition } from "../Types";
+import { CastlingSide, Color, GameStatus, JsonNotation, Moves, MoveType, PieceType, Square, StartPosition } from "../Types";
 import { SoundEffect, SquareClickMode, SquareEffect } from "./Types";
 import { Converter } from "../Utils/Converter.ts";
 import { Logger } from "@Services/Logger.ts";
@@ -612,8 +612,8 @@ export class ChessBoard {
      * Do the castling move on the chess board.
      */
     private _doCastling(fromSquare: HTMLDivElement, toSquare: HTMLDivElement): void {
-        const fromSquareId: number = this.getSquareId(fromSquare)
-        const toSquareId: number = this.getSquareId(toSquare);
+        let fromSquareId: number = this.getSquareId(fromSquare)
+        let toSquareId: number = this.getSquareId(toSquare);
 
         /**
          * Get the castling type by measuring the distance between
@@ -624,32 +624,40 @@ export class ChessBoard {
          * @see For more information about castling, see https://en.wikipedia.org/wiki/Castling
          * @see For more information about square ids, see src/Chess/Types/index.ts
          */
-        const castlingType: "Long" | "Short" = fromSquareId - toSquareId > 3 ? "Long" : "Short";
-        this.logger.save(`Castling type determined[${castlingType}] on board`);
+        const castlingSide: CastlingSide = fromSquareId > toSquareId ? CastlingSide.Long : CastlingSide.Short;
+        this.logger.save(`Castling type determined[${castlingSide}] on board`);
+
+        // Find the target rook square if it is clicked two square left or right of the king
+        // instead of the rook square itself.
+        const getColumn = (squareId: number): number => squareId % 8 === 0 ? 8 : squareId % 8;
+        if(castlingSide == CastlingSide.Long && getColumn(toSquareId) !== 1)
+            toSquareId = toSquareId - 2 as Square;
+        else if(castlingSide == CastlingSide.Short && getColumn(toSquareId) !== 8)
+            toSquareId = toSquareId + 1 as Square;
 
         /**
          * If the castling is long then the king's new square is
          * 2 squares left of the fromSquare otherwise 2 squares
          * right of the fromSquare.
          */
-        const kingNewSquare: number = castlingType == "Long" ? fromSquareId - 2 : fromSquareId + 2;
+        const kingNewSquare: number = castlingSide == CastlingSide.Long ? fromSquareId - 2 : fromSquareId + 2;
         this._doNormalMove(fromSquare, this.getSquareElement(kingNewSquare));
-        this.logger.save(`King moved to target square[${kingNewSquare}] by determined castling type[${castlingType}] on board`);
+        this.logger.save(`King moved to target square[${kingNewSquare}] by determined castling type[${castlingSide}] on board`);
 
         /**
          * If the castling is long and the king's current square
          * is "e1"(61) then the rook's current square is "a1"(57) and rook's
          * new square is "d1"(60).
          */
-        const rook: number = castlingType == "Long" ? fromSquareId - 4 : fromSquareId + 3;
-        const rookNewSquare: number = castlingType == "Long" ? kingNewSquare + 1 : kingNewSquare - 1;
+        const rook: number = castlingSide == CastlingSide.Long ? fromSquareId - 4 : fromSquareId + 3;
+        const rookNewSquare: number = castlingSide == CastlingSide.Long ? kingNewSquare + 1 : kingNewSquare - 1;
         this._doNormalMove(
             this.getSquareElement(rook),
             this.getSquareElement(rookNewSquare),
             false
         );
         this.playSound(SoundEffect.Castle);
-        this.logger.save(`Rook moved to target square[${rookNewSquare}] by determined castling type[${castlingType}] on board`);
+        this.logger.save(`Rook moved to target square[${rookNewSquare}] by determined castling type[${castlingSide}] on board`);
     }
 
     /**
@@ -704,7 +712,8 @@ export class ChessBoard {
         );
         
         let pieceType: PieceType;
-        switch(Math.round(squareId / 8)) {
+        const getRow = (squareId: number): number => Math.ceil(squareId / 8);
+        switch(getRow(squareId)) {
             case 1:
             case 8:
                 pieceType = PieceType.Queen;
@@ -964,7 +973,7 @@ export class ChessBoard {
         let promotionOptions: NodeListOf<Element> = document.querySelectorAll(".promotion-option");
         if(promotionOptions.length === 0) 
             return;
-        
+
         promotionOptions.forEach(promotionOption => {
             promotionOption.remove();
         });

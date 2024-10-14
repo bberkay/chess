@@ -37,6 +37,27 @@ export enum PieceType{
     Queen = "Queen",
     King = "King"
 }
+
+/**
+ * PieceIcon enum for the icon of the chess pieces.
+ * @enum {string}
+ * @see For more information, check src/Models/PieceModel.ts
+ */
+export enum PieceIcon{
+    WhitePawn = "P",
+    WhiteKnight = "N",
+    WhiteBishop = "B",
+    WhiteRook = "R",
+    WhiteQueen = "Q",
+    WhiteKing = "K",
+    BlackPawn = "p",
+    BlackKnight = "n",
+    BlackBishop = "b",
+    BlackRook = "r",
+    BlackQueen = "q", 
+    BlackKing = "k"
+}
+
 /**
  * PromotionPieceType enum for the promotion piece types.
  * @enum {string}
@@ -50,9 +71,19 @@ export enum PromotionPieceType{
 }
 
 /**
+ * CastlingSide enum for the castling sides.
+ * @enum {string}
+ * @see src/Engine/ChessEngine.ts For more information.
+ */
+export enum CastlingSide{
+    Long = "Long",
+    Short = "Short"
+}
+
+/**
  * CastlingType enum for the castling types.
  * @enum {string}
- * @see src/Engine/Checker/MoveChecker.ts For more information.
+ * @see src/Engine/Helper/MoveExtender.ts For more information.
  */
 export enum CastlingType{
     WhiteLong = "WhiteLong",
