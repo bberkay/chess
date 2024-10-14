@@ -284,9 +284,12 @@ export class NotationMenu extends Component {
     }
 
     /**
-     * This function adds a row/notation to the table.
+     * This function adds the given notations to the table. If the notations
+     * table is empty then the function creates a new table and adds the given
+     * every notation as a row. If the notations table is not empty then the
+     * function adds the last notation to the table.
      */
-    private addNotation(notations: ReadonlyArray<string>): void {
+    private setNotations(notations: ReadonlyArray<string>): void {
         /**
          * This function formats the unicode notation for adding to 
          * the table notation. For example, if the notation is "&#9812;f3"
@@ -334,7 +337,7 @@ export class NotationMenu extends Component {
                             notationMenu.querySelectorAll("td:not(td:first-child)")
                         ).indexOf(clickedNotation)
                     );
-                    this.showNotationAsCurrent(clickedNotation);
+                    this.highlightNotation(clickedNotation);
                     this.setScore(this.chess.getScores());
                 }
             });
@@ -353,7 +356,7 @@ export class NotationMenu extends Component {
                 );
         }
 
-        this.showNotationAsCurrent();
+        this.highlightNotation();
 
         const notationTable: HTMLElement = document.getElementById("notation-table")!.querySelector("tbody")!;
         setTimeout(() => {
@@ -364,13 +367,29 @@ export class NotationMenu extends Component {
     }
 
     /**
+     * This function deletes the last notation from the table.
+     */
+    public deleteLastNotation(): void {
+        const notationMenu: HTMLElement = document.getElementById("notations")!;
+        const lastRow = notationMenu.lastElementChild as HTMLElement;
+        if(lastRow.querySelectorAll(".move").length == 1) {
+            lastRow.remove();
+        } else {
+            const lastMove = lastRow.querySelector("td:last-child")!;
+            if(lastMove) lastMove.remove();
+        }
+        
+        this.highlightNotation();
+    }
+
+    /**
      * This function takes one move back from the current move. Only
      * on the board doesn't affect the game state.
      */
     private takeBack(): void {
         const previousMoveElement = this.getAdjacentMove(-1, document.querySelector(".current-move") as HTMLElement);
         if(previousMoveElement) {
-            this.showNotationAsCurrent(previousMoveElement);
+            this.highlightNotation(previousMoveElement);
             const notationTable: HTMLElement = document.getElementById("notation-table")!.querySelector("tbody")!;
             const previousMoveElementRect = previousMoveElement.getBoundingClientRect();
             if(previousMoveElementRect.top <= notationTable.getBoundingClientRect().top) {
@@ -387,7 +406,7 @@ export class NotationMenu extends Component {
     private takeForward(): void {
         const nextMoveElement = this.getAdjacentMove(1, document.querySelector(".current-move") as HTMLElement);
         if(nextMoveElement) {
-            this.showNotationAsCurrent(nextMoveElement);
+            this.highlightNotation(nextMoveElement);
             const notationTable: HTMLElement = document.getElementById("notation-table")!.querySelector("tbody")!;
             const nextMoveElementRect = nextMoveElement.getBoundingClientRect();
             if(nextMoveElementRect.top + nextMoveElementRect.height > notationTable.getBoundingClientRect().bottom) {
@@ -402,7 +421,7 @@ export class NotationMenu extends Component {
      * on the board doesn't affect the game state.
      */
     private goToFirstMove(): void {
-        this.showNotationAsCurrent(this.getAdjacentMove(0));
+        this.highlightNotation(this.getAdjacentMove(0));
         document.getElementById("notation-table")!.querySelector("tbody")!.scrollTop = 0;
         this.chess.goToSpecificMove(0);
     }
@@ -412,7 +431,7 @@ export class NotationMenu extends Component {
      * on the board doesn't affect the game state.
      */
     private goToLastMove(): void {
-        this.showNotationAsCurrent();
+        this.highlightNotation();
         const notationTable: HTMLElement = document.getElementById("notation-table")!.querySelector("tbody")!;
         notationTable.scrollTop = notationTable.scrollHeight;
         this.chess.goToSpecificMove(this.chess.getMoveHistory().length - 1);
@@ -427,7 +446,7 @@ export class NotationMenu extends Component {
      * the notationTd is given then the given notationTd will be 
      * shown as the current move.
      */
-    private showNotationAsCurrent(notationTd: HTMLElement | null = null): void {
+    private highlightNotation(notationTd: HTMLElement | null = null): void {
         document.querySelector(".current-move")?.classList.remove("current-move");
 
         // Add current move effect to the last notation.
@@ -660,7 +679,7 @@ export class NotationMenu extends Component {
             return;
 
         this.activateUndoButtonAfterFirstMove();
-        this.addNotation(this.chess.getAlgebraicNotation());
+        this.setNotations(this.chess.getAlgebraicNotation());
         this.changeIndicator();
 
         if ([
