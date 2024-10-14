@@ -315,6 +315,21 @@ export class Chess {
             if (!Array.isArray(move))
                 move = [move];
 
+            /**
+             * Get the piece type of the given square.
+             */
+            const getPieceType = (square: Square): PieceType | undefined => {
+                for (const piece of this.engine.getGameAsJsonNotation().board) {
+                    if (piece.square === square) {
+                        return piece.type;
+                    }
+                }
+                return;
+            };
+
+            if(getPieceType(move[0].from) == PieceType.King && Math.abs(move[0].from - move[0].to) > 1)
+                move[0].type = MoveType.Castling;
+            
             move.forEach((moveObject: Move) => {
                 this.playMove(moveObject.from, moveObject.to, Object.hasOwn(moveObject, "type") ? moveObject.type : null);
             });
@@ -330,6 +345,7 @@ export class Chess {
      * parameter is used by the bot/system/server etc. so try to avoid using it.
      */
     public playMove(from: Square, to: Square, moveType: MoveType | null = null): void {
+        console.log("3", from, to, moveType);
         try {
             this.engine.playMove(from, to);
             this._preSelectedSquare = null;
