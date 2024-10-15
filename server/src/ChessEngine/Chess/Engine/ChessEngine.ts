@@ -81,6 +81,7 @@ export class ChessEngine extends BoardManager {
         this.createTimersIfGiven();
         this.checkGameStatus();
         this.handleTimersIfExists();
+        this.saveCurrentBoard();
         this.logger.save("Game is created");
     }
 
@@ -301,12 +302,19 @@ export class ChessEngine extends BoardManager {
     /**
      * This function undoes the last move by taking the last - 1 board
      * from the board history and creating the board with it.
+     * @param {Color|null} undoColor Take back to the last turn 
+     * of the given color.
      */
-    public takeBack(): void
+    public takeBack(undoColor: Color | null = null): void
     {
-        this.createBoard(BoardQuerier.getBoardHistory().length > 1 ? {
-            ...BoardQuerier.getBoardHistory().slice(0, -1).pop()!,
-            boardHistory: BoardQuerier.getBoardHistory().slice(0, -2)
+        const count = undoColor ? this.getBoardHistory().findLastIndex((board) => board.turn == undoColor) - 2 : 1;        
+        if(count == -1)
+            throw new Error("There is no board with the given last turn");
+        
+        const lastIndex = undoColor ? this.getBoardHistory().length - 1 - count : 1;
+        this.createBoard(BoardQuerier.getBoardHistory().length > (undoColor == Color.Black ? 2 : 1) ? {
+            ...BoardQuerier.getBoardHistory().slice(0, -lastIndex).pop()!,
+            boardHistory: BoardQuerier.getBoardHistory().slice(0, -lastIndex)
         } : {
             ...BoardQuerier.getBoardHistory().pop()!,
             boardHistory: []
@@ -541,7 +549,7 @@ export class ChessEngine extends BoardManager {
         const killedPieceSquare = Number(this.playedTo) + (BoardQuerier.getPieceOnSquare(this.playedTo as Square)?.getColor() == Color.White ? 8 : -8);
 
         // Remove the killed piece.
-        this.removePiece(killedPieceSquare);
+        super.removePieceModel(killedPieceSquare);
         this.logger.save(`Captured piece by en passant move is found on square[${killedPieceSquare}] and removed on engine`);
 
         // Set the current move for the move history.
@@ -580,7 +588,7 @@ export class ChessEngine extends BoardManager {
         const firstSquareOfRow: Square = to > 8 && to < 32 ? to - ((Locator.getRow(to) - 1) * 8) : to > 32 && to < 57 ? to + ((8 - Locator.getRow(to)) * 8) : to;
 
         // Remove the pawn.
-        this.removePiece(firstSquareOfRow);
+        super.removePieceModel(firstSquareOfRow);
         this.logger.save(`Promoted Pawn is removed from square[${to}] on engine`);
 
         /**
@@ -617,7 +625,7 @@ export class ChessEngine extends BoardManager {
         const playerColor: Color = BoardQuerier.getColorOfTurn();
 
         // Create the new piece and increase the score of the player.
-        this.createPiece(playerColor, selectedPromote as PieceType, firstSquareOfRow);
+        super.createPieceModel(playerColor, selectedPromote as PieceType, firstSquareOfRow);
         this.updateScores(firstSquareOfRow);
         this.logger.save(`Player's[${playerColor}] Piece[${selectedPromote}] created on square[${to}] on engine`);
 
@@ -753,6 +761,12 @@ export class ChessEngine extends BoardManager {
      */
     private checkGameStatus(): void
     {
+        if([GameStatus.WhiteVictory,
+            GameStatus.BlackVictory,
+            GameStatus.Draw
+        ].includes(BoardQuerier.getBoardStatus()))
+            return;
+
         /**
          * First, check the board is on the standard position because if the board is on the
          * standard position then continue is unnecessary.

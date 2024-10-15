@@ -9,7 +9,7 @@
 
 import { JsonNotation, PieceType, Square, Color, StartPosition, ChessEvent, GameStatus, Durations, Move, Scores, MoveType, RemainingTimes } from "./Types";
 import { ChessEngine, MoveValidationError } from "./Engine/ChessEngine";
-import { ChessBoard } from "./Board/ChessBoard";
+import { ChessBoard, PIECE_ANIMATION_DURATION, PIECE_ANIMATION_DURATION_MS } from "./Board/ChessBoard";
 import { SquareClickMode, SquareEffect } from "./Board/Types";
 import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage.ts";
 import { Converter } from "./Utils/Converter.ts";
@@ -345,7 +345,6 @@ export class Chess {
      * parameter is used by the bot/system/server etc. so try to avoid using it.
      */
     public playMove(from: Square, to: Square, moveType: MoveType | null = null): void {
-        console.log("3", from, to, moveType);
         try {
             this.engine.playMove(from, to);
             this._preSelectedSquare = null;
@@ -360,7 +359,7 @@ export class Chess {
             this.logger.save(`Move[${JSON.stringify({ from, to })}] played on board and engine`);
             this.finishTurn();
             document.dispatchEvent(new CustomEvent(ChessEvent.onPieceMoved, { detail: { from: from, to: to } }));
-        }, 100);
+        }, PIECE_ANIMATION_DURATION_MS);
     }
 
     /**
@@ -378,7 +377,7 @@ export class Chess {
             document.dispatchEvent(new CustomEvent(
                 ChessEvent.onPieceMovedByPlayer, { detail: { from: from, to: to } }
             ));
-        }, 250); // When this is less than 250, the sound of the move is not heard.
+        }, PIECE_ANIMATION_DURATION_MS * 2);
     }
 
     /**
@@ -386,15 +385,27 @@ export class Chess {
      * @param {boolean} onEngine - If it is true then it 
      * will go back to the previous move on the engine not
      * just on the board.
+     * @param {Color|null} undoColor - If it is not null then
+     * it will go back to the previous move of the given color.
+     * on the engine and board.
      */
-    public takeBack(onEngine: boolean = false): void {
+    public takeBack(onEngine: boolean = false, undoColor: Color | null = null): void {
+        if(!onEngine && undoColor != null)
+            throw new Error("The 'undoColor' parameter must be null when the 'onEngine' parameter is false. Please try to use 'goToSpecificMove' function instead if you want to go to the specific move.");
+
         if(this.engine.getMoveHistory().length == 0)
             return;
-
+        
         this._currentTakeBackCount++;
         if (onEngine) {
-            this.goToSpecificMove(this.engine.getBoardHistory().length - 2, false);
-            this.engine.takeBack();
+            let moveIndex = undoColor 
+                ? this.engine.getBoardHistory().findLastIndex((board) => board.turn == undoColor) 
+                : this.engine.getBoardHistory().length;
+                
+            moveIndex = moveIndex - (!undoColor || undoColor === this.engine.getTurnColor() ? 2 : 0);
+            this.goToSpecificMove(moveIndex, false);
+            this.engine.takeBack(undoColor);
+            this.board.unlock();
             this._currentTakeBackCount = 0;
             LocalStorage.save(LocalStorageKey.LastBoard, this.engine.getGameAsJsonNotation());
         } else {
@@ -426,11 +437,9 @@ export class Chess {
         if (moveIndex < 0 || moveIndex > this.engine.getMoveHistory().length)
             return;
 
-        if (moveIndex == this.engine.getMoveHistory().length - 1)
-            this.board.unlock();
-        else
+        if (moveIndex !== this.engine.getMoveHistory().length - 1)
             this.board.lock(true);
-        
+
         let snapshotMove = showMoveReanimation ? this.engine.getMoveHistory()[moveIndex] : null;
         let snapshot = this.engine.getBoardHistory()[
             moveIndex + (snapshotMove ? (snapshotMove.type == MoveType.Promote ? 1 : 0) : 0)
@@ -448,6 +457,9 @@ export class Chess {
 
         this.board.showStatus(snapshot.gameStatus!);
         this._currentTakeBackCount = (this.engine.getMoveHistory().length - 1) - moveIndex;
+
+        if (moveIndex == this.engine.getMoveHistory().length - 1)
+            this.board.unlock();
     }
 
     /**

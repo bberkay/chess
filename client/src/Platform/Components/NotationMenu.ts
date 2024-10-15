@@ -368,15 +368,25 @@ export class NotationMenu extends Component {
 
     /**
      * This function deletes the last notation from the table.
+     * @param {Color|null} color The color of last notation to be 
+     * deleted for example if the color is white then the whole row
+     * will be deleted, if the color is black then only the last column
+     * will be deleted. If the color is null then the last notation will
+     * be deleted.
      */
-    public deleteLastNotation(): void {
+    public deleteLastNotation(color: Color | null = null): void {
         const notationMenu: HTMLElement = document.getElementById("notations")!;
         const lastRow = notationMenu.lastElementChild as HTMLElement;
-        if(lastRow.querySelectorAll(".move").length == 1) {
+
+        if(color == Color.White) {
             lastRow.remove();
         } else {
-            const lastMove = lastRow.querySelector("td:last-child")!;
-            if (lastMove && lastMove.querySelector(".move")) lastMove.innerHTML = "";
+            if(lastRow.querySelectorAll(".move").length == 1) {
+                lastRow.remove();
+            } else {
+                const lastMove = lastRow.querySelector("td:last-child")!;
+                if (lastMove && lastMove.querySelector(".move")) lastMove.innerHTML = "";
+            }
         }
         
         this.highlightNotation();

@@ -45,8 +45,6 @@ export class BoardManager extends Board{
         Board.durations = jsonNotation.durations ?? null;
         Board.gameStatus = jsonNotation.gameStatus ?? Board.gameStatus;
         this.calculateScores();
-        if(!jsonNotation.moveHistory || jsonNotation.moveHistory.length == 0)
-            this.saveCurrentBoard();
     }
 
     /**
