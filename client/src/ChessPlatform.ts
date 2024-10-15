@@ -532,16 +532,10 @@ export class ChessPlatform{
                     this.platform.notationMenu.showPlayAgainOffer();
                     break;
                 case WsTitle.SentOfferCancelled:
-                    if(![GameStatus.BlackVictory, 
-                        GameStatus.WhiteVictory, 
-                        GameStatus.Draw
-                    ].includes(this.chess.getGameStatus()))
-                        this.platform.notationMenu.displayOnlineGameUtilityMenu();
-                    else 
-                        this.platform.notationMenu.displayNewGameUtilityMenu();
+                    this.platform.notationMenu.goBack();
                     break;
                 case WsTitle.SentOfferDeclined:
-                    this.platform.notationMenu.displayOnlineGameUtilityMenu();
+                    this.platform.notationMenu.goBack();
                     break;
                 case WsTitle.Disconnected:
                     this.platform.notationMenu.updatePlayerAsOffline(

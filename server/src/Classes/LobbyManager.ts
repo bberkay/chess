@@ -81,7 +81,9 @@ export class LobbyManager{
         const lobby = this.getLobby(lobbyId);
         if (!lobby) return;
 
-        if (lobby.isBothPlayersOffline() && (lobby.isGameFinished() || !lobby.isGameStarted()))
+        if (lobby.isBothPlayersOffline() && (lobby.isGameFinished() || !lobby.isGameStarted())) {
+            console.log("Lobby is dead. Deleting...: ", lobbyId);
             this.lobbies.delete(lobbyId);
+        }
     }
 }

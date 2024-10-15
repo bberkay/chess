@@ -394,7 +394,10 @@ function joinLobby(ws: RWebSocket): void {
                 : WsCommand.connected({ lobbyId, player })
         );
         SocketManager.addSocket(ws.data.lobbyId, ws.data.player.token, ws);
-        startGame(lobby!);
+        if(lobby.isBothPlayersOnline())
+            startGame(lobby!);
+    } else {
+        console.log("Joining the lobby failed: ", lobbyId, player);
     }
 }
 
@@ -431,6 +434,7 @@ function startGame(lobby: Lobby): void {
     if (isGameReadyToStart) 
     {
         // Both players are online and the game is not started yet.
+        console.log("Starting the game: ", lobby.id);
 
         // Start the game and send the started command to the clients.
         lobby.startGame();
@@ -454,10 +458,11 @@ function startGame(lobby: Lobby): void {
 
         monitorGameTimeExpiration(lobby);
     }
-    else if (isGameAlreadyStarted) 
+    else if (isGameAlreadyStarted || !lobby.isBothPlayersOffline()) 
     {
         // One of the players is should be reconnected to the game.
         // send current board and durations to the reconnected player.
+        console.log("Reconnecting player to the game: ", lobby.id);
 
         // Send the current game to the reconnected 
         //yplayer.
@@ -548,12 +553,12 @@ function handleMessage(ws: RWebSocket, message: string): void {
             case WsTitle.DrawAccepted:
                 draw(lobby);
                 break;
-            case WsTitle.UndoOffered:
+            /*case WsTitle.UndoOffered:
                 offerUndo(lobby, player);
                 break;
             case WsTitle.UndoAccepted:
                 undo(lobby);
-                break;
+                break;*/
             case WsTitle.PlayAgainOffered:
                 offerPlayAgain(lobby, player);
                 break;

@@ -250,9 +250,12 @@ export class Lobby{
     {
         if(this.isTokenInLobby(player.token))
         {
+            console.log("Player is already in the lobby: ", player);
             // Reconnect the player with the same color
-            if(this.isTokenOnline(player.token))
+            if(this.isTokenOnline(player.token)) {
+                console.log("Player is already online: ", player.token, player.name, player.isOnline);
                 return false;
+            }
 
             const color = this.getTokenColor(player.token) as Color;
             if(color === Color.White) 
@@ -264,12 +267,15 @@ export class Lobby{
         }
         else
         {
+            console.log("Player is not in the lobby: ", player);
             // Add the player to the lobby with the random color 
             // if there is no player unless add with available color. 
             const whitePlayer = this.getWhitePlayer();
             const blackPlayer = this.getBlackPlayer();
-            if(whitePlayer && blackPlayer)
+            if(whitePlayer && blackPlayer) {
+                console.log("Lobby is full.");
                 return false;   
+            }
 
             if(whitePlayer) {
                 this.setBlackPlayer(player);
@@ -331,8 +337,12 @@ export class Lobby{
     public setPlayerOnline(player: Player): void
     {
         if(this.isPlayerInLobby(player)){
-            player.isOnline = true;
-            this.lastConnectedPlayerColor = this.getTokenColor(player.token) as Color;
+            const tokenColor = this.getTokenColor(player.token);
+            const tokenPlayer = tokenColor === Color.White 
+                ? this.whitePlayer!
+                : this.blackPlayer!;
+            tokenPlayer.isOnline = true;
+            this.lastConnectedPlayerColor = tokenColor;
         }
     }
 
@@ -341,8 +351,13 @@ export class Lobby{
      */
     public setPlayerOffline(player: Player): void
     {
-        if(this.isPlayerInLobby(player))
-            player.isOnline = false;
+        if(this.isPlayerInLobby(player)){
+            const tokenPlayer = this.getTokenColor(player.token) === Color.White 
+                ? this.whitePlayer!
+                : this.blackPlayer!;
+            tokenPlayer.isOnline = false;
+            console.log("Player is offline: ", player.token, player.name);
+        }
     }
     
     /**

@@ -243,7 +243,6 @@ export class BoardEditor extends Component{
         this.enableBoardCreator();
         this.createBoardForBoardEditor();
         this.enableBoardObserver();
-        LocalStorage.clear(LocalStorageKey.LastLobbyConnection);
         LocalStorage.save(LocalStorageKey.BoardEditorEnabled, true);
     }
 

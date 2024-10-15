@@ -27,6 +27,7 @@ export class NotationMenu extends Component {
     private lastScore: Record<Color, number> = { [Color.White]: 0, [Color.Black]: 0 };
     private activeIntervalId: number = -1;
     private activeUtilityMenu: UtilityMenuType = UtilityMenuType.NewGame;
+    private prevActiveUtilityMenu: UtilityMenuType | null = null;
     private confirmedOperation: NotationMenuOperation | null = null;
 
     /**
@@ -98,7 +99,7 @@ export class NotationMenu extends Component {
     private getPlayAgainUtilityMenuContent(): string {
         return `
             <button class="menu-item" data-menu-operation="${
-                this.activeUtilityMenu === UtilityMenuType.OnlineGame 
+                this.prevActiveUtilityMenu === UtilityMenuType.OnlineGame 
                     ? NotationMenuOperation.SendPlayAgainOffer 
                     : NotationMenuOperation.PlayAgain
                 }" data-tooltip-text="Play Again from Same Start">Play Again</button>
@@ -623,6 +624,7 @@ export class NotationMenu extends Component {
         document.querySelector(".utility-toggle-menu-section.active")!.classList.remove("active");
         this.loadHTML(UtilityMenuType.OnlineGame, this.getOnlineGameUtilityMenuContent());
         document.getElementById(UtilityMenuType.OnlineGame)!.classList.add("active");
+        this.prevActiveUtilityMenu = UtilityMenuType.OnlineGame;
         this.activeUtilityMenu = UtilityMenuType.OnlineGame;
     }
 
@@ -634,6 +636,7 @@ export class NotationMenu extends Component {
         document.querySelector(".utility-toggle-menu-section.active")!.classList.remove("active");
         this.loadHTML(UtilityMenuType.SingleplayerGame, this.getSingleplayerGameUtilityMenuContent());
         document.getElementById(UtilityMenuType.SingleplayerGame)!.classList.add("active");
+        this.prevActiveUtilityMenu = UtilityMenuType.SingleplayerGame;
         this.activeUtilityMenu = UtilityMenuType.SingleplayerGame;
     }
     
@@ -658,7 +661,7 @@ export class NotationMenu extends Component {
         
         const undoButton = document.querySelector(`
             .utility-toggle-menu-section.active [data-menu-operation="${
-                this.activeUtilityMenu === UtilityMenuType.OnlineGame 
+                this.prevActiveUtilityMenu === UtilityMenuType.OnlineGame 
                 ? NotationMenuOperation.SendUndoOffer
                 : NotationMenuOperation.UndoMove
             }"]
@@ -837,6 +840,9 @@ export class NotationMenu extends Component {
             const [minutes, seconds, deciseconds] = this.formatRemainingTimeForTimer(
                 Math.round(this.chess.getPlayersRemainingTime()[color])
             );
+            
+            if(minutes < 0 || seconds < 0 || deciseconds < 0)
+                return;
 
             playerMinuteSecond.textContent = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
 
@@ -857,7 +863,7 @@ export class NotationMenu extends Component {
      * only one timer/interval can be active at a time.
      */
     private stopOpponentTimerIfActive(): void {
-        if (this.activeIntervalId != -1)
+        if (this.activeIntervalId !== -1)
             clearInterval(this.activeIntervalId);
     }
 
@@ -943,7 +949,7 @@ export class NotationMenu extends Component {
         // operation.
         setTimeout(() => {
             confirmButton.setAttribute(
-                this.activeUtilityMenu === UtilityMenuType.OnlineGame 
+                this.prevActiveUtilityMenu === UtilityMenuType.OnlineGame 
                     ? "data-socket-operation"
                     : "data-menu-operation",
                 confirmationOperation
@@ -973,7 +979,7 @@ export class NotationMenu extends Component {
         acceptButton.textContent = "Accept";
         acceptButton.setAttribute("data-tooltip-text", "Accept Offer");
         acceptButton.setAttribute(
-            this.activeUtilityMenu === UtilityMenuType.OnlineGame 
+            this.prevActiveUtilityMenu === UtilityMenuType.OnlineGame 
                 ? "data-socket-operation"
                 : "data-menu-operation", 
             offerOperation
