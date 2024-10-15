@@ -180,7 +180,6 @@
         font-weight:bold;
         display: flex;
         align-items: center;
-        gap: 3px;
         height: var(--score-table-piece-icons-size);
         padding: 2px 0;
 
