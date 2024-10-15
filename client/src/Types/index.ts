@@ -117,6 +117,7 @@ export interface WsResignedData{
  * undo command to send to the client.
  */
 export interface WsUndoData{
+    undoColor: Color,
     board: string
 }
 

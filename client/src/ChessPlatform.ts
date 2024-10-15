@@ -372,6 +372,7 @@ export class ChessPlatform{
     private acceptUndoOffer(): void
     {
         this.socket?.send(WsCommand.undoAccepted());
+        this.platform.notationMenu.goBack();
     }
 
     /**
@@ -514,7 +515,8 @@ export class ChessPlatform{
                     closeConnectionOnFinish = true;
                     break;
                 case WsTitle.UndoAccepted:
-                    this.chess.takeBack(true);
+                    this.chess.takeBack(true, (wsData as WsUndoData).undoColor);
+                    this.platform.notationMenu.deleteLastNotation((wsData as WsUndoData).undoColor);
                     if ((wsData as WsUndoData).board !== this.chess.getGameAsFenNotation() ) {
                         location.reload();
                         this.platform.navigatorModal.showError("Unexpected game status. Game status is not equal to the server's game status. The game created again according to the server's game status.");

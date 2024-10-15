@@ -16,6 +16,8 @@ export class Lobby{
     private lastConnectedPlayerColor: Color | null = null;
     private gameTimeMonitorInterval: number | null = null;
     private isThereAnyOffer: boolean = false;
+    private currentUndoOffer: Color | null = null;
+    private _isGameStarted: boolean = false;
 
     private readonly chessEngine: ChessEngine = new ChessEngine();
 
@@ -226,9 +228,10 @@ export class Lobby{
      */
     public getLastConnectedPlayer(): Player | null
     {
-        const color = this.lastConnectedPlayerColor;
-        return color === Color.White ? this.getWhitePlayer() 
-            : color === Color.Black ? this.getBlackPlayer()
+        return this.lastConnectedPlayerColor === Color.White 
+            ? this.getWhitePlayer() 
+            : this.lastConnectedPlayerColor === Color.Black 
+                ? this.getBlackPlayer()
                 : null;
     }
 
@@ -364,21 +367,25 @@ export class Lobby{
 
     /**
      * Check if the game is ready to start.
-     * @param {boolean} fromStart - If game needs to be started 
-     * from the beginning.
      */
-    public isGameReadyToStart(fromStart: boolean = false): boolean
+    public isGameReadyToStart(): boolean
     {
-        if((fromStart && this.chessEngine.getGameStatus() !== GameStatus.ReadyToStart) || this.isGameStarted()) return false;
-        if(!this.board) return false;
+        if(!this.board) 
+            return false;
+        
         if(this.durations[Color.White].remaining <= 0 || this.durations[Color.White].increment < 0
             || this.durations[Color.Black].remaining <= 0 || this.durations[Color.Black].increment < 0) 
+            return false;
+            
+        if(this.isGameStarted()) 
             return false;
 
         const whitePlayer = this.getWhitePlayer();
         const blackPlayer = this.getBlackPlayer();
-        if(whitePlayer === null || blackPlayer === null) return false;
-        if(!whitePlayer.isOnline || !blackPlayer.isOnline) return false;
+        if(whitePlayer === null || blackPlayer === null) 
+            return false;
+        if(!whitePlayer.isOnline || !blackPlayer.isOnline) 
+            return false;
 
         return true;
     }
@@ -388,11 +395,7 @@ export class Lobby{
      */
     public isGameStarted(): boolean
     {
-        return [
-            GameStatus.WhiteInCheck, 
-            GameStatus.BlackInCheck,
-            GameStatus.InPlay, 
-        ].includes(this.chessEngine.getGameStatus());
+        return this._isGameStarted;
     }
 
     /**
@@ -445,6 +448,22 @@ export class Lobby{
     }
 
     /**
+     * Set current undo offer color of the lobby.
+     */
+    public setCurrentUndoOffer(color: Color): void
+    {
+        this.currentUndoOffer = color;
+    }
+
+    /**
+     * Get the current undo offer color of the lobby.
+     */
+    public getCurrentUndoOffer(): Color | null
+    {
+        return this.currentUndoOffer;
+    }
+
+    /**
      * Enable the offer cooldown to prevent the 
      * players to offer something again.
      */
@@ -460,6 +479,7 @@ export class Lobby{
     public disableOfferCooldown(): void
     {
         this.isThereAnyOffer = false;
+        this.currentUndoOffer = null;
     }
 
     /**
@@ -491,7 +511,7 @@ export class Lobby{
      */
     public undo(): void
     {
-        this.chessEngine.takeBack();
+        this.chessEngine.takeBack(this.currentUndoOffer);
     }
 
     /**
@@ -508,14 +528,23 @@ export class Lobby{
      */
     public startGame(): void
     {
-        if(!this.isGameReadyToStart()) 
-            return;
-
+        if(!this.isGameReadyToStart()) return;
         this.disableOfferCooldown();
         this.flipColors();
         this.chessEngine.createGame({
             ...(typeof this.board === "string" ? Converter.fenToJson(this.board) : this.board),
             durations: JSON.parse(JSON.stringify(this.getInitialDurations())) 
         });
+        this._isGameStarted = true;
+    }
+
+    /**
+     * Finish the game.
+     */
+    public finishGame(): void
+    {
+        this._isGameStarted = false;
+        this.clearGameTimeMonitorInterval();
+        this.disableOfferCooldown();
     }
 }

@@ -159,7 +159,7 @@ function findWebSocketReqParams(params: BaseWebSocketReqParams): Response | WebS
 /**
  * Check if the parameters are valid.
  */
-function areParametersValid(req: Request): Response | WebSocketReqParams {
+function isParametersValid(req: Request): Response | WebSocketReqParams {
     const url = new URL(req.url);
     const params: BaseWebSocketReqParams = {
         name: url.searchParams.get("name") || "",
@@ -247,7 +247,7 @@ function getReconnectingLobbyData(reconnectLobbyReqParams: ReconnectLobbyReqPara
  */
 function handleParameters(req: Request): Response | { lobbyId: string, token: string, name: string, id?: string } {
     // Check if the parameters are valid.
-    let params = areParametersValid(req);
+    let params = isParametersValid(req);
     if (params instanceof Response)
         return params;
 
@@ -383,9 +383,10 @@ function joinLobby(ws: RWebSocket): void {
         ws.send(WsCommand.error({ message: "Lobby not found." }));
         return;
     }
-    isLobbyJustCreated = lobby.isBothPlayersOffline() && (lobby.isGameFinished() || !lobby.isGameStarted());
-    console.log("Lobby Join: ", lobbyId, player.name, lobby.isBothPlayersOffline(), lobby.isGameFinished(), lobby.isGameStarted());
+    isLobbyJustCreated = lobby.getLastConnectedPlayerColor() === null && !lobby.isGameStarted();
+    console.log("Is Lobby Just Created: ", isLobbyJustCreated);
     if (LobbyManager.joinLobby(lobbyId, player)) {
+        console.log("Connection opened: ", lobbyId, player.name);
         ws.subscribe(lobbyId);
         ws.send(
             isLobbyJustCreated 
@@ -425,7 +426,7 @@ function leaveLobby(ws: RWebSocket): void {
  * it is ready.
  */
 function startGame(lobby: Lobby): void {
-    const isGameReadyToStart = lobby.isGameReadyToStart(true);
+    const isGameReadyToStart = lobby.isGameReadyToStart();
     const isGameAlreadyStarted = lobby.isGameStarted();
     if (isGameReadyToStart) 
     {
@@ -582,18 +583,15 @@ function movePiece(lobby: Lobby, player: Player, from: Square, to: Square): void
         lobby.makeMove(from, to);
 
         const playerColor = lobby.getTokenColor(player.token) as Color;
-        console.log("Player Color: ", playerColor);
         const opponentPlayer = playerColor === Color.White
             ? lobby.getBlackPlayer()
             : lobby.getWhitePlayer();
-        console.log("Opponent Player: ", opponentPlayer);
         if (!opponentPlayer) return;
 
         const opponentPlayerWs = SocketManager.getSocket(
             lobby.id,
             opponentPlayer.token
         )!;
-        console.log("Opponent Player WS: ", opponentPlayerWs);
         if (!opponentPlayerWs) return;
 
         opponentPlayerWs.send(WsCommand.moved({ from, to }));
@@ -621,6 +619,7 @@ function offerDraw(lobby: Lobby, player: Player): void {
  */
 function offerUndo(lobby: Lobby, player: Player): void {
     _offer(lobby, player, WsCommand.undoOffered);
+    lobby.setCurrentUndoOffer(lobby.getTokenColor(player.token) as Color);
 }
 
 /**
@@ -693,7 +692,10 @@ function draw(lobby: Lobby): void {
  */
 function undo(lobby: Lobby): void {
     lobby.undo();
-    server.publish(lobby.id, WsCommand.undoAccepted({board: lobby.getCurrentGame(true) as string}));
+    server.publish(lobby.id, WsCommand.undoAccepted({
+        board: lobby.getCurrentGame(true) as string,
+        undoColor: lobby.getCurrentUndoOffer() as Color
+    }));
 }
 
 /**
@@ -734,5 +736,5 @@ function _finishGame(
         }));
     }
 
-    lobby.disableOfferCooldown();
+    lobby.finishGame();
 }

@@ -537,8 +537,15 @@ export class Platform{
     private _undoMoveAndHandleComponents(): void
     {
         if(this.notationMenu.isOperationConfirmed(NotationMenuOperation.UndoMove)){
-            this.chess.takeBack(true);
-            this.notationMenu.deleteLastNotation();
+            const botSettings = this.chess.getBotSettings();
+            if(botSettings){
+                const playerColor = botSettings.botColor === Color.White ? Color.Black : Color.White
+                this.chess.takeBack(true, playerColor);
+                this.notationMenu.deleteLastNotation(playerColor);
+            } else {
+                this.chess.takeBack(true);
+                this.notationMenu.deleteLastNotation();
+            }
             this.notationMenu.goBack();
         }
     }
