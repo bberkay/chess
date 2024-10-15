@@ -12,6 +12,9 @@ import { SoundEffect, SquareClickMode, SquareEffect } from "./Types";
 import { Converter } from "../Utils/Converter.ts";
 import { Logger } from "@Services/Logger.ts";
 
+export const PIECE_ANIMATION_DURATION: number = 0.15; // seconds
+export const PIECE_ANIMATION_DURATION_MS: number = PIECE_ANIMATION_DURATION * 1000; // milliseconds
+
 /**
  * This class provides users to create and manage a chess board(does not include any mechanic/logic).
  */
@@ -30,7 +33,7 @@ export class ChessBoard {
     private turnColor: Color.White | Color.Black = Color.White;
     private _isMouseUpEventBound: boolean = false;
     private _disablePreSelectionFor: Color | null = null;
-    private _lockedSquaresModes: Array<SquareClickMode> = [];
+    private _lockedSquaresModes: Record<string, SquareClickMode> = {};
     private _isBoardMoveEventBound: boolean = false;
 
     private readonly _bindDragPiece: (e: MouseEvent) => void = this.dragPiece.bind(this);
@@ -73,7 +76,7 @@ export class ChessBoard {
      */
     private clearProperties(): void {
         this.turnColor = Color.White;
-        this._lockedSquaresModes = [];
+        this._lockedSquaresModes = {};
         this._isBoardMoveEventBound = false;
         this._disablePreSelectionFor = null;
         this.logger.save("Properties of the board are cleared.");
@@ -591,7 +594,7 @@ export class ChessBoard {
             document.body.appendChild(piece);
             piece.style.top = `${pieceRect.top + window.scrollY}px`;
             piece.style.left = `${pieceRect.left + window.scrollX}px`;
-            piece.style.animation = "move 0.15s ease-in-out forwards";
+            piece.style.animation = `move ${PIECE_ANIMATION_DURATION}s ease-in-out forwards`;
             piece.style.setProperty("--chessboard-move-from-left", `${pieceRect.left + window.scrollX}px`);
             piece.style.setProperty("--chessboard-move-from-top", `${pieceRect.top + window.scrollY}px`);
             piece.style.setProperty("--chessboard-move-to-left", `calc(${marginLeft}px + ${square.getBoundingClientRect().left + window.scrollX}px)`);
@@ -747,7 +750,7 @@ export class ChessBoard {
         if(!selectedSquare.querySelector(".piece")) {
             setTimeout(() => {
                 promote(color, pieceType, firstSquareOfRow);
-            }, 150);
+            }, PIECE_ANIMATION_DURATION_MS);
         } else {
             promote(color, pieceType, firstSquareOfRow);
         }
@@ -851,41 +854,44 @@ export class ChessBoard {
      * Lock board interactions.
      */
     public lock(disablePreSelection: boolean = true, showDisabledEffect: boolean = false): void {
-        let squares: NodeListOf<Element> = this.getAllSquares();
-        for (let i = 0; i < 64; i++) {
-            const squareClickMode = this.getSquareClickMode(squares[i]);
-            this._lockedSquaresModes.push(squareClickMode);
+        if(this.isLocked()) 
+            return;
+
+        this.getAllSquares().forEach(square => {
+            const squareClickMode = this.getSquareClickMode(square);
+            this._lockedSquaresModes[this.getSquareId(square)] = squareClickMode
 
             if (!disablePreSelection) {
-                if (this.getPieceElementOnSquare(squares[i])
-                    && this.getPieceColor(squares[i]) !== this._disablePreSelectionFor)
-                    continue;
+                if (this.getPieceElementOnSquare(square)
+                    && this.getPieceColor(square) !== this._disablePreSelectionFor)
+                    return;
             }
 
-            this.setSquareClickMode(squares[i], SquareClickMode.Disable);
+            this.setSquareClickMode(square, SquareClickMode.Disable);
             if (showDisabledEffect)
-                this.addSquareEffects(squares[i], SquareEffect.Disabled);
-        }
+                this.addSquareEffects(square, SquareEffect.Disabled);
+        });
     }
 
     /**
      * Enable board interactions.
      */
     public unlock(): void {
-        if (this._lockedSquaresModes.length == 0) return;
-        let squares: NodeListOf<Element> = this.getAllSquares();
-        for (let i = 0; i <= 63; i++) {
-            this.setSquareClickMode(squares[i], this._lockedSquaresModes[i]);
-            this.removeSquareEffect(squares[i], SquareEffect.Disabled);
-        }
-        this._lockedSquaresModes = [];
+        if (!this.isLocked()) 
+            return;
+
+        this.getAllSquares().forEach(square => {
+            this.setSquareClickMode(square, this._lockedSquaresModes[this.getSquareId(square)]);
+            this.removeSquareEffect(square, SquareEffect.Disabled);
+        });
+        this._lockedSquaresModes = {};
     }
 
     /**
      * Is board locked?
      */
     public isLocked(): boolean {
-        return this._lockedSquaresModes.length > 0;
+        return Object.values(this._lockedSquaresModes).length > 0;
     }
 
     /**
