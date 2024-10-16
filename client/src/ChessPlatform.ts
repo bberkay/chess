@@ -127,12 +127,12 @@ export class ChessPlatform{
          * the last connection should be cleared.
          */
         const createEventListeners = () => {
-            window.addEventListener('beforeunload', (event) => {
+            /*window.addEventListener('beforeunload', (event) => {
                 if(this.socket && [GameStatus.BlackInCheck, GameStatus.WhiteInCheck, GameStatus.InPlay].includes(this.chess.getGameStatus())){
                     event.preventDefault();
                     event.returnValue = '';
                 }
-            });
+            });*/
 
             document.addEventListener(PlatformEvent.onBoardCreated, (() => {
                 this.forceClearLastConnection(false);
@@ -551,6 +551,8 @@ export class ChessPlatform{
                 case WsTitle.UndoAccepted:
                     this.chess.takeBack(true, (wsData as WsUndoData).undoColor);
                     this.platform.notationMenu.deleteLastNotation((wsData as WsUndoData).undoColor);
+                    this.platform.notationMenu.goBack();
+                    this.platform.notationMenu.update();
                     if ((wsData as WsUndoData).board !== this.chess.getGameAsFenNotation() ) {
                         location.reload();
                         this.platform.navigatorModal.showError("Unexpected game status. Game status is not equal to the server's game status. The game created again according to the server's game status.");

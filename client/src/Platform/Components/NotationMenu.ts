@@ -25,6 +25,7 @@ export class NotationMenu extends Component {
     private readonly chess: Chess;
     private moveCount: number = 0;
     private lastScore: Record<Color, number> = { [Color.White]: 0, [Color.Black]: 0 };
+    private lastTurnColor: Color = Color.White;
     private activeIntervalId: number = -1;
     private activeUtilityMenu: UtilityMenuType = UtilityMenuType.NewGame;
     private prevActiveUtilityMenu: UtilityMenuType | null = null;
@@ -54,15 +55,19 @@ export class NotationMenu extends Component {
             this.hidePlayerCards();
 
         if(LocalStorage.isExist(LocalStorageKey.LastBoard)){
+            this.lastScore = LocalStorage.load(LocalStorageKey.LastBoard).scores;
+            this.lastTurnColor = LocalStorage.load(LocalStorageKey.LastBoard).turnColor;
+
             if(LocalStorage.isExist(LocalStorageKey.LastLobbyConnection))
                 this.displayOnlineGameUtilityMenu();
             else
-                this.displaySingleplayerGameUtilityMenu();
+                this.displayNewGameUtilityMenu();
         }
 
         if(LocalStorage.isExist(LocalStorageKey.LastBot)){
             const {color, _} = LocalStorage.load(LocalStorageKey.LastBot);
             if(color === Color.White) this.flip();
+            this.displaySingleplayerGameUtilityMenu();
         }
     }
 
@@ -77,17 +82,12 @@ export class NotationMenu extends Component {
      * Get default lobby utility menu content.
      */
     private getOnlineGameUtilityMenuContent(): string {
-        let undoOrAbortButton: string;
-        if(this.chess.getMoveHistory().length < 1) {
-            this.isUndoButtonShown = false;
-            undoOrAbortButton = `<button class="menu-item" data-menu-operation="${NotationMenuOperation.AbortGame}"  data-tooltip-text="Abort the Game">&#x2715; Abort</button>`;
-        } else {
-            this.isUndoButtonShown = true;
-            undoOrAbortButton = `<button class="menu-item" data-menu-operation="${NotationMenuOperation.SendUndoOffer}"  data-tooltip-text="Send Undo Offer">↺ Undo</button>`;
-        }
-
+        const moveHistoryLength = this.chess.getMoveHistory().length;
         return `
-            ${undoOrAbortButton}
+            ${moveHistoryLength < 1 && !this.isUndoButtonShown
+                ? `<button class="menu-item" data-menu-operation="${NotationMenuOperation.AbortGame}"  data-tooltip-text="Abort the Game">&#x2715; Abort</button>`
+                : `<button class="menu-item" data-menu-operation="${NotationMenuOperation.SendUndoOffer}" ${moveHistoryLength < 1 ? `disabled="true"` : ``} data-tooltip-text="Send Undo Offer">↺ Undo</button>`
+            }
             <button class="menu-item" data-menu-operation="${NotationMenuOperation.SendDrawOffer}" data-tooltip-text="Send Draw Offer">Draw</button>
             <button class="menu-item" data-menu-operation="${NotationMenuOperation.Resign}" data-tooltip-text="Resign From Game">⚐ Resign</button>
         `;
@@ -97,17 +97,12 @@ export class NotationMenu extends Component {
      * Get default single player game utility menu content.
      */
     private getSingleplayerGameUtilityMenuContent(): string {
-        let undoOrAbortButton: string;
-        if(this.chess.getMoveHistory().length < 1) {
-            this.isUndoButtonShown = false;
-            undoOrAbortButton = `<button class="menu-item" data-menu-operation="${NotationMenuOperation.AbortGame}"  data-tooltip-text="Abort the Game">&#x2715; Abort</button>`;
-        } else {
-            this.isUndoButtonShown = true;
-            undoOrAbortButton = `<button class="menu-item" data-menu-operation="${NotationMenuOperation.UndoMove}"  data-tooltip-text="Take Back Last Move">↺ Undo</button>`;
-        }
-
+        const moveHistoryLength = this.chess.getMoveHistory().length;
         return `
-            ${undoOrAbortButton}
+            ${moveHistoryLength < 1 && !this.isUndoButtonShown
+                ? `<button class="menu-item" data-menu-operation="${NotationMenuOperation.AbortGame}"  data-tooltip-text="Abort the Game">&#x2715; Abort</button>`
+                : `<button class="menu-item" data-menu-operation="${NotationMenuOperation.UndoMove}" ${moveHistoryLength < 1 ? `disabled="true"` : ``} data-tooltip-text="Take Back Last Move">↺ Undo</button>`
+            }
             <button class="menu-item" data-menu-operation="${NotationMenuOperation.Resign}" data-tooltip-text="Resign From Game">⚐ Resign</button>
         `;
     }
@@ -415,6 +410,7 @@ export class NotationMenu extends Component {
         } else {
             if(lastRow.querySelectorAll(".move").length == 1) {
                 lastRow.remove();
+                this.deleteLastNotation(color);
             } else {
                 const lastMove = lastRow.querySelector("td:last-child")!;
                 if (lastMove && lastMove.querySelector(".move")) 
@@ -658,6 +654,7 @@ export class NotationMenu extends Component {
      * undo, draw and resign buttons.
      */
     public displayOnlineGameUtilityMenu(): void {
+        this.isUndoButtonShown ||= this.chess.getMoveHistory().length >= 1;
         document.querySelector(".utility-toggle-menu-section.active")!.classList.remove("active");
         this.loadHTML(UtilityMenuType.OnlineGame, this.getOnlineGameUtilityMenuContent());
         document.getElementById(UtilityMenuType.OnlineGame)!.classList.add("active");
@@ -670,6 +667,7 @@ export class NotationMenu extends Component {
      * undo and resign buttons.
      */
     public displaySingleplayerGameUtilityMenu(): void {
+        this.isUndoButtonShown ||= this.chess.getMoveHistory().length >= 1;
         document.querySelector(".utility-toggle-menu-section.active")!.classList.remove("active");
         this.loadHTML(UtilityMenuType.SingleplayerGame, this.getSingleplayerGameUtilityMenuContent());
         document.getElementById(UtilityMenuType.SingleplayerGame)!.classList.add("active");
@@ -690,12 +688,39 @@ export class NotationMenu extends Component {
     }
 
     /**
+     * Activate the undo button if the move history is not empty.
+     */
+    private activateUndoButtonAfterFirstMove(): void {
+        if(this.chess.getMoveHistory().length < 1)
+            return;
+        
+        const undoButton = document.querySelector(`
+            .utility-toggle-menu-section.active [data-menu-operation="${
+                this.prevActiveUtilityMenu === UtilityMenuType.OnlineGame 
+                ? NotationMenuOperation.SendUndoOffer
+                : NotationMenuOperation.UndoMove
+            }"]
+        `);
+        if(undoButton && undoButton.getAttribute("disabled")) undoButton.removeAttribute("disabled");
+    }
+
+    /**
      * Update the notation table and the score of the players.
      * @param force If force is true then the notation table will be updated
      * even if the notation is not changed.
      */
     public update(force: boolean = false): void {
         const moveCount = this.chess.getMoveHistory().length;
+        
+        if(moveCount > 0 && !this.isUndoButtonShown){ 
+            // Rerender the online game utility menu to show the undo button
+            // instead of the abort button.
+            if(this.prevActiveUtilityMenu === UtilityMenuType.SingleplayerGame 
+                || this.activeUtilityMenu === UtilityMenuType.NewGame)
+                this.displaySingleplayerGameUtilityMenu();
+            else if(this.prevActiveUtilityMenu === UtilityMenuType.OnlineGame)
+                this.displayOnlineGameUtilityMenu();
+        }
 
         if ([
             GameStatus.WhiteVictory,
@@ -710,27 +735,23 @@ export class NotationMenu extends Component {
 
         if (!force && (moveCount == 0 || moveCount == this.moveCount))
             return;
-        
-        if(moveCount > 0 && !this.isUndoButtonShown){ 
-            // Rerender the online game utility menu to show the undo button
-            // instead of the abort button.
-            if(this.prevActiveUtilityMenu === UtilityMenuType.SingleplayerGame)
-                this.displaySingleplayerGameUtilityMenu();
-            else if(this.prevActiveUtilityMenu === UtilityMenuType.OnlineGame)
-                this.displayOnlineGameUtilityMenu();
-        }
-        
+
+        this.activateUndoButtonAfterFirstMove();
         this.setNotations(this.chess.getAlgebraicNotation());
         this.changeIndicator();
-
-        if ([
-            GameStatus.WhiteInCheck,
-            GameStatus.BlackInCheck,
-            GameStatus.InPlay
-        ].includes(this.chess.getGameStatus())
-            && moveCount >= 2
-            && this.chess.getDurations())
+        
+        if (!force || (
+            moveCount >= 2 
+            && this.chess.getDurations()
+            && this.chess.getTurnColor() !== this.lastTurnColor 
+            && [
+                GameStatus.WhiteInCheck,
+                GameStatus.BlackInCheck,
+                GameStatus.InPlay
+            ].includes(this.chess.getGameStatus())))
             this.startOrUpdateTimers();
+
+        this.lastTurnColor = this.chess.getTurnColor();
     }
 
     /**
@@ -862,7 +883,7 @@ export class NotationMenu extends Component {
         const playerTimer = document.getElementById(`${color.toLowerCase()}-player-duration`)!;
         const playerMinuteSecond = playerTimer.querySelector(".minute-second")!;
         const playerDecisecond = playerTimer.querySelector(".decisecond")!;
-
+                
         let isDecisecondActive = false;
         this.activeIntervalId = setInterval(() => {
             const [minutes, seconds, deciseconds] = this.formatRemainingTimeForTimer(
@@ -871,9 +892,9 @@ export class NotationMenu extends Component {
             
             if(minutes < 0 || seconds < 0 || deciseconds < 0)
                 return;
-
+            
             playerMinuteSecond.textContent = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
-
+            
             if (minutes <= 0 && seconds <= 10) {
                 if (!isDecisecondActive) {
                     playerDecisecond.classList.add("active");
@@ -882,7 +903,6 @@ export class NotationMenu extends Component {
                 playerDecisecond.textContent = "." + deciseconds;
             }
         }, 100) as unknown as number;
-        console.log("startPlayerTimer: ", this.activeIntervalId);
     }
 
     /**

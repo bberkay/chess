@@ -396,8 +396,8 @@ export class Chess {
         if(this.engine.getMoveHistory().length == 0)
             return;
         
-        this._currentTakeBackCount++;
         if (onEngine) {
+            this._currentTakeBackCount = (undoColor ? 0 : this._currentTakeBackCount + 1);
             let moveIndex = undoColor 
                 ? this.engine.getBoardHistory().findLastIndex((board) => board.turn == undoColor) 
                 : this.engine.getBoardHistory().length;
@@ -405,9 +405,12 @@ export class Chess {
             moveIndex = moveIndex - (!undoColor || undoColor === this.engine.getTurnColor() ? 2 : 0);
             this.goToSpecificMove(moveIndex, false);
             this.engine.takeBack(undoColor);
+
+            this.board.unlock();
             this.board.setTurnColor(this.engine.getTurnColor());
             LocalStorage.save(LocalStorageKey.LastBoard, this.engine.getGameAsJsonNotation());
         } else {
+            this._currentTakeBackCount++;
             this.goToSpecificMove((this.engine.getMoveHistory().length - 1) - this._currentTakeBackCount);
         }
     }
@@ -433,14 +436,14 @@ export class Chess {
      * pieces on the board by the given `move index`.
      */
     public goToSpecificMove(moveIndex: number, showMoveReanimation: boolean = true): void {
-        const newTakeBackCount = (this.engine.getMoveHistory().length - 1) - moveIndex;
+        const newTakeBackCount = (this.engine.getMoveHistory().length - 1) - moveIndex; 
 
         if (moveIndex < 0 || newTakeBackCount === this._currentTakeBackCount || moveIndex > this.engine.getMoveHistory().length)
             return;
-
+        
         if (moveIndex !== this.engine.getMoveHistory().length - 1)
             this.board.lock(true);
-
+        
         let snapshotMove = showMoveReanimation ? this.engine.getMoveHistory()[moveIndex] : null;
         let snapshot = this.engine.getBoardHistory()[
             moveIndex + (snapshotMove && snapshotMove.type === MoveType.Promote ? 1 : 0)
@@ -450,14 +453,16 @@ export class Chess {
         this.board.createPieces(
             snapshot.board
         );
-
+        
         if(snapshotMove && snapshotMove.type !== MoveType.Promote){
             this.board.playMove(snapshotMove.from, snapshotMove.to, snapshotMove.type!);
             snapshot = this.engine.getBoardHistory()[moveIndex == 0 ? 0 : moveIndex + 1];
-        } else if(!showMoveReanimation) {
+        } else if(!showMoveReanimation){
             const lastMove = this.engine.getMoveHistory()[moveIndex - 1];
-            this.board.addSquareEffects(lastMove.from, SquareEffect.From);
-            this.board.addSquareEffects(lastMove.to, SquareEffect.To);
+            if(lastMove){
+                this.board.addSquareEffects(lastMove.from, SquareEffect.From);
+                this.board.addSquareEffects(lastMove.to, SquareEffect.To);
+            }
         }
 
         this.board.showStatus(snapshot.gameStatus!);

@@ -298,15 +298,12 @@ export class Platform{
     {
         switch(menuOperation){
             case NavigatorModalOperation.Hide:
-                this.boardEditor.saveFen();
                 this.navigatorModal.hide();
                 break;
             case NavigatorModalOperation.ShowGameCreator:
-                this.boardEditor.saveFen(StartPosition.Standard);
                 this.navigatorModal.showGameCreator();
                 break;
             case NavigatorModalOperation.ShowStartPlayingBoard:
-                this.boardEditor.saveFen();
                 this.navigatorModal.showStartPlayingBoard();
                 break;
             case NavigatorModalOperation.PlayByYourself:
@@ -428,14 +425,17 @@ export class Platform{
         game: string | JsonNotation
     }, playerColor: Color): void
     {
-        if(BoardEditor.isEditorModeEnable()) 
+        if(BoardEditor.isEditorModeEnable()) {
+            this.boardEditor.saveFen();
             this.boardEditor.disableEditorMode();
+        }
 
         this._createBoardAndHandleComponents(createdGame.game);
         this.chess.board.disablePreSelectionFor(playerColor === Color.White ? Color.Black : Color.White);
         this.notationMenu.displayOnlineGameUtilityMenu();
         this.notationMenu.updatePlayerCards(createdGame.whitePlayer, createdGame.blackPlayer);
         this.notationMenu.setTurnIndicator(this.chess.getTurnColor());
+        this.notationMenu.update(true);
 
         if(playerColor === Color.Black) 
             this._flipBoardAndComponents();
@@ -462,13 +462,14 @@ export class Platform{
         bot: boolean | { botColor: Color, botDifficulty: number } = false
     ): void 
     {
-        let fenNotation = this.boardEditor.getSavedFen();
-        if(BoardEditor.isEditorModeEnable()) 
+        if(BoardEditor.isEditorModeEnable()){
+            this.boardEditor.saveFen();
             this.boardEditor.disableEditorMode();
+        }
     
         let { botColor, botDifficulty } = bot && typeof bot === "object" ? bot : this.navigatorModal.getCreatedBotSettings(); 
 
-        this._createBoardAndHandleComponents(fenNotation);
+        this._createBoardAndHandleComponents();
         this.notationMenu.displaySingleplayerGameUtilityMenu();
         
         if(bot){

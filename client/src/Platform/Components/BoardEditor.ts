@@ -241,7 +241,7 @@ export class BoardEditor extends Component{
         
         this.createPieceEditor();
         this.enableBoardCreator();
-        this.createBoardForBoardEditor();
+        this.createEditableBoard();
         this.enableBoardObserver();
         LocalStorage.save(LocalStorageKey.BoardEditorEnabled, true);
     }
@@ -419,9 +419,10 @@ export class BoardEditor extends Component{
     }
 
     /**
-     * This function creates a new board with the board creator.
+     * This function creates a new editable board 
+     * for the board editor.
      */
-    private createBoardForBoardEditor(
+    private createEditableBoard(
         fenNotation: string | StartPosition | null = null
     ): void
     {
@@ -439,7 +440,7 @@ export class BoardEditor extends Component{
         fenNotation: string | StartPosition | JsonNotation | null = null
     ): void
     {
-        this.chess.createGame(fenNotation || this.getCurrentFen());
+        this.chess.createGame(fenNotation || this.getSavedFen());
         this._prepareBoardEditorForGame();
     }
 

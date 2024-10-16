@@ -553,12 +553,12 @@ function handleMessage(ws: RWebSocket, message: string): void {
             case WsTitle.DrawAccepted:
                 draw(lobby);
                 break;
-            /*case WsTitle.UndoOffered:
+            case WsTitle.UndoOffered:
                 offerUndo(lobby, player);
                 break;
             case WsTitle.UndoAccepted:
                 undo(lobby);
-                break;*/
+                break;
             case WsTitle.Aborted:
                 abort(lobby);
                 break;
