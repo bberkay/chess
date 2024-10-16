@@ -308,11 +308,14 @@ export class ChessEngine extends BoardManager {
      */
     public takeBack(undoColor: Color | null = null): void
     {
-        const count = undoColor ? this.getBoardHistory().findLastIndex((board) => board.turn == undoColor) - 2 : 1;        
-        if(count == -1)
+        const turnDifference = this.getTurnColor() != undoColor ? 0 : 2;
+        const movesToUndo = undoColor 
+            ? this.getBoardHistory().findLastIndex((board) => board.turn == undoColor) - turnDifference 
+            : 1;        
+        if(movesToUndo == -1)
             throw new Error("There is no board with the given last turn");
         
-        const lastIndex = undoColor ? this.getBoardHistory().length - 1 - count : 1;
+        const lastIndex = undoColor ? this.getBoardHistory().length - 1 - movesToUndo : 1;
         this.createBoard(BoardQuerier.getBoardHistory().length > (undoColor == Color.Black ? 2 : 1) ? {
             ...BoardQuerier.getBoardHistory().slice(0, -lastIndex).pop()!,
             boardHistory: BoardQuerier.getBoardHistory().slice(0, -lastIndex)

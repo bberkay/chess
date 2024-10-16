@@ -397,7 +397,9 @@ export class Chess {
             return;
         
         if (onEngine) {
-            this._currentTakeBackCount = (undoColor ? 0 : this._currentTakeBackCount + 1);
+            this._currentTakeBackCount = undoColor === this.engine.getTurnColor() 
+                ? 0 
+                : this._currentTakeBackCount + 1;
             let moveIndex = undoColor 
                 ? this.engine.getBoardHistory().findLastIndex((board) => board.turn == undoColor) 
                 : this.engine.getBoardHistory().length;

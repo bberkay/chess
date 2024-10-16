@@ -740,17 +740,16 @@ export class NotationMenu extends Component {
         this.setNotations(this.chess.getAlgebraicNotation());
         this.changeIndicator();
         
-        if (!force || (
+        if (this.chess.getDurations() && (force || (
             moveCount >= 2 
-            && this.chess.getDurations()
             && this.chess.getTurnColor() !== this.lastTurnColor 
             && [
                 GameStatus.WhiteInCheck,
                 GameStatus.BlackInCheck,
                 GameStatus.InPlay
-            ].includes(this.chess.getGameStatus())))
+            ].includes(this.chess.getGameStatus()))))
             this.startOrUpdateTimers();
-
+        
         this.lastTurnColor = this.chess.getTurnColor();
     }
 
