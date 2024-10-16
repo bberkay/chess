@@ -81,7 +81,8 @@ export class ChessEngine extends BoardManager {
         this.createTimersIfGiven();
         this.checkGameStatus();
         this.handleTimersIfExists();
-        this.saveCurrentBoard();
+        if(this.getBoardHistory().length === 0)
+            this.saveCurrentBoard();
         this.logger.save("Game is created");
     }
 

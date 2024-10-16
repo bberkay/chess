@@ -405,8 +405,8 @@ export class Chess {
             moveIndex = moveIndex - (!undoColor || undoColor === this.engine.getTurnColor() ? 2 : 0);
             this.goToSpecificMove(moveIndex, false);
             this.engine.takeBack(undoColor);
-            this.board.unlock();
-            this._currentTakeBackCount = 0;
+            //this.board.unlock();
+            //this._currentTakeBackCount = 0;
             LocalStorage.save(LocalStorageKey.LastBoard, this.engine.getGameAsJsonNotation());
         } else {
             this.goToSpecificMove((this.engine.getMoveHistory().length - 1) - this._currentTakeBackCount);
@@ -434,7 +434,9 @@ export class Chess {
      * pieces on the board by the given `move index`.
      */
     public goToSpecificMove(moveIndex: number, showMoveReanimation: boolean = true): void {
-        if (moveIndex < 0 || moveIndex > this.engine.getMoveHistory().length)
+        const newTakeBackCount = (this.engine.getMoveHistory().length - 1) - moveIndex;
+
+        if (moveIndex < 0 || moveIndex > this.engine.getMoveHistory().length || newTakeBackCount === this._currentTakeBackCount)
             return;
 
         if (moveIndex !== this.engine.getMoveHistory().length - 1)
@@ -442,7 +444,7 @@ export class Chess {
 
         let snapshotMove = showMoveReanimation ? this.engine.getMoveHistory()[moveIndex] : null;
         let snapshot = this.engine.getBoardHistory()[
-            moveIndex + (snapshotMove ? (snapshotMove.type == MoveType.Promote ? 1 : 0) : 0)
+            moveIndex + (snapshotMove && snapshotMove.type === MoveType.Promote ? 1 : 0)
         ];
         this.board.removePieces();
         this.board.removeEffectFromAllSquares();
@@ -456,7 +458,7 @@ export class Chess {
         }
 
         this.board.showStatus(snapshot.gameStatus!);
-        this._currentTakeBackCount = (this.engine.getMoveHistory().length - 1) - moveIndex;
+        this._currentTakeBackCount = newTakeBackCount;
 
         if (moveIndex == this.engine.getMoveHistory().length - 1)
             this.board.unlock();

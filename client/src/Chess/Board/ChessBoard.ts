@@ -879,7 +879,7 @@ export class ChessBoard {
     public unlock(): void {
         if (!this.isLocked()) 
             return;
-
+        
         this.getAllSquares().forEach(square => {
             this.setSquareClickMode(square, this._lockedSquaresModes[this.getSquareId(square)]);
             this.removeSquareEffect(square, SquareEffect.Disabled);
