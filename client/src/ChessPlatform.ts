@@ -118,16 +118,33 @@ export class ChessPlatform{
                 this.reconnectLobby();
         };        
 
-        // If user creates single player game:
-        document.addEventListener(PlatformEvent.onBoardCreated, (() => {
-            this.forceClearLastConnection(false);
-        }) as EventListener);
+        /**
+         * Create necessary event listeners for the chess platform.
+         * Event listeners:
+         * - window.beforeunload: If the user tries to leave the page or refresh
+         * while playing a online game should be warned.
+         * - PlatformEvent.onBoardCreated: If the user creates a single player game,
+         * the last connection should be cleared.
+         */
+        const createEventListeners = () => {
+            window.addEventListener('beforeunload', (event) => {
+                if(this.socket && [GameStatus.BlackInCheck, GameStatus.WhiteInCheck, GameStatus.InPlay].includes(this.chess.getGameStatus())){
+                    event.preventDefault();
+                    event.returnValue = '';
+                }
+            });
+
+            document.addEventListener(PlatformEvent.onBoardCreated, (() => {
+                this.forceClearLastConnection(false);
+            }) as EventListener);
+        }
 
         /**
          * Initialize the chess platform.
          */
         connectToLastConnectionOrLobbyUrl();
         bindSocketOperations();
+        createEventListeners();
         this.logger.save("Chess platform is initialized.");
     }
 
@@ -149,6 +166,9 @@ export class ChessPlatform{
                 break;
             case SocketOperation.CancelLobby:
                 this.cancelLobby();
+                break;
+            case SocketOperation.AbortGame:
+                this.abortGame();
                 break;
             case SocketOperation.Resign:
                 this.resign();
@@ -312,6 +332,14 @@ export class ChessPlatform{
         this.socket?.close();
         this.platform.notationMenu.displayNewGameUtilityMenu();
         this.chess.board.lock();
+    }
+
+    /**
+     * Abort the game and send the abort command to the server.
+     */
+    private abortGame(): void
+    {
+        this.socket?.send(WsCommand.aborted());
     }
 
     /**
@@ -494,6 +522,12 @@ export class ChessPlatform{
                     this.platform.navigatorModal.showGameOverAsDrawAccepted();
                     closeConnectionOnFinish = true;
                     break;
+                case WsTitle.Aborted:
+                    this.chess.engine.setGameStatus(GameStatus.Draw);
+                    this.chess.finishTurn();
+                    this.platform.navigatorModal.showGameOverAsAborted();
+                    closeConnectionOnFinish = true;
+                    break;
                 case WsTitle.Resigned:
                     this.chess.engine.setGameStatus((wsData as WsResignedData).gameStatus);
                     this.chess.finishTurn();
@@ -620,6 +654,15 @@ class WsCommand{
     static moved(moveData: WsMovedData): string 
     {
         return this._wsCommand(WsTitle.Moved, moveData);
+    }
+
+    /**
+     * Send aborted command to the server.
+     * @example [ABORTED, {}]
+     */
+    static aborted(): string
+    {
+        return this._wsCommand(WsTitle.Aborted);
     }
 
     /**

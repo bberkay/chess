@@ -29,6 +29,7 @@ export class NotationMenu extends Component {
     private activeUtilityMenu: UtilityMenuType = UtilityMenuType.NewGame;
     private prevActiveUtilityMenu: UtilityMenuType | null = null;
     private confirmedOperation: NotationMenuOperation | null = null;
+    private isUndoButtonShown: boolean = false;
 
     /**
      * Constructor of the LogConsole class.
@@ -76,8 +77,17 @@ export class NotationMenu extends Component {
      * Get default lobby utility menu content.
      */
     private getOnlineGameUtilityMenuContent(): string {
+        let undoOrAbortButton: string;
+        if(this.chess.getMoveHistory().length < 1) {
+            this.isUndoButtonShown = false;
+            undoOrAbortButton = `<button class="menu-item" data-menu-operation="${NotationMenuOperation.AbortGame}"  data-tooltip-text="Abort the Game">&#x2715; Abort</button>`;
+        } else {
+            this.isUndoButtonShown = true;
+            undoOrAbortButton = `<button class="menu-item" data-menu-operation="${NotationMenuOperation.SendUndoOffer}"  data-tooltip-text="Send Undo Offer">↺ Undo</button>`;
+        }
+
         return `
-            <button class="menu-item" data-menu-operation="${NotationMenuOperation.SendUndoOffer}" ${this.chess.getMoveHistory().length < 1 ? `disabled="true"` : ``} data-tooltip-text="Send Undo Offer">↺ Undo</button>
+            ${undoOrAbortButton}
             <button class="menu-item" data-menu-operation="${NotationMenuOperation.SendDrawOffer}" data-tooltip-text="Send Draw Offer">Draw</button>
             <button class="menu-item" data-menu-operation="${NotationMenuOperation.Resign}" data-tooltip-text="Resign From Game">⚐ Resign</button>
         `;
@@ -87,8 +97,17 @@ export class NotationMenu extends Component {
      * Get default single player game utility menu content.
      */
     private getSingleplayerGameUtilityMenuContent(): string {
+        let undoOrAbortButton: string;
+        if(this.chess.getMoveHistory().length < 1) {
+            this.isUndoButtonShown = false;
+            undoOrAbortButton = `<button class="menu-item" data-menu-operation="${NotationMenuOperation.AbortGame}"  data-tooltip-text="Abort the Game">&#x2715; Abort</button>`;
+        } else {
+            this.isUndoButtonShown = true;
+            undoOrAbortButton = `<button class="menu-item" data-menu-operation="${NotationMenuOperation.UndoMove}"  data-tooltip-text="Take Back Last Move">↺ Undo</button>`;
+        }
+
         return `
-            <button class="menu-item" data-menu-operation="${NotationMenuOperation.UndoMove}" ${this.chess.getMoveHistory().length < 1 ? `disabled="true"` : ``} data-tooltip-text="Take Back Last Move">↺ Undo</button>
+            ${undoOrAbortButton}
             <button class="menu-item" data-menu-operation="${NotationMenuOperation.Resign}" data-tooltip-text="Resign From Game">⚐ Resign</button>
         `;
     }
@@ -690,6 +709,15 @@ export class NotationMenu extends Component {
 
         if (!force && (moveCount == 0 || moveCount == this.moveCount))
             return;
+        
+        if(moveCount > 0 && !this.isUndoButtonShown){ 
+            // Rerender the online game utility menu to show the undo button
+            // instead of the abort button.
+            if(this.prevActiveUtilityMenu === UtilityMenuType.SingleplayerGame)
+                this.displaySingleplayerGameUtilityMenu();
+            else if(this.prevActiveUtilityMenu === UtilityMenuType.OnlineGame)
+                this.displayOnlineGameUtilityMenu();
+        }
 
         this.activateUndoButtonAfterFirstMove();
         this.setNotations(this.chess.getAlgebraicNotation());
@@ -916,7 +944,8 @@ export class NotationMenu extends Component {
      * Ask for confirmation before resigning or sending draw offer.
      */
     private showConfirmation(
-        confirmationOperation: NotationMenuOperation.Resign 
+        confirmationOperation: NotationMenuOperation.AbortGame
+        | NotationMenuOperation.Resign 
         | NotationMenuOperation.UndoMove
         | NotationMenuOperation.SendDrawOffer 
         | NotationMenuOperation.SendUndoOffer
@@ -1117,6 +1146,9 @@ export class NotationMenu extends Component {
                 break;
             case NotationMenuOperation.ShowSingleplayerGameUtilityMenu:
                 this.displaySingleplayerGameUtilityMenu();
+                break;
+            case NotationMenuOperation.AbortGame:
+                this.showConfirmation(NotationMenuOperation.AbortGame);
                 break;
             case NotationMenuOperation.Resign:
                 this.showConfirmation(NotationMenuOperation.Resign);

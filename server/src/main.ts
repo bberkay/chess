@@ -559,6 +559,9 @@ function handleMessage(ws: RWebSocket, message: string): void {
             case WsTitle.UndoAccepted:
                 undo(lobby);
                 break;*/
+            case WsTitle.Aborted:
+                abort(lobby);
+                break;
             case WsTitle.PlayAgainOffered:
                 offerPlayAgain(lobby, player);
                 break;
@@ -673,12 +676,27 @@ function playAgain(lobby: Lobby): void {
 }
 
 /**
- * Resign the game and send the finished command to the client.
+ * Resign the game and send the resigned command to 
+ * the client.
  */
 function resign(lobby: Lobby, player: Player): void {
     lobby.clearGameTimeMonitorInterval();
     lobby.resign(player);
-    _finishGame(lobby, false, true, lobby.getTokenColor(player.token) as Color);
+    server.publish(lobby.id, WsCommand.resigned({
+        gameStatus: lobby.getGameStatus()
+    }));
+    lobby.finishGame();
+}
+
+/**
+ * Abort the game and send the aborted command to 
+ * the client.
+ */
+function abort(lobby: Lobby): void {
+    lobby.clearGameTimeMonitorInterval();
+    lobby.draw();
+    server.publish(lobby.id, WsCommand.aborted());
+    lobby.finishGame();
 }
 
 /**
@@ -688,7 +706,8 @@ function resign(lobby: Lobby, player: Player): void {
 function draw(lobby: Lobby): void {
     lobby.clearGameTimeMonitorInterval();
     lobby.draw();
-    _finishGame(lobby, true);
+    server.publish(lobby.id, WsCommand.drawAccepted());
+    lobby.finishGame();
 }
 
 /**
@@ -709,37 +728,8 @@ function undo(lobby: Lobby): void {
  */
 function finishGame(lobby: Lobby): void {
     lobby.clearGameTimeMonitorInterval();
-    _finishGame(lobby);
-}
-
-/**
- * Send finished command to the client.
- */
-function _finishGame(
-    lobby: Lobby,
-    isDraw: boolean = false,
-    isResigned: boolean = false,
-    resignColor: Color | null = null
-): void {
-    if (isDraw && (isResigned || resignColor))
-        throw new Error("isDraw and isResigned or resignColor cannot be used together.");
-
-    if ((isResigned && !resignColor) || (!isResigned && resignColor))
-        throw new Error("isResigned and resignColor must be used together.");
-
-    if (isResigned) {
-        server.publish(lobby.id, WsCommand.resigned({
-            gameStatus: lobby.getGameStatus()
-        }));
-    }
-    else if (isDraw) {
-        server.publish(lobby.id, WsCommand.drawAccepted());
-    }
-    else {
-        server.publish(lobby.id, WsCommand.finished({
-            gameStatus: lobby.getGameStatus()
-        }));
-    }
-
+    server.publish(lobby.id, WsCommand.finished({
+        gameStatus: lobby.getGameStatus()
+    }));
     lobby.finishGame();
 }

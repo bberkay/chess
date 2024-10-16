@@ -25,6 +25,7 @@ export enum NotationMenuOperation{
     SendDrawOffer = "SendDrawOffer",
     SendUndoOffer = "SendUndoOffer",
     SendPlayAgainOffer = "SendPlayAgainOffer",
+    AbortGame= "AbortGame",
     Resign = "Resign",
     UndoMove = "UndoMove",
     PlayAgain = "PlayAgain",

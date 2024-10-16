@@ -200,6 +200,17 @@ export class NavigatorModal extends Component{
     }
 
     /**
+     * Show the game over screen when one of the players
+     * aborted the game. This is going to modify the content
+     * of the game over screen to show the game aborted message.
+     */
+    public showGameOverAsAborted(): void
+    {
+        document.querySelector('.navigator-modal .navigator-modal-title')!.textContent = `Game Aborted`;
+        document.querySelector('.navigator-modal .game-over-message')!.textContent = `Player has aborted the game`;
+    }
+
+    /**
      * Show the board not ready screen.
      */
     public showBoardNotReady(): void

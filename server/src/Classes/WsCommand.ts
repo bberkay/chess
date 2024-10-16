@@ -12,6 +12,7 @@ export enum WsTitle {
     Disconnected="DISCONNECTED",
     Reconnected="RECONNECTED",
     Moved="MOVED",
+    Aborted="ABORTED",
     Resigned="RESIGNED",
     DrawOffered="DRAW_OFFERED",
     DrawAccepted="DRAW_ACCEPTED",
@@ -201,6 +202,14 @@ export class WsCommand{
     static moved(moveData: WsMovedData): string 
     {
         return WsCommand._wsCommand(WsTitle.Moved, moveData);
+    }
+
+    /**
+     * Send aborted command to the client.
+     */
+    static aborted(): string
+    {
+        return WsCommand._wsCommand(WsTitle.Aborted);
     }
 
     /**

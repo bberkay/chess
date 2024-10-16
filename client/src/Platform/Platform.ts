@@ -276,6 +276,9 @@ export class Platform{
     private handleNotationMenuOperation(menuOperation: NotationMenuOperation, menuItem: HTMLElement): void
     {
         switch(menuOperation){
+            case NotationMenuOperation.AbortGame:
+                this._abortSingleplayerGame();
+                break;
             case NotationMenuOperation.Resign:
                 this._resignFromSingleplayerGame();
                 break;
@@ -568,6 +571,22 @@ export class Platform{
         this.logConsole.clear();
         this.boardEditor.resetBoard();
         this.logger.save("Board is reset.");
+    }
+
+    /**
+     * Abort the singleplayer game and show the 
+     * game over modal.
+     */
+    private _abortSingleplayerGame(): void
+    {
+        if(!this.notationMenu.isOperationConfirmed(NotationMenuOperation.AbortGame))
+            return;
+
+        this.chess.engine.setGameStatus(GameStatus.Draw);
+        this.chess.finishTurn();
+        this.navigatorModal.showGameOverAsAborted();
+        this.notationMenu.displayPlayAgainUtilityMenu();
+        this.notationMenu.clearConfirmedOperation();
     }
 
     /**
