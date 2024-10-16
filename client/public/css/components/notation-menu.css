@@ -108,7 +108,7 @@
             padding-right: 5px;
 
             &.hidden{
-                background-color: var(--notation-menu-player-name-inner-bg-color);
+                background-color: var(--notation-menu-player-name-inner-bg-color)!important;
                 color: var(--notation-menu-player-name-inner-bg-color);
                 border-left: none;
                 border-right: none;

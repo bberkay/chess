@@ -78,9 +78,8 @@ export class ChessEngine extends BoardManager {
     {
         this.clearProperties();
         this.createBoard(typeof position !== "string" ? position : Converter.fenToJson(position));
-        this.createTimersIfGiven();
         this.checkGameStatus();
-        this.handleTimersIfExists();
+        this.createTimersIfGiven();
         if(this.getBoardHistory().length === 0)
             this.saveCurrentBoard();
         this.logger.save("Game is created");
@@ -204,7 +203,8 @@ export class ChessEngine extends BoardManager {
             }
         };
 
-        this.logger.save(`White and Black timers are started`);
+        this.updateTimersIfExists();
+        this.logger.save("Timers are created and updated according to the turn color");
     }
 
     /**
@@ -323,6 +323,7 @@ export class ChessEngine extends BoardManager {
             ...BoardQuerier.getBoardHistory().pop()!,
             boardHistory: []
         });
+        this.updateTimersIfExists();
     }
 
     /**
@@ -685,7 +686,7 @@ export class ChessEngine extends BoardManager {
 
         // Game might be playing without timers
         if(this.timerMap)
-            this.handleTimersIfExists();
+            this.updateTimersIfExists();
 
         // Clear the move notation for the next turn.
         this.moveNotation = "";
@@ -694,11 +695,11 @@ export class ChessEngine extends BoardManager {
     }
 
     /**
-     * Handle the timers of the players if they are created. Start the timer 
+     * Update the timers of the players if they are created. Start the timer 
      * of the player and pause the timer of the opponent. If the player's time
      * is over then handle the timeover situation.
      */
-    private handleTimersIfExists(): void 
+    private updateTimersIfExists(): void 
     {
         if(!this.timerMap) return;
 
@@ -720,7 +721,9 @@ export class ChessEngine extends BoardManager {
         if(this.timerMap[playerColor].intervalId)
             clearInterval(this.timerMap![playerColor].intervalId);
 
-        this.timerMap![playerColor].timer.start();
+        if(this.timerMap[playerColor].timer.isPaused() 
+            || !this.timerMap[playerColor].timer.isStarted())
+            this.timerMap[playerColor].timer.start();
         const intervalId = setInterval(() => {
             if(!this.timerMap) 
                 return;
