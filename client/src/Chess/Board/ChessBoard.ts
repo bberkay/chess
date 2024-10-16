@@ -204,15 +204,17 @@ export class ChessBoard {
         this.getAllPieces().forEach((pieceElement) => {
             const square = this.getSquareElementOfPiece(pieceElement);
             const pieceColor = this.getPieceColor(square);
-            if (!pieceElement.className.includes("promotion-option"))
-                this.setSquareClickMode(
-                    square,
-                    pieceColor == this.turnColor && !this.isLocked()
-                        ? SquareClickMode.Select
-                        : (this._disablePreSelectionFor == pieceColor
-                            ? SquareClickMode.Disable
-                            : SquareClickMode.PreSelect)
-                );
+            if (!pieceElement.className.includes("promotion-option")) {
+                if(pieceColor === this.turnColor && !this.isLocked())
+                    this.setSquareClickMode(square, SquareClickMode.Select);
+                else
+                    this.setSquareClickMode(
+                        square, 
+                        this._disablePreSelectionFor == pieceColor 
+                            ? SquareClickMode.Disable 
+                            : SquareClickMode.PreSelect
+                    );
+            }
         });
     }
 
@@ -499,16 +501,11 @@ export class ChessBoard {
 
     /**
      * This function moves the piece from the given square to the given square on the chess board.
-     * @param {boolean} isTakeBack - Is move is a take back move or not.
-     * @param {MoveType|null} moveType - Type of the move if the move is a take back move it must be provided,
-     * otherwise it is optional and if it is not given the function will determine the move type by checking the
-     * square click mode of the target square(`to`). Mostly, this parameter is used for the take back moves
-     * or the moves that are not determined by the player but by the bot/system/server etc.
+     * @param {MoveType|null} moveType - If it is not given the function will determine the 
+     * move type by checking the square click mode of the target square(`to`). Mostly, this 
+     * parameter is used by the bot/system/server etc.
      */
-    private _playMove(from: Square, to: Square, isTakeBack: boolean = false, moveType: MoveType | null = null): void {
-        if((isTakeBack && !moveType))
-            throw Error("moveType must be provided for the take back moves.");
-
+    public playMove(from: Square, to: Square, moveType: MoveType | null = null): void {
         this.removeEffectFromAllSquares();
         this.logger.save(`From[${from}], To[${to}] and Checked Square's(if exits) effects are cleaned.`);
         const fromSquare: HTMLDivElement = this.getSquareElement(from);
@@ -535,23 +532,6 @@ export class ChessBoard {
                 this._doNormalMove(fromSquare, toSquare);
                 break;
         }
-    }
-
-    /**
-     * Play the given move on the chess board.
-     * @param {MoveType|null} moveType - If it is not given the function will determine the 
-     * move type by checking the square click mode of the target square(`to`). Mostly, this 
-     * parameter is used by the bot/system/server etc.
-     */
-    public playMove(from: Square, to: Square, moveType: MoveType | null = null): void {
-        this._playMove(from, to, false, moveType);
-    }
-
-    /**
-     * Take back the played move on the chess board.
-     */
-    public takeBackMove(from: Square, to: Square, type: MoveType): void {
-        this._playMove(from, to, true, type);
     }
 
     /**

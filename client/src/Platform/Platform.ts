@@ -517,6 +517,7 @@ export class Platform{
                 this.notationMenu.deleteLastNotation();
             }
             this.notationMenu.goBack();
+            this.notationMenu.update();
         }
     }
 

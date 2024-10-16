@@ -405,8 +405,7 @@ export class Chess {
             moveIndex = moveIndex - (!undoColor || undoColor === this.engine.getTurnColor() ? 2 : 0);
             this.goToSpecificMove(moveIndex, false);
             this.engine.takeBack(undoColor);
-            //this.board.unlock();
-            //this._currentTakeBackCount = 0;
+            this.board.setTurnColor(this.engine.getTurnColor());
             LocalStorage.save(LocalStorageKey.LastBoard, this.engine.getGameAsJsonNotation());
         } else {
             this.goToSpecificMove((this.engine.getMoveHistory().length - 1) - this._currentTakeBackCount);
@@ -436,7 +435,7 @@ export class Chess {
     public goToSpecificMove(moveIndex: number, showMoveReanimation: boolean = true): void {
         const newTakeBackCount = (this.engine.getMoveHistory().length - 1) - moveIndex;
 
-        if (moveIndex < 0 || moveIndex > this.engine.getMoveHistory().length || newTakeBackCount === this._currentTakeBackCount)
+        if (moveIndex < 0 || newTakeBackCount === this._currentTakeBackCount || moveIndex > this.engine.getMoveHistory().length)
             return;
 
         if (moveIndex !== this.engine.getMoveHistory().length - 1)
@@ -453,8 +452,12 @@ export class Chess {
         );
 
         if(snapshotMove && snapshotMove.type !== MoveType.Promote){
-            this.board.takeBackMove(snapshotMove.from, snapshotMove.to, snapshotMove.type!);
+            this.board.playMove(snapshotMove.from, snapshotMove.to, snapshotMove.type!);
             snapshot = this.engine.getBoardHistory()[moveIndex == 0 ? 0 : moveIndex + 1];
+        } else if(!showMoveReanimation) {
+            const lastMove = this.engine.getMoveHistory()[moveIndex - 1];
+            this.board.addSquareEffects(lastMove.from, SquareEffect.From);
+            this.board.addSquareEffects(lastMove.to, SquareEffect.To);
         }
 
         this.board.showStatus(snapshot.gameStatus!);

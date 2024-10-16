@@ -274,6 +274,13 @@ export class NotationMenu extends Component {
      * is not given then the function returns the last move or the
      * first move according to the increment value. If there is no adjacent 
      * move then the function returns null.
+     * 
+     * @example getAdjacentMove(-1) returns the last move.
+     * @example getAdjacentMove(1) returns the first move.
+     * @example getAdjacentMove(-1, currentNotationElement) returns the previous move 
+     * of the given notation element.
+     * @example getAdjacentMove(1, currentNotationElement) returns the next move
+     * of the given notation element.
      */
     private getAdjacentMove(
         increment: number, 
@@ -329,6 +336,7 @@ export class NotationMenu extends Component {
          * otherwise add the notation to the last row as td.
          */
         const notationMenu: HTMLElement = document.getElementById("notations")!;
+        const notationCount = notationMenu.querySelectorAll("td:has(.move)").length;
         if (notationMenu.innerHTML == "") {
             for (let i = 0; i < notations.length; i += 1) {
                 const notationUnicoded = formatUnicodeNotation(
@@ -361,12 +369,12 @@ export class NotationMenu extends Component {
                     this.setScore(this.chess.getScores());
                 }
             });
-        }
-        else {
+        } else if(notationCount !== this.chess.getAlgebraicNotation().length) {
+            const lastRow: HTMLElement = notationMenu.lastElementChild as HTMLElement;
             const lastNotation: string = formatUnicodeNotation(
                 this.convertStringNotationToUnicodedNotation(notations[notations.length - 1])
             );
-            const lastRow: HTMLElement = notationMenu.lastElementChild as HTMLElement;
+            
             if (notations.length % 2 == 0)
                 lastRow.innerHTML = lastRow.innerHTML.replace(`<td></td>`, `<td>${lastNotation}</td>`);
             else
@@ -393,6 +401,10 @@ export class NotationMenu extends Component {
      * will be deleted, if the color is black then only the last column
      * will be deleted. If the color is null then the last notation will
      * be deleted.
+     * 
+     * @example deleteLastNotation(Color.White) deletes the last white notation.
+     * @example deleteLastNotation(Color.Black) deletes the last black notation.
+     * @example deleteLastNotation() deletes the last notation.
      */
     public deleteLastNotation(color: Color | null = null): void {
         const notationMenu: HTMLElement = document.getElementById("notations")!;
@@ -405,7 +417,8 @@ export class NotationMenu extends Component {
                 lastRow.remove();
             } else {
                 const lastMove = lastRow.querySelector("td:last-child")!;
-                if (lastMove && lastMove.querySelector(".move")) lastMove.innerHTML = "";
+                if (lastMove && lastMove.querySelector(".move")) 
+                    lastMove.innerHTML = "";
             }
         }
         
@@ -477,7 +490,12 @@ export class NotationMenu extends Component {
      * shown as the current move.
      */
     private highlightNotation(notationTd: HTMLElement | null = null): void {
-        document.querySelector(".current-move")?.classList.remove("current-move");
+        const currentMove = document.querySelector(".current-move");
+        if (currentMove) {
+            currentMove?.classList.remove("current-move");
+            if(currentMove.classList.length === 0)
+                currentMove.removeAttribute('class');
+        }
 
         // Add current move effect to the last notation.
         // First td is the move number, second td is the white move,
@@ -672,23 +690,6 @@ export class NotationMenu extends Component {
     }
 
     /**
-     * Activate the undo button if the move history is not empty.
-     */
-    private activateUndoButtonAfterFirstMove(): void {
-        if(this.chess.getMoveHistory().length < 1)
-            return;
-        
-        const undoButton = document.querySelector(`
-            .utility-toggle-menu-section.active [data-menu-operation="${
-                this.prevActiveUtilityMenu === UtilityMenuType.OnlineGame 
-                ? NotationMenuOperation.SendUndoOffer
-                : NotationMenuOperation.UndoMove
-            }"]
-        `);
-        if(undoButton && undoButton.getAttribute("disabled")) undoButton.removeAttribute("disabled");
-    }
-
-    /**
      * Update the notation table and the score of the players.
      * @param force If force is true then the notation table will be updated
      * even if the notation is not changed.
@@ -718,8 +719,7 @@ export class NotationMenu extends Component {
             else if(this.prevActiveUtilityMenu === UtilityMenuType.OnlineGame)
                 this.displayOnlineGameUtilityMenu();
         }
-
-        this.activateUndoButtonAfterFirstMove();
+        
         this.setNotations(this.chess.getAlgebraicNotation());
         this.changeIndicator();
 
