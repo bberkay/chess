@@ -323,40 +323,7 @@ export class Platform{
      */
     private handleBoardEditorOperation(menuOperation: BoardEditorOperation, menuItem: HTMLElement): void
     {   
-        // TODO: Board editor start da bir problem var.
-        // TODO: Cache kaydetmiyor nedense? hatta in play utility menu de gelmiyor nednese?
 
-        // TODO: Geri hamle, Undo, MEVCUT YAPI TEST EDİLECEK.
-            // Castling, promotion
-            // Skorlar vs. de gözükmeli.
-
-        // TODO: Coverage test
-
-        // TODO: Long algebraic notation
-        // TODO: Bot için resign, draw, play again, promotion, castling, undo test edilmeli.
-        // TODO: Board settings chess.com dan bakılabilir. Connections menu kaldırılmalı.
-        
-        // TODO: Pre move sorunları çözülecek ve Multiple pre move
-        // TODO: Switch case yapısı handling socket
-            // addEventListener onPieceMovedByPlayer
-        // TODO: Component fonksiyonları toplanabilir
-            // Mesela preparePlatformForSingleplayerGame preparePlatformForOnlineGame birleştiriilebilir.
-            // NotationMenu.prepareForGame gibi fonksiyonlar oluşturulabilir ve diğer fonksiyon private hale getirilir.
-            // Bu kadar detaylı erişlmemeli component methodlara daha genel itibari ile yukarıda ki gibi prepareForGame
-            // gibi basitçe methodlar olsun.
-            // TODO: Public ve private 
-
-        // TODO: Board settings chess.com dan bakılabilir. Connections menu kaldırılmalı.
-        // TODO: Server Uploading and supabase duruma göre
-        // TODO: Mobil için touchup
-        // function isTouchDevice() {
-        //  return window.matchMedia('(hover: none)').matches || window.matchMedia('(pointer: coarse)').matches;
-        // }
-
-        // TODO: Belki language eklenmese bile eklenecek altyapı kurulabilir.
-            // TODO: Mesele, tüm stringlerin bir objede tutulması ve bu objenin diline göre değişmesi.
-        // TODO: Son bir test farklı tarayıcılar ile(özellikle connection testi, reload testleri) ve Readme
-            // TODO: fixme ve todoları araştır.
 
         switch(menuOperation){
             case BoardEditorOperation.Enable:
