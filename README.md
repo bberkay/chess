@@ -1,6 +1,6 @@
-<h1 align = "center">Chess (Under Development)</h1>
-<p><a href = "https://chess-platform.vercel.app/">Live Demo (not up-to-date, under development)</a> (The site may open slowly because I deployed the project to a free vercel account)</p>
-<h3>Table of Contents (not up-to-date, under development)</h3>
+<h1 align = "center">Chess <i>(Under Development)</i></h1>
+<p><a href = "https://chess-platform.vercel.app/">Live Demo</a> <i> not up-to-date, under development</i>. (The site may open slowly because I deployed the project to a free vercel account)</p>
+<h3>Table of Contents <i>(not up-to-date, under development)</i></h3>
 <ol>
     <li><a href = "#introduction">Introduction</a></li>
     <li><a href = "#features">Features</a></li>
