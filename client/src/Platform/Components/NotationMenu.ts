@@ -936,6 +936,7 @@ export class NotationMenu extends Component {
         this.renderComponent();
         this.moveCount = 0;
         this.lastScore = { [Color.White]: 0, [Color.Black]: 0 };
+        this.displayNewGameUtilityMenu();
     }
 
     /**

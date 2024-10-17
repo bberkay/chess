@@ -437,7 +437,7 @@ export class ChessPlatform{
         this.removeLobbyIdFromUrl();        
         if(resetPlatform){
             LocalStorage.clear(LocalStorageKey.LastBoard);
-            this.platform.notationMenu.displayNewGameUtilityMenu();
+            this.platform.notationMenu.clear();
         }
     }
 
