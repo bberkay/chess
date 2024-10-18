@@ -358,7 +358,6 @@ export class ChessBoard {
                 ].includes(targetSquareClickMode)) {
                     const targetSquareId = this.getSquareId(targetSquare);
                     if (targetSquareClickMode.startsWith("Pre")){
-                        console.log(targetSquareClickMode);
                         this.highlightPreMove(targetSquareId);
                     }
                     onPieceMovedByDragging!(targetSquareId, targetSquareClickMode);
@@ -768,33 +767,42 @@ export class ChessBoard {
         const isFlipped = this.isFlipped();
         const loopRange = isFlipped ? [63, -1, -1] : [0, 64, 1];
         for (let i = loopRange[0]; i != loopRange[1]; i += loopRange[2]) {
-            const id = this.getSquareId(squares[Math.abs(loopRange[0] - i)]);
             if (![SquareClickMode.Select,
-            SquareClickMode.PreSelect
-            ].includes(this.getSquareClickMode(squares[i])))
+                SquareClickMode.PreSelect
+            ].includes(this.getSquareClickMode(squares[i]))) {
                 this.setSquareClickMode(squares[i], SquareClickMode.Clear);
+            }
+
+            this.removeSquareEffect(squares[i], [
+                SquareEffect.Playable,
+                SquareEffect.PrePlayable,
+                SquareEffect.Killable,
+                SquareEffect.PreKillable,
+                SquareEffect.Selected,
+            ].concat(savePreMoveEffects ? [] : [
+                SquareEffect.PrePlayed,
+                SquareEffect.PreKilled,
+                SquareEffect.PreSelected,
+            ]));
+
+            if (!savePreMoveEffects) {
+                const piece = this.getPieceElementOnSquare(squares[i]);
+                if(piece && piece.className.includes("ghost"))
+                    piece.remove();
+            }
 
             /**
              * If the square id is not equal to i + forInc[2] then set the square id to i + forInc[2].
              * This scenario can happen when the player change square is id in DOM with devtools.
              * So, we need to fix the square id's.
              */
-            if (id !== i + Math.abs(loopRange[2])) {
-                this.setSquareId(squares[i], i + loopRange[2]);
-                this.logger.save(`ID of square's fixed from[${id}] to [${(i + loopRange[2]).toString()}] on board`);
+            const currentId = this.getSquareId(squares[Math.abs(loopRange[0] - i)]);
+            if (currentId !== i + Math.abs(loopRange[2])) {
+                const newCorrectId = i + loopRange[2];
+                this.setSquareId(squares[i], newCorrectId);
+                this.logger.save(`ID of square's fixed from[${currentId}] to [${newCorrectId}] on board`);
             }
         }
-        this.removeEffectFromAllSquares([
-            SquareEffect.Playable,
-            SquareEffect.PrePlayable,
-            SquareEffect.Killable,
-            SquareEffect.PreKillable,
-            SquareEffect.Selected,
-        ].concat((savePreMoveEffects ? [] : [
-            SquareEffect.PrePlayed,
-            SquareEffect.PreKilled,
-            SquareEffect.PreSelected,
-        ])));
         this.setTurnColor(this.turnColor);
         this.logger.save("Board refreshed. Playable, Killable, Selected effects removed.");
     }
