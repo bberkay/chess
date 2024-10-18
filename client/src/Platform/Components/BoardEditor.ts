@@ -510,7 +510,7 @@ export class BoardEditor extends Component{
     @isEditorModeEnable()
     private removePiece(squareElement: HTMLElement): void
     {
-        if(!this.chess.board.getPieceElementOnSquare(squareElement)) 
+        if(!this.chess.board.getSquareId(squareElement)) 
             return;
         
         this.chess.removePiece(this.chess.board.getSquareId(squareElement) as Square);
