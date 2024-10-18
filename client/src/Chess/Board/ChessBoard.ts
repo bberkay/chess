@@ -672,7 +672,7 @@ export class ChessBoard {
         //this._doNormalMove(fromSquare, toSquare)
         this.removePiece(fromSquare);
         this.logger.save(`Piece moved to target square[${this.getSquareId(toSquare)}] on board`);
-        this._showPromotions(toSquare);
+        this.showPromotionMenu(toSquare);
     }
 
     /**
@@ -724,7 +724,7 @@ export class ChessBoard {
         const promote = (color: Color, pieceType: PieceType, square: Square) => {
             this.createPiece(color, pieceType, square);
             this.playSound(SoundEffect.Promote);
-            this._closePromotions();
+            this.closePromotionMenu();
         };
 
         if(!selectedSquare.querySelector(".piece")) {
@@ -840,16 +840,17 @@ export class ChessBoard {
         this.getAllSquares().forEach(square => {
             const squareClickMode = this.getSquareClickMode(square);
             this._lockedSquaresModes[this.getSquareId(square)] = squareClickMode
+            
+            if (showDisabledEffect)
+                this.addSquareEffects(square, SquareEffect.Disabled);
 
             if (!disablePreSelection) {
                 if (this.getPieceElementOnSquare(square)
                     && this.getPieceColor(square) !== this._disablePreSelectionFor)
                     return;
-            }
-
-            this.setSquareClickMode(square, SquareClickMode.Disable);
-            if (showDisabledEffect)
-                this.addSquareEffects(square, SquareEffect.Disabled);
+            } 
+            
+            this.setSquareClickMode(square, !disablePreSelection ? SquareClickMode.Clear : SquareClickMode.Disable);
         });
     }
 
@@ -915,18 +916,26 @@ export class ChessBoard {
     }
 
     /**
-     * Show promotion menu.
+     * Lock the board and show the promotion menu.
      */
-    private _showPromotions(promotionSquare: HTMLDivElement): void {
-        const square: Square = this.getSquareId(promotionSquare);
-        this.removePiece(promotionSquare);
-        this.logger.save(`Promoted Pawn is removed from square[${square}] on board`);
+    public showPromotionMenu(promotionSquare: HTMLElement | Square): void {
+        const square: Square = (promotionSquare instanceof HTMLElement) 
+            ? this.getSquareId(promotionSquare) 
+            : promotionSquare;
+        
+        const promoteColor = square < 9 ? Color.White : Color.Black;
+        const isPrePromotion = promoteColor !== this.turnColor;
+
+        if (!isPrePromotion) {
+            this.removePiece(promotionSquare);
+            this.logger.save(`Promoted Pawn is removed from square[${square}] on board`);
+        }
 
         /**
          * Disable the board. We don't want to allow player to
          * move pieces while choosing promotion piece.
          */
-        this.lock(true, true);
+        this.lock(!isPrePromotion, true);
         this.logger.save("Board locked for promotion screen");
 
         const PROMOTION_TYPES: Array<string> = [PieceType.Queen, PieceType.Rook, PieceType.Bishop, PieceType.Knight];
@@ -935,7 +944,7 @@ export class ChessBoard {
             promotionOption.className = "piece";
             promotionOption.className += " promotion-option";
             promotionOption.setAttribute("data-piece", PROMOTION_TYPES[i]);
-            promotionOption.setAttribute("data-color", square < 9 ? Color.White : Color.Black);
+            promotionOption.setAttribute("data-color", promoteColor);
 
             /**
              * Set position.
@@ -947,15 +956,15 @@ export class ChessBoard {
             targetSquare.appendChild(promotionOption);
 
             this.removeSquareEffect(targetSquare, SquareEffect.Disabled);
-            this.setSquareClickMode(targetSquare, SquareClickMode.Promote);
+            this.setSquareClickMode(targetSquare, isPrePromotion ? SquareClickMode.PrePromote : SquareClickMode.Promote);
         }
         this.logger.save("Promotion screen showed on board.");
     }
 
     /**
-     * Close promotion menu.
+     * Close the promotion menu and unlock the board.
      */
-    private _closePromotions(): void {
+    public closePromotionMenu(): void {
         let promotionOptions: NodeListOf<Element> = document.querySelectorAll(".promotion-option");
         if(promotionOptions.length === 0) 
             return;

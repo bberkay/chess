@@ -146,10 +146,12 @@
 
     & .square--black .row-coordinate{
         color:var(--chessboard-white-square-color);
+        filter: brightness(1.2);
     }
 
     & .square--white .row-coordinate{
         color:var(--chessboard-black-square-color);
+        filter: brightness(0.9);
     }
 
     & .column-coordinate{
@@ -163,10 +165,12 @@
 
     & .square--black .column-coordinate{
         color:var(--chessboard-white-square-color);
+        filter: brightness(1.2);
     }
 
     & .square--white .column-coordinate{
         color:var(--chessboard-black-square-color);
+        filter: brightness(0.9);
     }
 }
 

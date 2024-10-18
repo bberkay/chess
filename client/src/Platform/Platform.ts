@@ -334,6 +334,7 @@ export class Platform{
                 this._resetBoardAndComponents();
                 break;
             case BoardEditorOperation.CreateBoard:
+                this.boardEditor.saveFen();
                 this._createBoardAndHandleComponents();
                 break;
         }

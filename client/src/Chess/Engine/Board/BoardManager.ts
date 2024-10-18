@@ -132,8 +132,7 @@ export class BoardManager extends Board{
     }
 
     /**
-     * Change turn color to the given color. This is mostly
-     * used for precalculations of the moves.
+     * Change turn color to the given color.
      */
     protected changeTurnColor(color: Color): void
     {

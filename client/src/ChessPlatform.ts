@@ -127,6 +127,7 @@ export class ChessPlatform{
          * the last connection should be cleared.
          */
         const createEventListeners = () => {
+            // TODO: Open this
             /*window.addEventListener('beforeunload', (event) => {
                 if(this.socket && [GameStatus.BlackInCheck, GameStatus.WhiteInCheck, GameStatus.InPlay].includes(this.chess.getGameStatus())){
                     event.preventDefault();

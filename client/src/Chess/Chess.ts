@@ -9,7 +9,7 @@
 
 import { JsonNotation, PieceType, Square, Color, StartPosition, ChessEvent, GameStatus, Durations, Move, Scores, MoveType, RemainingTimes } from "./Types";
 import { ChessEngine, MoveValidationError } from "./Engine/ChessEngine";
-import { ChessBoard, PIECE_ANIMATION_DURATION, PIECE_ANIMATION_DURATION_MS } from "./Board/ChessBoard";
+import { ChessBoard, PIECE_ANIMATION_DURATION_MS } from "./Board/ChessBoard";
 import { SquareClickMode, SquareEffect } from "./Board/Types";
 import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage.ts";
 import { Converter } from "./Utils/Converter.ts";
@@ -34,7 +34,7 @@ export class Chess {
     private _selectedSquare: Square | null = null;
     private _isPromotionScreenOpen: boolean = false;
     private _preSelectedSquare: Square | null = null;
-    private _preMove: { from: Square, to: Square } | null = null;
+    private _preMoves: {[key in Color]: Move[]} = { [Color.Black]: [], [Color.White]: [] };
     private _currentTakeBackCount: number = 0;
     private _isGameOver: boolean = false;
 
@@ -57,7 +57,7 @@ export class Chess {
         this._lastCreatedBotSettings = null;
         this._isPromotionScreenOpen = false;
         this._preSelectedSquare = null;
-        this._preMove = null;
+        this._preMoves = { [Color.Black]: [], [Color.White]: [] };
         this._currentTakeBackCount = 0;
         this.terminateBotIfExist();
         this.logger.save("Properties reset");
@@ -222,7 +222,8 @@ export class Chess {
             },
             onPreMoveCanceled: () => {
                 this._preSelectedSquare = null;
-                this._preMove = null;
+                this._preMoves[this.engine.getTurnColor() === Color.White ? Color.Black : Color.White] = [];
+                this.board.closePromotionMenu();
                 this.logger.save("Pre-move canceled");
             }
         });
@@ -294,8 +295,25 @@ export class Chess {
         SquareClickMode.PreCastling,
         SquareClickMode.PreEnPassant
         ].includes(squareClickMode)) {
-            this._preMove = { from: this._preSelectedSquare!, to: squareId }
-            this.logger.save(`Pre-move[${JSON.stringify({ from: this._preSelectedSquare!, to: squareId })}] saved`);
+            const preMove: Move = {from: this._preSelectedSquare!, to: squareId};
+            switch(squareClickMode){
+                case SquareClickMode.PrePromote:
+                    preMove.type = MoveType.Promote;       
+                    this.board.closePromotionMenu(); 
+                    break;
+                case SquareClickMode.PrePromotion:
+                    preMove.type = MoveType.Promotion;
+                    this.board.showPromotionMenu(preMove.to);
+                    break;
+                case SquareClickMode.PreCastling:
+                    preMove.type = MoveType.Castling;
+                    break;
+                case SquareClickMode.PreEnPassant:
+                    preMove.type = MoveType.EnPassant;
+                    break;
+            }
+            this._preMoves[this.engine.getTurnColor() === Color.White ? Color.Black : Color.White].push(preMove);
+            this.logger.save(`Pre-move[${JSON.stringify(preMove)}] saved`);
             document.dispatchEvent(new CustomEvent(ChessEvent.onPieceSelected, { detail: { square: squareId } }));
         }
     }
@@ -366,16 +384,17 @@ export class Chess {
      * Play the pre-move if it exists.
      */
     private playPreMoveIfExist(): void {
-        if (!this._preMove)
+        const preMovesOfPlayer = this._preMoves[this.engine.getTurnColor()];
+        if (preMovesOfPlayer.length == 0)
             return;
-
-        const { from, to } = this._preMove;
-        this._preMove = null;
+        
+        const { from, to, type } = preMovesOfPlayer[0];
+        this._preMoves[this.engine.getTurnColor()] = preMovesOfPlayer.length > 1 ? preMovesOfPlayer.slice(1) : [];
         setTimeout(() => {
-            this.playMove(from, to);
-            this.logger.save(`Pre-move[${JSON.stringify({from, to})}] played`);
+            this.playMove(from, to, type);
+            this.logger.save(`Pre-move[${JSON.stringify({from, to, type})}] played`);
             document.dispatchEvent(new CustomEvent(
-                ChessEvent.onPieceMovedByPlayer, { detail: { from: from, to: to } }
+                ChessEvent.onPieceMovedByPlayer, { detail: { from, to, type } }
             ));
         }, PIECE_ANIMATION_DURATION_MS * 2);
     }
@@ -444,7 +463,7 @@ export class Chess {
             return;
         
         if (moveIndex !== this.engine.getMoveHistory().length - 1)
-            this.board.lock(true);
+            this.board.lock();
         
         let snapshotMove = showMoveReanimation ? this.engine.getMoveHistory()[moveIndex] : null;
         let snapshot = this.engine.getBoardHistory()[
@@ -585,15 +604,6 @@ export class Chess {
     }
 
     /**
-     * This function returns the board history of the game.
-     * After every move, the board is saved.
-     */
-    public getBoardHistory(): ReadonlyArray<JsonNotation>
-    {
-        return this.engine.getBoardHistory();
-    }
-
-        /**
      * This function returns the current game as fen notation.
      */
     public getGameAsFenNotation(): string
@@ -632,5 +642,14 @@ export class Chess {
     public getPlayersRemainingTime(): RemainingTimes
     {
         return this.engine.getPlayersRemainingTime();
+    }
+
+    /**
+     * This function returns the board history of the game.
+     * After every move, the board is saved.
+     */
+    public getBoardHistory(): ReadonlyArray<JsonNotation>
+    {
+        return this.engine.getBoardHistory();
     }
 }

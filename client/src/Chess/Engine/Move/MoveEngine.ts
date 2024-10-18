@@ -31,7 +31,7 @@ export class MoveEngine{
     /**
      * Get the possible moves of the piece on the given square.
      */
-    public getMoves(square: Square): Moves | null
+    public getMoves(square: Square, pieceSensitivity: boolean = true): Moves | null
     {
         /**
          * Check the given moves. If there is no move, then return null
@@ -64,17 +64,17 @@ export class MoveEngine{
          */
         switch(this.piece.getType()){
             case PieceType.Pawn:
-                return hasAnyMove(this.getPawnMoves());
+                return hasAnyMove(this.getPawnMoves(pieceSensitivity));
             case PieceType.Knight:
-                return hasAnyMove(this.getKnightMoves());
+                return hasAnyMove(this.getKnightMoves(pieceSensitivity));
             case PieceType.Bishop:
-                return hasAnyMove(this.getBishopMoves());
+                return hasAnyMove(this.getBishopMoves(pieceSensitivity));
             case PieceType.Rook:
-                return hasAnyMove(this.getRookMoves());
+                return hasAnyMove(this.getRookMoves(pieceSensitivity));
             case PieceType.Queen:
-                return hasAnyMove(this.getQueenMoves());
+                return hasAnyMove(this.getQueenMoves(pieceSensitivity));
             case PieceType.King:
-                return hasAnyMove(this.getKingMoves());
+                return hasAnyMove(this.getKingMoves(pieceSensitivity));
             default:
                 return null;
         }
@@ -83,13 +83,13 @@ export class MoveEngine{
     /**
      * Get the possible moves of the pawn on the given square.
      */
-    private getPawnMoves(): Moves | null
+    private getPawnMoves(pieceSensitivity: boolean = true): Moves | null
     {
         // Initialize the moves of the pawn.
         let moves: Moves = {[MoveType.Normal]: [], [MoveType.EnPassant]: [], [MoveType.Promotion]: []};
 
         // Find possible moves of the pawn.
-        const route: Route = RouteCalculator.getPawnRoute(this.pieceSquare!);
+        const route: Route = RouteCalculator.getPawnRoute(this.pieceSquare!, null, pieceSensitivity);
         if(!route) return null;
 
         /**************************************************************************
@@ -124,10 +124,7 @@ export class MoveEngine{
                 delete route[path as MoveRoute];
         }
 
-        /**
-         * Filter second square(first move of pawn) of the vertical route by
-         * the checking the pawn's color and position(row).
-         */
+        // Filter two square toward move 
         if(Locator.getRow(this.pieceSquare!) != (color == Color.White ? 7 : 2))
             route[moveDirection.vertical]!.splice(1, 1);
 
@@ -137,14 +134,17 @@ export class MoveEngine{
          * If the diagonal squares has no enemy piece, then remove
          * the diagonal routes from the moves.
          */
-        if(!BoardQuerier.isSquareHasPiece(route[moveDirection.leftDiagonal]![0], enemyColor))
+        if(!BoardQuerier.isSquareHasPiece(route[moveDirection.leftDiagonal]![0], enemyColor) && pieceSensitivity)
             delete route[moveDirection.leftDiagonal];
 
-        if(!BoardQuerier.isSquareHasPiece(route[moveDirection.rightDiagonal]![0], enemyColor))
+        if(!BoardQuerier.isSquareHasPiece(route[moveDirection.rightDiagonal]![0], enemyColor) && pieceSensitivity)
             delete route[moveDirection.rightDiagonal];
 
-        // Add normal moves to the pawn's moves.
-        moves[MoveType.Normal] = Extractor.extractSquares(this.moveFilterer.filterForKingSafety(this.pieceSquare!, this.piece!.getColor(), route)!);
+        moves[MoveType.Normal] = Extractor.extractSquares(
+            pieceSensitivity
+            ? this.moveFilterer.filterForKingSafety(this.pieceSquare!, this.piece!.getColor(), route)!
+            : route
+        );
 
         /**
          * Clear the pawn's routes. Because we will add en passant moves
@@ -172,17 +172,21 @@ export class MoveEngine{
          */
 
         // Add left en passant move to the pawn's moves.
-        const leftEnPassant: Square | null = this.moveExtender.getLeftEnPassantMove(this.pieceSquare!);
+        const leftEnPassant: Square | null = this.moveExtender.getLeftEnPassantMove(this.pieceSquare!, pieceSensitivity);
         if(leftEnPassant)
             route[moveDirection.leftDiagonal]!.push(leftEnPassant);
 
         // Add right en passant move to the pawn's moves.
-        const rightEnPassant: Square | null = this.moveExtender.getRightEnPassantMove(this.pieceSquare!);
+        const rightEnPassant: Square | null = this.moveExtender.getRightEnPassantMove(this.pieceSquare!, pieceSensitivity);
         if(rightEnPassant)
             route[moveDirection.rightDiagonal]!.push(rightEnPassant);
 
         // Add filtered(for king's safety) en passant moves to the pawn's moves.
-        moves[MoveType.EnPassant] = Extractor.extractSquares(this.moveFilterer.filterForKingSafety(this.pieceSquare!, this.piece!.getColor(), route)!);
+        moves[MoveType.EnPassant] = Extractor.extractSquares(
+            pieceSensitivity
+            ? this.moveFilterer.filterForKingSafety(this.pieceSquare!, this.piece!.getColor(), route)!
+            : route
+        );
 
         /**
          * Clear the pawn's routes. Because we will add promotion moves
@@ -213,51 +217,67 @@ export class MoveEngine{
     /**
      * Get the possible moves of the knight on the given square.
      */
-    private getKnightMoves(): Moves | null
+    private getKnightMoves(pieceSensitivity: boolean = true): Moves | null
     {
-        let route: Route = RouteCalculator.getKnightRoute(this.pieceSquare!);
+        let route: Route = RouteCalculator.getKnightRoute(this.pieceSquare!, null, pieceSensitivity);
         if(!route) return null;
-        return {[MoveType.Normal]: Extractor.extractSquares(this.moveFilterer.filterForKingSafety(this.pieceSquare!, this.piece!.getColor(), route))};
+        return {[MoveType.Normal]: Extractor.extractSquares(
+            pieceSensitivity 
+            ? this.moveFilterer.filterForKingSafety(this.pieceSquare!, this.piece!.getColor(), route)
+            : route
+        )};
     }
 
     /**
      * Get the possible moves of the bishop on the given square.
      */
-    private getBishopMoves(): Moves | null
+    private getBishopMoves(pieceSensitivity: boolean = true): Moves | null
     {
-        let route: Route = RouteCalculator.getBishopRoute(this.pieceSquare!);
+        let route: Route = RouteCalculator.getBishopRoute(this.pieceSquare!, null, pieceSensitivity);
         if(!route) return null;
-        return {[MoveType.Normal]: Extractor.extractSquares(this.moveFilterer.filterForKingSafety(this.pieceSquare!, this.piece!.getColor(), route))};
+        return {[MoveType.Normal]: Extractor.extractSquares(
+            pieceSensitivity
+            ? this.moveFilterer.filterForKingSafety(this.pieceSquare!, this.piece!.getColor(), route)
+            : route
+        )};
     }
 
     /**
      * Get the possible moves of the rook on the given square.
      */
-    private getRookMoves(): Moves | null
+    private getRookMoves(pieceSensitivity: boolean = true): Moves | null
     {
-        let route: Route = RouteCalculator.getRookRoute(this.pieceSquare!);
+        let route: Route = RouteCalculator.getRookRoute(this.pieceSquare!, null, pieceSensitivity);
         if(!route) return null;
-        return {[MoveType.Normal]: Extractor.extractSquares(this.moveFilterer.filterForKingSafety(this.pieceSquare!, this.piece!.getColor(), route))};
+        return {[MoveType.Normal]: Extractor.extractSquares(
+            pieceSensitivity
+            ? this.moveFilterer.filterForKingSafety(this.pieceSquare!, this.piece!.getColor(), route)
+            : route
+        )};
     }
 
     /**
      * Get the possible moves of the queen on the given square.
      */
-    private getQueenMoves(): Moves | null
+    private getQueenMoves(pieceSensitivity: boolean = true): Moves | null
     {
-        let route: Route = RouteCalculator.getQueenRoute(this.pieceSquare!);
+        let route: Route = RouteCalculator.getQueenRoute(this.pieceSquare!, null, pieceSensitivity);
         if(!route) return null;
-        return {[MoveType.Normal]: Extractor.extractSquares(this.moveFilterer.filterForKingSafety(this.pieceSquare!, this.piece!.getColor(), route))};
+        return {[MoveType.Normal]: Extractor.extractSquares(
+            pieceSensitivity 
+            ? this.moveFilterer.filterForKingSafety(this.pieceSquare!, this.piece!.getColor(), route)
+            : route
+        )};
     }
 
     /**
      * Get the possible moves of the king on the given square.
      */
-    private getKingMoves(): Moves | null
+    private getKingMoves(pieceSensitivity: boolean = true): Moves | null
     {
         let moves: Moves = {[MoveType.Normal]: [], [MoveType.Castling]: []};
 
-        let route: Route = RouteCalculator.getKingRoute(this.pieceSquare!);
+        let route: Route = RouteCalculator.getKingRoute(this.pieceSquare!, null, pieceSensitivity);
         if(!route) return null;
 
         const color: Color = BoardQuerier.getPieceOnSquare(this.pieceSquare!)!.getColor();
@@ -271,7 +291,7 @@ export class MoveEngine{
          */
         for(const square of Extractor.extractSquares(route))
         {
-            if(!BoardQuerier.isSquareThreatened(square, color == Color.White ? Color.Black : Color.White))
+            if(!pieceSensitivity || !BoardQuerier.isSquareThreatened(square, color == Color.White ? Color.Black : Color.White))
                 moves[MoveType.Normal]!.push(square);
         }
 
@@ -281,7 +301,9 @@ export class MoveEngine{
          * move to the g2 because after the king's move, g2 will be threatened
          * by the enemy's bishop again. This code block prevents this situation.
          */
-        const enemies: boolean | Square[] = BoardQuerier.isSquareThreatened(this.pieceSquare!, color == Color.White ? Color.Black : Color.White, true);
+        const enemies: boolean | Square[] = pieceSensitivity 
+            ? BoardQuerier.isSquareThreatened(this.pieceSquare!, color == Color.White ? Color.Black : Color.White, true) 
+            : false;
         if(moves[MoveType.Normal]!.length > 0 && enemies){
             for(const enemySquare of enemies as Square[])
             {
@@ -319,13 +341,13 @@ export class MoveEngine{
          */
         for(let path in route) route[path as MoveRoute] = [];
 
-        const longCastling: Square | null = this.moveExtender.getLongCastlingMove(color);
+        const longCastling: Square | null = this.moveExtender.getLongCastlingMove(color, pieceSensitivity);
         if(longCastling) {
             route[MoveRoute.Left]!.push(longCastling);
             route[MoveRoute.Left]!.push(longCastling + 2);
         }
 
-        const shortCastling: Square | null = this.moveExtender.getShortCastlingMove(color);
+        const shortCastling: Square | null = this.moveExtender.getShortCastlingMove(color, pieceSensitivity);
         if(shortCastling) {
             route[MoveRoute.Right]!.push(shortCastling);
             route[MoveRoute.Right]!.push(shortCastling - 1);

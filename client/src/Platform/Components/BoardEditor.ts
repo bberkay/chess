@@ -86,6 +86,9 @@ export class BoardEditor extends Component{
 
         if(LocalStorage.isExist(LocalStorageKey.BoardEditorEnabled))
             this.enableEditorMode();
+
+        if(LocalStorage.isExist(LocalStorageKey.LastSavedBoard))
+            this.saveFen(LocalStorage.load(LocalStorageKey.LastSavedBoard));
     }
 
     /**
@@ -507,6 +510,9 @@ export class BoardEditor extends Component{
     @isEditorModeEnable()
     private removePiece(squareElement: HTMLElement): void
     {
+        if(!this.chess.board.getPieceElementOnSquare(squareElement)) 
+            return;
+        
         this.chess.removePiece(this.chess.board.getSquareId(squareElement) as Square);
         squareElement.setAttribute("data-menu-operation", BoardEditorOperation.CreatePiece);
     }
@@ -622,6 +628,8 @@ export class BoardEditor extends Component{
     public saveFen(fen: string | null = null): void
     {
         this._savedFenNotation = fen ? fen : this.getCurrentFen();
+        console.log("fen saved: ", this._savedFenNotation);
+        LocalStorage.save(LocalStorageKey.LastSavedBoard, this._savedFenNotation);
     }
 
     /**
@@ -629,7 +637,8 @@ export class BoardEditor extends Component{
      */
     public getSavedFen(): string
     {
-        return this._savedFenNotation;
+        console.log("fen loaded: ", this._savedFenNotation);
+        return this._savedFenNotation || LocalStorage.load(LocalStorageKey.LastSavedBoard) || this.getCurrentFen();
     }
 
     /**
