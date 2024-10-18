@@ -319,7 +319,7 @@ export class ChessBoard {
         ].includes(squareClickMode)) {
             const squareId = this.getSquareId(square);
             if (squareClickMode.startsWith("Pre"))
-                this.highlightPreMove(squareId);
+                this.highlightPreMove(squareId, squareClickMode);
             onPieceMovedByClicking!(squareId, squareClickMode);
         }
     }
@@ -357,9 +357,8 @@ export class ChessBoard {
                 SquareClickMode.Disable,
                 ].includes(targetSquareClickMode)) {
                     const targetSquareId = this.getSquareId(targetSquare);
-                    if (targetSquareClickMode.startsWith("Pre")){
-                        this.highlightPreMove(targetSquareId);
-                    }
+                    if (targetSquareClickMode.startsWith("Pre"))
+                        this.highlightPreMove(targetSquareId, targetSquareClickMode);
                     onPieceMovedByDragging!(targetSquareId, targetSquareClickMode);
                 }
             }
@@ -473,9 +472,14 @@ export class ChessBoard {
      * Highlight the pre move that player wants to play 
      * on the chess board.
      */
-    public highlightPreMove(squareId: Square): void {
+    public highlightPreMove(squareId: Square, preMoveType: SquareClickMode | null = null): void {
         this.removeEffectFromAllSquares([SquareEffect.PrePlayable, SquareEffect.PreKillable]);
         this.addSquareEffects(squareId, SquareEffect.PrePlayed);
+        if(preMoveType === SquareClickMode.PrePromote){
+            this.removePiece(squareId);
+            const { color, type, square } = this._findPromotedOptionBySquare(squareId);
+            this.createPiece(color, type, square, true);
+        }
         this.refresh(true);
     }
 
@@ -542,7 +546,7 @@ export class ChessBoard {
                 this._doEnPassant(fromSquare, toSquare);
                 break;
             case SquareClickMode.Promotion:
-                this._doPromotion(fromSquare, toSquare);
+                this._doPromotion(fromSquare, toSquare, moveType === null);
                 break;
             case SquareClickMode.Promote:
                 this._doPromote(toSquare);
@@ -559,7 +563,7 @@ export class ChessBoard {
     private _doNormalMove(fromSquare: HTMLDivElement, toSquare: HTMLDivElement, playMoveSound: boolean = true): void {
         const piece: HTMLDivElement = fromSquare.querySelector(".piece") as HTMLDivElement;
         if (!piece) return;
-        this.animatePieceToSquare(piece, toSquare, playMoveSound).then(() => {
+        this._animatePieceToSquare(piece, toSquare, playMoveSound).then(() => {
             this.logger.save(`Piece moved to target square[${this.getSquareId(toSquare)}] on board`);
         });
     }
@@ -567,15 +571,14 @@ export class ChessBoard {
     /**
      * Move the piece to the square with animation.
      */
-    private animatePieceToSquare(piece: HTMLElement, square: HTMLElement, playMoveSound: boolean = true): Promise<void> {
+    private _animatePieceToSquare(piece: HTMLElement, square: HTMLElement, playMoveSound: boolean = true): Promise<void> {
         return new Promise((resolve) => {
-            const toSquareContent = square.querySelector(
-                `.piece[data-color="${this.getPieceColor(piece) === Color.White ? Color.Black : Color.White}"]`
-            );
+            const toSquareContent = square.querySelector(`.piece`);
+            // FIXME: .piece[data-color="${this.getPieceColor(piece) === Color.White ? Color.Black : Color.White}"]
 
             if (toSquareContent) {
-                // This is the case when the player
-                // captures the opponent's piece by drag and drop.
+                // This is the case when the player captures 
+                // the opponent's piece by drag and drop.
                 if (!piece) this.removePiece(this.getSquareElementOfPiece(toSquareContent));
                 if (playMoveSound) this.playSound(SoundEffect.Capture);
             } else if (playMoveSound) {
@@ -687,27 +690,53 @@ export class ChessBoard {
     /**
      * Do the promotion move on the chess board.
      */
-    private _doPromotion(fromSquare: HTMLDivElement, toSquare: HTMLDivElement): void {
+    private _doPromotion(fromSquare: HTMLDivElement, toSquare: HTMLDivElement, showPromotionMenu: boolean = true): void {
         //this._doNormalMove(fromSquare, toSquare)
         this.removePiece(fromSquare);
         this.logger.save(`Piece moved to target square[${this.getSquareId(toSquare)}] on board`);
-        this.showPromotionMenu(toSquare);
+        if(showPromotionMenu) this.showPromotionMenu(toSquare);
     }
 
     /**
      * Do the promote move on the chess board.
      */
     private _doPromote(selectedSquare: HTMLDivElement): void {
-        const squareId = this.getSquareId(selectedSquare);
-        const color = squareId < 33 ? Color.White : Color.Black;
+        const { color, type, square } = this._findPromotedOptionBySquare(selectedSquare);
 
         /**
-         * Example: Promoted pawn is white and on the "a8" square. Promotion options are
-         * queen(on a8), rook(on b8), bishop(on c8), knight(on d8). If the player selects
-         * other than queen the piece must be created not on the clicked square(if the player
-         * selects rook the selected square will be "b8" not "a8"). So, we need to find the
-         * first square of row to create piece on the "a8" square.
+         * This function creates the piece on the board and 
+         * closes the promotion options.
          */
+        const promote = (color: Color, pieceType: PieceType, square: Square) => {
+            this.createPiece(color, pieceType, square);
+            this.playSound(SoundEffect.Promote);
+            this.closePromotionMenu();
+        };
+
+        if(!selectedSquare.querySelector(".piece")) {
+            setTimeout(() => {
+                promote(color, type, square);
+            }, PIECE_ANIMATION_DURATION_MS);
+        } else {
+            promote(color, type, square);
+        }
+
+        // Set the square effect of the promoted square on the last row.
+        this.addSquareEffects(square, SquareEffect.To);
+        this.logger.save(`Player's[${color}] Piece[${type}] created on square[${square}] on board`);
+    }
+
+    /**
+     * This function determines the promoted option by clicked square id.
+     * Example: Promoted pawn is white and on the "a8" square. Promotion options are
+     * queen(on a8), rook(on b8), bishop(on c8), knight(on d8). If the player selects
+     * other than queen the piece must be created not on the clicked square(if the player
+     * selects rook the selected square will be "b8" not "a8"). So, we need to find the
+     * first square of row to create piece on the "a8" square.
+     */
+    private _findPromotedOptionBySquare(promoteSquare: HTMLElement | Square): { color: Color, type: PieceType, square: number} {
+        const squareId = promoteSquare instanceof HTMLElement ? this.getSquareId(promoteSquare) : promoteSquare;
+        const color = squareId < 33 ? Color.White : Color.Black;
         let firstSquareOfRow: string | Square = Converter.squareIDToSquare(squareId);
         firstSquareOfRow = Converter.squareToSquareID(
             firstSquareOfRow.replace(firstSquareOfRow.slice(-1), (color == Color.White ? "8" : "1"))
@@ -736,27 +765,7 @@ export class ChessBoard {
                 throw Error("Promotion type is not found. There was an error while promoting the piece on the board.");
         }
 
-        /**
-         * This function creates the piece on the board and 
-         * closes the promotion options.
-         */
-        const promote = (color: Color, pieceType: PieceType, square: Square) => {
-            this.createPiece(color, pieceType, square);
-            this.playSound(SoundEffect.Promote);
-            this.closePromotionMenu();
-        };
-
-        if(!selectedSquare.querySelector(".piece")) {
-            setTimeout(() => {
-                promote(color, pieceType, firstSquareOfRow);
-            }, PIECE_ANIMATION_DURATION_MS);
-        } else {
-            promote(color, pieceType, firstSquareOfRow);
-        }
-
-        // Set the square effect of the promoted square on the last row.
-        this.addSquareEffects(firstSquareOfRow, SquareEffect.To);
-        this.logger.save(`Player's[${color}] Piece[${pieceType}] created on square[${firstSquareOfRow}] on board`);
+        return { color, type: pieceType, square: firstSquareOfRow };
     }
 
     /**
