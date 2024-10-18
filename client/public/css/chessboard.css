@@ -188,7 +188,7 @@
     top:10%;
     cursor: pointer!important;
 
-    &.dragging {
+    &.dragging, &.ghost {
         opacity: 0.5;
     }
 

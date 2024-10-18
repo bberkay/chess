@@ -396,7 +396,7 @@ export class Chess {
             document.dispatchEvent(new CustomEvent(
                 ChessEvent.onPieceMovedByPlayer, { detail: { from, to, type } }
             ));
-        }, PIECE_ANIMATION_DURATION_MS * 2);
+        }, PIECE_ANIMATION_DURATION_MS * 1.5);
     }
 
     /**
