@@ -54,7 +54,7 @@ export class ChessEngine extends BoardManager {
     private moveType: MoveType | null = null;
     private moveNotation: string = "";
     private currentMoves: {[key in Square]?: Moves | null} = {};
-    private isPromotionMenuOpen: boolean = false;
+    private isPromoteWaiting: boolean = false;
     private isBoardPlayable: boolean = false;
     private threefoldRepetitionHistory: Array<string> = [];
     private timerMap: Record<Color, {intervalId: number | null, timer: Timer}> | null = null;
@@ -172,7 +172,7 @@ export class ChessEngine extends BoardManager {
         this.moveType = null;
         this.moveNotation = "";
         this.currentMoves = {};
-        this.isPromotionMenuOpen = false;
+        this.isPromoteWaiting = false;
         this.isBoardPlayable = false;
         this.threefoldRepetitionHistory = [];
         this.logger.save("Game properties set to default on ChessEngine, timers and bot are destroyed if they are created");
@@ -270,21 +270,13 @@ export class ChessEngine extends BoardManager {
     public getMoves(square: Square, isPreCalculation: boolean = false): Moves | null
     {
         if(isPreCalculation){
-            this.changeTurnColor(BoardQuerier.getColorOfOpponent());
-            this.logger.save("Move calculation set to pre calculation mode");
+            this.logger.save(`Pre-calculation of moves of the square[${square}] is started`);
+            return this.moveEngine.getMoves(square, !isPreCalculation);
         }
 
         if(!this.isBoardPlayable || !BoardQuerier.isSquareSelectable(square)){
             this.logger.save(`Moves of the square is not found because ${!this.isBoardPlayable ? `board is not playable` : ` square[${square}] is not selectable`}`);
             return null;
-        }
-
-        if(isPreCalculation){
-            const moves = this.moveEngine.getMoves(square);
-            this.logger.save(`Moves of the pre selected square[${square}] is calculated by move engine`);
-            this.changeTurnColor(BoardQuerier.getColorOfOpponent());
-            this.logger.save("Move calculation set to normal calculation mode");
-            return moves;
         }
 
         this.currentMoves[square] = this.currentMoves[square] ?? this.moveEngine.getMoves(square);
@@ -331,6 +323,7 @@ export class ChessEngine extends BoardManager {
      */
     public playMove(from: Square, to: Square): void
     {
+        console.log("playMove", from, to);
         if([GameStatus.NotReady, 
             GameStatus.Draw, 
             GameStatus.WhiteVictory, 
@@ -353,7 +346,7 @@ export class ChessEngine extends BoardManager {
         this.playedFrom = from!;
         this.playedTo = to!
 
-        if(this.isPromotionMenuOpen){
+        if(this.isPromoteWaiting){
             /**
              * If the given move is a promote move(not promotion),
              * then promote the piece and return. Because, promote
@@ -391,7 +384,7 @@ export class ChessEngine extends BoardManager {
          * If move is promotion move, then don't change the turn.
          * Because, user must promote the piece.
          */
-        if(!this.isPromotionMenuOpen)
+        if(!this.isPromoteWaiting)
             this.finishTurn();
     }
 
@@ -569,7 +562,7 @@ export class ChessEngine extends BoardManager {
         // Move the pawn.
         this._doNormalMove(this.playedFrom as Square, this.playedTo as Square, true);
         this.logger.save(`Piece moved to target square[${this.playedTo}] on engine`);
-        this.isPromotionMenuOpen = true;
+        this.isPromoteWaiting = true;
     }
 
     /**
@@ -635,7 +628,7 @@ export class ChessEngine extends BoardManager {
         this.logger.save(`Player's[${playerColor}] Piece[${selectedPromote}] created on square[${to}] on engine`);
 
         // Finish the promotion.
-        this.isPromotionMenuOpen = false;
+        this.isPromoteWaiting = false;
         this.logger.save("Promotion is finished on engine");
 
         // Set the current move for the move history.

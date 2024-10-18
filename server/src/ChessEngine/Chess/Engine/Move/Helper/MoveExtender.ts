@@ -17,7 +17,7 @@ export class MoveExtender{
      * @description Check if the castling is available for the given king, rook and squares between king and rook.
      * @see src/Chess/Engine/Move/Helper/MoveExtender.ts For more information.
      */
-    private calculateCastlingMove(color: Color, castlingSide: CastlingSide): Square | null
+    private calculateCastlingMove(color: Color, castlingSide: CastlingSide, pieceSensitivity: boolean = true): Square | null
     {
         /**
          * Rules for castling:
@@ -34,24 +34,28 @@ export class MoveExtender{
          * @see for more information icon of the piece https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
          */
         const kingSquare: Square = color == Color.White ? Square.e1 : Square.e8;
-        const chosenRookSquare: Square = castlingSide == CastlingSide.Long ? (color == Color.White ? Square.a1 : Square.a8) : (color == Color.White ? Square.h1 : Square.h8);
+        const castlingMove: Square = castlingSide == CastlingSide.Long ? (color == Color.White ? Square.a1 : Square.a8) : (color == Color.White ? Square.h1 : Square.h8);
         const kingIcon: string = color == Color.White ? PieceIcon.WhiteKing : PieceIcon.BlackKing;
         const rookIcon: string = color == Color.White ? PieceIcon.WhiteRook : PieceIcon.BlackRook;
 
-        // Check first rule and third rule. Also, check the fen 
-        // notation for castling availability when the game is loaded from fen notation.
-        if(!BoardQuerier.isSquareHasPiece(kingSquare, color, [PieceType.King])
-            || (BoardQuerier.getBoardStatus() == (color == Color.White ? GameStatus.WhiteInCheck : GameStatus.BlackInCheck))
-            || (BoardQuerier.getAlgebraicNotation().length == 0 && !(
-                (chosenRookSquare == Square.a8 && BoardQuerier.getCastling().BlackLong)
-                || (chosenRookSquare == Square.h8 && BoardQuerier.getCastling().BlackShort)
-                || (chosenRookSquare == Square.a1 && BoardQuerier.getCastling().WhiteLong)
-                || (chosenRookSquare == Square.h1 && BoardQuerier.getCastling().WhiteShort)))
-            || !BoardQuerier.isSquareHasPiece(chosenRookSquare, color, [PieceType.Rook])
-        )
+        if(BoardQuerier.getBoardStatus() == (color == Color.White ? GameStatus.WhiteInCheck : GameStatus.BlackInCheck))
             return null;
 
-        // For fourth rule.
+        // Check first rule. Also, check the fen notation for castling availability 
+        // when the game is loaded from fen notation.
+        if(!BoardQuerier.isSquareHasPiece(kingSquare, color, [PieceType.King])
+            || (!BoardQuerier.isSquareHasPiece(castlingMove, color, [PieceType.Rook]))
+            || (BoardQuerier.getAlgebraicNotation().length == 0 
+                && !((castlingMove == Square.a8 && BoardQuerier.getCastling().BlackLong)
+                || (castlingMove == Square.h8 && BoardQuerier.getCastling().BlackShort)
+                || (castlingMove == Square.a1 && BoardQuerier.getCastling().WhiteLong)
+                || (castlingMove == Square.h1 && BoardQuerier.getCastling().WhiteShort)))
+        ) return null;
+
+        // No need to check any further if the piece sensitivity is false.
+        if(!pieceSensitivity)
+            return castlingMove;
+        
         const betweenSquares: Array<Square> = castlingSide == CastlingSide.Long
             ? (color == Color.White ? [Square.b1, Square.c1, Square.d1] : [Square.b8, Square.c8, Square.d8])
             : (color == Color.White ? [Square.f1, Square.g1] : [Square.f8, Square.g8]);
@@ -80,32 +84,32 @@ export class MoveExtender{
                 return null;
         }
 
-        return chosenRookSquare;
+        return castlingMove;
     }
 
     /**
      * @description Check if the long castling is available for the given color.
      * @see src/Chess/Engine/Move/Helper/MoveExtender.ts For more information.
      */
-    public getLongCastlingMove(color: Color): Square | null
+    public getLongCastlingMove(color: Color, pieceSensitivity: boolean = true): Square | null
     {
-        return this.calculateCastlingMove(color, CastlingSide.Long);
+        return this.calculateCastlingMove(color, CastlingSide.Long, pieceSensitivity);
     }
 
     /**
      * @description Check if the short castling is available for the given color.
      * @see src/Chess/Engine/Move/Helper/MoveExtender.ts For more information.
      */
-    public getShortCastlingMove(color: Color): Square | null
+    public getShortCastlingMove(color: Color, pieceSensitivity: boolean = true): Square | null
     {
-        return this.calculateCastlingMove(color, CastlingSide.Short);
+        return this.calculateCastlingMove(color, CastlingSide.Short, pieceSensitivity);
     }
 
     /**
      * @description Check if the en passant is available for the given square and direction.
      * @see src/Chess/Engine/Move/Helper/MoveExtender.ts For more information.
      */
-    private calculateEnPassantMove(square: Square, direction: EnPassantDirection): Square | null
+    private calculateEnPassantMove(square: Square, direction: EnPassantDirection, pieceSensitivity: boolean = true): Square | null
     {
         /**
          * Rules for en passant:
@@ -131,7 +135,7 @@ export class MoveExtender{
         const enPassantMove: Square = direction == EnPassantDirection.Left
             ? (color == Color.White ? square - 9 : square + 7)
             : (color == Color.White ? square - 7 : square + 9); // back diagonal square of the enemy pawn.
-        
+
         // Check fen notation for en passant availability when the game is loaded from fen notation.
         if(BoardQuerier.getAlgebraicNotation().length == 0 && BoardQuerier.getGame().enPassant == enPassantMove)
             return enPassantMove;
@@ -139,6 +143,10 @@ export class MoveExtender{
         const pawnOnItsFifthRank = pawnRow == enPassantRow;
         if(!pawnOnItsFifthRank) 
             return null;
+
+        // No need to check any further if the piece sensitivity is false.
+        if(!pieceSensitivity) 
+            return enPassantMove;
 
         const enemyPawn: number = direction == EnPassantDirection.Left ? square - 1 : square + 1;
         const enemyPawnOnAdjacentSquare = BoardQuerier.isSquareHasPiece(
@@ -168,17 +176,17 @@ export class MoveExtender{
      * @description Check if the left en passant is available for the given square.
      * @see src/Chess/Engine/Move/Helper/MoveExtender.ts For more information.
      */
-    public getLeftEnPassantMove(square: Square): Square | null
+    public getLeftEnPassantMove(square: Square, pieceSensitivity: boolean = true): Square | null
     {
-        return this.calculateEnPassantMove(square, EnPassantDirection.Left);
+        return this.calculateEnPassantMove(square, EnPassantDirection.Left, pieceSensitivity);
     }
 
     /**
      * @description Check if the right en passant is available for the given square.
      * @see src/Chess/Engine/Move/Helper/MoveExtender.ts For more information.
      */
-    public getRightEnPassantMove(square: Square): Square | null
+    public getRightEnPassantMove(square: Square, pieceSensitivity: boolean = true): Square | null
     {
-        return this.calculateEnPassantMove(square, EnPassantDirection.Right);
+        return this.calculateEnPassantMove(square, EnPassantDirection.Right, pieceSensitivity);
     }
 }
