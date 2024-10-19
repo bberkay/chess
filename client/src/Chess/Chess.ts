@@ -223,6 +223,9 @@ export class Chess {
             onPieceMoved: (squareId: Square, squareClickMode: SquareClickMode) => {
                 this.handleOnPieceMoved(squareId, squareClickMode);
             },
+            onPiecePreMoved: (squareId: Square, squareClickMode: SquareClickMode) => {
+                this.handleOnPiecePreMoved(squareId, squareClickMode);
+            },
             onPreMoveCanceled: () => {
                 this._preSelectedSquare = null;
                 this._preMoves[this.engine.getTurnColor() === Color.White ? Color.Black : Color.White] = [];
@@ -255,7 +258,7 @@ export class Chess {
     }
 
     /**
-     * Handle the selected piece on the board.
+     * Handle the selected piece on the board and engine.
      */
     private handleOnPieceSelected(squareId: Square): void {
         this._selectedSquare = squareId;
@@ -265,7 +268,7 @@ export class Chess {
     }
 
     /**
-     * Handle the selected piece on the board.
+     * Handle the pre-selected piece on the board and engine.
      */
     private handleOnPiecePreSelected(squareId: Square): void {
         this._preSelectedSquare = squareId;
@@ -275,49 +278,47 @@ export class Chess {
     }
 
     /**
-     * Handle the moved piece on the board.
+     * Handle the moved piece on the board and engine.
      */
     private handleOnPieceMoved(squareId: Square, squareClickMode: SquareClickMode): void {
-        if ([SquareClickMode.Play,
-        SquareClickMode.Promote,
-        SquareClickMode.Promotion,
-        SquareClickMode.Castling,
-        SquareClickMode.EnPassant
-        ].includes(squareClickMode)) {
-            this._isPromotionScreenOpen = squareClickMode == SquareClickMode.Promotion;
-            this.playMove(this._selectedSquare!, squareId);
-            if (this._bot) this.board.lock(false);
-            document.dispatchEvent(new CustomEvent(
-                ChessEvent.onPieceMovedByPlayer, { detail: { from: this._selectedSquare!, to: squareId } }
-            ));
+        this._isPromotionScreenOpen = squareClickMode == SquareClickMode.Promotion;
+        
+        this.playMove(this._selectedSquare!, squareId);
+        
+        if (this._bot) 
+            this.board.lock(false);
+
+        document.dispatchEvent(new CustomEvent(
+            ChessEvent.onPieceMovedByPlayer, { detail: { from: this._selectedSquare!, to: squareId } }
+        ));
+    }
+
+    /**
+     * Handle the pre-moved piece on the board and engine.
+     */
+    private handleOnPiecePreMoved(squareId: Square, squareClickMode: SquareClickMode): void {
+        const preMove: Move = {from: this._preSelectedSquare!, to: squareId};
+
+        switch(squareClickMode){
+            case SquareClickMode.PrePromote:
+                preMove.type = MoveType.Promote;       
+                this.board.closePromotionMenu(); 
+                break;
+            case SquareClickMode.PrePromotion:
+                preMove.type = MoveType.Promotion;
+                this.board.showPromotionMenu(preMove.to);
+                break;
+            case SquareClickMode.PreCastling:
+                preMove.type = MoveType.Castling;
+                break;
+            case SquareClickMode.PreEnPassant:
+                preMove.type = MoveType.EnPassant;
+                break;
         }
-        else if ([SquareClickMode.PrePlay,
-        SquareClickMode.PrePromote,
-        SquareClickMode.PrePromotion,
-        SquareClickMode.PreCastling,
-        SquareClickMode.PreEnPassant
-        ].includes(squareClickMode)) {
-            const preMove: Move = {from: this._preSelectedSquare!, to: squareId};
-            switch(squareClickMode){
-                case SquareClickMode.PrePromote:
-                    preMove.type = MoveType.Promote;       
-                    this.board.closePromotionMenu(); 
-                    break;
-                case SquareClickMode.PrePromotion:
-                    preMove.type = MoveType.Promotion;
-                    this.board.showPromotionMenu(preMove.to);
-                    break;
-                case SquareClickMode.PreCastling:
-                    preMove.type = MoveType.Castling;
-                    break;
-                case SquareClickMode.PreEnPassant:
-                    preMove.type = MoveType.EnPassant;
-                    break;
-            }
-            this._preMoves[this.engine.getTurnColor() === Color.White ? Color.Black : Color.White].push(preMove);
-            this.logger.save(`Pre-move[${JSON.stringify(preMove)}] saved`);
-            document.dispatchEvent(new CustomEvent(ChessEvent.onPieceSelected, { detail: { square: squareId } }));
-        }
+        
+        this._preMoves[this.engine.getTurnColor() === Color.White ? Color.Black : Color.White].push(preMove);
+        this.logger.save(`Pre-move[${JSON.stringify(preMove)}] saved`);
+        document.dispatchEvent(new CustomEvent(ChessEvent.onPieceSelected, { detail: { square: squareId } }));
     }
 
     /**

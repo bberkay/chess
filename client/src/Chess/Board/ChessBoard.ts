@@ -220,10 +220,10 @@ export class ChessBoard {
         onPieceSelected: (squareId: Square) => void,
         onPiecePreSelected: (squareId: Square) => void,
         onPieceMoved: (squareId: Square, squareClickMode: SquareClickMode) => void,
+        onPiecePreMoved: (squareId: Square, squareClickMode: SquareClickMode) => void,
         onPreMoveCanceled: () => void
     }): void {
-        if (this._isBoardMoveEventBound)
-            throw Error("Move event callbacks already bound.");
+        if (this._isBoardMoveEventBound) throw Error("Move event callbacks already bound.");
         this._isBoardMoveEventBound = true;
 
         let mouseUpTriggered: boolean = false;
@@ -243,7 +243,8 @@ export class ChessBoard {
                 if (!mouseUpTriggered)
                     return this.handleSquareClick(
                         this.getClosestSquareElement(square)!,
-                        callbacks.onPieceMoved
+                        callbacks.onPieceMoved,
+                        callbacks.onPiecePreMoved
                     );
             });
         });
@@ -254,7 +255,8 @@ export class ChessBoard {
                 mouseUpTriggered = true;
                 return this.handleMouseUp(
                     e,
-                    callbacks.onPieceMoved
+                    callbacks.onPieceMoved,
+                    callbacks.onPiecePreMoved
                 );
             });
         }
@@ -304,7 +306,8 @@ export class ChessBoard {
      */
     private handleSquareClick(
         square: HTMLElement,
-        onPieceMovedByClicking: (squareId: Square, squareClickMode: SquareClickMode) => void
+        onPieceMovedByClicking: (squareId: Square, squareClickMode: SquareClickMode) => void,
+        onPiecePreMovedByClicking: (squareId: Square, squareClickMode: SquareClickMode) => void
     ): void {
         const squareClickMode = this.getSquareClickMode(square);
 
@@ -316,9 +319,12 @@ export class ChessBoard {
         SquareClickMode.Disable,
         ].includes(squareClickMode)) {
             const squareId = this.getSquareId(square);
-            if (squareClickMode.startsWith("Pre"))
+            if (squareClickMode.startsWith("Pre")) {
                 this.highlightPreMove(squareId, squareClickMode);
-            onPieceMovedByClicking!(squareId, squareClickMode);
+                onPiecePreMovedByClicking!(squareId, squareClickMode);
+            } else {
+                onPieceMovedByClicking!(squareId, squareClickMode);
+            }
         }
     }
 
@@ -327,7 +333,8 @@ export class ChessBoard {
      */
     private handleMouseUp(
         mouseUpEvent: MouseEvent,
-        onPieceMovedByDragging: (squareId: Square, squareClickMode: SquareClickMode) => void
+        onPieceMovedByDragging: (squareId: Square, squareClickMode: SquareClickMode) => void,
+        onPiecePreMovedByDragging: (squareId: Square, squareClickMode: SquareClickMode) => void
     ): void {
         if (document.querySelector(".piece.cloned"))
             this.dropPiece(mouseUpEvent);
@@ -355,9 +362,12 @@ export class ChessBoard {
                 SquareClickMode.Disable,
                 ].includes(targetSquareClickMode)) {
                     const targetSquareId = this.getSquareId(targetSquare);
-                    if (targetSquareClickMode.startsWith("Pre"))
+                    if (targetSquareClickMode.startsWith("Pre")) {
                         this.highlightPreMove(targetSquareId, targetSquareClickMode);
-                    onPieceMovedByDragging!(targetSquareId, targetSquareClickMode);
+                        onPiecePreMovedByDragging!(targetSquareId, targetSquareClickMode);
+                    } else {
+                        onPieceMovedByDragging!(targetSquareId, targetSquareClickMode);
+                    }
                 }
             }
         }
