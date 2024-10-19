@@ -217,7 +217,8 @@ export class ChessBoard {
      * Bind functions to the specific events of the chess board.
      */
     public bindMoveEventCallbacks(callbacks: {
-        onPieceSelected: (squareId: Square, isPreSelected: boolean) => void,
+        onPieceSelected: (squareId: Square) => void,
+        onPiecePreSelected: (squareId: Square) => void,
         onPieceMoved: (squareId: Square, squareClickMode: SquareClickMode) => void,
         onPreMoveCanceled: () => void
     }): void {
@@ -234,6 +235,7 @@ export class ChessBoard {
                     e,
                     this.getClosestSquareElement(square)!,
                     callbacks.onPieceSelected!,
+                    callbacks.onPiecePreSelected!,
                     callbacks.onPreMoveCanceled!
                 );
             });
@@ -266,7 +268,8 @@ export class ChessBoard {
     private handleSquareDown(
         mouseDownEvent: MouseEvent,
         square: HTMLElement,
-        onPieceSelected: (squareId: Square, isPreSelected: boolean) => void,
+        onPieceSelected: (squareId: Square) => void,
+        onPiecePreSelected: (squareId: Square) => void,
         onPreMoveCanceled: () => void
     ): void {
         const squareClickMode = this.getSquareClickMode(square);
@@ -285,10 +288,14 @@ export class ChessBoard {
         const squareId = this.getSquareId(square);
         if ([SquareClickMode.PreSelect, SquareClickMode.Select].includes(squareClickMode)) {
             const isPreSelect = squareClickMode == SquareClickMode.PreSelect;
+
             if (isPreSelect) this.addSquareEffects(square, SquareEffect.PreSelected);
-            else this.removeEffectFromAllSquares([SquareEffect.PreSelected]);
+            else  this.removeEffectFromAllSquares([SquareEffect.PreSelected]);
+            
             this.selectPiece(squareId, isPreSelect);
-            onPieceSelected(squareId, isPreSelect);
+            
+            if(isPreSelect) onPiecePreSelected(squareId);
+            else onPieceSelected(squareId);
         }
     }
 

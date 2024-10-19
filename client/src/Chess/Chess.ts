@@ -214,8 +214,11 @@ export class Chess {
      */
     private initBoardListener(): void {
         this.board.bindMoveEventCallbacks({
-            onPieceSelected: (squareId: Square, isPreSelected: boolean) => {
-                this.handleOnPieceSelected(squareId, isPreSelected);
+            onPieceSelected: (squareId: Square) => {
+                this.handleOnPieceSelected(squareId);
+            },
+            onPiecePreSelected: (squareId: Square) => {
+                this.handleOnPiecePreSelected(squareId);
             },
             onPieceMoved: (squareId: Square, squareClickMode: SquareClickMode) => {
                 this.handleOnPieceMoved(squareId, squareClickMode);
@@ -254,21 +257,20 @@ export class Chess {
     /**
      * Handle the selected piece on the board.
      */
-    private handleOnPieceSelected(squareId: Square, isPreSelected: boolean): void {
-        if (isPreSelected)
-            this._preSelectedSquare = squareId;
-        else
-            this._selectedSquare = squareId;
-
-        const selectedSquare = isPreSelected ? this._preSelectedSquare : this._selectedSquare;
-        this.board.highlightMoves(
-            this.engine.getMoves(
-                selectedSquare!,
-                isPreSelected
-            ),
-            isPreSelected
-        );
+    private handleOnPieceSelected(squareId: Square): void {
+        this._selectedSquare = squareId;
+        this.board.highlightMoves(this.engine.getMoves(this._selectedSquare!));
         this.logger.save(`Piece[${squareId}] selected on the board`);
+        document.dispatchEvent(new CustomEvent(ChessEvent.onPieceSelected, { detail: { square: squareId } }));
+    }
+
+    /**
+     * Handle the selected piece on the board.
+     */
+    private handleOnPiecePreSelected(squareId: Square): void {
+        this._preSelectedSquare = squareId;
+        this.board.highlightMoves(this.engine.getMoves(this._preSelectedSquare!, true), true);
+        this.logger.save(`Piece[${squareId}] pre selected on the board`);
         document.dispatchEvent(new CustomEvent(ChessEvent.onPieceSelected, { detail: { square: squareId } }));
     }
 
