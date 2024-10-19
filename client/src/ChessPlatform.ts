@@ -11,7 +11,7 @@ import { Chess } from '@Chess/Chess';
 import { Platform } from "@Platform/Platform.ts";
 import { Logger } from "@Services/Logger";
 import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage.ts";
-import { ChessEvent, Color, GameStatus, StartPosition } from '@Chess/Types';
+import { ChessEvent, Color, GameStatus, JsonNotation, StartPosition } from '@Chess/Types';
 import { DEFULT_PLAYER_NAME, DEFAULT_TOTAL_TIME, DEFAULT_INCREMENT_TIME } from "@Platform/Consts";
 import { PlatformEvent } from '@Platform/Types';
 import type {
@@ -443,6 +443,15 @@ export class ChessPlatform{
     }
 
     /**
+     * 
+     */
+    private resyncGameDueToMismatchedStatus(webSocketEndpoint: string): void
+    {
+        this.createAndHandleWebSocket(webSocketEndpoint);
+        this.platform.navigatorModal.showError("Unexpected game status. Game status is not equal to the server's game status. The game created again according to the server's game status.");
+    }
+
+    /**
      * Handle the websocket socket connection and listen the
      * messages from the server.
      */
@@ -542,11 +551,8 @@ export class ChessPlatform{
                 case WsTitle.Finished:
                     // When the game is finished on the server, also should be finished on the client.
                     // If there is a mismatch, then make client's game status equal to the server's game status.
-                    if(this.chess.getGameStatus() !== (wsData as WsFinishedData).gameStatus){
-                        // reset page
-                        location.reload();
-                        this.platform.navigatorModal.showError("Unexpected game status. Game status is not equal to the server's game status.");
-                    }
+                    if(this.chess.getGameStatus() !== (wsData as WsFinishedData).gameStatus)
+                        this.resyncGameDueToMismatchedStatus(webSocketEndpoint);
                     closeConnectionOnFinish = true;
                     break;
                 case WsTitle.UndoAccepted:
@@ -554,10 +560,8 @@ export class ChessPlatform{
                     this.platform.notationMenu.deleteLastNotation((wsData as WsUndoData).undoColor);
                     this.platform.notationMenu.goBack();
                     this.platform.notationMenu.update();
-                    if ((wsData as WsUndoData).board !== this.chess.getGameAsFenNotation() ) {
-                        location.reload();
-                        this.platform.navigatorModal.showError("Unexpected game status. Game status is not equal to the server's game status. The game created again according to the server's game status.");
-                    }
+                    if ((wsData as WsUndoData).board !== this.chess.getGameAsFenNotation())
+                        this.resyncGameDueToMismatchedStatus(webSocketEndpoint);
                     break;
                 case WsTitle.DrawOffered:
                     this.platform.notationMenu.showDrawOffer();

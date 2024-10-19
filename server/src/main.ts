@@ -491,6 +491,12 @@ function startGame(lobby: Lobby): void {
             },
             game: lobby.getCurrentGame()
         }) as WsStartedData));
+        
+        if(lobby.isGameFinished()){
+            reconnectedPlayerWs.send(WsCommand.finished({
+                gameStatus: lobby.getGameStatus()
+            }));
+        }
 
         // Send reconnected player's color to the 
         // opponent player.
