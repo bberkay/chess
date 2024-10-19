@@ -89,7 +89,7 @@ export class MoveEngine{
         let moves: Moves = {[MoveType.Normal]: [], [MoveType.EnPassant]: [], [MoveType.Promotion]: []};
 
         // Find possible moves of the pawn.
-        const route: Route = RouteCalculator.getPawnRoute(this.pieceSquare!, null, pieceSensitivity);
+        const route: Route = RouteCalculator.getPawnRoute(this.pieceSquare!, pieceSensitivity);
         if(!route) return null;
 
         /**************************************************************************
@@ -219,7 +219,7 @@ export class MoveEngine{
      */
     private getKnightMoves(pieceSensitivity: boolean = true): Moves | null
     {
-        let route: Route = RouteCalculator.getKnightRoute(this.pieceSquare!, null, pieceSensitivity);
+        let route: Route = RouteCalculator.getKnightRoute(this.pieceSquare!, pieceSensitivity);
         if(!route) return null;
         return {[MoveType.Normal]: Extractor.extractSquares(
             pieceSensitivity 
@@ -233,7 +233,7 @@ export class MoveEngine{
      */
     private getBishopMoves(pieceSensitivity: boolean = true): Moves | null
     {
-        let route: Route = RouteCalculator.getBishopRoute(this.pieceSquare!, null, pieceSensitivity);
+        let route: Route = RouteCalculator.getBishopRoute(this.pieceSquare!, pieceSensitivity);
         if(!route) return null;
         return {[MoveType.Normal]: Extractor.extractSquares(
             pieceSensitivity
@@ -247,7 +247,7 @@ export class MoveEngine{
      */
     private getRookMoves(pieceSensitivity: boolean = true): Moves | null
     {
-        let route: Route = RouteCalculator.getRookRoute(this.pieceSquare!, null, pieceSensitivity);
+        let route: Route = RouteCalculator.getRookRoute(this.pieceSquare!, pieceSensitivity);
         if(!route) return null;
         return {[MoveType.Normal]: Extractor.extractSquares(
             pieceSensitivity
@@ -261,7 +261,7 @@ export class MoveEngine{
      */
     private getQueenMoves(pieceSensitivity: boolean = true): Moves | null
     {
-        let route: Route = RouteCalculator.getQueenRoute(this.pieceSquare!, null, pieceSensitivity);
+        let route: Route = RouteCalculator.getQueenRoute(this.pieceSquare!, pieceSensitivity);
         if(!route) return null;
         return {[MoveType.Normal]: Extractor.extractSquares(
             pieceSensitivity 
@@ -277,7 +277,7 @@ export class MoveEngine{
     {
         let moves: Moves = {[MoveType.Normal]: [], [MoveType.Castling]: []};
 
-        let route: Route = RouteCalculator.getKingRoute(this.pieceSquare!, null, pieceSensitivity);
+        let route: Route = RouteCalculator.getKingRoute(this.pieceSquare!, pieceSensitivity);
         if(!route) return null;
 
         const color: Color = BoardQuerier.getPieceOnSquare(this.pieceSquare!)!.getColor();
