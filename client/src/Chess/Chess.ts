@@ -128,7 +128,7 @@ export class Chess {
         this.logger.save(`Game successfully created on Chessboard and status[${this.engine.getGameStatus()}] shown`);
 
         this.initBoardListener();
-        this.initEngineListener();
+        this.monitorGameTimeExpiration();
 
         LocalStorage.save(LocalStorageKey.LastBoard, this.getGameAsJsonNotation());
         this.logger.save(`Game saved to cache as json notation[${JSON.stringify(position)}]`);
@@ -235,7 +235,7 @@ export class Chess {
      * This function initializes the listener for engine's
      * actions on chessboard to make a move on engine and board.
      */
-    private initEngineListener(): void {
+    private monitorGameTimeExpiration(): void {
         const interval = setInterval(() => {
             if ([
                 GameStatus.BlackVictory,
