@@ -1,5 +1,5 @@
 import {Board} from "./Board.ts";
-import {Castling, CastlingType, Color, Durations, GameStatus, JsonNotation, Move, PieceType, Scores, Square} from "../../Types";
+import {Castling, Color, Durations, GameStatus, JsonNotation, Move, PieceType, Scores, Square} from "../../Types";
 import {MoveRoute, Piece, Route} from "../Types";
 import {RouteCalculator} from "../Move/Calculator/RouteCalculator.ts";
 import {Extractor} from "../Move/Utils/Extractor.ts";
@@ -30,7 +30,7 @@ export class BoardQuerier extends Board{
         // Return the game as JsonNotation.
         return {
             board: pieces,
-            turn: BoardQuerier.getColorOfTurn(),
+            turn: BoardQuerier.getTurnColor(),
             castling: BoardQuerier.getCastling(),
             enPassant: BoardQuerier.getEnPassant(),
             halfMoveClock: BoardQuerier.getHalfMoveCount(),
@@ -55,7 +55,7 @@ export class BoardQuerier extends Board{
     /**
      * Get current turn's color
      */
-    public static getColorOfTurn(): Color
+    public static getTurnColor(): Color
     {
         return Board.currentTurn;
     }
@@ -63,7 +63,7 @@ export class BoardQuerier extends Board{
     /**
      * Get opponent's color
      */
-    public static getColorOfOpponent(): Color
+    public static getOpponentColor(): Color
     {
         return Board.currentTurn === Color.White ? Color.Black : Color.White;
     }
@@ -238,7 +238,7 @@ export class BoardQuerier extends Board{
      */
     public static isSquareSelectable(select: Square): boolean
     {
-        return !(!this.getPieceOnSquare(select) || this.getPieceOnSquare(select)?.getColor() != this.getColorOfTurn());
+        return !(!this.getPieceOnSquare(select) || this.getPieceOnSquare(select)?.getColor() != this.getTurnColor());
     }
 
     /**
@@ -308,7 +308,7 @@ export class BoardQuerier extends Board{
 
         // Get the color of enemy player with the piece on the given square.
         const piece: Piece | null = this.getPieceOnSquare(targetSquare);
-        const enemyColor: Color = by ?? (piece ? (piece.getColor() == Color.White ? Color.Black : Color.White) : this.getColorOfOpponent());
+        const enemyColor: Color = by ?? (piece ? (piece.getColor() == Color.White ? Color.Black : Color.White) : this.getOpponentColor());
 
         /**
          * Get all routes like queen, rook, bishop, knight except pawn.

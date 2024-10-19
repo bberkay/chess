@@ -127,7 +127,7 @@ export class BoardManager extends Board{
      */
     protected changeTurn(): void
     {
-        Board.currentTurn = BoardQuerier.getColorOfOpponent();
+        Board.currentTurn = BoardQuerier.getOpponentColor();
         Board.moveCount += Board.currentTurn === Color.White ? 1 : 0;
     }
 

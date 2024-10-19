@@ -58,7 +58,7 @@ export class RouteCalculator{
         /**
          * Find player's color by given square.
          */
-        color = color ?? BoardQuerier.getColorBySquare(square) ?? BoardQuerier.getColorOfTurn();
+        color = color ?? BoardQuerier.getColorBySquare(square) ?? BoardQuerier.getTurnColor();
 
         // Get first 2 vertical squares and first 1 diagonal squares.
         return {
@@ -78,7 +78,7 @@ export class RouteCalculator{
          * Find player's color by given square. If square has no piece,
          * then use BoardQuerier.
          */
-        color = color ?? BoardQuerier.getColorBySquare(square) ?? BoardQuerier.getColorOfTurn();
+        color = color ?? BoardQuerier.getColorBySquare(square) ?? BoardQuerier.getTurnColor();
 
         // Knight can't move to any direction, it can move only 2 horizontal and 1 vertical or 2 vertical and 1 horizontal.
         // So, we can't return Path type here.
@@ -140,7 +140,7 @@ export class RouteCalculator{
          */
         return DirectionCalculator.getDiagonalSquares(
             square, 
-            color ?? BoardQuerier.getColorBySquare(square) ?? BoardQuerier.getColorOfTurn(),
+            color ?? BoardQuerier.getColorBySquare(square) ?? BoardQuerier.getTurnColor(),
             null,
             pieceSensitivity,
         );
@@ -157,7 +157,7 @@ export class RouteCalculator{
          * Find player's color by given square. If square has no piece,
          * then use BoardQuerier.
          */
-        color = color ?? BoardQuerier.getColorBySquare(square) ?? BoardQuerier.getColorOfTurn();
+        color = color ?? BoardQuerier.getColorBySquare(square) ?? BoardQuerier.getTurnColor();
 
         // Get the horizontal and vertical squares.
         return {
@@ -177,7 +177,7 @@ export class RouteCalculator{
          * Find player's color by given square. If square has no piece,
          * then use BoardQuerier.
          */
-        color = color ?? BoardQuerier.getColorBySquare(square) ?? BoardQuerier.getColorOfTurn();
+        color = color ?? BoardQuerier.getColorBySquare(square) ?? BoardQuerier.getTurnColor();
 
         // Get the horizontal, vertical and diagonal squares.
         return {
@@ -198,7 +198,7 @@ export class RouteCalculator{
          * Find player's color by given square. If square has no piece,
          * then use BoardQuerier.
          */
-        color = color ?? BoardQuerier.getColorBySquare(square) ?? BoardQuerier.getColorOfTurn();
+        color = color ?? BoardQuerier.getColorBySquare(square) ?? BoardQuerier.getTurnColor();
 
         // Get the horizontal, vertical and diagonal squares but only one square away.
         return {
@@ -220,7 +220,7 @@ export class RouteCalculator{
          * Find player's color by given square. If square has no piece,
          * then use BoardQuerier.
          */
-        color = color ?? BoardQuerier.getColorBySquare(square) ?? BoardQuerier.getColorOfTurn();
+        color = color ?? BoardQuerier.getColorBySquare(square) ?? BoardQuerier.getTurnColor();
 
         return {
             ...DirectionCalculator.getHorizontalSquares(square, color, distanceLimit, pieceSensitivity),

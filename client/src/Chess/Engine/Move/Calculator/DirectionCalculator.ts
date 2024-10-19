@@ -32,7 +32,7 @@ export class DirectionCalculator {
      * For more information, please check the class description.
      * @See src/Chess/Engine/Move/Calculator/DirectionCalculator.ts
      */
-    public static getDiagonalSquares(square: Square, safeColor: Color | null, distanceLimit: number | null = null, pieceSensitivity: boolean = true): Route
+    public static getDiagonalSquares(square: Square, stopColor: Color | null, distanceLimit: number | null = null, pieceSensitivity: boolean = true): Route
     {
         /**
          * Step is used to set the next square of the given square. For example, if step is -7 and
@@ -41,10 +41,10 @@ export class DirectionCalculator {
          * @see For more information, please check the Square enum.
          */
         return {
-            [MoveRoute.BottomRight]: this.traversePath(square, 9, distanceLimit, pieceSensitivity, safeColor),
-            [MoveRoute.TopRight]: this.traversePath(square, -7, distanceLimit, pieceSensitivity, safeColor),
-            [MoveRoute.TopLeft]: this.traversePath(square, -9, distanceLimit, pieceSensitivity, safeColor),
-            [MoveRoute.BottomLeft]: this.traversePath(square, 7, distanceLimit, pieceSensitivity, safeColor),
+            [MoveRoute.BottomRight]: this.traversePath(square, 9, distanceLimit, pieceSensitivity, stopColor),
+            [MoveRoute.TopRight]: this.traversePath(square, -7, distanceLimit, pieceSensitivity, stopColor),
+            [MoveRoute.TopLeft]: this.traversePath(square, -9, distanceLimit, pieceSensitivity, stopColor),
+            [MoveRoute.BottomLeft]: this.traversePath(square, 7, distanceLimit, pieceSensitivity, stopColor),
         };
     }
 
@@ -53,7 +53,7 @@ export class DirectionCalculator {
      * For more information, please check the class description.
      * @See src/Chess/Engine/Move/Calculator/DirectionCalculator.ts
      */
-    public static getHorizontalSquares(square: Square, safeColor: Color | null, distanceLimit: number | null = null, pieceSensitivity: boolean = true): Route
+    public static getHorizontalSquares(square: Square, stopColor: Color | null, distanceLimit: number | null = null, pieceSensitivity: boolean = true): Route
     {
         /**
          * Step is used to set the next square of the given square. For example, if step is 1 and
@@ -62,8 +62,8 @@ export class DirectionCalculator {
          * @see For more information, please check the Square enum.
          */
         return {
-            [MoveRoute.Right]: this.traversePath(square, 1, distanceLimit, pieceSensitivity, safeColor),
-            [MoveRoute.Left]: this.traversePath(square, -1, distanceLimit, pieceSensitivity, safeColor),
+            [MoveRoute.Right]: this.traversePath(square, 1, distanceLimit, pieceSensitivity, stopColor),
+            [MoveRoute.Left]: this.traversePath(square, -1, distanceLimit, pieceSensitivity, stopColor),
         };
     }
 
@@ -72,7 +72,7 @@ export class DirectionCalculator {
      * For more information, please check the class description.
      * @See src/Chess/Engine/Move/Calculator/DirectionCalculator.ts
      */
-    public static getVerticalSquares(square: Square, safeColor: Color | null, distanceLimit: number | null = null, pieceSensitivity: boolean = true): Route
+    public static getVerticalSquares(square: Square, stopColor: Color | null, distanceLimit: number | null = null, pieceSensitivity: boolean = true): Route
     {
         /**
          * Step is used to set the next square of the given square. For example, if step is 8 and
@@ -81,8 +81,8 @@ export class DirectionCalculator {
          * @see For more information, please check the Square enum.
          */
         return {
-            [MoveRoute.Bottom]: this.traversePath(square, 8, distanceLimit, pieceSensitivity, safeColor),
-            [MoveRoute.Top]: this.traversePath(square, -8, distanceLimit, pieceSensitivity, safeColor),
+            [MoveRoute.Bottom]: this.traversePath(square, 8, distanceLimit, pieceSensitivity, stopColor),
+            [MoveRoute.Top]: this.traversePath(square, -8, distanceLimit, pieceSensitivity, stopColor),
         };
     }
 
@@ -91,7 +91,7 @@ export class DirectionCalculator {
      * For more information, please check the class description.
      * @See src/Chess/Engine/Move/Calculator/DirectionCalculator.ts
      */
-    private static traversePath(square: Square, step: number, distanceLimit: number | null, pieceSensitivity: boolean, safeColor: Color | null): Array<Square>
+    private static traversePath(square: Square, step: number, distanceLimit: number | null, pieceSensitivity: boolean, stopColor: Color | null): Array<Square>
     {
         // This variable is used to check if the edge is changed.
         // For more information, please check the isEdgeChanged function.
@@ -144,7 +144,7 @@ export class DirectionCalculator {
              * if square has no player's piece(has enemy piece) or piece sensitivity is false then
              * add the square to the array.
              */
-            if(!BoardQuerier.isSquareHasPiece(square, safeColor) || !pieceSensitivity)
+            if(!BoardQuerier.isSquareHasPiece(square, stopColor) || !pieceSensitivity)
                 squares.push(square);
 
             /**
