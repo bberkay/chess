@@ -42,6 +42,16 @@
             text-align: center;
             padding:5px;
             cursor: pointer;
+            height: var(--notation-table-piece-icon-size);
+            
+            & .piece-icon{
+                font-size: var(--notation-table-piece-icon-size);
+                line-height: 1;
+            }
+
+            & .move{
+                line-height: 1;
+            }
         }
 
         &:nth-child(odd) td:has(span){
