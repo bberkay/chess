@@ -323,7 +323,6 @@ export class ChessEngine extends BoardManager {
      */
     public playMove(from: Square, to: Square): void
     {
-        console.log("playMove", from, to);
         if([GameStatus.NotReady, 
             GameStatus.Draw, 
             GameStatus.WhiteVictory, 

@@ -127,16 +127,15 @@ export class ChessPlatform{
          * the last connection should be cleared.
          */
         const createEventListeners = () => {
-            // TODO: Open this
-            /*window.addEventListener('beforeunload', (event) => {
+            window.addEventListener('beforeunload', (event) => {
                 if(this.socket && [GameStatus.BlackInCheck, GameStatus.WhiteInCheck, GameStatus.InPlay].includes(this.chess.getGameStatus())){
                     event.preventDefault();
                     event.returnValue = '';
                 }
-            });*/
+            });
 
             document.addEventListener(PlatformEvent.onBoardCreated, (() => {
-                this.forceClearLastConnection(false);
+                this.terminateAndCleanupConnection(false);
             }) as EventListener);
         }
 
@@ -211,13 +210,13 @@ export class ChessPlatform{
             const response = await fetch(SERVER_ADDRESS + "?lobbyId=" + lobbyId);
             if (!response.ok) {
                 if(showAsError) this.platform.navigatorModal.showError("The lobby id is invalid.");
-                this.forceClearLastConnection();
+                this.terminateAndCleanupConnection();
                 return null;
             }
         } catch (error) {
             console.log("error", error);
             if(showAsError) this.platform.navigatorModal.showError("The lobby id cannot be checked.");
-            this.forceClearLastConnection();
+            this.terminateAndCleanupConnection();
             return null;
         }
 
@@ -357,7 +356,7 @@ export class ChessPlatform{
     private sendPlayAgainOffer(): void
     {
         this.platform.navigatorModal.hide();
-        this.platform.notationMenu.showPlayAgainOfferSent();
+        this.platform.notationMenu.showSentPlayAgainOffer();
         this.socket?.send(WsCommand.playAgainOffered());
     }
 
@@ -366,7 +365,7 @@ export class ChessPlatform{
      */
     private sendDrawOffer(): void
     {
-        this.platform.notationMenu.showDrawOfferSent();
+        this.platform.notationMenu.showSentDrawOffer();
         this.socket?.send(WsCommand.drawOffered());
     }
 
@@ -375,7 +374,7 @@ export class ChessPlatform{
      */
     private sendUndoOffer(): void
     {
-        this.platform.notationMenu.showUndoOfferSent();
+        this.platform.notationMenu.showSentUndoOffer();
         this.socket?.send(WsCommand.undoOffered());
     }
 
@@ -430,7 +429,7 @@ export class ChessPlatform{
      * for a new game by clearing the last board and displaying the
      * new game utility menu.
      */
-    private forceClearLastConnection(resetPlatform: boolean = true): void
+    private terminateAndCleanupConnection(resetPlatform: boolean = true): void
     {
         this.socket?.close();
         this.socket = null;
@@ -443,7 +442,10 @@ export class ChessPlatform{
     }
 
     /**
-     * 
+     * Resynchronize the game due to the mismatched status 
+     * between the client and server. This function recreates
+     * the websocket connection and displays an error message
+     * about the mismatched status.
      */
     private resyncGameDueToMismatchedStatus(webSocketEndpoint: string): void
     {
@@ -470,140 +472,93 @@ export class ChessPlatform{
         
         let lobbyId: string | null = null;
         let player: Player | null = null;
-        let closeConnectionOnFinish = false;
+        let shouldTerminateConnectionOnClose = false;
 
-        this.socket.onopen = (event) => {
+        /**
+         * Handle the WebSocket connection events.
+         */
+        this.socket.onopen = () => {
             lobbyId = null;
             player = null;
-            closeConnectionOnFinish = false;
+            shouldTerminateConnectionOnClose = false;
         };
 
         this.socket.onmessage = (event) => {
-            console.log("message:", event.data);
+            //console.log("message:", event.data);
             const [wsCommand, wsData] = WsCommand.parse(event.data);
             switch(wsCommand){
                 case WsTitle.Created:
-                    lobbyId = (wsData as WsCreatedData).lobbyId;
-                    player = (wsData as WsCreatedData).player;
-                    this.platform.navigatorModal.showLobbyInfo(window.location.origin + "/" + lobbyId);
-                    this.displayLobbyIdOnUrl(lobbyId);
-                    LocalStorage.save(LocalStorageKey.LastLobbyConnection, wsData);
-                    LocalStorage.save(LocalStorageKey.LastPlayerName, player.name);
-                    this.logger.save(`Lobby created and connected [${lobbyId}] as ${player.name}.`);
+                    ({ lobbyId, player } = this._handleCreatedCommand(wsData as WsCreatedData));
                     break;
                 case WsTitle.Connected:
-                    lobbyId = (wsData as WsConnectedData).lobbyId;
-                    player = (wsData as WsConnectedData).player;
-                    this.displayLobbyIdOnUrl(lobbyId);
-                    LocalStorage.save(LocalStorageKey.LastLobbyConnection, wsData);
-                    LocalStorage.save(LocalStorageKey.LastPlayerName, player.name);
-                    this.logger.save(`Connected to the lobby[${lobbyId}] as ${player.name}.`);
-                    break;
-                case WsTitle.PlayAgainAccepted:
-                case WsTitle.Started:
-                    this.platform.navigatorModal.hide();
-                    const playerColor = (wsData as WsStartedData).whitePlayer.id === player!.id ? Color.White : Color.Black;
-                    this.platform.preparePlatformForOnlineGame(wsData as WsStartedData, playerColor);
-                    document.addEventListener(ChessEvent.onPieceMovedByPlayer, ((event: CustomEvent) => {
-                        if(!this.socket) return;
-                        const { from, to } = event.detail;
-                        this.socket?.send(WsCommand.moved({from, to}));
-                        this.chess.board.lock(false);
-                    }) as EventListener);
-                    break;
-                case WsTitle.Moved:
-                    this.chess.board.unlock();
-                    this.chess.playMove(
-                        (wsData as WsMovedData).from, 
-                        (wsData as WsMovedData).to
-                    );
-                    document.dispatchEvent(new CustomEvent(
-                        ChessEvent.onPieceMovedByOpponent, {
-                            detail: {
-                                from: (wsData as WsMovedData).from, 
-                                to: (wsData as WsMovedData).to
-                            }
-                        }
-                    ));
-                    break;
-                case WsTitle.DrawAccepted:
-                    this.chess.engine.setGameStatus(GameStatus.Draw);
-                    this.chess.finishTurn();
-                    this.platform.navigatorModal.showGameOverAsDrawAccepted();
-                    closeConnectionOnFinish = true;
-                    break;
-                case WsTitle.Aborted:
-                    this.chess.engine.setGameStatus(GameStatus.Draw);
-                    this.chess.finishTurn();
-                    this.platform.navigatorModal.showGameOverAsAborted();
-                    closeConnectionOnFinish = true;
-                    break;
-                case WsTitle.Resigned:
-                    this.chess.engine.setGameStatus((wsData as WsResignedData).gameStatus);
-                    this.chess.finishTurn();
-                    this.platform.navigatorModal.showGameOverAsResigned(
-                        (wsData as WsResignedData).gameStatus === GameStatus.WhiteVictory 
-                            ? Color.Black 
-                            : Color.White
-                    );
-                    closeConnectionOnFinish = true;
-                    break;
-                case WsTitle.Finished:
-                    // When the game is finished on the server, also should be finished on the client.
-                    // If there is a mismatch, then make client's game status equal to the server's game status.
-                    if(this.chess.getGameStatus() !== (wsData as WsFinishedData).gameStatus)
-                        this.resyncGameDueToMismatchedStatus(webSocketEndpoint);
-                    closeConnectionOnFinish = true;
-                    break;
-                case WsTitle.UndoAccepted:
-                    this.chess.takeBack(true, (wsData as WsUndoData).undoColor);
-                    this.platform.notationMenu.deleteLastNotation((wsData as WsUndoData).undoColor);
-                    this.platform.notationMenu.goBack();
-                    this.platform.notationMenu.update();
-                    if ((wsData as WsUndoData).board !== this.chess.getGameAsFenNotation())
-                        this.resyncGameDueToMismatchedStatus(webSocketEndpoint);
-                    break;
-                case WsTitle.DrawOffered:
-                    this.platform.notationMenu.showDrawOffer();
-                    break;
-                case WsTitle.UndoOffered:
-                    this.platform.notationMenu.showUndoOffer();
-                    break;
-                case WsTitle.PlayAgainOffered:
-                    this.platform.notationMenu.showPlayAgainOffer();
-                    break;
-                case WsTitle.SentOfferCancelled:
-                    this.platform.notationMenu.goBack();
-                    break;
-                case WsTitle.SentOfferDeclined:
-                    this.platform.notationMenu.goBack();
+                    ({ lobbyId, player } = this._handleConnectedCommand(wsData as WsConnectedData));
                     break;
                 case WsTitle.Disconnected:
-                    this.platform.notationMenu.updatePlayerAsOffline(
-                        (wsData as WsDisconnectedData).color
-                    );
+                    this._handleDisconnectedCommand(wsData as WsDisconnectedData);
                     break;
                 case WsTitle.Reconnected:
-                    this.platform.notationMenu.updatePlayerAsOnline(
-                        (wsData as WsReconnectedData).color
-                    );
+                    this._handleReconnectedCommand(wsData as WsReconnectedData);
+                    break;
+                case WsTitle.Started:
+                    this._handleStartedCommand(wsData as WsStartedData, player!);
+                    break;
+                case WsTitle.Moved:
+                    this._handleMovedCommand(wsData as WsMovedData);
+                    break;
+                case WsTitle.Finished:
+                    this._handleFinishedCommand(wsData as WsFinishedData, webSocketEndpoint);
+                    shouldTerminateConnectionOnClose = true;
+                    break;
+                case WsTitle.Aborted:
+                    this._handleAbortedCommand();
+                    shouldTerminateConnectionOnClose = true;
+                    break;
+                case WsTitle.Resigned:
+                    this._handleResignedCommand(wsData as WsResignedData);
+                    shouldTerminateConnectionOnClose = true;
+                    break;
+                case WsTitle.DrawOffered:
+                    this._handleDrawOfferedCommand();
+                    break;
+                case WsTitle.DrawAccepted:
+                    this._handleDrawAcceptedCommand();
+                    shouldTerminateConnectionOnClose = true;
+                    break;
+                case WsTitle.UndoOffered:
+                    this._handleUndoOfferedCommand();
+                    break;
+                case WsTitle.UndoAccepted:
+                    this._handleUndoAcceptedCommand(wsData as WsUndoData, webSocketEndpoint);
+                    break;
+                case WsTitle.PlayAgainOffered:
+                    this._handlePlayAgainOfferedCommand();
+                    break;
+                case WsTitle.PlayAgainAccepted:
+                    this._handlePlayAgainAcceptedCommand(wsData as WsData, player!);
+                    break;
+                case WsTitle.SentOfferDeclined:
+                    this._handleSentOfferDeclinedCommand();
+                    break;
+                case WsTitle.SentOfferCancelled:
+                    this._handleSentOfferCancelledCommand();
                     break;
                 case WsTitle.Error:
-                    this.platform.navigatorModal.showError((wsData as WsErrorData).message);
-                    this.logger.save(`Error: ${(wsData as WsErrorData).message}`);
+                    this._handleErrorCommand(wsData as WsErrorData);
                     break;
                 default:
                     throw new Error("Invalid WebSocket command.");
             }
         };
 
-        this.socket.onerror = (event) => {
+        this.socket.onerror = () => {
             this.platform.navigatorModal.showError(`An error occurred on the WebSocket connection. Retrying in <span id='reconnection-counter'></span> seconds...`, false);
             this.logger.save("An error occurred on the WebSocket connection. Retrying...");
-
-            // Retry the connection
+            
             let remainingTime = RECONNECTION_TIMEOUT;
-            const reconnectionTimeout = document.getElementById("reconnection-counter")!;
+            const reconnectionTimeout = document.getElementById("reconnection-counter");
+            if(!reconnectionTimeout) 
+                return;
+
             const interval = window.setInterval(() => {
                 if(remainingTime === 0 || !reconnectionTimeout){
                     reconnectionTimeout.innerText = "Reconnecting...";
@@ -618,7 +573,7 @@ export class ChessPlatform{
                         else{
                             this.platform.navigatorModal.showError("There is a problem with the WebSocket connection. Please try again later.");
                             this.logger.save("There is a problem with the WebSocket connection. Please try again later.");
-                            this.forceClearLastConnection();
+                            this.terminateAndCleanupConnection();
                         }
                         clearTimeout(timeout);
                     }, RECONNECTION_TIMEOUT);
@@ -628,12 +583,274 @@ export class ChessPlatform{
             }, 1000);
         };
         
-        this.socket.onclose = (event) => {
-            if(closeConnectionOnFinish){
-                this.forceClearLastConnection();
-                closeConnectionOnFinish = false;
+        this.socket.onclose = () => {
+            if(shouldTerminateConnectionOnClose){
+                this.terminateAndCleanupConnection();
+                shouldTerminateConnectionOnClose = false;
             }
         };
+    }
+
+    /**
+     * Handle the WsTitle.Created command 
+     * that is received from the server.
+     * 
+     * Parse the data, show the lobby info modal, 
+     * lobby id on the url and save the last connection
+     * to the local storage.
+     */
+    private _handleCreatedCommand(wsData: WsCreatedData): { lobbyId: string, player: Player }
+    {
+        const { lobbyId, player } = wsData as WsCreatedData;
+        this.platform.navigatorModal.showLobbyInfo(window.location.origin + "/" + lobbyId);
+        this.displayLobbyIdOnUrl(lobbyId);
+        LocalStorage.save(LocalStorageKey.LastLobbyConnection, wsData);
+        LocalStorage.save(LocalStorageKey.LastPlayerName, player.name);
+        this.logger.save(`Lobby created and connected [${lobbyId}] as ${player.name}.`);
+        return { lobbyId, player };
+    }
+
+    /**
+     * Handle the WsTitle.Connected command
+     * that is received from the server.
+     * 
+     * Parse the data, show the lobby info modal,
+     * lobby id on the url and save the last connection
+     * to the local storage.
+     */
+    private _handleConnectedCommand(wsData: WsConnectedData): { lobbyId: string, player: Player }
+    {
+        const { lobbyId, player } = wsData as WsConnectedData;
+        this.displayLobbyIdOnUrl(lobbyId);
+        LocalStorage.save(LocalStorageKey.LastLobbyConnection, wsData);
+        LocalStorage.save(LocalStorageKey.LastPlayerName, player.name);
+        this.logger.save(`Connected to the lobby[${lobbyId}] as ${player.name}.`);
+        return { lobbyId, player };
+    }
+
+    /**
+     * Handle the WsTitle.Disconnected command
+     * that is received from the server.
+     * 
+     * Update the player as offline on the notation menu.
+     */
+    private _handleDisconnectedCommand(wsData: WsDisconnectedData): void
+    {
+        this.platform.notationMenu.updatePlayerAsOffline(
+            (wsData as WsDisconnectedData).color
+        );
+    }
+
+    /**
+     * Handle the WsTitle.Reconnected command
+     * that is received from the server.
+     * 
+     * Update the player as online on the notation menu.
+     */
+    private _handleReconnectedCommand(wsData: WsReconnectedData): void
+    {
+        this.platform.notationMenu.updatePlayerAsOnline(
+            (wsData as WsReconnectedData).color
+        );
+    }
+
+    /**
+     * Handle the WsTitle.Started command
+     * that is received from the server.
+     * 
+     * Prepare the platform for the online game, 
+     * and add the event listener that listens 
+     * the player's move, sends it to the server 
+     * and locks the board.
+     */
+    private _handleStartedCommand(wsData: WsStartedData, player: Player): void
+    {
+        const playerColor = (wsData as WsStartedData).whitePlayer.id === player!.id ? Color.White : Color.Black;
+        this.platform.preparePlatformForOnlineGame(wsData as WsStartedData, playerColor);
+        document.addEventListener(ChessEvent.onPieceMovedByPlayer, ((event: CustomEvent) => {
+            if(!this.socket) return;
+            const { from, to } = event.detail;
+            this.socket?.send(WsCommand.moved({from, to}));
+            this.chess.board.lock(false);
+        }) as EventListener);
+    }
+
+    /**
+     * Handle the WsTitle.Moved command
+     * that is received from the server.
+     * 
+     * Unlock the board, play the move and 
+     * dispatch the event that the piece is 
+     * moved by the opponent.
+     */
+    private _handleMovedCommand(wsData: WsMovedData): void
+    {
+        this.chess.board.unlock();
+        this.chess.playMove(
+            (wsData as WsMovedData).from, 
+            (wsData as WsMovedData).to
+        );
+        document.dispatchEvent(new CustomEvent(
+            ChessEvent.onPieceMovedByOpponent, { detail: wsData as WsMovedData }
+        ));
+    }
+
+    /**
+     * Handle the WsTitle.Finished command
+     * that is received from the server.
+     * 
+     * Check the game status and resynchronize the 
+     * game if there is a mismatched status between 
+     * the client and server.
+     */
+    private _handleFinishedCommand(wsData: WsFinishedData, webSocketEndpoint: string): void
+    {
+        if(this.chess.getGameStatus() !== (wsData as WsFinishedData).gameStatus)
+            this.resyncGameDueToMismatchedStatus(webSocketEndpoint);
+    }
+
+    /**
+     * Handle the WsTitle.Aborted command
+     * that is received from the server.
+     * 
+     * Set the game status as draw, finish the turn
+     * and show the game over modal as aborted.
+     */
+    private _handleAbortedCommand(): void
+    {
+        this.chess.engine.setGameStatus(GameStatus.Draw);
+        this.chess.finishTurn();
+        this.platform.navigatorModal.showGameOverAsAborted();
+    }
+
+    /**
+     * Handle the WsTitle.Resigned command
+     * that is received from the server.
+     * 
+     * Set the game status as the resigned player's 
+     * opponent's victory, finish the turn and show 
+     * the game over modal as resigned.
+     */
+    private _handleResignedCommand(wsData: WsResignedData): void
+    {
+        this.chess.engine.setGameStatus((wsData as WsResignedData).gameStatus);
+        this.chess.finishTurn();
+        this.platform.navigatorModal.showGameOverAsResigned(
+            (wsData as WsResignedData).gameStatus === GameStatus.WhiteVictory 
+                ? Color.Black 
+                : Color.White
+        );
+    }
+    
+    /**
+     * Handle the WsTitle.UndoOffered command
+     * that is received from the server.
+     * 
+     * Show the received undo offer to the user.
+     */
+    private _handleUndoOfferedCommand(): void
+    {
+        this.platform.notationMenu.showReceivedUndoOffer();
+    }
+
+    /**
+     * Handle the WsTitle.UndoAccepted command
+     * that is received from the server.
+     * 
+     * Take back the move, delete the last notation
+     * and go back to the notation menu. If there is a
+     * mismatched status between the client and server
+     * after the undo, resynchronize the game.
+     */
+    private _handleUndoAcceptedCommand(wsData: WsUndoData, webSocketEndpoint: string): void
+    {
+        this.chess.takeBack(true, (wsData as WsUndoData).undoColor);
+        this.platform.notationMenu.deleteLastNotation((wsData as WsUndoData).undoColor);
+        this.platform.notationMenu.goBack();
+        this.platform.notationMenu.update();
+        if ((wsData as WsUndoData).board !== this.chess.getGameAsFenNotation())
+            this.resyncGameDueToMismatchedStatus(webSocketEndpoint);
+    }
+
+    /**
+     * Handle the WsTitle.DrawOffered command
+     * that is received from the server.
+     * 
+     * Show the received draw offer to the user.
+     */
+    private _handleDrawOfferedCommand(): void
+    {
+        this.platform.notationMenu.showReceivedDrawOffer();
+    }
+
+    /**
+     * Handle the WsTitle.DrawAccepted command
+     * that is received from the server.
+     * 
+     * Set the game status as draw, finish the turn
+     * and show the game over modal as draw accepted.
+     */
+    private _handleDrawAcceptedCommand(): void
+    {
+        this.chess.engine.setGameStatus(GameStatus.Draw);
+        this.chess.finishTurn();
+        this.platform.navigatorModal.showGameOverAsDrawAccepted();
+    }
+
+    /**
+     * Handle the WsTitle.PlayAgainOffered command
+     * that is received from the server.
+     * 
+     * Show the received play again offer to the user.
+     */
+    private _handlePlayAgainOfferedCommand(): void
+    {
+        this.platform.notationMenu.showReceivedPlayAgainOffer();
+    }
+
+    /**
+     * Handle the WsTitle.PlayAgainAccepted command
+     * that is received from the server.
+     * 
+     * Start the game again.
+     */
+    private _handlePlayAgainAcceptedCommand(wsData: WsData, player: Player): void
+    {
+        this._handleStartedCommand(wsData as WsStartedData, player);
+    }
+
+    /**
+     * Handle the WsTitle.SentOfferDeclined command
+     * that is received from the server.
+     * 
+     * Go back to the notation menu.
+     */
+    private _handleSentOfferDeclinedCommand(): void
+    {
+        this.platform.notationMenu.goBack();
+    }
+
+    /**
+     * Handle the WsTitle.SentOfferCancelled command
+     * that is received from the server.
+     * 
+     * Go back to the notation menu.
+     */
+    private _handleSentOfferCancelledCommand(): void
+    {
+        this._handleSentOfferDeclinedCommand();
+    }
+
+    /**
+     * Handle the WsTitle.Error command
+     * that is received from the server.
+     * 
+     * Show the error message to the user.
+     */
+    private _handleErrorCommand(wsData: WsErrorData): void
+    {
+        this.platform.navigatorModal.showError((wsData as WsErrorData).message);
+        this.logger.save(`Error: ${(wsData as WsErrorData).message}`);
     }
 }
 

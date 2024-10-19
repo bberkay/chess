@@ -433,7 +433,7 @@ export class Platform{
         }
 
         this._createBoardAndHandleComponents(createdGame.game);
-        this.chess.board.disablePreSelectionFor(playerColor === Color.White ? Color.Black : Color.White);
+        this.chess.board.disablePreSelection(playerColor === Color.White ? Color.Black : Color.White);
         this.notationMenu.displayOnlineGameUtilityMenu();
         this.notationMenu.updatePlayerCards(createdGame.whitePlayer, createdGame.blackPlayer);
         this.notationMenu.setTurnIndicator(this.chess.getTurnColor());

@@ -628,7 +628,6 @@ export class BoardEditor extends Component{
     public saveFen(fen: string | null = null): void
     {
         this._savedFenNotation = fen ? fen : this.getCurrentFen();
-        console.log("fen saved: ", this._savedFenNotation);
         LocalStorage.save(LocalStorageKey.LastSavedBoard, this._savedFenNotation);
     }
 
@@ -637,7 +636,6 @@ export class BoardEditor extends Component{
      */
     public getSavedFen(): string
     {
-        console.log("fen loaded: ", this._savedFenNotation);
         return this._savedFenNotation || LocalStorage.load(LocalStorageKey.LastSavedBoard) || this.getCurrentFen();
     }
 

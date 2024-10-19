@@ -1012,7 +1012,7 @@ export class NotationMenu extends Component {
     /**
      * Show the offer menu with the given message and operation.
      */
-    private _showOffer(
+    private _showReceivedOffer(
         offerMessage: string, 
         offerOperation: SocketOperation.AcceptDrawOffer 
         | SocketOperation.AcceptPlayAgainOffer 
@@ -1043,8 +1043,8 @@ export class NotationMenu extends Component {
      * declines, client will send the declined message to the server. Shouldn't
      * be called without the offer coming from the server.
      */
-    public showDrawOffer(): void {
-        this._showOffer(
+    public showReceivedDrawOffer(): void {
+        this._showReceivedOffer(
             "Opponent has offered a draw.",
             SocketOperation.AcceptDrawOffer
         );
@@ -1056,8 +1056,8 @@ export class NotationMenu extends Component {
      * declines, client will send the declined message to the server. Shouldn't
      * be called without the offer coming from the server.
      */
-    public showUndoOffer(): void {
-        this._showOffer(
+    public showReceivedUndoOffer(): void {
+        this._showReceivedOffer(
             "Opponent has offered to undo the last move.",
             SocketOperation.AcceptUndoOffer
         );
@@ -1070,9 +1070,9 @@ export class NotationMenu extends Component {
      * client will send the declined message to the server. Shouldn't
      * be called without the offer coming from the server.
      */
-    public showPlayAgainOffer(): void
+    public showReceivedPlayAgainOffer(): void
     {
-        this._showOffer(
+        this._showReceivedOffer(
             "Your opponet has offered to play again.",
             SocketOperation.AcceptPlayAgainOffer
         );
@@ -1097,7 +1097,7 @@ export class NotationMenu extends Component {
      * is a feedback for the player that the play again offer is sent.
      * This function should be called after the play again offer is sent.
      */
-    public showPlayAgainOfferSent(): void {
+    public showSentPlayAgainOffer(): void {
         this._showSentRequest(document.querySelector(`[data-socket-operation="${SocketOperation.SendPlayAgainOffer}"]`)!);
     }
 
@@ -1106,7 +1106,7 @@ export class NotationMenu extends Component {
      * is a feedback for the player that the draw offer is sent.
      * This function should be called after the draw offer is sent.
      */
-    public showDrawOfferSent(): void {
+    public showSentDrawOffer(): void {
         this._showSentRequest(document.querySelector(`[data-socket-operation="${NotationMenuOperation.SendDrawOffer}"]`)!);
     }
 
@@ -1115,7 +1115,7 @@ export class NotationMenu extends Component {
      * is a feedback for the player that the undo offer is sent.
      * This function should be called after the undo offer is sent.
      */
-    public showUndoOfferSent(): void {
+    public showSentUndoOffer(): void {
         this._showSentRequest(document.querySelector(`[data-socket-operation="${NotationMenuOperation.SendUndoOffer}"]`)!);
     }
 
