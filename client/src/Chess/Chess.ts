@@ -146,7 +146,7 @@ export class Chess {
         this._bot.start();
 
         this._lastCreatedBotSettings = { botColor: this._bot.color, botDifficulty };
-        this.board.disablePreSelectionFor(this._bot.color);
+        this.board.disablePreSelection(this._bot.color);
         this.logger.save(`Bot[${this._bot.color}] created with difficulty[${botDifficulty}]`);
 
         // First move

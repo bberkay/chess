@@ -33,7 +33,7 @@ export class ChessBoard {
 
     private turnColor: Color.White | Color.Black = Color.White;
     private _isMouseUpEventBound: boolean = false;
-    private _disablePreSelectionFor: Color | null = null;
+    private _disabledPreSelectionColor: Color | null = null;
     private _lockedSquaresModes: Record<string, SquareClickMode> = {};
     private _isBoardMoveEventBound: boolean = false;
 
@@ -69,7 +69,7 @@ export class ChessBoard {
         this.turnColor = Color.White;
         this._lockedSquaresModes = {};
         this._isBoardMoveEventBound = false;
-        this._disablePreSelectionFor = null;
+        this._disabledPreSelectionColor = null;
         this.logger.save("Properties of the board are cleared.");
     }
 
@@ -205,7 +205,7 @@ export class ChessBoard {
                 else
                     this.setSquareClickMode(
                         square, 
-                        this._disablePreSelectionFor == pieceColor 
+                        this._disabledPreSelectionColor == pieceColor 
                             ? SquareClickMode.Disable 
                             : SquareClickMode.PreSelect
                     );
@@ -859,7 +859,7 @@ export class ChessBoard {
 
             if (!disablePreSelection) {
                 if (this.getPieceElementOnSquare(square)
-                    && this.getPieceColor(square) !== this._disablePreSelectionFor)
+                    && this.getPieceColor(square) !== this._disabledPreSelectionColor)
                     return;
             } 
             
@@ -999,8 +999,8 @@ export class ChessBoard {
     /**
      * Disable the preselection of the given color pieces.
      */
-    public disablePreSelectionFor(color: Color): void {
-        this._disablePreSelectionFor = color;
+    public disablePreSelection(color: Color): void {
+        this._disabledPreSelectionColor = color;
         this.setTurnColor(this.turnColor);
     }
 
