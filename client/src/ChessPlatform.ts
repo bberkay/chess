@@ -119,12 +119,8 @@ export class ChessPlatform{
         };        
 
         /**
-         * Create necessary event listeners for the chess platform.
-         * Event listeners:
-         * - window.beforeunload: If the user tries to leave the page or refresh
-         * while playing a online game should be warned.
-         * - PlatformEvent.onBoardCreated: If the user creates a single player game,
-         * the last connection should be cleared.
+         * Create necessary event listeners for the chess 
+         * platform.
          */
         const createEventListeners = () => {
             window.addEventListener('beforeunload', (event) => {
@@ -136,6 +132,13 @@ export class ChessPlatform{
 
             document.addEventListener(PlatformEvent.onBoardCreated, (() => {
                 this.terminateAndCleanupConnection(false);
+            }) as EventListener);
+
+            document.addEventListener(ChessEvent.onPieceMovedByPlayer, ((event: CustomEvent) => {
+                if(!this.socket) return;
+                const { from, to } = event.detail;
+                this.socket?.send(WsCommand.moved({from, to}));
+                this.chess.board.lock(false);
             }) as EventListener);
         }
 
@@ -667,12 +670,6 @@ export class ChessPlatform{
     {
         const playerColor = (wsData as WsStartedData).whitePlayer.id === player!.id ? Color.White : Color.Black;
         this.platform.preparePlatformForOnlineGame(wsData as WsStartedData, playerColor);
-        document.addEventListener(ChessEvent.onPieceMovedByPlayer, ((event: CustomEvent) => {
-            if(!this.socket) return;
-            const { from, to } = event.detail;
-            this.socket?.send(WsCommand.moved({from, to}));
-            this.chess.board.lock(false);
-        }) as EventListener);
     }
 
     /**
