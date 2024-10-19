@@ -20,14 +20,15 @@ export const PIECE_ANIMATION_DURATION_MS: number = PIECE_ANIMATION_DURATION * 10
  */
 export class ChessBoard {
 
-    private readonly sounds: { [key in SoundEffect]: HTMLAudioElement } = {
-        Start: new Audio("./assets/sounds/game-start.mp3"),
-        Move: new Audio("./assets/sounds/move.mp3"),
-        Capture: new Audio("./assets/sounds/capture.mp3"),
-        Castle: new Audio("./assets/sounds/castle.mp3"),
-        Check: new Audio("./assets/sounds/move-check.mp3"),
-        Promote: new Audio("./assets/sounds/promote.mp3"),
-        End: new Audio("./assets/sounds/game-end.mp3"),
+    private readonly sounds: { [key in SoundEffect]: string } = {
+        Start: "./assets/sounds/game-start.mp3",
+        Move: "./assets/sounds/move.mp3",
+        Capture: "./assets/sounds/capture.mp3",
+        Castle: "./assets/sounds/castle.mp3",
+        Check: "./assets/sounds/move-check.mp3",
+        Promote: "./assets/sounds/promote.mp3",
+        LowTime: "./assets/sounds/low-time.mp3",
+        End: "./assets/sounds/game-end.mp3",
     };
 
     private turnColor: Color.White | Color.Black = Color.White;
@@ -45,7 +46,6 @@ export class ChessBoard {
      */
     constructor() {
         this._loadCSS();
-        this._loadSounds();
     }
 
     /**
@@ -60,15 +60,6 @@ export class ChessBoard {
         link.rel = "stylesheet";
         link.href = './css/chessboard.css';
         document.head.appendChild(link);
-    }
-
-    /**
-     * This function loads the sounds files of the chess board.
-     */
-    private _loadSounds(): void {
-        for (const sound of Object.values(this.sounds)) {
-            document.body.appendChild(sound);
-        }
     }
 
     /**
@@ -528,7 +519,7 @@ export class ChessBoard {
      * move type by checking the square click mode of the target square(`to`). Mostly, this 
      * parameter is used by the bot/system/server etc.
      */
-    public playMove(from: Square, to: Square, moveType: MoveType | null = null): void {
+    public async playMove(from: Square, to: Square, moveType: MoveType | null = null): Promise<void> {
         this.removeEffectFromAllSquares();
         this.logger.save(`From[${from}], To[${to}] and Checked Square's(if exits) effects are cleaned.`);
         const fromSquare: HTMLDivElement = this.getSquareElement(from);
@@ -552,7 +543,7 @@ export class ChessBoard {
                 this._doPromote(toSquare);
                 break;
             default:
-                this._doNormalMove(fromSquare, toSquare);
+                await this._doNormalMove(fromSquare, toSquare);
                 break;
         }
     }
@@ -560,12 +551,11 @@ export class ChessBoard {
     /**
      * Do the normal move(move piece to another square) with animation on the chess board.
      */
-    private _doNormalMove(fromSquare: HTMLDivElement, toSquare: HTMLDivElement, playMoveSound: boolean = true): void {
+    private async _doNormalMove(fromSquare: HTMLDivElement, toSquare: HTMLDivElement, playMoveSound: boolean = true): Promise<void> {
         const piece: HTMLDivElement = fromSquare.querySelector(".piece") as HTMLDivElement;
         if (!piece) return;
-        this._animatePieceToSquare(piece, toSquare, playMoveSound).then(() => {
-            this.logger.save(`Piece moved to target square[${this.getSquareId(toSquare)}] on board`);
-        });
+        await this._animatePieceToSquare(piece, toSquare, playMoveSound)
+        this.logger.save(`Piece moved to target square[${this.getSquareId(toSquare)}] on board`);
     }
 
     /**
@@ -576,7 +566,7 @@ export class ChessBoard {
             const toSquareContent = square.querySelector(`.piece`);
             // FIXME: .piece[data-color="${this.getPieceColor(piece) === Color.White ? Color.Black : Color.White}"]
 
-            if (toSquareContent) {
+            if (toSquareContent && this.getPieceColor(toSquareContent) !== this.getPieceColor(piece)) {
                 // This is the case when the player captures 
                 // the opponent's piece by drag and drop.
                 if (!piece) this.removePiece(this.getSquareElementOfPiece(toSquareContent));
@@ -703,23 +693,9 @@ export class ChessBoard {
     private _doPromote(selectedSquare: HTMLDivElement): void {
         const { color, type, square } = this._findPromotedOptionBySquare(selectedSquare);
 
-        /**
-         * This function creates the piece on the board and 
-         * closes the promotion options.
-         */
-        const promote = (color: Color, pieceType: PieceType, square: Square) => {
-            this.createPiece(color, pieceType, square);
-            this.playSound(SoundEffect.Promote);
-            this.closePromotionMenu();
-        };
-
-        if(!selectedSquare.querySelector(".piece")) {
-            setTimeout(() => {
-                promote(color, type, square);
-            }, PIECE_ANIMATION_DURATION_MS);
-        } else {
-            promote(color, type, square);
-        }
+        this.createPiece(color, type, square);
+        this.playSound(SoundEffect.Promote);
+        this.closePromotionMenu();
 
         // Set the square effect of the promoted square on the last row.
         this.addSquareEffects(square, SquareEffect.To);
@@ -1241,7 +1217,16 @@ export class ChessBoard {
     /**
      * This function plays the given sound.
      */
-    private playSound(name: SoundEffect): void {
-        this.sounds[name].play().then();
+    public playSound(name: SoundEffect): void {
+        const audio = new Audio(this.sounds[name]);
+
+        audio.addEventListener('ended', () => {
+            audio.remove();
+        });
+
+        audio.play().catch(error => {
+            console.error("Error while playing sound: ", error);
+            audio.remove();
+        });
     }
 }

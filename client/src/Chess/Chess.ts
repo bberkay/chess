@@ -9,8 +9,8 @@
 
 import { JsonNotation, PieceType, Square, Color, StartPosition, ChessEvent, GameStatus, Durations, Move, Scores, MoveType, RemainingTimes } from "./Types";
 import { ChessEngine, MoveValidationError } from "./Engine/ChessEngine";
-import { ChessBoard, PIECE_ANIMATION_DURATION_MS } from "./Board/ChessBoard";
-import { SquareClickMode, SquareEffect } from "./Board/Types";
+import { ChessBoard } from "./Board/ChessBoard";
+import { SoundEffect, SquareClickMode, SquareEffect } from "./Board/Types";
 import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage.ts";
 import { Converter } from "./Utils/Converter.ts";
 import { Logger } from "@Services/Logger.ts";
@@ -362,41 +362,42 @@ export class Chess {
      * move type by checking the square click mode of the target square(`to`). Mostly, this 
      * parameter is used by the bot/system/server etc. so try to avoid using it.
      */
-    public playMove(from: Square, to: Square, moveType: MoveType | null = null): void {
+    public async playMove(from: Square, to: Square, moveType: MoveType | null = null): Promise<void> {
         try {
             this.engine.playMove(from, to);
             this._preSelectedSquare = null;
         } catch (e) {
             if (!(e instanceof MoveValidationError && this._preSelectedSquare)) {
+                this.board.refresh();
+                this._preMoves[this.engine.getTurnColor()] = [];
                 throw e;
             }
         }
 
-        this.board.playMove(from, to, moveType);
-        setTimeout(() => {
-            this.logger.save(`Move[${JSON.stringify({ from, to })}] played on board and engine`);
-            this.finishTurn();
-            document.dispatchEvent(new CustomEvent(ChessEvent.onPieceMoved, { detail: { from: from, to: to } }));
-        }, PIECE_ANIMATION_DURATION_MS);
+        await this.board.playMove(from, to, moveType);
+        this.logger.save(`Move[${JSON.stringify({ from, to })}] played on board and engine`);
+        this.finishTurn();
+        document.dispatchEvent(new CustomEvent(ChessEvent.onPieceMoved, { detail: { from: from, to: to } }));
     }
 
     /**
      * Play the pre-move if it exists.
      */
-    private playPreMoveIfExist(): void {
+    private async playPreMoveIfExist(): Promise<void> {
         const preMovesOfPlayer = this._preMoves[this.engine.getTurnColor()];
         if (preMovesOfPlayer.length == 0)
             return;
         
         const { from, to, type } = preMovesOfPlayer[0];
         this._preMoves[this.engine.getTurnColor()] = preMovesOfPlayer.length > 1 ? preMovesOfPlayer.slice(1) : [];
-        setTimeout(() => {
-            this.playMove(from, to, type);
+
+        setTimeout(async () => {
+            await this.playMove(from, to, type);
             this.logger.save(`Pre-move[${JSON.stringify({from, to, type})}] played`);
             document.dispatchEvent(new CustomEvent(
                 ChessEvent.onPieceMovedByPlayer, { detail: { from, to, type } }
             ));
-        }, PIECE_ANIMATION_DURATION_MS * 1.5);
+        }, 100);
     }
 
     /**
@@ -507,6 +508,7 @@ export class Chess {
             this.logger.save("Game updated in cache after move");
             LocalStorage.clear(LocalStorageKey.LastBoard);
             this.terminateBotIfExist();
+            this.board.playSound(SoundEffect.End);
             this.logger.save("Game over");
             document.dispatchEvent(new Event(ChessEvent.onGameOver));
             this._isGameOver = true;

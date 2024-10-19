@@ -53,5 +53,6 @@ export enum SoundEffect{
     Castle = "Castle",
     Check = "Check",
     Promote = "Promote",
+    LowTime = "LowTime",
     End = "End",
 }

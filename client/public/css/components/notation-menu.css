@@ -191,6 +191,7 @@
         & .score{
             font-size: var(--score-table-score-font-size);
             margin-top: 2px;
+            margin-left: 2px;
         }
     }
 }

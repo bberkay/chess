@@ -5,6 +5,7 @@ import { BoardEditorOperation, NavigatorModalOperation, NotationMenuOperation } 
 import { SocketOperation } from "../../Types";
 import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage.ts";
 import { NOTATION_MENU_ID } from "@Platform/Consts";
+import { SoundEffect } from "@Chess/Board/Types/index.ts";
 
 /**
  * This enum provides the utility menu types.
@@ -600,12 +601,12 @@ export class NotationMenu extends Component {
      */
     private getPieceUnicode(piece: PieceType | string): string {
         switch (piece) {
-            case PieceType.Pawn: return "&#9817;";
-            case PieceType.Rook: return "&#9814;";
-            case PieceType.Knight: return "&#9816;";
-            case PieceType.Bishop: return "&#9815;";
-            case PieceType.Queen: return "&#9813;";
-            case PieceType.King: return "&#9812;";
+            case PieceType.Pawn: return "&#9823;"; // &#9817;
+            case PieceType.Knight: return "&#9822;"; // &#9816;
+            case PieceType.Bishop: return "&#9821;"; // &#9815;
+            case PieceType.Rook: return "&#9820;"; // &#9814;
+            case PieceType.Queen: return "&#9819;"; // &#9813;
+            case PieceType.King: return "&#9818;"; // &#9812;
             default: return "";
         }
     }
@@ -896,6 +897,7 @@ export class NotationMenu extends Component {
             
             if (minutes <= 0 && seconds <= 10) {
                 if (!isDecisecondActive) {
+                    this.chess.board.playSound(SoundEffect.LowTime);
                     playerDecisecond.classList.add("active");
                     isDecisecondActive = true;
                 }
