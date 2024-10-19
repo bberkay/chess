@@ -3,7 +3,7 @@ import {MoveRoute, Piece, Route} from "../Types";
 import {BoardQuerier} from "../Board/BoardQuerier.ts";
 import {Locator} from "./Utils/Locator.ts";
 import {RouteCalculator} from "./Calculator/RouteCalculator.ts";
-import {Extractor} from "./Utils/Extractor.ts";
+import {Flattener} from "./Utils/Flattener.ts";
 import {MoveExtender} from "./Helper/MoveExtender.ts";
 import {MoveFilterer} from "./Helper/MoveFilterer.ts";
 
@@ -140,7 +140,7 @@ export class MoveEngine{
         if(!BoardQuerier.isSquareHasPiece(route[moveDirection.rightDiagonal]![0], enemyColor) && pieceSensitivity)
             delete route[moveDirection.rightDiagonal];
 
-        moves[MoveType.Normal] = Extractor.extractSquares(
+        moves[MoveType.Normal] = Flattener.flattenSquares(
             pieceSensitivity
             ? this.moveFilterer.filterForKingSafety(this.pieceSquare!, this.piece!.getColor(), route)!
             : route
@@ -182,7 +182,7 @@ export class MoveEngine{
             route[moveDirection.rightDiagonal]!.push(rightEnPassant);
 
         // Add filtered(for king's safety) en passant moves to the pawn's moves.
-        moves[MoveType.EnPassant] = Extractor.extractSquares(
+        moves[MoveType.EnPassant] = Flattener.flattenSquares(
             pieceSensitivity
             ? this.moveFilterer.filterForKingSafety(this.pieceSquare!, this.piece!.getColor(), route)!
             : route
@@ -221,7 +221,7 @@ export class MoveEngine{
     {
         let route: Route = RouteCalculator.getKnightRoute(this.pieceSquare!, pieceSensitivity);
         if(!route) return null;
-        return {[MoveType.Normal]: Extractor.extractSquares(
+        return {[MoveType.Normal]: Flattener.flattenSquares(
             pieceSensitivity 
             ? this.moveFilterer.filterForKingSafety(this.pieceSquare!, this.piece!.getColor(), route)
             : route
@@ -235,7 +235,7 @@ export class MoveEngine{
     {
         let route: Route = RouteCalculator.getBishopRoute(this.pieceSquare!, pieceSensitivity);
         if(!route) return null;
-        return {[MoveType.Normal]: Extractor.extractSquares(
+        return {[MoveType.Normal]: Flattener.flattenSquares(
             pieceSensitivity
             ? this.moveFilterer.filterForKingSafety(this.pieceSquare!, this.piece!.getColor(), route)
             : route
@@ -249,7 +249,7 @@ export class MoveEngine{
     {
         let route: Route = RouteCalculator.getRookRoute(this.pieceSquare!, pieceSensitivity);
         if(!route) return null;
-        return {[MoveType.Normal]: Extractor.extractSquares(
+        return {[MoveType.Normal]: Flattener.flattenSquares(
             pieceSensitivity
             ? this.moveFilterer.filterForKingSafety(this.pieceSquare!, this.piece!.getColor(), route)
             : route
@@ -263,7 +263,7 @@ export class MoveEngine{
     {
         let route: Route = RouteCalculator.getQueenRoute(this.pieceSquare!, pieceSensitivity);
         if(!route) return null;
-        return {[MoveType.Normal]: Extractor.extractSquares(
+        return {[MoveType.Normal]: Flattener.flattenSquares(
             pieceSensitivity 
             ? this.moveFilterer.filterForKingSafety(this.pieceSquare!, this.piece!.getColor(), route)
             : route
@@ -289,7 +289,7 @@ export class MoveEngine{
          * g4 from the king's route because g4 is threatened by the enemy's
          * bishop currently.
          */
-        for(const square of Extractor.extractSquares(route))
+        for(const square of Flattener.flattenSquares(route))
         {
             if(!pieceSensitivity || !BoardQuerier.isSquareThreatened(square, color == Color.White ? Color.Black : Color.White))
                 moves[MoveType.Normal]!.push(square);
@@ -355,7 +355,7 @@ export class MoveEngine{
 
         // Get castling moves of the king. Also, 
         // castling doesn't need king safety filter because it is already filtered.
-        moves[MoveType.Castling] = Extractor.extractSquares(route);
+        moves[MoveType.Castling] = Flattener.flattenSquares(route);
 
         return moves;
     }

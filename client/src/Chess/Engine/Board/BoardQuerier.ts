@@ -2,7 +2,7 @@ import {Board} from "./Board.ts";
 import {Castling, Color, Durations, GameStatus, JsonNotation, Move, PieceType, Scores, Square} from "../../Types";
 import {MoveRoute, Piece, Route} from "../Types";
 import {RouteCalculator} from "../Move/Calculator/RouteCalculator.ts";
-import {Extractor} from "../Move/Utils/Extractor.ts";
+import {Flattener} from "../Move/Utils/Flattener.ts";
 
 
 /**
@@ -267,7 +267,7 @@ export class BoardQuerier extends Board{
              * - If there is only one white king and one black king then the game can't play anymore.
              * - If there is only one white king and one black king and one white knight or bishop then the game can't play anymore.
              */
-            if(Extractor.extractSquares(RouteCalculator.getKingRoute(
+            if(Flattener.flattenSquares(RouteCalculator.getKingRoute(
                 this.getSquareOfPiece(this.getPiecesWithFilter(Color.White, [PieceType.King])[0])!
             )).includes(
                 this.getSquareOfPiece(this.getPiecesWithFilter(Color.Black, [PieceType.King])[0])!

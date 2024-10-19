@@ -30,7 +30,7 @@ import {BoardManager} from "./Board/BoardManager.ts";
 import {Converter} from "../Utils/Converter";
 import {BoardQuerier} from "./Board/BoardQuerier.ts";
 import {Locator} from "./Move/Utils/Locator.ts";
-import {Extractor} from "./Move/Utils/Extractor.ts";
+import {Flattener} from "./Move/Utils/Flattener.ts";
 import {Logger} from "@Services/Logger.ts";
 
 export class MoveValidationError extends Error {
@@ -913,7 +913,7 @@ export class ChessEngine extends BoardManager {
                     // Calculate the moves of the piece and get squares of the moves. Also save the moves to the currentMoves for prevent unnecessary calculations.
                     const square: Square = BoardQuerier.getSquareOfPiece(piece)!;
                     this.currentMoves[square] = this.moveEngine.getMoves(square);
-                    const moves: Square[] = Extractor.extractSquares(this.currentMoves[square]!);
+                    const moves: Square[] = Flattener.flattenSquares(this.currentMoves[square]!);
 
                     // If piece has at least one move then the game is in play status.
                     if (moves.length > 0)

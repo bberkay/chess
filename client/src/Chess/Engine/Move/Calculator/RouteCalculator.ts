@@ -1,7 +1,7 @@
 import {Color, PieceType, Square} from "../../../Types";
 import {MoveRoute, Piece, Route} from "../../Types";
 import {DirectionCalculator} from "./DirectionCalculator.ts";
-import {Extractor} from "../Utils/Extractor.ts";
+import {Flattener} from "../Utils/Flattener.ts";
 import {BoardQuerier} from "../../Board/BoardQuerier.ts";
 
 /**
@@ -122,7 +122,7 @@ export class RouteCalculator{
                 lastRoute = DirectionCalculator.getVerticalSquares(lastSquare, playerColor, 1, pieceSensitivity);
 
             // Update the route
-            route[MoveRoute.L] = Extractor.extractSquares(lastRoute).concat(route[MoveRoute.L]);
+            route[MoveRoute.L] = Flattener.flattenSquares(lastRoute).concat(route[MoveRoute.L]);
         }
 
         return route;
