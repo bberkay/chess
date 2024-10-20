@@ -25,15 +25,12 @@ import {
 import { 
     ChessEvent, 
     Color, 
-    Durations, 
     GameStatus, 
     JsonNotation, 
-    PieceType, 
     StartPosition 
 } from "@Chess/Types/index.ts";
 import { LogConsole } from "./Components/NavbarComponents/LogConsole";
 import { AboutMenu } from "./Components/NavbarComponents/AboutMenu.ts";
-import { ConnectionsMenu } from "./Components/NavbarComponents/ConnectionsMenu.ts";
 import { AppearanceMenu } from "./Components/NavbarComponents/AppearanceMenu.ts";
 import { Logger } from "@Services/Logger";
 import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage.ts";
@@ -50,7 +47,6 @@ export class Platform{
     public readonly notationMenu: NotationMenu;
     public readonly navigatorModal: NavigatorModal;
     public readonly logConsole: LogConsole;
-    public readonly connectionsMenu: ConnectionsMenu
     public readonly appearanceMenu: AppearanceMenu;
     public readonly aboutMenu: AboutMenu;
     public readonly logger: Logger = new Logger("src/Platform/Platform.ts");
@@ -66,8 +62,7 @@ export class Platform{
         this.navigatorModal = new NavigatorModal();
         this.logConsole = new LogConsole();
         this.aboutMenu = new AboutMenu();
-        this.connectionsMenu = new ConnectionsMenu();
-        this.navbar = new Navbar([this.logConsole, this.aboutMenu, this.connectionsMenu, this.appearanceMenu]);
+        this.navbar = new Navbar([this.logConsole, this.aboutMenu, this.appearanceMenu]);
         this.init();
 
         //For testing purposes
@@ -89,7 +84,7 @@ export class Platform{
          */
         const listenBoardChanges = () => {
             // First time update
-            this.boardEditor.updateFenOnForm();
+            this.boardEditor.updateFen();
 
             const updateComponentTriggers = [
                 ChessEvent.onGameCreated,
@@ -330,9 +325,6 @@ export class Platform{
             case BoardEditorOperation.FlipBoard:
                 this._flipBoardAndComponents();
                 break;
-            case BoardEditorOperation.ResetBoard:
-                this._resetBoardAndComponents();
-                break;
             case BoardEditorOperation.CreateBoard:
                 this.boardEditor.saveFen();
                 this._createBoardAndHandleComponents();
@@ -348,9 +340,6 @@ export class Platform{
         switch(menuOperation){
             case NavbarOperation.ShowLogConsole:
                 this.navbar.showComponent(this.logConsole);
-                break;
-            case NavbarOperation.ShowConnections:
-                this.navbar.showComponent(this.connectionsMenu);
                 break;
             case NavbarOperation.ShowAppearance:
                 this.navbar.showComponent(this.appearanceMenu);
@@ -379,7 +368,7 @@ export class Platform{
      * console after the move is made.
      */
     private updateComponents(): void {
-        this.boardEditor.updateFenOnForm();
+        this.boardEditor.updateFen();
         if(!BoardEditor.isEditorModeEnable()){
             this.notationMenu.update();
 
@@ -435,7 +424,7 @@ export class Platform{
         this._createBoardAndHandleComponents(createdGame.game);
         this.chess.board.disablePreSelection(playerColor === Color.White ? Color.Black : Color.White);
         this.notationMenu.displayOnlineGameUtilityMenu();
-        this.notationMenu.updatePlayerCards(createdGame.whitePlayer, createdGame.blackPlayer);
+        this.notationMenu.setPlayersOnPlayerCards(createdGame.whitePlayer, createdGame.blackPlayer);
         this.notationMenu.setTurnIndicator(this.chess.getTurnColor());
         this.notationMenu.update(true);
 
@@ -535,16 +524,6 @@ export class Platform{
     }
 
     /**
-     * Reset the board and update the components of the menu.
-     */
-    private _resetBoardAndComponents(): void
-    {
-        this.logConsole.clear();
-        this.boardEditor.resetBoard();
-        this.logger.save("Board is reset.");
-    }
-
-    /**
      * Abort the singleplayer game and show the 
      * game over modal.
      */
@@ -557,7 +536,6 @@ export class Platform{
         this.chess.finishTurn();
         this.navigatorModal.showGameOverAsAborted();
         this.notationMenu.displayPlayAgainUtilityMenu();
-        this.notationMenu.clearConfirmedOperation();
     }
 
     /**
@@ -583,7 +561,6 @@ export class Platform{
         this.chess.finishTurn();
         this.navigatorModal.showGameOverAsResigned(resignColor);
         this.notationMenu.displayPlayAgainUtilityMenu();
-        this.notationMenu.clearConfirmedOperation();
     }
 
     /**
@@ -597,6 +574,5 @@ export class Platform{
         this.preparePlatformForSingleplayerGame(
             botColor && botDifficulty ? {botColor, botDifficulty} : false
         );
-        this.notationMenu.clearConfirmedOperation();
     }
 }
