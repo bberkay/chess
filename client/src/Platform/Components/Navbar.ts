@@ -19,7 +19,7 @@ enum NavbarComponentType {
  */
 export class Navbar extends Component{
     private readonly navbarComponents: NavbarComponent[];
-    private currentlyShownComponent: NavbarComponent | null = null;
+    private _currentlyShownComponent: NavbarComponent | null = null;
 
     /**
      * Constructor of the Navbar class.
@@ -80,7 +80,6 @@ export class Navbar extends Component{
         this.loadHTML("navbar", `
             <div class="navbar-buttons">
                 <button data-menu-operation="${NavbarOperation.ShowLogConsole}">Stream</button>
-                <button data-menu-operation="${NavbarOperation.ShowConnections}" disabled="true">Connections</button>
                 <button data-menu-operation="${NavbarOperation.ShowAppearance}">Appearance</button>
                 <button data-menu-operation="${NavbarOperation.ShowAbout}">About</button>
             </div>
@@ -96,7 +95,7 @@ export class Navbar extends Component{
         if(!(navbarComponent instanceof NavbarComponent))
             throw new Error("The given component is not a NavbarComponent.");
         
-        if(this.currentlyShownComponent === navbarComponent)
+        if(this._currentlyShownComponent === navbarComponent)
             return;
 
         if(!this.navbarComponents.includes(navbarComponent))
@@ -107,7 +106,7 @@ export class Navbar extends Component{
         });
 
         navbarComponent.show();
-        this.currentlyShownComponent = navbarComponent;
+        this._currentlyShownComponent = navbarComponent;
     }
 
     /**
@@ -121,7 +120,7 @@ export class Navbar extends Component{
     }
 
     /**
-     * Handle navbar operation.
+     * Handle the given `NavbarOperation`.
      */
     public handleOperation(operation: NavbarOperation): void
     {

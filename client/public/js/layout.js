@@ -43,7 +43,6 @@ function reOrderLayoutForMobile(){
     document.querySelector(".left").append(
         document.getElementById("navbar"),
         document.getElementById("log-console"),
-        document.getElementById("connections-menu"),
         document.getElementById("appearance-menu"),
         document.getElementById("about-menu")
     );
@@ -64,7 +63,6 @@ function reOrderLayoutForTablet(){
     document.querySelector(".center").append(
         document.getElementById("navbar"),
         document.getElementById("log-console"),
-        document.getElementById("connections-menu"),
         document.getElementById("appearance-menu"),
         document.getElementById("about-menu")
     );
@@ -93,7 +91,6 @@ function reOrderLayoutForDesktop(){
     document.querySelector(".left").append(
         document.getElementById("navbar"),
         document.getElementById("log-console"),
-        document.getElementById("connections-menu"),
         document.getElementById("appearance-menu"),
         document.getElementById("about-menu")
     );
