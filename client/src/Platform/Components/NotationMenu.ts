@@ -1,4 +1,4 @@
-import { ChessEvent, Color, Durations, GameStatus, PieceType, Scores } from "@Chess/Types";
+import { Color, GameStatus, PieceIcon, PieceType, Scores } from "@Chess/Types";
 import { Component } from "./Component.ts";
 import { Chess } from "@Chess/Chess.ts";
 import { BoardEditorOperation, NavigatorModalOperation, NotationMenuOperation } from "../Types";
@@ -27,11 +27,11 @@ export class NotationMenu extends Component {
     private moveCount: number = 0;
     private lastScore: Record<Color, number> = { [Color.White]: 0, [Color.Black]: 0 };
     private lastTurnColor: Color = Color.White;
-    private activeIntervalId: number = -1;
-    private activeUtilityMenu: UtilityMenuType = UtilityMenuType.NewGame;
-    private prevActiveUtilityMenu: UtilityMenuType | null = null;
-    private confirmedOperation: NotationMenuOperation | null = null;
-    private isUndoButtonShown: boolean = false;
+    private _activeIntervalId: number = -1;
+    private _activeUtilityMenu: UtilityMenuType = UtilityMenuType.NewGame;
+    private _prevActiveUtilityMenu: UtilityMenuType | null = null;
+    private _confirmedOperation: NotationMenuOperation | null = null;
+    private _isUndoButtonShown: boolean = false;
 
     /**
      * Constructor of the LogConsole class.
@@ -85,7 +85,7 @@ export class NotationMenu extends Component {
     private getOnlineGameUtilityMenuContent(): string {
         const moveHistoryLength = this.chess.getMoveHistory().length;
         return `
-            ${moveHistoryLength < 1 && !this.isUndoButtonShown
+            ${moveHistoryLength < 1 && !this._isUndoButtonShown
                 ? `<button class="menu-item" data-menu-operation="${NotationMenuOperation.AbortGame}"  data-tooltip-text="Abort the Game">&#x2715; Abort</button>`
                 : `<button class="menu-item" data-menu-operation="${NotationMenuOperation.SendUndoOffer}" ${moveHistoryLength < 1 ? `disabled="true"` : ``} data-tooltip-text="Send Undo Offer">↺ Undo</button>`
             }
@@ -100,7 +100,7 @@ export class NotationMenu extends Component {
     private getSingleplayerGameUtilityMenuContent(): string {
         const moveHistoryLength = this.chess.getMoveHistory().length;
         return `
-            ${moveHistoryLength < 1 && !this.isUndoButtonShown
+            ${moveHistoryLength < 1 && !this._isUndoButtonShown
                 ? `<button class="menu-item" data-menu-operation="${NotationMenuOperation.AbortGame}"  data-tooltip-text="Abort the Game">&#x2715; Abort</button>`
                 : `<button class="menu-item" data-menu-operation="${NotationMenuOperation.UndoMove}" ${moveHistoryLength < 1 ? `disabled="true"` : ``} data-tooltip-text="Take Back Last Move">↺ Undo</button>`
             }
@@ -114,7 +114,7 @@ export class NotationMenu extends Component {
     private getPlayAgainUtilityMenuContent(): string {
         return `
             <button class="menu-item" data-menu-operation="${
-                this.prevActiveUtilityMenu === UtilityMenuType.OnlineGame 
+                this._prevActiveUtilityMenu === UtilityMenuType.OnlineGame 
                     ? NotationMenuOperation.SendPlayAgainOffer 
                     : NotationMenuOperation.PlayAgain
                 }" data-tooltip-text="Play Again from Same Start">Play Again</button>
@@ -577,25 +577,6 @@ export class NotationMenu extends Component {
     }
 
     /**
-     * This function converts the string notation to unicode notation.
-     * @example convertStringNotationToUnicodedNotation("Kf3") returns "&#9812;f3"
-     */
-    private convertStringNotationToUnicodedNotation(notation: string): string {
-        if (notation.length <= 2 || notation == "O-O-O")
-            return notation;
-
-        const pieceInfo = notation[0].toUpperCase();
-        switch (pieceInfo) {
-            case "K": return this.getPieceUnicode(PieceType.King) + notation.slice(1);
-            case "N": return this.getPieceUnicode(PieceType.Knight) + notation.slice(1);
-            case "B": return this.getPieceUnicode(PieceType.Bishop) + notation.slice(1);
-            case "R": return this.getPieceUnicode(PieceType.Rook) + notation.slice(1);
-            case "Q": return this.getPieceUnicode(PieceType.Queen) + notation.slice(1);
-            default: return notation;
-        }
-    }
-
-    /**
      * This function returns the unicode of the piece
      * according to the given piece type.
      */
@@ -612,24 +593,22 @@ export class NotationMenu extends Component {
     }
 
     /**
-     * This function changes the indicator of the turn.
+     * This function converts the string notation to unicode notation.
+     * @example convertStringNotationToUnicodedNotation("Kf3") returns "&#9812;f3"
      */
-    private changeIndicator(): void {
-        const current_player_color = this.chess.getTurnColor();
-        const previous_player_color = current_player_color == Color.White ? Color.Black : Color.White
-        document.getElementById(`${previous_player_color.toLowerCase()}-player-section`)!.classList.remove("your-turn-effect");
-        document.getElementById(`${current_player_color.toLowerCase()}-player-section`)!.classList.add("your-turn-effect");
-    }
+    private convertStringNotationToUnicodedNotation(notation: string): string {
+        if (notation.length <= 2 || notation == "O-O-O")
+            return notation;
 
-    /**
-     * Flip the notation table.
-     */
-    public flip(): void {
-        let playerScoreSectionOnTop = document.querySelector(".player-section")!;
-        playerScoreSectionOnTop.parentElement!.append(playerScoreSectionOnTop);
-
-        playerScoreSectionOnTop = document.querySelector(".player-section")!;
-        playerScoreSectionOnTop.parentElement!.prepend(playerScoreSectionOnTop!);
+        const pieceInfo = notation[0].toUpperCase() as PieceIcon;
+        switch (pieceInfo) {
+            case PieceIcon.WhiteKing: return this.getPieceUnicode(PieceType.King) + notation.slice(1);
+            case PieceIcon.WhiteQueen: return this.getPieceUnicode(PieceType.Queen) + notation.slice(1);
+            case PieceIcon.WhiteRook: return this.getPieceUnicode(PieceType.Rook) + notation.slice(1);
+            case PieceIcon.WhiteBishop: return this.getPieceUnicode(PieceType.Bishop) + notation.slice(1);
+            case PieceIcon.WhiteKnight: return this.getPieceUnicode(PieceType.Knight) + notation.slice(1);
+            default: return notation;
+        }
     }
 
     /**
@@ -644,65 +623,62 @@ export class NotationMenu extends Component {
      * new game and info buttons.
      */
     public displayNewGameUtilityMenu(): void {
+        this.resetConfirmedOperation();
+
         document.querySelector(".utility-toggle-menu-section.active")!.classList.remove("active");
+
         this.loadHTML(UtilityMenuType.NewGame, this.getNewGameUtilityMenuContent());
         document.getElementById(UtilityMenuType.NewGame)!.classList.add("active");
-        this.activeUtilityMenu = UtilityMenuType.NewGame;
+        this._activeUtilityMenu = UtilityMenuType.NewGame;
     }
 
     /**
      * Show the online game utility menu section. This menu contains
-     * undo, draw and resign buttons.
+     * undo or abort, draw and resign buttons.
      */
     public displayOnlineGameUtilityMenu(): void {
-        this.isUndoButtonShown ||= this.chess.getMoveHistory().length >= 1;
+        this.resetConfirmedOperation();
+
+        this._isUndoButtonShown ||= this.chess.getMoveHistory().length >= 1;
+
         document.querySelector(".utility-toggle-menu-section.active")!.classList.remove("active");
+
         this.loadHTML(UtilityMenuType.OnlineGame, this.getOnlineGameUtilityMenuContent());
         document.getElementById(UtilityMenuType.OnlineGame)!.classList.add("active");
-        this.prevActiveUtilityMenu = UtilityMenuType.OnlineGame;
-        this.activeUtilityMenu = UtilityMenuType.OnlineGame;
+        this._prevActiveUtilityMenu = UtilityMenuType.OnlineGame;
+        this._activeUtilityMenu = UtilityMenuType.OnlineGame;
     }
 
     /**
      * Show the single player game utility menu section. This menu contains
-     * undo and resign buttons.
+     * undo or abort and resign buttons.
      */
     public displaySingleplayerGameUtilityMenu(): void {
-        this.isUndoButtonShown ||= this.chess.getMoveHistory().length >= 1;
+        this.resetConfirmedOperation();
+
+        this._isUndoButtonShown ||= this.chess.getMoveHistory().length >= 1;
+
         document.querySelector(".utility-toggle-menu-section.active")!.classList.remove("active");
+
         this.loadHTML(UtilityMenuType.SingleplayerGame, this.getSingleplayerGameUtilityMenuContent());
         document.getElementById(UtilityMenuType.SingleplayerGame)!.classList.add("active");
-        this.prevActiveUtilityMenu = UtilityMenuType.SingleplayerGame;
-        this.activeUtilityMenu = UtilityMenuType.SingleplayerGame;
+        this._prevActiveUtilityMenu = UtilityMenuType.SingleplayerGame;
+        this._activeUtilityMenu = UtilityMenuType.SingleplayerGame;
     }
     
     /**
-     * Show the new game utility menu section. This menu contains
+     * Show the play again utility menu section. This menu contains
      * new game and play again buttons. This menu is shown when the
      * online game is finished.
      */
     public displayPlayAgainUtilityMenu(): void {
+        this.resetConfirmedOperation();
+
         document.querySelector(".utility-toggle-menu-section.active")!.classList.remove("active");
+
         this.loadHTML(UtilityMenuType.PlayAgain, this.getPlayAgainUtilityMenuContent());
         document.getElementById(UtilityMenuType.PlayAgain)!.classList.add("active");
-        this.activeUtilityMenu = UtilityMenuType.PlayAgain;
-    }
-
-    /**
-     * Activate the undo button if the move history is not empty.
-     */
-    private activateUndoButtonAfterFirstMove(): void {
-        if(this.chess.getMoveHistory().length < 1)
-            return;
-        
-        const undoButton = document.querySelector(`
-            .utility-toggle-menu-section.active [data-menu-operation="${
-                this.prevActiveUtilityMenu === UtilityMenuType.OnlineGame 
-                ? NotationMenuOperation.SendUndoOffer
-                : NotationMenuOperation.UndoMove
-            }"]
-        `);
-        if(undoButton && undoButton.getAttribute("disabled")) undoButton.removeAttribute("disabled");
+        this._activeUtilityMenu = UtilityMenuType.PlayAgain;
     }
 
     /**
@@ -713,13 +689,13 @@ export class NotationMenu extends Component {
     public update(force: boolean = false): void {
         const moveCount = this.chess.getMoveHistory().length;
         
-        if(moveCount > 0 && !this.isUndoButtonShown){ 
+        if(moveCount > 0 && !this._isUndoButtonShown){ 
             // Rerender the online game utility menu to show the undo button
             // instead of the abort button.
-            if(this.prevActiveUtilityMenu === UtilityMenuType.SingleplayerGame 
-                || this.activeUtilityMenu === UtilityMenuType.NewGame)
+            if(this._prevActiveUtilityMenu === UtilityMenuType.SingleplayerGame 
+                || this._activeUtilityMenu === UtilityMenuType.NewGame)
                 this.displaySingleplayerGameUtilityMenu();
-            else if(this.prevActiveUtilityMenu === UtilityMenuType.OnlineGame)
+            else if(this._prevActiveUtilityMenu === UtilityMenuType.OnlineGame)
                 this.displayOnlineGameUtilityMenu();
         }
 
@@ -728,10 +704,15 @@ export class NotationMenu extends Component {
             GameStatus.BlackVictory,
             GameStatus.Draw
         ].includes(this.chess.getGameStatus())){
-            this.stopTimers();
+            this.stopOpponentTimerIfActive();
             this.displayPlayAgainUtilityMenu();
         }
 
+        // Even if the move count is 0, the score 
+        // might be different than 0 if the board 
+        // is started from a specific position.
+        // but there is no need to update the notations
+        // because there can't be any notation.
         this.setScore(this.chess.getScores());
 
         if (!force && (moveCount == 0 || moveCount == this.moveCount))
@@ -739,6 +720,7 @@ export class NotationMenu extends Component {
 
         this.activateUndoButtonAfterFirstMove();
         this.setNotations(this.chess.getAlgebraicNotation());
+
         this.changeIndicator();
         
         if (this.chess.getDurations() && (force || (
@@ -755,23 +737,85 @@ export class NotationMenu extends Component {
     }
 
     /**
-     * Update the player names, durations and online status.
+     * Activate the undo button if the move history is not empty.
      */
-    public updatePlayerCards(
+    private activateUndoButtonAfterFirstMove(): void {
+        if(this.chess.getMoveHistory().length < 1)
+            return;
+        
+        const undoButton = document.querySelector(`
+            .utility-toggle-menu-section.active [data-menu-operation="${
+                this._prevActiveUtilityMenu === UtilityMenuType.OnlineGame 
+                ? NotationMenuOperation.SendUndoOffer
+                : NotationMenuOperation.UndoMove
+            }"]
+        `);
+        if(undoButton && undoButton.getAttribute("disabled")) 
+            undoButton.removeAttribute("disabled");
+    }
+
+    /**
+     * Set the turn indicator to the given color.
+     */
+    public setTurnIndicator(color: Color): void {
+        document.querySelector(`.your-turn-effect`)?.classList.remove("your-turn-effect");
+        document.getElementById(`${color.toLowerCase()}-player-section`)!.classList.add("your-turn-effect");
+    }
+
+    /**
+     * This function changes the indicator from the opponent to the 
+     * current player.
+     */
+    private changeIndicator(): void {
+        const current_player_color = this.chess.getTurnColor();
+        const previous_player_color = current_player_color == Color.White ? Color.Black : Color.White
+        document.getElementById(`${previous_player_color.toLowerCase()}-player-section`)!.classList.remove("your-turn-effect");
+        document.getElementById(`${current_player_color.toLowerCase()}-player-section`)!.classList.add("your-turn-effect");
+    }
+
+    /**
+     * Show the player cards with the given player names and 
+     * their online status.
+     */
+    public setPlayersOnPlayerCards(
         whitePlayer: { name: string, isOnline: boolean },
         blackPlayer: { name: string, isOnline: boolean }
     ): void {
         this.showPlayerCards();
+
         this.displayWhitePlayerName(whitePlayer.name);
+        if (whitePlayer.isOnline) {
+            this.updatePlayerAsOnline(Color.White);
+        } else {
+            this.updatePlayerAsOffline(Color.White);
+        }
+        
         this.displayBlackPlayerName(blackPlayer.name);
-
-        if (whitePlayer.isOnline) this.updatePlayerAsOnline(Color.White);
-        else this.updatePlayerAsOffline(Color.White);
-
-        if (blackPlayer.isOnline) this.updatePlayerAsOnline(Color.Black);
-        else this.updatePlayerAsOffline(Color.Black);
+        if (blackPlayer.isOnline) {
+            this.updatePlayerAsOnline(Color.Black);
+        } else {
+            this.updatePlayerAsOffline(Color.Black);
+        }
 
         this.showPlayerDurations();
+    }
+
+    /**
+     * Hide shown player cards(multiplayer or singleplayer).
+     */
+    public hidePlayerCards(): void {
+        (document.querySelectorAll(".player-section") as NodeListOf<HTMLElement>).forEach((playerCard) => {
+            playerCard.classList.add("hidden");
+        });
+    }
+
+    /**
+     * Show the player cards(multiplayer or singleplayer).
+     */
+    public showPlayerCards(): void {
+        (document.querySelectorAll(".player-section") as NodeListOf<HTMLElement>).forEach((playerCard) => {
+            playerCard.classList.remove("hidden");
+        });
     }
 
     /**
@@ -836,43 +880,12 @@ export class NotationMenu extends Component {
     }
 
     /**
-     * Hide the player cards.
-     */
-    public hidePlayerCards(): void {
-        (document.querySelectorAll(".player-section") as NodeListOf<HTMLElement>).forEach((playerCard) => {
-            playerCard.classList.add("hidden");
-        });
-    }
-
-    /**
-     * Show the player cards.
-     */
-    public showPlayerCards(): void {
-        (document.querySelectorAll(".player-section") as NodeListOf<HTMLElement>).forEach((playerCard) => {
-            playerCard.classList.remove("hidden");
-        });
-    }
-
-    /**
      * Start/Update the timers by starting the timer of the player
      * and stopping the timer of the opponent.
      */
     private startOrUpdateTimers(): void {
         this.stopOpponentTimerIfActive();
         this.startPlayerTimer(this.chess.getTurnColor());
-    }
-
-    /**
-     * Format the given milliseconds to the mm:ss format.
-     * @returns [minutes, seconds, deciseconds]
-     */
-    private formatRemainingTimeForTimer(milliseconds: number): number[] {
-        const totalDeciseconds = Math.floor(milliseconds / 100);
-        const totalSeconds = Math.floor(totalDeciseconds / 10);
-        const minutes = Math.floor(totalSeconds / 60);
-        const seconds = totalSeconds % 60;
-        const deciseconds = totalDeciseconds % 10;
-        return [minutes, seconds, deciseconds];
     }
 
     /**
@@ -885,7 +898,7 @@ export class NotationMenu extends Component {
         const playerDecisecond = playerTimer.querySelector(".decisecond")!;
                 
         let isDecisecondActive = false;
-        this.activeIntervalId = setInterval(() => {
+        this._activeIntervalId = setInterval(() => {
             const [minutes, seconds, deciseconds] = this.formatRemainingTimeForTimer(
                 Math.round(this.chess.getPlayersRemainingTime()[color])
             );
@@ -907,32 +920,42 @@ export class NotationMenu extends Component {
     }
 
     /**
+     * Format the given milliseconds to the mm:ss format.
+     * @returns [minutes, seconds, deciseconds]
+     */
+    private formatRemainingTimeForTimer(milliseconds: number): number[] {
+        const totalDeciseconds = Math.floor(milliseconds / 100);
+        const totalSeconds = Math.floor(totalDeciseconds / 10);
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        const deciseconds = totalDeciseconds % 10;
+        return [minutes, seconds, deciseconds];
+    }
+
+    /**
      * Stop the oppenent's timer. Clearing the active
      * interval id is enough to stop the timer because
      * only one timer/interval can be active at a time.
      */
     private stopOpponentTimerIfActive(): void {
-        if (this.activeIntervalId !== -1)
-            clearInterval(this.activeIntervalId);
+        if (this._activeIntervalId !== -1)
+            clearInterval(this._activeIntervalId);
     }
 
     /**
-     * Stop the timer of the both players.
+     * Flip the notation table.
      */
-    public stopTimers() {
-        this.stopOpponentTimerIfActive();
+    public flip(): void {
+        let playerScoreSectionOnTop = document.querySelector(".player-section")!;
+        playerScoreSectionOnTop.parentElement!.append(playerScoreSectionOnTop);
+
+        playerScoreSectionOnTop = document.querySelector(".player-section")!;
+        playerScoreSectionOnTop.parentElement!.prepend(playerScoreSectionOnTop!);
     }
 
     /**
-     * Set the turn indicator to the given color.
-     */
-    public setTurnIndicator(color: Color): void {
-        document.querySelector(`.your-turn-effect`)?.classList.remove("your-turn-effect");
-        document.getElementById(`${color.toLowerCase()}-player-section`)!.classList.add("your-turn-effect");
-    }
-
-    /**
-     * This function clears the table.
+     * This function sets the notation table to the 
+     * initial state.
      */
     public clear(): void {
         this.renderComponent();
@@ -942,30 +965,9 @@ export class NotationMenu extends Component {
     }
 
     /**
-     * Set the given operation as the confirmed operation.
+     * Ask for confirmation before making the given operation.
      */
-    private confirmOperation(operation: NotationMenuOperation): void {
-        this.confirmedOperation = operation;
-    }
-
-    /**
-     * Check if the given operation is confirmed.
-     */
-    public isOperationConfirmed(operation: NotationMenuOperation): boolean {
-        return this.confirmedOperation === operation;
-    }
-
-    /**
-     * Clear the confirmed operation.
-     */
-    public clearConfirmedOperation(): void {
-        this.confirmedOperation = null;
-    }
-
-    /**
-     * Ask for confirmation before resigning or sending draw offer.
-     */
-    private showConfirmation(
+    private askConfirmation(
         confirmationOperation: NotationMenuOperation.AbortGame
         | NotationMenuOperation.Resign 
         | NotationMenuOperation.UndoMove
@@ -1000,7 +1002,7 @@ export class NotationMenu extends Component {
         // operation.
         setTimeout(() => {
             confirmButton.setAttribute(
-                this.prevActiveUtilityMenu === UtilityMenuType.OnlineGame 
+                this._prevActiveUtilityMenu === UtilityMenuType.OnlineGame 
                     ? "data-socket-operation"
                     : "data-menu-operation",
                 confirmationOperation
@@ -1010,7 +1012,29 @@ export class NotationMenu extends Component {
     }
 
     /**
-     * Show the offer menu with the given message and operation.
+     * Set the given operation as the confirmed operation.
+     */
+    private confirmOperation(operation: NotationMenuOperation): void {
+        this._confirmedOperation = operation;
+    }
+
+    /**
+     * Check if the given operation is confirmed.
+     */
+    public isOperationConfirmed(operation: NotationMenuOperation): boolean {
+        return this._confirmedOperation === operation;
+    }
+
+    /**
+     * Clear the confirmed operation if it is set.
+     */
+    private resetConfirmedOperation(): void {
+        this._confirmedOperation = null;
+    }
+
+    /**
+     * Show the received offer on the offer menu. This function
+     * should be called after the offer is received from the server.
      */
     private _showReceivedOffer(
         offerMessage: string, 
@@ -1030,7 +1054,7 @@ export class NotationMenu extends Component {
         acceptButton.textContent = "Accept";
         acceptButton.setAttribute("data-tooltip-text", "Accept Offer");
         acceptButton.setAttribute(
-            this.prevActiveUtilityMenu === UtilityMenuType.OnlineGame 
+            this._prevActiveUtilityMenu === UtilityMenuType.OnlineGame 
                 ? "data-socket-operation"
                 : "data-menu-operation", 
             offerOperation
@@ -1079,9 +1103,11 @@ export class NotationMenu extends Component {
     }
 
     /**
-     * Show the given message on the information menu.
+     * Show the sent request on the information menu. This function
+     * is a feedback for the player that the request is sent and
+     * should be called after the request is sent.
      */
-    public _showSentRequest(sentRequestButton: HTMLElement): void {
+    private _showOfferSentFeedback(sentRequestButton: HTMLElement): void {
         if(!sentRequestButton) return;
         sentRequestButton.textContent = "Offered";
         sentRequestButton.setAttribute("disabled", "true");
@@ -1097,8 +1123,8 @@ export class NotationMenu extends Component {
      * is a feedback for the player that the play again offer is sent.
      * This function should be called after the play again offer is sent.
      */
-    public showSentPlayAgainOffer(): void {
-        this._showSentRequest(document.querySelector(`[data-socket-operation="${SocketOperation.SendPlayAgainOffer}"]`)!);
+    public showPlayAgainSentFeedback(): void {
+        this._showOfferSentFeedback(document.querySelector(`[data-socket-operation="${SocketOperation.SendPlayAgainOffer}"]`)!);
     }
 
     /**
@@ -1106,8 +1132,8 @@ export class NotationMenu extends Component {
      * is a feedback for the player that the draw offer is sent.
      * This function should be called after the draw offer is sent.
      */
-    public showSentDrawOffer(): void {
-        this._showSentRequest(document.querySelector(`[data-socket-operation="${NotationMenuOperation.SendDrawOffer}"]`)!);
+    public showDrawOfferSentFeedback(): void {
+        this._showOfferSentFeedback(document.querySelector(`[data-socket-operation="${NotationMenuOperation.SendDrawOffer}"]`)!);
     }
 
     /**
@@ -1115,8 +1141,8 @@ export class NotationMenu extends Component {
      * is a feedback for the player that the undo offer is sent.
      * This function should be called after the undo offer is sent.
      */
-    public showSentUndoOffer(): void {
-        this._showSentRequest(document.querySelector(`[data-socket-operation="${NotationMenuOperation.SendUndoOffer}"]`)!);
+    public showUndoOfferSentFeedback(): void {
+        this._showOfferSentFeedback(document.querySelector(`[data-socket-operation="${NotationMenuOperation.SendUndoOffer}"]`)!);
     }
 
     /**
@@ -1125,7 +1151,7 @@ export class NotationMenu extends Component {
      * the offer or sender cancels the offer.
      */
     public goBack(): void {
-        switch (this.activeUtilityMenu) {
+        switch (this._activeUtilityMenu) {
             case UtilityMenuType.NewGame:
                 this.displayNewGameUtilityMenu();
                 break;
@@ -1140,7 +1166,7 @@ export class NotationMenu extends Component {
                 break;
         }
         
-        this.clearConfirmedOperation();
+        this.resetConfirmedOperation();
     }
 
     /**
@@ -1170,22 +1196,22 @@ export class NotationMenu extends Component {
                 this.displaySingleplayerGameUtilityMenu();
                 break;
             case NotationMenuOperation.AbortGame:
-                this.showConfirmation(NotationMenuOperation.AbortGame);
+                this.askConfirmation(NotationMenuOperation.AbortGame);
                 break;
             case NotationMenuOperation.Resign:
-                this.showConfirmation(NotationMenuOperation.Resign);
+                this.askConfirmation(NotationMenuOperation.Resign);
                 break;
             case NotationMenuOperation.UndoMove:
-                this.showConfirmation(NotationMenuOperation.UndoMove);
+                this.askConfirmation(NotationMenuOperation.UndoMove);
                 break;
             case NotationMenuOperation.SendDrawOffer:
-                this.showConfirmation(NotationMenuOperation.SendDrawOffer);
+                this.askConfirmation(NotationMenuOperation.SendDrawOffer);
                 break;
             case NotationMenuOperation.SendUndoOffer:
-                this.showConfirmation(NotationMenuOperation.SendUndoOffer);
+                this.askConfirmation(NotationMenuOperation.SendUndoOffer);
                 break;
             case NotationMenuOperation.SendPlayAgainOffer:
-                this.showConfirmation(NotationMenuOperation.SendPlayAgainOffer);
+                this.askConfirmation(NotationMenuOperation.SendPlayAgainOffer);
                 break;
             case NotationMenuOperation.GoBack:
                 this.goBack();
