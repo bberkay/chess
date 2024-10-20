@@ -11,7 +11,7 @@ import { Chess } from '@Chess/Chess';
 import { Platform } from "@Platform/Platform.ts";
 import { Logger } from "@Services/Logger";
 import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage.ts";
-import { ChessEvent, Color, GameStatus, JsonNotation, StartPosition } from '@Chess/Types';
+import { ChessEvent, Color, GameStatus, StartPosition } from '@Chess/Types';
 import { DEFULT_PLAYER_NAME, DEFAULT_TOTAL_TIME, DEFAULT_INCREMENT_TIME } from "@Platform/Consts";
 import { PlatformEvent } from '@Platform/Types';
 import type {
@@ -359,7 +359,7 @@ export class ChessPlatform{
     private sendPlayAgainOffer(): void
     {
         this.platform.navigatorModal.hide();
-        this.platform.notationMenu.showSentPlayAgainOffer();
+        this.platform.notationMenu.showPlayAgainSentFeedback();
         this.socket?.send(WsCommand.playAgainOffered());
     }
 
@@ -368,7 +368,7 @@ export class ChessPlatform{
      */
     private sendDrawOffer(): void
     {
-        this.platform.notationMenu.showSentDrawOffer();
+        this.platform.notationMenu.showDrawOfferSentFeedback();
         this.socket?.send(WsCommand.drawOffered());
     }
 
@@ -377,7 +377,7 @@ export class ChessPlatform{
      */
     private sendUndoOffer(): void
     {
-        this.platform.notationMenu.showSentUndoOffer();
+        this.platform.notationMenu.showUndoOfferSentFeedback();
         this.socket?.send(WsCommand.undoOffered());
     }
 
