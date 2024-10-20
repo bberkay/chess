@@ -1,6 +1,6 @@
 import { PlatformEvent, BoardEditorOperation, NavigatorModalOperation } from "../Types";
 import { Chess } from "@Chess/Chess";
-import { ChessEvent, Color, Durations, GameStatus, JsonNotation, PieceType, Square, StartPosition } from "@Chess/Types";
+import { Color, GameStatus, JsonNotation, PieceType, Square, StartPosition } from "@Chess/Types";
 import { Component } from "./Component";
 import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage";
 import { BOARD_EDITOR_ID, PIECE_CREATOR_ID, NOTATION_MENU_ID } from "@Platform/Consts";
@@ -37,7 +37,6 @@ export class BoardEditor extends Component{
     private _savedFenNotation: string = StartPosition.Standard;
     private _boardEditorObserver: MutationObserver | null = null;
     private _currentBoardCreatorMode: BoardCreatorMode = BoardCreatorMode.Custom
-    private _lastLoadedFenNotation: string = StartPosition.Standard;
 
     /**
      * Constructor of the BoardCreator class.
@@ -94,7 +93,7 @@ export class BoardEditor extends Component{
     /**
      * This function changes the notation menu to piece editor.
      */
-    public createPieceEditor(): void
+    private createPieceEditor(): void
     {
         if(!BoardEditor.isEditorModeEnable()) return;
         document.getElementById(NOTATION_MENU_ID)!.style.display = "none";
@@ -199,26 +198,6 @@ export class BoardEditor extends Component{
                 </div>
             </div>
         `);
-    }
-
-    /**
-     * Enable the start game button.
-     */
-    @isEditorModeEnable()
-    private enableStartGameButton(): void
-    {
-        const startButton: HTMLElement = document.querySelector(`[data-menu-operation="${NavigatorModalOperation.ShowStartPlayingBoard}"]`) as HTMLElement;
-        startButton.removeAttribute("disabled");
-    }
-
-    /**
-     * Disable the start game button.
-     */
-    @isEditorModeEnable()
-    private disableStartGameButton(): void
-    {
-        const startButton: HTMLElement = document.querySelector(`[data-menu-operation="${NavigatorModalOperation.ShowStartPlayingBoard}"]`) as HTMLElement;
-        startButton.setAttribute("disabled", "true");
     }
 
     /**
@@ -345,6 +324,29 @@ export class BoardEditor extends Component{
     }
 
     /**
+     * Get the template options for the board creator.
+     * The options are the starting positions of the 
+     * chess board.
+     */
+    private getTemplateOptions(): string
+    {
+        let options: string = "";
+        for (const position in StartPosition) {
+          // @ts-ignore
+          options += `<option value="${StartPosition[position as string]}">${position}</option>`;
+        }
+        return options;
+    }
+
+    /**
+     * This function if the current mode is custom mode or not.
+     */
+    private isBoardCreatorModeCustom(): boolean
+    {
+        return this._currentBoardCreatorMode == BoardCreatorMode.Custom;
+    }
+
+    /**
      * This function enables the board creator.
      */
     private enableBoardCreator(): void
@@ -367,15 +369,8 @@ export class BoardEditor extends Component{
     }
 
     /**
-     * This function toggles the utility menu.
-     */
-    private toggleUtilityMenu(): void
-    {
-        document.querySelector(`#${PIECE_CREATOR_ID} .utility-toggle-menu`)!.classList.toggle("visible");
-    }
-
-    /**
-     * This function changes the mode of the form.
+     * This function changes the board creator form 
+     * mode from custom to template or vice versa.
      */
     private changeBoardCreatorMode(): void
     {
@@ -385,19 +380,6 @@ export class BoardEditor extends Component{
             ? BoardCreatorMode.Custom 
             : BoardCreatorMode.Template;
         document.querySelector(`.board-creator.${this._currentBoardCreatorMode}`)!.classList.add("visible");
-    }
-
-    /**
-     * Get the template mode of the form.
-     */
-    private getTemplateOptions(): string
-    {
-        let options: string = "";
-        for (const position in StartPosition) {
-          // @ts-ignore
-          options += `<option value="${StartPosition[position as string]}">${position}</option>`;
-        }
-        return options;
     }
 
     /**
@@ -429,7 +411,7 @@ export class BoardEditor extends Component{
         fenNotation: string | StartPosition | null = null
     ): void
     {
-        fenNotation = fenNotation || this.getCurrentFen();
+        fenNotation = fenNotation || this.getShownFen();
         fenNotation = fenNotation.replace(" b ", " w ");
         fenNotation = fenNotation.replace(/\d+ \d+$/, "0 1");
         this.chess.createGame();
@@ -447,6 +429,23 @@ export class BoardEditor extends Component{
         this._prepareBoardEditorForGame();
     }
 
+    /**
+     * This function creates the selected piece on the board.
+     */
+    @isEditorModeEnable()
+    private createPiece(selectedSquare: HTMLElement): void
+    {
+        const selectedPieceOption: HTMLElement = document.querySelector(".selected-option .piece") as HTMLElement;
+        if(selectedSquare.classList.contains("square") && selectedPieceOption !== null){
+            this.chess.createPiece(
+                selectedPieceOption.getAttribute("data-color") as Color,
+                selectedPieceOption.getAttribute("data-piece") as PieceType,
+                this.chess.board.getSquareId(selectedSquare) as Square
+            );
+            this.makePieceSelectable(selectedSquare.querySelector(".piece") as HTMLElement);
+        }
+    }
+    
     /**
      * Clear the current selected option effects on the editor
      * and select the new tool.
@@ -488,23 +487,6 @@ export class BoardEditor extends Component{
     }
 
     /**
-     * This function creates the selected piece on the board.
-     */
-    @isEditorModeEnable()
-    private createPiece(selectedSquare: HTMLElement): void
-    {
-        const selectedPieceOption: HTMLElement = document.querySelector(".selected-option .piece") as HTMLElement;
-        if(selectedSquare.classList.contains("square") && selectedPieceOption !== null){
-            this.chess.createPiece(
-                selectedPieceOption.getAttribute("data-color") as Color,
-                selectedPieceOption.getAttribute("data-piece") as PieceType,
-                this.chess.board.getSquareId(selectedSquare) as Square
-            );
-            this.makePieceSelectable(selectedSquare.querySelector(".piece") as HTMLElement);
-        }
-    }
-
-    /**
      * Remove the piece from the board.
      */
     @isEditorModeEnable()
@@ -515,6 +497,25 @@ export class BoardEditor extends Component{
         
         this.chess.removePiece(this.chess.board.getSquareId(squareElement) as Square);
         squareElement.setAttribute("data-menu-operation", BoardEditorOperation.CreatePiece);
+    }
+
+    /**
+     * This function clears the board.
+     */
+    @isEditorModeEnable()
+    private clearBoard(): void
+    {
+        this.createBoard(StartPosition.Empty);
+    }
+
+    /**
+     * This function create a new board with 
+     * the saved FEN notation.
+     */
+    @isEditorModeEnable()
+    private resetBoard(): void
+    {
+        this.createBoard(this.getSavedFen());
     }
 
     /**
@@ -572,14 +573,25 @@ export class BoardEditor extends Component{
     }
 
     /**
-     * This function clears the board.
+     * Enable the start game button.
      */
     @isEditorModeEnable()
-    private clearBoard(): void
+    private enableStartGameButton(): void
     {
-        this.createBoard(StartPosition.Empty);
+        const startButton: HTMLElement = document.querySelector(`[data-menu-operation="${NavigatorModalOperation.ShowStartPlayingBoard}"]`) as HTMLElement;
+        startButton.removeAttribute("disabled");
     }
-    
+
+    /**
+     * Disable the start game button.
+     */
+    @isEditorModeEnable()
+    private disableStartGameButton(): void
+    {
+        const startButton: HTMLElement = document.querySelector(`[data-menu-operation="${NavigatorModalOperation.ShowStartPlayingBoard}"]`) as HTMLElement;
+        startButton.setAttribute("disabled", "true");
+    }
+
     /**
      * This function flips the board.
      */
@@ -589,25 +601,9 @@ export class BoardEditor extends Component{
     }
 
     /**
-     * This function if the current mode is custom mode or not.
-     */
-    public resetBoard(): void
-    {
-        this.createBoard(this._lastLoadedFenNotation);
-    }
-
-    /**
-     * This function if the current mode is custom mode or not.
-     */
-    private isBoardCreatorModeCustom(): boolean
-    {
-        return this._currentBoardCreatorMode == BoardCreatorMode.Custom;
-    }
-
-    /**
      * Get the form value of the custom or template mode.
      */
-    public getCurrentFen(): string
+    public getShownFen(): string
     {
         let formValue: string;
         
@@ -616,8 +612,15 @@ export class BoardEditor extends Component{
         else if(this._currentBoardCreatorMode == BoardCreatorMode.Template)
             formValue = (document.querySelector(`.${BoardCreatorMode.Template} select`) as HTMLSelectElement).value;
 
-        this._lastLoadedFenNotation = formValue!;
         return formValue!;
+    }
+
+    /**
+     * Load the saved FEN form value.
+     */
+    public getSavedFen(): string
+    {
+        return this._savedFenNotation || LocalStorage.load(LocalStorageKey.LastSavedBoard) || this.getShownFen();
     }
 
     /**
@@ -627,22 +630,14 @@ export class BoardEditor extends Component{
      */
     public saveFen(fen: string | null = null): void
     {
-        this._savedFenNotation = fen ? fen : this.getCurrentFen();
+        this._savedFenNotation = fen ? fen : this.getShownFen();
         LocalStorage.save(LocalStorageKey.LastSavedBoard, this._savedFenNotation);
-    }
-
-    /**
-     * Load the saved FEN form value.
-     */
-    public getSavedFen(): string
-    {
-        return this._savedFenNotation || LocalStorage.load(LocalStorageKey.LastSavedBoard) || this.getCurrentFen();
     }
 
     /**
      * This function shows the FEN notation on the form.
      */
-    public updateFenOnForm(): void
+    public updateFen(): void
     {
         if(!this.isBoardCreatorModeCustom()) this.changeBoardCreatorMode();
         const inputElement = document.querySelector(`.${BoardCreatorMode.Custom} input`) as HTMLInputElement;
@@ -657,31 +652,42 @@ export class BoardEditor extends Component{
     }
 
     /**
+     * This function toggles the utility menu.
+     */
+    private toggleUtilityMenu(): void
+    {
+        document.querySelector(`#${PIECE_CREATOR_ID} .utility-toggle-menu`)!.classList.toggle("visible");
+    }
+
+    /**
      * This function handles the board creator operation.
      */
     public handleOperation(operation: BoardEditorOperation, menuItem: HTMLElement): void
     {
         switch(operation){
-            case BoardEditorOperation.ToggleBoardEditorUtilityMenu:
-                this.toggleUtilityMenu();
-                break;
-            case BoardEditorOperation.ChangeBoardCreatorMode:
-                this.changeBoardCreatorMode();
-                break;
-            case BoardEditorOperation.ClearBoard:
-                this.clearBoard();
-                break;
             case BoardEditorOperation.CreatePiece:
                 this.createPiece(menuItem);
                 break;
             case BoardEditorOperation.RemovePiece:
                 this.removePiece(menuItem);
                 break;
+            case BoardEditorOperation.ClearBoard:
+                this.clearBoard();
+                break;
+            case BoardEditorOperation.ResetBoard:
+                this.resetBoard();
+                break;
             case BoardEditorOperation.EnableMovePieceCursorMode:
                 this.enableMovePieceCursorMode();
                 break;
             case BoardEditorOperation.EnableRemovePieceCursorMode:
                 this.enableRemovePieceCursorMode();
+                break;
+            case BoardEditorOperation.ChangeBoardCreatorMode:
+                this.changeBoardCreatorMode();
+                break;
+            case BoardEditorOperation.ToggleBoardEditorUtilityMenu:
+                this.toggleUtilityMenu();
                 break;
         }
     }
