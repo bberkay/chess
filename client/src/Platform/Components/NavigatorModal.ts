@@ -624,11 +624,12 @@ export class NavigatorModal extends Component{
     public handleOperation(operation: NavigatorModalOperation): void
     {
         switch(operation){
-            case NavigatorModalOperation.Undo:
-                this.undo();
-                break;
-            case NavigatorModalOperation.AskConfirmation:
-                this.showConfirmation();
+            case NavigatorModalOperation.ShowCreateLobby:
+                this.saveSelectedGameDuration();
+                this.showCreateLobby();
+                break
+            case NavigatorModalOperation.ShowJoinLobby:
+                this.showJoinLobby();
                 break;
             case NavigatorModalOperation.ShowSelectDuration:
                 this.showSelectDuration();
@@ -639,16 +640,15 @@ export class NavigatorModal extends Component{
             case NavigatorModalOperation.ShowPlayAgainstBot:
                 this.showPlayAgainstBot();
                 break;
-            case NavigatorModalOperation.ShowCreateLobby:
-                this.saveSelectedGameDuration();
-                this.showCreateLobby();
-                break
-            case NavigatorModalOperation.ShowJoinLobby:
-                this.showJoinLobby();
-                break;
             case NavigatorModalOperation.ShowSelectColorAgainsBot:
                 this.saveSelectedBotDifficulty();
                 this.showSelectColorAgainstBot();
+                break;
+            case NavigatorModalOperation.AskConfirmation:
+                this.showConfirmation();
+                break;
+            case NavigatorModalOperation.Undo:
+                this.undo();
                 break;
         }
     }
