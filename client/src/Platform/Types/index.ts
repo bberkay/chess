@@ -21,60 +21,89 @@ export enum PlatformEvent {
     onOperationMounted = "onOperationMounted",
 }
 
+/**
+ * Represents operations related to the 
+ * `BoardEditor` component.
+ */
+export enum BoardEditorOperation{
+    Enable = "Enable",
+    EnableMovePieceCursorMode = "EnableMovePieceCursorMode",
+    EnableRemovePieceCursorMode = "EnableRemovePieceCursorMode",
+    CreateBoard = "CreateBoard",
+    CreatePiece = "CreatePiece",
+    RemovePiece = "RemovePiece",
+    ClearBoard = "ClearBoard",
+    ResetBoard = "ResetBoard",
+    FlipBoard = "FlipBoard",
+    ChangeBoardCreatorMode = "ChangeBoardCreatorMode",
+    ToggleBoardEditorUtilityMenu = "ToggleBoardEditorUtilityMenu"
+}
+
+/**
+ * Represents operations related to the 
+ * `NotationMenu` component.
+ */
 export enum NotationMenuOperation{
+    ShowNewGameUtilityMenu = "ShowNewGameUtilityMenu",
+    ShowOnlineGameUtilityMenu = "ShowOnlineGameUtilityMenu",
+    ShowSingleplayerGameUtilityMenu = "ShowSingleplayerGameUtilityMenu",
+    ShowPlayAgainUtilityMenu = "ShowPlayAgainUtilityMenu",
     SendDrawOffer = "SendDrawOffer",
     SendUndoOffer = "SendUndoOffer",
     SendPlayAgainOffer = "SendPlayAgainOffer",
-    AbortGame= "AbortGame",
-    Resign = "Resign",
     UndoMove = "UndoMove",
+    Resign = "Resign",
+    AbortGame= "AbortGame",
     PlayAgain = "PlayAgain",
     PreviousMove = "PreviousMove",
     NextMove = "NextMove",
     LastMove = "LastMove",
     FirstMove = "FirstMove",
     GoBack = "GoBack",
-    ShowOnlineGameUtilityMenu = "ShowOnlineGameUtilityMenu",
-    ShowSingleplayerGameUtilityMenu = "ShowSingleplayerGameUtilityMenu",
-    ShowNewGameUtilityMenu = "ShowNewGameUtilityMenu",
-    ShowPlayAgainUtilityMenu = "ShowPlayAgainUtilityMenu",
     ToggleUtilityMenu = "ToggleUtilityMenu",
 }
 
+/**
+ * Represents operations related to the 
+ * `NavigatorModal` component.
+ */
 export enum NavigatorModalOperation{
-    Hide = "Hide",
-    Undo = "Undo",
     ShowGameCreator = "ShowGameCreator",
-    AskConfirmation = "AskConfirmation",
     ShowStartPlayingBoard = "ShowStartPlayingBoard",
+    ShowCreateLobby = "ShowCreateLobby",
     ShowSelectDuration = "ShowSelectDuration",
     ShowSelectDurationCustom = "ShowSelectDurationCustom",
-    ShowCreateLobby = "ShowCreateLobby",
     ShowJoinLobby = "ShowJoinLobby",
     ShowPlayAgainstBot = "ShowPlayAgainstBot",
     ShowSelectColorAgainsBot = "ShowSelectColorAgainsBot",
-    PlayByYourself = "PlayByYourself",
     PlayAgainstBot = "PlayAgainstBot",
+    PlayByYourself = "PlayByYourself",
+    AskConfirmation = "AskConfirmation",
+    Hide = "Hide",
+    Undo = "Undo"
 }
 
+/**
+ * Represents operations related to the 
+ * `LogConsole` component.
+ */
 export enum LogConsoleOperation{
     Clear = "Clear"
 }
 
-export enum BoardEditorOperation{
-    Enable = "Enable",
-    FlipBoard = "FlipBoard",
-    ResetBoard = "ResetBoard",
-    ClearBoard = "ClearBoard",
-    CreatePiece = "CreatePiece",
-    RemovePiece = "RemovePiece",
-    CreateBoard = "CreateBoard",
-    EnableMovePieceCursorMode = "EnableMovePieceCursorMode",
-    EnableRemovePieceCursorMode = "EnableRemovePieceCursorMode",
-    ChangeBoardCreatorMode = "ChangeBoardCreatorMode",
-    ToggleBoardEditorUtilityMenu = "ToggleBoardEditorUtilityMenu"
+/**
+ * Represents operations related to the 
+ * `AppearanceMenu` component.
+ */
+export enum AppearanceMenuOperation{
+    ChangeTheme = "ChangeTheme",
+    Reset = "Reset"
 }
 
+/**
+ * Represents operations related to the 
+ * `Navbar` component.
+ */
 export enum NavbarOperation{
     ShowAbout = "ShowAbout",
     ShowLogConsole = "ShowLogConsole",
@@ -82,14 +111,12 @@ export enum NavbarOperation{
     ShowConnections = "ShowConnections",
 }
 
-export enum AppearanceMenuOperation{
-    Reset = "Reset",
-    ChangeTheme = "ChangeTheme"
-}
-
+/**
+ * Represents a union type of all menu operations.
+ */
 export type MenuOperation = BoardEditorOperation 
-    | NavigatorModalOperation 
     | NotationMenuOperation 
+    | NavigatorModalOperation 
     | LogConsoleOperation
-    | NavbarOperation
-    | AppearanceMenuOperation;
+    | AppearanceMenuOperation
+    | NavbarOperation;
