@@ -2,7 +2,7 @@ import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage";
 import { SocketOperation } from "../../Types";
 import { BoardEditorOperation, NavigatorModalOperation } from "../Types";
 import { Component } from "./Component";
-import { Color, Duration, GameStatus, StartPosition } from "@Chess/Types";
+import { Color, Duration, GameStatus } from "@Chess/Types";
 import { BotColor, BotDifficulty } from "@Chess/Bot";
 import { 
     DEFULT_PLAYER_NAME,
@@ -21,7 +21,7 @@ import {
  * This class provide a menu to show the logs.
  */
 export class NavigatorModal extends Component{
-    private readonly _boundClose: ((event: MouseEvent) => void) = this.close.bind(this);
+    private readonly _boundCloseModalOnOutsideClick: ((event: MouseEvent) => void) = this.closeModalOnOutsideClick.bind(this);
 
     private lastNavigatorModalTitle: string = "";
     private lastNavigatorModalContent: string = "";
@@ -56,20 +56,6 @@ export class NavigatorModal extends Component{
                 <div class="navigator-modal-content"></div>
             </div>
         `);
-    }
-
-    /**
-     * Close the modal when the user clicks outside of the active modal.
-     */
-    private close(event: MouseEvent): void {
-        const activeModal = document.querySelector('.navigator-modal')! as HTMLElement;
-        if(!activeModal) 
-            return;
-
-        if(!(event.target as HTMLElement).closest(".navigator-modal")){
-            if(activeModal.classList.contains("closeable"))
-                this.hide();
-        }   
     }
 
     /**
@@ -123,7 +109,7 @@ export class NavigatorModal extends Component{
         }   
 
         setTimeout(() => {
-            document.addEventListener("click", this._boundClose);
+            document.addEventListener("click", this._boundCloseModalOnOutsideClick);
         }, 0);  
 
         // For go back to the previous state of the modal.
@@ -134,11 +120,25 @@ export class NavigatorModal extends Component{
     }
 
     /**
+     * Close the modal when the user clicks outside of the active modal.
+     */
+    private closeModalOnOutsideClick(event: MouseEvent): void {
+        const activeModal = document.querySelector('.navigator-modal')! as HTMLElement;
+        if(!activeModal) 
+            return;
+
+        if(!(event.target as HTMLElement).closest(".navigator-modal")){
+            if(activeModal.classList.contains("closeable"))
+                this.hide();
+        }   
+    }
+
+    /**
      * Hide the modal.
      */
     public hide(): void
     {
-        document.removeEventListener("click", this._boundClose);
+        document.removeEventListener("click", this._boundCloseModalOnOutsideClick);
         const navigatorModal = document.querySelector('.navigator-modal');
         if(!navigatorModal) return;
         navigatorModal.remove();
@@ -271,7 +271,8 @@ export class NavigatorModal extends Component{
     }
 
     /**
-     * Show the select game duration screen.
+     * Show the select game duration screen after
+     * the start playing board screen.
      */
     private showSelectDuration(): void
     {
@@ -300,7 +301,9 @@ export class NavigatorModal extends Component{
     }
 
     /**
-     * Show the select custom duration screen.
+     * Show the select custom duration screen 
+     * if the user selects the custom duration
+     * on the select duration screen.
      */
     private showSelectDurationCustom(): void
     {
@@ -320,203 +323,6 @@ export class NavigatorModal extends Component{
             </div>
             `
         );
-    }
-
-    /**
-     * Show the create lobby screen.
-     */
-    private showCreateLobby(): void
-    {
-        this.show(
-            "Create a Lobby",
-            `<span>Enter your name: </span>
-            <div class="input-group" style="padding-top:5px;padding-bottom:5px;">
-                <input type="text" id="player-name" placeholder="Your Name" value="${
-                    LocalStorage.isExist(LocalStorageKey.LastPlayerName) 
-                        ? LocalStorage.load(LocalStorageKey.LastPlayerName) 
-                        : ""
-                }" maxlength="${MAX_PLAYER_NAME_LENGTH}" minlength="${MIN_PLAYER_NAME_LENGTH}" required>
-                <button type="submit" data-socket-operation="${SocketOperation.CreateLobby}">Create</button>
-            </div>
-            <div style="text-align:center;margin-top:10px;">
-                <button class="button--text" data-menu-operation="${NavigatorModalOperation.Hide}">
-                    Cancel
-                </button>
-            </div>
-        `);
-    }
-
-    /**
-     * Show the join lobby screen.
-     */
-    public showJoinLobby(): void
-    {
-        this.show(
-            "Join a Lobby",
-            `<span>Enter your name: </span>
-            <div class="input-group" style="padding-top:5px;padding-bottom:5px;">
-                <input type="text" id="player-name" placeholder="Your Name" value="${
-                    LocalStorage.isExist(LocalStorageKey.LastPlayerName) 
-                        ? LocalStorage.load(LocalStorageKey.LastPlayerName) 
-                        : ""
-                }" maxlength="${MAX_PLAYER_NAME_LENGTH}" minlength="${MIN_PLAYER_NAME_LENGTH}" required>
-                <button type="submit" data-socket-operation="${SocketOperation.JoinLobby}">Play</button>
-            </div>
-            <div style="text-align:center;margin-top:10px;">
-                <button class="button--text" data-menu-operation="${NavigatorModalOperation.Hide}">
-                    Cancel
-                </button>
-            </div>
-        `);
-    }
-
-    /**
-     * Show the created lobby info.
-     */
-    public showLobbyInfo(lobbyLink: string): void
-    {
-        this.show(
-            "Ready to Play",
-            `<div class = "input-group" style="padding-bottom:5px;">
-                <input type="text" id="lobby-link" placeholder="Lobby Name" value="${lobbyLink}" readonly>
-                <button data-clipboard-text="lobby-link">Copy</button>
-            </div>
-            <span>Share this lobby link with your friend to play together.</span>
-            <div style="text-align:center;margin-top:10px;">
-                <button class="button--text" data-menu-operation="${NavigatorModalOperation.AskConfirmation}">
-                    Cancel
-                </button>
-            </div>
-            `
-        );
-    }
-
-    /**
-     * Show the play against bot screen. This screen
-     * will allow the user to select the difficulty level
-     * of the bot.
-     */
-    private showPlayAgainstBot(): void
-    {
-        this.show(
-            "Play against Bot",
-            `<span>Select the difficulty level of the bot:</span>
-            <div class="btn-group-horizontal btn-group-horizontal--triple" style="padding-top:5px;padding-bottom:15px;">
-                <button data-selected="false" data-bot-difficulty="${BotDifficulty.Easy}">Easy</button>
-                <button data-selected="false" data-bot-difficulty="${BotDifficulty.Medium}">Medium</button>
-                <button data-selected="false" data-bot-difficulty="${BotDifficulty.Hard}">Hard</button>
-            </div>
-            <button type="submit" data-menu-operation="${NavigatorModalOperation.ShowSelectColorAgainsBot}">Next</button>
-            <div style="text-align:center;margin-top:10px;">
-                <button class="button--text" data-menu-operation="${NavigatorModalOperation.ShowGameCreator}">
-                    Cancel
-                </button>
-            </div>
-            `
-        );
-    }
-
-    /**
-     * Show the select color against bot screen.
-     */
-    private showSelectColorAgainstBot(): void
-    {
-        this.show(
-            "Play against Bot",
-            `<span>Select the color of the bot:</span>
-            <div class="btn-group-horizontal btn-group-horizontal--triple" style="padding-top:5px;padding-bottom:15px;">
-                <button data-selected="false" data-bot-color="${BotColor.Black}">Black</button>
-                <button data-selected="false" data-bot-color="${BotColor.Random}">Random</button>
-                <button data-selected="false" data-bot-color="${BotColor.White}">White</button>
-            </div>
-            <button type="submit" data-menu-operation="${NavigatorModalOperation.PlayAgainstBot}">Play</button>
-            <div style="text-align:center;margin-top:10px;">
-                <button class="button--text" data-menu-operation="${NavigatorModalOperation.ShowGameCreator}">
-                    Cancel
-                </button>
-            </div>
-            `
-        );
-    }
-
-    /**
-     * Show the confirmation screen.
-     */
-    private showConfirmation(): void
-    {
-        this.show(
-            "Confirmation",
-            `<div id = "confirmation">Are you sure you want to cancel the game?
-            <br> <br> 
-            <div class="btn-group-vertical">
-                <button data-menu-operation="${NavigatorModalOperation.Undo}">Continue Playing</button>
-                <button style="background-color:transparent" data-socket-operation="${SocketOperation.CancelLobby}">Yes, Cancel the Game</button>
-            </div></div>`
-        );
-    }
-
-    /**
-     * Show error screen.
-     */
-    public showError(message: string, okButton: boolean = true): void
-    {
-        this.show(
-            "Something Went Wrong",
-            `<span>${message}</span>
-            <div style="text-align:center;margin-top:10px;">
-                ${okButton ? `<button data-menu-operation="${NavigatorModalOperation.Hide}">Ok</button>` : ""}
-            </div>
-            `
-        );
-        document.querySelector('.navigator-modal')!.classList.add("navigator-modal--error");
-    }
-
-    /**
-     * Get the selected difficulty level of the bot.
-     * If the play against bot modal is open.
-     */
-    private saveSelectedBotDifficulty(): void
-    {
-        const selectedButton = document.querySelector(".navigator-modal button[data-selected='true'][data-bot-difficulty]");
-        if(!selectedButton) return;
-        this.lastSelectedBotDifficulty = parseInt(selectedButton.getAttribute("data-bot-difficulty")!) as BotDifficulty;
-    }
-
-    /**
-     * Save the selected color of the bot.
-     * If the play against bot modal is open.
-     */
-    private saveSelectedBotColor(): void
-    {
-        const selectedButton = document.querySelector(".navigator-modal button[data-selected='true'][data-bot-color]");
-        if(!selectedButton) return;
-        this.lastSelectedBotColor = selectedButton.getAttribute("data-bot-color")! as BotColor
-    }
-
-    /**
-     * Get the entered player name from the 
-     * modal. If the player name modal is open.
-     * 
-     * @returns Must be between MIN_PLAYER_NAME_LENGTH and MAX_PLAYER_NAME_LENGTH
-     * characters. If not, it will be DEFULT_PLAYER_NAME.
-     */
-    public getEnteredPlayerName(): string
-    {
-        if(document.getElementById("navigator-modal")!.querySelector("#player-name")) 
-            this.saveEnteredPlayerName();
-        return this.lastEnteredPlayerName;
-    }
-
-    /**
-     * Save the entered player name. If the player name
-     * modal is open.
-     */
-    private saveEnteredPlayerName(): void
-    {
-        let playerName = (document.getElementById("navigator-modal")!.querySelector("#player-name") as HTMLInputElement).value;
-        this.lastEnteredPlayerName = (playerName.length < MIN_PLAYER_NAME_LENGTH || playerName.length > MAX_PLAYER_NAME_LENGTH) 
-            ? DEFULT_PLAYER_NAME
-            : playerName;
     }
 
     /**
@@ -581,16 +387,49 @@ export class NavigatorModal extends Component{
     }
 
     /**
-     * Get the created bot settings from the modal.
+     * Show the create lobby screen after the user
+     * selects the game duration.
      */
-    public getCreatedBotSettings(): {botColor: BotColor, botDifficulty: BotDifficulty}
+    private showCreateLobby(): void
     {
-        this.saveSelectedBotColor();
-        
-        return {
-            botColor: this.lastSelectedBotColor,
-            botDifficulty: this.lastSelectedBotDifficulty
-        };
+        this.show(
+            "Create a Lobby",
+            `<span>Enter your name: </span>
+            <div class="input-group" style="padding-top:5px;padding-bottom:5px;">
+                <input type="text" id="player-name" placeholder="Your Name" value="${
+                    LocalStorage.isExist(LocalStorageKey.LastPlayerName) 
+                        ? LocalStorage.load(LocalStorageKey.LastPlayerName) 
+                        : ""
+                }" maxlength="${MAX_PLAYER_NAME_LENGTH}" minlength="${MIN_PLAYER_NAME_LENGTH}" required>
+                <button type="submit" data-socket-operation="${SocketOperation.CreateLobby}">Create</button>
+            </div>
+            <div style="text-align:center;margin-top:10px;">
+                <button class="button--text" data-menu-operation="${NavigatorModalOperation.Hide}">
+                    Cancel
+                </button>
+            </div>
+        `);
+    }
+
+    /**
+     * Show the created lobby info.
+     */
+    public showLobbyInfo(lobbyLink: string): void
+    {
+        this.show(
+            "Ready to Play",
+            `<div class = "input-group" style="padding-bottom:5px;">
+                <input type="text" id="lobby-link" placeholder="Lobby Name" value="${lobbyLink}" readonly>
+                <button data-clipboard-text="lobby-link">Copy</button>
+            </div>
+            <span>Share this lobby link with your friend to play together.</span>
+            <div style="text-align:center;margin-top:10px;">
+                <button class="button--text" data-menu-operation="${NavigatorModalOperation.AskConfirmation}">
+                    Cancel
+                </button>
+            </div>
+            `
+        );
     }
 
     /**
@@ -607,7 +446,180 @@ export class NavigatorModal extends Component{
     }
 
     /**
-     * Handle the operation of the navigator modal.
+     * Show the join lobby screen.
+     */
+    public showJoinLobby(): void
+    {
+        this.show(
+            "Join a Lobby",
+            `<span>Enter your name: </span>
+            <div class="input-group" style="padding-top:5px;padding-bottom:5px;">
+                <input type="text" id="player-name" placeholder="Your Name" value="${
+                    LocalStorage.isExist(LocalStorageKey.LastPlayerName) 
+                        ? LocalStorage.load(LocalStorageKey.LastPlayerName) 
+                        : ""
+                }" maxlength="${MAX_PLAYER_NAME_LENGTH}" minlength="${MIN_PLAYER_NAME_LENGTH}" required>
+                <button type="submit" data-socket-operation="${SocketOperation.JoinLobby}">Play</button>
+            </div>
+            <div style="text-align:center;margin-top:10px;">
+                <button class="button--text" data-menu-operation="${NavigatorModalOperation.Hide}">
+                    Cancel
+                </button>
+            </div>
+        `);
+    }
+
+    /**
+     * Get the entered player name from the 
+     * modal. If the player name modal is open.
+     * 
+     * @returns Must be between `MIN_PLAYER_NAME_LENGTH` and 
+     * `MAX_PLAYER_NAME_LENGTH` characters. If not, it will 
+     * be `DEFULT_PLAYER_NAME`.
+     */
+    public getEnteredPlayerName(): string
+    {
+        if(document.getElementById("navigator-modal")!.querySelector("#player-name")) 
+            this.saveEnteredPlayerName();
+        return this.lastEnteredPlayerName;
+    }
+
+    /**
+     * Save the entered player name. If the player name
+     * modal is open.
+     */
+    private saveEnteredPlayerName(): void
+    {
+        let playerName = (document.getElementById("navigator-modal")!.querySelector("#player-name") as HTMLInputElement).value;
+        this.lastEnteredPlayerName = (playerName.length < MIN_PLAYER_NAME_LENGTH || playerName.length > MAX_PLAYER_NAME_LENGTH) 
+            ? DEFULT_PLAYER_NAME
+            : playerName;
+    }
+    
+    /**
+     * Show the play against bot screen after the user
+     * selects the play against bot option on the game 
+     * creator screen. This screen will allow the user 
+     * to select the difficulty level of the bot. 
+     */
+    private showPlayAgainstBot(): void
+    {
+        this.show(
+            "Play against Bot",
+            `<span>Select the difficulty level of the bot:</span>
+            <div class="btn-group-horizontal btn-group-horizontal--triple" style="padding-top:5px;padding-bottom:15px;">
+                <button data-selected="false" data-bot-difficulty="${BotDifficulty.Easy}">Easy</button>
+                <button data-selected="false" data-bot-difficulty="${BotDifficulty.Medium}">Medium</button>
+                <button data-selected="false" data-bot-difficulty="${BotDifficulty.Hard}">Hard</button>
+            </div>
+            <button type="submit" data-menu-operation="${NavigatorModalOperation.ShowSelectColorAgainsBot}">Next</button>
+            <div style="text-align:center;margin-top:10px;">
+                <button class="button--text" data-menu-operation="${NavigatorModalOperation.ShowGameCreator}">
+                    Cancel
+                </button>
+            </div>
+            `
+        );
+    }
+
+    /**
+     * Get the selected difficulty level of the bot.
+     * If the play against bot modal is open.
+     */
+    private saveSelectedBotDifficulty(): void
+    {
+        const selectedButton = document.querySelector(".navigator-modal button[data-selected='true'][data-bot-difficulty]");
+        if(!selectedButton) return;
+        this.lastSelectedBotDifficulty = parseInt(selectedButton.getAttribute("data-bot-difficulty")!) as BotDifficulty;
+    }
+
+    /**
+     * Show the select color against bot screen after 
+     * the user selects the difficulty level of the bot.
+     */
+    private showSelectColorAgainstBot(): void
+    {
+        this.show(
+            "Play against Bot",
+            `<span>Select the color of the bot:</span>
+            <div class="btn-group-horizontal btn-group-horizontal--triple" style="padding-top:5px;padding-bottom:15px;">
+                <button data-selected="false" data-bot-color="${BotColor.Black}">Black</button>
+                <button data-selected="false" data-bot-color="${BotColor.Random}">Random</button>
+                <button data-selected="false" data-bot-color="${BotColor.White}">White</button>
+            </div>
+            <button type="submit" data-menu-operation="${NavigatorModalOperation.PlayAgainstBot}">Play</button>
+            <div style="text-align:center;margin-top:10px;">
+                <button class="button--text" data-menu-operation="${NavigatorModalOperation.ShowGameCreator}">
+                    Cancel
+                </button>
+            </div>
+            `
+        );
+    }
+
+    /**
+     * Save the selected color of the bot.
+     * If the play against bot modal is open.
+     */
+    private saveSelectedBotColor(): void
+    {
+        const selectedButton = document.querySelector(".navigator-modal button[data-selected='true'][data-bot-color]");
+        if(!selectedButton) return;
+        this.lastSelectedBotColor = selectedButton.getAttribute("data-bot-color")! as BotColor
+    }
+
+    /**
+     * Get the created bot settings from the modal.
+     */
+    public getCreatedBotSettings(): {botColor: BotColor, botDifficulty: BotDifficulty}
+    {
+        this.saveSelectedBotColor();
+        
+        return {
+            botColor: this.lastSelectedBotColor,
+            botDifficulty: this.lastSelectedBotDifficulty
+        };
+    }
+
+    /**
+     * Show the confirmation screen when the user
+     * wants to cancel something(currently the game).
+     */
+    private showConfirmation(): void
+    {
+        this.show(
+            "Confirmation",
+            `<div id = "confirmation">Are you sure you want to cancel the game?
+            <br> <br> 
+            <div class="btn-group-vertical">
+                <button data-menu-operation="${NavigatorModalOperation.Undo}">Continue Playing</button>
+                <button style="background-color:transparent" data-socket-operation="${SocketOperation.CancelLobby}">Yes, Cancel the Game</button>
+            </div></div>`
+        );
+    }
+
+    /**
+     * Show error screen.
+     * @param {boolean} okButton - If true, it will 
+     * show the ok button and the user will be able to
+     * close the modal by clicking the ok button. If false,
+     * user won't be able to close the modal.
+     */
+    public showError(message: string, okButton: boolean = true): void
+    {
+        this.show(
+            "Something Went Wrong",
+            `<span>${message}</span>
+            <div style="text-align:center;margin-top:10px;">
+                ${okButton ? `<button data-menu-operation="${NavigatorModalOperation.Hide}">Ok</button>` : ""}
+            </div>
+            `
+        );
+        document.querySelector('.navigator-modal')!.classList.add("navigator-modal--error");
+    }
+
+    /**
+     * Handle the given `NavigatorModalOperation`.
      */
     public handleOperation(operation: NavigatorModalOperation): void
     {
