@@ -1170,7 +1170,7 @@ export class NotationMenu extends Component {
     }
 
     /**
-     * Handle the notation menu operation.
+     * Handle the given `NotationMenuOperation`.
      */
     public handleOperation(operation: NotationMenuOperation): void {
         switch (operation) {
