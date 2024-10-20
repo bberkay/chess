@@ -37,7 +37,7 @@
  * *************************************************
  */
 
-import type { Server, ServerWebSocket } from "bun";
+import type { Server } from "bun";
 import type {
     CreateLobbyReqParams,
     JoinLobbyReqParams,
@@ -48,9 +48,8 @@ import type {
     BaseWebSocketReqParams,
     Player
 } from "./Types";
-import type { Durations, JsonNotation, Square, StartPosition } from "@Chess/Types";
+import type { Square } from "@Chess/Types";
 import { Color } from "@Chess/Types";
-import { MoveValidationError } from "@Chess/Engine/ChessEngine";
 import { LobbyManager } from "./Classes/LobbyManager";
 import {
     createRandomId,
@@ -61,7 +60,7 @@ import {
 import { CORS_HEADERS, MAX_PAYLOAD_LENGTH, SERVER_PORT } from "./Consts";
 import { ALLOWED_ORIGINS } from "./Consts";
 import {
-    ID_LENGTH,
+    GU_ID_LENGTH,
     MAX_PLAYER_NAME_LENGTH,
     MIN_PLAYER_NAME_LENGTH,
     MAX_TOTAL_TIME,
@@ -78,23 +77,15 @@ import {
 } from "./Classes/WsCommand";
 import { Lobby } from "./Classes/Lobby";
 
-/**
- * Check if the origin is allowed to connect.
- */
-function isOriginAllowed(req: Request): boolean {
-    const origin = req.headers.get("origin") || "";
-    if (!origin) return false;
-    return ALLOWED_ORIGINS.includes(origin);
-}
 
 /**
- * 
+ * Validates individual parameters of a WebSocket request.
  */
 function validate(params: BaseWebSocketReqParams): Response | boolean {
     const validations: Record<string, boolean> = {
         name: params.name === "" || isInRange(params.name.length, MIN_PLAYER_NAME_LENGTH, MAX_PLAYER_NAME_LENGTH),
-        lobbyId: params.lobbyId === "" || isValidLength(params.lobbyId, ID_LENGTH) && LobbyManager.isLobbyExist(params.lobbyId),
-        token: params.token === "" || isValidLength(params.token, ID_LENGTH),
+        lobbyId: params.lobbyId === "" || isValidLength(params.lobbyId, GU_ID_LENGTH) && LobbyManager.isLobbyExist(params.lobbyId),
+        token: params.token === "" || isValidLength(params.token, GU_ID_LENGTH),
         board: params.board === "" || params.board.length <= 100,
         remaining: params.remaining === "" || isInRange(parseInt(params.remaining as string), MIN_TOTAL_TIME, MAX_TOTAL_TIME),
         increment: params.increment === "" || isInRange(parseInt(params.increment as string), MIN_INCREMENT_TIME, MAX_INCREMENT_TIME)
@@ -103,8 +94,8 @@ function validate(params: BaseWebSocketReqParams): Response | boolean {
 
     const errors: Record<string, string> = {
         name: `Invalid request. playerName length must be between ${MIN_PLAYER_NAME_LENGTH} and ${MAX_PLAYER_NAME_LENGTH}.`,
-        lobbyId: `Invalid request. lobbyId length must be ${ID_LENGTH} length and lobby must be exist.`,
-        token: `Invalid request. token length must be ${ID_LENGTH}.`,
+        lobbyId: `Invalid request. lobbyId length must be ${GU_ID_LENGTH} length and lobby must be exist.`,
+        token: `Invalid request. token length must be ${GU_ID_LENGTH}.`,
         board: "Invalid request. board length must be less than 100.",
         remaining: `Invalid request. remaining must be a number between ${MIN_TOTAL_TIME} and ${MAX_TOTAL_TIME}.`,
         increment: `Invalid request. increment must be a number between ${MIN_INCREMENT_TIME} and ${MAX_INCREMENT_TIME}.`
@@ -119,7 +110,9 @@ function validate(params: BaseWebSocketReqParams): Response | boolean {
 }
 
 /**
- * 
+ * Ensures that certain parameters are not used 
+ * together and that required combinations are 
+ * present.
  */
 function validateCombination(params: BaseWebSocketReqParams): Response | boolean {
     if (params.name && params.token)
@@ -141,7 +134,8 @@ function validateCombination(params: BaseWebSocketReqParams): Response | boolean
 }
 
 /**
- * 
+ * Determines the specific type of WebSocket request 
+ * based on the provided parameters.
  */
 function findWebSocketReqParams(params: BaseWebSocketReqParams): Response | WebSocketReqParams {
     if (params.name && params.board && params.remaining && params.increment)
@@ -157,7 +151,8 @@ function findWebSocketReqParams(params: BaseWebSocketReqParams): Response | WebS
 }
 
 /**
- * Check if the parameters are valid.
+ * This function combines individual parameter validation, 
+ * combination validation, and request type determination.
  */
 function isParametersValid(req: Request): Response | WebSocketReqParams {
     const url = new URL(req.url);
@@ -186,7 +181,7 @@ function isParametersValid(req: Request): Response | WebSocketReqParams {
 }
 
 /**
- * 
+ * Parse the needed data for the creating of the lobby.
  */
 function createLobbyAndGetLobbyJoiningData(createLobbyReqParams: CreateLobbyReqParams): Response | { lobbyId: string, token: string } {
     const lobbyId = LobbyManager.createLobby(
@@ -201,11 +196,11 @@ function createLobbyAndGetLobbyJoiningData(createLobbyReqParams: CreateLobbyReqP
         }
     );
 
-    return { lobbyId, token: createRandomId(ID_LENGTH) };
+    return { lobbyId, token: createRandomId(GU_ID_LENGTH) };
 }
 
 /**
- * 
+ * Parse the needed data for the joining to the lobby.
  */
 function getLobbyJoiningData(joinLobbyReqParams: JoinLobbyReqParams): Response | { lobbyId: string, token: string } {
     const lobby = LobbyManager.getLobby(joinLobbyReqParams.lobbyId);
@@ -218,14 +213,14 @@ function getLobbyJoiningData(joinLobbyReqParams: JoinLobbyReqParams): Response |
     return { 
         lobbyId: joinLobbyReqParams.lobbyId, 
         token: createRandomId(
-            ID_LENGTH, 
+            GU_ID_LENGTH, 
             lobby.getWhitePlayer()?.token || lobby.getBlackPlayer()?.token
         ) 
     };
 }
 
 /**
- * 
+ * Parse the needed data for the reconnecting to the lobby.
  */
 function getReconnectingLobbyData(reconnectLobbyReqParams: ReconnectLobbyReqParams): Response | { lobbyId: string, name: string, id: string } {
     const lobby = LobbyManager.getLobby(reconnectLobbyReqParams.lobbyId);
@@ -243,7 +238,9 @@ function getReconnectingLobbyData(reconnectLobbyReqParams: ReconnectLobbyReqPara
 }
 
 /**
- * 
+ * Handles the incoming WebSocket request parameters.
+ * This function handles the entire process of validating and 
+ * processing the request parameters.
  */
 function handleParameters(req: Request): Response | { lobbyId: string, token: string, name: string, id?: string } {
     // Check if the parameters are valid.
@@ -262,10 +259,10 @@ function handleParameters(req: Request): Response | { lobbyId: string, token: st
     return neededParams as { lobbyId: string, token: string, name: string, id?: string };
 }
 
-function isHttpRequest(req: Request): boolean {
-    return req.headers.get("upgrade") === null;
-}
-
+/**
+ * Handles HTTP requests to the server.
+ * This function processes GET requests and provides appropriate responses.
+ */
 function handleHttpRequest(req: Request): CORSResponse {
     if (req.method !== "GET")
         return new CORSResponse("Only GET method is allowed.", { status: 405 });
@@ -288,10 +285,6 @@ function handleHttpRequest(req: Request): CORSResponse {
     return new CORSResponse("Invalid request.", { status: 400 });
 }
 
-function isWebSocketRequest(req: Request): boolean {
-    return req.headers.get("upgrade") === "websocket";
-}
-
 /**
  * Response class with CORS headers.
  */
@@ -302,6 +295,29 @@ class CORSResponse extends Response {
             this.headers.set(key, CORS_HEADERS[key]);
         }
     }
+}
+
+/**
+ * Check if the request is a websocket request.
+ */
+function isWebSocketRequest(req: Request): boolean {
+    return req.headers.get("upgrade") === "websocket";
+}
+
+/**
+ * Check if the request is a http request.
+ */
+function isHttpRequest(req: Request): boolean {
+    return req.headers.get("upgrade") === null;
+}
+
+/**
+ * Check if the origin is allowed to connect.
+ */
+function isOriginAllowed(req: Request): boolean {
+    const origin = req.headers.get("origin") || "";
+    if (!origin) return false;
+    return ALLOWED_ORIGINS.includes(origin);
 }
 
 /**
@@ -322,7 +338,6 @@ const server = Bun.serve<WebSocketData>({
         // Handle the parameters and get 
         // lobbyId and (token or name).
         const params = handleParameters(req);
-        console.log("Params: ", params);
         if (params instanceof Response)
             return params;
 

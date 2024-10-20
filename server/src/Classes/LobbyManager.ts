@@ -2,7 +2,7 @@ import type { Player } from "../Types";
 import { JsonNotation, StartPosition, Duration } from "@Chess/Types";
 import { Lobby } from "./Lobby";
 import { createRandomId } from "./Helper";
-import { ID_LENGTH } from "../Consts";
+import { GU_ID_LENGTH } from "../Consts";
 
 /**
  * This class manages the lobbies of the game.
@@ -34,7 +34,7 @@ export class LobbyManager{
         initialDuration: Duration
     ): string
     {
-        const lobbyId = createRandomId(ID_LENGTH, [...LobbyManager.lobbies.keys()]);
+        const lobbyId = createRandomId(GU_ID_LENGTH, [...LobbyManager.lobbies.keys()]);
         LobbyManager.lobbies.set(lobbyId, new Lobby(lobbyId, board, initialDuration));
         return lobbyId;
     }

@@ -2,7 +2,7 @@ import type { Player } from "../Types";
 import { Color, Duration, Durations, GameStatus, JsonNotation, Square, StartPosition } from '@Chess/Types';
 import { ChessEngine } from '@Chess/Engine/ChessEngine';
 import { Converter } from "@Chess/Utils/Converter";
-import { ID_LENGTH } from "src/Consts";
+import { GU_ID_LENGTH } from "src/Consts";
 import { createRandomId, deepFreeze } from "./Helper";
 
 /**
@@ -302,7 +302,7 @@ export class Lobby{
     private setWhitePlayer(player: Player): void
     {
         if(!player.id)
-            player.id = createRandomId(ID_LENGTH, this.getPlayerIdByColor(Color.Black));
+            player.id = createRandomId(GU_ID_LENGTH, this.getPlayerIdByColor(Color.Black));
 
         this.whitePlayer = player;
     }
@@ -313,7 +313,7 @@ export class Lobby{
     private setBlackPlayer(player: Player): void
     {
         if(!player.id)
-            player.id = createRandomId(ID_LENGTH, this.getPlayerIdByColor(Color.White));
+            player.id = createRandomId(GU_ID_LENGTH, this.getPlayerIdByColor(Color.White));
 
         this.blackPlayer = player;
     }
