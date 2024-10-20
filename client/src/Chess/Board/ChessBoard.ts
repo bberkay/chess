@@ -37,7 +37,7 @@ export class ChessBoard {
     private _lockedSquaresModes: Record<string, SquareClickMode> = {};
     private _isBoardMoveEventBound: boolean = false;
 
-    private readonly _bindDragPiece: (e: MouseEvent) => void = this.dragPiece.bind(this);
+    private readonly _bindDragPiece: (e: MouseEvent | TouchEvent) => void = this.dragPiece.bind(this);
     public readonly logger: Logger = new Logger("src/Chess/Board/ChessBoard.ts");
 
     /**
@@ -217,7 +217,8 @@ export class ChessBoard {
      * Check if the device is touch device or not.
      */
     private _isTouchDevice(): boolean {
-        return window.matchMedia('(hover: none)').matches || window.matchMedia('(pointer: coarse)').matches;
+        //return window.matchMedia('(hover: none)').matches || window.matchMedia('(pointer: coarse)').matches;
+        return false;
     }
 
     /**
@@ -254,6 +255,7 @@ export class ChessBoard {
         
         let mouseUpTriggered: boolean = false;
         const isTouchDevice = this._isTouchDevice();
+        //const isTouchDevice = false;
         const squares = this.getAllSquares();
         squares.forEach(square => {
             square.addEventListener(isTouchDevice ? "touchstart" :  "mousedown", (e: MouseEvent | TouchEvent) => {
@@ -432,8 +434,9 @@ export class ChessBoard {
         clonedPiece.style.top = `calc(${clientY + window.scrollY}px - ${clonedPiece.offsetHeight / 2}px)`;
         clonedPiece.style.left = `calc(${clientX + window.scrollX}px - ${clonedPiece.offsetWidth / 2}px)`;
 
-        document.removeEventListener("mousemove", this._bindDragPiece);
-        document.addEventListener("mousemove", this._bindDragPiece);
+        const isTouchDevice = this._isTouchDevice();
+        document.removeEventListener(isTouchDevice ? "touchmove" : "mousemove", this._bindDragPiece);
+        document.addEventListener(isTouchDevice ? "touchmove" : "mousemove", this._bindDragPiece);
     }
 
     /**
@@ -509,7 +512,7 @@ export class ChessBoard {
         }
 
         if (originalPiece) originalPiece.classList.remove("dragging");
-        document.removeEventListener("mousemove", this._bindDragPiece);
+        document.removeEventListener(this._isTouchDevice() ? "touchmove" : "mousemove", this._bindDragPiece);
     }
 
     /**
