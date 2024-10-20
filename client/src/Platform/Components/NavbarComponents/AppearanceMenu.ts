@@ -100,6 +100,74 @@ export class AppearanceMenu extends NavbarComponent{
 
         this.loadCSS("appearance-menu.css");
     }
+    /**
+     * This function returns the default hex code of the color.
+     */
+    private _getDefaultHexCode(colorId: string): string {
+        return this.rootComputedStyle.getPropertyValue(`--chessboard-default-${colorId}`);
+    }
+
+    /**
+     * This function returns the color and opacity from the hex code.
+     */
+    private _getColorAndOpacityFromHexCode(color: string): {color: string, opacity: string}
+    {
+        const colorWithoutOpacity: string = color.length > 7 ? color.slice(0, 7) : color;
+        const opacityHex = color.length > 7 ? color.slice(-2) : "FF";
+        const opacityFloat = parseInt(opacityHex, 16) / 255;
+        return {color: colorWithoutOpacity, opacity: opacityFloat.toString()};
+    }
+
+    /**
+     * This function generates the hex code with opacity.
+     * @example _generateHexCodeWithOpacity("#ffffff", "0.5") => "#ffffff80"
+     * @example _generateHexCodeWithOpacity("#ffffff", "1") => "#ffffffFF"
+     * @example _generateHexCodeWithOpacity("#ffffff", "0") => "#ffffff00"
+     * @example _generateHexCodeWithOpacity("#ffffff", "0.75") => "#ffffffBF"
+     */
+    private _generateHexCodeWithOpacity(color: string, opacity: string | number): string
+    {
+        if(typeof opacity !== "number")
+            opacity = parseFloat(opacity);
+
+        const opacityHex = Math.round(opacity * 255).toString(16).padStart(2, "0");
+        return `${color}${opacityHex}`;
+    }
+
+    /**
+     * This function adds event listeners to the appearance menu.
+     */
+    private addEventListeners(): void
+    {
+        document.querySelectorAll(`#${APPEARANCE_MENU_ID} .color-picker`).forEach((colorPicker) => {
+            const colorInput = colorPicker.querySelector("input[type='color']") as HTMLInputElement;
+            const opacityInput = colorPicker.querySelector("input[type='range']") as HTMLInputElement;
+            const resetButton = colorPicker.querySelector(".reset-button") as HTMLButtonElement;
+
+            colorInput.addEventListener("input", () => {
+                this.addCustomAppearanceStyle(colorInput.id, colorInput.value);
+            });
+
+            opacityInput.addEventListener("change", () => {
+                colorInput.style.opacity = opacityInput.value;
+
+                this.addCustomAppearanceStyle(
+                    colorInput.id, 
+                    this._generateHexCodeWithOpacity(colorInput.value, opacityInput.value)
+                );
+            });
+
+            resetButton.addEventListener("click", () => {
+                const defaultColor = this._getDefaultHexCode(colorInput.id);
+                this.addCustomAppearanceStyle(colorInput.id, defaultColor);
+
+                const { color, opacity } = this._getColorAndOpacityFromHexCode(defaultColor);
+                colorInput.value = color;
+                opacityInput.value = opacity;
+                colorInput.style.opacity = opacity;
+            });
+        });
+    }
 
     /**
      * This function creates the style element for custom appearance styles.
@@ -127,33 +195,6 @@ export class AppearanceMenu extends NavbarComponent{
     }
 
     /**
-     * This function returns the default hex code of the color.
-     */
-    private getDefaultHexCode(colorId: string): string {
-        return this.rootComputedStyle.getPropertyValue(`--chessboard-default-${colorId}`);
-    }
-
-    /**
-     * This function returns the color and opacity from the hex code.
-     */
-    private getColorAndOpacityFromHexCode(color: string): {color: string, opacity: string}
-    {
-        const colorWithoutOpacity: string = color.length > 7 ? color.slice(0, 7) : color;
-        const opacityHex = color.length > 7 ? color.slice(-2) : "FF";
-        const opacityFloat = parseInt(opacityHex, 16) / 255;
-        return {color: colorWithoutOpacity, opacity: opacityFloat.toString()};
-    }
-
-    /**
-     * This function returns the hex code generated from the color and opacity.
-     */
-    private getHexCodeFromColorAndOpacity(color: string, opacity: string): string
-    {
-        const opacityHex = Math.round(parseFloat(opacity) * 255).toString(16).padStart(2, "0");
-        return `${color}${opacityHex}`;
-    }
-
-    /**
      * Add custom appearance style to the style element.
      */
     private addCustomAppearanceStyle(varName: string, value: string): void
@@ -174,42 +215,7 @@ export class AppearanceMenu extends NavbarComponent{
             }
         );
     }
-
-    /**
-     * This function adds event listeners to the appearance menu.
-     */
-    private addEventListeners(): void
-    {
-        document.querySelectorAll(`#${APPEARANCE_MENU_ID} .color-picker`).forEach((colorPicker) => {
-            const colorInput = colorPicker.querySelector("input[type='color']") as HTMLInputElement;
-            const opacityInput = colorPicker.querySelector("input[type='range']") as HTMLInputElement;
-            const resetButton = colorPicker.querySelector(".reset-button") as HTMLButtonElement;
-
-            colorInput.addEventListener("input", () => {
-                this.addCustomAppearanceStyle(colorInput.id, colorInput.value);
-            });
-
-            opacityInput.addEventListener("change", () => {
-                colorInput.style.opacity = opacityInput.value;
-
-                this.addCustomAppearanceStyle(
-                    colorInput.id, 
-                    this.getHexCodeFromColorAndOpacity(colorInput.value, opacityInput.value)
-                );
-            });
-
-            resetButton.addEventListener("click", () => {
-                const defaultColor = this.getDefaultHexCode(colorInput.id);
-                this.addCustomAppearanceStyle(colorInput.id, defaultColor);
-
-                const { color, opacity } = this.getColorAndOpacityFromHexCode(defaultColor);
-                colorInput.value = color;
-                opacityInput.value = opacity;
-                colorInput.style.opacity = opacity;
-            });
-        });
-    }
-
+    
     /**
      * This function shows the last saved if exist, otherwise default color palette.
      */
@@ -227,15 +233,37 @@ export class AppearanceMenu extends NavbarComponent{
             if(customAppearance && Object.hasOwn(customAppearance, colorInput.id))
                 colorHex = customAppearance[colorInput.id];
             else
-                colorHex = this.getDefaultHexCode(colorInput.id);
+                colorHex = this._getDefaultHexCode(colorInput.id);
 
-            const { color, opacity } = this.getColorAndOpacityFromHexCode(colorHex);
+            const { color, opacity } = this._getColorAndOpacityFromHexCode(colorHex);
             colorInput.value = color;
             opacityInput.value = opacity;
             colorInput.style.opacity = opacity;
 
             this.addCustomAppearanceStyle(colorInput.id, colorHex);
         }
+    }
+
+    /**
+     * Change the theme of the app.
+     */
+    private changeTheme(theme: Theme = Theme.Dark): void
+    {
+        const changeThemeButton = document.querySelector(`
+            [data-menu-operation="${AppearanceMenuOperation.ChangeTheme}"]
+        `) as HTMLButtonElement;
+
+        if(theme === Theme.Light){
+            this.currentTheme = Theme.Light;
+            document.body.classList.remove(Theme.Dark);
+            if(changeThemeButton) changeThemeButton.innerText = "Dark Mode";
+        }else if(theme === Theme.Dark){
+            this.currentTheme = Theme.Dark;
+            document.body.classList.add(Theme.Dark);
+            if(changeThemeButton) changeThemeButton.innerText = "Light Mode";
+        }
+
+        LocalStorage.save(LocalStorageKey.Theme, this.currentTheme);
     }
 
     /**
@@ -255,28 +283,6 @@ export class AppearanceMenu extends NavbarComponent{
     {
         document.getElementById(APPEARANCE_MENU_ID)!.classList.remove("hidden");
         this.loadAppearanceMenu();
-    }
-
-    /**
-     * Change the theme of the app.
-     */
-    public changeTheme(theme: Theme = Theme.Dark): void
-    {
-        const changeThemeButton = document.querySelector(`
-            [data-menu-operation="${AppearanceMenuOperation.ChangeTheme}"]
-        `) as HTMLButtonElement;
-
-        if(theme === Theme.Light){
-            this.currentTheme = Theme.Light;
-            document.body.classList.remove(Theme.Dark);
-            if(changeThemeButton) changeThemeButton.innerText = "Dark Mode";
-        }else if(theme === Theme.Dark){
-            this.currentTheme = Theme.Dark;
-            document.body.classList.add(Theme.Dark);
-            if(changeThemeButton) changeThemeButton.innerText = "Light Mode";
-        }
-
-        LocalStorage.save(LocalStorageKey.Theme, this.currentTheme);
     }
 
     /**
