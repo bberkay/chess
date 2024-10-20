@@ -53,4 +53,12 @@ export class AboutMenu extends NavbarComponent{
         document.getElementById(ABOUT_MENU_ID)!.classList.remove("hidden");
         this.renderComponent();
     }
+
+    /**
+     * Handle the operation of the menu.
+     */
+    public handleOperation(): void
+    {
+        
+    }
 }
