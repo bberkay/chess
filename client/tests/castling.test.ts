@@ -33,12 +33,12 @@ const castlingTestGames: TestGame[] = [
     {
         title: "Long Castling Forbidden Because of Enemy Bishop",
         board: StartPosition.LongCastlingCheck,
-        expectation: [Square.h1] // Expected castling moves
+        expectation: [Square.h1, Square.g1] // Expected castling moves
     },
     {
         title: "Short Castling Forbidden Because of Enemy Bishop",
         board: StartPosition.ShortCastlingCheck,
-        expectation: [Square.a1]
+        expectation: [Square.a1, Square.c1]
     },
     {
         title: "Both Castling Forbidden Because of Enemy Bishop",
@@ -57,7 +57,7 @@ const castlingTestGames: TestGame[] = [
             {from: Square.a1, to: Square.a2},
             {from: Square.e8, to: Square.e7}, // Unimportant black move to set the turn to white
         ],
-        expectation: [Square.h1]
+        expectation: [Square.h1, Square.g1]
     },
     {
         title: "Short Castling Forbidden Because of King Side Rook has Moved/Not on the true position",
@@ -66,7 +66,7 @@ const castlingTestGames: TestGame[] = [
             {from: Square.h1, to: Square.h2},
             {from: Square.e8, to: Square.e7},
         ],
-        expectation: [Square.a1]
+        expectation: [Square.a1, Square.c1]
     },
     {
         title: "Long Castling Forbidden Because of Queen Side Rook has Moved previously but now on the true position",
@@ -77,7 +77,7 @@ const castlingTestGames: TestGame[] = [
             {from: Square.a2, to: Square.a1},
             {from: Square.e7, to: Square.e8} // Unimportant black move to set the turn to white
         ],
-        expectation: [Square.h1]
+        expectation: [Square.h1, Square.g1]
     },
     {
         title: "Short Castling Forbidden Because of King Side Rook has Moved previously but now on the true position",
@@ -88,7 +88,7 @@ const castlingTestGames: TestGame[] = [
             {from: Square.h2, to: Square.h1},
             {from: Square.e7, to: Square.e8}
         ],
-        expectation: [Square.a1]
+        expectation: [Square.a1, Square.c1]
     },
     {
         title: "Both Castling Forbidden Because of King has Moved previously",
