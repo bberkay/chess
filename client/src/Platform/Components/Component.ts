@@ -1,10 +1,19 @@
-import { PlatformEvent } from "@Platform/Types";
+import { MenuOperation, PlatformEvent } from "@Platform/Types";
 
 /**
  * Component abstract class. All components must inherit from this class.
  */
 export abstract class Component{
+    /**
+     * Render the component's html.
+     */
     protected abstract renderComponent(): void;
+
+    /**
+     * Handle the operation of the component.
+     * @param operation The operation to be handled.
+     */
+    public abstract handleOperation(operation: MenuOperation, menuItem: HTMLElement | null): void;
 
     /**
      * This function loads the css file of the component.
@@ -36,10 +45,10 @@ export abstract class Component{
             throw new Error(`${componentId} element is not initialized. Please add it to the html file.`);
 
         component.innerHTML = html;
-        this.createTooltips(componentId);
-        this.createValidations(componentId);
-        this.createCopyToClipboard(componentId);
-        this.createSelectableButtons(componentId);
+        this.createTooltipsIfThereAre(componentId);
+        this.createValidationsIfThereAre(componentId);
+        this.createCopyToClipboardIfThereAre(componentId);
+        this.createSelectableButtonsIfThereAre(componentId);
         document.dispatchEvent(new CustomEvent(PlatformEvent.onOperationMounted, {detail: {selector: "#" + componentId}}));
     }
     
@@ -47,7 +56,7 @@ export abstract class Component{
      * Create tooltips of the component by data-tooltip-text 
      * attribute.
      */
-    private createTooltips(componentId: string): void
+    private createTooltipsIfThereAre(componentId: string): void
     {
         const component = document.getElementById(componentId);
         if(!component) return;
@@ -102,7 +111,7 @@ export abstract class Component{
     /**
      * This function creates the validations of the component.
      */
-    private createValidations(componentId: string): void
+    private createValidationsIfThereAre(componentId: string): void
     {
         const component = document.getElementById(componentId);
         if(!component) return;
@@ -157,7 +166,7 @@ export abstract class Component{
     /**
      * Create copy to clipboard functionality of the component.
      */
-    private createCopyToClipboard(componentId: string): void
+    private createCopyToClipboardIfThereAre(componentId: string): void
     {
         const component = document.getElementById(componentId);
         if(!component) return;
@@ -179,7 +188,7 @@ export abstract class Component{
     /**
      * Create selectable buttons of the component.
      */
-    private createSelectableButtons(componentId: string): void
+    private createSelectableButtonsIfThereAre(componentId: string): void
     {
         const component = document.getElementById(componentId);
         if(!component) return;
