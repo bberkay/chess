@@ -212,12 +212,12 @@ export class RouteCalculator{
          * Find player's color by given square. If square has no piece,
          * then use BoardQuerier.
          */
-        const playerColor = BoardQuerier.getColorBySquare(square) ?? BoardQuerier.getTurnColor();
+        color = color ?? BoardQuerier.getColorBySquare(square) ?? BoardQuerier.getTurnColor();
 
         return {
-            ...DirectionCalculator.getHorizontalSquares(square, playerColor, distanceLimit, pieceSensitivity),
-            ...DirectionCalculator.getVerticalSquares(square, playerColor, distanceLimit, pieceSensitivity),
-            ...DirectionCalculator.getDiagonalSquares(square, playerColor, distanceLimit, pieceSensitivity),
+            ...DirectionCalculator.getHorizontalSquares(square, color, distanceLimit, pieceSensitivity),
+            ...DirectionCalculator.getVerticalSquares(square, color, distanceLimit, pieceSensitivity),
+            ...DirectionCalculator.getDiagonalSquares(square, color, distanceLimit, pieceSensitivity),
             ...RouteCalculator.getKnightRoute(square, pieceSensitivity)
         }
     }
