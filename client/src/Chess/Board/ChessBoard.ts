@@ -214,6 +214,32 @@ export class ChessBoard {
     }
 
     /**
+     * Check if the device is touch device or not.
+     */
+    private _isTouchDevice(): boolean {
+        return window.matchMedia('(hover: none)').matches || window.matchMedia('(pointer: coarse)').matches;
+    }
+
+    /**
+     * Get the clientX and clientY values of the event.
+     */
+    private _getPointerCoordinates(e: MouseEvent | TouchEvent): { clientX: number, clientY: number } {
+        if (e instanceof MouseEvent) {
+            return { 
+                clientX: e.clientX, 
+                clientY: e.clientY 
+            };
+        } else if (e instanceof TouchEvent) {
+            return { 
+                clientX: e.changedTouches[0].clientX, 
+                clientY: e.changedTouches[0].clientY 
+            };
+        }
+
+        throw Error("Invalid event type. The event must be either MouseEvent or TouchEvent.");
+    }
+
+    /**
      * Bind functions to the specific events of the chess board.
      */
     public bindMoveEventCallbacks(callbacks: {
@@ -225,11 +251,12 @@ export class ChessBoard {
     }): void {
         if (this._isBoardMoveEventBound) throw Error("Move event callbacks already bound.");
         this._isBoardMoveEventBound = true;
-
+        
         let mouseUpTriggered: boolean = false;
+        const isTouchDevice = this._isTouchDevice();
         const squares = this.getAllSquares();
         squares.forEach(square => {
-            square.addEventListener("mousedown", (e: MouseEvent) => {
+            square.addEventListener(isTouchDevice ? "touchstart" :  "mousedown", (e: MouseEvent | TouchEvent) => {
                 mouseUpTriggered = false;
                 this.handleSquareDown(
                     e,
@@ -239,7 +266,7 @@ export class ChessBoard {
                     callbacks.onPreMoveCanceled!
                 );
             });
-            square.addEventListener("click", () => {
+            square.addEventListener(isTouchDevice ? "touchend" : "click", () => {
                 if (!mouseUpTriggered)
                     return this.handleSquareClick(
                         this.getClosestSquareElement(square)!,
@@ -251,7 +278,7 @@ export class ChessBoard {
 
         if (!this._isMouseUpEventBound) {
             this._isMouseUpEventBound = true;
-            document.addEventListener("mouseup", (e: MouseEvent) => {
+            document.addEventListener(isTouchDevice ? "touchend" : "mouseup", (e: MouseEvent | TouchEvent) => {
                 mouseUpTriggered = true;
                 return this.handleMouseUp(
                     e,
@@ -268,7 +295,7 @@ export class ChessBoard {
      * This function handles the square down event on the chess board.
      */
     private handleSquareDown(
-        mouseDownEvent: MouseEvent,
+        mouseDownEvent: MouseEvent | TouchEvent,
         square: HTMLElement,
         onPieceSelected: (squareId: Square) => void,
         onPiecePreSelected: (squareId: Square) => void,
@@ -332,16 +359,17 @@ export class ChessBoard {
      * This function handles the mouse up event on the chess board.
      */
     private handleMouseUp(
-        mouseUpEvent: MouseEvent,
+        mouseUpEvent: MouseEvent | TouchEvent,
         onPieceMovedByDragging: (squareId: Square, squareClickMode: SquareClickMode) => void,
         onPiecePreMovedByDragging: (squareId: Square, squareClickMode: SquareClickMode) => void
     ): void {
         if (document.querySelector(".piece.cloned"))
             this.dropPiece(mouseUpEvent);
 
+        const { clientX, clientY } = this._getPointerCoordinates(mouseUpEvent);
         let targetSquare = document.elementFromPoint(
-            mouseUpEvent.clientX,
-            mouseUpEvent.clientY
+            clientX + window.scrollX,
+            clientY + window.scrollY
         );
         if (targetSquare && targetSquare.closest("#chessboard")) {
             targetSquare = this.getClosestSquareElement(targetSquare as HTMLElement) as HTMLElement;
@@ -387,7 +415,7 @@ export class ChessBoard {
     /**
      * Stick the piece to the cursor when the user clicks on the piece.
      */
-    private stickPieceToCursor(downEvent: MouseEvent, square: HTMLElement): void {
+    private stickPieceToCursor(downEvent: MouseEvent | TouchEvent, square: HTMLElement): void {
         if (this.getSquareClickMode(square) == SquareClickMode.Disable) return;
 
         const originalPiece = square.querySelector(".piece") as HTMLElement;
@@ -398,9 +426,11 @@ export class ChessBoard {
         originalPiece.classList.add("dragging");
         clonedPiece.classList.add("cloned");
         document.body.appendChild(clonedPiece);
+
+        const { clientX, clientY } = this._getPointerCoordinates(downEvent);
         clonedPiece.style.position = "absolute";
-        clonedPiece.style.top = `calc(${downEvent.clientY + window.scrollY}px - ${clonedPiece.offsetHeight / 2}px)`;
-        clonedPiece.style.left = `calc(${downEvent.clientX + window.scrollX}px - ${clonedPiece.offsetWidth / 2}px)`;
+        clonedPiece.style.top = `calc(${clientY + window.scrollY}px - ${clonedPiece.offsetHeight / 2}px)`;
+        clonedPiece.style.left = `calc(${clientX + window.scrollX}px - ${clonedPiece.offsetWidth / 2}px)`;
 
         document.removeEventListener("mousemove", this._bindDragPiece);
         document.addEventListener("mousemove", this._bindDragPiece);
@@ -409,11 +439,13 @@ export class ChessBoard {
     /**
      * Drag the cloned piece with the cursor.
      */
-    private dragPiece(moveEvent: MouseEvent): void {
+    private dragPiece(moveEvent: MouseEvent | TouchEvent): void {
         const clonedPiece = document.querySelector(".piece.cloned") as HTMLElement;
         if (!clonedPiece) return;
-        clonedPiece.style.top = `calc(${moveEvent.clientY + window.scrollY}px - ${clonedPiece.offsetHeight / 2}px)`;
-        clonedPiece.style.left = `calc(${moveEvent.clientX + window.scrollX}px - ${clonedPiece.offsetWidth / 2}px)`;
+
+        const { clientX, clientY } = this._getPointerCoordinates(moveEvent);
+        clonedPiece.style.top = `calc(${clientY + window.scrollY}px - ${clonedPiece.offsetHeight / 2}px)`;
+        clonedPiece.style.left = `calc(${clientX + window.scrollX}px - ${clonedPiece.offsetWidth / 2}px)`;
 
         // Highlight the square where the cursor is.
         /*this.removeSquareEffect(document.querySelector(`[class*="${SquareEffect.Hovering}"]`)!, SquareEffect.Hovering);
@@ -426,13 +458,17 @@ export class ChessBoard {
     /**
      * Drop the piece to the square where the cursor is.
      */
-    private dropPiece(upEvent: MouseEvent): void {
+    private dropPiece(upEvent: MouseEvent | TouchEvent): void {
         const originalPiece = document.querySelector(".piece.dragging") as HTMLElement;
         const clonedPiece = document.querySelector(".piece.cloned") as HTMLElement;
         if (clonedPiece) {
             clonedPiece.remove();
 
-            let targetSquare: Element | null = document.elementFromPoint(upEvent.clientX, upEvent.clientY);
+            const { clientX, clientY } = this._getPointerCoordinates(upEvent);
+            let targetSquare: Element | null = document.elementFromPoint(
+                clientX + window.scrollX,
+                clientY + window.scrollY
+            );
             if (targetSquare) {
                 targetSquare = this.getClosestSquareElement(targetSquare as HTMLElement) as HTMLElement;
                 if (!targetSquare) return;
