@@ -4,6 +4,7 @@
 // Components
 export const ABOUT_MENU_ID = "about-menu";
 export const APPEARANCE_MENU_ID = "appearance-menu";
+export const SETTINGS_MENU_ID = "settings-menu";
 export const LOG_CONSOLE_ID = "log-console";
 export const BOARD_EDITOR_ID = "board-editor";
 export const PIECE_CREATOR_ID = "piece-creator";

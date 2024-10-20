@@ -93,6 +93,15 @@ export enum LogConsoleOperation{
 
 /**
  * Represents operations related to the 
+ * `SettingsMenu` component.
+ */
+export enum SettingsMenuOperation{
+    ToggleBoardSounds = "ToggleBoardSounds",
+    Reset = "Reset"
+}
+
+/**
+ * Represents operations related to the 
  * `AppearanceMenu` component.
  */
 export enum AppearanceMenuOperation{
@@ -108,7 +117,7 @@ export enum NavbarOperation{
     ShowAbout = "ShowAbout",
     ShowLogConsole = "ShowLogConsole",
     ShowAppearance = "ShowAppearance",
-    ShowConnections = "ShowConnections",
+    ShowSettings = "ShowSettings",
 }
 
 /**
@@ -118,5 +127,6 @@ export type MenuOperation = BoardEditorOperation
     | NotationMenuOperation 
     | NavigatorModalOperation 
     | LogConsoleOperation
+    | SettingsMenuOperation
     | AppearanceMenuOperation
     | NavbarOperation;

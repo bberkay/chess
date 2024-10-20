@@ -2,7 +2,7 @@ import { NavbarOperation } from "@Platform/Types";
 import { Component } from "./Component";
 import { NavbarComponent } from "./NavbarComponents/NavbarComponent";
 import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage";
-import { ABOUT_MENU_ID, APPEARANCE_MENU_ID, LOG_CONSOLE_ID } from "@Platform/Consts";
+import { ABOUT_MENU_ID, APPEARANCE_MENU_ID, LOG_CONSOLE_ID, SETTINGS_MENU_ID } from "@Platform/Consts";
 
 /**
  * This enum represents the different types of components 
@@ -11,6 +11,7 @@ import { ABOUT_MENU_ID, APPEARANCE_MENU_ID, LOG_CONSOLE_ID } from "@Platform/Con
 enum NavbarComponentType {
     LogConsole = "LogConsole",
     AppearanceMenu = "AppearanceMenu",
+    SettingsMenu = "SettingsMenu",
     AboutMenu = "AboutMenu"
 }
 
@@ -46,6 +47,9 @@ export class Navbar extends Component{
 
         const logConsole = document.getElementById(LOG_CONSOLE_ID);
         if(logConsole) logConsole.classList.add("navbar-component");
+
+        const settingsMenu = document.getElementById(SETTINGS_MENU_ID);
+        if(settingsMenu) settingsMenu.classList.add("navbar-component");
     }
 
     /**
@@ -81,6 +85,7 @@ export class Navbar extends Component{
             <div class="navbar-buttons">
                 <button data-menu-operation="${NavbarOperation.ShowLogConsole}">Stream</button>
                 <button data-menu-operation="${NavbarOperation.ShowAppearance}">Appearance</button>
+                <button data-menu-operation="${NavbarOperation.ShowSettings}">Settings</button>
                 <button data-menu-operation="${NavbarOperation.ShowAbout}">About</button>
             </div>
         `);
@@ -124,5 +129,19 @@ export class Navbar extends Component{
      */
     public handleOperation(operation: NavbarOperation): void
     {
+        switch(operation){
+            case NavbarOperation.ShowLogConsole:
+                this.showComponent(this.getComponentByType(NavbarComponentType.LogConsole)!);
+                break;
+            case NavbarOperation.ShowAppearance:
+                this.showComponent(this.getComponentByType(NavbarComponentType.AppearanceMenu)!);
+                break;
+            case NavbarOperation.ShowAbout:
+                this.showComponent(this.getComponentByType(NavbarComponentType.AboutMenu)!);
+                break;
+            case NavbarOperation.ShowSettings:
+                this.showComponent(this.getComponentByType(NavbarComponentType.SettingsMenu)!);
+                break;
+        }
     }
 }

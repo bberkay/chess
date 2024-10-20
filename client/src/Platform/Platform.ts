@@ -20,7 +20,8 @@ import {
     NavbarOperation, 
     NavigatorModalOperation, 
     NotationMenuOperation, 
-    PlatformEvent 
+    PlatformEvent, 
+    SettingsMenuOperation
 } from "./Types";
 import { 
     ChessEvent, 
@@ -34,6 +35,7 @@ import { AboutMenu } from "./Components/NavbarComponents/AboutMenu.ts";
 import { AppearanceMenu } from "./Components/NavbarComponents/AppearanceMenu.ts";
 import { Logger } from "@Services/Logger";
 import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage.ts";
+import { SettingsMenu } from "./Components/NavbarComponents/SettingsMenu.ts";
 
 /**
  * This class is the main class of the chess platform menu.
@@ -48,6 +50,7 @@ export class Platform{
     public readonly navigatorModal: NavigatorModal;
     public readonly logConsole: LogConsole;
     public readonly appearanceMenu: AppearanceMenu;
+    public readonly settingsMenu: SettingsMenu;
     public readonly aboutMenu: AboutMenu;
     public readonly logger: Logger = new Logger("src/Platform/Platform.ts");
 
@@ -61,8 +64,9 @@ export class Platform{
         this.notationMenu = new NotationMenu(this.chess);
         this.navigatorModal = new NavigatorModal();
         this.logConsole = new LogConsole();
+        this.settingsMenu = new SettingsMenu();
         this.aboutMenu = new AboutMenu();
-        this.navbar = new Navbar([this.logConsole, this.aboutMenu, this.appearanceMenu]);
+        this.navbar = new Navbar([this.logConsole, this.aboutMenu, this.settingsMenu, this.appearanceMenu]);
         this.init();
 
         //For testing purposes
@@ -175,7 +179,8 @@ export class Platform{
                 ...Object.values(NotationMenuOperation),
                 ...Object.values(LogConsoleOperation),
                 ...Object.values(NavbarOperation),
-                ...Object.values(AppearanceMenuOperation)
+                ...Object.values(AppearanceMenuOperation),
+                ...Object.values(SettingsMenuOperation)
             ];
 
             if (allMenuOperations.filter(operation => operation === menuOperation).length > 1) {
@@ -202,6 +207,16 @@ export class Platform{
             );
             this.handleAppearanceMenuOperation(
                 menuOperation as AppearanceMenuOperation, 
+                menuItem
+            );
+        }
+        else if(Object.hasOwn(SettingsMenuOperation, menuOperation))
+        {
+            this.settingsMenu.handleOperation(
+                menuOperation as SettingsMenuOperation
+            );
+            this.handleSettingsMenuOperation(
+                menuOperation as SettingsMenuOperation, 
                 menuItem
             );
         }
@@ -260,6 +275,24 @@ export class Platform{
      * Handle the appearance menu operations.
      */
     private handleAppearanceMenuOperation(menuOperation: AppearanceMenuOperation, menuItem: HTMLElement): void
+    {
+        switch(menuOperation){
+        }
+    }
+
+    /**
+     * Handle the settings menu operations.
+     */
+    private handleSettingsMenuOperation(menuOperation: SettingsMenuOperation, menuItem: HTMLElement): void
+    {
+        switch(menuOperation){
+        }
+    }
+
+    /**
+     * Handle the navbar operations.
+     */
+    private handleNavbarOperation(menuOperation: NavbarOperation): void
     {
         switch(menuOperation){
         }
@@ -328,24 +361,6 @@ export class Platform{
             case BoardEditorOperation.CreateBoard:
                 this.boardEditor.saveFen();
                 this._createBoardAndHandleComponents();
-                break;
-        }
-    }
-
-    /**
-     * Handle the navbar operations.
-     */
-    private handleNavbarOperation(menuOperation: NavbarOperation): void
-    {
-        switch(menuOperation){
-            case NavbarOperation.ShowLogConsole:
-                this.navbar.showComponent(this.logConsole);
-                break;
-            case NavbarOperation.ShowAppearance:
-                this.navbar.showComponent(this.appearanceMenu);
-                break;
-            case NavbarOperation.ShowAbout:
-                this.navbar.showComponent(this.aboutMenu);
                 break;
         }
     }

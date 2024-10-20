@@ -1,0 +1,68 @@
+/**
+ * CSS codes of SettingsMenu component
+ * @see For more information about this component check file: src\Platform\Components\NavbarComponents\SettingsMenu.ts
+ */
+#settings-menu{
+    background-color:var(--settings-menu-bg-color);
+    border:1px solid var(--settings-menu-border-color);
+    color: var(--settings-menu-text-color);
+    resize: horizontal;
+}
+
+#settings-body{
+    padding: 1.5rem;
+    padding-top: 1.25rem;
+    padding-bottom: 0.5rem;
+    height: calc(var(--chessboard-board-size) - 87px);
+    width:auto;
+    overflow-y: scroll;
+    overflow-x: hidden;
+
+    & fieldset {
+        border: 1px solid var(--settings-menu-border-color);
+        border-left: none;
+        border-right: none;
+        border-bottom: none;
+        padding-top: 0.5rem;
+
+        & legend {
+            font-size: var(--settings-menu-legend-font-size);
+        }
+    }
+
+    & .settings-item{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        white-space: nowrap;
+        margin-bottom: 1rem;
+
+        & input[type="number"] {
+            width: 50px;
+            text-align: center;
+            border: 1px solid var(--settings-menu-border-color);
+            padding:5px 0px;
+            background-color: var(--settings-menu-border-color);
+        }
+    }
+}
+
+#settings-footer{
+    padding: 10px;
+
+    & .settings-utilities{
+        width: 100%;
+        display: flex;
+        gap: 5px;
+
+        & button{
+            flex-grow: 1;
+        }
+    }
+}
+
+ /** 
+ * ------------------ Responsive ------------------- 
+ *             700px - 900px - 1250px
+ */
