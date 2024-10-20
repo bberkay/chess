@@ -1174,6 +1174,33 @@ export class NotationMenu extends Component {
      */
     public handleOperation(operation: NotationMenuOperation): void {
         switch (operation) {
+            case NotationMenuOperation.ToggleUtilityMenu:
+                this.toggleUtilityMenu();
+                break;
+            case NotationMenuOperation.ShowOnlineGameUtilityMenu:
+                this.displayOnlineGameUtilityMenu();
+                break;
+            case NotationMenuOperation.ShowSingleplayerGameUtilityMenu:
+                this.displaySingleplayerGameUtilityMenu();
+                break;
+            case NotationMenuOperation.UndoMove:
+                this.askConfirmation(NotationMenuOperation.UndoMove);
+                break;
+            case NotationMenuOperation.Resign:
+                this.askConfirmation(NotationMenuOperation.Resign);
+                break;
+            case NotationMenuOperation.AbortGame:
+                this.askConfirmation(NotationMenuOperation.AbortGame);
+                break;
+            case NotationMenuOperation.SendDrawOffer:
+                this.askConfirmation(NotationMenuOperation.SendDrawOffer);
+                break;
+            case NotationMenuOperation.SendUndoOffer:
+                this.askConfirmation(NotationMenuOperation.SendUndoOffer);
+                break;
+            case NotationMenuOperation.SendPlayAgainOffer:
+                this.askConfirmation(NotationMenuOperation.SendPlayAgainOffer);
+                break;
             case NotationMenuOperation.PreviousMove:
                 this.takeBack();
                 break;
@@ -1185,33 +1212,6 @@ export class NotationMenu extends Component {
                 break;
             case NotationMenuOperation.LastMove:
                 this.goToLastMove();
-                break;
-            case NotationMenuOperation.ToggleUtilityMenu:
-                this.toggleUtilityMenu();
-                break;
-            case NotationMenuOperation.ShowOnlineGameUtilityMenu:
-                this.displayOnlineGameUtilityMenu();
-                break;
-            case NotationMenuOperation.ShowSingleplayerGameUtilityMenu:
-                this.displaySingleplayerGameUtilityMenu();
-                break;
-            case NotationMenuOperation.AbortGame:
-                this.askConfirmation(NotationMenuOperation.AbortGame);
-                break;
-            case NotationMenuOperation.Resign:
-                this.askConfirmation(NotationMenuOperation.Resign);
-                break;
-            case NotationMenuOperation.UndoMove:
-                this.askConfirmation(NotationMenuOperation.UndoMove);
-                break;
-            case NotationMenuOperation.SendDrawOffer:
-                this.askConfirmation(NotationMenuOperation.SendDrawOffer);
-                break;
-            case NotationMenuOperation.SendUndoOffer:
-                this.askConfirmation(NotationMenuOperation.SendUndoOffer);
-                break;
-            case NotationMenuOperation.SendPlayAgainOffer:
-                this.askConfirmation(NotationMenuOperation.SendPlayAgainOffer);
                 break;
             case NotationMenuOperation.GoBack:
                 this.goBack();
