@@ -185,7 +185,8 @@ export type WsData = WsCreatedData
 export type WsMessage = [WsTitle, WsData];
 
 /**
- * 
+ * Represents the parameters required to create a 
+ * new lobby.
  */
 export interface CreateLobbyReqParams{
     name: string;
@@ -195,7 +196,8 @@ export interface CreateLobbyReqParams{
 }
 
 /**
- * 
+ * Represents the parameters required to join a
+ * lobby.
  */
 export interface JoinLobbyReqParams{
     name: string;
@@ -203,7 +205,8 @@ export interface JoinLobbyReqParams{
 }
 
 /**
- * 
+ * Represents the parameters required to reconnect
+ * to a lobby.
  */
 export interface ReconnectLobbyReqParams{
     lobbyId: string;
@@ -211,6 +214,9 @@ export interface ReconnectLobbyReqParams{
 }
 
 /**
- * 
+ * A union type representing all possible WebSocket 
+ * request parameter types. This can be used when a 
+ * function or method can accept any of these request 
+ * types.
  */
 type WebSocketReqParams = CreateLobbyReqParams | JoinLobbyReqParams | ReconnectLobbyReqParams;

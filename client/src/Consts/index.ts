@@ -1,5 +1,5 @@
 /**
- * Server address and WebSocket address.
+ * Server Settings
  */
 export const SERVER_ADDRESS = "http://localhost:3000"
 export const WS_ADDRESS = "ws://localhost:3000"
@@ -15,6 +15,6 @@ export const RECONNECTION_ATTEMPT_LIMIT = 3;
 export const RECONNECTION_TIMEOUT = 5; // seconds
 
 /**
- * 
+ * Project Details
  */
 export const REPOSITORY_URL = "https://github.com/bberkay/chess"
