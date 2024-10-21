@@ -3,9 +3,9 @@
  * @see For more information about this component check file: src\Platform\Components\NavbarComponents\SettingsMenu.ts
  */
 #settings-menu{
-    background-color:var(--settings-menu-bg-color);
-    border:1px solid var(--settings-menu-border-color);
-    color: var(--settings-menu-text-color);
+    background-color:var(--accent-color);
+    border:1px solid var(--border-color);
+    color: var(--text-color);
     resize: horizontal;
 }
 
@@ -19,7 +19,7 @@
     overflow-x: hidden;
 
     & fieldset {
-        border: 1px solid var(--settings-menu-border-color);
+        border: 1px solid var(--border-color);
         border-left: none;
         border-right: none;
         border-bottom: none;
@@ -41,9 +41,9 @@
         & input[type="number"] {
             width: 50px;
             text-align: center;
-            border: 1px solid var(--settings-menu-border-color);
+            border: 1px solid var(--border-color);
             padding:5px 0px;
-            background-color: var(--settings-menu-border-color);
+            background-color: var(--border-color);
         }
     }
 }

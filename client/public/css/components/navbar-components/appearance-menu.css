@@ -3,9 +3,9 @@
  * @see For more information about this component check file: src\Platform\Components\NavbarComponents\AppearanceMenu.ts
  */
 #appearance-menu{
-    background-color:var(--appearance-menu-bg-color);
-    border:1px solid var(--appearance-menu-border-color);
-    color: var(--appearance-menu-text-color);
+    background-color:var(--accent-color);
+    border:1px solid var(--border-color);
+    color: var(--text-color);
     font-size: var(--appearance-menu-font-size);
     resize: horizontal;
 }
@@ -31,7 +31,7 @@
             width: 100%;
             padding: 0;
             box-sizing: border-box;
-            border:2px solid var(--appearance-menu-color-picker-border-color);
+            border:2px solid var(--border-color);
             border-right: none;
         }
 
@@ -46,7 +46,7 @@
 
         & button{
             padding:0 4px 0 6px;
-            background-color: var(--appearance-menu-button-bg-color);
+            background-color: var(--component-color);
             border-left:none;
         }
     };

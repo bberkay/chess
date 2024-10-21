@@ -4,9 +4,9 @@
  */
 
 #navbar{
-    background-color: var(--navbar-bg-color);
-    color: var(--navbar-text-color);
-    border: 1px solid var(--navbar-border-color);
+    background-color: var(--accent-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
     border-bottom: none;
     padding: 4px;
     width: calc(var(--navbar-width) - 8px);

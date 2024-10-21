@@ -5,9 +5,9 @@
 
 .navigator-modal{
     box-shadow: none;
-    background-color: var(--navigator-modal-bg-color);
-    color: var(--navigator-modal-text-color);
-    border: 1px solid var(--navigator-modal-bg-color);
+    background-color: var(--accent-opaque-color);
+    color: var(--text-color);
+    border: 1px solid var(--accent-opaque-color);
     position: absolute;
     text-align: center;
     display: flex;
@@ -21,12 +21,12 @@
     transform: scale(1);
 
     & button{
-        border:1px solid var(--navigator-modal-button-bg-color);
-        background-color: var(--navigator-modal-bg-color);
+        border:1px solid var(--accent-color);
+        background-color: var(--accent-opaque-color);
     }
 
     & a{
-        color: var(--navigator-modal-text-button-color);
+        color: var(--text-color);
 
         &:hover{
             filter: brightness(0.9);
@@ -84,13 +84,13 @@ body.dark-mode .navigator-modal .navigator-modal-bg,
 }
 
 .navigator-modal--glass{
-    box-shadow: 0 4px 30px var(--navigator-modal-glass-box-shadow-color);
+    box-shadow: 0 4px 30px var(--glass-box-shadow-color);
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
-    border: 1px solid var(--navigator-modal-glass-border-color);
-    background: var(--navigator-modal-glass-bg-color);
+    border: 1px solid var(--glass-border-color);
+    background: var(--glass-bg-color);
     border-radius: 10px;
-    color: var(--navigator-modal-glass-text-color);
+    color: var(--glass-text-color);
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
@@ -104,25 +104,25 @@ body.dark-mode .navigator-modal .navigator-modal-bg,
     }
 
     & button{
-        background: var(--navigator-modal-glass-button-bg-color);
-        border: 1px solid var(--navigator-modal-glass-button-border-color);
-        color: var(--navigator-modal-glass-button-text-color);
+        background: var(--glass-component-bg-color);
+        border: 1px solid var(--glass-component-bg-color);
+        color: var(--glass-text-color);
         transition: background-color .15s ease;
         border-radius: 5px;
 
         &:hover{
-            background-color: var(--navigator-modal-glass-active-color);
+            background-color: var(--glass-component-active-bg-color);
         }
 
         &[data-selected="true"]{
-            background-color: var(--navigator-modal-glass-active-color);
+            background-color: var(--glass-component-active-bg-color);
         }
     }
 
     & input{
-        background: var(--navigator-modal-glass-input-bg-color);
-        border: 1px solid var(--navigator-modal-glass-border-color);
-        color: var(--navigator-modal-glass-button-text-color);
+        background: var(--glass-component-bg-color);
+        border: 1px solid var(--glass-component-bg-color);
+        color: var(--glass-text-color);
         transition: background-color .15s ease;
         border-radius: 5px;
         width: fit-content;
@@ -130,13 +130,13 @@ body.dark-mode .navigator-modal .navigator-modal-bg,
 }
 
 body.dark-mode .navigator-modal:not(.navigator-modal--glass){
-    box-shadow: 0 0 5px var(--navigator-modal-shadow-color);
-    border: 1px solid var(--navigator-modal-border-color);
+    box-shadow: 0 0 5px var(--black-color);
+    border: 1px solid var(--border-color);
 }
 
 .navigator-modal--error{
-    border: 1px solid var(--navigator-modal-glass-error-bg-color);
-    background: var(--navigator-modal-glass-error-bg-color);
+    border: 1px solid  var(--glass-error-bg-color);
+    background:  var(--glass-error-bg-color);
 
     & button{
         width: 100%;
@@ -152,7 +152,7 @@ body.dark-mode .navigator-modal:not(.navigator-modal--glass){
     left: 0;
     width: 100%;
     height: 100%;
-    background: var(--navigator-modal-backdrop-bg-color);
+    background: var(--backdrop-bg-color);
     backdrop-filter: blur(1px);
     -webkit-backdrop-filter: blur(1px);
 

@@ -5,7 +5,7 @@
 
 #board-editor .board-creator{
     display: none;
-    border:1px solid var(--board-editor-border-color);
+    border:1px solid var(--border-color);
 
     &.visible{
         display: flex;
@@ -14,7 +14,7 @@
 
 #piece-creator{
     & .selected-option{
-        background-color: var(--board-editor-piece-creator-selected-option-bg-color);
+        background-color: var(--component-active-color);;
     }
 }
 
@@ -22,9 +22,9 @@
     width: var(--board-editor-table-width);
     height: calc(var(--chessboard-board-size) - 52px);
     max-height: calc(var(--chessboard-board-size) - 52px);
-    background-color: var(--board-editor-piece-table-bg-color);
-    color: var(--board-editor-text-color);
-    border:1px solid var(--board-editor-border-color);
+    background-color: var(--accent-color);
+    color: var(--text-color);
+    border:1px solid var(--border-color);
     user-select: none;
 
     & tbody{
@@ -42,8 +42,8 @@
 
         & th{
             padding:7px 5px;
-            background-color: var(--board-editor-piece-table-title-bg-color);
-            border:1px solid var(--board-editor-piece-table-title-border-color);
+            background-color: var(--component-color);
+            border:1px solid var(--border-color);
         }
 
         & td{
@@ -52,12 +52,12 @@
             width:calc((var(--chessboard-board-size) / 9) + 5px);
             /*height:calc((var(--chessboard-board-size) / 10) + 15px);*/
             height: 100%;
-            background-color: var(--board-editor-piece-table-option-bg-color);
-            border:1px solid var(--board-editor-piece-table-option-border-color);
+            background-color: var(--component-color);
+            border:1px solid var(--border-color);
             cursor: pointer;
 
             &:hover{
-                background-color: var(--board-editor-piece-table-option-hover-bg-color);
+                background-color: var(--component-active-color);
             }
         }
     }
@@ -95,8 +95,8 @@
     display: flex;
     justify-content: space-between;
     width: calc(100% - 12px);
-    background-color: var(--utility-menu-bg-color);
-    border: 1px solid var(--utility-menu-border-color);
+    background-color: var(--accent-color);
+    border: 1px solid var(--border-color);
     border-top:none;
     padding: 5px;
 }

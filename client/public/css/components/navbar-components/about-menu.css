@@ -3,9 +3,9 @@
  * @see For more information about this component check file: src\Platform\Components\NavbarComponents\AboutMenu.ts
  */
 #about-menu{
-    background-color:var(--about-menu-bg-color);
-    border:1px solid var(--about-menu-border-color);
-    color: var(--about-menu-text-color);
+    background-color:var(--accent-color);
+    border:1px solid var(--border-color);
+    color: var(--text-color);
 }
 
 #about-body{

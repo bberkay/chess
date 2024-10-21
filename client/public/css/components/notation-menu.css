@@ -13,9 +13,9 @@
 #notation-table{
     width: var(--notation-table-width);
     font-size:var(--notation-table-font-size);
-    background-color: var(--notation-menu-bg-color);
-    color: var(--notation-menu-text-color);
-    border:1px solid var(--notation-menu-border-color);
+    background-color: var(--accent-color);
+    color: var(--text-color);
+    border:1px solid  var(--border-color);
 
     & tbody{
         max-height: var(--notation-table-height);
@@ -34,8 +34,8 @@
         & th{
             padding:7px 5px;
             padding-bottom:3px;
-            background-color: var(--notation-menu-title-bg-color);
-            border:1px solid var(--notation-menu-title-border-color);
+            background-color: var(--component-color);
+            border:1px solid var(--border-color);
         }
 
         & td{
@@ -55,16 +55,16 @@
         }
 
         &:nth-child(odd) td:has(span){
-            background-color: var(--notation-menu-odd-row-bg-color);
-            border:1px solid var(--notation-menu-odd-row-border-color);
+            background-color: var(--component-color);
+            border:1px solid var(--component-color);
         }
 
         & td.current-move{
-            background-color: var(--notation-menu-current-move-bg-color)!important;
+            background-color: var(--component-active-color)!important;
         }
 
         & td:has(.move):hover{
-            background-color: var(--notation-menu-hover-bg-color)!important;
+            background-color:  var(--component-active-color)!important;
         }
     }
 }
@@ -89,15 +89,15 @@
         display:flex;
         justify-content: space-between;
         align-items: stretch;
-        background-color: var(--notation-menu-player-name-bg-color);
-        border:1px solid var(--notation-menu-player-name-border-color);
+        background-color: var(--accent-color);
+        border:1px solid var(--border-color);
         padding: 4px;
         
         & .player-name{
             padding: 10px 10px;
             padding-bottom: 7px;
-            background-color: var(--notation-menu-player-name-inner-bg-color);
-            border:1px solid var(--notation-menu-player-name-border-color);
+            background-color: var(--component-color);
+            border:1px solid var(--border-color);
             border-right: none;
             font-weight: bold;
             font-size: var(--notation-menu-player-name-font-size);
@@ -111,15 +111,15 @@
             justify-content: center;
             align-items: center;
             width: 27%;
-            border: 1px solid var(--notation-menu-player-name-border-color);
+            border: 1px solid var(--border-color);
             height: auto;
             padding-top: 3px;
             padding-left: 5px;
             padding-right: 5px;
 
             &.hidden{
-                background-color: var(--notation-menu-player-name-inner-bg-color)!important;
-                color: var(--notation-menu-player-name-inner-bg-color);
+                background-color: var(--component-color)!important;
+                color: var(--component-color);
                 border-left: none;
                 border-right: none;
                 user-select: none;
@@ -140,12 +140,12 @@
         }
 
         & .duration:has(.decisecond.active){
-            background-color: var(--notation-menu-decisecond-bg-color);
+            background-color: var(--danger-color);
         }
 
         & .player-status{
-            background-color: var(--notation-menu-player-name-inner-bg-color);
-            border:1px solid var(--notation-menu-player-name-border-color);
+            background-color: var(--component-color);
+            border:1px solid var(--border-color);
             width: 10%;
             display: flex;
             justify-content: center;
@@ -212,8 +212,8 @@
 #notation-menu .utility-menu{
     display: flex;
     justify-content: space-between;
-    background-color: var(--utility-menu-bg-color);
-    border: 1px solid var(--utility-menu-border-color);
+    background-color: var(--accent-color);
+    border: 1px solid var(--border-color);
     border-top:none;
     padding: 4px;
 
@@ -229,7 +229,7 @@
 
 #notation-menu .utility-menu:has(.utility-toggle-menu-section.confirmation.active){
     & button {
-        border: 1px solid var(--utility-menu-confirmation-bg-color);
+        border: 1px solid var(--warning-color);
     }
 }
 
@@ -271,7 +271,7 @@
         & .offer-message{
             font-size: var(--utility-menu-offer-message-font-size);
             font-weight: bold;
-            color: var(--utility-menu-offer-message-text-color);
+            color: var(--text-color);
             padding: 7px 0 5px 0;
         }
     }
