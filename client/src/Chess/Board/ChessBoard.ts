@@ -53,6 +53,7 @@ export class ChessBoard {
     private _isMouseUpEventBound: boolean = false;
     private _disabledPreSelectionColor: Color | null = null;
     private _lockedSquaresModes: Record<string, SquareClickMode> = {};
+    private _savedSquareEffects: Record<string, SquareEffect[]> = {};
     private _isBoardMoveEventBound: boolean = false;
     private _pieceAnimationSpeeds: Record<PieceAnimationSpeed, number> = {
         [PieceAnimationSpeed.Slow]: 0.25,
@@ -106,9 +107,10 @@ export class ChessBoard {
         if(config.enableWinnerAnimation === false) {
             this.removeEffectFromAllSquares([SquareEffect.WinnerAnimation]);
         } else if (config.showHighlights === false) {
+            this.saveEffectsOfAllSquares();
             this.removeEffectFromAllSquares();
         } else if (this.config.showHighlights) {
-            this.refresh();
+            this.restoreEffectsOfAllSquares();
         }
     }
 
@@ -1340,6 +1342,33 @@ export class ChessBoard {
         let squares: NodeListOf<Element> = this.getAllSquares();
         for (let i = 0; i <= 63; i++)
             this.removeSquareEffect(squares[i], effects);
+    }
+
+    /**
+     * This function saves the effects of all squares on 
+     * the board.
+     */
+    private saveEffectsOfAllSquares(): void {
+        let squares: NodeListOf<Element> = this.getAllSquares();
+        for (let i = 0; i <= 63; i++) {
+            const effects = this.getSquareEffects(squares[i]);
+            this._savedSquareEffects[this.getSquareId(squares[i])] = effects;
+        }
+    }
+
+    /**
+     * This function restores the effects of all squares on 
+     * the board.
+     */
+    private restoreEffectsOfAllSquares(): void {
+        this.removeEffectFromAllSquares();
+        
+        for (let squareID in this._savedSquareEffects) {
+            const square = this.getSquareElement(parseInt(squareID));
+            this.addSquareEffects(square, this._savedSquareEffects[squareID]);
+        }
+
+        this._savedSquareEffects = {};
     }
 
     /**
