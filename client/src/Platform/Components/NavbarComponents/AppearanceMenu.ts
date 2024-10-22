@@ -20,6 +20,8 @@ export class AppearanceMenu extends NavbarComponent{
      */
     constructor() {
         super();
+        this.createStyleElement();
+        this.loadLocalStorage();
     }
 
     /**
@@ -29,24 +31,13 @@ export class AppearanceMenu extends NavbarComponent{
     {
         if(LocalStorage.isExist(LocalStorageKey.Theme))
             this.changeTheme(LocalStorage.load(LocalStorageKey.Theme));
-    }
 
-    /**
-     * This function loads the appearance menu. Waits
-     * until the chessboard.css variables are loaded.
-     */
-    private loadAppearanceMenu(): void {
-        const interval = setInterval(() => {
-            if(Array.from(this.rootComputedStyle).find((property) => property.startsWith("--chessboard-"))){
-                this.createStyleElement();
-                this.renderComponent();
-                this.addEventListeners();
-                this.initColorPalette();
-                this.loadLocalStorage();
-
-                clearInterval(interval);
-            }    
-        }, 100);
+        if(LocalStorage.isExist(LocalStorageKey.CustomAppearance)) {
+            const customAppearance = LocalStorage.load(LocalStorageKey.CustomAppearance);
+            for(const customColor in customAppearance){
+                this.addCustomAppearanceStyle(customColor, customAppearance[customColor]);
+            }
+        }
     }
 
     /**
@@ -99,7 +90,10 @@ export class AppearanceMenu extends NavbarComponent{
         `);
 
         this.loadCSS("appearance-menu.css");
+        this.initColorPalette();
+        this.addEventListeners();
     }
+
     /**
      * This function returns the default hex code of the color.
      */
@@ -135,6 +129,31 @@ export class AppearanceMenu extends NavbarComponent{
     }
 
     /**
+     * This function creates the style element for custom appearance styles.
+     */
+    private createStyleElement(): void
+    {
+        if(document.getElementById("appearance-menu-style"))
+            return;
+
+        const styleElement = document.createElement("style");
+        styleElement.id = "appearance-menu-style";
+        document.head.appendChild(styleElement);
+        styleElement.innerHTML = `:root{}`;
+    }
+
+    /**
+     * Get the style element for custom appearance styles.
+     */
+    private getStyleElement(): HTMLStyleElement
+    {
+        if(document.getElementById("appearance-menu-style"))
+            return document.getElementById("appearance-menu-style") as HTMLStyleElement;
+        else
+            throw new Error("Style element for custom appearance does not exist.");
+    }
+
+    /**
      * This function adds event listeners to the appearance menu.
      */
     private addEventListeners(): void
@@ -167,31 +186,6 @@ export class AppearanceMenu extends NavbarComponent{
                 colorInput.style.opacity = opacity;
             });
         });
-    }
-
-    /**
-     * This function creates the style element for custom appearance styles.
-     */
-    private createStyleElement(): void
-    {
-        if(document.getElementById("appearance-menu-style"))
-            return;
-
-        const styleElement = document.createElement("style");
-        styleElement.id = "appearance-menu-style";
-        document.head.appendChild(styleElement);
-        styleElement.innerHTML = `:root{}`;
-    }
-
-    /**
-     * Get the style element for custom appearance styles.
-     */
-    private getStyleElement(): HTMLStyleElement
-    {
-        if(document.getElementById("appearance-menu-style"))
-            return document.getElementById("appearance-menu-style") as HTMLStyleElement;
-        else
-            throw new Error("Style element for custom appearance does not exist.");
     }
 
     /**
@@ -282,7 +276,7 @@ export class AppearanceMenu extends NavbarComponent{
     public show(): void
     {
         document.getElementById(APPEARANCE_MENU_ID)!.classList.remove("hidden");
-        this.loadAppearanceMenu();
+        this.renderComponent();
     }
 
     /**
