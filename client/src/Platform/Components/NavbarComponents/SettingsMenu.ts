@@ -114,7 +114,7 @@ export class SettingsMenu extends NavbarComponent {
                             <div class="dropdown-content">
                                 ${Object.values(MovementType).map((c: string) => {
                                     return `<button data-menu-operation="${SettingsMenuOperation.MovementType}" class="dropdown-item ${
-                                        c == currentSettings.movementType
+                                        c.trim() == currentSettings.movementType.trim()
                                             ? "selected" 
                                             : ""
                                     }">${Formatter.pascalCaseToTitleCase(c)}</button>`
@@ -131,7 +131,7 @@ export class SettingsMenu extends NavbarComponent {
                             <div class="dropdown-content">
                                 ${Object.values(PieceAnimationSpeed).map((c: string) => {
                                     return `<button data-menu-operation="${SettingsMenuOperation.PieceAnimationSpeed}" class="dropdown-item ${
-                                        c == currentSettings.pieceAnimationSpeed
+                                        c.trim() == currentSettings.pieceAnimationSpeed.trim()
                                             ? "selected" 
                                             : ""
                                     }">${Formatter.pascalCaseToTitleCase(c)}</button>`
@@ -151,7 +151,7 @@ export class SettingsMenu extends NavbarComponent {
                             <div class="dropdown-content">
                                 ${Object.values(AlgebraicNotationStyle).map((c: string) => {
                                     return `<button data-menu-operation="${SettingsMenuOperation.AlgebraicNotationStyle}" class="dropdown-item ${
-                                        c == currentSettings.algebraicNotationStyle 
+                                        c.trim() == currentSettings.algebraicNotationStyle.trim()
                                             ? "selected" 
                                             : ""
                                     }">${Formatter.pascalCaseToTitleCase(c)}</button>`
@@ -167,17 +167,6 @@ export class SettingsMenu extends NavbarComponent {
                         <label class="switch">
                             <input data-menu-operation="${SettingsMenuOperation.ShowSquareIds}" type="checkbox" ${
                                 currentSettings.showSquareIds
-                                    ? `checked="true"`
-                                    : ``
-                                }>
-                            <span class="slider round"></span>
-                        </label>
-                    </div>
-                    <div class="settings-item">
-                        <span>${Formatter.pascalCaseToTitleCase(SettingsMenuOperation.ShowStreamWhenLogAdded)}</span>
-                        <label class="switch">
-                            <input data-menu-operation="${SettingsMenuOperation.ShowStreamWhenLogAdded}" type="checkbox" ${
-                                currentSettings.showStreamWhenLogAdded 
                                     ? `checked="true"`
                                     : ``
                                 }>
@@ -223,7 +212,7 @@ export class SettingsMenu extends NavbarComponent {
         
         const settings = LocalStorage.load(LocalStorageKey.Settings);
         for(const setting in settings){
-            const settingItem = document.querySelector(`#${SETTINGS_MENU_ID} [data-menu-operation="${setting}"]`);
+            const settingItem = document.querySelector(`#${SETTINGS_MENU_ID} [data-menu-operation="${Formatter.camelCaseToPascalCase(setting)}"]`);
             if(settingItem){
                 if(settingItem.getAttribute("type") === "checkbox") {
                     if(settings[setting]){
@@ -232,7 +221,10 @@ export class SettingsMenu extends NavbarComponent {
                         settingItem.removeAttribute("checked");
                     }
                 } else if(settingItem.tagName === "BUTTON") {
-                    settingItem.classList.add("selected");
+                    if(settingItem.textContent 
+                        && settings[setting] === Formatter.titleCaseToCamelCase(settingItem.textContent)){
+                        settingItem.classList.add("selected");
+                    }
                 }
             }
         }
@@ -293,12 +285,12 @@ export class SettingsMenu extends NavbarComponent {
         if(menuItem instanceof HTMLElement){
             newValue = menuItem.getAttribute("type") === "checkbox" 
             ? menuItem.getAttribute("checked") === null 
-            : menuItem.textContent;
+            : menuItem.textContent ? Formatter.titleCaseToCamelCase(menuItem.textContent).trim() : "";
         } else {
             newValue = menuItem;
         }
         
-        switch(operation){
+        switch(Formatter.camelCaseToPascalCase(operation)){
             case SettingsMenuOperation.ClearCache:
                 LocalStorage.clear();
                 break;
@@ -310,21 +302,22 @@ export class SettingsMenu extends NavbarComponent {
             case SettingsMenuOperation.EnablePreSelection:
             case SettingsMenuOperation.ShowHighlights:
             case SettingsMenuOperation.EnableWinnerAnimation:
-            case SettingsMenuOperation.AlgebraicNotationStyle:
             case SettingsMenuOperation.PieceAnimationSpeed:
+            case SettingsMenuOperation.MovementType:
                 operation = Formatter.pascalCaseToCamelCase(operation) as SettingsMenuOperation;
+                (this.getClassInstanceByType(Chess) as Chess)?.board.setConfig({ [operation]: newValue });
                 this.saveSetting(operation, newValue);
-                (this.getClassInstanceByType(Chess) as Chess)?.board.setConfig({
-                    [operation]: newValue
-                });
                 break;
             case SettingsMenuOperation.ShowSquareIds:
                 operation = Formatter.pascalCaseToCamelCase(operation) as SettingsMenuOperation;
+                (this.getClassInstanceByType(LogConsole) as LogConsole).setConfig({ [operation]: newValue });
                 this.saveSetting(operation, newValue);
-                (this.getClassInstanceByType(LogConsole) as LogConsole)?.setConfig({
-                    [operation]: newValue as boolean 
-                });
                 break; 
+            case SettingsMenuOperation.AlgebraicNotationStyle:
+                operation = Formatter.pascalCaseToCamelCase(operation) as SettingsMenuOperation;
+                (this.getClassInstanceByType(NotationMenu) as NotationMenu).setConfig({ [operation]: newValue });
+                this.saveSetting(operation, newValue);
+                break;
         }
     }
 }

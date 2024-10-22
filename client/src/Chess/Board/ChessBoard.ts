@@ -13,14 +13,14 @@ import { Converter } from "../Utils/Converter.ts";
 import { Logger } from "@Services/Logger.ts";
 
 export enum MovementType {
-    Default = "Default",
-    Click = "Click",
-    Drag = "Drag"
+    Both = "Both",
+    OnlyClick = "OnlyClick",
+    OnlyDrag = "OnlyDrag"
 }
 
 export enum PieceAnimationSpeed {
     Slow = "Slow",
-    Normal = "Normal",
+    Medium = "Medium",
     Fast = "Fast"
 }
 
@@ -29,8 +29,8 @@ export const DEFAULT_CONFIG = {
     enablePreSelection: true,
     showHighlights: true,
     enableWinnerAnimation: true,
-    movementType: MovementType.Default,
-    pieceAnimationSpeed: PieceAnimationSpeed.Normal
+    movementType: MovementType.Both,
+    pieceAnimationSpeed: PieceAnimationSpeed.Medium
 };
 
 /**
@@ -54,11 +54,11 @@ export class ChessBoard {
     private _disabledPreSelectionColor: Color | null = null;
     private _lockedSquaresModes: Record<string, SquareClickMode> = {};
     private _isBoardMoveEventBound: boolean = false;
-    private _pieceAnimationDuration: number = {
-        [PieceAnimationSpeed.Slow]: 0.20,
-        [PieceAnimationSpeed.Normal]: 0.15,
+    private _pieceAnimationSpeeds: Record<PieceAnimationSpeed, number> = {
+        [PieceAnimationSpeed.Slow]: 0.25,
+        [PieceAnimationSpeed.Medium]: 0.15,
         [PieceAnimationSpeed.Fast]: 0.05
-    }[this.config.pieceAnimationSpeed];
+    }
 
     private readonly _bindDragPiece: (e: MouseEvent | TouchEvent) => void = this.dragPiece.bind(this);
     private readonly sounds: { [key in SoundEffect]: string } = {
@@ -101,6 +101,15 @@ export class ChessBoard {
      */
     public setConfig(config: Partial<ChessBoard["config"]>): void {
         this.config = { ...this.config, ...config };
+
+        // Update the winner animation if the configuration is changed.
+        if(config.enableWinnerAnimation === false) {
+            this.removeEffectFromAllSquares([SquareEffect.WinnerAnimation]);
+        } else if (config.showHighlights === false) {
+            this.removeEffectFromAllSquares();
+        } else if (this.config.showHighlights) {
+            this.refresh();
+        }
     }
 
     /**
@@ -351,7 +360,9 @@ export class ChessBoard {
             return;
         }
 
-        this.stickPieceToCursor(mouseDownEvent, square);
+        if(this.config.movementType !== MovementType.OnlyClick) 
+            this.stickPieceToCursor(mouseDownEvent, square);
+
         if ([SquareClickMode.PreSelected, SquareClickMode.Selected].includes(squareClickMode)) {
             this.setSquareClickMode(square, SquareClickMode.Clear);
             return;
@@ -388,6 +399,9 @@ export class ChessBoard {
         onPieceMovedByClicking: (squareId: Square, squareClickMode: SquareClickMode) => void,
         onPiecePreMovedByClicking: (squareId: Square, squareClickMode: SquareClickMode) => void
     ): void {
+        if(this.config.movementType === MovementType.OnlyDrag)
+            return;
+        
         const squareClickMode = this.getSquareClickMode(square);
 
         if (![SquareClickMode.PreSelect,
@@ -415,6 +429,9 @@ export class ChessBoard {
         onPieceMovedByDragging: (squareId: Square, squareClickMode: SquareClickMode) => void,
         onPiecePreMovedByDragging: (squareId: Square, squareClickMode: SquareClickMode) => void
     ): void {
+        if(this.config.movementType === MovementType.OnlyClick) 
+            return;
+
         if (document.querySelector(".piece.cloned"))
             this.dropPiece(mouseUpEvent);
 
@@ -692,7 +709,7 @@ export class ChessBoard {
             document.body.appendChild(piece);
             piece.style.top = `${pieceRect.top + window.scrollY}px`;
             piece.style.left = `${pieceRect.left + window.scrollX}px`;
-            piece.style.animation = `move ${this._pieceAnimationDuration}s ease-in-out forwards`;
+            piece.style.animation = `move ${this._pieceAnimationSpeeds[this.config.pieceAnimationSpeed]}s ease-in-out forwards`;
             piece.style.setProperty("--chessboard-move-from-left", `${pieceRect.left + window.scrollX}px`);
             piece.style.setProperty("--chessboard-move-from-top", `${pieceRect.top + window.scrollY}px`);
             piece.style.setProperty("--chessboard-move-to-left", `calc(${marginLeft}px + ${square.getBoundingClientRect().left + window.scrollX}px)`);

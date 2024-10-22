@@ -4,8 +4,7 @@ import { NavbarComponent } from "./NavbarComponent";
 import { LOG_CONSOLE_ID } from "@Platform/Consts";
 
 export const DEFAULT_CONFIG = {
-    showSquareIds: true,
-    showStreamWhenLogAdded: true
+    showSquareIds: true
 }
 
 /**
@@ -18,8 +17,7 @@ export class LogConsole extends NavbarComponent{
      * The configuration of the log console.
      */
     private config: { 
-        showSquareIds: boolean,
-        showStreamWhenLogAdded: boolean
+        showSquareIds: boolean
     } = DEFAULT_CONFIG;
 
     /**
@@ -31,21 +29,11 @@ export class LogConsole extends NavbarComponent{
         document.addEventListener("DOMContentLoaded", () => {
             this.stream();
             document.addEventListener(LoggerEvent.LogAdded, this.stream.bind(this));
-            document.addEventListener(LoggerEvent.LogAdded, () => {
-                if(this.config.showStreamWhenLogAdded) {
-                    const showNavbarComponent = document.querySelector(".navbar-component:not(.hidden):not(#log-console)");
-                    if(showNavbarComponent){
-                        showNavbarComponent!.innerHTML = "";
-                        showNavbarComponent!.classList.add("hidden");
-                    }
-                    this.show();
-                }
-            });
         });
     }
 
     /**
-     * Set the configuration of the chess board.
+     * Set the configuration of the log console.
      */
     public setConfig(config: Partial<LogConsole["config"]>): void {
         this.config = { ...this.config, ...config };

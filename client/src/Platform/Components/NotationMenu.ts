@@ -31,6 +31,10 @@ enum UtilityMenuType{
 export class NotationMenu extends Component {
     public readonly id: string = NOTATION_MENU_ID;
     private readonly chess: Chess;
+    private config: {
+        algebraicNotationStyle: AlgebraicNotationStyle
+    } = DEFAULT_CONFIG;
+
     private moveCount: number = 0;
     private lastScore: Record<Color, number> = { [Color.White]: 0, [Color.Black]: 0 };
     private lastTurnColor: Color = Color.White;
@@ -53,6 +57,19 @@ export class NotationMenu extends Component {
         document.addEventListener("DOMContentLoaded", () => {
             this.update(true);
         });
+    }
+
+    /**
+     * Set the configuration of the notation menu.
+     */
+    public setConfig(config: Partial<NotationMenu["config"]>): void {
+        this.config = { ...this.config, ...config };
+
+        // Update the notation table according to the new configuration.
+        if(config.algebraicNotationStyle) {
+            document.getElementById("notations")!.innerHTML = "";
+            this.setNotations(this.chess.getAlgebraicNotation());
+        }
     }
 
     /**
@@ -343,7 +360,9 @@ export class NotationMenu extends Component {
         if (notationMenu.innerHTML == "") {
             for (let i = 0; i < notations.length; i += 1) {
                 const notationUnicoded = formatUnicodeNotation(
-                    this.convertStringNotationToUnicodedNotation(notations[i])
+                    this.config.algebraicNotationStyle === AlgebraicNotationStyle.WithIcons 
+                    ? this.convertStringNotationToUnicodedNotation(notations[i])
+                    : notations[i]
                 );
                 if (i % 2 == 0) {
                     notationMenu.innerHTML +=
@@ -375,7 +394,9 @@ export class NotationMenu extends Component {
         } else if(notationCount !== this.chess.getAlgebraicNotation().length) {
             const lastRow: HTMLElement = notationMenu.lastElementChild as HTMLElement;
             const lastNotation: string = formatUnicodeNotation(
-                this.convertStringNotationToUnicodedNotation(notations[notations.length - 1])
+                this.config.algebraicNotationStyle === AlgebraicNotationStyle.WithIcons
+                ? this.convertStringNotationToUnicodedNotation(notations[notations.length - 1])
+                : notations[notations.length - 1]
             );
             
             if (notations.length % 2 == 0)

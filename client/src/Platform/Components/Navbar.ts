@@ -33,34 +33,6 @@ export class Navbar extends Component{
         this.addNavbarComponentClass();
         this.hideComponents();
         this.loadLocalStorage();
-
-        /*this._currentlyShownComponent = this._navbarComponents.find(
-            (c: NavbarComponent) => !document.getElementById(c.id)!.classList.contains("hidden")
-        ) || null;
-        
-        // Create a mutation observer to watch the hidden class changes of the navbar components.
-        const observer = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                if(mutation.attributeName === "class"){
-                    const target = mutation.target as HTMLElement;
-                    if(target.classList.contains("hidden")){
-                        this._currentlyShownComponent = null;
-                    } else {
-                        this._currentlyShownComponent = this._navbarComponents.find(
-                            (c: NavbarComponent) => document.getElementById(c.id) === target
-                        ) || null;
-                        console.log(this._currentlyShownComponent);
-                    }
-                }
-            });
-        });
-
-        this._navbarComponents.forEach((c: NavbarComponent) => {
-            observer.observe(document.getElementById(c.id)!, { 
-                attributes: true, 
-                attributeFilter: ["class"] 
-            });
-        });*/
     }
 
     /**
@@ -137,6 +109,8 @@ export class Navbar extends Component{
 
         this.hideComponents();
         navbarComponent.show();
+        
+        this._currentlyShownComponent = navbarComponent;
     }
 
     /**
@@ -147,6 +121,8 @@ export class Navbar extends Component{
         this._navbarComponents.forEach((c: NavbarComponent) => {
             c.hide();
         });
+
+        this._currentlyShownComponent = null;
     }
 
     /**

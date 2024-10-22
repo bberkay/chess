@@ -15,7 +15,7 @@ export class Formatter{
      * @example camelCaseToPascalCase("camelCase") => "CamelCase"
      */
     public static camelCaseToPascalCase(str: string): string {
-        return str.replace(/([A-Z])/g, " $1").replace(/^./, (s) => s.toUpperCase());
+        return (str.charAt(0).toUpperCase() + str.slice(1)).trim();
     }
 
     /**
@@ -23,7 +23,7 @@ export class Formatter{
      * @example pascalCaseToCamelCase("PascalCase") => "pascalCase"
      */
     public static pascalCaseToCamelCase(str: string): string {
-        return str.charAt(0).toLowerCase() + str.slice(1);
+        return (str.charAt(0).toLowerCase() + str.slice(1)).trim();
     }
 
     /**
@@ -40,6 +40,15 @@ export class Formatter{
      * @example titleCaseToCamelCase("title Case") => "TitleCase"
      */
     public static titleCaseToPascalCase(str: string): string {
-        return str.charAt(0).toUpperCase() + str.slice(1).replace(/\s/g, "");
+        return (str.charAt(0).toUpperCase() + str.slice(1).replace(/\s/g, "")).trim();
+    }
+
+    /**
+     * Convert the title case string to camel case.
+     * @example titleCaseToCamelCase("Title Case") => "titleCase"
+     * @example titleCaseToCamelCase("title Case") => "titleCase"
+     */
+    public static titleCaseToCamelCase(str: string): string {
+        return (str.charAt(0).toLowerCase() + str.slice(1).replace(/\s/g, "")).trim();
     }
 }
