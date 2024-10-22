@@ -2,7 +2,7 @@ import { NavbarOperation } from "@Platform/Types";
 import { Component } from "./Component";
 import { NavbarComponent } from "./NavbarComponents/NavbarComponent";
 import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage";
-import { ABOUT_MENU_ID, APPEARANCE_MENU_ID, LOG_CONSOLE_ID, SETTINGS_MENU_ID } from "@Platform/Consts";
+import { ABOUT_MENU_ID, APPEARANCE_MENU_ID, LOG_CONSOLE_ID, NAVBAR_ID, SETTINGS_MENU_ID } from "@Platform/Consts";
 import { LogConsole } from "./NavbarComponents/LogConsole";
 import { AboutMenu } from "./NavbarComponents/AboutMenu";
 import { SettingsMenu } from "./NavbarComponents/SettingsMenu";
@@ -12,6 +12,7 @@ import { AppearanceMenu } from "./NavbarComponents/AppearanceMenu";
  * This class provide a navbar to navigate between components.
  */
 export class Navbar extends Component{
+    public readonly id: string = NAVBAR_ID;
     private _navbarComponents: NavbarComponent[] = [];
     private _currentlyShownComponent: NavbarComponent | null = null;
 
@@ -32,6 +33,34 @@ export class Navbar extends Component{
         this.addNavbarComponentClass();
         this.hideComponents();
         this.loadLocalStorage();
+
+        /*this._currentlyShownComponent = this._navbarComponents.find(
+            (c: NavbarComponent) => !document.getElementById(c.id)!.classList.contains("hidden")
+        ) || null;
+        
+        // Create a mutation observer to watch the hidden class changes of the navbar components.
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if(mutation.attributeName === "class"){
+                    const target = mutation.target as HTMLElement;
+                    if(target.classList.contains("hidden")){
+                        this._currentlyShownComponent = null;
+                    } else {
+                        this._currentlyShownComponent = this._navbarComponents.find(
+                            (c: NavbarComponent) => document.getElementById(c.id) === target
+                        ) || null;
+                        console.log(this._currentlyShownComponent);
+                    }
+                }
+            });
+        });
+
+        this._navbarComponents.forEach((c: NavbarComponent) => {
+            observer.observe(document.getElementById(c.id)!, { 
+                attributes: true, 
+                attributeFilter: ["class"] 
+            });
+        });*/
     }
 
     /**
@@ -70,7 +99,7 @@ export class Navbar extends Component{
      */
     protected renderComponent(): void
     {
-        this.loadHTML("navbar", `
+        this.loadHTML(NAVBAR_ID, `
             <div class="navbar-buttons">
                 <button data-menu-operation="${NavbarOperation.ShowLogConsole}">Stream</button>
                 <button data-menu-operation="${NavbarOperation.ShowAppearance}">Appearance</button>
@@ -106,12 +135,8 @@ export class Navbar extends Component{
         if(!this._navbarComponents.includes(navbarComponent))
             throw new Error("The given component is not in the components list.");
 
-        this._navbarComponents.forEach((c: NavbarComponent) => {
-            c.hide();
-        });
-
+        this.hideComponents();
         navbarComponent.show();
-        this._currentlyShownComponent = navbarComponent;
     }
 
     /**
