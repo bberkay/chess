@@ -19,7 +19,32 @@ export const PIECE_ANIMATION_DURATION_MS: number = PIECE_ANIMATION_DURATION * 10
  * This class provides users to create and manage a chess board(does not include any mechanic/logic).
  */
 export class ChessBoard {
+    /**
+     * Properties of the ChessBoard class.
+     */
+    private config: {
+        enableSoundEffects: boolean,
+        enablePreSelection: boolean,
+        showHighlights: boolean,
+        enableWinnerAnimation: boolean,
+        movementType: "Default" | "Click" | "Drag",
+        pieceAnimationSpeed: "Slow" | "Normal" | "Fast",
+    } = {
+        enableSoundEffects: true,
+        enablePreSelection: true,
+        showHighlights: true,
+        enableWinnerAnimation: true,
+        movementType: "Default",
+        pieceAnimationSpeed: "Normal",
+    };
 
+    private _turnColor: Color.White | Color.Black = Color.White;
+    private _isMouseUpEventBound: boolean = false;
+    private _disabledPreSelectionColor: Color | null = null;
+    private _lockedSquaresModes: Record<string, SquareClickMode> = {};
+    private _isBoardMoveEventBound: boolean = false;
+
+    private readonly _bindDragPiece: (e: MouseEvent | TouchEvent) => void = this.dragPiece.bind(this);
     private readonly sounds: { [key in SoundEffect]: string } = {
         Start: "./assets/sounds/game-start.mp3",
         Move: "./assets/sounds/move.mp3",
@@ -30,14 +55,7 @@ export class ChessBoard {
         LowTime: "./assets/sounds/low-time.mp3",
         End: "./assets/sounds/game-end.mp3",
     };
-
-    private turnColor: Color.White | Color.Black = Color.White;
-    private _isMouseUpEventBound: boolean = false;
-    private _disabledPreSelectionColor: Color | null = null;
-    private _lockedSquaresModes: Record<string, SquareClickMode> = {};
-    private _isBoardMoveEventBound: boolean = false;
-
-    private readonly _bindDragPiece: (e: MouseEvent | TouchEvent) => void = this.dragPiece.bind(this);
+    
     public readonly logger: Logger = new Logger("src/Chess/Board/ChessBoard.ts");
 
     /**
@@ -63,10 +81,17 @@ export class ChessBoard {
     }
 
     /**
+     * Set the configuration of the chess board.
+     */
+    public setConfig(config: Partial<ChessBoard["config"]>): void {
+        this.config = { ...this.config, ...config };
+    }
+
+    /**
      * Set the properties of the chess board to the initial values.
      */
     private clearProperties(): void {
-        this.turnColor = Color.White;
+        this._turnColor = Color.White;
         this._lockedSquaresModes = {};
         this._isBoardMoveEventBound = false;
         this._disabledPreSelectionColor = null;
@@ -195,12 +220,12 @@ export class ChessBoard {
      * Current player of the game.
      */
     public setTurnColor(color: Color.White | Color.Black): void {
-        this.turnColor = color;
+        this._turnColor = color;
         this.getAllPieces().forEach((pieceElement) => {
             const square = this.getSquareElementOfPiece(pieceElement);
             const pieceColor = this.getPieceColor(square);
             if (!pieceElement.className.includes("promotion-option")) {
-                if(pieceColor === this.turnColor && !this.isLocked())
+                if(pieceColor === this._turnColor && !this.isLocked())
                     this.setSquareClickMode(square, SquareClickMode.Select);
                 else
                     this.setSquareClickMode(
@@ -317,16 +342,25 @@ export class ChessBoard {
         }
 
         const squareId = this.getSquareId(square);
-        if ([SquareClickMode.PreSelect, SquareClickMode.Select].includes(squareClickMode)) {
+        if ([SquareClickMode.PreSelect, SquareClickMode.Select].includes(squareClickMode)) 
+        {
             const isPreSelect = squareClickMode == SquareClickMode.PreSelect;
+            if(isPreSelect && !this.config.enablePreSelection) 
+                return;
 
-            if (isPreSelect) this.addSquareEffects(square, SquareEffect.PreSelected);
-            else  this.removeEffectFromAllSquares([SquareEffect.PreSelected]);
+            if (isPreSelect) {
+                this.addSquareEffects(square, SquareEffect.PreSelected);
+            } else {
+                this.removeEffectFromAllSquares([SquareEffect.PreSelected]);
+            }
             
             this.selectPiece(squareId, isPreSelect);
             
-            if(isPreSelect) onPiecePreSelected(squareId);
-            else onPieceSelected(squareId);
+            if(isPreSelect) {
+                onPiecePreSelected(squareId);
+            } else {
+                onPieceSelected(squareId);
+            }
         }
     }
 
@@ -844,7 +878,7 @@ export class ChessBoard {
                 this.logger.save(`ID of square's fixed from[${currentId}] to [${newCorrectId}] on board`);
             }
         }
-        this.setTurnColor(this.turnColor);
+        this.setTurnColor(this._turnColor);
         this.logger.save("Board refreshed. Playable, Killable, Selected effects removed.");
     }
 
@@ -978,6 +1012,8 @@ export class ChessBoard {
             }
             winnerSquares.forEach(winnerKingSquare => {
                 this.addSquareEffects(winnerKingSquare, SquareEffect.Winner);
+                if(this.config.enableWinnerAnimation)
+                    this.addSquareEffects(winnerKingSquare, SquareEffect.WinnerAnimation);
             });
             this.playSound(SoundEffect.End);
             this.logger.save("Game ended. Board locked.");
@@ -993,7 +1029,7 @@ export class ChessBoard {
             : promotionSquare;
         
         const promoteColor = square < 9 ? Color.White : Color.Black;
-        const isPrePromotion = promoteColor !== this.turnColor;
+        const isPrePromotion = promoteColor !== this._turnColor;
 
         if (!isPrePromotion) {
             this.removePiece(promotionSquare);
@@ -1057,7 +1093,7 @@ export class ChessBoard {
      */
     public disablePreSelection(color: Color): void {
         this._disabledPreSelectionColor = color;
-        this.setTurnColor(this.turnColor);
+        this.setTurnColor(this._turnColor);
     }
 
     /**
@@ -1206,6 +1242,9 @@ export class ChessBoard {
         square: Square | HTMLDivElement | Element,
         effect: SquareEffect | Array<SquareEffect>
     ): void {
+        if(!this.config.showHighlights)
+            return;
+        
         if (typeof square === "number")
             square = this.getSquareElement(square);
 
@@ -1274,6 +1313,9 @@ export class ChessBoard {
      * This function plays the given sound.
      */
     public playSound(name: SoundEffect): void {
+        if(!this.config.enableSoundEffects)
+            return;
+
         const audio = new Audio(this.sounds[name]);
 
         audio.addEventListener('ended', () => {

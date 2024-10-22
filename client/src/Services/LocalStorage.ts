@@ -3,15 +3,16 @@
  * Add new keys here.
  */
 export enum LocalStorageKey{
-    WelcomeShown = "welcomeShown",
-    LastBoard = "lastBoard",
-    LastSavedBoard = "lastSavedBoard",
-    LastBot = "lastBot",
-    LastPlayerName = "lastPlayerName",
+    WelcomeShown = "WelcomeShown",
+    LastBoard = "LastBoard",
+    LastSavedBoard = "LastSavedBoard",
+    LastBot = "LastBot",
+    LastPlayerName = "LastPlayerName",
     LastLobbyConnection = "LastLobbyConnection",
-    BoardEditorEnabled = "boardEditorEnabled",
-    CustomAppearance = "customAppearance",
-    Theme = "theme",
+    BoardEditorEnabled = "BoardEditorEnabled",
+    CustomAppearance = "CustomAppearance",
+    Theme = "Theme",
+    Settings = "Settings",
 }
 
 /**

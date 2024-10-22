@@ -1,6 +1,11 @@
 /**
+ * ************************************************************
  * Platform Constants
+ * ************************************************************
  */
+
+import { SettingsMenuOperation } from "@Platform/Types";
+
 // Components
 export const ABOUT_MENU_ID = "about-menu";
 export const APPEARANCE_MENU_ID = "appearance-menu";
@@ -11,9 +16,23 @@ export const PIECE_CREATOR_ID = "piece-creator";
 export const NAVIGATOR_MODAL_ID = "navigator-modal";
 export const NOTATION_MENU_ID = "notation-menu";
 
+export const DEFAULT_SETTINGS = {
+    [SettingsMenuOperation.EnableSoundEffects]: true,
+    [SettingsMenuOperation.EnablePreSelection]: true,
+    [SettingsMenuOperation.ShowHighlights]: true,
+    [SettingsMenuOperation.EnableWinnerAnimation]: true,
+    [SettingsMenuOperation.ShowSquareIds]: true,
+    [SettingsMenuOperation.MovementType]: "Dropdown",
+    [SettingsMenuOperation.PieceAnimationSpeed]: 1,
+    [SettingsMenuOperation.AlgebraicNotationStyle]: "Standard",
+}
+
 /**
+ * ************************************************************
  * Online Game Constants
+ * ************************************************************
  */
+
 // Players
 export const DEFULT_PLAYER_NAME = "Anonymous";
 export const MAX_PLAYER_NAME_LENGTH = 25;

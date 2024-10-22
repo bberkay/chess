@@ -8,7 +8,10 @@
 
 :root{
     --font-family: 'Roboto', sans-serif;
+
+    /* Sizes */
     --component-font-size: 15px;
+    --component-small-font-size: 14px;
 
     /* Navbar */
     --navbar-width: 400px; 
@@ -25,7 +28,8 @@
     --appearance-menu-font-size: 13px;
 
     /* Settings Menu(Navbar Component) */
-    --settings-menu-legend-font-size: 13px;
+    --settings-menu-fieldset-font-size: 15px;
+    --settings-menu-legend-font-size: 14px;
 
     /* Connections Menu(Navbar Component) */
     --connections-menu-player-info-font-size: 0.95rem;
@@ -62,6 +66,7 @@
 
     /* Z-Index, avoid changing */
     --tooltip-z-index: 5;
+    --dropdown-z-index: 5;
     --log-console-tooltip-z-index: 5;
     --log-console-square-id-z-index: 10; /* Higher than piece-z-index and promotion-option-z-index */
     --navigator-modal-z-index:15; /* Higher than everything */
@@ -430,6 +435,72 @@ input:checked + .slider:before {
 
 .slider.round:before {
     border-radius: 50%;
+}
+
+/* Dropdown */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-button {
+    background-color: var(--component-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    padding: 6px 8px;
+    cursor: pointer;
+    font-size: var(--component-font-size);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 120px;
+
+    & .down-icon{
+        margin-left: 10px;
+    }
+
+    &:hover{
+        background-color: var(--component-active-color);
+    }
+
+    &:active{
+        opacity:0.7;
+    }
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    flex-direction: column;
+    background-color: var(--accent-color);
+    z-index: var(--dropdown-z-index);
+    width: calc(100% - 2px);
+    border: 1px solid var(--border-color);
+    box-shadow: 0px 8px 16px 0px var(--backdrop-bg-color);
+
+    & button{
+        width: 100%;
+        padding: 5px 8px;
+        background-color: var(--component-color);
+        color: var(--text-color);
+        border: none;
+        cursor: pointer;
+        font-size: var(--component-small-font-size);
+        text-align: left;
+
+        &:hover{
+            background-color: var(--primary-color);
+        }
+
+        &:active{
+            opacity:0.7;
+        }
+    }
+
+
+    &.active{
+        display: flex;
+    }
 }
 
 /* Utility */

@@ -8,6 +8,15 @@ import { LOG_CONSOLE_ID } from "@Platform/Consts";
  */
 export class LogConsole extends NavbarComponent{
     /**
+     * The configuration of the log console.
+     */
+    private config: { 
+        showSquareIds: boolean
+    } = { 
+        showSquareIds: true
+    };
+
+    /**
      * Constructor of the LogConsole class.
      */
     constructor() {
@@ -17,6 +26,13 @@ export class LogConsole extends NavbarComponent{
             this.stream();
             document.addEventListener(LoggerEvent.LogAdded, this.stream.bind(this));
         });
+    }
+
+    /**
+     * Set the configuration of the chess board.
+     */
+    public setConfig(config: Partial<LogConsole["config"]>): void {
+        this.config = { ...this.config, ...config };
     }
 
     /**
@@ -133,15 +149,18 @@ export class LogConsole extends NavbarComponent{
         }
 
         const lastLog: HTMLElement = document.getElementById("log-list")!.lastElementChild as HTMLElement;
-        const squares: NodeListOf<HTMLElement> = document.querySelectorAll(".square");
+        const squares: NodeListOf<HTMLElement> | null = this.config.showSquareIds ? document.querySelectorAll(".square") : null;
 
         // Tooltipts
         lastLog.querySelectorAll(".tooltip-toggle").forEach((tooltip_toggle) => {
             // square ids and tooltip location added when the mouse is over the tooltip.
             tooltip_toggle.addEventListener("mouseover", () => {
-                squares.forEach((square: HTMLElement) => {
-                    square.innerHTML += `<div class = "square-id">${square.getAttribute("data-square-id")}</div>`
-                });
+                if(this.config.showSquareIds) {
+                    squares!.forEach((square: HTMLElement) => {
+                        square.innerHTML += `<div class = "square-id">${square.getAttribute("data-square-id")}</div>`
+                    });
+                }
+                
 
                 const openingLocation: string[] = calculateOpeningLocation((tooltip_toggle as HTMLElement));
                 if(openingLocation.length == 0) return;
@@ -152,7 +171,9 @@ export class LogConsole extends NavbarComponent{
             });
 
             tooltip_toggle.addEventListener("mouseout", () => {
-                document.querySelectorAll(".square-id").forEach((element) => { element.remove() });
+                if(this.config.showSquareIds)
+                    document.querySelectorAll(".square-id").forEach((element) => { element.remove() });
+
                 tooltip_toggle.querySelector(".tooltip-container")!.classList.remove(
                     "tooltip-container--top", "tooltip-container--bottom", "tooltip-container--left", "tooltip-container--right", "tooltip-container--center"
                 );

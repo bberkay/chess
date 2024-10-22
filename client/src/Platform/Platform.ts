@@ -59,14 +59,14 @@ export class Platform{
      */
     constructor(chess: Chess) {
         this.chess = chess;
-        this.appearanceMenu = new AppearanceMenu();
         this.boardEditor = new BoardEditor(this.chess);
         this.notationMenu = new NotationMenu(this.chess);
         this.navigatorModal = new NavigatorModal();
+        this.appearanceMenu = new AppearanceMenu();
         this.logConsole = new LogConsole();
-        this.settingsMenu = new SettingsMenu();
         this.aboutMenu = new AboutMenu();
-        this.navbar = new Navbar([this.logConsole, this.aboutMenu, this.settingsMenu, this.appearanceMenu]);
+        this.settingsMenu = new SettingsMenu(this.chess, this.logConsole, this.notationMenu);
+        this.navbar = new Navbar(this.logConsole, this.aboutMenu, this.settingsMenu, this.appearanceMenu);
         this.init();
 
         //For testing purposes
@@ -101,8 +101,6 @@ export class Platform{
 
             updateComponentTriggers.forEach((trigger) => {
                 document.addEventListener(trigger, () => {
-                    if(trigger == ChessEvent.onPieceSelected || trigger == ChessEvent.onPieceMoved)
-                        this.navbar.showComponent(this.logConsole);
                     this.updateComponents();
                 });
             });
@@ -213,7 +211,8 @@ export class Platform{
         else if(Object.hasOwn(SettingsMenuOperation, menuOperation))
         {
             this.settingsMenu.handleOperation(
-                menuOperation as SettingsMenuOperation
+                menuOperation as SettingsMenuOperation,
+                menuItem
             );
             this.handleSettingsMenuOperation(
                 menuOperation as SettingsMenuOperation, 
@@ -257,11 +256,21 @@ export class Platform{
                 menuOperation as NavbarOperation
             );
             this.handleNavbarOperation(
-                menuOperation as NavbarOperation
+                menuOperation as NavbarOperation,
+                menuItem
             );
         }
     }
-    
+
+    /**
+     * Handle the navbar operations.
+     */
+    private handleNavbarOperation(menuOperation: NavbarOperation, menuItem: HTMLElement): void
+    {
+        switch(menuOperation){
+        }
+    }
+
     /**
      * Handle the log console operations.
      */
@@ -284,15 +293,6 @@ export class Platform{
      * Handle the settings menu operations.
      */
     private handleSettingsMenuOperation(menuOperation: SettingsMenuOperation, menuItem: HTMLElement): void
-    {
-        switch(menuOperation){
-        }
-    }
-
-    /**
-     * Handle the navbar operations.
-     */
-    private handleNavbarOperation(menuOperation: NavbarOperation): void
     {
         switch(menuOperation){
         }
@@ -325,15 +325,6 @@ export class Platform{
     private handleNavigatorModalOperation(menuOperation: NavigatorModalOperation, menuItem: HTMLElement): void
     {
         switch(menuOperation){
-            case NavigatorModalOperation.Hide:
-                this.navigatorModal.hide();
-                break;
-            case NavigatorModalOperation.ShowGameCreator:
-                this.navigatorModal.showGameCreator();
-                break;
-            case NavigatorModalOperation.ShowStartPlayingBoard:
-                this.navigatorModal.showStartPlayingBoard();
-                break;
             case NavigatorModalOperation.PlayByYourself:
                 this.preparePlatformForSingleplayerGameByYourself();
                 break;

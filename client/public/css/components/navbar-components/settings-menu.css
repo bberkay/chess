@@ -20,11 +20,10 @@
 
     & fieldset {
         border: 1px solid var(--border-color);
-        border-left: none;
-        border-right: none;
-        border-bottom: none;
-        padding-top: 0.5rem;
-
+        padding: 0.75rem 1rem 0rem 1rem;
+        margin-bottom: 1rem;
+        font-size: var(--settings-menu-fieldset-font-size);
+        
         & legend {
             font-size: var(--settings-menu-legend-font-size);
         }
@@ -37,14 +36,6 @@
         gap: 10px;
         white-space: nowrap;
         margin-bottom: 1rem;
-
-        & input[type="number"] {
-            width: 50px;
-            text-align: center;
-            border: 1px solid var(--border-color);
-            padding:5px 0px;
-            background-color: var(--border-color);
-        }
     }
 }
 

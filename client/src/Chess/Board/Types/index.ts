@@ -17,6 +17,7 @@ export enum SquareEffect{
     PrePlayable = "preplayable",
     PrePlayed = "preplayed",
     Winner = "winner",
+    WinnerAnimation = "winner-animation",
 }
 
 /**

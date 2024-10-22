@@ -624,6 +624,12 @@ export class NavigatorModal extends Component{
     public handleOperation(operation: NavigatorModalOperation): void
     {
         switch(operation){
+            case NavigatorModalOperation.ShowGameCreator:
+                this.showGameCreator();
+                break;
+            case NavigatorModalOperation.ShowStartPlayingBoard:
+                this.showStartPlayingBoard();
+                break;
             case NavigatorModalOperation.ShowCreateLobby:
                 this.saveSelectedGameDuration();
                 this.showCreateLobby();
@@ -649,6 +655,9 @@ export class NavigatorModal extends Component{
                 break;
             case NavigatorModalOperation.Undo:
                 this.undo();
+                break;
+            case NavigatorModalOperation.Hide:
+                this.hide();
                 break;
         }
     }

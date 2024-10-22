@@ -3,33 +3,32 @@ import { Component } from "./Component";
 import { NavbarComponent } from "./NavbarComponents/NavbarComponent";
 import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage";
 import { ABOUT_MENU_ID, APPEARANCE_MENU_ID, LOG_CONSOLE_ID, SETTINGS_MENU_ID } from "@Platform/Consts";
-
-/**
- * This enum represents the different types of components 
- * that can be shown in the navbar.
- */
-enum NavbarComponentType {
-    LogConsole = "LogConsole",
-    AppearanceMenu = "AppearanceMenu",
-    SettingsMenu = "SettingsMenu",
-    AboutMenu = "AboutMenu"
-}
+import { LogConsole } from "./NavbarComponents/LogConsole";
+import { AboutMenu } from "./NavbarComponents/AboutMenu";
+import { SettingsMenu } from "./NavbarComponents/SettingsMenu";
+import { AppearanceMenu } from "./NavbarComponents/AppearanceMenu";
 
 /**
  * This class provide a navbar to navigate between components.
  */
 export class Navbar extends Component{
-    private readonly navbarComponents: NavbarComponent[];
+    private _navbarComponents: NavbarComponent[] = [];
     private _currentlyShownComponent: NavbarComponent | null = null;
 
     /**
      * Constructor of the Navbar class.
      * @param navbarComponents The components to navigate between.
      */
-    constructor(navbarComponents: NavbarComponent[]) {
+    constructor(...navbarComponents: NavbarComponent[]) {
         super();
         this.renderComponent();
-        this.navbarComponents = navbarComponents;
+        for(const component of navbarComponents){
+            if(!(component instanceof NavbarComponent))
+                throw new Error("The given component is not a NavbarComponent.");
+
+            this._navbarComponents.push(component);
+        }
+
         this.addNavbarComponentClass();
         this.hideComponents();
         this.loadLocalStorage();
@@ -59,21 +58,11 @@ export class Navbar extends Component{
     {
         // Welcome message
         if(LocalStorage.isExist(LocalStorageKey.WelcomeShown))
-            this.showComponent(this.getComponentByType(NavbarComponentType.LogConsole)!);
+            this.showComponent(this.getComponentByType(LogConsole));
         else{
-            this.showComponent(this.getComponentByType(NavbarComponentType.AboutMenu)!);
+            this.showComponent(this.getComponentByType(AboutMenu));
             LocalStorage.save(LocalStorageKey.WelcomeShown, true);
         }
-    }
-
-    /**
-     * Get the component by type.
-     */
-    private getComponentByType(type: NavbarComponentType): NavbarComponent | null
-    {
-        return this.navbarComponents.find(
-            instance => instance.constructor.name === NavbarComponentType[type]
-        ) || null;
     }
 
     /**
@@ -93,20 +82,31 @@ export class Navbar extends Component{
     }
 
     /**
+     * Get the component instance by its class type.
+     */
+    private getComponentByType(classType: Function): NavbarComponent | null
+    {
+        return this._navbarComponents.find((c: NavbarComponent) => c instanceof classType) || null;
+    }
+
+    /**
      * Show the given component.
      */
-    public showComponent(navbarComponent: NavbarComponent): void
+    public showComponent(navbarComponent: NavbarComponent | null): void    
     {
-        if(!(navbarComponent instanceof NavbarComponent))
-            throw new Error("The given component is not a NavbarComponent.");
+        if(!navbarComponent)
+            throw new Error("The given component cannot be null.");
         
         if(this._currentlyShownComponent === navbarComponent)
             return;
 
-        if(!this.navbarComponents.includes(navbarComponent))
+        if(!(navbarComponent instanceof NavbarComponent))
+            throw new Error("The given component is not a NavbarComponent.");
+        
+        if(!this._navbarComponents.includes(navbarComponent))
             throw new Error("The given component is not in the components list.");
 
-        this.navbarComponents.forEach((c: NavbarComponent) => {
+        this._navbarComponents.forEach((c: NavbarComponent) => {
             c.hide();
         });
 
@@ -119,7 +119,7 @@ export class Navbar extends Component{
      */
     public hideComponents(): void
     {
-        this.navbarComponents.forEach((c: NavbarComponent) => {
+        this._navbarComponents.forEach((c: NavbarComponent) => {
             c.hide();
         });
     }
@@ -131,16 +131,16 @@ export class Navbar extends Component{
     {
         switch(operation){
             case NavbarOperation.ShowLogConsole:
-                this.showComponent(this.getComponentByType(NavbarComponentType.LogConsole)!);
+                this.showComponent(this.getComponentByType(LogConsole));
                 break;
             case NavbarOperation.ShowAppearance:
-                this.showComponent(this.getComponentByType(NavbarComponentType.AppearanceMenu)!);
+                this.showComponent(this.getComponentByType(AppearanceMenu));
                 break;
             case NavbarOperation.ShowAbout:
-                this.showComponent(this.getComponentByType(NavbarComponentType.AboutMenu)!);
+                this.showComponent(this.getComponentByType(AboutMenu));
                 break;
             case NavbarOperation.ShowSettings:
-                this.showComponent(this.getComponentByType(NavbarComponentType.SettingsMenu)!);
+                this.showComponent(this.getComponentByType(SettingsMenu));
                 break;
         }
     }

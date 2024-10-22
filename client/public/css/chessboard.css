@@ -417,7 +417,6 @@
             height:calc(var(--chessboard-board-size) / 11);
             left:14%;
             top:8%;
-            animation: piece-idle 2.5s infinite;
         }
 
         & .square-effect-icon::before{
@@ -431,7 +430,6 @@
             transform: scale(1);
             background-color: black;
             opacity: 0.3;
-            animation: shadow-idle 2.5s infinite;
         }
 
         & .square-effect-icon::after{
@@ -445,6 +443,19 @@
             background-color: transparent;
             box-shadow: 0 0 12px 6px #FFF, 
                         0 0 20px 10px var(--chessboard-winner-color);
+        } 
+    }
+
+    & .square:has(.square-effect--winner-animation .square-effect-layer){
+        & .piece{
+            animation: piece-idle 2.5s infinite;
+        }
+
+        & .square-effect-icon::before{
+            animation: shadow-idle 2.5s infinite;
+        }
+
+        & .square-effect-icon::after{
             animation: glow 2.5s infinite, glow-idle 2.5s infinite; 
         } 
     }

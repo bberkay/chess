@@ -49,6 +49,8 @@ export abstract class Component{
         this.createValidationsIfThereAre(componentId);
         this.createCopyToClipboardIfThereAre(componentId);
         this.createSelectableButtonsIfThereAre(componentId);
+        this.createDropdownsIfThereAre(componentId);
+        this.createSwitchesIfThereAre(componentId);
         document.dispatchEvent(new CustomEvent(PlatformEvent.onOperationMounted, {detail: {selector: "#" + componentId}}));
     }
     
@@ -115,6 +117,16 @@ export abstract class Component{
     {
         const component = document.getElementById(componentId);
         if(!component) return;
+        
+        /**
+         * Check if the input is valid.
+         * If the input is required then it must have a value.
+         * If the input has a minlength attribute then the value must 
+         * be longer than the minlength.
+         * If the input has a maxlength attribute then the value must
+         * be shorter than the maxlength.
+         * If the input is number it should be a number.
+         */
         function isValid(input: HTMLInputElement): boolean
         {
             if(input.hasAttribute("required") && input.value === "")
@@ -126,39 +138,57 @@ export abstract class Component{
             if(input.hasAttribute("maxlength") && input.value.length > parseInt(input.getAttribute("maxlength")!))
                 return false;
 
+            if(input.hasAttribute("type") && input.getAttribute("type") === "number" && isNaN(parseInt(input.value)))
+                return false;
+
             return true;
+        }
+
+        /**
+         * Prevent non-numeric input for number inputs.
+         */
+        function preventNonNumericInput(event: KeyboardEvent): void
+        {
+            if (event.ctrlKey || event.altKey || event.metaKey) {
+                return;
+            }
+            
+            // Allow only numbers, backspace, delete, tab, and arrow keys
+            const charCode = event.which ? event.which : event.keyCode;
+            if ((charCode < 48 || charCode > 57) && charCode !== 8 && charCode !== 9 && (charCode < 37 || charCode > 40)) {
+                event.preventDefault();
+            }
         }
 
         const submitButton = component.querySelector("button[type='submit']");
         if(!submitButton) return;
 
-        let allValid = false;
         const inputs = component.querySelectorAll("input");
-        
-        /**
-         * Check all inputs if they are valid.
-         */
-        const checkInputs = () => {
-            for(const input of inputs){
-                if(!isValid(input)){
-                    allValid = false;
-                    break;
-                }
-                allValid = true;
-            }
-            
-            if(allValid) submitButton.removeAttribute("disabled");
-            else submitButton.setAttribute("disabled", "true");
-        }
 
         // Check inputs on load.
-        checkInputs();
+        const inputArray = Array.from(inputs);
+        if(inputArray.every(input => isValid(input))) {
+            submitButton.removeAttribute("disabled");
+        } else {
+            submitButton.setAttribute("disabled", "true");
+        }
 
         // Add event listener to check every input.
         inputs.forEach((input: HTMLInputElement) => {
             if(!input) return;
+            
+            const isNumber = input.getAttribute("type") === "number";
+            input.addEventListener("keydown", (e) => {
+                if(isNumber)
+                    preventNonNumericInput(e);
+            });
+
             input.addEventListener("input", () => {
-                checkInputs();
+                if(inputArray.every(input => isValid(input))) {
+                    submitButton.removeAttribute("disabled");
+                } else {
+                    submitButton.setAttribute("disabled", "true");
+                }
             });
         });
     }
@@ -186,7 +216,7 @@ export abstract class Component{
     }
 
     /**
-     * Create selectable buttons of the component.
+     * Add functionality to selectable buttons.
      */
     private createSelectableButtonsIfThereAre(componentId: string): void
     {
@@ -209,5 +239,82 @@ export abstract class Component{
                 button.setAttribute("data-selected", "true");
             });
         });
+    }
+
+    /**
+     * Add functionality to dropdowns.
+     */
+    private createDropdownsIfThereAre(componentId: string): void 
+    {
+        const component = document.getElementById(componentId);
+        if(!component) return;
+
+        const dropdowns = component.querySelectorAll(".dropdown");
+        if(!dropdowns || dropdowns.length === 0) return;
+
+        for(const dropdown of dropdowns){
+            const dropdownButton = dropdown.querySelector(".dropdown-button");
+            if(!dropdownButton) return;
+
+            const dropdownContent = dropdown.querySelector(".dropdown-content");
+            if(!dropdownContent) return;
+
+            dropdownButton.addEventListener("click", () => {
+                dropdownContent.classList.toggle("active");
+            });
+
+            window.addEventListener("click", (e) => {
+                if(!dropdown.contains(e.target as Node)){
+                    dropdownContent.classList.remove("active");
+                }
+            });
+
+            const dropdownItems = dropdownContent.querySelectorAll(".dropdown-item") as NodeListOf<HTMLElement>;
+            if(!dropdownItems || dropdownItems.length === 0) return;
+
+            dropdownItems.forEach((item: HTMLElement) => {
+                item.addEventListener("click", () => {
+                    dropdownContent.classList.remove("active");
+                });
+            });
+
+            const dropdownTitle = dropdown.querySelector(".dropdown-title") as HTMLElement;
+            const observer = new MutationObserver(() => {
+                const selectedItems = dropdownContent.querySelectorAll(".dropdown-item.selected");
+                if(selectedItems.length > 0){
+                    dropdownTitle.textContent = selectedItems[0].textContent;
+                }
+            });
+
+            observer.observe(dropdownContent, {attributes: true, attributeFilter: ["class"]});
+        }
+    }
+
+    /**
+     * Add functionality to switches.
+     */
+    private createSwitchesIfThereAre(componentId: string): void
+    {
+        const component = document.getElementById(componentId);
+        if(!component) return;
+
+        const switches = component.querySelectorAll(".switch");
+        if(!switches || switches.length === 0) return;
+        
+        for(const switchElement of switches){
+            const input = switchElement.querySelector("input");
+            if(!input) return;
+
+            const slider = switchElement.querySelector(".slider");
+            if(!slider) return;
+            
+            input.addEventListener("change", () => {
+                if(input.checked){
+                    input.setAttribute("checked", "true");
+                } else {
+                    input.removeAttribute("checked");
+                }
+            });
+        }
     }
 }

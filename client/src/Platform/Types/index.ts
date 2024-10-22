@@ -96,8 +96,16 @@ export enum LogConsoleOperation{
  * `SettingsMenu` component.
  */
 export enum SettingsMenuOperation{
-    ToggleBoardSounds = "ToggleBoardSounds",
-    Reset = "Reset"
+    EnableSoundEffects = "EnableSoundEffects",
+    EnablePreSelection = "EnablePreSelection",
+    ShowHighlights = "ShowHighlights",
+    EnableWinnerAnimation = "EnableWinnerAnimation",
+    MovementType = "MovementType",
+    PieceAnimationSpeed = "PieceAnimationSpeed",
+    AlgebraicNotationStyle = "AlgebraicNotationStyle",
+    ShowSquareIds = "ShowSquareIds",
+    ClearCache = "ClearCache",
+    ResetSettings = "ResetSettings"
 }
 
 /**
