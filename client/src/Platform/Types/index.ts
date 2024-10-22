@@ -104,6 +104,7 @@ export enum SettingsMenuOperation{
     PieceAnimationSpeed = "PieceAnimationSpeed",
     AlgebraicNotationStyle = "AlgebraicNotationStyle",
     ShowSquareIds = "ShowSquareIds",
+    ShowStreamWhenLogAdded = "ShowStreamWhenLogAdded",
     ClearCache = "ClearCache",
     ResetSettings = "ResetSettings"
 }

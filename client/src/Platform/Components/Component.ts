@@ -4,6 +4,8 @@ import { MenuOperation, PlatformEvent } from "@Platform/Types";
  * Component abstract class. All components must inherit from this class.
  */
 export abstract class Component{
+    public abstract readonly id: string;
+
     /**
      * Render the component's html.
      */
@@ -274,11 +276,15 @@ export abstract class Component{
 
             dropdownItems.forEach((item: HTMLElement) => {
                 item.addEventListener("click", () => {
+                    const prevSelectedItem = dropdownContent.querySelector(".dropdown-item.selected");
+                    if(prevSelectedItem) prevSelectedItem.classList.remove("selected");
+                    item.classList.add("selected");
+                    dropdownButton.querySelector(".dropdown-title")!.textContent = item.textContent;
                     dropdownContent.classList.remove("active");
                 });
             });
 
-            const dropdownTitle = dropdown.querySelector(".dropdown-title") as HTMLElement;
+            /*const dropdownTitle = dropdown.querySelector(".dropdown-title") as HTMLElement;
             const observer = new MutationObserver(() => {
                 const selectedItems = dropdownContent.querySelectorAll(".dropdown-item.selected");
                 if(selectedItems.length > 0){
@@ -286,7 +292,7 @@ export abstract class Component{
                 }
             });
 
-            observer.observe(dropdownContent, {attributes: true, attributeFilter: ["class"]});
+            observer.observe(dropdownContent, {attributes: true, attributeFilter: ["class"]});*/
         }
     }
 

@@ -460,7 +460,7 @@ input:checked + .slider:before {
     }
 
     &:hover{
-        background-color: var(--component-active-color);
+        background-color: var(--component-color);
     }
 
     &:active{
@@ -492,11 +492,22 @@ input:checked + .slider:before {
             background-color: var(--primary-color);
         }
 
+        &.selected {
+            background-color: var(--primary-color);
+        }    
+
+        &:hover ~ .selected,
+        &:hover + .selected,
+        &:has(~ :hover).selected,
+        &:has(+ :hover).selected {
+            background-color: var(--component-color);
+        }
+
         &:active{
             opacity:0.7;
         }
+        
     }
-
 
     &.active{
         display: flex;

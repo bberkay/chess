@@ -21,6 +21,7 @@ import {
  * This class provide a menu to show the logs.
  */
 export class NavigatorModal extends Component{
+    public readonly id: string = NAVIGATOR_MODAL_ID;
     private readonly _boundCloseModalOnOutsideClick: ((event: MouseEvent) => void) = this.closeModalOnOutsideClick.bind(this);
 
     private lastNavigatorModalTitle: string = "";

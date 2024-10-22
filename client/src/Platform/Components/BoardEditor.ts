@@ -31,6 +31,7 @@ function isEditorModeEnable() {
  * This class provide a form to create a new board.
  */
 export class BoardEditor extends Component{
+    public readonly id: string = BOARD_EDITOR_ID;
     private readonly chess: Chess;
 
     private static _isEditorModeEnable: boolean = false;

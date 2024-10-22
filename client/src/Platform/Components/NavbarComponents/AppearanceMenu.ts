@@ -12,6 +12,7 @@ enum Theme{
  * This class provide a menu to show the appearance menu.
  */
 export class AppearanceMenu extends NavbarComponent{
+    public readonly id: string = APPEARANCE_MENU_ID;
     private currentTheme: string = Theme.Dark;
     private rootComputedStyle = getComputedStyle(document.documentElement);
 
@@ -25,7 +26,7 @@ export class AppearanceMenu extends NavbarComponent{
     }
 
     /**
-     * Load the local storage data.
+     * Load the appearance from the local storage.
      */
     private loadLocalStorage(): void
     {
@@ -90,7 +91,7 @@ export class AppearanceMenu extends NavbarComponent{
         `);
 
         this.loadCSS("appearance-menu.css");
-        this.initColorPalette();
+        this.loadColorPalette();
         this.addEventListeners();
     }
 
@@ -211,9 +212,9 @@ export class AppearanceMenu extends NavbarComponent{
     }
     
     /**
-     * This function shows the last saved if exist, otherwise default color palette.
+     * This function shows the color palette on the appearance menu.
      */
-    private initColorPalette(): void
+    private loadColorPalette(): void
     {        
         let customAppearance;
         if(LocalStorage.isExist(LocalStorageKey.CustomAppearance))
@@ -290,7 +291,7 @@ export class AppearanceMenu extends NavbarComponent{
                 break;
             case AppearanceMenuOperation.Reset:
                 LocalStorage.clear(LocalStorageKey.CustomAppearance);
-                this.initColorPalette();
+                this.loadColorPalette();
                 break;
         }
     }

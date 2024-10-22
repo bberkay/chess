@@ -5,6 +5,8 @@ import { ABOUT_MENU_ID } from "@Platform/Consts";
  * This class provide a menu to show the about information.
  */
 export class AboutMenu extends NavbarComponent{
+    public readonly id: string = ABOUT_MENU_ID;
+    
     /**
      * Constructor of the AboutMenu class.
      */

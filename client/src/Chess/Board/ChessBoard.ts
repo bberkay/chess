@@ -12,8 +12,26 @@ import { SoundEffect, SquareClickMode, SquareEffect } from "./Types";
 import { Converter } from "../Utils/Converter.ts";
 import { Logger } from "@Services/Logger.ts";
 
-export const PIECE_ANIMATION_DURATION: number = 0.15; // seconds
-export const PIECE_ANIMATION_DURATION_MS: number = PIECE_ANIMATION_DURATION * 1000; // milliseconds
+export enum MovementType {
+    Default = "Default",
+    Click = "Click",
+    Drag = "Drag"
+}
+
+export enum PieceAnimationSpeed {
+    Slow = "Slow",
+    Normal = "Normal",
+    Fast = "Fast"
+}
+
+export const DEFAULT_CONFIG = {
+    enableSoundEffects: true,
+    enablePreSelection: true,
+    showHighlights: true,
+    enableWinnerAnimation: true,
+    movementType: MovementType.Default,
+    pieceAnimationSpeed: PieceAnimationSpeed.Normal
+};
 
 /**
  * This class provides users to create and manage a chess board(does not include any mechanic/logic).
@@ -27,22 +45,20 @@ export class ChessBoard {
         enablePreSelection: boolean,
         showHighlights: boolean,
         enableWinnerAnimation: boolean,
-        movementType: "Default" | "Click" | "Drag",
-        pieceAnimationSpeed: "Slow" | "Normal" | "Fast",
-    } = {
-        enableSoundEffects: true,
-        enablePreSelection: true,
-        showHighlights: true,
-        enableWinnerAnimation: true,
-        movementType: "Default",
-        pieceAnimationSpeed: "Normal",
-    };
+        movementType: MovementType,
+        pieceAnimationSpeed: PieceAnimationSpeed
+    } = DEFAULT_CONFIG;
 
     private _turnColor: Color.White | Color.Black = Color.White;
     private _isMouseUpEventBound: boolean = false;
     private _disabledPreSelectionColor: Color | null = null;
     private _lockedSquaresModes: Record<string, SquareClickMode> = {};
     private _isBoardMoveEventBound: boolean = false;
+    private _pieceAnimationDuration: number = {
+        [PieceAnimationSpeed.Slow]: 0.20,
+        [PieceAnimationSpeed.Normal]: 0.15,
+        [PieceAnimationSpeed.Fast]: 0.05
+    }[this.config.pieceAnimationSpeed];
 
     private readonly _bindDragPiece: (e: MouseEvent | TouchEvent) => void = this.dragPiece.bind(this);
     private readonly sounds: { [key in SoundEffect]: string } = {
@@ -676,7 +692,7 @@ export class ChessBoard {
             document.body.appendChild(piece);
             piece.style.top = `${pieceRect.top + window.scrollY}px`;
             piece.style.left = `${pieceRect.left + window.scrollX}px`;
-            piece.style.animation = `move ${PIECE_ANIMATION_DURATION}s ease-in-out forwards`;
+            piece.style.animation = `move ${this._pieceAnimationDuration}s ease-in-out forwards`;
             piece.style.setProperty("--chessboard-move-from-left", `${pieceRect.left + window.scrollX}px`);
             piece.style.setProperty("--chessboard-move-from-top", `${pieceRect.top + window.scrollY}px`);
             piece.style.setProperty("--chessboard-move-to-left", `calc(${marginLeft}px + ${square.getBoundingClientRect().left + window.scrollX}px)`);

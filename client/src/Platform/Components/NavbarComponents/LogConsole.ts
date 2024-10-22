@@ -3,18 +3,24 @@ import { Logger, LoggerEvent } from "@Services/Logger";
 import { NavbarComponent } from "./NavbarComponent";
 import { LOG_CONSOLE_ID } from "@Platform/Consts";
 
+export const DEFAULT_CONFIG = {
+    showSquareIds: true,
+    showStreamWhenLogAdded: true
+}
+
 /**
  * This class provide a menu to show the logs.
  */
 export class LogConsole extends NavbarComponent{
+    public readonly id: string = LOG_CONSOLE_ID;
+    
     /**
      * The configuration of the log console.
      */
     private config: { 
-        showSquareIds: boolean
-    } = { 
-        showSquareIds: true
-    };
+        showSquareIds: boolean,
+        showStreamWhenLogAdded: boolean
+    } = DEFAULT_CONFIG;
 
     /**
      * Constructor of the LogConsole class.
@@ -25,6 +31,16 @@ export class LogConsole extends NavbarComponent{
         document.addEventListener("DOMContentLoaded", () => {
             this.stream();
             document.addEventListener(LoggerEvent.LogAdded, this.stream.bind(this));
+            document.addEventListener(LoggerEvent.LogAdded, () => {
+                if(this.config.showStreamWhenLogAdded) {
+                    const showNavbarComponent = document.querySelector(".navbar-component:not(.hidden):not(#log-console)");
+                    if(showNavbarComponent){
+                        showNavbarComponent!.innerHTML = "";
+                        showNavbarComponent!.classList.add("hidden");
+                    }
+                    this.show();
+                }
+            });
         });
     }
 

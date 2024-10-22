@@ -1,27 +1,54 @@
 import { NavbarComponent } from "./NavbarComponent";
 import { SettingsMenuOperation } from "@Platform/Types";
-import { SETTINGS_MENU_ID, DEFAULT_SETTINGS } from "@Platform/Consts";
+import { SETTINGS_MENU_ID } from "@Platform/Consts";
 import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage";
 import { Chess } from "@Chess/Chess";
-import { LogConsole } from "./LogConsole";
-import { NotationMenu } from "../NotationMenu";
+import { 
+    MovementType,
+    PieceAnimationSpeed,
+    DEFAULT_CONFIG as DEFAULT_SETTINGS_CHESSBOARD 
+} from "@Chess/Board/ChessBoard";
+import { LogConsole, DEFAULT_CONFIG as DEFAULT_SETTINGS_LOG_CONSOLE } from "./LogConsole";
+import { 
+    NotationMenu, 
+    AlgebraicNotationStyle,
+    DEFAULT_CONFIG as DEFAULT_SETTINGS_NOTATION_MENU 
+} from "../NotationMenu";
+import { Formatter } from "@Platform/Utils/Formatter";
+
 
 /**
  * This class provide a menu to change the settings
  * of the game and the platform itself.
  */
 export class SettingsMenu extends NavbarComponent {
+    public readonly id: string = SETTINGS_MENU_ID;
     private _classes: Object[] = [];
-
+    
     /**
      * Constructor of the SettingsMenu class.
      */
     constructor(...classes: Object[]) {
         super();
+        
         for(const classInstance of classes){
             if(!(classInstance instanceof Object))
                 throw new Error("The given object is not an Object.");
             this._classes.push(classInstance);
+        }
+
+        this.loadLocalStorage();
+    }
+
+    /**
+     * Get every default settings of the platform as an object.
+     */
+    private getDefaultSettings(): object
+    {
+        return {
+            ...DEFAULT_SETTINGS_CHESSBOARD,
+            ...DEFAULT_SETTINGS_LOG_CONSOLE,
+            ...DEFAULT_SETTINGS_NOTATION_MENU
         }
     }
 
@@ -29,57 +56,86 @@ export class SettingsMenu extends NavbarComponent {
      * This function renders the settings menu.
      */
     protected renderComponent(): void {
+        const currentSettings = LocalStorage.load(LocalStorageKey.Settings);
         this.loadHTML(SETTINGS_MENU_ID, `
             <div id="settings-body">
                 <fieldset>
                     <legend>Board</legend>
                     <div class="settings-item">
-                        <span>Enable Sound Effects</span>
+                        <span>${Formatter.pascalCaseToTitleCase(SettingsMenuOperation.EnableSoundEffects)}</span>
                         <label class="switch">
-                            <input data-menu-operation="${SettingsMenuOperation.EnableSoundEffects}" type="checkbox">
+                            <input data-menu-operation="${SettingsMenuOperation.EnableSoundEffects}" type="checkbox" ${
+                                currentSettings.enableSoundEffects 
+                                    ? `checked="true"`
+                                    : ``
+                                }>
                             <span class="slider round"></span>
                         </label>
                     </div>
                     <div class="settings-item">
-                        <span>Enable Pre Selection</span>
+                        <span>${Formatter.pascalCaseToTitleCase(SettingsMenuOperation.EnablePreSelection)}</span>
                         <label class="switch">
-                            <input data-menu-operation="${SettingsMenuOperation.EnablePreSelection}" type="checkbox">
+                            <input data-menu-operation="${SettingsMenuOperation.EnablePreSelection}" type="checkbox" ${
+                                currentSettings.enablePreSelection 
+                                    ? `checked="true"`
+                                    : ``
+                                }>
                             <span class="slider round"></span>
                         </label>
                     </div>
                     <div class="settings-item">
-                        <span>Show Highlights</span>
+                        <span>${Formatter.pascalCaseToTitleCase(SettingsMenuOperation.ShowHighlights)}</span>
                         <label class="switch">
-                            <input data-menu-operation="${SettingsMenuOperation.ShowHighlights}" type="checkbox">
+                            <input data-menu-operation="${SettingsMenuOperation.ShowHighlights}" type="checkbox" ${
+                                currentSettings.showHighlights 
+                                    ? `checked="true"`
+                                    : ``
+                                }>
                             <span class="slider round"></span>
                         </label>
                     </div>
                     <div class="settings-item">
-                        <span>Enable Winner Animation</span>
+                        <span>${Formatter.pascalCaseToTitleCase(SettingsMenuOperation.EnableWinnerAnimation)}</span>
                         <label class="switch">
-                            <input data-menu-operation="${SettingsMenuOperation.EnableWinnerAnimation}" type="checkbox">
+                            <input data-menu-operation="${SettingsMenuOperation.EnableWinnerAnimation}" type="checkbox" ${
+                                currentSettings.enableWinnerAnimation 
+                                    ? `checked="true"`
+                                    : ``
+                                }>
                             <span class="slider round"></span>
                         </label>
                     </div>
                     <div class="settings-item">
-                        <span>Movement Type</span>
+                        <span>${Formatter.pascalCaseToTitleCase(SettingsMenuOperation.MovementType)}</span>
                         <div class="dropdown">
-                            <button class="dropdown-button"><span class="dropdown-title">Dropdown</span> <span class="down-icon">▾</span></button>
+                            <button class="dropdown-button"><span class="dropdown-title">${
+                                Formatter.pascalCaseToTitleCase(currentSettings.movementType)
+                            }</span> <span class="down-icon">▾</span></button>
                             <div class="dropdown-content">
-                                <button class="dropdown-item selected">Link 1</button>
-                                <button class="dropdown-item">Link 2</button>
-                                <button class="dropdown-item">Link 3</button>
+                                ${Object.values(MovementType).map((c: string) => {
+                                    return `<button data-menu-operation="${SettingsMenuOperation.MovementType}" class="dropdown-item ${
+                                        c == currentSettings.movementType
+                                            ? "selected" 
+                                            : ""
+                                    }">${Formatter.pascalCaseToTitleCase(c)}</button>`
+                                }).join("")}
                             </div>
                         </div>
                     </div>
                     <div class="settings-item">
-                        <span>Piece Animation Speed</span>
+                        <span>${Formatter.pascalCaseToTitleCase(SettingsMenuOperation.PieceAnimationSpeed)}</span>
                         <div class="dropdown">
-                            <button class="dropdown-button"><span class="dropdown-title">Dropdown</span> <span class="down-icon">▾</span></button>
+                            <button class="dropdown-button"><span class="dropdown-title">${
+                                Formatter.pascalCaseToTitleCase(currentSettings.pieceAnimationSpeed)
+                            }</span> <span class="down-icon">▾</span></button>
                             <div class="dropdown-content">
-                                <button class="dropdown-item selected">Link 1</button>
-                                <button class="dropdown-item">Link 2</button>
-                                <button class="dropdown-item">Link 3</button>
+                                ${Object.values(PieceAnimationSpeed).map((c: string) => {
+                                    return `<button data-menu-operation="${SettingsMenuOperation.PieceAnimationSpeed}" class="dropdown-item ${
+                                        c == currentSettings.pieceAnimationSpeed
+                                            ? "selected" 
+                                            : ""
+                                    }">${Formatter.pascalCaseToTitleCase(c)}</button>`
+                                }).join("")}
                             </div>
                         </div>
                     </div>
@@ -87,13 +143,19 @@ export class SettingsMenu extends NavbarComponent {
                 <fieldset>
                     <legend>Notation Menu</legend>
                     <div class="settings-item">
-                        <span>Algebraic Notation Style</span>
+                        <span>${Formatter.pascalCaseToTitleCase(SettingsMenuOperation.AlgebraicNotationStyle)}</span>
                         <div class="dropdown">
-                            <button class="dropdown-button"><span class="dropdown-title">Dropdown</span> <span class="down-icon">▾</span></button>
+                            <button class="dropdown-button"><span class="dropdown-title">${
+                                Formatter.pascalCaseToTitleCase(currentSettings.algebraicNotationStyle)
+                            }</span> <span class="down-icon">▾</span></button>
                             <div class="dropdown-content">
-                                <button class="dropdown-item selected">Link 1</button>
-                                <button class="dropdown-item">Link 2</button>
-                                <button class="dropdown-item">Link 3</button>
+                                ${Object.values(AlgebraicNotationStyle).map((c: string) => {
+                                    return `<button data-menu-operation="${SettingsMenuOperation.AlgebraicNotationStyle}" class="dropdown-item ${
+                                        c == currentSettings.algebraicNotationStyle 
+                                            ? "selected" 
+                                            : ""
+                                    }">${Formatter.pascalCaseToTitleCase(c)}</button>`
+                                }).join("")}
                             </div>
                         </div>
                     </div>
@@ -101,9 +163,24 @@ export class SettingsMenu extends NavbarComponent {
                 <fieldset>
                     <legend>Log Console</legend>
                     <div class="settings-item">
-                        <span>Show Square IDs</span>
+                        <span>${Formatter.pascalCaseToTitleCase(SettingsMenuOperation.ShowSquareIds)}</span>
                         <label class="switch">
-                            <input data-menu-operation="${SettingsMenuOperation.ShowSquareIds}" type="checkbox">
+                            <input data-menu-operation="${SettingsMenuOperation.ShowSquareIds}" type="checkbox" ${
+                                currentSettings.showSquareIds
+                                    ? `checked="true"`
+                                    : ``
+                                }>
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    <div class="settings-item">
+                        <span>${Formatter.pascalCaseToTitleCase(SettingsMenuOperation.ShowStreamWhenLogAdded)}</span>
+                        <label class="switch">
+                            <input data-menu-operation="${SettingsMenuOperation.ShowStreamWhenLogAdded}" type="checkbox" ${
+                                currentSettings.showStreamWhenLogAdded 
+                                    ? `checked="true"`
+                                    : ``
+                                }>
                             <span class="slider round"></span>
                         </label>
                     </div>
@@ -121,11 +198,17 @@ export class SettingsMenu extends NavbarComponent {
     }
 
     /**
-     * 
+     * Load the settings from the local storage.
      */
     private loadLocalStorage(): void
     {
-
+        if(!LocalStorage.isExist(LocalStorageKey.Settings))
+            LocalStorage.save(LocalStorageKey.Settings, this.getDefaultSettings());    
+        
+        const currentSettings = LocalStorage.load(LocalStorageKey.Settings);
+        for(const setting in currentSettings){
+            this.handleOperation(setting as SettingsMenuOperation, currentSettings[setting]);
+        }
     }
 
     /**
@@ -135,7 +218,7 @@ export class SettingsMenu extends NavbarComponent {
     private loadSettings(): void
     {        
         if(!LocalStorage.isExist(LocalStorageKey.Settings)){
-            LocalStorage.save(LocalStorageKey.Settings, DEFAULT_SETTINGS);
+            LocalStorage.save(LocalStorageKey.Settings, this.getDefaultSettings());
         }
         
         const settings = LocalStorage.load(LocalStorageKey.Settings);
@@ -148,12 +231,11 @@ export class SettingsMenu extends NavbarComponent {
                     } else {
                         settingItem.removeAttribute("checked");
                     }
-
-                    this.handleOperation(setting as SettingsMenuOperation, settingItem as HTMLElement);
+                } else if(settingItem.tagName === "BUTTON") {
+                    settingItem.classList.add("selected");
                 }
             }
         }
-        
     }
 
     /**
@@ -165,9 +247,9 @@ export class SettingsMenu extends NavbarComponent {
     }
 
     /**
-     * 
+     * Save given setting to the local storage.
      */
-    private setSomething(operation: SettingsMenuOperation, newValue: any): void
+    private saveSetting(operation: SettingsMenuOperation, newValue: any): void
     {
         const settings = LocalStorage.load(LocalStorageKey.Settings);
         settings[operation] = newValue;
@@ -195,41 +277,54 @@ export class SettingsMenu extends NavbarComponent {
 
     /**
      * Handle the operations of the settings menu.
+     * @param operation The operation to be handled.
+     * @param menuItem The menu item that the operation will be applied.
+     * 
+     * @example handleOperation(SettingsMenuOperation.EnableSoundEffects, document.querySelector("#settings-menu [data-menu-operation='EnableSoundEffects']"));
+     * This example will find the menu item and according to its 
+     * type(checkbox or text), it will change the value of the setting.
+     * 
+     * @example handleOperation(SettingsMenuOperation.EnableSoundEffects, true);
+     * This example will change the value of the setting to true.
      */
-    public handleOperation(operation: SettingsMenuOperation, menuItem: HTMLElement): void
+    public handleOperation(operation: SettingsMenuOperation, menuItem: any): void
     {
-        const newValue = menuItem.getAttribute("type") === "checkbox" 
+        let newValue;
+        if(menuItem instanceof HTMLElement){
+            newValue = menuItem.getAttribute("type") === "checkbox" 
             ? menuItem.getAttribute("checked") === null 
             : menuItem.textContent;
-
+        } else {
+            newValue = menuItem;
+        }
+        
         switch(operation){
             case SettingsMenuOperation.ClearCache:
                 LocalStorage.clear();
                 break;
             case SettingsMenuOperation.ResetSettings:
-                LocalStorage.save(LocalStorageKey.Settings, DEFAULT_SETTINGS);
+                LocalStorage.save(LocalStorageKey.Settings, this.getDefaultSettings());
                 this.loadSettings();
                 break;
             case SettingsMenuOperation.EnableSoundEffects:
-                this.setSomething(operation, newValue);
-                (this.getClassInstanceByType(Chess) as Chess)?.board.setConfig({ enableSoundEffects: newValue as boolean });
-                break;
             case SettingsMenuOperation.EnablePreSelection:
-                this.setSomething(operation, newValue);
-                (this.getClassInstanceByType(Chess) as Chess)?.board.setConfig({ enablePreSelection: newValue as boolean });
-                break;
             case SettingsMenuOperation.ShowHighlights:
-                this.setSomething(operation, newValue);
-                (this.getClassInstanceByType(Chess) as Chess)?.board.setConfig({ showHighlights: newValue as boolean });
-                break;
             case SettingsMenuOperation.EnableWinnerAnimation:
-                this.setSomething(operation, newValue);
-                (this.getClassInstanceByType(Chess) as Chess)?.board.setConfig({ enableWinnerAnimation: newValue as boolean });
+            case SettingsMenuOperation.AlgebraicNotationStyle:
+            case SettingsMenuOperation.PieceAnimationSpeed:
+                operation = Formatter.pascalCaseToCamelCase(operation) as SettingsMenuOperation;
+                this.saveSetting(operation, newValue);
+                (this.getClassInstanceByType(Chess) as Chess)?.board.setConfig({
+                    [operation]: newValue
+                });
                 break;
             case SettingsMenuOperation.ShowSquareIds:
-                this.setSomething(operation, newValue);
-                (this.getClassInstanceByType(LogConsole) as LogConsole)?.setConfig({ showSquareIds: newValue as boolean });
-                break;
+                operation = Formatter.pascalCaseToCamelCase(operation) as SettingsMenuOperation;
+                this.saveSetting(operation, newValue);
+                (this.getClassInstanceByType(LogConsole) as LogConsole)?.setConfig({
+                    [operation]: newValue as boolean 
+                });
+                break; 
         }
     }
 }
