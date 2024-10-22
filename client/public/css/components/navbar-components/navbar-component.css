@@ -11,6 +11,7 @@
     max-width: calc(var(--chessboard-board-size) - 50px);
     color: var(--text-color);;
     visibility: visible;
+    box-shadow: 0 0 5px var(--shadow-color);
     
     &.hidden{
         visibility: hidden!important;

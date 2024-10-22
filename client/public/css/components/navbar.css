@@ -10,6 +10,7 @@
     border-bottom: none;
     padding: 4px;
     width: calc(var(--navbar-width) - 8px);
+    box-shadow: 0 0 5px var(--shadow-color);
 }
 
 #navbar .navbar-buttons{

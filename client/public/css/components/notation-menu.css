@@ -16,6 +16,7 @@
     background-color: var(--accent-color);
     color: var(--text-color);
     border:1px solid  var(--border-color);
+    box-shadow: 0 0 5px var(--shadow-color);
 
     & tbody{
         max-height: var(--notation-table-height);
@@ -93,6 +94,7 @@
         background-color: var(--accent-color);
         border:1px solid var(--border-color);
         padding: 4px;
+        box-shadow: 0 0 5px var(--shadow-color);
         
         & .player-name{
             padding: 10px 10px;
@@ -215,8 +217,8 @@
     justify-content: space-between;
     background-color: var(--accent-color);
     border: 1px solid var(--border-color);
-    border-top:none;
     padding: 4px;
+    box-shadow: 0 0 5px var(--shadow-color);
 
     & button{
         padding:7px 10px;
@@ -236,6 +238,7 @@
 
 #notation-menu .utility-menu.utility-toggle-menu{
     opacity: 0;
+    box-shadow: 0 0 5px var(--shadow-color);
 
     & .utility-toggle-menu-section{
         display: none;
