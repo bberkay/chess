@@ -272,7 +272,11 @@
 }
 
 /* -------------- Effects Styles -------------- */
-#chessboard {
+#chessboard:not(:has(.square-effect.hidden)) {
+    & .square-effect.hidden{
+        display:none;
+    }
+
     & .square-effect-layer{
         position: absolute;
         width:100%;
