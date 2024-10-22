@@ -32,7 +32,7 @@
         width:100%;
 
         & th{
-            padding:7px 5px;
+            padding:10px 5px;
             padding-bottom:3px;
             background-color: var(--component-color);
             border:1px solid var(--border-color);
@@ -40,10 +40,10 @@
 
         & td{
             text-align: center;
-            padding:5px;
+            padding:3px 5px;
             cursor: pointer;
             height: var(--notation-table-piece-icon-size);
-            
+
             & .piece-icon{
                 font-size: var(--notation-table-piece-icon-size);
                 line-height: 1;
@@ -54,17 +54,18 @@
             }
         }
 
-        &:nth-child(odd) td:has(span){
+        & td:has(span){
             background-color: var(--component-color);
-            border:1px solid var(--component-color);
+            border:1px solid var(--border-color);
         }
 
         & td.current-move{
-            background-color: var(--component-active-color)!important;
+            background-color: var(--primary-color)!important;
+            border:1px solid var(--primary-color);
         }
 
         & td:has(.move):hover{
-            background-color:  var(--component-active-color)!important;
+            background-color:  var(--component-active-color);
         }
     }
 }
