@@ -78,7 +78,7 @@
     background-image: url("../../assets/images/result-screen-bg-icon-dark.png");
 }
 
-body.dark-mode .navigator-modal .navigator-modal-bg,
+body[data-color-scheme="dark"] .navigator-modal .navigator-modal-bg,
 .navigator-modal--glass .navigator-modal-bg{
     background-image: url("../../assets/images/result-screen-bg-icon-light.png");
 }
@@ -129,7 +129,7 @@ body.dark-mode .navigator-modal .navigator-modal-bg,
     }
 }
 
-body.dark-mode .navigator-modal:not(.navigator-modal--glass){
+body[data-color-scheme="dark"] .navigator-modal:not(.navigator-modal--glass){
     box-shadow: 0 0 5px var(--black-color);
     border: 1px solid var(--border-color);
 }

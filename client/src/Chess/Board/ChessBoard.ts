@@ -52,7 +52,7 @@ export class ChessBoard {
     private _turnColor: Color.White | Color.Black = Color.White;
     private _isMouseUpEventBound: boolean = false;
     private _disabledPreSelectionColor: Color | null = null;
-    private _lockedSquaresModes: Record<string, SquareClickMode> = {};
+    private _lockedSquaresModes: { [squareId: string]: SquareClickMode } = {};
     private _isBoardMoveEventBound: boolean = false;
     private _pieceAnimationSpeeds: Record<PieceAnimationSpeed, number> = {
         [PieceAnimationSpeed.Slow]: 0.25,

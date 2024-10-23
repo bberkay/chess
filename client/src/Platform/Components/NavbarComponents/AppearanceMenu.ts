@@ -2,10 +2,12 @@ import { NavbarComponent } from "./NavbarComponent";
 import { AppearanceMenuOperation } from "../../Types";
 import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage";
 import { APPEARANCE_MENU_ID } from "@Platform/Consts";
+import { Formatter } from "@Platform/Utils/Formatter";
 
 enum Theme{
-    Dark = "dark-mode",
-    Light = "light-mode"
+    Dark = "dark",
+    Light = "light",
+    System = "system"
 }
 
 /**
@@ -13,7 +15,7 @@ enum Theme{
  */
 export class AppearanceMenu extends NavbarComponent{
     public readonly id: string = APPEARANCE_MENU_ID;
-    private currentTheme: string = Theme.Dark;
+    private currentTheme: string = Theme.System;
     private rootComputedStyle = getComputedStyle(document.documentElement);
 
     /**
@@ -30,8 +32,11 @@ export class AppearanceMenu extends NavbarComponent{
      */
     private loadLocalStorage(): void
     {
-        if(LocalStorage.isExist(LocalStorageKey.Theme))
+        if(LocalStorage.isExist(LocalStorageKey.Theme)){
             this.changeTheme(LocalStorage.load(LocalStorageKey.Theme));
+        } else {
+            this.changeTheme(Theme.System);
+        }
 
         if(LocalStorage.isExist(LocalStorageKey.CustomAppearance)) {
             const customAppearance = LocalStorage.load(LocalStorageKey.CustomAppearance);
@@ -84,7 +89,11 @@ export class AppearanceMenu extends NavbarComponent{
                 <div class="appearance-utilities">
                     <button data-menu-operation="${AppearanceMenuOperation.Reset}">Reset to Default</button>
                     <button data-menu-operation="${AppearanceMenuOperation.ChangeTheme}">${
-                        this.currentTheme === Theme.Dark ? "Light Mode" : "Dark Mode"
+                        this.currentTheme === Theme.System 
+                            ? Formatter.camelCaseToTitleCase(Theme.Dark) + " Mode" 
+                            : this.currentTheme === Theme.Dark
+                                ? Formatter.camelCaseToTitleCase(Theme.Light) + " Mode"
+                                : Formatter.camelCaseToTitleCase(Theme.System) + " Mode"
                     }</button>
                 </div>
             </div>
@@ -242,20 +251,24 @@ export class AppearanceMenu extends NavbarComponent{
     /**
      * Change the theme of the app.
      */
-    private changeTheme(theme: Theme = Theme.Dark): void
+    private changeTheme(theme: Theme | null = null): void
     {
         const changeThemeButton = document.querySelector(`
             [data-menu-operation="${AppearanceMenuOperation.ChangeTheme}"]
         `) as HTMLButtonElement;
-
-        if(theme === Theme.Light){
+        
+        if(theme === Theme.Light || this.currentTheme === Theme.Dark){
             this.currentTheme = Theme.Light;
-            document.body.classList.remove(Theme.Dark);
-            if(changeThemeButton) changeThemeButton.innerText = "Dark Mode";
-        }else if(theme === Theme.Dark){
+            document.body.setAttribute("data-color-scheme", Theme.Light);
+            if(changeThemeButton) changeThemeButton.innerText = Formatter.camelCaseToTitleCase(Theme.System) + " Mode";
+        }else if(theme === Theme.System || this.currentTheme === Theme.Light){
+            this.currentTheme = Theme.System;
+            document.body.removeAttribute("data-color-scheme");
+            if(changeThemeButton) changeThemeButton.innerText = Formatter.camelCaseToTitleCase(Theme.Dark) + " Mode";
+        }else if(theme === Theme.Dark || this.currentTheme === Theme.System){
             this.currentTheme = Theme.Dark;
-            document.body.classList.add(Theme.Dark);
-            if(changeThemeButton) changeThemeButton.innerText = "Light Mode";
+            document.body.setAttribute("data-color-scheme", Theme.Dark);
+            if(changeThemeButton) changeThemeButton.innerText = Formatter.camelCaseToTitleCase(Theme.Light) + " Mode";
         }
 
         LocalStorage.save(LocalStorageKey.Theme, this.currentTheme);
@@ -287,7 +300,7 @@ export class AppearanceMenu extends NavbarComponent{
     {
         switch(operation){
             case AppearanceMenuOperation.ChangeTheme:
-                this.changeTheme(this.currentTheme === Theme.Dark ? Theme.Light : Theme.Dark);
+                this.changeTheme();
                 break;
             case AppearanceMenuOperation.Reset:
                 LocalStorage.clear(LocalStorageKey.CustomAppearance);
