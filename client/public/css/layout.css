@@ -375,7 +375,7 @@ input[type="range"]::-webkit-slider-thumb{
     padding: 0;
     margin: 0;
     border: 1px solid var(--border-color);
-    background-color: var(--accent-color);
+    background-color: var(--linear-gradient-color);
     height:15px;
 }
 

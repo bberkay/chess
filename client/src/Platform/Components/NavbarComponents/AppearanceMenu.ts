@@ -51,39 +51,60 @@ export class AppearanceMenu extends NavbarComponent{
      */
     protected renderComponent(): void
     {
-        const getTitleOfCssProp = (str: string) => {
-            str = str.replace("-color", "");
-            str = str.replace(/-/g, " ");
-            return str
-                .split(" ")
-                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                .join(" ")
-        };
-    
+        /**
+         * This function returns the custom properties of the 
+         * chessboard.css from the CSS.
+         */
+        const getChessboardCssProps = (): Set<string> => {
+            const customProperties = new Set<string>();
+            for (const sheet of document.styleSheets) {
+                try {
+                    for (const rule of sheet.cssRules) {
+                        if ((rule as CSSStyleRule).style) {
+                            for (const property of (rule as CSSStyleRule).style) {
+                                if (property.startsWith("--chessboard-") 
+                                    && property.endsWith("-color") 
+                                    && !property.startsWith("--chessboard-default-")) {
+                                    customProperties.add(property);
+                                }
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.error("Error while reading CSS rules", e);
+                }
+            }    
+            return customProperties;
+        }
+
+        /**
+         * Generate the color picker html elements for the 
+         * chessboard.css properties.
+         */
+        const generateColorPickersOfChessboardCssProps = (): string => {
+            let colorPickers = "";
+            for(const property of getChessboardCssProps()){
+                const colorId = property.replace("--chessboard-", "");
+                const colorTitle = Formatter.kebabCaseToTitleCase(colorId.replace("-color", ""));
+                colorPickers += `
+                    <div class="input-group color-picker">
+                        <label for="${colorId}" data-tooltip-text="${colorTitle}" data-shortened-parent=".color-picker" data-shortened-length="15">${colorTitle}</label>
+                        <div class="input-group--horizontal">
+                            <div class="input-group">
+                                <input type="color" id="${colorId}" value="#ffffff">
+                                <input type="range" id="${colorId}-opacity" min="0" max="1" step="0.1" value="1">
+                            </div>
+                            <button class="reset-button" id="reset-${colorId}">↻</button>
+                        </div>
+                    </div>
+                `;
+            }
+            return colorPickers;
+        }
+
         this.loadHTML(APPEARANCE_MENU_ID, `
             <div id="appearance-body">
-                ${
-                    Array.from(this.rootComputedStyle).filter((property) => 
-                        property.startsWith("--chessboard-") &&
-                        property.endsWith("-color") &&
-                        !property.startsWith("--chessboard-default-")
-                    ).reverse().map((property) => {
-                        const colorId = property.replace("--chessboard-", "");
-                        const colorTitle = getTitleOfCssProp(colorId);
-                        return `
-                            <div class="input-group color-picker">
-                                <label for="${colorId}" data-tooltip-text="${colorTitle}" data-shortened-parent=".color-picker" data-shortened-length="15">${colorTitle}</label>
-                                <div class="input-group--horizontal">
-                                    <div class="input-group">
-                                        <input type="color" id="${colorId}" value="#ffffff">
-                                        <input type="range" id="${colorId}-opacity" min="0" max="1" step="0.1" value="1">
-                                    </div>
-                                    <button class="reset-button" id="reset-${colorId}">↻</button>
-                                </div>
-                            </div>
-                        `;
-                    }).join("")
-                }
+                ${generateColorPickersOfChessboardCssProps()}
             </div>
             <div id="appearance-footer">
                 <div class="appearance-utilities">

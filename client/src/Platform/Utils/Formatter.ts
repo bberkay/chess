@@ -3,6 +3,33 @@
  */
 export class Formatter{
     /**
+     * Convert the kebab case string to camel case.
+     * @example kebabCaseToCamelCase("kebab-case") => "kebabCase"
+     * @example kebabCaseToCamelCase("Kebab-cAse") => "kebabCase"
+     */
+    public static kebabCaseToCamelCase(str: string): string {
+        return str.toLowerCase().replace(/-./g, (s) => s.charAt(1).toUpperCase());
+    }
+
+    /**
+     * Convert the kebab case string to title case.
+     * @example kebabCaseToTitleCase("kebab-case") => "Kebab Case"
+     * @example kebabCaseToTitleCase("Kebab-cAse") => "Kebab Case"
+     */
+    public static kebabCaseToTitleCase(str: string): string {
+        return str.replace(/-/g, " ").replace(/([A-Z])/g, " $1").replace(/^./, (s) => s.toUpperCase());
+    }
+
+    /**
+     * Convert the kebab case string to pascal case.
+     * @example kebabCaseToPascalCase("kebab-case") => "KebabCase"
+     * @example kebabCaseToPascalCase("Kebab-cAse") => "KebabCase"
+     */
+    public static kebabCaseToPascalCase(str: string): string {
+        return (str.charAt(0).toUpperCase() + str.slice(1).replace(/-/g, "")).trim();
+    }
+    
+    /**
      * Convert the camel case string to title case.
      * @example camelCaseToTitleCase("camelCase") => "Camel Case"
      */
