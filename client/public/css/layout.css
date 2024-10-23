@@ -123,12 +123,32 @@ body {
     --component-opaque-color: light-dark(#EAEAEAEA, #222222EE);
     --component-active-color: light-dark(#D5D5D5, #333);
     --border-color: light-dark(#CCC, #2A2A2A);
-    --linear-gradient-color: light-dark(#F5F5F5, #515151);
-    --linear-gradient: light-dark(
-        linear-gradient(90deg, rgba(245,245,245,1) 0%, rgba(234,234,234,1) 35%, rgba(153,153,153,1) 100%), 
-        linear-gradient(90deg, rgba(51,51,51,1) 0%, rgba(34,34,34,1) 35%, rgba(20,20,20,1) 100%)
-    );
     --shadow-color: light-dark(#B9B9B9, #000);
+    --linear-gradient-color: light-dark(#F5F5F5, #515151);
+
+    /* I couldn't make linear gradient work with light-dark function */
+    --linear-gradient-light: linear-gradient(90deg, rgba(245,245,245,1) 0%, rgba(234,234,234,1) 35%, rgba(153,153,153,1) 100%);
+    --linear-gradient-dark: linear-gradient(90deg, rgba(51,51,51,1) 0%, rgba(34,34,34,1) 35%, rgba(20,20,20,1) 100%); 
+}
+
+@media (prefers-color-scheme: light) {
+    body {
+        --linear-gradient: var(--linear-gradient-light);
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    body {
+        --linear-gradient: var(--linear-gradient-dark);
+    }
+}
+
+body[data-color-scheme="light"]{
+    --linear-gradient: var(--linear-gradient-light);
+}
+
+body[data-color-scheme="dark"]{
+    --linear-gradient: var(--linear-gradient-dark);
 }
 
 body{
@@ -368,16 +388,7 @@ input[type="range"]::-moz-range-thumb {
     margin: 0;
     height: 100%;
     border: 1px solid var(--border-color);
-}
-
-body[data-color-scheme="dark"] input[type="range"]::-webkit-slider-thumb{
-    background-color: var(--darker-gray-color);
-    border: 1px solid var(--border-color);
-}
-
-body[data-color-scheme="dark"] input[type="range"]::-moz-range-thumb {
-    background-color: var(--darker-gray-color);
-    border: 1px solid var(--border-color);
+    background-color: var(--linear-gradient-color);
 }
 
 /* Switch */
