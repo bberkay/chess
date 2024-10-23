@@ -435,8 +435,7 @@ export class Chess {
             this.board.setTurnColor(this.engine.getTurnColor());
             LocalStorage.save(LocalStorageKey.LastBoard, this.engine.getGameAsJsonNotation());
         } else {
-            this._currentTakeBackCount++;
-            this.goToSpecificMove((this.engine.getMoveHistory().length - 1) - this._currentTakeBackCount);
+            this.goToSpecificMove((this.engine.getMoveHistory().length - 1) - this._currentTakeBackCount - 1);
         }
     }
 
@@ -447,8 +446,7 @@ export class Chess {
         if(this.engine.getMoveHistory().length == 0 || this._currentTakeBackCount == 0)
             return;
 
-        this._currentTakeBackCount--;
-        this.goToSpecificMove((this.engine.getMoveHistory().length - 1) - this._currentTakeBackCount);
+        this.goToSpecificMove((this.engine.getMoveHistory().length - 1) - this._currentTakeBackCount + 1);
     }
 
     /**

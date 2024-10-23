@@ -153,49 +153,15 @@ export class ChessBoard {
             let square: HTMLDivElement = document.createElement("div");
             this.setSquareId(square, i);
             square.className = "square";
-            this.setSquareClickMode(square, SquareClickMode.Disable);
-
-            /**
-             * Set the color of the square. This formula create a chess board pattern on the board.
-             * Example for first and second row: true(i = 1), false(i = 2), true(i = 3), false, true, false,
-             * true, false(i=8), false(i=9), true, false, ... false, true(i=16), true(i=17), false, true,
-             * This means even numbers are white squares and odd numbers are black squares. But the sequence  is
-             * changes every 8th square so if row finishes with white square, next row will start with white square
-             * again or if row finishes with black square, next row will start with black square again and sequence
-             * will continue.
-             *
-             * Another example: finishedColor(1)-oppositeColor(2)-finishedColor(3)-oppositeColor(4)-...-finishedColor(8)-finishedColor(9)
-             * -oppositeColor(10)-finishedColor-oppositeColor-...-oppositeColor(16)-oppositeColor(17)-finishedColor(18)-oppositeColor-...
-             */
             square.className += ((Math.floor((i - 1) / 8) + i) % 2 === 0) ? " square--black" : " square--white";
-
-            /**
-             * Set the column letters of the board. (a, b, c, d, e, f, g, h)
-             * 65 > i > 56 means if the square is in the first row or bottom of the board.
-             * Because top of the board is 8th row and bottom of the board is 1st row.
-             * Also, letters calculated by ASCII codes. 97 is the ASCII code of "a".
-             * i % 8 finds the column number of the square. If the square is in the 1st column, i % 8 will be 1.
-             * If the square is in the 2nd column, i % 8 will be 2. If the square is in the 8th column, i % 8 will be 0
-             * not 8. Because 8 % 8 is 0. So, we that's why we use "|| 8" in the code. This means if i % 8 is 0, use 8.
-             *
-             * @see For more information about ASCII codes: https://www.ascii-code.com/
-             */
+            
             if (i > 56 && i < 65)
                 square.innerHTML += `<div class="column-coordinate">${String.fromCharCode(96 + (i % 8 || 8))}</div>`;
 
-            /**
-             * Set the row numbers of the board. (1, 2, 3, 4, 5, 6, 7, 8)
-             * i % 8 == 0 means if the square is in the 8th column or right of the board.
-             * Because left of the board is 1st column and right of the board is 8th column and
-             * we want to show the row numbers in the right of the board. Also, we use Math.floor
-             * function to round the number to the nearest integer. If i is 1, 1 / 8 = 0.125.
-             * Math.floor(0.125) = 0. So, we use 9 - Math.floor(i / 8) to show the row numbers
-             * from 8 to 1. If i is 56, 56 / 8 = 7. 9 - Math.floor(7) = 2. So, we show the row
-             * number 2 in the 56th square.
-             */
             if (i % 8 == 0)
                 square.innerHTML += `<div class="row-coordinate">${9 - Math.floor(i / 8)}</div>`;
 
+            this.setSquareClickMode(square, SquareClickMode.Disable);
             board.appendChild(square);
         }
     }
@@ -309,7 +275,6 @@ export class ChessBoard {
         
         let mouseUpTriggered: boolean = false;
         const isTouchDevice = this._isTouchDevice();
-        //const isTouchDevice = false;
         const squares = this.getAllSquares();
         squares.forEach(square => {
             square.addEventListener(isTouchDevice ? "touchstart" :  "mousedown", (e: MouseEvent | TouchEvent) => {
@@ -514,6 +479,7 @@ export class ChessBoard {
      * Drag the cloned piece with the cursor.
      */
     private dragPiece(moveEvent: MouseEvent | TouchEvent): void {
+        moveEvent.preventDefault();
         const clonedPiece = document.querySelector(".piece.cloned") as HTMLElement;
         if (!clonedPiece) return;
 

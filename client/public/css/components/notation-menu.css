@@ -55,6 +55,11 @@
             }
         }
 
+        &:nth-child(odd) td:has(span){
+            background-color: var(--accent-color);
+            border:1px solid var(--accent-color);
+        }
+
         & td:has(span){
             background-color: var(--component-color);
             border:1px solid var(--border-color);
