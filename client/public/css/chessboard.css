@@ -54,21 +54,24 @@
     --chessboard-promotion-option-outline-color: #B7B7B7;
     --chessboard-promotion-option-shadow-color: #000;
 
-    /* White Pieces */
-    --chessboard-white-pawn-image: url("../assets/pieces/white_pawn.svg");
-    --chessboard-white-rook-image: url("../assets/pieces/white_rook.svg");
-    --chessboard-white-knight-image: url("../assets/pieces/white_knight.svg");
-    --chessboard-white-bishop-image: url("../assets/pieces/white_bishop.svg");
-    --chessboard-white-queen-image: url("../assets/pieces/white_queen.svg");
-    --chessboard-white-king-image: url("../assets/pieces/white_king.svg");
+    /* White Pieces - For Desktop */
+    --chessboard-white-pawn-image: url("../assets/pieces/desktop/white_pawn.png");
+    --chessboard-white-rook-image: url("../assets/pieces/desktop/white_rook.png");
+    --chessboard-white-knight-image: url("../assets/pieces/desktop/white_knight.png");
+    --chessboard-white-bishop-image: url("../assets/pieces/desktop/white_bishop.png");
+    --chessboard-white-queen-image: url("../assets/pieces/desktop/white_queen.png");
+    --chessboard-white-king-image: url("../assets/pieces/desktop/white_king.png");
 
-    /* Black Pieces */
-    --chessboard-black-pawn-image: url("../assets/pieces/black_pawn.svg");
-    --chessboard-black-rook-image: url("../assets/pieces/black_rook.svg");
-    --chessboard-black-knight-image: url("../assets/pieces/black_knight.svg");
-    --chessboard-black-bishop-image: url("../assets/pieces/black_bishop.svg");
-    --chessboard-black-queen-image: url("../assets/pieces/black_queen.svg");
-    --chessboard-black-king-image: url("../assets/pieces/black_king.svg");
+    /* Black Pieces - For Desktop */
+    --chessboard-black-pawn-image: url("../assets/pieces/desktop/black_pawn.png");
+    --chessboard-black-rook-image: url("../assets/pieces/desktop/black_rook.png");
+    --chessboard-black-knight-image: url("../assets/pieces/desktop/black_knight.png");
+    --chessboard-black-bishop-image: url("../assets/pieces/desktop/black_bishop.png");
+    --chessboard-black-queen-image: url("../assets/pieces/desktop/black_queen.png");
+    --chessboard-black-king-image: url("../assets/pieces/desktop/black_king.png");
+
+    /* Background */
+    --chessboard-noise-effect-image: url("../assets/images/chessboard-noise-effect.png");
 
     /* Z-Index, avoid changing */
     --chessboard-piece-z-index: 5;
@@ -80,6 +83,26 @@
     --chessboard-move-from-top: 0;
     --chessboard-move-to-left: 0;
     --chessboard-move-to-top: 0;
+}
+
+@media only screen and (hover: none) and (pointer: coarse){
+    :root{
+        /* White Pieces - For Mobile */
+        --chessboard-white-pawn-image: url("../assets/pieces/mobile/white_pawn.png");
+        --chessboard-white-rook-image: url("../assets/pieces/mobile/white_rook.png");
+        --chessboard-white-knight-image: url("../assets/pieces/mobile/white_knight.png");
+        --chessboard-white-bishop-image: url("../assets/pieces/mobile/white_bishop.png");
+        --chessboard-white-queen-image: url("../assets/pieces/mobile/white_queen.png");
+        --chessboard-white-king-image: url("../assets/pieces/mobile/white_king.png");
+
+        /* Black Pieces - For Mobile */
+        --chessboard-black-pawn-image: url("../assets/pieces/mobile/black_pawn.png");
+        --chessboard-black-rook-image: url("../assets/pieces/mobile/black_rook.png");
+        --chessboard-black-knight-image: url("../assets/pieces/mobile/black_knight.png");
+        --chessboard-black-bishop-image: url("../assets/pieces/mobile/black_bishop.png");
+        --chessboard-black-queen-image: url("../assets/pieces/mobile/black_queen.png");
+        --chessboard-black-king-image: url("../assets/pieces/mobile/black_king.png");
+    }
 }
 
 /* -------------- Chessboard -------------- */
@@ -109,7 +132,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: url("../assets/images/chessboard-noise-effect.png");
+    background-image: var(--chessboard-noise-effect-image);
     opacity: 0.4;
     filter: brightness(0);
     pointer-events: none;
