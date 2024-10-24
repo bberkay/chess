@@ -340,7 +340,7 @@ export class Platform{
     private handleBoardEditorOperation(menuOperation: BoardEditorOperation, menuItem: HTMLElement): void
     {   
 
-        // TODO: Multiple pre move.
+
 
         switch(menuOperation){
             case BoardEditorOperation.Enable:

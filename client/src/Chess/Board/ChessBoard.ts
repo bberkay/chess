@@ -54,10 +54,10 @@ export class ChessBoard {
     private _disabledPreSelectionColor: Color | null = null;
     private _lockedSquaresModes: { [squareId: string]: SquareClickMode } = {};
     private _isBoardMoveEventBound: boolean = false;
-    private _pieceAnimationSpeeds: Record<PieceAnimationSpeed, number> = {
-        [PieceAnimationSpeed.Slow]: 0.25,
-        [PieceAnimationSpeed.Medium]: 0.15,
-        [PieceAnimationSpeed.Fast]: 0.05
+    private _pieceAnimationSpeeds: Record<PieceAnimationSpeed, string> = {
+        [PieceAnimationSpeed.Slow]: "0.25s",
+        [PieceAnimationSpeed.Medium]: "0.15s",
+        [PieceAnimationSpeed.Fast]: "0.05s"
     }
 
     private readonly _bindDragPiece: (e: MouseEvent | TouchEvent) => void = this.dragPiece.bind(this);
@@ -679,7 +679,7 @@ export class ChessBoard {
             document.body.appendChild(piece);
             piece.style.top = `${pieceRect.top + window.scrollY}px`;
             piece.style.left = `${pieceRect.left + window.scrollX}px`;
-            piece.style.animation = `move ${this._pieceAnimationSpeeds[this.config.pieceAnimationSpeed]}s ease-in-out forwards`;
+            piece.style.animation = `move ${this._pieceAnimationSpeeds[this.config.pieceAnimationSpeed]} ease-in-out forwards`;
             piece.style.setProperty("--chessboard-move-from-left", `${pieceRect.left + window.scrollX}px`);
             piece.style.setProperty("--chessboard-move-from-top", `${pieceRect.top + window.scrollY}px`);
             piece.style.setProperty("--chessboard-move-to-left", `calc(${marginLeft}px + ${square.getBoundingClientRect().left + window.scrollX}px)`);
