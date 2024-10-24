@@ -149,20 +149,29 @@ export class ChessBoard {
         let board: HTMLDivElement = document.getElementById("chessboard") as HTMLDivElement;
         board.innerHTML = "";
 
-        for (let i = 1; i <= 64; i++) {
-            let square: HTMLDivElement = document.createElement("div");
-            this.setSquareId(square, i);
-            square.className = "square";
-            square.className += ((Math.floor((i - 1) / 8) + i) % 2 === 0) ? " square--black" : " square--white";
-            
-            if (i > 56 && i < 65)
-                square.innerHTML += `<div class="column-coordinate">${String.fromCharCode(96 + (i % 8 || 8))}</div>`;
+        for (let row = 0; row < 8; row++) {
+            for (let col = 0; col < 8; col++) {
+                const square = document.createElement('div');
+                this.setSquareId(square, row * 8 + col + 1);
+                square.className = `square square--${(row + col) % 2 === 0 ? 'white' : 'black'}`;
+                
+                if (col === 7) {
+                    const rowLabel = document.createElement('div');
+                    rowLabel.className = 'row-coordinate';
+                    rowLabel.textContent = (8 - row).toString();
+                    square.appendChild(rowLabel);
+                }
+                
+                if (row === 7) {
+                    const colLabel = document.createElement('div');
+                    colLabel.className = 'column-coordinate';
+                    colLabel.textContent = String.fromCharCode(97 + col);
+                    square.appendChild(colLabel);
+                }
 
-            if (i % 8 == 0)
-                square.innerHTML += `<div class="row-coordinate">${9 - Math.floor(i / 8)}</div>`;
-
-            this.setSquareClickMode(square, SquareClickMode.Disable);
-            board.appendChild(square);
+                this.setSquareClickMode(square, SquareClickMode.Disable);
+                board.appendChild(square);
+            }
         }
     }
 

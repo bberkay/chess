@@ -111,8 +111,8 @@
     height: calc(var(--chessboard-board-size) - 2px);
     min-width: calc(var(--chessboard-board-size) - 2px);
     min-height: calc(var(--chessboard-board-size) - 2px);
-    display:flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
     cursor: pointer!important;
     border: 2px solid var(--chessboard-border-color);
     -webkit-tap-highlight-color: transparent;
