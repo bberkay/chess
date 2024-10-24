@@ -23,15 +23,7 @@ export class AboutMenu extends NavbarComponent{
             <div id="about-body">
                 <h1>Chess Game</h1>
                 <p>Chess Game is a web application that allows you to play chess with your friends online.</p>
-                <p>It is built using the following technologies:</p>
-                <ul>
-                    <li>HTML</li>
-                    <li>CSS</li>
-                    <li>JavaScript</li>
-                    <li>Node.js</li>
-                    <li>Express</li>
-                    <li>Socket.IO</li>
-                </ul>
+                <p>Bun + TypeScript + Vite</p>
             </div>
         `);
         this.loadCSS("about-menu.css");
