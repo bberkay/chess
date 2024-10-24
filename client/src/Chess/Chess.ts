@@ -509,7 +509,6 @@ export class Chess {
             this.logger.save("Game updated in cache after move");
             LocalStorage.clear(LocalStorageKey.LastBoard);
             this.terminateBotIfExist();
-            this.board.playSound(SoundEffect.End);
             this.logger.save("Game over");
             document.dispatchEvent(new Event(ChessEvent.onGameOver));
             this._isGameOver = true;
