@@ -4,9 +4,9 @@ import { ABOUT_MENU_ID } from "@Platform/Consts";
 /**
  * This class provide a menu to show the about information.
  */
-export class AboutMenu extends NavbarComponent{
+export class AboutMenu extends NavbarComponent {
     public readonly id: string = ABOUT_MENU_ID;
-    
+
     /**
      * Constructor of the AboutMenu class.
      */
@@ -17,23 +17,24 @@ export class AboutMenu extends NavbarComponent{
     /**
      * This function renders the about menu.
      */
-    protected renderComponent(): void
-    {
-        this.loadHTML(ABOUT_MENU_ID, `
+    protected renderComponent(): void {
+        this.loadHTML(
+            ABOUT_MENU_ID,
+            `
             <div id="about-body">
                 <h1>Chess Game</h1>
                 <p>Chess Game is a web application that allows you to play chess with your friends online.</p>
                 <p>Bun + TypeScript + Vite</p>
             </div>
-        `);
+        `
+        );
         this.loadCSS("about-menu.css");
     }
 
     /**
      * Hide the about menu.
      */
-    public hide(): void
-    {
+    public hide(): void {
         const aboutMenu = document.getElementById(ABOUT_MENU_ID)!;
         aboutMenu.innerHTML = "";
         aboutMenu.classList.add("hidden");
@@ -42,8 +43,7 @@ export class AboutMenu extends NavbarComponent{
     /**
      * Show the about menu.
      */
-    public show(): void
-    {
+    public show(): void {
         document.getElementById(ABOUT_MENU_ID)!.classList.remove("hidden");
         this.renderComponent();
     }
@@ -51,8 +51,5 @@ export class AboutMenu extends NavbarComponent{
     /**
      * Handle the operation of the menu.
      */
-    public handleOperation(): void
-    {
-        
-    }
+    public handleOperation(): void {}
 }

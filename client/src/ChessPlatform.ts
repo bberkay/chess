@@ -183,9 +183,9 @@ export class ChessPlatform {
         ) as SocketOperation;
         if (
             operation != SocketOperation.CancelLobby &&
-            LocalStorage.isExist(LocalStorageKey.BoardEditorEnabled)
+            LocalStorage.isExist(LocalStorageKey.WasBoardEditorEnabled)
         )
-            LocalStorage.clear(LocalStorageKey.BoardEditorEnabled);
+            LocalStorage.clear(LocalStorageKey.WasBoardEditorEnabled);
 
         switch (operation) {
             case SocketOperation.CreateLobby:
@@ -362,7 +362,7 @@ export class ChessPlatform {
 
         const lastLobbyConnection = LocalStorage.load(
             LocalStorageKey.LastLobbyConnection
-        );
+        ) as WsCreatedData;
         this._reconnectLobby({
             lobbyId: lastLobbyConnection.lobbyId,
             token: lastLobbyConnection.player.token,

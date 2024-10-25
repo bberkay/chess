@@ -38,6 +38,14 @@ export enum BotColor{
 }
 
 /**
+ * Created bot's attributes.
+ */
+export type BotAttributes = {
+    color: Color,
+    difficulty: BotDifficulty
+}
+
+/**
  * Bot class that controls the chess engine's behavior.
  * This bot uses the Stockfish engine (via WebAssembly if available) to compute 
  * moves based on a specified difficulty.
@@ -47,9 +55,10 @@ export enum BotColor{
  * https://github.com/lichess-org/stockfish.js
  */
 export class Bot{
-    public readonly color: Color;
-    public readonly difficulty: BotDifficulty;
+    private readonly color: Color;
+    private readonly difficulty: BotDifficulty;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private stockfish: any;
     public readonly isWasmSupported: boolean = typeof WebAssembly === 'object' 
         && WebAssembly.validate(
@@ -67,8 +76,7 @@ export class Bot{
      * Initializes the bot with the given color and difficulty level.   
      * @param difficulty Difficulty level (1 for easy, 2 for medium, 3 for hard).
      */
-    constructor(color: BotColor | Color, difficulty: BotDifficulty)
-    {
+    constructor(color: BotColor | Color, difficulty: BotDifficulty){
         if(difficulty < BotDifficulty.Easy || difficulty > BotDifficulty.Hard)
             throw new Error("Difficulty must be between 1(easy), 2(medium), or 3(hard)");
 
@@ -80,6 +88,16 @@ export class Bot{
         
         this.color = color as Color;
         this.difficulty = difficulty * DIFFICULTY_MULTIPLIER;
+    }
+
+    /**
+     * Returns the bot's last calculated move.
+     */
+    public getAttributes(): BotAttributes {
+        return {
+            color: this.color,
+            difficulty: this.difficulty
+        };
     }
 
     /**

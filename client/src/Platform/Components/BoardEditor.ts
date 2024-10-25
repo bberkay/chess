@@ -15,10 +15,10 @@ enum BoardCreatorMode {
  * before executing the function that requires the editor mode to be enabled.
  */
 function isEditorModeEnable() {
-    return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+    return function (target: unknown, propertyKey: string, descriptor: PropertyDescriptor) {
       const originalMethod = descriptor.value;
   
-      descriptor.value = function (...args: any[]) {
+      descriptor.value = function (...args: unknown[]) {
         if (!BoardEditor.isEditorModeEnable()) {
           throw new Error("The editor mode is not enabled.");
         }
@@ -84,11 +84,11 @@ export class BoardEditor extends Component{
             if(color === Color.White) this.flip();
         }
 
-        if(LocalStorage.isExist(LocalStorageKey.BoardEditorEnabled))
+        if(LocalStorage.isExist(LocalStorageKey.IsBoardEditorEnabled))
             this.enableEditorMode();
 
-        if(LocalStorage.isExist(LocalStorageKey.LastSavedBoard))
-            this.saveFen(LocalStorage.load(LocalStorageKey.LastSavedBoard));
+        if(LocalStorage.isExist(LocalStorageKey.LastSavedFen))
+            this.saveFen(LocalStorage.load(LocalStorageKey.LastSavedFen));
     }
 
     /**
@@ -226,7 +226,7 @@ export class BoardEditor extends Component{
         this.enableBoardCreator();
         this.createEditableBoard();
         this.enableBoardObserver();
-        LocalStorage.save(LocalStorageKey.BoardEditorEnabled, true);
+        LocalStorage.save(LocalStorageKey.WasBoardEditorEnabled, true);
     }
 
     /**
@@ -621,7 +621,7 @@ export class BoardEditor extends Component{
      */
     public getSavedFen(): string
     {
-        return this._savedFenNotation || LocalStorage.load(LocalStorageKey.LastSavedBoard) || this.getShownFen();
+        return this._savedFenNotation || LocalStorage.load(LocalStorageKey.LastSavedFen) || this.getShownFen();
     }
 
     /**
@@ -632,7 +632,7 @@ export class BoardEditor extends Component{
     public saveFen(fen: string | null = null): void
     {
         this._savedFenNotation = fen ? fen : this.getShownFen();
-        LocalStorage.save(LocalStorageKey.LastSavedBoard, this._savedFenNotation);
+        LocalStorage.save(LocalStorageKey.LastSavedFen, this._savedFenNotation);
     }
 
     /**

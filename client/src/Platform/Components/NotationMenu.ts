@@ -1,4 +1,4 @@
-import { Color, GameStatus, PieceIcon, PieceType, Scores } from "@Chess/Types";
+import { Color, GameStatus, JsonNotation, PieceIcon, PieceType, Scores } from "@Chess/Types";
 import { Component } from "./Component.ts";
 import { Chess } from "@Chess/Chess.ts";
 import { BoardEditorOperation, NavigatorModalOperation, NotationMenuOperation } from "../Types";
@@ -36,8 +36,6 @@ export class NotationMenu extends Component {
     } = DEFAULT_CONFIG;
 
     private moveCount: number = 0;
-    private lastScore: Record<Color, number> = { [Color.White]: 0, [Color.Black]: 0 };
-    private lastTurnColor: Color = Color.White;
     private _activeIntervalId: number = -1;
     private _activeUtilityMenu: UtilityMenuType = UtilityMenuType.NewGame;
     private _prevActiveUtilityMenu: UtilityMenuType | null = null;
@@ -80,9 +78,6 @@ export class NotationMenu extends Component {
             this.hidePlayerCards();
 
         if(LocalStorage.isExist(LocalStorageKey.LastBoard)){
-            this.lastScore = LocalStorage.load(LocalStorageKey.LastBoard).scores;
-            this.lastTurnColor = LocalStorage.load(LocalStorageKey.LastBoard).turnColor;
-
             if(LocalStorage.isExist(LocalStorageKey.LastLobbyConnection))
                 this.displayOnlineGameUtilityMenu();
             else
@@ -90,8 +85,8 @@ export class NotationMenu extends Component {
         }
 
         if(LocalStorage.isExist(LocalStorageKey.LastBot)){
-            const {color, _} = LocalStorage.load(LocalStorageKey.LastBot);
-            if(color === Color.White) this.flip();
+            const { botColor } = LocalStorage.load(LocalStorageKey.LastBot);
+            if(botColor === Color.White) this.flip();
             this.displaySingleplayerGameUtilityMenu();
         }
     }
@@ -539,9 +534,6 @@ export class NotationMenu extends Component {
      * This function shows the score of the players top and bottom of the table.
      */
     private setScore(scores: Scores): void {
-        if (this.lastScore.White == scores.White.score && this.lastScore.Black == scores.Black.score)
-            return;
-
         /**
          * Piece Icons
          */
@@ -600,8 +592,6 @@ export class NotationMenu extends Component {
 
         addScore(whiteScore, Color.Black);
         addScore(blackScore, Color.White);
-
-        this.lastScore = { [Color.White]: whiteScore, [Color.Black]: blackScore };
     }
 
     /**
@@ -751,9 +741,10 @@ export class NotationMenu extends Component {
 
         this.changeIndicator();
         
+        const playerTimer = document.getElementById(`${this.chess.getTurnColor().toLowerCase()}-player-duration`)?.classList.contains("active");
         if (this.chess.getDurations() && (force || (
             moveCount >= 2 
-            && this.chess.getTurnColor() !== this.lastTurnColor 
+            && !playerTimer
             && [
                 GameStatus.WhiteInCheck,
                 GameStatus.BlackInCheck,
@@ -892,7 +883,7 @@ export class NotationMenu extends Component {
 
         // White
         let milliseconds = Math.round(this.chess.getPlayersRemainingTime()[Color.White]);
-        let [minutes, seconds, _] = this.formatRemainingTimeForTimer(milliseconds);
+        let [minutes, seconds] = this.formatRemainingTimeForTimer(milliseconds);
 
         const whitePlayerDuration = document.getElementById("white-player-duration")!;
         whitePlayerDuration.classList.remove("hidden");
@@ -900,7 +891,7 @@ export class NotationMenu extends Component {
 
         // Black
         milliseconds = Math.round(this.chess.getPlayersRemainingTime()[Color.Black]);
-        [minutes, seconds, _] = this.formatRemainingTimeForTimer(milliseconds);
+        [minutes, seconds] = this.formatRemainingTimeForTimer(milliseconds);
 
         const blackPlayerDuration = document.getElementById("black-player-duration")!;
         blackPlayerDuration.classList.remove("hidden");
@@ -922,6 +913,8 @@ export class NotationMenu extends Component {
      */
     private startPlayerTimer(color: Color): void {
         const playerTimer = document.getElementById(`${color.toLowerCase()}-player-duration`)!;
+        playerTimer.classList.add("active");
+
         const playerMinuteSecond = playerTimer.querySelector(".minute-second")!;
         const playerDecisecond = playerTimer.querySelector(".decisecond")!;
                 
@@ -966,6 +959,10 @@ export class NotationMenu extends Component {
      * only one timer/interval can be active at a time.
      */
     private stopOpponentTimerIfActive(): void {
+        document.querySelectorAll(".player-section .duration.active").forEach((playerTimer) => {
+            playerTimer.classList.remove("active");
+        });
+
         if (this._activeIntervalId !== -1)
             clearInterval(this._activeIntervalId);
     }
@@ -988,7 +985,6 @@ export class NotationMenu extends Component {
     public clear(): void {
         this.renderComponent();
         this.moveCount = 0;
-        this.lastScore = { [Color.White]: 0, [Color.Black]: 0 };
         this.displayNewGameUtilityMenu();
     }
 

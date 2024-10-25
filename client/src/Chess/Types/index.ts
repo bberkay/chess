@@ -171,13 +171,13 @@ export interface JsonNotation{
     turn: Color;
     fullMoveNumber: number;
     halfMoveClock: number;
-    gameStatus?: GameStatus;
     enPassant: Square | null;
     castling: Castling;
     scores?:  Scores;
-    durations?: Durations | null;
     algebraicNotation?: string[]; 
     moveHistory?: Move[];
+    durations?: Durations | null;
+    gameStatus?: GameStatus;
     boardHistory?: JsonNotation[];
 }
 

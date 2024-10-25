@@ -473,7 +473,7 @@ export class Platform {
         this.notationMenu.setTurnIndicator(this.chess.getTurnColor());
 
         this.logger.save(`Editor mode is disabled and board is now playable.`);
-        LocalStorage.clear(LocalStorageKey.BoardEditorEnabled);
+        LocalStorage.clear(LocalStorageKey.WasBoardEditorEnabled);
         document.dispatchEvent(new Event(PlatformEvent.onBoardCreated));
     }
 

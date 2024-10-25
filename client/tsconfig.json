@@ -24,6 +24,7 @@
     /* Paths */
     "baseUrl": ".",
     "paths": {
+      "@ChessPlatform/*": ["src/*"],
       "@Chess/*": ["src/Chess/*"],
       "@Platform/*": ["src/Platform/*"],
       "@Services/*": ["src/Services/*"]

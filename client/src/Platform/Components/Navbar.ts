@@ -65,11 +65,11 @@ export class Navbar extends Component {
      */
     private loadLocalStorage(): void {
         // Welcome message
-        if (LocalStorage.isExist(LocalStorageKey.WelcomeShown))
+        if (LocalStorage.isExist(LocalStorageKey.WasWelcomeModalShown))
             this.showComponent(this.getComponentByType(LogConsole));
         else {
             this.showComponent(this.getComponentByType(AboutMenu));
-            LocalStorage.save(LocalStorageKey.WelcomeShown, true);
+            LocalStorage.save(LocalStorageKey.WasWelcomeModalShown, true);
         }
     }
 

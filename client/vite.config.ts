@@ -10,6 +10,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
+      '@ChessPlatform': path.resolve(__dirname, 'src'),
       '@Chess': path.resolve(__dirname, 'src/Chess'),
       '@Platform': path.resolve(__dirname, 'src/Platform'),
       '@Services': path.resolve(__dirname, 'src/Services'),

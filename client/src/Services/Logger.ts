@@ -76,6 +76,7 @@ export class Logger{
             if (this.isWindowAndDomAvailable && typeof window !== "undefined" && document) 
                 document.dispatchEvent(new Event(LoggerEvent.LogAdded));
         }catch(e){
+            console.error("The window or document might not be available: ", e);
             this.isWindowAndDomAvailable = false;
         }
     }

@@ -72,11 +72,11 @@ export class Chess {
         // If there is a game in the cache, load it.
         if (LocalStorage.isExist(LocalStorageKey.LastBoard)) {
             this.logger.save("Game loading from cache...");
-            this.createGame(LocalStorage.load(LocalStorageKey.LastBoard));
+            this.createGame(LocalStorage.load(LocalStorageKey.LastBoard) as JsonNotation);
             if (LocalStorage.isExist(LocalStorageKey.LastBot)) {
-                const { color, difficulty } = LocalStorage.load(LocalStorageKey.LastBot);
-                this.addBotToCurrentGame(color, difficulty);
-                this.logger.save(`Bot[${JSON.stringify({ color, difficulty })}] found in cache and added to the game`);
+                const { botColor, botDifficulty } = LocalStorage.load(LocalStorageKey.LastBot);
+                this.addBotToCurrentGame(botColor, botDifficulty);
+                this.logger.save(`Bot[${JSON.stringify({ botColor, botDifficulty })}] found in cache and added to the game`);
             }
             this.logger.save("Game loaded from cache");
         } else {
@@ -155,7 +155,7 @@ export class Chess {
             this.playBotIfExist();
         }
 
-        LocalStorage.save(LocalStorageKey.LastBot, { color: this._bot.color, difficulty: botDifficulty });
+        LocalStorage.save(LocalStorageKey.LastBot, { botColor: this._bot.color, botDifficulty: botDifficulty });
         document.dispatchEvent(new CustomEvent(ChessEvent.onBotAdded, { detail: { color: this._bot.color } }));
     }
 
