@@ -1,13 +1,28 @@
-import { PlatformEvent, BoardEditorOperation, NavigatorModalOperation } from "../Types";
+import {
+    PlatformEvent,
+    BoardEditorOperation,
+    NavigatorModalOperation,
+} from "../Types";
 import { Chess } from "@Chess/Chess";
-import { Color, GameStatus, JsonNotation, PieceType, Square, StartPosition } from "@Chess/Types";
+import {
+    Color,
+    GameStatus,
+    JsonNotation,
+    PieceType,
+    Square,
+    StartPosition,
+} from "@Chess/Types";
 import { Component } from "./Component";
 import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage";
-import { BOARD_EDITOR_ID, PIECE_CREATOR_ID, NOTATION_MENU_ID } from "@Platform/Consts";
+import {
+    BOARD_EDITOR_ID,
+    PIECE_CREATOR_ID,
+    NOTATION_MENU_ID,
+} from "@Platform/Consts";
 
 enum BoardCreatorMode {
     Custom = "custom-board-creator-mode",
-    Template = "template-board-creator-mode"
+    Template = "template-board-creator-mode",
 }
 
 /**
@@ -15,29 +30,34 @@ enum BoardCreatorMode {
  * before executing the function that requires the editor mode to be enabled.
  */
 function isEditorModeEnable() {
-    return function (target: unknown, propertyKey: string, descriptor: PropertyDescriptor) {
-      const originalMethod = descriptor.value;
-  
-      descriptor.value = function (...args: unknown[]) {
-        if (!BoardEditor.isEditorModeEnable()) {
-          throw new Error("The editor mode is not enabled.");
-        }
-        return originalMethod.apply(this, args);
-      };
+    return function (
+        target: unknown,
+        propertyKey: string,
+        descriptor: PropertyDescriptor
+    ) {
+        const originalMethod = descriptor.value;
+
+        descriptor.value = function (...args: unknown[]) {
+            if (!BoardEditor.isEditorModeEnable()) {
+                throw new Error("The editor mode is not enabled.");
+            }
+            return originalMethod.apply(this, args);
+        };
     };
 }
 
 /**
  * This class provide a form to create a new board.
  */
-export class BoardEditor extends Component{
+export class BoardEditor extends Component {
     public readonly id: string = BOARD_EDITOR_ID;
     private readonly chess: Chess;
 
     private static _isEditorModeEnable: boolean = false;
     private _savedFenNotation: string = StartPosition.Standard;
     private _boardEditorObserver: MutationObserver | null = null;
-    private _currentBoardCreatorMode: BoardCreatorMode = BoardCreatorMode.Custom
+    private _currentBoardCreatorMode: BoardCreatorMode =
+        BoardCreatorMode.Custom;
 
     /**
      * Constructor of the BoardCreator class.
@@ -53,55 +73,69 @@ export class BoardEditor extends Component{
     /**
      * This function renders the game creator.
      */
-    protected renderComponent(): void
-    {
-        this.loadHTML(BOARD_EDITOR_ID, `
+    protected renderComponent(): void {
+        this.loadHTML(
+            BOARD_EDITOR_ID,
+            `
           <div class = "board-creator ${BoardCreatorMode.Template}">
-              <div class = "border-inset"><button data-menu-operation="${BoardEditorOperation.ChangeBoardCreatorMode}" disabled="true">Custom</button></div>
+              <div class = "border-inset"><button data-menu-operation="${
+                  BoardEditorOperation.ChangeBoardCreatorMode
+              }" disabled="true">Custom</button></div>
               <select disabled="true">${this.getTemplateOptions()}</select>
-              <div class = "border-inset"><button data-menu-operation="${BoardEditorOperation.CreateBoard}" disabled="true">Load</button></div>
+              <div class = "border-inset"><button data-menu-operation="${
+                  BoardEditorOperation.CreateBoard
+              }" disabled="true">Load</button></div>
           </div>
           <div class = "board-creator ${BoardCreatorMode.Custom} visible">
-            <div class = "border-inset"><button data-menu-operation="${BoardEditorOperation.ChangeBoardCreatorMode}" disabled="true">Templates</button></div>
-            <input type="text" id="fen-notation" placeholder="FEN Notation" value = "${StartPosition.Standard}">
-            <div class = "border-inset"><button data-menu-operation="${BoardEditorOperation.CreateBoard}" disabled="true">Load</button></div>
+            <div class = "border-inset"><button data-menu-operation="${
+                BoardEditorOperation.ChangeBoardCreatorMode
+            }" disabled="true">Templates</button></div>
+            <input type="text" id="fen-notation" placeholder="FEN Notation" value = "${
+                StartPosition.Standard
+            }">
+            <div class = "border-inset"><button data-menu-operation="${
+                BoardEditorOperation.CreateBoard
+            }" disabled="true">Load</button></div>
           </div>
-        `);
+        `
+        );
 
-        document.getElementById("fen-notation")!.addEventListener("focus", (e) => {
-            (e.target as HTMLInputElement).select();
-        });
+        document
+            .getElementById("fen-notation")!
+            .addEventListener("focus", (e) => {
+                (e.target as HTMLInputElement).select();
+            });
     }
 
     /**
-     * This function checks the cache and loads the game from the cache 
+     * This function checks the cache and loads the game from the cache
      * if there is a game in the cache.
      */
-    private loadLocalStorage(): void
-    {
-        if(LocalStorage.isExist(LocalStorageKey.LastBot)){
-            const {color, _} = LocalStorage.load(LocalStorageKey.LastBot);
-            if(color === Color.White) this.flip();
+    private loadLocalStorage(): void {
+        if (LocalStorage.isExist(LocalStorageKey.LastBot)) {
+            const botAttributes = LocalStorage.load(LocalStorageKey.LastBot)!;
+            if (botAttributes.color === Color.White) this.flip();
         }
 
-        if(LocalStorage.isExist(LocalStorageKey.IsBoardEditorEnabled))
+        if (LocalStorage.isExist(LocalStorageKey.WasBoardEditorEnabled))
             this.enableEditorMode();
 
-        if(LocalStorage.isExist(LocalStorageKey.LastSavedFen))
+        if (LocalStorage.isExist(LocalStorageKey.LastSavedFen))
             this.saveFen(LocalStorage.load(LocalStorageKey.LastSavedFen));
     }
 
     /**
      * This function changes the notation menu to piece editor.
      */
-    private createPieceEditor(): void
-    {
-        if(!BoardEditor.isEditorModeEnable()) return;
+    private createPieceEditor(): void {
+        if (!BoardEditor.isEditorModeEnable()) return;
         document.getElementById(NOTATION_MENU_ID)!.style.display = "none";
         document.querySelector("#black-score-section")?.remove();
         document.querySelector("#white-score-section")?.remove();
 
-        this.loadHTML(PIECE_CREATOR_ID, `
+        this.loadHTML(
+            PIECE_CREATOR_ID,
+            `
             <table id = "piece-table">
                 <thead>
                     <tr>
@@ -198,15 +232,15 @@ export class BoardEditor extends Component{
                     <button class="menu-item" data-menu-operation="${NavigatorModalOperation.ShowGameCreator}" data-tooltip-text="Create New Game">+ New Game</button>
                 </div>
             </div>
-        `);
+        `
+        );
     }
 
     /**
      * This function removes the piece editor.
      */
     @isEditorModeEnable()
-    private removePieceEditor(): void
-    {
+    private removePieceEditor(): void {
         document.getElementById(PIECE_CREATOR_ID)!.innerHTML = "";
         document.getElementById(NOTATION_MENU_ID)!.style.display = "flex";
     }
@@ -214,14 +248,13 @@ export class BoardEditor extends Component{
     /**
      * This function enables the editor mode.
      */
-    public enableEditorMode(): void
-    {
-        if(BoardEditor.isEditorModeEnable()) return;
+    public enableEditorMode(): void {
+        if (BoardEditor.isEditorModeEnable()) return;
         BoardEditor._isEditorModeEnable = true;
 
-        if(this._currentBoardCreatorMode == BoardCreatorMode.Template) 
+        if (this._currentBoardCreatorMode == BoardCreatorMode.Template)
             this.changeBoardCreatorMode();
-        
+
         this.createPieceEditor();
         this.enableBoardCreator();
         this.createEditableBoard();
@@ -233,11 +266,10 @@ export class BoardEditor extends Component{
      * This function disables the editor mode.
      */
     @isEditorModeEnable()
-    public disableEditorMode(): void
-    {
-        if(this._currentBoardCreatorMode == BoardCreatorMode.Template) 
+    public disableEditorMode(): void {
+        if (this._currentBoardCreatorMode == BoardCreatorMode.Template)
             this.changeBoardCreatorMode();
-        
+
         this.disableBoardCreator();
         this.disableCursorMode();
         this.removePieceEditor();
@@ -250,34 +282,39 @@ export class BoardEditor extends Component{
     /**
      * Check if the board creator is enabled or not.
      */
-    public static isEditorModeEnable(): boolean
-    {
+    public static isEditorModeEnable(): boolean {
         return BoardEditor._isEditorModeEnable;
     }
 
     /**
-     * This function initiates the board observer for dispatching the event 
+     * This function initiates the board observer for dispatching the event
      * when there is a change in the board that made by the editor.
      */
     @isEditorModeEnable()
-    private enableBoardObserver(): void
-    {
-        this._boardEditorObserver = new MutationObserver((mutations: MutationRecord[]) => {
-            mutations.forEach((mutation: MutationRecord) => {
-                if((mutation.target as HTMLElement).hasAttribute("data-menu-operation")){
-                    document.dispatchEvent(new CustomEvent(
-                        PlatformEvent.onOperationMounted, 
-                        { detail: { selector: mutation.target } }
-                    ));
-                }
-            });
-        });
+    private enableBoardObserver(): void {
+        this._boardEditorObserver = new MutationObserver(
+            (mutations: MutationRecord[]) => {
+                mutations.forEach((mutation: MutationRecord) => {
+                    if (
+                        (mutation.target as HTMLElement).hasAttribute(
+                            "data-menu-operation"
+                        )
+                    ) {
+                        document.dispatchEvent(
+                            new CustomEvent(PlatformEvent.onOperationMounted, {
+                                detail: { selector: mutation.target },
+                            })
+                        );
+                    }
+                });
+            }
+        );
 
         this._boardEditorObserver.observe(
             document.getElementById("chessboard")!,
-            { 
-                childList: true, 
-                subtree: true, 
+            {
+                childList: true,
+                subtree: true,
                 attributes: true,
                 attributeFilter: ["data-menu-operation"],
                 characterData: false,
@@ -288,9 +325,8 @@ export class BoardEditor extends Component{
     /**
      * This function disables the board observer.
      */
-    private disableBoardObserver(): void
-    {
-        if(this._boardEditorObserver) this._boardEditorObserver.disconnect();
+    private disableBoardObserver(): void {
+        if (this._boardEditorObserver) this._boardEditorObserver.disconnect();
     }
 
     /**
@@ -298,125 +334,139 @@ export class BoardEditor extends Component{
      * for editing the board.
      */
     @isEditorModeEnable()
-    private addDragAndDropEventListeners(): void
-    {
+    private addDragAndDropEventListeners(): void {
         // Drag event listeners for the pieces.
-        (document.querySelectorAll(`
+        (
+            document.querySelectorAll(`
             #chessboard .piece, #${PIECE_CREATOR_ID} .piece
-        `) as NodeListOf<HTMLElement>)
-            .forEach((piece: HTMLElement) => {
-                this.makePieceSelectable(piece);
-            });
+        `) as NodeListOf<HTMLElement>
+        ).forEach((piece: HTMLElement) => {
+            this.makePieceSelectable(piece);
+        });
 
         // Drop event listeners for the squares.
-        this.chess.board.getAllSquares().forEach((squareElement: HTMLElement) => {
-            // For creating the piece on the board by clicking on the square.
-            squareElement.setAttribute("data-menu-operation", BoardEditorOperation.CreatePiece);
+        this.chess.board
+            .getAllSquares()
+            .forEach((squareElement: HTMLElement) => {
+                // For creating the piece on the board by clicking on the square.
+                squareElement.setAttribute(
+                    "data-menu-operation",
+                    BoardEditorOperation.CreatePiece
+                );
 
-            // For creating the piece on the board by dropping the piece on the square.
-            squareElement.addEventListener("dragover", (e: DragEvent) => { e.preventDefault() });
-            squareElement.addEventListener("drop", (e: DragEvent) => {
-                e.preventDefault();
-                this.createPiece(squareElement);
-                const selectedPieceOption: HTMLElement = document.querySelector(".selected-option") as HTMLElement;
-                if(selectedPieceOption.closest("#chessboard")) this.removePiece(selectedPieceOption);
+                // For creating the piece on the board by dropping the piece on the square.
+                squareElement.addEventListener("dragover", (e: DragEvent) => {
+                    e.preventDefault();
+                });
+                squareElement.addEventListener("drop", (e: DragEvent) => {
+                    e.preventDefault();
+                    this.createPiece(squareElement);
+                    const selectedPieceOption: HTMLElement =
+                        document.querySelector(
+                            ".selected-option"
+                        ) as HTMLElement;
+                    if (selectedPieceOption.closest("#chessboard"))
+                        this.removePiece(selectedPieceOption);
+                });
             });
-        });
     }
 
     /**
      * Get the template options for the board creator.
-     * The options are the starting positions of the 
+     * The options are the starting positions of the
      * chess board.
      */
-    private getTemplateOptions(): string
-    {
+    private getTemplateOptions(): string {
         let options: string = "";
-        for (const position in StartPosition) {
-          // @ts-ignore
-          options += `<option value="${StartPosition[position as string]}">${position}</option>`;
-        }
+        Object.entries(StartPosition).forEach(([key, value]) => {
+            options += `<option value="${value}">${key}</option>`;
+        });
         return options;
     }
 
     /**
      * This function if the current mode is custom mode or not.
      */
-    private isBoardCreatorModeCustom(): boolean
-    {
+    private isBoardCreatorModeCustom(): boolean {
         return this._currentBoardCreatorMode == BoardCreatorMode.Custom;
     }
 
     /**
      * This function enables the board creator.
      */
-    private enableBoardCreator(): void
-    {
-        (document.querySelectorAll(".board-creator button, .board-creator select") as NodeListOf<HTMLElement>)
-            .forEach((element: HTMLElement) => {
-                element.removeAttribute("disabled");
-            });
+    private enableBoardCreator(): void {
+        (
+            document.querySelectorAll(
+                ".board-creator button, .board-creator select"
+            ) as NodeListOf<HTMLElement>
+        ).forEach((element: HTMLElement) => {
+            element.removeAttribute("disabled");
+        });
     }
-    
+
     /**
      * This function disables the board creator.
      */
-    private disableBoardCreator(): void
-    {
-        (document.querySelectorAll(".board-creator button, .board-creator select") as NodeListOf<HTMLElement>)
-            .forEach((element: HTMLElement) => {
-                element.setAttribute("disabled", "true");
-            });
+    private disableBoardCreator(): void {
+        (
+            document.querySelectorAll(
+                ".board-creator button, .board-creator select"
+            ) as NodeListOf<HTMLElement>
+        ).forEach((element: HTMLElement) => {
+            element.setAttribute("disabled", "true");
+        });
     }
 
     /**
-     * This function changes the board creator form 
+     * This function changes the board creator form
      * mode from custom to template or vice versa.
      */
-    private changeBoardCreatorMode(): void
-    {
-        const boardCreator: HTMLElement = document.querySelector('.board-creator.visible') as HTMLElement;
+    private changeBoardCreatorMode(): void {
+        const boardCreator: HTMLElement = document.querySelector(
+            ".board-creator.visible"
+        ) as HTMLElement;
         boardCreator.classList.remove("visible");
-        this._currentBoardCreatorMode = this._currentBoardCreatorMode === BoardCreatorMode.Template 
-            ? BoardCreatorMode.Custom 
-            : BoardCreatorMode.Template;
-        document.querySelector(`.board-creator.${this._currentBoardCreatorMode}`)!.classList.add("visible");
+        this._currentBoardCreatorMode =
+            this._currentBoardCreatorMode === BoardCreatorMode.Template
+                ? BoardCreatorMode.Custom
+                : BoardCreatorMode.Template;
+        document
+            .querySelector(`.board-creator.${this._currentBoardCreatorMode}`)!
+            .classList.add("visible");
     }
 
     /**
-     * This function prepares the board editor for the 
-     * created game. Checks if the editor mode is 
+     * This function creates a new editable board
+     * for the board editor.
+     */
+    private createEditableBoard(
+        fenNotation: string | StartPosition | null = null
+    ): void {
+        fenNotation = fenNotation || this.getShownFen();
+        fenNotation = fenNotation.replace(" b ", " w ");
+        fenNotation = fenNotation.replace(/\d+ \d+$/, "0 1");
+        this.chess.createGame(fenNotation);
+        this._prepareBoardEditorForGame();
+    }
+
+    /**
+     * This function prepares the board editor for the
+     * created game. Checks if the editor mode is
      * enabled or not, adds the drag and drop event
      * listeners to the pieces and squares, and enables
      * the move piece cursor mode. If the current mode is
      * template mode, it changes the mode to custom mode.
      */
-    private _prepareBoardEditorForGame(): void
-    {
-        if(BoardEditor.isEditorModeEnable()){
+    private _prepareBoardEditorForGame(): void {
+        if (BoardEditor.isEditorModeEnable()) {
             this.chess.board.lock();
             this.chess.board.removeEffectFromAllSquares();
             this.addDragAndDropEventListeners();
             this.enableMovePieceCursorMode();
         }
-        
-        if(this._currentBoardCreatorMode == BoardCreatorMode.Template)
-          this.changeBoardCreatorMode();
-    }
 
-    /**
-     * This function creates a new editable board 
-     * for the board editor.
-     */
-    private createEditableBoard(
-        fenNotation: string | StartPosition | null = null
-    ): void
-    {
-        fenNotation = fenNotation || this.getShownFen();
-        fenNotation = fenNotation.replace(" b ", " w ");
-        fenNotation = fenNotation.replace(/\d+ \d+$/, "0 1");
-        this.chess.createGame();
-        this._prepareBoardEditorForGame();
+        if (this._currentBoardCreatorMode == BoardCreatorMode.Template)
+            this.changeBoardCreatorMode();
     }
 
     /**
@@ -424,8 +474,7 @@ export class BoardEditor extends Component{
      */
     public createBoard(
         fenNotation: string | StartPosition | JsonNotation | null = null
-    ): void
-    {
+    ): void {
         this.chess.createGame(fenNotation || this.getSavedFen());
         this._prepareBoardEditorForGame();
     }
@@ -434,52 +483,68 @@ export class BoardEditor extends Component{
      * This function creates the selected piece on the board.
      */
     @isEditorModeEnable()
-    private createPiece(selectedSquare: HTMLElement): void
-    {
-        const selectedPieceOption: HTMLElement = document.querySelector(".selected-option .piece") as HTMLElement;
-        if(selectedSquare.classList.contains("square") && selectedPieceOption !== null){
+    private createPiece(selectedSquare: HTMLElement): void {
+        const selectedPieceOption: HTMLElement = document.querySelector(
+            ".selected-option .piece"
+        ) as HTMLElement;
+        if (
+            selectedSquare.classList.contains("square") &&
+            selectedPieceOption !== null
+        ) {
             this.chess.createPiece(
                 selectedPieceOption.getAttribute("data-color") as Color,
                 selectedPieceOption.getAttribute("data-piece") as PieceType,
                 this.chess.board.getSquareId(selectedSquare) as Square
             );
-            this.makePieceSelectable(selectedSquare.querySelector(".piece") as HTMLElement);
+            this.makePieceSelectable(
+                selectedSquare.querySelector(".piece") as HTMLElement
+            );
         }
     }
-    
+
     /**
      * Clear the current selected option effects on the editor
      * and select the new tool.
      */
     @isEditorModeEnable()
-    private selectOption(selectedOption: HTMLElement): void
-    {
-        const currentSelectedOption: HTMLElement = document.querySelector(".selected-option") as HTMLElement;
-        if(currentSelectedOption) currentSelectedOption.classList.remove("selected-option");
-        
+    private selectOption(selectedOption: HTMLElement): void {
+        const currentSelectedOption: HTMLElement = document.querySelector(
+            ".selected-option"
+        ) as HTMLElement;
+        if (currentSelectedOption)
+            currentSelectedOption.classList.remove("selected-option");
+
         selectedOption.classList.add("selected-option");
 
-        (document.querySelectorAll("#chessboard, #chessboard .piece, #chessboard .square") as NodeListOf<HTMLElement>)
-            .forEach((piece: HTMLElement) => { piece.setAttribute("style", "cursor: pointer !important") });
+        (
+            document.querySelectorAll(
+                "#chessboard, #chessboard .piece, #chessboard .square"
+            ) as NodeListOf<HTMLElement>
+        ).forEach((piece: HTMLElement) => {
+            piece.setAttribute("style", "cursor: pointer !important");
+        });
     }
 
     /**
      * This function select the piece on the piece creator for creating a new piece.
      */
     @isEditorModeEnable()
-    private makePieceSelectable(piece: HTMLElement): void
-    {
-        if(piece.classList.contains("piece")){
-            piece.parentElement!.setAttribute("data-menu-operation", BoardEditorOperation.CreatePiece);
+    private makePieceSelectable(piece: HTMLElement): void {
+        if (piece.classList.contains("piece")) {
+            piece.parentElement!.setAttribute(
+                "data-menu-operation",
+                BoardEditorOperation.CreatePiece
+            );
             piece.setAttribute("draggable", "true");
-            piece.parentElement!.addEventListener("dragstart", () => { 
-                if(piece.parentElement) this.selectOption(piece.parentElement!);
+            piece.parentElement!.addEventListener("dragstart", () => {
+                if (piece.parentElement)
+                    this.selectOption(piece.parentElement!);
             });
             piece.parentElement!.addEventListener("dragend", (e: DragEvent) => {
-                if(e.dataTransfer!.dropEffect === "none")
+                if (e.dataTransfer!.dropEffect === "none")
                     this.removePiece(piece.parentElement!);
             });
-            if(!piece.closest("#chessboard")){
+            if (!piece.closest("#chessboard")) {
                 piece.parentElement!.addEventListener("click", () => {
                     this.selectOption(piece.parentElement!);
                 });
@@ -491,31 +556,32 @@ export class BoardEditor extends Component{
      * Remove the piece from the board.
      */
     @isEditorModeEnable()
-    private removePiece(squareElement: HTMLElement): void
-    {
-        if(!this.chess.board.getSquareId(squareElement)) 
-            return;
-        
-        this.chess.removePiece(this.chess.board.getSquareId(squareElement) as Square);
-        squareElement.setAttribute("data-menu-operation", BoardEditorOperation.CreatePiece);
+    private removePiece(squareElement: HTMLElement): void {
+        if (!this.chess.board.getSquareId(squareElement)) return;
+
+        this.chess.removePiece(
+            this.chess.board.getSquareId(squareElement) as Square
+        );
+        squareElement.setAttribute(
+            "data-menu-operation",
+            BoardEditorOperation.CreatePiece
+        );
     }
 
     /**
      * This function clears the board.
      */
     @isEditorModeEnable()
-    private clearBoard(): void
-    {
+    private clearBoard(): void {
         this.createBoard(StartPosition.Empty);
     }
 
     /**
-     * This function create a new board with 
+     * This function create a new board with
      * the saved FEN notation.
      */
     @isEditorModeEnable()
-    private resetBoard(): void
-    {
+    private resetBoard(): void {
         this.createBoard(this.getSavedFen());
     }
 
@@ -523,63 +589,80 @@ export class BoardEditor extends Component{
      * This function enables the add piece cursor mode.
      */
     @isEditorModeEnable()
-    private enableMovePieceCursorMode(): void
-    {
+    private enableMovePieceCursorMode(): void {
         this.selectOption(
             document.querySelector(`
                 [data-menu-operation="${BoardEditorOperation.EnableMovePieceCursorMode}"]
             `) as HTMLElement
         );
 
-        this.chess.board.getAllSquares().forEach((squareElement: HTMLElement) => {
-            if(this.chess.board.getPieceElementOnSquare(squareElement))
-                squareElement.removeAttribute("data-menu-operation");
-        });
+        this.chess.board
+            .getAllSquares()
+            .forEach((squareElement: HTMLElement) => {
+                if (this.chess.board.getPieceElementOnSquare(squareElement))
+                    squareElement.removeAttribute("data-menu-operation");
+            });
     }
 
     /**
      * This function enables the remove piece cursor mode.
      */
     @isEditorModeEnable()
-    private enableRemovePieceCursorMode(): void
-    {
+    private enableRemovePieceCursorMode(): void {
         this.selectOption(
             document.querySelector(`
                 [data-menu-operation="${BoardEditorOperation.EnableRemovePieceCursorMode}"]
             `) as HTMLElement
         );
-        
-        this.chess.board.getAllSquares().forEach((squareElement: HTMLElement) => {
-            if(this.chess.board.getPieceElementOnSquare(squareElement)){
-                squareElement.setAttribute("data-menu-operation", BoardEditorOperation.RemovePiece);
-            }
-        });
 
-        (document.querySelectorAll("#chessboard, #chessboard .piece, #chessboard .square") as NodeListOf<HTMLElement>)
-            .forEach((piece: HTMLElement) => { piece.setAttribute("style", "cursor: no-drop !important") });
+        this.chess.board
+            .getAllSquares()
+            .forEach((squareElement: HTMLElement) => {
+                if (this.chess.board.getPieceElementOnSquare(squareElement)) {
+                    squareElement.setAttribute(
+                        "data-menu-operation",
+                        BoardEditorOperation.RemovePiece
+                    );
+                }
+            });
+
+        (
+            document.querySelectorAll(
+                "#chessboard, #chessboard .piece, #chessboard .square"
+            ) as NodeListOf<HTMLElement>
+        ).forEach((piece: HTMLElement) => {
+            piece.setAttribute("style", "cursor: no-drop !important");
+        });
     }
-    
+
     /**
      * This function disables the cursor mode.
      */
     @isEditorModeEnable()
-    private disableCursorMode(): void
-    {
-        this.chess.board.getAllSquares().forEach((squareElement: HTMLElement) => {
-            squareElement.removeAttribute("data-menu-operation");
-        });
+    private disableCursorMode(): void {
+        this.chess.board
+            .getAllSquares()
+            .forEach((squareElement: HTMLElement) => {
+                squareElement.removeAttribute("data-menu-operation");
+            });
 
-        (document.querySelectorAll("#chessboard, #chessboard .piece, #chessboard .square") as NodeListOf<HTMLElement>)
-            .forEach((piece: HTMLElement) => { piece.removeAttribute("style") });
+        (
+            document.querySelectorAll(
+                "#chessboard, #chessboard .piece, #chessboard .square"
+            ) as NodeListOf<HTMLElement>
+        ).forEach((piece: HTMLElement) => {
+            piece.removeAttribute("style");
+        });
     }
 
     /**
      * Enable the start game button.
      */
     @isEditorModeEnable()
-    private enableStartGameButton(): void
-    {
-        const startButton: HTMLElement = document.querySelector(`[data-menu-operation="${NavigatorModalOperation.ShowStartPlayingBoard}"]`) as HTMLElement;
+    private enableStartGameButton(): void {
+        const startButton: HTMLElement = document.querySelector(
+            `[data-menu-operation="${NavigatorModalOperation.ShowStartPlayingBoard}"]`
+        ) as HTMLElement;
         startButton.removeAttribute("disabled");
     }
 
@@ -587,31 +670,38 @@ export class BoardEditor extends Component{
      * Disable the start game button.
      */
     @isEditorModeEnable()
-    private disableStartGameButton(): void
-    {
-        const startButton: HTMLElement = document.querySelector(`[data-menu-operation="${NavigatorModalOperation.ShowStartPlayingBoard}"]`) as HTMLElement;
+    private disableStartGameButton(): void {
+        const startButton: HTMLElement = document.querySelector(
+            `[data-menu-operation="${NavigatorModalOperation.ShowStartPlayingBoard}"]`
+        ) as HTMLElement;
         startButton.setAttribute("disabled", "true");
     }
 
     /**
      * This function flips the board.
      */
-    public flip(): void
-    {
+    public flip(): void {
         this.chess.board.flip();
     }
 
     /**
      * Get the form value of the custom or template mode.
      */
-    public getShownFen(): string
-    {
+    public getShownFen(): string {
         let formValue: string;
-        
-        if(this._currentBoardCreatorMode == BoardCreatorMode.Custom)
-            formValue = (document.querySelector(`.${BoardCreatorMode.Custom} input`) as HTMLInputElement).value;
-        else if(this._currentBoardCreatorMode == BoardCreatorMode.Template)
-            formValue = (document.querySelector(`.${BoardCreatorMode.Template} select`) as HTMLSelectElement).value;
+
+        if (this._currentBoardCreatorMode == BoardCreatorMode.Custom)
+            formValue = (
+                document.querySelector(
+                    `.${BoardCreatorMode.Custom} input`
+                ) as HTMLInputElement
+            ).value;
+        else if (this._currentBoardCreatorMode == BoardCreatorMode.Template)
+            formValue = (
+                document.querySelector(
+                    `.${BoardCreatorMode.Template} select`
+                ) as HTMLSelectElement
+            ).value;
 
         return formValue!;
     }
@@ -619,18 +709,20 @@ export class BoardEditor extends Component{
     /**
      * Load the saved FEN form value.
      */
-    public getSavedFen(): string
-    {
-        return this._savedFenNotation || LocalStorage.load(LocalStorageKey.LastSavedFen) || this.getShownFen();
+    public getSavedFen(): string {
+        return (
+            this._savedFenNotation ||
+            LocalStorage.load(LocalStorageKey.LastSavedFen) ||
+            this.getShownFen()
+        );
     }
 
     /**
      * Save the FEN form value to use it later.
-     * @param {string} fen - The FEN notation to save if it is 
+     * @param {string} fen - The FEN notation to save if it is
      * not given then it saves the current FEN form value.
      */
-    public saveFen(fen: string | null = null): void
-    {
+    public saveFen(fen: string | null = null): void {
         this._savedFenNotation = fen ? fen : this.getShownFen();
         LocalStorage.save(LocalStorageKey.LastSavedFen, this._savedFenNotation);
     }
@@ -638,34 +730,41 @@ export class BoardEditor extends Component{
     /**
      * This function shows the FEN notation on the form.
      */
-    public updateFen(): void
-    {
-        if(!this.isBoardCreatorModeCustom()) this.changeBoardCreatorMode();
-        const inputElement = document.querySelector(`.${BoardCreatorMode.Custom} input`) as HTMLInputElement;
+    public updateFen(): void {
+        if (!this.isBoardCreatorModeCustom()) this.changeBoardCreatorMode();
+        const inputElement = document.querySelector(
+            `.${BoardCreatorMode.Custom} input`
+        ) as HTMLInputElement;
         inputElement.value = this.chess.getGameAsFenNotation();
-        
-        if(BoardEditor.isEditorModeEnable()){
-            if([GameStatus.ReadyToStart, GameStatus.InPlay].includes(this.chess.getGameStatus()))
+
+        if (BoardEditor.isEditorModeEnable()) {
+            if (
+                [GameStatus.ReadyToStart, GameStatus.InPlay].includes(
+                    this.chess.getGameStatus()
+                )
+            )
                 this.enableStartGameButton();
-            else 
-                this.disableStartGameButton();
+            else this.disableStartGameButton();
         }
     }
 
     /**
      * This function toggles the utility menu.
      */
-    private toggleUtilityMenu(): void
-    {
-        document.querySelector(`#${PIECE_CREATOR_ID} .utility-toggle-menu`)!.classList.toggle("visible");
+    private toggleUtilityMenu(): void {
+        document
+            .querySelector(`#${PIECE_CREATOR_ID} .utility-toggle-menu`)!
+            .classList.toggle("visible");
     }
 
     /**
      * This function handles the board creator operation.
      */
-    public handleOperation(operation: BoardEditorOperation, menuItem: HTMLElement): void
-    {
-        switch(operation){
+    public handleOperation(
+        operation: BoardEditorOperation,
+        menuItem: HTMLElement
+    ): void {
+        switch (operation) {
             case BoardEditorOperation.CreatePiece:
                 this.createPiece(menuItem);
                 break;
