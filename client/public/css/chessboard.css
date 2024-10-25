@@ -107,12 +107,11 @@
 
 /* -------------- Chessboard -------------- */
 #chessboard {
-    width: calc(var(--chessboard-board-size) - 2px);
-    height: calc(var(--chessboard-board-size) - 2px);
-    min-width: calc(var(--chessboard-board-size) - 2px);
-    min-height: calc(var(--chessboard-board-size) - 2px);
     display: grid;
     grid-template-columns: repeat(8, 1fr);
+    width:var(--chessboard-board-size);
+    height:var(--chessboard-board-size);
+    gap: 0;
     cursor: pointer!important;
     border: 2px solid var(--chessboard-border-color);
     -webkit-tap-highlight-color: transparent;
@@ -130,8 +129,8 @@
     position: absolute;
     top: 0;
     left: 0;
-    width: calc(var(--chessboard-board-size) - 2px);
-    height: calc(var(--chessboard-board-size) - 2px);
+    width: var(--chessboard-board-size);
+    height: var(--chessboard-board-size);
     background-image: var(--chessboard-noise-effect-image);
     opacity: 0.4;
     filter: brightness(0);
@@ -142,8 +141,8 @@
 #chessboard {
     & .square{
         position: relative;
-        width:calc((var(--chessboard-board-size) - 2px) / 8);
-        height:calc((var(--chessboard-board-size) - 2px) / 8);
+        width:calc((var(--chessboard-board-size)) / 8);
+        height:calc((var(--chessboard-board-size)) / 8);
         box-shadow: inset 0 0 0 1px var(--chessboard-square-shadow-color);
         text-align: center;
         margin:0!important;
