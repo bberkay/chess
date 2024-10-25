@@ -24,31 +24,34 @@ export enum PieceAnimationSpeed {
     Fast = "Fast"
 }
 
-export const DEFAULT_CONFIG = {
+export interface Config {
+    enableSoundEffects: boolean,
+    enablePreSelection: boolean,
+    showHighlights: boolean,
+    enableWinnerAnimation: boolean,
+    movementType: MovementType,
+    pieceAnimationSpeed: PieceAnimationSpeed
+}
+
+export const DEFAULT_CONFIG: Config = {
     enableSoundEffects: true,
     enablePreSelection: true,
     showHighlights: true,
     enableWinnerAnimation: true,
     movementType: MovementType.Both,
     pieceAnimationSpeed: PieceAnimationSpeed.Medium
-};
+}
 
 /**
  * This class provides users to create and manage a chess board(does not include any mechanic/logic).
  */
 export class ChessBoard {
+
     /**
      * Properties of the ChessBoard class.
      */
-    private config: {
-        enableSoundEffects: boolean,
-        enablePreSelection: boolean,
-        showHighlights: boolean,
-        enableWinnerAnimation: boolean,
-        movementType: MovementType,
-        pieceAnimationSpeed: PieceAnimationSpeed
-    } = DEFAULT_CONFIG;
-
+    private config: Config = DEFAULT_CONFIG;
+    
     private _turnColor: Color.White | Color.Black = Color.White;
     private _isMouseUpEventBound: boolean = false;
     private _disabledPreSelectionColor: Color | null = null;
@@ -138,7 +141,7 @@ export class ChessBoard {
 
         this.createPieces(typeof position == "string" ? Converter.fenToJson(position).board : position.board);
         this.logger.save("Pieces created on ChessBoard.");
-
+        
         this.playSound(SoundEffect.Start);
     }
 

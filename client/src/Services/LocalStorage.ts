@@ -2,6 +2,7 @@ import { BotAttributes } from "@Chess/Bot";
 import { JsonNotation } from "@Chess/Types";
 import { Theme } from "@Platform/Components/NavbarComponents/AppearanceMenu";
 import { WsCreatedData } from "@ChessPlatform/Types";
+import { Settings } from "@Platform/Components/NavbarComponents/SettingsMenu";
 
 /**
  * Enum for the local storage keys.
@@ -22,6 +23,7 @@ export enum LocalStorageKey {
 
 /**
  * Type mapping for local storage data types.
+ * TODO: Add comments for each key.
  */
 type LocalStorageData = {
     [LocalStorageKey.WasWelcomeModalShown]: boolean;
@@ -33,7 +35,7 @@ type LocalStorageData = {
     [LocalStorageKey.LastPlayerName]: string | null;
     [LocalStorageKey.CustomAppearance]: Record<string, string>;
     [LocalStorageKey.Theme]: Theme;
-    [LocalStorageKey.Settings]: Record<string, unknown>;
+    [LocalStorageKey.Settings]: Settings;
 };
 
 /**

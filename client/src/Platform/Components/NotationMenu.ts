@@ -11,15 +11,6 @@ import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage.ts";
 import { NOTATION_MENU_ID } from "@Platform/Consts";
 import { SoundEffect } from "@Chess/Board/Types/index.ts";
 
-export enum AlgebraicNotationStyle {
-    OnlyText = "OnlyText",
-    WithIcons = "WithIcons",
-}
-
-export const DEFAULT_CONFIG = {
-    algebraicNotationStyle: AlgebraicNotationStyle.WithIcons,
-};
-
 enum UtilityMenuType {
     OnlineGame = "online-game-utility-menu",
     SingleplayerGame = "singleplayer-game-utility-menu",
@@ -29,16 +20,28 @@ enum UtilityMenuType {
     Offer = "offer-utility-menu",
 }
 
+export enum AlgebraicNotationStyle {
+    OnlyText = "OnlyText",
+    WithIcons = "WithIcons",
+}
+
+export interface Config {
+    algebraicNotationStyle: AlgebraicNotationStyle;
+}
+
+export const DEFAULT_CONFIG: Config = {
+    algebraicNotationStyle: AlgebraicNotationStyle.WithIcons,
+};
+
 /**
  * This class provide a table to show the notation.
  */
 export class NotationMenu extends Component {
     public readonly id: string = NOTATION_MENU_ID;
     private readonly chess: Chess;
-    private config: {
-        algebraicNotationStyle: AlgebraicNotationStyle;
-    } = DEFAULT_CONFIG;
 
+    private config: Config = DEFAULT_CONFIG;
+    
     private moveCount: number = 0;
     private _activeIntervalId: number = -1;
     private _activeUtilityMenu: UtilityMenuType = UtilityMenuType.NewGame;
