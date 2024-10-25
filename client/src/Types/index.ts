@@ -212,11 +212,3 @@ export interface ReconnectLobbyReqParams{
     lobbyId: string;
     token: string;
 }
-
-/**
- * A union type representing all possible WebSocket 
- * request parameter types. This can be used when a 
- * function or method can accept any of these request 
- * types.
- */
-type WebSocketReqParams = CreateLobbyReqParams | JoinLobbyReqParams | ReconnectLobbyReqParams;
