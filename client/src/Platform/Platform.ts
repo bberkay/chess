@@ -577,7 +577,7 @@ export class Platform {
      * update the components.
      */
     private _playAgainSingleplayerGame(): void {
-        const botAttributes = this.chess.getLastCreatedBotAttributes()
+        const botAttributes = this.chess.getLastCreatedBotAttributes();
         this.preparePlatformForSingleplayerGame(botAttributes ?? false);
     }
 }

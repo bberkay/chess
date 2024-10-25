@@ -1,30 +1,44 @@
-import {Board} from "./Board.ts";
-import {Castling, Color, Durations, GameStatus, JsonNotation, Move, PieceType, Scores, Square} from "../../Types";
-import {MoveRoute, Piece, Route} from "../Types";
-import {RouteCalculator} from "../Move/Calculator/RouteCalculator.ts";
-import {Flattener} from "../Move/Utils/Flattener.ts";
-
+import { Board } from "./Board.ts";
+import {
+    Castling,
+    Color,
+    Durations,
+    GameStatus,
+    JsonNotation,
+    Move,
+    PieceType,
+    Scores,
+    Square,
+} from "../../Types";
+import { MoveRoute, Piece, Route } from "../Types";
+import { RouteCalculator } from "../Move/Calculator/RouteCalculator.ts";
+import { Flattener } from "../Move/Utils/Flattener.ts";
 
 /**
  * This class provides the traversing and querying of the board.
  * Like, get all pieces, get piece on square, get square of piece, etc.
  */
-export class BoardQuerier extends Board{
-
+export class BoardQuerier extends Board {
     /**
      * Get current game
      */
-    public static getGame(): JsonNotation
-    {
+    public static getGame(): JsonNotation {
         /**
          * Get all pieces on the board and convert them to JsonNotation.
          * @see For more information about JsonNotation, please check the src/Chess/Types/index.ts
          */
-        const pieces: Array<{color: Color, type:PieceType, square:Square}> = [];
-        for(let square in this.getBoard()){
-            const piece: Piece | null = this.getPieceOnSquare(Number(square) as Square);
-            if(piece)
-                pieces.push({color: piece.getColor(), type: piece.getType(), square: Number(square) as Square});
+        const pieces: Array<{ color: Color; type: PieceType; square: Square }> =
+            [];
+        for (const square in this.getBoard()) {
+            const piece: Piece | null = this.getPieceOnSquare(
+                Number(square) as Square
+            );
+            if (piece)
+                pieces.push({
+                    color: piece.getColor(),
+                    type: piece.getType(),
+                    square: Number(square) as Square,
+                });
         }
 
         // Return the game as JsonNotation.
@@ -40,133 +54,121 @@ export class BoardQuerier extends Board{
             boardHistory: BoardQuerier.getBoardHistory(),
             durations: BoardQuerier.getDurations() || undefined,
             scores: BoardQuerier.getScores(),
-            gameStatus: BoardQuerier.getBoardStatus()
-        }
+            gameStatus: BoardQuerier.getBoardStatus(),
+        };
     }
-    
+
     /**
      * Get current board
      */
-    public static getBoard(): Record<Square, Piece | null>
-    {
+    public static getBoard(): Record<Square, Piece | null> {
         return JSON.parse(JSON.stringify(Board.currentBoard));
     }
 
     /**
      * Get current turn's color
      */
-    public static getTurnColor(): Color
-    {
+    public static getTurnColor(): Color {
         return Board.currentTurn;
     }
 
     /**
      * Get opponent's color
      */
-    public static getOpponentColor(): Color
-    {
+    public static getOpponentColor(): Color {
         return Board.currentTurn === Color.White ? Color.Black : Color.White;
     }
 
     /**
      * Get move count
      */
-    public static getMoveCount(): number
-    {
+    public static getMoveCount(): number {
         return Board.moveCount;
     }
 
     /**
      * Get en passant square
      */
-    public static getEnPassant(): Square | null
-    {
+    public static getEnPassant(): Square | null {
         return JSON.parse(JSON.stringify(Board.enPassant));
     }
 
     /**
      * Get castling availability
      */
-    public static getCastling(): Castling
-    {
+    public static getCastling(): Castling {
         return JSON.parse(JSON.stringify(Board.castling));
     }
 
     /**
      * Get half move count
      */
-    public static getHalfMoveCount(): number
-    {
+    public static getHalfMoveCount(): number {
         return Board.halfMoveCount;
     }
 
     /**
      * Get algebraic notation
      */
-    public static getAlgebraicNotation(): string[]
-    {
+    public static getAlgebraicNotation(): string[] {
         return Board.algebraicNotation || [];
     }
 
     /**
      * Get move history
      */
-    public static getMoveHistory(): Move[]
-    {
+    public static getMoveHistory(): Move[] {
         return JSON.parse(JSON.stringify(Board.moveHistory || []));
     }
 
     /**
      * Get board history
      */
-    public static getBoardHistory(): JsonNotation[]
-    {
+    public static getBoardHistory(): JsonNotation[] {
         return JSON.parse(JSON.stringify(Board.boardHistory || []));
     }
-    
+
     /**
      * Get durations
      */
-    public static getDurations(): Durations | null
-    {
+    public static getDurations(): Durations | null {
         return JSON.parse(JSON.stringify(Board.durations));
     }
 
     /**
      * Get scores
      */
-    public static getScores(): Scores
-    {
+    public static getScores(): Scores {
         return JSON.parse(JSON.stringify(Board.scores));
     }
 
     /**
      * Get game status
      */
-    public static getBoardStatus(): GameStatus
-    {
+    public static getBoardStatus(): GameStatus {
         return JSON.parse(JSON.stringify(Board.gameStatus));
     }
 
     /**
      * Get piece with the given square.
      */
-    public static getPieceOnSquare(square: Square): Piece | null
-    {
+    public static getPieceOnSquare(square: Square): Piece | null {
         return Board.currentBoard[square] ?? null;
     }
 
     /**
      * Get square of the given piece.
      */
-    public static getSquareOfPiece(piece: Piece): Square | null
-    {
-        for(let square in this.getBoard()){
+    public static getSquareOfPiece(piece: Piece): Square | null {
+        for (const square in this.getBoard()) {
             // Convert square to Square type.
-            let squareKey: Square = Number(square) as Square;
+            const squareKey: Square = Number(square) as Square;
 
             // If the square has a piece and the piece is the same with the given piece then return the square.
-            if(this.isSquareHasPiece(squareKey) && this.getPieceOnSquare(squareKey) === piece)
+            if (
+                this.isSquareHasPiece(squareKey) &&
+                this.getPieceOnSquare(squareKey) === piece
+            )
                 return squareKey;
         }
 
@@ -177,19 +179,21 @@ export class BoardQuerier extends Board{
      * Get all pieces by color and/or type.
      * @example getPiecesWithFilter(Color.White, [PieceType.Rook, PieceType.Bishop]); // Returns all white rooks and bishops.
      */
-    public static getPiecesWithFilter(targetColor: Color | null = null, targetTypes: Array<PieceType> | null = null): Array<Piece>
-    {
+    public static getPiecesWithFilter(
+        targetColor: Color | null = null,
+        targetTypes: Array<PieceType> | null = null
+    ): Array<Piece> {
         const pieces: Array<Piece> = [];
 
-        for(let square in this.getBoard()){
+        for (const square in this.getBoard()) {
             // Convert square to Square type.
-            let squareKey: Square = Number(square) as Square;
+            const squareKey: Square = Number(square) as Square;
 
             /**
              * If the square has a piece and the piece color and type is the same with the given color and type
              * then add the piece to the list.
              */
-            if(this.isSquareHasPiece(squareKey, targetColor, targetTypes))
+            if (this.isSquareHasPiece(squareKey, targetColor, targetTypes))
                 pieces.push(this.getPieceOnSquare(squareKey) as Piece);
         }
 
@@ -199,25 +203,28 @@ export class BoardQuerier extends Board{
     /**
      * Find player's color by given square
      */
-    public static getColorBySquare(square: Square): Color | null
-    {
-        return this.isSquareHasPiece(square) ? this.getPieceOnSquare(square)!.getColor() : null;
+    public static getColorBySquare(square: Square): Color | null {
+        return this.isSquareHasPiece(square)
+            ? this.getPieceOnSquare(square)!.getColor()
+            : null;
     }
 
     /**
      * Has the given square a piece?
      * @example hasPiece(Square.a1, Color.White, [PieceType.King, PieceType.Queen]); // Returns true if the square has a white king or queen.
      */
-    public static isSquareHasPiece(square: Square, specificColor: Color | null = null, specificTypes: Array<PieceType> | PieceType | null = null): boolean
-    {
+    public static isSquareHasPiece(
+        square: Square,
+        specificColor: Color | null = null,
+        specificTypes: Array<PieceType> | PieceType | null = null
+    ): boolean {
         const squareContent: Piece | null = this.getPieceOnSquare(square);
 
         // If there is no piece on the square
-        if(!squareContent)
-            return false;
+        if (!squareContent) return false;
 
         // If the piece color is not the same with the given color
-        if(specificColor && squareContent.getColor() != specificColor)
+        if (specificColor && squareContent.getColor() != specificColor)
             return false;
 
         /**
@@ -225,65 +232,96 @@ export class BoardQuerier extends Board{
          * - If the given type is an array then check if the piece type is in the array
          * - If the given type is not an array then check if the piece type is the same with the given type
          */
-        return !(specificTypes && (
-            (Array.isArray(specificTypes) && !specificTypes.includes(squareContent.getType()))
-            ||
-            (!Array.isArray(specificTypes) && squareContent.getType() != specificTypes)
-        ));
+        return !(
+            specificTypes &&
+            ((Array.isArray(specificTypes) &&
+                !specificTypes.includes(squareContent.getType())) ||
+                (!Array.isArray(specificTypes) &&
+                    squareContent.getType() != specificTypes))
+        );
     }
 
     /**
      * This function check the select is legal or not by checking the piece's color
      * and the color of the turn.
      */
-    public static isSquareSelectable(select: Square): boolean
-    {
-        return !(!this.getPieceOnSquare(select) || this.getPieceOnSquare(select)?.getColor() != this.getTurnColor());
+    public static isSquareSelectable(select: Square): boolean {
+        return !(
+            !this.getPieceOnSquare(select) ||
+            this.getPieceOnSquare(select)?.getColor() != this.getTurnColor()
+        );
     }
 
     /**
      * This function check the board is playable or not.
      */
-    public static isBoardPlayable(): boolean
-    {
+    public static isBoardPlayable(): boolean {
         /**
          * Check the status is it started or finished. Also,
          * check pieces on the board and if there is no pieces that can
          * finish the game then the game can't be started. If game is started then
          * set the status of the game to draw.
          */
-        if(
-            this.getBoardStatus() == GameStatus.WhiteVictory
-            || this.getBoardStatus() == GameStatus.BlackVictory
-            || this.getBoardStatus() == GameStatus.Draw
-            || this.getPiecesWithFilter(Color.White, [PieceType.King]).length != 1
-            || this.getPiecesWithFilter(Color.Black, [PieceType.King]).length != 1
-        ) return false;
-        else
-        {
+        if (
+            this.getBoardStatus() == GameStatus.WhiteVictory ||
+            this.getBoardStatus() == GameStatus.BlackVictory ||
+            this.getBoardStatus() == GameStatus.Draw ||
+            this.getPiecesWithFilter(Color.White, [PieceType.King]).length !=
+                1 ||
+            this.getPiecesWithFilter(Color.Black, [PieceType.King]).length != 1
+        )
+            return false;
+        else {
             /**
              * Check the pieces on the board and:
              * - If white king and black king are side by side then the game can't play anymore.
              * - If there is only one white king and one black king then the game can't play anymore.
              * - If there is only one white king and one black king and one white knight or bishop then the game can't play anymore.
              */
-            if(Flattener.flattenSquares(RouteCalculator.getKingRoute(
-                this.getSquareOfPiece(this.getPiecesWithFilter(Color.White, [PieceType.King])[0])!
-            )).includes(
-                this.getSquareOfPiece(this.getPiecesWithFilter(Color.Black, [PieceType.King])[0])!
-            ))
+            if (
+                Flattener.flattenSquares(
+                    RouteCalculator.getKingRoute(
+                        this.getSquareOfPiece(
+                            this.getPiecesWithFilter(Color.White, [
+                                PieceType.King,
+                            ])[0]
+                        )!
+                    )
+                ).includes(
+                    this.getSquareOfPiece(
+                        this.getPiecesWithFilter(Color.Black, [
+                            PieceType.King,
+                        ])[0]
+                    )!
+                )
+            )
                 return false;
 
             // If board has any pawn, rook or queen then the game can be finished.
-            for(const square in this.getBoard()){
-                const piece: Piece | null = this.getPieceOnSquare(Number(square) as Square);
-                if(piece && (piece.getType() == PieceType.Pawn || piece.getType() == PieceType.Rook || piece.getType() == PieceType.Queen))
+            for (const square in this.getBoard()) {
+                const piece: Piece | null = this.getPieceOnSquare(
+                    Number(square) as Square
+                );
+                if (
+                    piece &&
+                    (piece.getType() == PieceType.Pawn ||
+                        piece.getType() == PieceType.Rook ||
+                        piece.getType() == PieceType.Queen)
+                )
                     return true;
             }
 
             // If board has no queen, rook or pawn then check the king and bishop count.
-            return BoardQuerier.getPiecesWithFilter(Color.White, [PieceType.Knight, PieceType.Bishop]).length > 1
-                || BoardQuerier.getPiecesWithFilter(Color.Black, [PieceType.Knight, PieceType.Bishop]).length > 1;
+            return (
+                BoardQuerier.getPiecesWithFilter(Color.White, [
+                    PieceType.Knight,
+                    PieceType.Bishop,
+                ]).length > 1 ||
+                BoardQuerier.getPiecesWithFilter(Color.Black, [
+                    PieceType.Knight,
+                    PieceType.Bishop,
+                ]).length > 1
+            );
         }
     }
 
@@ -302,13 +340,22 @@ export class BoardQuerier extends Board{
      * 4. Get knight routes and check if any of them contains any enemy piece.
      * 5. If any of the routes not contains any enemy piece, then return false.
      */
-    public static isSquareThreatened(targetSquare: Square, by: Color | null = null, getThreatening: boolean = false): boolean | Array<Square>
-    {
+    public static isSquareThreatened(
+        targetSquare: Square,
+        by: Color | null = null,
+        getThreatening: boolean = false
+    ): boolean | Array<Square> {
         const squaresOfThreateningEnemies: Array<Square> = [];
 
         // Get the color of enemy player with the piece on the given square.
         const piece: Piece | null = this.getPieceOnSquare(targetSquare);
-        const enemyColor: Color = by ?? (piece ? (piece.getColor() == Color.White ? Color.Black : Color.White) : this.getOpponentColor());
+        const enemyColor: Color =
+            by ??
+            (piece
+                ? piece.getColor() == Color.White
+                    ? Color.Black
+                    : Color.White
+                : this.getOpponentColor());
 
         /**
          * Get all routes like queen, rook, bishop, knight except pawn.
@@ -319,7 +366,10 @@ export class BoardQuerier extends Board{
          *
          * @see src/Chess/Engine/Core/Move/Calculator/RouteCalculator.ts For more information.
          */
-        const allRoutes: Route = RouteCalculator.getAllRoutes(targetSquare, enemyColor == Color.White ? Color.Black : Color.White);
+        const allRoutes: Route = RouteCalculator.getAllRoutes(
+            targetSquare,
+            enemyColor == Color.White ? Color.Black : Color.White
+        );
 
         /**
          * Traverse all routes and check if the route contains any dangerous enemy piece.
@@ -328,34 +378,51 @@ export class BoardQuerier extends Board{
          *
          * @see src/Chess/Engine/Core/Move/Calculator/RouteCalculator.ts For more information.
          */
-        const diagonalRoutes: Array<MoveRoute> = [MoveRoute.TopLeft, MoveRoute.TopRight, MoveRoute.BottomLeft, MoveRoute.BottomRight];
+        const diagonalRoutes: Array<MoveRoute> = [
+            MoveRoute.TopLeft,
+            MoveRoute.TopRight,
+            MoveRoute.BottomLeft,
+            MoveRoute.BottomRight,
+        ];
 
         // Loop through all routes for all piece types except pawn threat.
-        for(const route in allRoutes){
+        for (const route in allRoutes) {
             /**
              * If the route is diagonal, then enemy types are bishop and queen.
              * Otherwise, if the route is horizontal or vertical, then enemy types
              * are rook and queen. If the route is L, then enemy type is knight.
              */
-            const enemyTypes: Array<PieceType> = diagonalRoutes.includes(route as MoveRoute) ? [PieceType.Bishop, PieceType.Queen]
-                : (route == MoveRoute.L ? [PieceType.Knight] : [PieceType.Rook, PieceType.Queen]);
+            const enemyTypes: Array<PieceType> = diagonalRoutes.includes(
+                route as MoveRoute
+            )
+                ? [PieceType.Bishop, PieceType.Queen]
+                : route == MoveRoute.L
+                ? [PieceType.Knight]
+                : [PieceType.Rook, PieceType.Queen];
 
             // Check if any squares at the route contain any enemy piece.
-            for(let square of allRoutes[route as MoveRoute]!){
-                if(this.isSquareHasPiece(square, enemyColor, enemyTypes)){
-                    if(getThreatening)
+            for (const square of allRoutes[route as MoveRoute]!) {
+                if (this.isSquareHasPiece(square, enemyColor, enemyTypes)) {
+                    if (getThreatening)
                         squaresOfThreateningEnemies.push(square);
-                    else
-                        return true;
+                    else return true;
                 }
             }
 
             // Check the king threat, king threat is calculated differently because king can only move one square.
-            if(route != MoveRoute.L && this.isSquareHasPiece(allRoutes[route as MoveRoute]![0]!, enemyColor, PieceType.King)){
-                if(getThreatening)
-                    squaresOfThreateningEnemies.push(allRoutes[route as MoveRoute]![0]!);
-                else
-                    return true;
+            if (
+                route != MoveRoute.L &&
+                this.isSquareHasPiece(
+                    allRoutes[route as MoveRoute]![0]!,
+                    enemyColor,
+                    PieceType.King
+                )
+            ) {
+                if (getThreatening)
+                    squaresOfThreateningEnemies.push(
+                        allRoutes[route as MoveRoute]![0]!
+                    );
+                else return true;
             }
         }
 
@@ -368,8 +435,10 @@ export class BoardQuerier extends Board{
          *
          * @see For more information about pawn please check the src/Chess/Engine/Core/Move/MoveEngine.ts
          */
-        const pawnRoutes: Array<MoveRoute> = enemyColor == Color.White ? [MoveRoute.BottomLeft, MoveRoute.BottomRight]
-            : [MoveRoute.TopLeft, MoveRoute.TopRight];
+        const pawnRoutes: Array<MoveRoute> =
+            enemyColor == Color.White
+                ? [MoveRoute.BottomLeft, MoveRoute.BottomRight]
+                : [MoveRoute.TopLeft, MoveRoute.TopRight];
 
         // Loop through all pawn routes for enemy pawn threat.
         for (const route of pawnRoutes) {
@@ -378,13 +447,10 @@ export class BoardQuerier extends Board{
 
             // Check if any squares at the route contain any enemy piece.
             if (this.isSquareHasPiece(square, enemyColor, PieceType.Pawn)) {
-                if (getThreatening)
-                    squaresOfThreateningEnemies.push(square);
-                else
-                    return true;
+                if (getThreatening) squaresOfThreateningEnemies.push(square);
+                else return true;
             }
         }
-
 
         // If getThreatening is true, then return squares of threatening enemies.
         // Otherwise, return false because if we are here, then there is no enemy threat.

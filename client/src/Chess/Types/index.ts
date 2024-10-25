@@ -3,9 +3,9 @@
  * @enum {string}
  * @see For more information, check src/Models/PieceModel.ts
  */
-export enum Color{
+export enum Color {
     White = "White",
-    Black = "Black"
+    Black = "Black",
 }
 
 /**
@@ -13,6 +13,7 @@ export enum Color{
  * @enum {number}
  * @see For more information, check src/Engine/Core/Board/BoardEngine.ts
  */
+// prettier-ignore
 export enum Square{
     a1 = 57, a2 = 49, a3 = 41, a4 = 33, a5 = 25, a6 = 17, a7 = 9, a8 = 1,
     b1 = 58, b2 = 50, b3 = 42, b4 = 34, b5 = 26, b6 = 18, b7 = 10, b8 = 2,
@@ -29,13 +30,13 @@ export enum Square{
  * @enum {string}
  * @see For more information, check src/Models/PieceModel.ts
  */
-export enum PieceType{
+export enum PieceType {
     Pawn = "Pawn",
     Knight = "Knight",
     Bishop = "Bishop",
     Rook = "Rook",
     Queen = "Queen",
-    King = "King"
+    King = "King",
 }
 
 /**
@@ -43,7 +44,7 @@ export enum PieceType{
  * @enum {string}
  * @see For more information, check src/Models/PieceModel.ts
  */
-export enum PieceIcon{
+export enum PieceIcon {
     WhitePawn = "P",
     WhiteKnight = "N",
     WhiteBishop = "B",
@@ -54,8 +55,8 @@ export enum PieceIcon{
     BlackKnight = "n",
     BlackBishop = "b",
     BlackRook = "r",
-    BlackQueen = "q", 
-    BlackKing = "k"
+    BlackQueen = "q",
+    BlackKing = "k",
 }
 
 /**
@@ -63,7 +64,7 @@ export enum PieceIcon{
  * @enum {string}
  * @see For more information, check src/Utils/Converter.ts
  */
-export enum PromotionPieceType{
+export enum PromotionPieceType {
     Knight = "n",
     Bishop = "b",
     Rook = "r",
@@ -75,9 +76,9 @@ export enum PromotionPieceType{
  * @enum {string}
  * @see src/Engine/ChessEngine.ts For more information.
  */
-export enum CastlingSide{
+export enum CastlingSide {
     Long = "Long",
-    Short = "Short"
+    Short = "Short",
 }
 
 /**
@@ -85,11 +86,11 @@ export enum CastlingSide{
  * @enum {string}
  * @see src/Engine/Helper/MoveExtender.ts For more information.
  */
-export enum CastlingType{
+export enum CastlingType {
     WhiteLong = "WhiteLong",
     WhiteShort = "WhiteShort",
     BlackLong = "BlackLong",
-    BlackShort = "BlackShort"
+    BlackShort = "BlackShort",
 }
 
 /**
@@ -110,22 +111,22 @@ export enum MoveType {
  * @enum {string}
  * @see src/Engine/Checker/MoveChecker.ts For more information.
  */
-export enum EnPassantDirection{
+export enum EnPassantDirection {
     Left = "Left",
-    Right = "Right"
+    Right = "Right",
 }
 
 /**
  * Moves type for the moves of the pieces.
  * @see For more information, check src/Chess.ts
  */
-export type Moves = {[key in MoveType]?: Array<Square>};
+export type Moves = { [key in MoveType]?: Array<Square> };
 
 /**
  * Duration type mostly for the initial duration of the players.
  * @see For more information, check src/Chess.ts
  */
-export type Duration = {remaining: number, increment: number};
+export type Duration = { remaining: number; increment: number };
 
 /**
  * Durations type for the durations of the players.
@@ -143,19 +144,19 @@ export type RemainingTimes = Record<Color, number>;
  * Scores type for the scores of the players.
  * @see For more information, check src/Chess.ts
  */
-export type Scores = Record<Color, {score: number, pieces: PieceType[]}>;
+export type Scores = Record<Color, { score: number; pieces: PieceType[] }>;
 
 /**
  * Move type for the player moves.
  * @see For more information, check src/Chess.ts
  */
-export type Move = {from: Square, to: Square, type?: MoveType};
+export type Move = { from: Square; to: Square; type?: MoveType };
 
 /**
  * Pieces type for the pieces of the board.
  * @see For more information, check src/Chess.ts
  */
-export type Pieces = {color: Color, type: PieceType, square: Square}[];
+export type Pieces = { color: Color; type: PieceType; square: Square }[];
 
 /**
  * Castling type for the castling status of the players.
@@ -166,15 +167,15 @@ export type Castling = Record<CastlingType, boolean>;
 /**
  * Json notation for is alternative notation for the FEN notation.
  */
-export interface JsonNotation{
+export interface JsonNotation {
     board: Pieces;
     turn: Color;
     fullMoveNumber: number;
     halfMoveClock: number;
     enPassant: Square | null;
     castling: Castling;
-    scores?:  Scores;
-    algebraicNotation?: string[]; 
+    scores?: Scores;
+    algebraicNotation?: string[];
     moveHistory?: Move[];
     durations?: Durations | null;
     gameStatus?: GameStatus;
@@ -185,7 +186,7 @@ export interface JsonNotation{
  * StartPosition enum for the start positions.
  * @see For more information, check src/Chess.ts
  */
-export enum StartPosition{
+export enum StartPosition {
     Standard = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
     Empty = "8/8/8/8/8/8/8/8 w - - 0 1",
     Promotion = "8/8/k3P3/8/8/8/8/4K3 w - - 0 1",
@@ -207,14 +208,14 @@ export enum StartPosition{
     EnPassantCheck = "8/p3pk2/8/8/5N2/8/3P4/4K3 w - - 0 1",
     Checkmate = "k7/8/4rp2/8/8/8/1R5K/1R6 w - - 0 1",
     AdjacentCheckmate = "rnbqkbnr/ppppp1pp/8/8/2B2Q2/8/PPPPPPPP/RNB1K1NR w KQkq - 0 1",
-    Stalemate = "k7/5R2/6p1/8/6P1/8/7K/1R6 w - - 0 1"
+    Stalemate = "k7/5R2/6p1/8/6P1/8/7K/1R6 w - - 0 1",
 }
 
 /**
  * StartPosition enum for the start positions.
  * @see For more information, check src/Chess.ts
  */
-export enum GameStatus{
+export enum GameStatus {
     NotReady = "NotReady",
     ReadyToStart = "ReadyToStart",
     InPlay = "InPlay",
@@ -288,7 +289,7 @@ export enum ChessEvent {
      * @param {Color} color - The color of the bot.
      */
     onBotAdded = "onBotAdded",
-    
+
     /**
      * Triggered when the game is over.
      * @Event

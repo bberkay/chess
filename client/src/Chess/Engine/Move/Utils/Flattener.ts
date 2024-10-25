@@ -11,8 +11,7 @@ export class Flattener {
      *          Returns: [3, 4, 5, 8, 9, 10]
      */
     static flattenSquares(targetObject: Route | Moves | null): Array<Square> {
-        if(!targetObject)
-            return [];
+        if (!targetObject) return [];
 
         return Object.values(targetObject).flat();
     }

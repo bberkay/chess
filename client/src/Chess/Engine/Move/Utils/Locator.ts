@@ -1,18 +1,16 @@
-import {Square} from "../../../Types";
-import {MoveRoute} from "../../Types";
+import { Square } from "../../../Types";
+import { MoveRoute } from "../../Types";
 
 /**
  * This class contains static methods that are used to calculate the row and column of a square.
  */
-export class Locator{
-
+export class Locator {
     /**
      * Calculates the row of a square
      * @example getRow(64), return 8
      * @example getRow(Square.g7), return 2
      */
-    static getRow(squareID: Square|number): number
-    {
+    static getRow(squareID: Square | number): number {
         return Math.ceil(squareID / 8);
     }
 
@@ -21,8 +19,7 @@ export class Locator{
      * @example getColumn(64), return 8
      * @example getColumn(Square.g7), return 7
      */
-    static getColumn(squareID: Square|number): number
-    {
+    static getColumn(squareID: Square | number): number {
         return squareID % 8 === 0 ? 8 : squareID % 8;
     }
 
@@ -31,10 +28,9 @@ export class Locator{
      * @example getOppositeRoute(MoveRoute.TopLeft), return MoveRoute.BottomRight
      * @example getOppositeRoute(MoveRoute.Top), return MoveRoute.Bottom
      */
-    static getOpposite(route: MoveRoute): MoveRoute
-    {
+    static getOpposite(route: MoveRoute): MoveRoute {
         // Init the opposite route scheme.
-        const oppositeRoutes: {[key in MoveRoute]?: MoveRoute} = {
+        const oppositeRoutes: { [key in MoveRoute]?: MoveRoute } = {
             [MoveRoute.Top]: MoveRoute.Bottom,
             [MoveRoute.TopRight]: MoveRoute.BottomLeft,
             [MoveRoute.Right]: MoveRoute.Left,
@@ -42,7 +38,7 @@ export class Locator{
             [MoveRoute.Bottom]: MoveRoute.Top,
             [MoveRoute.BottomLeft]: MoveRoute.TopRight,
             [MoveRoute.Left]: MoveRoute.Right,
-            [MoveRoute.TopLeft]: MoveRoute.BottomRight
+            [MoveRoute.TopLeft]: MoveRoute.BottomRight,
         };
 
         return oppositeRoutes[route]!;
@@ -55,26 +51,39 @@ export class Locator{
      * @example getRelative(Square.e4, Square.e6), return MoveRoute.Top
      *
      */
-    static getRelative(relative: Square, relativeTo: Square): MoveRoute | null
-    {
-        const relativeRoute = relativeTo > relative
-            ? {Vertical: MoveRoute.Top, Horizontal: MoveRoute.Left, LeftDiagonal: MoveRoute.TopRight, RightDiagonal: MoveRoute.TopLeft}
-            : {Vertical: MoveRoute.Bottom, Horizontal: MoveRoute.Right, LeftDiagonal: MoveRoute.BottomRight, RightDiagonal: MoveRoute.BottomLeft};
+    static getRelative(relative: Square, relativeTo: Square): MoveRoute | null {
+        const relativeRoute =
+            relativeTo > relative
+                ? {
+                      Vertical: MoveRoute.Top,
+                      Horizontal: MoveRoute.Left,
+                      LeftDiagonal: MoveRoute.TopRight,
+                      RightDiagonal: MoveRoute.TopLeft,
+                  }
+                : {
+                      Vertical: MoveRoute.Bottom,
+                      Horizontal: MoveRoute.Right,
+                      LeftDiagonal: MoveRoute.BottomRight,
+                      RightDiagonal: MoveRoute.BottomLeft,
+                  };
 
         const relativeRow = Locator.getRow(relative);
         const relativeToRow = Locator.getRow(relativeTo);
-        if(relativeRow == relativeToRow)
-            return relativeRoute.Horizontal;
+        if (relativeRow == relativeToRow) return relativeRoute.Horizontal;
 
         const relativeColumn = Locator.getColumn(relative);
         const relativeToColumn = Locator.getColumn(relativeTo);
-        if(relativeColumn == relativeToColumn)
-            return relativeRoute.Vertical;
-        
-        if(Math.abs(relativeRow - relativeToRow) != Math.abs(relativeColumn - relativeToColumn))
+        if (relativeColumn == relativeToColumn) return relativeRoute.Vertical;
+
+        if (
+            Math.abs(relativeRow - relativeToRow) !=
+            Math.abs(relativeColumn - relativeToColumn)
+        )
             return null;
 
-        return relativeColumn < relativeToColumn ? relativeRoute.RightDiagonal : relativeRoute.LeftDiagonal;
+        return relativeColumn < relativeToColumn
+            ? relativeRoute.RightDiagonal
+            : relativeRoute.LeftDiagonal;
     }
 
     /**
@@ -84,13 +93,19 @@ export class Locator{
      * @example getNext([], MoveRoute.Top, Square.e3), return Square.e4
      * @example getNext([], MoveRoute.Bottom, Square.e3), return Square.e2
      */
-    static getNext(squares: Square[], route: MoveRoute, startSquare: Square | null = null): Square
-    {
-        if(squares.length == 0 && !startSquare)
-            throw new Error("Squares and startSquare cannot be empty at the same time.");
+    static getNext(
+        squares: Square[],
+        route: MoveRoute,
+        startSquare: Square | null = null
+    ): Square {
+        if (squares.length == 0 && !startSquare)
+            throw new Error(
+                "Squares and startSquare cannot be empty at the same time."
+            );
 
         // If squares is empty, the define the start square as the last square of the given squares.
-        let lastSquare: Square = squares.length == 0 ? startSquare! : squares[squares.length - 1];
+        const lastSquare: Square =
+            squares.length == 0 ? startSquare! : squares[squares.length - 1];
 
         // Get the next square of the given route.
         switch (route) {

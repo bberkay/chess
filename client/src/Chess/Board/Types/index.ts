@@ -2,7 +2,7 @@
  * @description SquareEffect enum for the effects of the move/square.
  * @see src/Chess/Board/ChessBoard.ts For more information.
  */
-export enum SquareEffect{
+export enum SquareEffect {
     Selected = "selected",
     PreSelected = "preselected",
     Disabled = "disabled",
@@ -24,7 +24,7 @@ export enum SquareEffect{
  * @description SquareClickMode enum for the click modes of the chess board.
  * @see src/Chess/Board/ChessBoard.ts For more information.
  */
-export enum SquareClickMode{
+export enum SquareClickMode {
     PreSelect = "PreSelect",
     Select = "Select",
     PreSelected = "PreSelected",
@@ -33,7 +33,7 @@ export enum SquareClickMode{
     Play = "Play",
     PrePromote = "PrePromote", // Promote the pawn to queen.
     Promote = "Promote", // Promote the pawn to the selected piece.
-    PrePromotion = "PrePromotion", 
+    PrePromotion = "PrePromotion",
     Promotion = "Promotion", // Move pawn to the promotion square.
     PreCastling = "PreCastling",
     Castling = "Castling",
@@ -47,7 +47,7 @@ export enum SquareClickMode{
  * @description SoundEffect enum for the sound effects of the chess board.
  * @see src/Chess/Board/ChessBoard.ts For more information.
  */
-export enum SoundEffect{
+export enum SoundEffect {
     Start = "Start",
     Move = "Move",
     Capture = "Capture",

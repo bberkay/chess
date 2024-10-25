@@ -1,8 +1,8 @@
-import {Color, GameStatus, PieceType, Square} from "../../../Types";
-import {MoveRoute, Piece, Route} from "../../Types";
-import {BoardQuerier} from "../../Board/BoardQuerier.ts";
-import {Locator} from "../Utils/Locator.ts";
-import {RouteCalculator} from "../Calculator/RouteCalculator.ts";
+import { Color, GameStatus, PieceType, Square } from "../../../Types";
+import { MoveRoute, Piece, Route } from "../../Types";
+import { BoardQuerier } from "../../Board/BoardQuerier.ts";
+import { Locator } from "../Utils/Locator.ts";
+import { RouteCalculator } from "../Calculator/RouteCalculator.ts";
 
 /**
  * This class is responsible for filtering the moves of the
@@ -10,14 +10,17 @@ import {RouteCalculator} from "../Calculator/RouteCalculator.ts";
  *
  * @see src/Chess/Engine/Move/MoveEngine.ts
  */
-export class MoveFilterer{
+export class MoveFilterer {
     private threatsOfKing: Square[] = [];
 
     /**
      * Filter the moves of the piece for the king's safety.
      */
-    public filterForKingSafety(pieceSquare: Square, pieceColor: Color, moveRoute: Route): Route | null
-    {
+    public filterForKingSafety(
+        pieceSquare: Square,
+        pieceColor: Color,
+        moveRoute: Route
+    ): Route | null {
         return this.removeUnsacrificeMoves(
             pieceColor,
             this.removeUnprotectMoves(pieceSquare, pieceColor, moveRoute)!
@@ -29,48 +32,65 @@ export class MoveFilterer{
      * For example, if the king is in check, then remove the moves
      * that doesn't block or capture the enemy/threat.
      */
-    private removeUnsacrificeMoves(pieceColor: Color, moveRoute: Route): Route | null
-    {
-        if(!moveRoute)
-            return null;
+    private removeUnsacrificeMoves(
+        pieceColor: Color,
+        moveRoute: Route
+    ): Route | null {
+        if (!moveRoute) return null;
 
         // Get the threats of the king.
         this.threatsOfKing = this._findThreatsOfKing(pieceColor);
 
         // If king threatened by multiple enemies then king can't protect so mandatory moves calculation is unnecessary.
-        if(this.threatsOfKing.length > 1)
-            return null;
-        else if(this.threatsOfKing.length < 1)
-            return moveRoute;
+        if (this.threatsOfKing.length > 1) return null;
+        else if (this.threatsOfKing.length < 1) return moveRoute;
 
         // Find the route that threat the player's king.
-        const squareOfKing: Square = BoardQuerier.getSquareOfPiece(BoardQuerier.getPiecesWithFilter(pieceColor, [PieceType.King])[0] as Piece) as Square;
-        const isEnemyKnight: boolean = BoardQuerier.getPieceOnSquare(this.threatsOfKing[0])!.getType() == PieceType.Knight;
+        const squareOfKing: Square = BoardQuerier.getSquareOfPiece(
+            BoardQuerier.getPiecesWithFilter(pieceColor, [
+                PieceType.King,
+            ])[0] as Piece
+        ) as Square;
+        const isEnemyKnight: boolean =
+            BoardQuerier.getPieceOnSquare(this.threatsOfKing[0])!.getType() ==
+            PieceType.Knight;
 
         /**
          * If enemy is knight then check if the piece can capture the knight, if it is then return the only capture move.
          * If piece can't capture the knight then return null because knight can't be blocked.
          */
-        if(isEnemyKnight){
-            for(const route in moveRoute){
-                moveRoute[<MoveRoute>route] = !moveRoute[<MoveRoute>route]!.includes(this.threatsOfKing[0]) ? [] : [this.threatsOfKing[0]];
+        if (isEnemyKnight) {
+            for (const route in moveRoute) {
+                moveRoute[<MoveRoute>route] = !moveRoute[
+                    <MoveRoute>route
+                ]!.includes(this.threatsOfKing[0])
+                    ? []
+                    : [this.threatsOfKing[0]];
             }
 
             return moveRoute;
         }
 
         // If enemy is not knight then find the dangerous route of the threat because it can be blocked.
-        const dangerousRouteOfThreat: Square[] = RouteCalculator.getRouteBySquare(this.threatsOfKing[0])[Locator.getRelative(squareOfKing, this.threatsOfKing[0])!]!
+        const dangerousRouteOfThreat: Square[] =
+            RouteCalculator.getRouteBySquare(this.threatsOfKing[0])[
+                Locator.getRelative(squareOfKing, this.threatsOfKing[0])!
+            ]!;
 
         // If there is no square between king and enemy then there will be no block so return null.
-        if(!dangerousRouteOfThreat || dangerousRouteOfThreat.length < 1)
+        if (!dangerousRouteOfThreat || dangerousRouteOfThreat.length < 1)
             return null;
 
         // Delete the moves that doesn't block or capture the enemy/threat.
-        for(const route in moveRoute){
-            for(const square of moveRoute[<MoveRoute>route]!){
-                if(!dangerousRouteOfThreat.includes(square) && square != this.threatsOfKing[0])
-                    delete moveRoute[<MoveRoute>route]![moveRoute[<MoveRoute>route]!.indexOf(square)];
+        for (const route in moveRoute) {
+            for (const square of moveRoute[<MoveRoute>route]!) {
+                if (
+                    !dangerousRouteOfThreat.includes(square) &&
+                    square != this.threatsOfKing[0]
+                )
+                    delete moveRoute[<MoveRoute>route]![
+                        moveRoute[<MoveRoute>route]!.indexOf(square)
+                    ];
             }
         }
 
@@ -83,26 +103,25 @@ export class MoveFilterer{
      * front of the piece, then remove horizontal and diagonal routes
      * from the moves of the piece.
      */
-    private removeUnprotectMoves(pieceSquare: Square, pieceColor: Color, moveRoute: Route): Route | null
-    {
+    private removeUnprotectMoves(
+        pieceSquare: Square,
+        pieceColor: Color,
+        moveRoute: Route
+    ): Route | null {
         /**
          * Find the king and king's square and enemy's color
          * by the given piece color.
          */
-        const king: Piece | null = BoardQuerier.getPiecesWithFilter(pieceColor, [PieceType.King])[0];
-        if(!king) return moveRoute;
+        const king: Piece | null = BoardQuerier.getPiecesWithFilter(
+            pieceColor,
+            [PieceType.King]
+        )[0];
+        if (!king) return moveRoute;
 
         // Square of the king and enemy's color.
         const kingSquare: Square = BoardQuerier.getSquareOfPiece(king)!;
-        const enemyColor: Color = pieceColor == Color.White ? Color.Black : Color.White;
-
-        /**
-         * Find the dangerous route for the king. For example,
-         * if the king is in bottom left of the piece, then
-         * the dangerous route is top right(because piece can
-         * only protect king from one route at the same time).
-         */
-        let dangerousRoute: MoveRoute;
+        const enemyColor: Color =
+            pieceColor == Color.White ? Color.Black : Color.White;
 
         /**
          * For find the dangerous route, get relative route of the piece and king.
@@ -110,17 +129,21 @@ export class MoveFilterer{
          *
          * @see for more information about relative route src/Chess/Engine/Move/Utils/Locator.ts
          */
-        const relativeRoute: MoveRoute | null = Locator.getRelative(kingSquare, pieceSquare);
-        if(!relativeRoute)
+        const relativeRoute: MoveRoute | null = Locator.getRelative(
+            kingSquare,
+            pieceSquare
+        );
+        if (!relativeRoute)
             // If dangerous route is null, then return the moves/routes without filtering.
             return moveRoute;
 
         /**
-         * For find the dangerous route, get opposite route of relative route.
-         *
-         * @see for more information about opposite route src/Chess/Engine/Move/Utils/Locator.ts
+         * Find the dangerous route for the king. For example,
+         * if the king is in bottom left of the piece, then
+         * the dangerous route is top right(because piece can
+         * only protect king from one route at the same time).
          */
-        dangerousRoute = Locator.getOpposite(relativeRoute);
+        const dangerousRoute: MoveRoute = Locator.getOpposite(relativeRoute);
 
         /**
          * Find the dangerous piece types by the dangerous route. For example,
@@ -128,7 +151,12 @@ export class MoveFilterer{
          * bishop and queen. If the dangerous route is top, then dangerous piece
          * types are rook and queen.
          */
-        const dangerousPieces: Array<PieceType> = [MoveRoute.TopLeft, MoveRoute.TopRight, MoveRoute.BottomLeft, MoveRoute.BottomRight].includes(dangerousRoute)
+        const dangerousPieces: Array<PieceType> = [
+            MoveRoute.TopLeft,
+            MoveRoute.TopRight,
+            MoveRoute.BottomLeft,
+            MoveRoute.BottomRight,
+        ].includes(dangerousRoute)
             ? [PieceType.Bishop, PieceType.Queen]
             : [PieceType.Rook, PieceType.Queen];
 
@@ -139,35 +167,55 @@ export class MoveFilterer{
          * routes that doesn't protect the king from the dangerous pieces.
          */
         const allRoutes: Route = RouteCalculator.getAllRoutes(pieceSquare);
-        
+
         /**
-         * Is there a piece between king and piece or even king is behind 
+         * Is there a piece between king and piece or even king is behind
          * of the piece?
          */
-        if(!BoardQuerier.isSquareHasPiece(Locator.getNext(allRoutes[relativeRoute]!, relativeRoute, pieceSquare), pieceColor, [PieceType.King]))
+        if (
+            !BoardQuerier.isSquareHasPiece(
+                Locator.getNext(
+                    allRoutes[relativeRoute]!,
+                    relativeRoute,
+                    pieceSquare
+                ),
+                pieceColor,
+                [PieceType.King]
+            )
+        )
             return moveRoute;
 
-        for(const square of allRoutes[relativeRoute]!){
-            if(BoardQuerier.isSquareHasPiece(
-                square, 
-                enemyColor, 
-                [PieceType.Pawn, PieceType.Knight, PieceType.Bishop, PieceType.Rook, PieceType.Queen, PieceType.King]
-            ))
+        for (const square of allRoutes[relativeRoute]!) {
+            if (
+                BoardQuerier.isSquareHasPiece(square, enemyColor, [
+                    PieceType.Pawn,
+                    PieceType.Knight,
+                    PieceType.Bishop,
+                    PieceType.Rook,
+                    PieceType.Queen,
+                    PieceType.King,
+                ])
+            )
                 return moveRoute;
         }
 
         // If there is no piece between king and piece, and king is behind of the piece:
-        for(const square of allRoutes[dangerousRoute]!){
+        for (const square of allRoutes[dangerousRoute]!) {
             // If route has any dangerous piece, then(next step)
-            if(BoardQuerier.isSquareHasPiece(square, enemyColor, dangerousPieces)){
+            if (
+                BoardQuerier.isSquareHasPiece(
+                    square,
+                    enemyColor,
+                    dangerousPieces
+                )
+            ) {
                 /**
                  * If moveRoute has MoveRoute.L, then it means that we are in
                  * getKnightMoves() method. In this case, knight can't
                  * attack while protecting the king. So, we can return
                  * null.
                  */
-                if(moveRoute[MoveRoute.L])
-                    return null;
+                if (moveRoute[MoveRoute.L]) return null;
 
                 /**
                  * Remove the moves/routes that doesn't protect the king.
@@ -177,7 +225,7 @@ export class MoveFilterer{
                  * top and bottom routes from the moveRoutes.
                  */
                 for (const route in moveRoute) {
-                    if(route != dangerousRoute && route != relativeRoute)
+                    if (route != dangerousRoute && route != relativeRoute)
                         delete moveRoute[route as MoveRoute];
                 }
                 break;
@@ -195,15 +243,25 @@ export class MoveFilterer{
      * If move count is not changed after the last calculation,
      * then return the threats of king from the threatsOfKing
      */
-    private _findThreatsOfKing(kingColor: Color): Square[]
-    {
+    private _findThreatsOfKing(kingColor: Color): Square[] {
         // If game is not in check status then there is no threat to the king.
-        if(BoardQuerier.getBoardStatus() != GameStatus.BlackInCheck && BoardQuerier.getBoardStatus() != GameStatus.WhiteInCheck)
+        if (
+            BoardQuerier.getBoardStatus() != GameStatus.BlackInCheck &&
+            BoardQuerier.getBoardStatus() != GameStatus.WhiteInCheck
+        )
             return [];
 
         // Find the enemies that threat the king.
-        const squareOfKing: Square = BoardQuerier.getSquareOfPiece(BoardQuerier.getPiecesWithFilter(kingColor, [PieceType.King])[0] as Piece) as Square;
-        this.threatsOfKing = BoardQuerier.isSquareThreatened(squareOfKing, kingColor == Color.White ? Color.Black : Color.White, true) as Square[];
+        const squareOfKing: Square = BoardQuerier.getSquareOfPiece(
+            BoardQuerier.getPiecesWithFilter(kingColor, [
+                PieceType.King,
+            ])[0] as Piece
+        ) as Square;
+        this.threatsOfKing = BoardQuerier.isSquareThreatened(
+            squareOfKing,
+            kingColor == Color.White ? Color.Black : Color.White,
+            true
+        ) as Square[];
 
         // Return the threats of king.
         return this.threatsOfKing;

@@ -32,8 +32,12 @@ export class DirectionCalculator {
      * For more information, please check the class description.
      * @See src/Chess/Engine/Move/Calculator/DirectionCalculator.ts
      */
-    public static getDiagonalSquares(square: Square, stopColor: Color | null, distanceLimit: number | null = null, pieceSensitivity: boolean = true): Route
-    {
+    public static getDiagonalSquares(
+        square: Square,
+        stopColor: Color | null,
+        distanceLimit: number | null = null,
+        pieceSensitivity: boolean = true
+    ): Route {
         /**
          * Step is used to set the next square of the given square. For example, if step is -7 and
          * given square is Square.e5(29), then next square is Square.f4(22), next next square is
@@ -41,10 +45,34 @@ export class DirectionCalculator {
          * @see For more information, please check the Square enum.
          */
         return {
-            [MoveRoute.BottomRight]: this.traversePath(square, 9, distanceLimit, pieceSensitivity, stopColor),
-            [MoveRoute.TopRight]: this.traversePath(square, -7, distanceLimit, pieceSensitivity, stopColor),
-            [MoveRoute.TopLeft]: this.traversePath(square, -9, distanceLimit, pieceSensitivity, stopColor),
-            [MoveRoute.BottomLeft]: this.traversePath(square, 7, distanceLimit, pieceSensitivity, stopColor),
+            [MoveRoute.BottomRight]: this.traversePath(
+                square,
+                9,
+                distanceLimit,
+                pieceSensitivity,
+                stopColor
+            ),
+            [MoveRoute.TopRight]: this.traversePath(
+                square,
+                -7,
+                distanceLimit,
+                pieceSensitivity,
+                stopColor
+            ),
+            [MoveRoute.TopLeft]: this.traversePath(
+                square,
+                -9,
+                distanceLimit,
+                pieceSensitivity,
+                stopColor
+            ),
+            [MoveRoute.BottomLeft]: this.traversePath(
+                square,
+                7,
+                distanceLimit,
+                pieceSensitivity,
+                stopColor
+            ),
         };
     }
 
@@ -53,8 +81,12 @@ export class DirectionCalculator {
      * For more information, please check the class description.
      * @See src/Chess/Engine/Move/Calculator/DirectionCalculator.ts
      */
-    public static getHorizontalSquares(square: Square, stopColor: Color | null, distanceLimit: number | null = null, pieceSensitivity: boolean = true): Route
-    {
+    public static getHorizontalSquares(
+        square: Square,
+        stopColor: Color | null,
+        distanceLimit: number | null = null,
+        pieceSensitivity: boolean = true
+    ): Route {
         /**
          * Step is used to set the next square of the given square. For example, if step is 1 and
          * given square is Square.e5(29), then next square is Square.f5(30), next next square is
@@ -62,8 +94,20 @@ export class DirectionCalculator {
          * @see For more information, please check the Square enum.
          */
         return {
-            [MoveRoute.Right]: this.traversePath(square, 1, distanceLimit, pieceSensitivity, stopColor),
-            [MoveRoute.Left]: this.traversePath(square, -1, distanceLimit, pieceSensitivity, stopColor),
+            [MoveRoute.Right]: this.traversePath(
+                square,
+                1,
+                distanceLimit,
+                pieceSensitivity,
+                stopColor
+            ),
+            [MoveRoute.Left]: this.traversePath(
+                square,
+                -1,
+                distanceLimit,
+                pieceSensitivity,
+                stopColor
+            ),
         };
     }
 
@@ -72,8 +116,12 @@ export class DirectionCalculator {
      * For more information, please check the class description.
      * @See src/Chess/Engine/Move/Calculator/DirectionCalculator.ts
      */
-    public static getVerticalSquares(square: Square, stopColor: Color | null, distanceLimit: number | null = null, pieceSensitivity: boolean = true): Route
-    {
+    public static getVerticalSquares(
+        square: Square,
+        stopColor: Color | null,
+        distanceLimit: number | null = null,
+        pieceSensitivity: boolean = true
+    ): Route {
         /**
          * Step is used to set the next square of the given square. For example, if step is 8 and
          * given square is Square.e5(29), then next square is Square.e6(37), next next square is
@@ -81,8 +129,20 @@ export class DirectionCalculator {
          * @see For more information, please check the Square enum.
          */
         return {
-            [MoveRoute.Bottom]: this.traversePath(square, 8, distanceLimit, pieceSensitivity, stopColor),
-            [MoveRoute.Top]: this.traversePath(square, -8, distanceLimit, pieceSensitivity, stopColor),
+            [MoveRoute.Bottom]: this.traversePath(
+                square,
+                8,
+                distanceLimit,
+                pieceSensitivity,
+                stopColor
+            ),
+            [MoveRoute.Top]: this.traversePath(
+                square,
+                -8,
+                distanceLimit,
+                pieceSensitivity,
+                stopColor
+            ),
         };
     }
 
@@ -91,8 +151,13 @@ export class DirectionCalculator {
      * For more information, please check the class description.
      * @See src/Chess/Engine/Move/Calculator/DirectionCalculator.ts
      */
-    private static traversePath(square: Square, step: number, distanceLimit: number | null, pieceSensitivity: boolean, stopColor: Color | null): Array<Square>
-    {
+    private static traversePath(
+        square: Square,
+        step: number,
+        distanceLimit: number | null,
+        pieceSensitivity: boolean,
+        stopColor: Color | null
+    ): Array<Square> {
         // This variable is used to check if the edge is changed.
         // For more information, please check the isEdgeChanged function.
         let prevRow: number = Locator.getRow(square);
@@ -103,14 +168,18 @@ export class DirectionCalculator {
          * If the given square is Square.h3(48) and step is 1, then the next square
          * is Square.a2(49). In this case, the edge is changed.
          */
-        function isEdgeChanged(square: Square): boolean
-        {
+        function isEdgeChanged(square: Square): boolean {
             // Get the current row and column of the square.
-            let currentRow = Locator.getRow(square);
-            let currentColumn = Locator.getColumn(square);
+            const currentRow = Locator.getRow(square);
+            const currentColumn = Locator.getColumn(square);
 
             // If the previous row and column is far away from the current row and column, then the edge is changed.
-            if(prevRow > currentRow + 1 || prevRow < currentRow - 1 || prevColumn > currentColumn + 1 || prevColumn < currentColumn - 1)
+            if (
+                prevRow > currentRow + 1 ||
+                prevRow < currentRow - 1 ||
+                prevColumn > currentColumn + 1 ||
+                prevColumn < currentColumn - 1
+            )
                 return true;
 
             // Update the previous row and column.
@@ -121,11 +190,11 @@ export class DirectionCalculator {
         }
 
         // This array is used to store the squares.
-        let squares: Array<Square> = [];
+        const squares: Array<Square> = [];
 
         // This variable is used to count the steps for the distance limit.
         let stepCounter = 0;
-        while((square + step) <= 64 && (square + step) >= 1){
+        while (square + step <= 64 && square + step >= 1) {
             /**
              * Set the next square. For example, if step is 1 and given square is Square.e5(29),
              * then next square is Square.f5(30). Also, We are doing this operation before the
@@ -137,21 +206,23 @@ export class DirectionCalculator {
              * If distance limit is reached or the square is on the edge of the board or
              * if piece sensitivity is true AND if square has a piece, then break the loop.
              */
-            if(distanceLimit == stepCounter || isEdgeChanged(square))
-                break;
+            if (distanceLimit == stepCounter || isEdgeChanged(square)) break;
 
             /**
              * if square has no player's piece(has enemy piece) or piece sensitivity is false then
              * add the square to the array.
              */
-            if(!BoardQuerier.isSquareHasPiece(square, stopColor) || !pieceSensitivity)
+            if (
+                !BoardQuerier.isSquareHasPiece(square, stopColor) ||
+                !pieceSensitivity
+            )
                 squares.push(square);
 
             /**
              * If piece sensitivity is true AND if square has a piece(enemy or player), then break the loop.
              * Because we can't go further.
              */
-            if(pieceSensitivity && BoardQuerier.isSquareHasPiece(square))
+            if (pieceSensitivity && BoardQuerier.isSquareHasPiece(square))
                 break;
 
             // Increase the step counter.
