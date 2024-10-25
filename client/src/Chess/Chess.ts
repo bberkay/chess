@@ -10,11 +10,11 @@
 import { JsonNotation, PieceType, Square, Color, StartPosition, ChessEvent, GameStatus, Durations, Move, Scores, MoveType, RemainingTimes } from "./Types";
 import { ChessEngine, MoveValidationError } from "./Engine/ChessEngine";
 import { ChessBoard } from "./Board/ChessBoard";
-import { SoundEffect, SquareClickMode, SquareEffect } from "./Board/Types";
+import { SquareClickMode, SquareEffect } from "./Board/Types";
 import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage.ts";
 import { Converter } from "./Utils/Converter.ts";
 import { Logger } from "@Services/Logger.ts";
-import { Bot, BotColor, BotDifficulty } from "./Bot";
+import { Bot, BotAttributes } from "./Bot";
 
 /**
  * This class provides users to a playable chess game on the web by connecting ChessEngine and ChessBoard. Also,
@@ -30,7 +30,7 @@ export class Chess {
     public readonly board: ChessBoard = new ChessBoard();
 
     private _bot: Bot | null = null;
-    private _lastCreatedBotSettings: { botColor: Color, botDifficulty: number } | null = null;
+    private _lastCreatedBotAttributes: BotAttributes | null = null;
     private _selectedSquare: Square | null = null;
     private _isPromotionScreenOpen: boolean = false;
     private _preSelectedSquare: Square | null = null;
@@ -54,7 +54,7 @@ export class Chess {
     private resetProperties(): void {
         this._selectedSquare = null;
         this._isGameOver = false;
-        this._lastCreatedBotSettings = null;
+        this._lastCreatedBotAttributes = null;
         this._isPromotionScreenOpen = false;
         this._preSelectedSquare = null;
         this._preMoves = { [Color.Black]: [], [Color.White]: [] };
@@ -74,9 +74,9 @@ export class Chess {
             this.logger.save("Game loading from cache...");
             this.createGame(LocalStorage.load(LocalStorageKey.LastBoard) as JsonNotation);
             if (LocalStorage.isExist(LocalStorageKey.LastBot)) {
-                const { botColor, botDifficulty } = LocalStorage.load(LocalStorageKey.LastBot);
-                this.addBotToCurrentGame(botColor, botDifficulty);
-                this.logger.save(`Bot[${JSON.stringify({ botColor, botDifficulty })}] found in cache and added to the game`);
+                const botAttributes = LocalStorage.load(LocalStorageKey.LastBot)!;
+                this.addBotToCurrentGame(botAttributes);
+                this.logger.save(`Bot[${JSON.stringify(botAttributes)}] found in cache and added to the game`);
             }
             this.logger.save("Game loaded from cache");
         } else {
@@ -141,32 +141,32 @@ export class Chess {
      * given position(fen notation/string, `StartPosition/string` or 
      * `JsonNotation`).
      */
-    public addBotToCurrentGame(botColor: BotColor | Color, botDifficulty: BotDifficulty): void {
-        this._bot = new Bot(botColor, botDifficulty);
+    public addBotToCurrentGame(botAttributes: BotAttributes): void {
+        this._bot = new Bot(botAttributes);
         this._bot.start();
 
-        this._lastCreatedBotSettings = { botColor: this._bot.color, botDifficulty };
+        this._lastCreatedBotAttributes = this._bot.getAttributes();
         this.board.disablePreSelection(this._bot.color);
-        this.logger.save(`Bot[${this._bot.color}] created with difficulty[${botDifficulty}]`);
+        this.logger.save(`Bot[${this._bot.color}] created with difficulty[${this._bot.difficulty}]`);
 
         // First move
-        if (botColor == this.engine.getTurnColor()) {
+        if (this._bot.color == this.engine.getTurnColor()) {
             this.board.lock(false);
             this.playBotIfExist();
         }
 
-        LocalStorage.save(LocalStorageKey.LastBot, { botColor: this._bot.color, botDifficulty: botDifficulty });
+        LocalStorage.save(LocalStorageKey.LastBot, this._bot.getAttributes());
         document.dispatchEvent(new CustomEvent(ChessEvent.onBotAdded, { detail: { color: this._bot.color } }));
     }
 
     /**
-     * This function returns the bot if it exists.
+     * This function returns the attributes of bot if it exists or created before.
      */
-    public getBotSettings(): {botColor: Color, botDifficulty: number} | null {
+    public getLastCreatedBotAttributes(): BotAttributes | null {
         if(!this._bot)
-            return this._lastCreatedBotSettings;
+            return this._lastCreatedBotAttributes;
 
-        return { botColor: this._bot.color, botDifficulty: this._bot.difficulty };
+        return this._bot.getAttributes();
     }
 
     /**
@@ -467,7 +467,7 @@ export class Chess {
         if (moveIndex !== this.engine.getMoveHistory().length - 1)
             this.board.lock();
         
-        let snapshotMove = showMoveReanimation ? this.engine.getMoveHistory()[moveIndex] : null;
+        const snapshotMove = showMoveReanimation ? this.engine.getMoveHistory()[moveIndex] : null;
         let snapshot = this.engine.getBoardHistory()[
             moveIndex + (snapshotMove && snapshotMove.type === MoveType.Promote ? 1 : 0)
         ];

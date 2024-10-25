@@ -36,6 +36,7 @@ import { AppearanceMenu } from "./Components/NavbarComponents/AppearanceMenu.ts"
 import { Logger } from "@Services/Logger";
 import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage.ts";
 import { SettingsMenu } from "./Components/NavbarComponents/SettingsMenu.ts";
+import { BotAttributes } from "@ChessPlatform/Chess/Bot/index.ts";
 
 /**
  * This class is the main class of the chess platform menu.
@@ -440,7 +441,7 @@ export class Platform {
     /**
      * Create a new game and update the components of the menu.
      * @param fenNotation The FEN notation of the game.
-     * @param {boolean|{botColor: Color, botDifficulty: number}} bot
+     * @param {boolean|BotAttributes} bot
      * If the boolean is true, the settings will be taken from the navigator modal
      * or this.chess.getBotSettings() method(the last bot created bot's settings if exists).
      * If the object is provided, the bot will be added to the game with the given color
@@ -448,14 +449,14 @@ export class Platform {
      * If the boolean is false, the game will be created without bot.
      */
     private preparePlatformForSingleplayerGame(
-        bot: boolean | { botColor: Color; botDifficulty: number } = false
+        bot: boolean | BotAttributes
     ): void {
         if (BoardEditor.isEditorModeEnable()) {
             this.boardEditor.saveFen();
             this.boardEditor.disableEditorMode();
         }
 
-        let { botColor, botDifficulty } =
+        let botAttributes =
             bot && typeof bot === "object"
                 ? bot
                 : this.navigatorModal.getCreatedBotSettings();
@@ -464,9 +465,9 @@ export class Platform {
         this.notationMenu.displaySingleplayerGameUtilityMenu();
 
         if (bot) {
-            if ((!botColor || !botDifficulty) && this.chess.getBotSettings())
-                ({ botColor, botDifficulty } = this.chess.getBotSettings()!);
-            this.chess.addBotToCurrentGame(botColor, botDifficulty);
+            if (!botAttributes && this.chess.getLastCreatedBotAttributes())
+                botAttributes = this.chess.getLastCreatedBotAttributes()!;
+            this.chess.addBotToCurrentGame(botAttributes);
         }
 
         this.notationMenu.showPlayerCards();
@@ -500,10 +501,10 @@ export class Platform {
                 NotationMenuOperation.UndoMove
             )
         ) {
-            const botSettings = this.chess.getBotSettings();
-            if (botSettings) {
+            const botAttributes = this.chess.getLastCreatedBotAttributes();
+            if (botAttributes) {
                 const playerColor =
-                    botSettings.botColor === Color.White
+                    botAttributes.color === Color.White
                         ? Color.Black
                         : Color.White;
                 this.chess.takeBack(true, playerColor);
@@ -555,9 +556,9 @@ export class Platform {
         )
             return;
 
-        const { botColor } = this.chess.getBotSettings() || {};
-        const resignColor = botColor
-            ? botColor == Color.White
+        const botAttributes = this.chess.getLastCreatedBotAttributes();
+        const resignColor = botAttributes
+            ? botAttributes.color == Color.White
                 ? Color.Black
                 : Color.White
             : this.chess.getTurnColor();
@@ -576,15 +577,7 @@ export class Platform {
      * update the components.
      */
     private _playAgainSingleplayerGame(): void {
-        const { botColor, botDifficulty } = this.chess.getBotSettings() || {};
-        this.preparePlatformForSingleplayerGame(
-            botColor && botDifficulty
-                ? {
-                      botColor:
-                          botColor == Color.White ? Color.Black : Color.White,
-                      botDifficulty,
-                  }
-                : false
-        );
+        const botAttributes = this.chess.getLastCreatedBotAttributes()
+        this.preparePlatformForSingleplayerGame(botAttributes ?? false);
     }
 }

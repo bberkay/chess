@@ -41,7 +41,7 @@ export enum BotColor{
  * Created bot's attributes.
  */
 export type BotAttributes = {
-    color: Color,
+    color: BotColor | Color,
     difficulty: BotDifficulty
 }
 
@@ -55,8 +55,8 @@ export type BotAttributes = {
  * https://github.com/lichess-org/stockfish.js
  */
 export class Bot{
-    private readonly color: Color;
-    private readonly difficulty: BotDifficulty;
+    public readonly color: Color;
+    public readonly difficulty: BotDifficulty;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private stockfish: any;
@@ -76,18 +76,18 @@ export class Bot{
      * Initializes the bot with the given color and difficulty level.   
      * @param difficulty Difficulty level (1 for easy, 2 for medium, 3 for hard).
      */
-    constructor(color: BotColor | Color, difficulty: BotDifficulty){
-        if(difficulty < BotDifficulty.Easy || difficulty > BotDifficulty.Hard)
+    constructor(attributes: BotAttributes){
+        if(attributes.difficulty < BotDifficulty.Easy || attributes.difficulty > BotDifficulty.Hard)
             throw new Error("Difficulty must be between 1(easy), 2(medium), or 3(hard)");
 
-        if(color !== BotColor.Random && color !== BotColor.White && color !== BotColor.Black)
+        if(attributes.color !== BotColor.Random && attributes.color !== BotColor.White && attributes.color !== BotColor.Black)
             throw new Error("Color must be BotColor.Random, BotColor.White/Color.White, or BotColor.Black/Color.Black");
 
-        if(color === BotColor.Random)
-            color = Math.random() < 0.5 ? Color.White : Color.Black;
+        if(attributes.color === BotColor.Random)
+            attributes.color = Math.random() < 0.5 ? Color.White : Color.Black;
         
-        this.color = color as Color;
-        this.difficulty = difficulty * DIFFICULTY_MULTIPLIER;
+        this.color = attributes.color as Color;
+        this.difficulty = attributes.difficulty * DIFFICULTY_MULTIPLIER;
     }
 
     /**

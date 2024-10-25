@@ -3,7 +3,7 @@ import { SocketOperation } from "../../Types";
 import { BoardEditorOperation, NavigatorModalOperation } from "../Types";
 import { Component } from "./Component";
 import { Color, Duration, GameStatus } from "@Chess/Types";
-import { BotColor, BotDifficulty } from "@Chess/Bot";
+import { BotAttributes, BotColor, BotDifficulty } from "@Chess/Bot";
 import {
     DEFULT_PLAYER_NAME,
     MAX_PLAYER_NAME_LENGTH,
@@ -665,15 +665,12 @@ export class NavigatorModal extends Component {
     /**
      * Get the created bot settings from the modal.
      */
-    public getCreatedBotSettings(): {
-        botColor: BotColor;
-        botDifficulty: BotDifficulty;
-    } {
+    public getCreatedBotSettings(): BotAttributes {
         this.saveSelectedBotColor();
 
         return {
-            botColor: this.lastSelectedBotColor,
-            botDifficulty: this.lastSelectedBotDifficulty,
+            color: this.lastSelectedBotColor,
+            difficulty: this.lastSelectedBotDifficulty,
         };
     }
 

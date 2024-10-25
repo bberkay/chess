@@ -67,8 +67,8 @@ export class Converter{
     {
         let square: string = "";
 
-        let file = squareID % 8 === 0 ? 8 : squareID % 8;
-        let rank = Math.ceil(squareID / 8);
+        const file = squareID % 8 === 0 ? 8 : squareID % 8;
+        const rank = Math.ceil(squareID / 8);
 
         // 97 is the char code of "a" and file + 96 because the file starts from 1
         square += String.fromCharCode(file + 96);
@@ -196,7 +196,7 @@ export class Converter{
             for (let j:number = 0; j < currentRow.length; j++)
             {
                 // Find current square from the current row, can be 8 or P7
-                let square: string = currentRow[j];
+                const square: string = currentRow[j];
 
                 if (parseInt(square)) // If square is a number(is 8 or 7)
                 {
@@ -253,7 +253,7 @@ export class Converter{
          * Default fen notation, 8 rows and 8 columns and all of them are empty
          * @see For more information please see above wikipedia page
          */
-        let fenNotation: Array<number|string> = [8, 8, 8, 8, 8, 8, 8, 8];
+        const fenNotation: Array<number|string> = [8, 8, 8, 8, 8, 8, 8, 8];
 
         /**
          * Type scheme (first letter of the piece type except for the knight) for convert piece type to the fen notation
@@ -277,7 +277,7 @@ export class Converter{
          *
          * Bridge: {8:[1, 1, 1, 1, 1, 1, 1, 1], 7:[1, 1, 1, 1, 1, 1, 1, 1], ..., 1:[1, 1, 1, 1, 1, 1, 1, 1]}
          */
-        let jsonToFenBridgeBoard:Record<number, Array<number|string>> = {};
+        const jsonToFenBridgeBoard:Record<number, Array<number|string>> = {};
 
         for(let i = 0; i<8; i++)
         {
@@ -285,23 +285,23 @@ export class Converter{
         }
 
         // Loop through the jsonNotation
-        for(let i in jsonNotation.board)
+        for(const i in jsonNotation.board)
         {
             // Current piece
-            let piece: {color:Color, type:PieceType, square:Square} = jsonNotation.board[Number(i)];
+            const piece: {color:Color, type:PieceType, square:Square} = jsonNotation.board[Number(i)];
 
             // Convert squareID to square
-            let square: string = Converter.squareIDToSquare(piece["square"]);
+            const square: string = Converter.squareIDToSquare(piece["square"]);
 
             // Type of the piece
-            let type: string = typeScheme[piece["type"]];
+            const type: string = typeScheme[piece["type"]];
 
             /**
              * Convert square to the place, for example if square is a1 then square.charCodeAt(0) is 97
              * and 'a'.charCodeAt(0) is 97 then 97 - 97 = 0, means place is 0 or if square is b1 then
              * square.charCodeAt(0) is 98 and 'a'.charCodeAt(0) is 97 then 98 - 97 = 1, means place is 1
              */
-            let place: number = square.charCodeAt(0) - 'a'.charCodeAt(0);
+            const place: number = square.charCodeAt(0) - 'a'.charCodeAt(0);
 
             /**
              * If piece is black then convert type to lowercase, otherwise convert type to uppercase(fen notation)
@@ -319,7 +319,7 @@ export class Converter{
         for(let i= 8; i>0; i--) // We start from 8 to 0 because fen notation starts from 8th row
         {
             // Current row of the board
-            let row: Array<number|string> = jsonToFenBridgeBoard[i];
+            const row: Array<number|string> = jsonToFenBridgeBoard[i];
 
             /**
              * Fen string initialize for current row. We will increment this string
@@ -331,7 +331,7 @@ export class Converter{
             for(let t = 0; t<8; t++)
             {
                 // Current square of the row (square can be number or letter)
-                let square: number|string = row[t];
+                const square: number|string = row[t];
 
                 // If square is number then increment fenString with square
                 if(isNumeric(square.toString()))
