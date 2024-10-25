@@ -202,17 +202,13 @@ body[data-color-scheme="light"]{
 @media screen and (max-width: 550px) {
     .navigator-modal--glass{
         margin: 1rem;
-        top: 40%;
+        top: 30%;
         left: 5%;
         right: 5%;
         transform: scale(1);
 
         & .navigator-modal-bg{
             left: -10%;
-        }
-
-        &.bounce{
-            transform: scale(1.01);
         }
     }
 }
