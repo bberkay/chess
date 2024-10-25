@@ -27,7 +27,7 @@ export class LocalStorage
     /**
      * Stores the data in the local storage.
      */
-    public static save(key: LocalStorageKey, value: any): void
+    public static save(key: LocalStorageKey, value: unknown): void
     {
         localStorage.setItem(key, JSON.stringify({
             value: value,
@@ -38,7 +38,7 @@ export class LocalStorage
     /**
      * Returns the data from the local storage.
      */
-    public static load(key: LocalStorageKey): any
+    public static load(key: LocalStorageKey): unknown | null
     {
         if(!LocalStorage.isExist(key)) return null;
         const data = JSON.parse(localStorage.getItem(key)!);
