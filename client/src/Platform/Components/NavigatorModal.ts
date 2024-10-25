@@ -4,7 +4,7 @@ import { BoardEditorOperation, NavigatorModalOperation } from "../Types";
 import { Component } from "./Component";
 import { Color, Duration, GameStatus } from "@Chess/Types";
 import { BotColor, BotDifficulty } from "@Chess/Bot";
-import { 
+import {
     DEFULT_PLAYER_NAME,
     MAX_PLAYER_NAME_LENGTH,
     MIN_PLAYER_NAME_LENGTH,
@@ -14,27 +14,29 @@ import {
     DEFAULT_INCREMENT_TIME,
     MAX_INCREMENT_TIME,
     MIN_INCREMENT_TIME,
-    NAVIGATOR_MODAL_ID
+    NAVIGATOR_MODAL_ID,
 } from "@Platform/Consts";
 
 /**
  * This class provide a menu to show the logs.
  */
-export class NavigatorModal extends Component{
+export class NavigatorModal extends Component {
     public readonly id: string = NAVIGATOR_MODAL_ID;
-    private readonly _boundCloseModalOnOutsideClick: ((event: MouseEvent) => void) = this.closeModalOnOutsideClick.bind(this);
+    private readonly _boundCloseModalOnOutsideClick: (
+        event: MouseEvent
+    ) => void = this.closeModalOnOutsideClick.bind(this);
 
     private lastNavigatorModalTitle: string = "";
     private lastNavigatorModalContent: string = "";
-    
+
     private lastEnteredPlayerName: string = DEFULT_PLAYER_NAME;
     private lastSelectedBotDifficulty: BotDifficulty = BotDifficulty.Easy;
     private lastSelectedBotColor: BotColor = BotColor.Black;
     private lastSelectedDuration: Duration = {
         remaining: DEFAULT_TOTAL_TIME,
-        increment: DEFAULT_INCREMENT_TIME
+        increment: DEFAULT_INCREMENT_TIME,
     };
-    
+
     /**
      * Constructor of the NavigatorModal class.
      */
@@ -46,9 +48,10 @@ export class NavigatorModal extends Component{
     /**
      * This function renders the navigator modal.
      */
-    protected renderComponent(): void
-    {
-        this.loadHTML(NAVIGATOR_MODAL_ID, `
+    protected renderComponent(): void {
+        this.loadHTML(
+            NAVIGATOR_MODAL_ID,
+            `
             <div class="navigator-modal navigator-modal--glass">
                 <div class="navigator-modal-bg">
                     <img src="./assets/images/result-screen-bg-icon.png" alt="Chessboard">
@@ -56,16 +59,16 @@ export class NavigatorModal extends Component{
                 <div class="navigator-modal-title"></div>
                 <div class="navigator-modal-content"></div>
             </div>
-        `);
+        `
+        );
     }
 
     /**
      * Add the backdrop to the modal.
      */
-    private showModalBackdrop(): void
-    {
-        let modalBgLayer = document.querySelector(".navigator-modal-bg-layer")!
-        if(!modalBgLayer){
+    private showModalBackdrop(): void {
+        let modalBgLayer = document.querySelector(".navigator-modal-bg-layer")!;
+        if (!modalBgLayer) {
             modalBgLayer = document.createElement("div");
             modalBgLayer.classList.add("navigator-modal-bg-layer");
             document.body.appendChild(modalBgLayer);
@@ -76,45 +79,70 @@ export class NavigatorModal extends Component{
     /**
      * Remove the backdrop from the modal.
      */
-    private hideModalBackdrop(): void
-    {
-        const modalBgLayer = document.querySelector(".navigator-modal-bg-layer");
-        if(modalBgLayer) modalBgLayer.remove();
+    private hideModalBackdrop(): void {
+        const modalBgLayer = document.querySelector(
+            ".navigator-modal-bg-layer"
+        );
+        if (modalBgLayer) modalBgLayer.remove();
     }
-    
+
     /**
      * Show the modal with the given title and content.
      */
-    private show(title: string, content: string, closeable: boolean = false, backdrop: boolean = true): void
-    {
+    private show(
+        title: string,
+        content: string,
+        closeable: boolean = false,
+        backdrop: boolean = true
+    ): void {
         this.hide();
         window.scrollTo(0, 0);
 
-        this.loadHTML(NAVIGATOR_MODAL_ID, `
-            <div class="navigator-modal ${backdrop ? "navigator-modal--glass" : ""} ${closeable ? "closeable" : ""}">
+        this.loadHTML(
+            NAVIGATOR_MODAL_ID,
+            `
+            <div class="navigator-modal ${
+                backdrop ? "navigator-modal--glass" : ""
+            } ${closeable ? "closeable" : ""}">
                 <div class="navigator-modal-bg"></div>
                 <div class="navigator-modal-title">${title}</div>
                 <div class="navigator-modal-content">${content}</div>
             </div>
-        `);
+        `
+        );
 
-        const modal = document.querySelector('.navigator-modal')! as HTMLElement;
+        const modal = document.querySelector(
+            ".navigator-modal"
+        )! as HTMLElement;
 
-        if(backdrop){
+        if (backdrop) {
             this.showModalBackdrop();
         } else {
             // center the modal to the chessboard if it is not backdrop.
-            const chessboard = document.getElementById("chessboard") as HTMLElement;
-            modal.style.left = `${chessboard.offsetLeft + chessboard.offsetWidth / 2 - modal.offsetWidth / 2}px`;
-            modal.style.top = `${chessboard.offsetTop + chessboard.offsetWidth / 2 - modal.offsetHeight / 2}px`;
-        }   
+            const chessboard = document.getElementById(
+                "chessboard"
+            ) as HTMLElement;
+            modal.style.left = `${
+                chessboard.offsetLeft +
+                chessboard.offsetWidth / 2 -
+                modal.offsetWidth / 2
+            }px`;
+            modal.style.top = `${
+                chessboard.offsetTop +
+                chessboard.offsetWidth / 2 -
+                modal.offsetHeight / 2
+            }px`;
+        }
 
         setTimeout(() => {
-            document.addEventListener("click", this._boundCloseModalOnOutsideClick);
-        }, 0);  
+            document.addEventListener(
+                "click",
+                this._boundCloseModalOnOutsideClick
+            );
+        }, 0);
 
         // For go back to the previous state of the modal.
-        if(!modal.querySelector(".navigator-modal-content #confirmation")){
+        if (!modal.querySelector(".navigator-modal-content #confirmation")) {
             this.lastNavigatorModalTitle = title;
             this.lastNavigatorModalContent = content;
         }
@@ -124,24 +152,26 @@ export class NavigatorModal extends Component{
      * Close the modal when the user clicks outside of the active modal.
      */
     private closeModalOnOutsideClick(event: MouseEvent): void {
-        const activeModal = document.querySelector('.navigator-modal')! as HTMLElement;
-        if(!activeModal) 
-            return;
+        const activeModal = document.querySelector(
+            ".navigator-modal"
+        )! as HTMLElement;
+        if (!activeModal) return;
 
-        if(!(event.target as HTMLElement).closest(".navigator-modal")){
-            if(activeModal.classList.contains("closeable"))
-                this.hide();
-        }   
+        if (!(event.target as HTMLElement).closest(".navigator-modal")) {
+            if (activeModal.classList.contains("closeable")) this.hide();
+        }
     }
 
     /**
      * Hide the modal.
      */
-    public hide(): void
-    {
-        document.removeEventListener("click", this._boundCloseModalOnOutsideClick);
-        const navigatorModal = document.querySelector('.navigator-modal');
-        if(!navigatorModal) return;
+    public hide(): void {
+        document.removeEventListener(
+            "click",
+            this._boundCloseModalOnOutsideClick
+        );
+        const navigatorModal = document.querySelector(".navigator-modal");
+        if (!navigatorModal) return;
         navigatorModal.remove();
         this.hideModalBackdrop();
     }
@@ -149,32 +179,37 @@ export class NavigatorModal extends Component{
     /**
      * Go back to the previous state of the modal.
      */
-    public undo(): void
-    {
-        document.querySelector('.navigator-modal-title')!.innerHTML = this.lastNavigatorModalTitle;
-        document.querySelector('.navigator-modal-content')!.innerHTML = this.lastNavigatorModalContent;
+    public undo(): void {
+        document.querySelector(".navigator-modal-title")!.innerHTML =
+            this.lastNavigatorModalTitle;
+        document.querySelector(".navigator-modal-content")!.innerHTML =
+            this.lastNavigatorModalContent;
     }
 
     /**
      * Show the game over screen.
      */
-    public showGameOver(status: GameStatus): void
-    {
-        const gameOverMessage = document.querySelector('.navigator-modal .game-over-message');
-        
+    public showGameOver(status: GameStatus): void {
+        const gameOverMessage = document.querySelector(
+            ".navigator-modal .game-over-message"
+        );
+
         this.show(
-            status === GameStatus.WhiteVictory 
-                ? "White Wins" 
-                : (status === GameStatus.BlackVictory ? "Black Wins" : "Stalemate"),
+            status === GameStatus.WhiteVictory
+                ? "White Wins"
+                : status === GameStatus.BlackVictory
+                ? "Black Wins"
+                : "Stalemate",
             `
-            <span class="game-over-message">${gameOverMessage ? gameOverMessage.textContent : ""}</span>
+            <span class="game-over-message">${
+                gameOverMessage ? gameOverMessage.textContent : ""
+            }</span>
             `,
             true,
             false
         );
 
-        if(gameOverMessage) 
-            gameOverMessage.textContent = "";
+        if (gameOverMessage) gameOverMessage.textContent = "";
     }
 
     /**
@@ -182,22 +217,26 @@ export class NavigatorModal extends Component{
      * resigned. This is going to modify the content of the
      * game over screen to show the resigned player.
      */
-    public showGameOverAsResigned(resignColor: Color): void 
-    {
-        document.querySelector('.navigator-modal .game-over-message')!.textContent = `
-            ${resignColor === Color.White ? Color.White : Color.Black} has resigned
+    public showGameOverAsResigned(resignColor: Color): void {
+        document.querySelector(
+            ".navigator-modal .game-over-message"
+        )!.textContent = `
+            ${
+                resignColor === Color.White ? Color.White : Color.Black
+            } has resigned
         `;
     }
 
     /**
      * Show the game over screen when both players
-     * accepted the draw. This is going to modify the 
-     * content of the game over screen to show the draw 
+     * accepted the draw. This is going to modify the
+     * content of the game over screen to show the draw
      * accepted message.
      */
-    public showGameOverAsDrawAccepted(): void
-    {
-        document.querySelector('.navigator-modal .game-over-message')!.textContent = `Draw accepted`;
+    public showGameOverAsDrawAccepted(): void {
+        document.querySelector(
+            ".navigator-modal .game-over-message"
+        )!.textContent = `Draw accepted`;
     }
 
     /**
@@ -205,17 +244,19 @@ export class NavigatorModal extends Component{
      * aborted the game. This is going to modify the content
      * of the game over screen to show the game aborted message.
      */
-    public showGameOverAsAborted(): void
-    {
-        document.querySelector('.navigator-modal .navigator-modal-title')!.textContent = `Game Aborted`;
-        document.querySelector('.navigator-modal .game-over-message')!.textContent = `Player has aborted the game`;
+    public showGameOverAsAborted(): void {
+        document.querySelector(
+            ".navigator-modal .navigator-modal-title"
+        )!.textContent = `Game Aborted`;
+        document.querySelector(
+            ".navigator-modal .game-over-message"
+        )!.textContent = `Player has aborted the game`;
     }
 
     /**
      * Show the board not ready screen.
      */
-    public showBoardNotReady(): void
-    {
+    public showBoardNotReady(): void {
         this.show(
             "Not Ready",
             `<span>There might be missing pieces like kings. Please create playable board.</span>
@@ -230,8 +271,7 @@ export class NavigatorModal extends Component{
     /**
      * Show the game creator.
      */
-    public showGameCreator(): void
-    {
+    public showGameCreator(): void {
         this.show(
             "Create New Game",
             `
@@ -252,8 +292,7 @@ export class NavigatorModal extends Component{
     /**
      * Show the play the board screen.
      */
-    public showStartPlayingBoard(): void
-    {
+    public showStartPlayingBoard(): void {
         this.show(
             "Start Playing the Board",
             `
@@ -275,8 +314,7 @@ export class NavigatorModal extends Component{
      * Show the select game duration screen after
      * the start playing board screen.
      */
-    private showSelectDuration(): void
-    {
+    private showSelectDuration(): void {
         this.show(
             "Select Game Duration",
             `<span>Select the total and increment time:</span>
@@ -302,23 +340,32 @@ export class NavigatorModal extends Component{
     }
 
     /**
-     * Show the select custom duration screen 
+     * Show the select custom duration screen
      * if the user selects the custom duration
      * on the select duration screen.
      */
-    private showSelectDurationCustom(): void
-    {
+    private showSelectDurationCustom(): void {
         this.show(
             "Enter Game Duration",
             `<span>Enter the total and increment time:</span>
             <div class="btn-group-horizontal" style="padding-top:5px;padding-bottom:15px;justify-content:center;">
-                <input type="number" id="total-time" placeholder="Min" min="${MIN_TOTAL_TIME / 60000}" max="${MAX_TOTAL_TIME / 60000}" required>
+                <input type="number" id="total-time" placeholder="Min" min="${
+                    MIN_TOTAL_TIME / 60000
+                }" max="${MAX_TOTAL_TIME / 60000}" required>
                 <span style="font-size:var(--navigator-modal-content-duration-separator-font-size);padding:0 10px;">+</span>
-                <input type="number" id="increment-time" placeholder="Sec" value="${MIN_INCREMENT_TIME / 1000}" min="${MIN_INCREMENT_TIME / 1000}" max="${MAX_INCREMENT_TIME / 1000}" required>
+                <input type="number" id="increment-time" placeholder="Sec" value="${
+                    MIN_INCREMENT_TIME / 1000
+                }" min="${MIN_INCREMENT_TIME / 1000}" max="${
+                MAX_INCREMENT_TIME / 1000
+            }" required>
             </div>
-            <button type="submit" data-menu-operation="${NavigatorModalOperation.ShowCreateLobby}">Next</button>
+            <button type="submit" data-menu-operation="${
+                NavigatorModalOperation.ShowCreateLobby
+            }">Next</button>
             <div style="text-align:center;margin-top:10px;">
-                <button class="button--text" data-menu-operation="${NavigatorModalOperation.ShowSelectDuration}">
+                <button class="button--text" data-menu-operation="${
+                    NavigatorModalOperation.ShowSelectDuration
+                }">
                     Back
                 </button>
             </div>
@@ -329,94 +376,122 @@ export class NavigatorModal extends Component{
     /**
      * Get the selected game duration from the
      * modal. If the select duration modal is open.
-     * 
+     *
      * @returns Must be between MIN_TOTAL_TIME and MAX_TOTAL_TIME
      * minutes for total time and MIN_INCREMENT_TIME and MAX_INCREMENT_TIME
      * seconds for increment time. If not, it will be DEFAULT_TOTAL_TIME
      * and DEFAULT_INCREMENT_TIME.
      */
-    private saveSelectedGameDuration(): void
-    {
+    private saveSelectedGameDuration(): void {
         /**
          * Convert minutes to milliseconds.
          */
-        const minutesToMilliseconds = (minutes: number) => { 
+        const minutesToMilliseconds = (minutes: number) => {
             return minutes * 60000;
-        }
+        };
 
         /**
          * Convert seconds to milliseconds.
          */
         const secondsToMilliseconds = (seconds: number) => {
             return seconds * 1000;
-        }
+        };
 
         const isCustomDurationModalOpen = document.querySelector(
             `[data-menu-operation="${NavigatorModalOperation.ShowSelectDurationCustom}"]
-        `) ? false : true;
+        `
+        )
+            ? false
+            : true;
 
         let totalTime, incrementTime;
-        if(isCustomDurationModalOpen){
-            const totalTimeInput = document.querySelector(".navigator-modal #total-time") as HTMLInputElement;
-            const incrementTimeInput = (document.querySelector(".navigator-modal #increment-time") as HTMLInputElement);
-            if(totalTimeInput) totalTime = totalTimeInput.valueAsNumber;
-            if(incrementTimeInput) incrementTime = incrementTimeInput.valueAsNumber;
-        }else{
-            const selectedButton = document.querySelector(".navigator-modal #select-duration button[data-selected='true']") as HTMLElement;
-            if(selectedButton){
-                totalTime = parseInt(selectedButton.querySelector(".total-time")!.textContent!);
-                incrementTime = parseInt(selectedButton.querySelector(".increment-time")!.textContent!);
+        if (isCustomDurationModalOpen) {
+            const totalTimeInput = document.querySelector(
+                ".navigator-modal #total-time"
+            ) as HTMLInputElement;
+            const incrementTimeInput = document.querySelector(
+                ".navigator-modal #increment-time"
+            ) as HTMLInputElement;
+            if (totalTimeInput) totalTime = totalTimeInput.valueAsNumber;
+            if (incrementTimeInput)
+                incrementTime = incrementTimeInput.valueAsNumber;
+        } else {
+            const selectedButton = document.querySelector(
+                ".navigator-modal #select-duration button[data-selected='true']"
+            ) as HTMLElement;
+            if (selectedButton) {
+                totalTime = parseInt(
+                    selectedButton.querySelector(".total-time")!.textContent!
+                );
+                incrementTime = parseInt(
+                    selectedButton.querySelector(".increment-time")!
+                        .textContent!
+                );
             }
         }
 
         // Check the validity of the entered values in mm:ss format.
-        totalTime = !totalTime && this.lastSelectedDuration.remaining 
-            ? this.lastSelectedDuration.remaining 
-            : minutesToMilliseconds(totalTime!);
-        totalTime = (!totalTime || totalTime < MIN_TOTAL_TIME || totalTime > MAX_TOTAL_TIME) 
-            ? DEFAULT_TOTAL_TIME 
-            : totalTime;
+        totalTime =
+            !totalTime && this.lastSelectedDuration.remaining
+                ? this.lastSelectedDuration.remaining
+                : minutesToMilliseconds(totalTime!);
+        totalTime =
+            !totalTime ||
+            totalTime < MIN_TOTAL_TIME ||
+            totalTime > MAX_TOTAL_TIME
+                ? DEFAULT_TOTAL_TIME
+                : totalTime;
 
-        incrementTime = !incrementTime && this.lastSelectedDuration.increment 
-            ? this.lastSelectedDuration.increment 
-            : secondsToMilliseconds(incrementTime!);
-        incrementTime = (!incrementTime || incrementTime < MIN_INCREMENT_TIME || incrementTime > MAX_INCREMENT_TIME) 
-            ? DEFAULT_INCREMENT_TIME 
-            : incrementTime;
+        incrementTime =
+            !incrementTime && this.lastSelectedDuration.increment
+                ? this.lastSelectedDuration.increment
+                : secondsToMilliseconds(incrementTime!);
+        incrementTime =
+            !incrementTime ||
+            incrementTime < MIN_INCREMENT_TIME ||
+            incrementTime > MAX_INCREMENT_TIME
+                ? DEFAULT_INCREMENT_TIME
+                : incrementTime;
 
-        this.lastSelectedDuration = {remaining: totalTime, increment: incrementTime};
+        this.lastSelectedDuration = {
+            remaining: totalTime,
+            increment: incrementTime,
+        };
     }
 
     /**
      * Show the create lobby screen after the user
      * selects the game duration.
      */
-    private showCreateLobby(): void
-    {
+    private showCreateLobby(): void {
         this.show(
             "Create a Lobby",
             `<span>Enter your name: </span>
             <div class="input-group" style="padding-top:5px;padding-bottom:5px;">
                 <input type="text" id="player-name" placeholder="Your Name" value="${
-                    LocalStorage.isExist(LocalStorageKey.LastPlayerName) 
-                        ? LocalStorage.load(LocalStorageKey.LastPlayerName) 
+                    LocalStorage.isExist(LocalStorageKey.LastPlayerName)
+                        ? LocalStorage.load(LocalStorageKey.LastPlayerName)
                         : ""
                 }" maxlength="${MAX_PLAYER_NAME_LENGTH}" minlength="${MIN_PLAYER_NAME_LENGTH}" required>
-                <button type="submit" data-socket-operation="${SocketOperation.CreateLobby}">Create</button>
+                <button type="submit" data-socket-operation="${
+                    SocketOperation.CreateLobby
+                }">Create</button>
             </div>
             <div style="text-align:center;margin-top:10px;">
-                <button class="button--text" data-menu-operation="${NavigatorModalOperation.Hide}">
+                <button class="button--text" data-menu-operation="${
+                    NavigatorModalOperation.Hide
+                }">
                     Cancel
                 </button>
             </div>
-        `);
+        `
+        );
     }
 
     /**
      * Show the created lobby info.
      */
-    public showLobbyInfo(lobbyLink: string): void
-    {
+    public showLobbyInfo(lobbyLink: string): void {
         this.show(
             "Ready to Play",
             `<div class = "input-group" style="padding-bottom:5px;">
@@ -434,53 +509,62 @@ export class NavigatorModal extends Component{
     }
 
     /**
-     * Get the created lobby settings from the modal. 
+     * Get the created lobby settings from the modal.
      */
-    public getCreatedLobbySettings(): {playerName: string, duration: Duration}
-    {
+    public getCreatedLobbySettings(): {
+        playerName: string;
+        duration: Duration;
+    } {
         this.saveEnteredPlayerName();
 
         return {
             playerName: this.lastEnteredPlayerName,
-            duration: this.lastSelectedDuration
+            duration: this.lastSelectedDuration,
         };
     }
 
     /**
      * Show the join lobby screen.
      */
-    public showJoinLobby(): void
-    {
+    public showJoinLobby(): void {
         this.show(
             "Join a Lobby",
             `<span>Enter your name: </span>
             <div class="input-group" style="padding-top:5px;padding-bottom:5px;">
                 <input type="text" id="player-name" placeholder="Your Name" value="${
-                    LocalStorage.isExist(LocalStorageKey.LastPlayerName) 
-                        ? LocalStorage.load(LocalStorageKey.LastPlayerName) 
+                    LocalStorage.isExist(LocalStorageKey.LastPlayerName)
+                        ? LocalStorage.load(LocalStorageKey.LastPlayerName)
                         : ""
                 }" maxlength="${MAX_PLAYER_NAME_LENGTH}" minlength="${MIN_PLAYER_NAME_LENGTH}" required>
-                <button type="submit" data-socket-operation="${SocketOperation.JoinLobby}">Play</button>
+                <button type="submit" data-socket-operation="${
+                    SocketOperation.JoinLobby
+                }">Play</button>
             </div>
             <div style="text-align:center;margin-top:10px;">
-                <button class="button--text" data-menu-operation="${NavigatorModalOperation.Hide}">
+                <button class="button--text" data-menu-operation="${
+                    NavigatorModalOperation.Hide
+                }">
                     Cancel
                 </button>
             </div>
-        `);
+        `
+        );
     }
 
     /**
-     * Get the entered player name from the 
+     * Get the entered player name from the
      * modal. If the player name modal is open.
-     * 
-     * @returns Must be between `MIN_PLAYER_NAME_LENGTH` and 
-     * `MAX_PLAYER_NAME_LENGTH` characters. If not, it will 
+     *
+     * @returns Must be between `MIN_PLAYER_NAME_LENGTH` and
+     * `MAX_PLAYER_NAME_LENGTH` characters. If not, it will
      * be `DEFULT_PLAYER_NAME`.
      */
-    public getEnteredPlayerName(): string
-    {
-        if(document.getElementById("navigator-modal")!.querySelector("#player-name")) 
+    public getEnteredPlayerName(): string {
+        if (
+            document
+                .getElementById("navigator-modal")!
+                .querySelector("#player-name")
+        )
             this.saveEnteredPlayerName();
         return this.lastEnteredPlayerName;
     }
@@ -489,22 +573,26 @@ export class NavigatorModal extends Component{
      * Save the entered player name. If the player name
      * modal is open.
      */
-    private saveEnteredPlayerName(): void
-    {
-        let playerName = (document.getElementById("navigator-modal")!.querySelector("#player-name") as HTMLInputElement).value;
-        this.lastEnteredPlayerName = (playerName.length < MIN_PLAYER_NAME_LENGTH || playerName.length > MAX_PLAYER_NAME_LENGTH) 
-            ? DEFULT_PLAYER_NAME
-            : playerName;
+    private saveEnteredPlayerName(): void {
+        const playerName = (
+            document
+                .getElementById("navigator-modal")!
+                .querySelector("#player-name") as HTMLInputElement
+        ).value;
+        this.lastEnteredPlayerName =
+            playerName.length < MIN_PLAYER_NAME_LENGTH ||
+            playerName.length > MAX_PLAYER_NAME_LENGTH
+                ? DEFULT_PLAYER_NAME
+                : playerName;
     }
-    
+
     /**
      * Show the play against bot screen after the user
-     * selects the play against bot option on the game 
-     * creator screen. This screen will allow the user 
-     * to select the difficulty level of the bot. 
+     * selects the play against bot option on the game
+     * creator screen. This screen will allow the user
+     * to select the difficulty level of the bot.
      */
-    private showPlayAgainstBot(): void
-    {
+    private showPlayAgainstBot(): void {
         this.show(
             "Play against Bot",
             `<span>Select the difficulty level of the bot:</span>
@@ -527,19 +615,21 @@ export class NavigatorModal extends Component{
      * Get the selected difficulty level of the bot.
      * If the play against bot modal is open.
      */
-    private saveSelectedBotDifficulty(): void
-    {
-        const selectedButton = document.querySelector(".navigator-modal button[data-selected='true'][data-bot-difficulty]");
-        if(!selectedButton) return;
-        this.lastSelectedBotDifficulty = parseInt(selectedButton.getAttribute("data-bot-difficulty")!) as BotDifficulty;
+    private saveSelectedBotDifficulty(): void {
+        const selectedButton = document.querySelector(
+            ".navigator-modal button[data-selected='true'][data-bot-difficulty]"
+        );
+        if (!selectedButton) return;
+        this.lastSelectedBotDifficulty = parseInt(
+            selectedButton.getAttribute("data-bot-difficulty")!
+        ) as BotDifficulty;
     }
 
     /**
-     * Show the select color against bot screen after 
+     * Show the select color against bot screen after
      * the user selects the difficulty level of the bot.
      */
-    private showSelectColorAgainstBot(): void
-    {
+    private showSelectColorAgainstBot(): void {
         this.show(
             "Play against Bot",
             `<span>Select the color of the bot:</span>
@@ -562,23 +652,28 @@ export class NavigatorModal extends Component{
      * Save the selected color of the bot.
      * If the play against bot modal is open.
      */
-    private saveSelectedBotColor(): void
-    {
-        const selectedButton = document.querySelector(".navigator-modal button[data-selected='true'][data-bot-color]");
-        if(!selectedButton) return;
-        this.lastSelectedBotColor = selectedButton.getAttribute("data-bot-color")! as BotColor
+    private saveSelectedBotColor(): void {
+        const selectedButton = document.querySelector(
+            ".navigator-modal button[data-selected='true'][data-bot-color]"
+        );
+        if (!selectedButton) return;
+        this.lastSelectedBotColor = selectedButton.getAttribute(
+            "data-bot-color"
+        )! as BotColor;
     }
 
     /**
      * Get the created bot settings from the modal.
      */
-    public getCreatedBotSettings(): {botColor: BotColor, botDifficulty: BotDifficulty}
-    {
+    public getCreatedBotSettings(): {
+        botColor: BotColor;
+        botDifficulty: BotDifficulty;
+    } {
         this.saveSelectedBotColor();
-        
+
         return {
             botColor: this.lastSelectedBotColor,
-            botDifficulty: this.lastSelectedBotDifficulty
+            botDifficulty: this.lastSelectedBotDifficulty,
         };
     }
 
@@ -586,8 +681,7 @@ export class NavigatorModal extends Component{
      * Show the confirmation screen when the user
      * wants to cancel something(currently the game).
      */
-    private showConfirmation(): void
-    {
+    private showConfirmation(): void {
         this.show(
             "Confirmation",
             `<div id = "confirmation">Are you sure you want to cancel the game?
@@ -601,30 +695,34 @@ export class NavigatorModal extends Component{
 
     /**
      * Show error screen.
-     * @param {boolean} okButton - If true, it will 
+     * @param {boolean} okButton - If true, it will
      * show the ok button and the user will be able to
      * close the modal by clicking the ok button. If false,
      * user won't be able to close the modal.
      */
-    public showError(message: string, okButton: boolean = true): void
-    {
+    public showError(message: string, okButton: boolean = true): void {
         this.show(
             "Something Went Wrong",
             `<span>${message}</span>
             <div style="text-align:center;margin-top:10px;">
-                ${okButton ? `<button data-menu-operation="${NavigatorModalOperation.Hide}">Ok</button>` : ""}
+                ${
+                    okButton
+                        ? `<button data-menu-operation="${NavigatorModalOperation.Hide}">Ok</button>`
+                        : ""
+                }
             </div>
             `
         );
-        document.querySelector('.navigator-modal')!.classList.add("navigator-modal--error");
+        document
+            .querySelector(".navigator-modal")!
+            .classList.add("navigator-modal--error");
     }
 
     /**
      * Handle the given `NavigatorModalOperation`.
      */
-    public handleOperation(operation: NavigatorModalOperation): void
-    {
-        switch(operation){
+    public handleOperation(operation: NavigatorModalOperation): void {
+        switch (operation) {
             case NavigatorModalOperation.ShowGameCreator:
                 this.showGameCreator();
                 break;
@@ -634,7 +732,7 @@ export class NavigatorModal extends Component{
             case NavigatorModalOperation.ShowCreateLobby:
                 this.saveSelectedGameDuration();
                 this.showCreateLobby();
-                break
+                break;
             case NavigatorModalOperation.ShowJoinLobby:
                 this.showJoinLobby();
                 break;
@@ -643,7 +741,7 @@ export class NavigatorModal extends Component{
                 break;
             case NavigatorModalOperation.ShowSelectDurationCustom:
                 this.showSelectDurationCustom();
-                break
+                break;
             case NavigatorModalOperation.ShowPlayAgainstBot:
                 this.showPlayAgainstBot();
                 break;

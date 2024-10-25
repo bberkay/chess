@@ -1,5 +1,5 @@
 /**
- * PlatformEvent  enum is used to define the events 
+ * PlatformEvent  enum is used to define the events
  * that are triggered by the platform.
  * @enum {string}
  */
@@ -11,10 +11,10 @@ export enum PlatformEvent {
     onBoardCreated = "OnBoardCreated",
 
     /**
-     * Triggered when a component that has a data-menu-operation or 
+     * Triggered when a component that has a data-menu-operation or
      * data-socket-operation attribute is mounted.
      * @CustomEvent
-     * @param {string|HTMLElement} selector - If a string is passed, 
+     * @param {string|HTMLElement} selector - If a string is passed,
      * the selector will be used as querySelectorAll(selector + data-menu/socket-operation).
      * If an HTMLElement is passed, the element directly will be used as data-menu/socket-operation.
      */
@@ -22,10 +22,10 @@ export enum PlatformEvent {
 }
 
 /**
- * Represents operations related to the 
+ * Represents operations related to the
  * `BoardEditor` component.
  */
-export enum BoardEditorOperation{
+export enum BoardEditorOperation {
     Enable = "Enable",
     EnableMovePieceCursorMode = "EnableMovePieceCursorMode",
     EnableRemovePieceCursorMode = "EnableRemovePieceCursorMode",
@@ -36,14 +36,14 @@ export enum BoardEditorOperation{
     ResetBoard = "ResetBoard",
     FlipBoard = "FlipBoard",
     ChangeBoardCreatorMode = "ChangeBoardCreatorMode",
-    ToggleBoardEditorUtilityMenu = "ToggleBoardEditorUtilityMenu"
+    ToggleBoardEditorUtilityMenu = "ToggleBoardEditorUtilityMenu",
 }
 
 /**
- * Represents operations related to the 
+ * Represents operations related to the
  * `NotationMenu` component.
  */
-export enum NotationMenuOperation{
+export enum NotationMenuOperation {
     ShowNewGameUtilityMenu = "ShowNewGameUtilityMenu",
     ShowOnlineGameUtilityMenu = "ShowOnlineGameUtilityMenu",
     ShowSingleplayerGameUtilityMenu = "ShowSingleplayerGameUtilityMenu",
@@ -53,7 +53,7 @@ export enum NotationMenuOperation{
     SendPlayAgainOffer = "SendPlayAgainOffer",
     UndoMove = "UndoMove",
     Resign = "Resign",
-    AbortGame= "AbortGame",
+    AbortGame = "AbortGame",
     PlayAgain = "PlayAgain",
     PreviousMove = "PreviousMove",
     NextMove = "NextMove",
@@ -64,10 +64,10 @@ export enum NotationMenuOperation{
 }
 
 /**
- * Represents operations related to the 
+ * Represents operations related to the
  * `NavigatorModal` component.
  */
-export enum NavigatorModalOperation{
+export enum NavigatorModalOperation {
     ShowGameCreator = "ShowGameCreator",
     ShowStartPlayingBoard = "ShowStartPlayingBoard",
     ShowCreateLobby = "ShowCreateLobby",
@@ -80,22 +80,22 @@ export enum NavigatorModalOperation{
     PlayByYourself = "PlayByYourself",
     AskConfirmation = "AskConfirmation",
     Hide = "Hide",
-    Undo = "Undo"
+    Undo = "Undo",
 }
 
 /**
- * Represents operations related to the 
+ * Represents operations related to the
  * `LogConsole` component.
  */
-export enum LogConsoleOperation{
-    Clear = "Clear"
+export enum LogConsoleOperation {
+    Clear = "Clear",
 }
 
 /**
- * Represents operations related to the 
+ * Represents operations related to the
  * `SettingsMenu` component.
  */
-export enum SettingsMenuOperation{
+export enum SettingsMenuOperation {
     EnableSoundEffects = "EnableSoundEffects",
     EnablePreSelection = "EnablePreSelection",
     ShowHighlights = "ShowHighlights",
@@ -105,23 +105,23 @@ export enum SettingsMenuOperation{
     AlgebraicNotationStyle = "AlgebraicNotationStyle",
     ShowSquareIds = "ShowSquareIds",
     ClearCache = "ClearCache",
-    ResetSettings = "ResetSettings"
+    ResetSettings = "ResetSettings",
 }
 
 /**
- * Represents operations related to the 
+ * Represents operations related to the
  * `AppearanceMenu` component.
  */
-export enum AppearanceMenuOperation{
+export enum AppearanceMenuOperation {
     ChangeTheme = "ChangeTheme",
-    Reset = "Reset"
+    Reset = "Reset",
 }
 
 /**
- * Represents operations related to the 
+ * Represents operations related to the
  * `Navbar` component.
  */
-export enum NavbarOperation{
+export enum NavbarOperation {
     ShowAbout = "ShowAbout",
     ShowLogConsole = "ShowLogConsole",
     ShowAppearance = "ShowAppearance",
@@ -131,9 +131,10 @@ export enum NavbarOperation{
 /**
  * Represents a union type of all menu operations.
  */
-export type MenuOperation = BoardEditorOperation 
-    | NotationMenuOperation 
-    | NavigatorModalOperation 
+export type MenuOperation =
+    | BoardEditorOperation
+    | NotationMenuOperation
+    | NavigatorModalOperation
     | LogConsoleOperation
     | SettingsMenuOperation
     | AppearanceMenuOperation

@@ -1,12 +1,12 @@
-import { Color, GameStatus, JsonNotation, Square } from '@Chess/Types';
+import { Color, GameStatus, JsonNotation, Square } from "@Chess/Types";
 
 /**
- * SocketOperation enum for the types 
- * of operations that can be done in/by 
+ * SocketOperation enum for the types
+ * of operations that can be done in/by
  * the socket.
  * @see src/ChessPlatform.ts
  */
-export enum SocketOperation{
+export enum SocketOperation {
     CreateLobby = "CreateLobby",
     JoinLobby = "JoinLobby",
     CancelLobby = "CancelLobby",
@@ -19,13 +19,13 @@ export enum SocketOperation{
     SendPlayAgainOffer = "SendPlayAgainOffer",
     AcceptPlayAgainOffer = "AcceptPlayAgainOffer",
     DeclineSentOffer = "DeclineSentOffer",
-    CancelOffer = "CancelOffer"
+    CancelOffer = "CancelOffer",
 }
 
 /**
  * Player interface for the player data.
  */
-export interface Player{
+export interface Player {
     id: string;
     name: string;
     isOnline: boolean;
@@ -36,45 +36,45 @@ export interface Player{
  * WebSocket command types.
  */
 export enum WsTitle {
-    Created="CREATED",
-    Connected="CONNECTED",
-    Started="STARTED",
-    Finished="FINISHED",
-    Disconnected="DISCONNECTED",
-    Reconnected="RECONNECTED",
-    Moved="MOVED",
-    Aborted="ABORTED",
-    Resigned="RESIGNED",
-    DrawOffered="DRAW_OFFERED",
-    DrawAccepted="DRAW_ACCEPTED",
-    UndoOffered="UNDO_OFFERED",
-    UndoAccepted="UNDO_ACCEPTED",
-    PlayAgainOffered="PLAY_AGAIN_OFFERED",
-    PlayAgainAccepted="PLAY_AGAIN_ACCEPTED",
-    SentOfferDeclined="SENT_OFFER_DECLINED",
-    OfferCancelled="OFFER_CANCELLED",
-    SentOfferCancelled="SENT_OFFER_CANCELLED",
-    Error="ERROR",
-};
-
-/**
- * WsCreatedData interface for the 
- * created command to receive from the 
- * WebSocket.
- */
-export interface WsCreatedData{
-    lobbyId: string,
-    player: Player
+    Created = "CREATED",
+    Connected = "CONNECTED",
+    Started = "STARTED",
+    Finished = "FINISHED",
+    Disconnected = "DISCONNECTED",
+    Reconnected = "RECONNECTED",
+    Moved = "MOVED",
+    Aborted = "ABORTED",
+    Resigned = "RESIGNED",
+    DrawOffered = "DRAW_OFFERED",
+    DrawAccepted = "DRAW_ACCEPTED",
+    UndoOffered = "UNDO_OFFERED",
+    UndoAccepted = "UNDO_ACCEPTED",
+    PlayAgainOffered = "PLAY_AGAIN_OFFERED",
+    PlayAgainAccepted = "PLAY_AGAIN_ACCEPTED",
+    SentOfferDeclined = "SENT_OFFER_DECLINED",
+    OfferCancelled = "OFFER_CANCELLED",
+    SentOfferCancelled = "SENT_OFFER_CANCELLED",
+    Error = "ERROR",
 }
 
 /**
- * WsConnectedData interface for the 
- * connected command to receive from the 
+ * WsCreatedData interface for the
+ * created command to receive from the
  * WebSocket.
  */
-export interface WsConnectedData{
-    lobbyId: string,
-    player: Player
+export interface WsCreatedData {
+    lobbyId: string;
+    player: Player;
+}
+
+/**
+ * WsConnectedData interface for the
+ * connected command to receive from the
+ * WebSocket.
+ */
+export interface WsConnectedData {
+    lobbyId: string;
+    player: Player;
 }
 
 /**
@@ -82,45 +82,45 @@ export interface WsConnectedData{
  * started command to receive from the
  * WebSocket.
  */
-export interface WsStartedData{
+export interface WsStartedData {
     whitePlayer: {
-        id: string,
-        name: string, 
-        isOnline: boolean
-    }, 
+        id: string;
+        name: string;
+        isOnline: boolean;
+    };
     blackPlayer: {
-        id: string,
-        name: string, 
-        isOnline: boolean
-    }, 
-    game: string | JsonNotation
+        id: string;
+        name: string;
+        isOnline: boolean;
+    };
+    game: string | JsonNotation;
 }
 
 /**
  * WsFinishedData interface for the
- * finished command to receive from the 
+ * finished command to receive from the
  * WebSocket.
  */
-export interface WsFinishedData{
-    gameStatus: GameStatus
+export interface WsFinishedData {
+    gameStatus: GameStatus;
 }
 
 /**
  * WsResignedData interface for the
- * resigned command to receive from the 
+ * resigned command to receive from the
  * WebSocket.
  */
-export interface WsResignedData{
-    gameStatus: GameStatus
+export interface WsResignedData {
+    gameStatus: GameStatus;
 }
 
 /**
  * WsUndoData interface for the
  * undo command to send to the client.
  */
-export interface WsUndoData{
-    undoColor: Color,
-    board: string
+export interface WsUndoData {
+    undoColor: Color;
+    board: string;
 }
 
 /**
@@ -128,19 +128,19 @@ export interface WsUndoData{
  * moved command to send to the client
  * or receive from the client.
  */
-export interface WsMovedData{
-    from: Square,
-    to: Square
+export interface WsMovedData {
+    from: Square;
+    to: Square;
 }
 
 /**
  * WsDisconnectedData interface for the
- * disconnected command to receive from the 
+ * disconnected command to receive from the
  * WebSocket.
  */
-export interface WsDisconnectedData{
-    lobbyId: string,
-    color: Color
+export interface WsDisconnectedData {
+    lobbyId: string;
+    color: Color;
 }
 
 /**
@@ -148,33 +148,34 @@ export interface WsDisconnectedData{
  * reconnected command to receive from the
  * WebSocket.
  */
-export interface WsReconnectedData{
-    lobbyId: string,
-    color: Color
+export interface WsReconnectedData {
+    lobbyId: string;
+    color: Color;
 }
 
 /**
  * WsErrorData interface for the
- * error command to receive from the 
+ * error command to receive from the
  * WebSocket.
  */
-export interface WsErrorData{
-    message: string
+export interface WsErrorData {
+    message: string;
 }
 
 /**
  * WsData type for the data that can be
  * received from the WebSocket.
  */
-export type WsData = WsCreatedData
-    | WsConnectedData 
-    | WsStartedData 
+export type WsData =
+    | WsCreatedData
+    | WsConnectedData
+    | WsStartedData
     | WsFinishedData
     | WsResignedData
     | WsUndoData
-    | WsMovedData 
-    | WsReconnectedData 
-    | WsDisconnectedData 
+    | WsMovedData
+    | WsReconnectedData
+    | WsDisconnectedData
     | WsErrorData;
 
 /**
@@ -185,10 +186,10 @@ export type WsData = WsCreatedData
 export type WsMessage = [WsTitle, WsData];
 
 /**
- * Represents the parameters required to create a 
+ * Represents the parameters required to create a
  * new lobby.
  */
-export interface CreateLobbyReqParams{
+export interface CreateLobbyReqParams {
     name: string;
     board: string;
     remaining: string;
@@ -199,7 +200,7 @@ export interface CreateLobbyReqParams{
  * Represents the parameters required to join a
  * lobby.
  */
-export interface JoinLobbyReqParams{
+export interface JoinLobbyReqParams {
     name: string;
     lobbyId: string;
 }
@@ -208,7 +209,7 @@ export interface JoinLobbyReqParams{
  * Represents the parameters required to reconnect
  * to a lobby.
  */
-export interface ReconnectLobbyReqParams{
+export interface ReconnectLobbyReqParams {
     lobbyId: string;
     token: string;
 }
