@@ -39,3 +39,8 @@
         height: auto;
     }
 }
+@media screen and (min-width: 700px) and (max-width: 900px) {
+    .navbar-component{
+        max-width: calc(var(--chessboard-board-size) + 6px);
+    }
+}

@@ -617,6 +617,11 @@ main{
             order:3;
             margin-top: 0.5rem;
             flex-basis: 100%;
+
+            & #navbar{
+                margin-top: 0.5rem;
+                margin-right: 0;
+            }
         }
 
         & .center { 
@@ -631,8 +636,8 @@ main{
             }
 
             & #navbar{
-                margin-right: 0;
                 margin-top: 0.5rem;
+                margin-right: 0;
             }
         }
 
@@ -664,6 +669,10 @@ main{
         margin-bottom: 0.5rem;
     }
 
+    & #navbar{
+        margin-right: 0;
+    }
+    
     #notation-menu, #piece-creator{
         margin-left: 0;
         margin-top: 0.5rem;

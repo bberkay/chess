@@ -57,3 +57,10 @@
  * ------------------ Responsive ------------------- 
  *             700px - 900px - 1250px
  */
+@media screen and (max-width: 700px) {
+    #settings-body{
+        padding: 1rem;
+        padding-top: 1.25rem;
+        padding-bottom: 0.5rem;
+    }
+}

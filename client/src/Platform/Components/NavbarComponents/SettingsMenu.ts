@@ -346,6 +346,20 @@ export class SettingsMenu extends NavbarComponent {
         operation: SettingsMenuOperation,
         menuItem: HTMLElement
     ): void {
+        switch (operation) {
+            case SettingsMenuOperation.ClearCache:
+                LocalStorage.clear();
+                setTimeout(() => { window.location.reload() }, 500);
+                return;
+            case SettingsMenuOperation.ResetSettings:
+                LocalStorage.save(
+                    LocalStorageKey.Settings,
+                    this.getDefaultSettings()
+                );
+                this.loadSettings();
+                return;
+        }
+
         if (!(menuItem instanceof HTMLElement))
             throw new Error("The given menu item is not an HTMLElement.");
 
@@ -365,16 +379,6 @@ export class SettingsMenu extends NavbarComponent {
             );
 
         switch (operation) {
-            case SettingsMenuOperation.ClearCache:
-                LocalStorage.clear();
-                break;
-            case SettingsMenuOperation.ResetSettings:
-                LocalStorage.save(
-                    LocalStorageKey.Settings,
-                    this.getDefaultSettings()
-                );
-                this.loadSettings();
-                break;
             case SettingsMenuOperation.ChangeBoardSetting:
                 (this.getClassInstanceByType(Chess) as Chess)?.board.setConfig({
                     [settingKey]: settingValue,

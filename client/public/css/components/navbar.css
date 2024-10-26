@@ -41,3 +41,9 @@
         max-width: calc(var(--chessboard-board-size) - 8px);
     }
 }
+
+@media screen and (min-width: 700px) and (max-width: 900px) {
+    #navbar{
+        max-width: calc(var(--chessboard-board-size) - 2px);
+    }
+}

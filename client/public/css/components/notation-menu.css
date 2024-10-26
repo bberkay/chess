@@ -363,6 +363,7 @@
         & .score-table{
             width: auto;
             margin: 0;
+            height: var(--score-table-piece-icons-size);
         }
     }
 }
