@@ -23,7 +23,7 @@ import {
 import { Formatter } from "@Platform/Utils/Formatter";
 
 /**
- * A union type that contains all the config types 
+ * A union type that contains all the config types
  * to change the settings of every configurable
  * component of the chess platform.
  */
@@ -53,6 +53,20 @@ export class SettingsMenu extends NavbarComponent {
     }
 
     /**
+     * This function checks the cache and loads the settings
+     * from the local storage if they exist. If not, it saves
+     * the default settings to the local storage.
+     */
+    private loadLocalStorage(): void {
+        if (!LocalStorage.isExist(LocalStorageKey.Settings)) {
+            LocalStorage.save(
+                LocalStorageKey.Settings,
+                this.getDefaultSettings()
+            );
+        }
+    }        
+
+    /**
      * Get every default settings of the platform as an object.
      */
     private getDefaultSettings(): Settings {
@@ -68,6 +82,83 @@ export class SettingsMenu extends NavbarComponent {
      */
     protected renderComponent(): void {
         const currentSettings = LocalStorage.load(LocalStorageKey.Settings)!;
+        type SettingKey = keyof typeof currentSettings;
+        const currentSettingsKeyProxy = new Proxy(
+            currentSettings as Record<SettingKey, unknown>,
+            {
+                get(target, prop: SettingKey): SettingKey {
+                    if (prop in target) {
+                        return prop;
+                    }
+                    throw new Error(
+                        "The given setting is not a valid setting."
+                    );
+                },
+            }
+        ) as Record<SettingKey, SettingKey>;
+
+        /**
+         * Generate a toggle setting with the given values.
+         * @param operation data-menu-operation attribute value
+         * to catching the operation to be handled.
+         * @param settingKey The name of the setting also used as
+         * the key for handling the data-menu-operation.
+         * @param settingValue The current value of the setting.
+         * It will be also checked if the setting is enabled or not.
+         */
+        const generateToggleSetting = (
+            operation: SettingsMenuOperation,
+            settingKey: SettingKey,
+            settingValue: boolean
+        ): string => {
+            return `
+            <span>${Formatter.camelCaseToTitleCase(settingKey)}</span>
+            <label class="switch">
+                    <input type="checkbox" data-menu-operation="${operation}" data-setting-key="${settingKey}" ${
+                settingValue ? `checked="true"` : ``
+            }>
+                    <span class="slider round"></span>
+                </label>
+            `;
+        };
+
+        /**
+         * Generate a dropdown setting with the given values.
+         * @param operation data-menu-operation attribute value
+         * to catching the operation to be handled.
+         * @param settingKey The name of the setting also used as
+         * the key for handling the data-menu-operation.
+         * @param settingValue The current value of the setting.
+         * It will be shown as the title of the dropdown button.
+         * @param values The values for the dropdown items.
+         */
+        const generateDropdownSetting = (
+            operation: SettingsMenuOperation,
+            settingKey: SettingKey,
+            settingValue: string,
+            values: string[]
+        ): string => {
+            return `
+            <span>${Formatter.camelCaseToPascalCase(settingKey)}</span>
+            <div class="dropdown">
+                <button class="dropdown-button"><span class="dropdown-title">${Formatter.camelCaseToTitleCase(
+                    settingValue
+                )}</span> <span class="down-icon">▾</span></button>
+                <div class="dropdown-content">
+                    ${values
+                        .map((c: string) => {
+                            return `<button data-menu-operation="${operation}" data-setting-key="${settingKey}" class="dropdown-item ${
+                                c.trim() == settingValue.trim()
+                                    ? "selected"
+                                    : ""
+                            }">${Formatter.camelCaseToTitleCase(c)}</button>`;
+                        })
+                        .join("")}
+                </div>
+            </div>
+            `;
+        };
+
         this.loadHTML(
             SETTINGS_MENU_ID,
             `
@@ -75,153 +166,69 @@ export class SettingsMenu extends NavbarComponent {
                 <fieldset>
                     <legend>Board</legend>
                     <div class="settings-item">
-                        <span>${Formatter.pascalCaseToTitleCase(
-                            SettingsMenuOperation.EnableSoundEffects
-                        )}</span>
-                        <label class="switch">
-                            <input data-menu-operation="${
-                                SettingsMenuOperation.EnableSoundEffects
-                            }" type="checkbox" ${
-                currentSettings.enableSoundEffects ? `checked="true"` : ``
-            }>
-                            <span class="slider round"></span>
-                        </label>
+                        ${generateToggleSetting(
+                            SettingsMenuOperation.ChangeBoardSetting,
+                            currentSettingsKeyProxy.enableSoundEffects,
+                            currentSettings.enableSoundEffects
+                        )}
                     </div>
                     <div class="settings-item">
-                        <span>${Formatter.pascalCaseToTitleCase(
-                            SettingsMenuOperation.EnablePreSelection
-                        )}</span>
-                        <label class="switch">
-                            <input data-menu-operation="${
-                                SettingsMenuOperation.EnablePreSelection
-                            }" type="checkbox" ${
-                currentSettings.enablePreSelection ? `checked="true"` : ``
-            }>
-                            <span class="slider round"></span>
-                        </label>
+                        ${generateToggleSetting(
+                            SettingsMenuOperation.ChangeBoardSetting,
+                            currentSettingsKeyProxy.enablePreSelection,
+                            currentSettings.enablePreSelection
+                        )}
                     </div>
                     <div class="settings-item">
-                        <span>${Formatter.pascalCaseToTitleCase(
-                            SettingsMenuOperation.ShowHighlights
-                        )}</span>
-                        <label class="switch">
-                            <input data-menu-operation="${
-                                SettingsMenuOperation.ShowHighlights
-                            }" type="checkbox" ${
-                currentSettings.showHighlights ? `checked="true"` : ``
-            }>
-                            <span class="slider round"></span>
-                        </label>
+                        ${generateToggleSetting(
+                            SettingsMenuOperation.ChangeBoardSetting,
+                            currentSettingsKeyProxy.showHighlights,
+                            currentSettings.showHighlights
+                        )}
                     </div>
                     <div class="settings-item">
-                        <span>${Formatter.pascalCaseToTitleCase(
-                            SettingsMenuOperation.EnableWinnerAnimation
-                        )}</span>
-                        <label class="switch">
-                            <input data-menu-operation="${
-                                SettingsMenuOperation.EnableWinnerAnimation
-                            }" type="checkbox" ${
-                currentSettings.enableWinnerAnimation ? `checked="true"` : ``
-            }>
-                            <span class="slider round"></span>
-                        </label>
+                        ${generateToggleSetting(
+                            SettingsMenuOperation.ChangeBoardSetting,
+                            currentSettingsKeyProxy.enableWinnerAnimation,
+                            currentSettings.enableWinnerAnimation
+                        )}
                     </div>
                     <div class="settings-item">
-                        <span>${Formatter.pascalCaseToTitleCase(
-                            SettingsMenuOperation.MovementType
-                        )}</span>
-                        <div class="dropdown">
-                            <button class="dropdown-button"><span class="dropdown-title">${Formatter.pascalCaseToTitleCase(
-                                currentSettings.movementType as string
-                            )}</span> <span class="down-icon">▾</span></button>
-                            <div class="dropdown-content">
-                                ${Object.values(MovementType)
-                                    .map((c: string) => {
-                                        return `<button data-menu-operation="${
-                                            SettingsMenuOperation.MovementType
-                                        }" class="dropdown-item ${
-                                            c.trim() ==
-                                            currentSettings.movementType.trim()
-                                                ? "selected"
-                                                : ""
-                                        }">${Formatter.pascalCaseToTitleCase(
-                                            c
-                                        )}</button>`;
-                                    })
-                                    .join("")}
-                            </div>
-                        </div>
+                        ${generateDropdownSetting(
+                            SettingsMenuOperation.ChangeBoardSetting,
+                            currentSettingsKeyProxy.movementType,
+                            currentSettings.movementType,
+                            Object.values(MovementType)
+                        )}
                     </div>
                     <div class="settings-item">
-                        <span>${Formatter.pascalCaseToTitleCase(
-                            SettingsMenuOperation.PieceAnimationSpeed
-                        )}</span>
-                        <div class="dropdown">
-                            <button class="dropdown-button"><span class="dropdown-title">${Formatter.pascalCaseToTitleCase(
-                                currentSettings.pieceAnimationSpeed
-                            )}</span> <span class="down-icon">▾</span></button>
-                            <div class="dropdown-content">
-                                ${Object.values(PieceAnimationSpeed)
-                                    .map((c: string) => {
-                                        return `<button data-menu-operation="${
-                                            SettingsMenuOperation.PieceAnimationSpeed
-                                        }" class="dropdown-item ${
-                                            c.trim() ==
-                                            currentSettings.pieceAnimationSpeed.trim()
-                                                ? "selected"
-                                                : ""
-                                        }">${Formatter.pascalCaseToTitleCase(
-                                            c
-                                        )}</button>`;
-                                    })
-                                    .join("")}
-                            </div>
-                        </div>
+                        ${generateDropdownSetting(
+                            SettingsMenuOperation.ChangeBoardSetting,
+                            currentSettingsKeyProxy.pieceAnimationSpeed,
+                            currentSettings.pieceAnimationSpeed,
+                            Object.values(PieceAnimationSpeed)
+                        )}
                     </div>
                 </fieldset>
                 <fieldset>
                     <legend>Notation Menu</legend>
                     <div class="settings-item">
-                        <span>${Formatter.pascalCaseToTitleCase(
-                            SettingsMenuOperation.AlgebraicNotationStyle
-                        )}</span>
-                        <div class="dropdown">
-                            <button class="dropdown-button"><span class="dropdown-title">${Formatter.pascalCaseToTitleCase(
-                                currentSettings.algebraicNotationStyle
-                            )}</span> <span class="down-icon">▾</span></button>
-                            <div class="dropdown-content">
-                                ${Object.values(AlgebraicNotationStyle)
-                                    .map((c: string) => {
-                                        return `<button data-menu-operation="${
-                                            SettingsMenuOperation.AlgebraicNotationStyle
-                                        }" class="dropdown-item ${
-                                            c.trim() ==
-                                            currentSettings.algebraicNotationStyle.trim()
-                                                ? "selected"
-                                                : ""
-                                        }">${Formatter.pascalCaseToTitleCase(
-                                            c
-                                        )}</button>`;
-                                    })
-                                    .join("")}
-                            </div>
-                        </div>
+                        ${generateDropdownSetting(
+                            SettingsMenuOperation.ChangeNotationMenuSetting,
+                            currentSettingsKeyProxy.algebraicNotationStyle,
+                            currentSettings.algebraicNotationStyle,
+                            Object.values(AlgebraicNotationStyle)
+                        )}
                     </div>
                 </fieldset>
                 <fieldset>
                     <legend>Log Console</legend>
                     <div class="settings-item">
-                        <span>${Formatter.pascalCaseToTitleCase(
-                            SettingsMenuOperation.ShowSquareIds
-                        )}</span>
-                        <label class="switch">
-                            <input data-menu-operation="${
-                                SettingsMenuOperation.ShowSquareIds
-                            }" type="checkbox" ${
-                currentSettings.showSquareIds ? `checked="true"` : ``
-            }>
-                            <span class="slider round"></span>
-                        </label>
+                        ${generateToggleSetting(
+                            SettingsMenuOperation.ChangeLogConsoleSetting,
+                            currentSettingsKeyProxy.showSquareIds,
+                            currentSettings.showSquareIds
+                        )}
                     </div>
                 </fieldset>
             </div>
@@ -242,42 +249,14 @@ export class SettingsMenu extends NavbarComponent {
     }
 
     /**
-     * Load the settings from the local storage.
-     */
-    private loadLocalStorage(): void {
-        if (!LocalStorage.isExist(LocalStorageKey.Settings))
-            LocalStorage.save(
-                LocalStorageKey.Settings,
-                this.getDefaultSettings()
-            );
-
-        const currentSettings = LocalStorage.load(LocalStorageKey.Settings);
-        for (const setting in currentSettings) {
-            this.handleOperation(
-                setting as SettingsMenuOperation,
-                currentSettings[setting as keyof Settings]
-            );
-        }
-    }
-
-    /**
      * Show the saved settings on the settings menu if they
      * exist in local storage. If not, show the default settings.
      */
     private loadSettings(): void {
-        if (!LocalStorage.isExist(LocalStorageKey.Settings)) {
-            LocalStorage.save(
-                LocalStorageKey.Settings,
-                this.getDefaultSettings()
-            );
-        }
-
         const settings = LocalStorage.load(LocalStorageKey.Settings);
         for (const setting in settings) {
             const settingItem = document.querySelector(
-                `#${SETTINGS_MENU_ID} [data-menu-operation="${Formatter.camelCaseToPascalCase(
-                    setting
-                )}"]`
+                `#${SETTINGS_MENU_ID} [data-setting-key="${setting}"]`
             );
             if (settingItem) {
                 if (settingItem.getAttribute("type") === "checkbox") {
@@ -314,7 +293,10 @@ export class SettingsMenu extends NavbarComponent {
     /**
      * Save given setting to the local storage.
      */
-    private saveSetting<K extends keyof Settings>(setting: K, newValue: Settings[K]): void {
+    private saveSetting<K extends keyof Settings>(
+        setting: K,
+        newValue: Settings[K]
+    ): void {
         const settings = LocalStorage.isExist(LocalStorageKey.Settings)
             ? LocalStorage.load(LocalStorageKey.Settings)!
             : this.getDefaultSettings()!;
@@ -350,35 +332,39 @@ export class SettingsMenu extends NavbarComponent {
      * @param operation The operation to be handled.
      * @param menuItem The menu item that the operation will be applied.
      *
-     * @example handleOperation(SettingsMenuOperation.EnableSoundEffects, document.querySelector("#settings-menu [data-menu-operation='EnableSoundEffects']"));
-     * This example will find the menu item and according to its
-     * type(checkbox or text), it will change the value of the setting.
-     *
-     * @example handleOperation(SettingsMenuOperation.EnableSoundEffects, true);
-     * This example will change the value of the setting to true.
-     *
-     * @example handleOperation(SettingsMenuOperation.MovementType, MovementType.DragAndDrop);
-     * This example will change the value of the setting to DragAndDrop.
+     * @example handleOperation(
+     *  SettingsMenuOperation.ChangeBoardSetting,
+     *  document.querySelector("#settings-menu [data-menu-operation='ChangeBoardSetting']")
+     * );
+     * This example finds the setting key from the given `menuItem.getAttribute("data-setting-key")`
+     * and takes its value from the `menuItem.getAttribute("checked")` if it is a checkbox or
+     * from the `menuItem.textContent` if it is a dropdown. Then, it saves the setting to the
+     * local storage and applies the setting to its class instance like `Chess` or `LogConsole`
+     * by calling the `setConfig` method of the class instance.
      */
     public handleOperation(
         operation: SettingsMenuOperation,
-        menuItem: unknown
+        menuItem: HTMLElement
     ): void {
-        let newValue;
-        if (menuItem instanceof HTMLElement) {
-            newValue =
-                menuItem.getAttribute("type") === "checkbox"
-                    ? menuItem.getAttribute("checked") === null
-                    : menuItem.textContent
-                    ? Formatter.titleCaseToCamelCase(
-                          menuItem.textContent
-                      ).trim()
-                    : "";
-        } else {
-            newValue = menuItem;
-        }
+        if (!(menuItem instanceof HTMLElement))
+            throw new Error("The given menu item is not an HTMLElement.");
 
-        switch (Formatter.camelCaseToPascalCase(operation)) {
+        const settingKey = menuItem.getAttribute(
+            "data-setting-key"
+        ) as keyof Settings;
+        const settingValue =
+            menuItem.getAttribute("type") === "checkbox"
+                ? menuItem.getAttribute("checked") === null
+                : menuItem.textContent
+                ? Formatter.titleCaseToCamelCase(menuItem.textContent).trim()
+                : "";
+
+        if (!settingKey || !settingValue)
+            throw new Error(
+                "The setting key or value is not found. Please check the given menu item and its data-setting-key and data-setting-value attributes."
+            );
+
+        switch (operation) {
             case SettingsMenuOperation.ClearCache:
                 LocalStorage.clear();
                 break;
@@ -389,38 +375,30 @@ export class SettingsMenu extends NavbarComponent {
                 );
                 this.loadSettings();
                 break;
-            case SettingsMenuOperation.EnableSoundEffects:
-            case SettingsMenuOperation.EnablePreSelection:
-            case SettingsMenuOperation.ShowHighlights:
-            case SettingsMenuOperation.EnableWinnerAnimation:
-            case SettingsMenuOperation.PieceAnimationSpeed:
-            case SettingsMenuOperation.MovementType:
-                operation = Formatter.pascalCaseToCamelCase(
-                    operation
-                ) as SettingsMenuOperation;
+            case SettingsMenuOperation.ChangeBoardSetting:
                 (this.getClassInstanceByType(Chess) as Chess)?.board.setConfig({
-                    [operation]: newValue,
+                    [settingKey]: settingValue,
                 });
-                this.saveSetting(operation as keyof Settings, newValue as Settings[typeof operation]);
                 break;
-            case SettingsMenuOperation.ShowSquareIds:
-                operation = Formatter.pascalCaseToCamelCase(
-                    operation
-                ) as SettingsMenuOperation;
+            case SettingsMenuOperation.ChangeLogConsoleSetting:
                 (
                     this.getClassInstanceByType(LogConsole) as LogConsole
-                ).setConfig({ [operation]: newValue });
-                this.saveSetting(operation, newValue);
+                ).setConfig({
+                    [settingKey]: settingValue,
+                });
                 break;
-            case SettingsMenuOperation.AlgebraicNotationStyle:
-                operation = Formatter.pascalCaseToCamelCase(
-                    operation
-                ) as SettingsMenuOperation;
+            case SettingsMenuOperation.ChangeNotationMenuSetting:
                 (
                     this.getClassInstanceByType(NotationMenu) as NotationMenu
-                ).setConfig({ [operation]: newValue });
-                this.saveSetting(operation, newValue);
+                ).setConfig({
+                    [settingKey]: settingValue,
+                });
                 break;
         }
+
+        this.saveSetting(
+            settingKey as keyof Settings,
+            settingValue as Settings[typeof settingKey]
+        );
     }
 }

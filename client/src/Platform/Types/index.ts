@@ -96,37 +96,11 @@ export enum LogConsoleOperation {
  * `SettingsMenu` component.
  */
 export enum SettingsMenuOperation {
-    /**
-     * Settings menu operations related to the
-     * `Toggle` buttons. These are also camelCased
-     * because they are used as the key in the config
-     * of their respective components. 
-     * 
-     * For example, `showSquareIds` is used as the
-     * key in the config of the `LogConsole` component.
-     */
-    EnableSoundEffects = "enableSoundEffects",
-    EnablePreSelection = "enablePreSelection",
-    ShowHighlights = "showHighlights",
-    EnableWinnerAnimation = "enableWinnerAnimation",
-    MovementType = "movementType",
-    PieceAnimationSpeed = "pieceAnimationSpeed",
-    AlgebraicNotationStyle = "algebraicNotationStyle",
-    ShowSquareIds = "showSquareIds",
-    
-    /**
-     * Even though these operations are not 
-     * related to the `Toggle` buttons, 
-     * they are still camelCased to avoid
-     * errors like "Element implicitly has 
-     * an 'any' type..." when using SettingsMenuOperation
-     * enum as the key in the config of the 
-     * components.
-     * 
-     * @see src/Platform/Components/NavbarComponents/SettingsMenu.ts
-     */
-    ClearCache = "clearCache", 
-    ResetSettings = "resetSettings",
+    ChangeBoardSetting = "ChangeBoardSetting",
+    ChangeNotationMenuSetting = "ChangeNotationMenuSetting",
+    ChangeLogConsoleSetting = "ChangeLogConsoleSetting",
+    ClearCache = "ClearCache", 
+    ResetSettings = "ResetSettings",
 }
 
 /**
