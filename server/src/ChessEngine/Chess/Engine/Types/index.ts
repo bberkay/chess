@@ -15,22 +15,22 @@ export interface Piece {
  * @see src/Engine/Calculator/PathCalculator For more information.
  */
 export type Route = {
-    [MoveRoute.BottomRight]?: Square[],
-    [MoveRoute.Right]?: Square[],
-    [MoveRoute.TopRight]?: Square[],
-    [MoveRoute.Top]?: Square[],
-    [MoveRoute.TopLeft]?: Square[],
-    [MoveRoute.Left]?: Square[],
-    [MoveRoute.BottomLeft]?: Square[],
-    [MoveRoute.Bottom]?: Square[]
-    [MoveRoute.L]?: Square[],
-}
+    [MoveRoute.BottomRight]?: Square[];
+    [MoveRoute.Right]?: Square[];
+    [MoveRoute.TopRight]?: Square[];
+    [MoveRoute.Top]?: Square[];
+    [MoveRoute.TopLeft]?: Square[];
+    [MoveRoute.Left]?: Square[];
+    [MoveRoute.BottomLeft]?: Square[];
+    [MoveRoute.Bottom]?: Square[];
+    [MoveRoute.L]?: Square[];
+};
 
 /**
  * @description MoveRoute enum for the route of the move.
  * @see src/Engine/Calculator/PathCalculator For more information.
  */
-export enum MoveRoute{
+export enum MoveRoute {
     BottomLeft = "BottomLeft",
     BottomRight = "BottomRight",
     TopLeft = "TopLeft",
@@ -39,14 +39,14 @@ export enum MoveRoute{
     Right = "Right",
     Top = "Top",
     Bottom = "Bottom",
-    L = "L"
+    L = "L",
 }
 
 /**
  * @description NotationSymbol enum for the notation symbols.
  * @see src/Engine/ChessEngine For more information.
  */
-export enum NotationSymbol{
+export enum NotationSymbol {
     Capture = "x",
     Check = "+",
     Checkmate = "#",

@@ -1,14 +1,24 @@
-import { Square, Color, CastlingType,GameStatus, Castling, Scores, Move, Durations, JsonNotation } from "../../Types";
+import {
+    Square,
+    Color,
+    CastlingType,
+    GameStatus,
+    Castling,
+    Scores,
+    Move,
+    Durations,
+    JsonNotation,
+} from "../../Types";
 import { Piece } from "../Types";
 
 /**
  * This class is used for the store the board.
  */
 export class Board {
-
     /**
      * Properties of the Board class.
      */
+    // prettier-ignore
     protected static currentBoard: Record<Square, Piece | null> = {
         [Square.a1]: null, [Square.a2]: null, [Square.a3]: null, [Square.a4]: null, [Square.a5]: null, [Square.a6]: null, [Square.a7]: null, [Square.a8]: null,
         [Square.b1]: null, [Square.b2]: null, [Square.b3]: null, [Square.b4]: null, [Square.b5]: null, [Square.b6]: null, [Square.b7]: null, [Square.b8]: null,
@@ -27,12 +37,12 @@ export class Board {
         [CastlingType.WhiteLong]: true,
         [CastlingType.WhiteShort]: true,
         [CastlingType.BlackLong]: true,
-        [CastlingType.BlackShort]: true
+        [CastlingType.BlackShort]: true,
     };
     protected static scores: Scores = {
-        [Color.White]: {score: 0, pieces: []},
-        [Color.Black]: {score: 0, pieces: []}
-    }
+        [Color.White]: { score: 0, pieces: [] },
+        [Color.Black]: { score: 0, pieces: [] },
+    };
     protected static algebraicNotation: string[] = [];
     protected static moveHistory: Move[] = [];
     protected static durations: Durations | null = null;

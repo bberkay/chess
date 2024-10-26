@@ -11,6 +11,11 @@ import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage.ts";
 import { NOTATION_MENU_ID } from "@Platform/Consts";
 import { SoundEffect } from "@Chess/Board/Types/index.ts";
 
+/**
+ * Represents the type of the utility menu.
+ * Each utility menu contains different buttons
+ * like abort game, resign, draw, undo, etc.
+ */
 enum UtilityMenuType {
     OnlineGame = "online-game-utility-menu",
     SingleplayerGame = "singleplayer-game-utility-menu",
@@ -20,21 +25,38 @@ enum UtilityMenuType {
     Offer = "offer-utility-menu",
 }
 
+/**
+ * Represents the style of the algebraic notation.
+ * For example:
+ * - OnlyText: "Qf3"
+ * - WithIcons: "&#9819;f3"
+ */
 export enum AlgebraicNotationStyle {
     OnlyText = "OnlyText",
     WithIcons = "WithIcons",
 }
 
+/**
+ * Represents the configuration of the notation menu.
+ */
 export interface Config {
     algebraicNotationStyle: AlgebraicNotationStyle;
 }
 
+/**
+ * Default configuration of the notation menu.
+ */
 export const DEFAULT_CONFIG: Config = {
     algebraicNotationStyle: AlgebraicNotationStyle.WithIcons,
 };
 
 /**
- * This class provide a table to show the notation.
+ * This class provides the notation table,
+ * player cards, utility menu for different
+ * game states like online game, singleplayer
+ * game, new game, etc. Each utility menu
+ * contains different buttons like abort game,
+ * resign, draw, undo, etc.
  */
 export class NotationMenu extends Component {
     public readonly id: string = NOTATION_MENU_ID;
@@ -50,7 +72,7 @@ export class NotationMenu extends Component {
     private _isUndoButtonShown: boolean = false;
 
     /**
-     * Constructor of the LogConsole class.
+     * Constructor of the NotationMenu class.
      */
     constructor(chess: Chess) {
         super();

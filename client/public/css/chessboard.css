@@ -10,7 +10,7 @@
      * will be 100px(1/8 of the board size), font size will be 16px(1/50 of
       the board size), and the piece size will be 80px(1/10 of the board size).
      */
-    --chessboard-board-size: 70vh;
+    --chessboard-board-size: 600px;
 
     /* Colors, use hex code */
     --chessboard-default-white-square-color: #879A86;
@@ -111,7 +111,7 @@
     grid-template-columns: repeat(8, 1fr);
     width:var(--chessboard-board-size);
     height:var(--chessboard-board-size);
-    gap: 0;
+    gap: 0!important;
     cursor: pointer!important;
     border: 2px solid var(--chessboard-border-color);
     -webkit-tap-highlight-color: transparent;

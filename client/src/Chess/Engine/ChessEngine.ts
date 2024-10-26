@@ -33,6 +33,10 @@ import { Locator } from "./Move/Utils/Locator.ts";
 import { Flattener } from "./Move/Utils/Flattener.ts";
 import { Logger } from "@Services/Logger.ts";
 
+/**
+ * MoveValidationError class is used when the given 
+ * move is not valid.
+ */
 export class MoveValidationError extends Error {
     constructor(message: string) {
         super(message);

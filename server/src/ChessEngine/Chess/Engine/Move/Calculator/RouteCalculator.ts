@@ -1,8 +1,8 @@
-import {Color, PieceType, Square} from "../../../Types";
-import {MoveRoute, Piece, Route} from "../../Types";
-import {DirectionCalculator} from "./DirectionCalculator.ts";
-import {Flattener} from "../Utils/Flattener.ts";
-import {BoardQuerier} from "../../Board/BoardQuerier.ts";
+import { Color, PieceType, Square } from "../../../Types";
+import { MoveRoute, Piece, Route } from "../../Types";
+import { DirectionCalculator } from "./DirectionCalculator.ts";
+import { Flattener } from "../Utils/Flattener.ts";
+import { BoardQuerier } from "../../Board/BoardQuerier.ts";
 
 /**
  * This class calculates the route of the given piece.
@@ -18,17 +18,17 @@ import {BoardQuerier} from "../../Board/BoardQuerier.ts";
  * Note: This function does not control check scenarios(it means, piece will not protect the king).
  * It only calculates the route. So, please use this class with MoveEngine class.
  */
-export class RouteCalculator{
-
+export class RouteCalculator {
     /**
      * This function returns the route of the piece on given square.
      * For more information, please check the class description.
      */
-    public static getRouteBySquare(square: Square, pieceSensitivity: boolean = true): Route
-    {
+    public static getRouteBySquare(
+        square: Square,
+        pieceSensitivity: boolean = true
+    ): Route {
         const piece: Piece | null = BoardQuerier.getPieceOnSquare(square);
-        if(!piece)
-            return {};
+        if (!piece) return {};
 
         switch (piece.getType()) {
             case PieceType.Pawn:
@@ -53,18 +53,26 @@ export class RouteCalculator{
      * For more information, please check the class description.
      * @See src/Chess/Engine/Move/Calculator/RouteCalculator.ts
      */
-    public static getPawnRoute(square: Square, pieceSensitivity: boolean = true): Route
-    {
+    public static getPawnRoute(
+        square: Square,
+        pieceSensitivity: boolean = true
+    ): Route {
         // Get first 2 vertical squares and first 1 diagonal squares.
         return {
-            ...DirectionCalculator.getVerticalSquares(square, null, 2, pieceSensitivity),
-            ...DirectionCalculator.getDiagonalSquares(
-                square, 
-                BoardQuerier.getColorBySquare(square) ?? BoardQuerier.getTurnColor(), 
-                1, 
+            ...DirectionCalculator.getVerticalSquares(
+                square,
+                null,
+                2,
                 pieceSensitivity
-            )
-        }
+            ),
+            ...DirectionCalculator.getDiagonalSquares(
+                square,
+                BoardQuerier.getColorBySquare(square) ??
+                    BoardQuerier.getTurnColor(),
+                1,
+                pieceSensitivity
+            ),
+        };
     }
 
     /**
@@ -72,23 +80,37 @@ export class RouteCalculator{
      * For more information, please check the class description.
      * @See src/Chess/Engine/Move/Calculator/RouteCalculator.ts
      */
-    public static getKnightRoute(square: Square, pieceSensitivity: boolean = true): Route
-    {
+    public static getKnightRoute(
+        square: Square,
+        pieceSensitivity: boolean = true
+    ): Route {
         /**
          * Find player's color by given square. If square has no piece,
          * then use BoardQuerier.
          */
-        const playerColor = BoardQuerier.getColorBySquare(square) ?? BoardQuerier.getTurnColor();
+        const playerColor =
+            BoardQuerier.getColorBySquare(square) ??
+            BoardQuerier.getTurnColor();
 
         // Knight can't move to any direction, it can move only 2 horizontal and 1 vertical or 2 vertical and 1 horizontal.
         // So, we can't return Path type here.
-        let route: { [MoveRoute.L]: Square[] } = { [MoveRoute.L]: [] };
+        const route: { [MoveRoute.L]: Square[] } = { [MoveRoute.L]: [] };
 
         // Get the 2 horizontal and vertical squares.
         const firstPath = {
-            ...DirectionCalculator.getVerticalSquares(square, playerColor,2, false),
-            ...DirectionCalculator.getHorizontalSquares(square, playerColor, 2, false)
-        }
+            ...DirectionCalculator.getVerticalSquares(
+                square,
+                playerColor,
+                2,
+                false
+            ),
+            ...DirectionCalculator.getHorizontalSquares(
+                square,
+                playerColor,
+                2,
+                false
+            ),
+        };
 
         /**
          * Now, get first squares of the firstPath's horizontal and vertical directions.
@@ -98,14 +120,16 @@ export class RouteCalculator{
          */
         for (const path in firstPath) {
             // If knight can't move 2 horizontal or 2 vertical, then skip the path.
-            if(firstPath[path as MoveRoute]!.length != 2)
-                continue;
+            if (firstPath[path as MoveRoute]!.length != 2) continue;
 
             /**
              * Get the last square of the path. Example, if the path is MoveRoute.Bottom and the squares are
              * [Square.b1, Square.b2], then the last square is Square.b2.
              */
-            const lastSquare = firstPath[path as MoveRoute]![firstPath[path as MoveRoute]!.length - 1];
+            const lastSquare =
+                firstPath[path as MoveRoute]![
+                    firstPath[path as MoveRoute]!.length - 1
+                ];
 
             /**
              * Get the horizontal and vertical squares of the last square of the path.
@@ -116,13 +140,26 @@ export class RouteCalculator{
             let lastRoute: Route | null = null;
 
             // If the path is vertical, then get the horizontal squares of last square of the path.
-            if(path == MoveRoute.Bottom || path == MoveRoute.Top)
-                lastRoute = DirectionCalculator.getHorizontalSquares(lastSquare, playerColor, 1, pieceSensitivity);
-            else // If the path is horizontal, then get the vertical squares of last square of the path.
-                lastRoute = DirectionCalculator.getVerticalSquares(lastSquare, playerColor, 1, pieceSensitivity);
+            if (path == MoveRoute.Bottom || path == MoveRoute.Top)
+                lastRoute = DirectionCalculator.getHorizontalSquares(
+                    lastSquare,
+                    playerColor,
+                    1,
+                    pieceSensitivity
+                );
+            // If the path is horizontal, then get the vertical squares of last square of the path.
+            else
+                lastRoute = DirectionCalculator.getVerticalSquares(
+                    lastSquare,
+                    playerColor,
+                    1,
+                    pieceSensitivity
+                );
 
             // Update the route
-            route[MoveRoute.L] = Flattener.flattenSquares(lastRoute).concat(route[MoveRoute.L]);
+            route[MoveRoute.L] = Flattener.flattenSquares(lastRoute).concat(
+                route[MoveRoute.L]
+            );
         }
 
         return route;
@@ -133,16 +170,19 @@ export class RouteCalculator{
      * For more information, please check the class description.
      * @See src/Chess/Engine/Move/Calculator/RouteCalculator.ts
      */
-    public static getBishopRoute(square: Square, pieceSensitivity: boolean = true): Route
-    {
+    public static getBishopRoute(
+        square: Square,
+        pieceSensitivity: boolean = true
+    ): Route {
         /**
          * Get the diagonal squares with color of square
          */
         return DirectionCalculator.getDiagonalSquares(
-            square, 
-            BoardQuerier.getColorBySquare(square) ?? BoardQuerier.getTurnColor(),
+            square,
+            BoardQuerier.getColorBySquare(square) ??
+                BoardQuerier.getTurnColor(),
             null,
-            pieceSensitivity,
+            pieceSensitivity
         );
     }
 
@@ -151,14 +191,28 @@ export class RouteCalculator{
      * For more information, please check the class description.
      * @See src/Chess/Engine/Move/Calculator/RouteCalculator.ts
      */
-    public static getRookRoute(square: Square, pieceSensitivity: boolean = true): Route
-    {
-        const playerColor = BoardQuerier.getColorBySquare(square) ?? BoardQuerier.getTurnColor();
+    public static getRookRoute(
+        square: Square,
+        pieceSensitivity: boolean = true
+    ): Route {
+        const playerColor =
+            BoardQuerier.getColorBySquare(square) ??
+            BoardQuerier.getTurnColor();
 
         // Get the horizontal and vertical squares.
         return {
-            ...DirectionCalculator.getHorizontalSquares(square, playerColor, null, pieceSensitivity),
-            ...DirectionCalculator.getVerticalSquares(square, playerColor, null, pieceSensitivity)
+            ...DirectionCalculator.getHorizontalSquares(
+                square,
+                playerColor,
+                null,
+                pieceSensitivity
+            ),
+            ...DirectionCalculator.getVerticalSquares(
+                square,
+                playerColor,
+                null,
+                pieceSensitivity
+            ),
         };
     }
 
@@ -167,15 +221,34 @@ export class RouteCalculator{
      * For more information, please check the class description.
      * @See src/Chess/Engine/Move/Calculator/RouteCalculator.ts
      */
-    public static getQueenRoute(square: Square, pieceSensitivity: boolean = true): Route
-    {
-        const playerColor = BoardQuerier.getColorBySquare(square) ?? BoardQuerier.getTurnColor();
+    public static getQueenRoute(
+        square: Square,
+        pieceSensitivity: boolean = true
+    ): Route {
+        const playerColor =
+            BoardQuerier.getColorBySquare(square) ??
+            BoardQuerier.getTurnColor();
 
         // Get the horizontal, vertical and diagonal squares.
         return {
-            ...DirectionCalculator.getHorizontalSquares(square, playerColor, null ,pieceSensitivity),
-            ...DirectionCalculator.getVerticalSquares(square, playerColor, null, pieceSensitivity),
-            ...DirectionCalculator.getDiagonalSquares(square, playerColor, null, pieceSensitivity)
+            ...DirectionCalculator.getHorizontalSquares(
+                square,
+                playerColor,
+                null,
+                pieceSensitivity
+            ),
+            ...DirectionCalculator.getVerticalSquares(
+                square,
+                playerColor,
+                null,
+                pieceSensitivity
+            ),
+            ...DirectionCalculator.getDiagonalSquares(
+                square,
+                playerColor,
+                null,
+                pieceSensitivity
+            ),
         };
     }
 
@@ -184,19 +257,38 @@ export class RouteCalculator{
      * For more information, please check the class description.
      * @See src/Chess/Engine/Move/Calculator/RouteCalculator.ts
      */
-    public static getKingRoute(square: Square, pieceSensitivity: boolean = true): Route
-    {
+    public static getKingRoute(
+        square: Square,
+        pieceSensitivity: boolean = true
+    ): Route {
         /**
          * Find player's color by given square. If square has no piece,
          * then use BoardQuerier.
          */
-        const playerColor = BoardQuerier.getColorBySquare(square) ?? BoardQuerier.getTurnColor();
+        const playerColor =
+            BoardQuerier.getColorBySquare(square) ??
+            BoardQuerier.getTurnColor();
 
         // Get the horizontal, vertical and diagonal squares but only one square away.
         return {
-            ...DirectionCalculator.getHorizontalSquares(square, playerColor, 1, pieceSensitivity),
-            ...DirectionCalculator.getVerticalSquares(square, playerColor, 1, pieceSensitivity),
-            ...DirectionCalculator.getDiagonalSquares(square, playerColor, 1, pieceSensitivity)
+            ...DirectionCalculator.getHorizontalSquares(
+                square,
+                playerColor,
+                1,
+                pieceSensitivity
+            ),
+            ...DirectionCalculator.getVerticalSquares(
+                square,
+                playerColor,
+                1,
+                pieceSensitivity
+            ),
+            ...DirectionCalculator.getDiagonalSquares(
+                square,
+                playerColor,
+                1,
+                pieceSensitivity
+            ),
         };
     }
 
@@ -206,19 +298,41 @@ export class RouteCalculator{
      * For more information, please check the class description.
      * @See src/Chess/Engine/Move/Calculator/RouteCalculator.ts
      */
-    public static getAllRoutes(square: Square, color: Color | null = null, distanceLimit: number | null = null, pieceSensitivity: boolean = true): Route
-    {
+    public static getAllRoutes(
+        square: Square,
+        color: Color | null = null,
+        distanceLimit: number | null = null,
+        pieceSensitivity: boolean = true
+    ): Route {
         /**
          * Find player's color by given square. If square has no piece,
          * then use BoardQuerier.
          */
-        const playerColor = BoardQuerier.getColorBySquare(square) ?? BoardQuerier.getTurnColor();
+        color =
+            color ??
+            BoardQuerier.getColorBySquare(square) ??
+            BoardQuerier.getTurnColor();
 
         return {
-            ...DirectionCalculator.getHorizontalSquares(square, playerColor, distanceLimit, pieceSensitivity),
-            ...DirectionCalculator.getVerticalSquares(square, playerColor, distanceLimit, pieceSensitivity),
-            ...DirectionCalculator.getDiagonalSquares(square, playerColor, distanceLimit, pieceSensitivity),
-            ...RouteCalculator.getKnightRoute(square, pieceSensitivity)
-        }
+            ...DirectionCalculator.getHorizontalSquares(
+                square,
+                color,
+                distanceLimit,
+                pieceSensitivity
+            ),
+            ...DirectionCalculator.getVerticalSquares(
+                square,
+                color,
+                distanceLimit,
+                pieceSensitivity
+            ),
+            ...DirectionCalculator.getDiagonalSquares(
+                square,
+                color,
+                distanceLimit,
+                pieceSensitivity
+            ),
+            ...RouteCalculator.getKnightRoute(square, pieceSensitivity),
+        };
     }
 }

@@ -22,6 +22,11 @@ import {
 } from "../NotationMenu";
 import { Formatter } from "@Platform/Utils/Formatter";
 
+/**
+ * A union type that contains all the config types 
+ * to change the settings of every configurable
+ * component of the chess platform.
+ */
 export type Settings = ChessBoardConfig & LogConsoleConfig & NotationMenuConfig;
 
 /**
@@ -250,7 +255,7 @@ export class SettingsMenu extends NavbarComponent {
         for (const setting in currentSettings) {
             this.handleOperation(
                 setting as SettingsMenuOperation,
-                currentSettings[setting]
+                currentSettings[setting as keyof Settings]
             );
         }
     }
@@ -276,7 +281,7 @@ export class SettingsMenu extends NavbarComponent {
             );
             if (settingItem) {
                 if (settingItem.getAttribute("type") === "checkbox") {
-                    if (settings[setting as SettingsMenuOperation]) {
+                    if (settings[setting as keyof Settings]) {
                         settingItem.setAttribute("checked", "");
                     } else {
                         settingItem.removeAttribute("checked");
@@ -284,7 +289,7 @@ export class SettingsMenu extends NavbarComponent {
                 } else if (settingItem.tagName === "BUTTON") {
                     if (
                         settingItem.textContent &&
-                        settings[setting] ===
+                        settings[setting as keyof Settings] ===
                             Formatter.titleCaseToCamelCase(
                                 settingItem.textContent
                             )
@@ -309,17 +314,17 @@ export class SettingsMenu extends NavbarComponent {
     /**
      * Save given setting to the local storage.
      */
-    private saveSetting(operation: string, newValue: unknown): void {
+    private saveSetting<K extends keyof Settings>(setting: K, newValue: Settings[K]): void {
         const settings = LocalStorage.isExist(LocalStorageKey.Settings)
             ? LocalStorage.load(LocalStorageKey.Settings)!
             : this.getDefaultSettings()!;
 
-        if (Object.keys(settings).indexOf(operation) === -1)
+        if (Object.keys(settings).indexOf(setting) === -1)
             throw new Error(
                 "The given operation is not a valid setting operation."
             );
 
-        settings[operation] = newValue;
+        settings[setting] = newValue;
         LocalStorage.save(LocalStorageKey.Settings, settings);
     }
 
@@ -396,7 +401,7 @@ export class SettingsMenu extends NavbarComponent {
                 (this.getClassInstanceByType(Chess) as Chess)?.board.setConfig({
                     [operation]: newValue,
                 });
-                this.saveSetting(operation, newValue);
+                this.saveSetting(operation as keyof Settings, newValue as Settings[typeof operation]);
                 break;
             case SettingsMenuOperation.ShowSquareIds:
                 operation = Formatter.pascalCaseToCamelCase(

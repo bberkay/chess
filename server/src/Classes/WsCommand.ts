@@ -5,43 +5,43 @@ import type { Player } from "../Types";
  * WebSocket command types.
  */
 export enum WsTitle {
-    Created="CREATED",
-    Connected="CONNECTED",
-    Started="STARTED",
-    Finished="FINISHED",
-    Disconnected="DISCONNECTED",
-    Reconnected="RECONNECTED",
-    Moved="MOVED",
-    Aborted="ABORTED",
-    Resigned="RESIGNED",
-    DrawOffered="DRAW_OFFERED",
-    DrawAccepted="DRAW_ACCEPTED",
-    UndoOffered="UNDO_OFFERED",
-    UndoAccepted="UNDO_ACCEPTED",
-    PlayAgainOffered="PLAY_AGAIN_OFFERED",
-    PlayAgainAccepted="PLAY_AGAIN_ACCEPTED",
-    OfferCancelled="OFFER_CANCELLED",
-    SentOfferCancelled="SENT_OFFER_CANCELLED",
-    SentOfferDeclined="SENT_OFFER_DECLINED",
-    Error="ERROR",
-};
-
-/**
- * WsCreatedData interface for the 
- * created command to send to the client.
- */
-export interface WsCreatedData{
-    lobbyId: string,
-    player: Player
+    Created = "CREATED",
+    Connected = "CONNECTED",
+    Started = "STARTED",
+    Finished = "FINISHED",
+    Disconnected = "DISCONNECTED",
+    Reconnected = "RECONNECTED",
+    Moved = "MOVED",
+    Aborted = "ABORTED",
+    Resigned = "RESIGNED",
+    DrawOffered = "DRAW_OFFERED",
+    DrawAccepted = "DRAW_ACCEPTED",
+    UndoOffered = "UNDO_OFFERED",
+    UndoAccepted = "UNDO_ACCEPTED",
+    PlayAgainOffered = "PLAY_AGAIN_OFFERED",
+    PlayAgainAccepted = "PLAY_AGAIN_ACCEPTED",
+    OfferCancelled = "OFFER_CANCELLED",
+    SentOfferCancelled = "SENT_OFFER_CANCELLED",
+    SentOfferDeclined = "SENT_OFFER_DECLINED",
+    Error = "ERROR",
 }
 
 /**
- * WsConnectedData interface for the 
+ * WsCreatedData interface for the
+ * created command to send to the client.
+ */
+export interface WsCreatedData {
+    lobbyId: string;
+    player: Player;
+}
+
+/**
+ * WsConnectedData interface for the
  * connected command to send to the client.
  */
-export interface WsConnectedData{
-    lobbyId: string,
-    player: Player
+export interface WsConnectedData {
+    lobbyId: string;
+    player: Player;
 }
 
 /**
@@ -49,41 +49,41 @@ export interface WsConnectedData{
  * started command to send to the client
  * or receive from the client.
  */
-export interface WsStartedData{
+export interface WsStartedData {
     whitePlayer: {
-        name: string, 
-        isOnline: boolean
-    }, 
+        name: string;
+        isOnline: boolean;
+    };
     blackPlayer: {
-        name: string, 
-        isOnline: boolean
-    }, 
-    game: string | JsonNotation
+        name: string;
+        isOnline: boolean;
+    };
+    game: string | JsonNotation;
 }
 
 /**
  * WsFinishedData interface for the
  * finished command to send to the client.
  */
-export interface WsFinishedData{
-    gameStatus: GameStatus
+export interface WsFinishedData {
+    gameStatus: GameStatus;
 }
 
 /**
  * WsResignedData interface for the
  * resigned command to send to the client.
  */
-export interface WsResignedData{
-    gameStatus: GameStatus
+export interface WsResignedData {
+    gameStatus: GameStatus;
 }
 
 /**
  * WsUndoData interface for the
  * undo command to send to the client.
  */
-export interface WsUndoData{
-    undoColor: Color,
-    board: string
+export interface WsUndoData {
+    undoColor: Color;
+    board: string;
 }
 
 /**
@@ -91,27 +91,27 @@ export interface WsUndoData{
  * moved command to send to the client
  * or receive from the client.
  */
-export interface WsMovedData{
-    from: Square,
-    to: Square
+export interface WsMovedData {
+    from: Square;
+    to: Square;
 }
 
 /**
  * WsDisconnectedData interface for the
  * disconnected command to send to the client.
  */
-export interface WsDisconnectedData{
-    lobbyId: string,
-    color: Color
+export interface WsDisconnectedData {
+    lobbyId: string;
+    color: Color;
 }
 
 /**
  * WsReconnectedData interface for the
  * reconnected command to send to the client.
  */
-export interface WsReconnectedData{
-    lobbyId: string,
-    color: Color
+export interface WsReconnectedData {
+    lobbyId: string;
+    color: Color;
 }
 
 /**
@@ -119,23 +119,24 @@ export interface WsReconnectedData{
  * error command to send to the client
  * or receive from the client.
  */
-export interface WsErrorData{
-    message: string
+export interface WsErrorData {
+    message: string;
 }
 
 /**
  * WsData type for the data that can be
  * received from the WebSocket.
  */
-export type WsData = WsCreatedData
-    | WsConnectedData 
-    | WsStartedData 
+export type WsData =
+    | WsCreatedData
+    | WsConnectedData
+    | WsStartedData
     | WsFinishedData
     | WsResignedData
     | WsUndoData
-    | WsMovedData 
-    | WsReconnectedData 
-    | WsDisconnectedData 
+    | WsMovedData
+    | WsReconnectedData
+    | WsDisconnectedData
     | WsErrorData;
 
 /**
@@ -149,13 +150,16 @@ export type WsMessage = [WsTitle, WsData];
  * This class is used to create WebSocket commands
  * to send to the client.
  */
-export class WsCommand{
+export class WsCommand {
     /**
      * Create a WebSocket command with the given command and data.
      * @example [Connected, {lobbyId: "1234", ...}]
      */
-    private static _wsCommand(title: WsTitle, data: WsData | null = null): string {
-        if(Object.values(WsTitle).indexOf(title) === -1) 
+    private static _wsCommand(
+        title: WsTitle,
+        data: WsData | null = null
+    ): string {
+        if (Object.values(WsTitle).indexOf(title) === -1)
             throw new Error("Invalid command.");
 
         return data ? JSON.stringify([title, data]) : JSON.stringify([title]);
@@ -181,8 +185,7 @@ export class WsCommand{
      * Send started command to the client.
      * @example [STARTED, {board: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR", ...}]
      */
-    static started(startedData: WsStartedData): string 
-    {
+    static started(startedData: WsStartedData): string {
         return WsCommand._wsCommand(WsTitle.Started, startedData);
     }
 
@@ -190,8 +193,7 @@ export class WsCommand{
      * Send finished command to the client.
      * @example [FINISHED, {gameStatus: GameStatus.Draw}]
      */
-    static finished(finishedData: WsFinishedData): string
-    {
+    static finished(finishedData: WsFinishedData): string {
         return WsCommand._wsCommand(WsTitle.Finished, finishedData);
     }
 
@@ -199,24 +201,21 @@ export class WsCommand{
      * Send moved command to the client.
      * @example [MOVED, {from: Square.a2, to: Square.a4}]
      */
-    static moved(moveData: WsMovedData): string 
-    {
+    static moved(moveData: WsMovedData): string {
         return WsCommand._wsCommand(WsTitle.Moved, moveData);
     }
 
     /**
      * Send aborted command to the client.
      */
-    static aborted(): string
-    {
+    static aborted(): string {
         return WsCommand._wsCommand(WsTitle.Aborted);
     }
 
     /**
      * Send resigned command to the client.
      */
-    static resigned(resignedData: WsResignedData): string
-    {
+    static resigned(resignedData: WsResignedData): string {
         return WsCommand._wsCommand(WsTitle.Resigned, resignedData);
     }
 
@@ -224,8 +223,7 @@ export class WsCommand{
      * Send draw accepted command to the client.
      * @example [DRAW_ACCEPTED]
      */
-    static drawAccepted(): string
-    {
+    static drawAccepted(): string {
         return WsCommand._wsCommand(WsTitle.DrawAccepted);
     }
 
@@ -233,48 +231,42 @@ export class WsCommand{
      * Send undo accepted command to the client.
      * @example [UNDO_ACCEPTED, {board: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR", ...}]
      */
-    static undoAccepted(undoData: WsUndoData): string
-    {
+    static undoAccepted(undoData: WsUndoData): string {
         return WsCommand._wsCommand(WsTitle.UndoAccepted, undoData);
     }
-    
+
     /**
      * Send draw offered command to the client.
      */
-    static drawOffered(): string
-    {
+    static drawOffered(): string {
         return WsCommand._wsCommand(WsTitle.DrawOffered);
     }
 
     /**
      * Send undo offered command to the client.
      */
-    static undoOffered(): string
-    {
+    static undoOffered(): string {
         return WsCommand._wsCommand(WsTitle.UndoOffered);
     }
-    
+
     /**
      * Send play again offered command to the server.
      */
-    static playAgainOffered(): string
-    {
+    static playAgainOffered(): string {
         return WsCommand._wsCommand(WsTitle.PlayAgainOffered);
     }
 
     /**
      * Send sent offer cancelled command to the client.
      */
-    static sentOfferCancelled(): string
-    {
+    static sentOfferCancelled(): string {
         return WsCommand._wsCommand(WsTitle.SentOfferCancelled);
     }
 
     /**
      * Send offer declined command to the client.
      */
-    static sentOfferDeclined(): string
-    {
+    static sentOfferDeclined(): string {
         return WsCommand._wsCommand(WsTitle.SentOfferDeclined);
     }
 
@@ -282,8 +274,7 @@ export class WsCommand{
      * Send disconnected command to the client.
      * @example [DISCONNECTED, {lobbyId: "1234", player: {name: "Player1", color: "white"}}]
      */
-    static disconnected(disconnectedData: WsDisconnectedData): string 
-    {
+    static disconnected(disconnectedData: WsDisconnectedData): string {
         return WsCommand._wsCommand(WsTitle.Disconnected, disconnectedData);
     }
 
@@ -291,17 +282,15 @@ export class WsCommand{
      * Send reconnected command to the client.
      * @example [RECONNECTED, {lobbyId: "1234", player: {name: "Player1", color: "white"}}]
      */
-    static reconnected(reconnectData: WsReconnectedData): string 
-    {
+    static reconnected(reconnectData: WsReconnectedData): string {
         return WsCommand._wsCommand(WsTitle.Reconnected, reconnectData);
     }
-    
+
     /**
      * Send error command to the client.
      * @example [ERROR, {message: "Invalid move."}]
      */
-    static error(errorData: WsErrorData): string
-    {
+    static error(errorData: WsErrorData): string {
         return WsCommand._wsCommand(WsTitle.Error, errorData);
     }
 

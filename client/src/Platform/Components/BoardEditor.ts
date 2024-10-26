@@ -20,6 +20,13 @@ import {
     NOTATION_MENU_ID,
 } from "@Platform/Consts";
 
+/**
+ * Represents the modes of the board creator.
+ * Custom mode is for creating a board with a 
+ * custom FEN notation through the input field.
+ * Template mode is for creating a board with a
+ * template FEN notation through the select field.
+ */
 enum BoardCreatorMode {
     Custom = "custom-board-creator-mode",
     Template = "template-board-creator-mode",

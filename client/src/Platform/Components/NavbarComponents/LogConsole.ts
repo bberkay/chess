@@ -3,10 +3,16 @@ import { Logger, LoggerEvent } from "@Services/Logger";
 import { NavbarComponent } from "./NavbarComponent";
 import { LOG_CONSOLE_ID } from "@Platform/Consts";
 
+/**
+ * Represents the configuration of the log console.
+ */
 export interface Config {
     showSquareIds: boolean;
 }
 
+/**
+ * The default configuration of the log console.
+ */
 export const DEFAULT_CONFIG: Config = {
     showSquareIds: true,
 };
@@ -17,9 +23,6 @@ export const DEFAULT_CONFIG: Config = {
 export class LogConsole extends NavbarComponent {
     public readonly id: string = LOG_CONSOLE_ID;
 
-    /**
-     * The configuration of the log console.
-     */
     private config: Config = DEFAULT_CONFIG;
 
     /**

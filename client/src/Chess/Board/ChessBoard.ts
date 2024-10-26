@@ -22,18 +22,28 @@ import { SoundEffect, SquareClickMode, SquareEffect } from "./Types";
 import { Converter } from "../Utils/Converter.ts";
 import { Logger } from "@Services/Logger.ts";
 
+/**
+ * Movement type of the pieces on the chess board
+ * like only click, only drag or both.
+ */
 export enum MovementType {
     Both = "Both",
     OnlyClick = "OnlyClick",
     OnlyDrag = "OnlyDrag",
 }
 
+/**
+ * Animation speed of the pieces on the chess board.
+ */
 export enum PieceAnimationSpeed {
     Slow = "Slow",
     Medium = "Medium",
     Fast = "Fast",
 }
 
+/**
+ * Configuration of the chess board.
+ */
 export interface Config {
     enableSoundEffects: boolean;
     enablePreSelection: boolean;
@@ -43,6 +53,9 @@ export interface Config {
     pieceAnimationSpeed: PieceAnimationSpeed;
 }
 
+/**
+ * Default configuration of the chess board.
+ */
 export const DEFAULT_CONFIG: Config = {
     enableSoundEffects: true,
     enablePreSelection: true,
