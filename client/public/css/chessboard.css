@@ -49,10 +49,10 @@
     /* Promotion Menu, use hex code */
     --chessboard-default-promotion-option-color: #D3D3D3;
     --chessboard-default-promotion-option-outline-color: #B7B7B7;
-    --chessboard-default-promotion-option-shadow-color: #000;
+    --chessboard-default-promotion-option-shadow-color: #000000;
     --chessboard-promotion-option-color: #D3D3D3;
     --chessboard-promotion-option-outline-color: #B7B7B7;
-    --chessboard-promotion-option-shadow-color: #000;
+    --chessboard-promotion-option-shadow-color: #000000;
 
     /* White Pieces - For Desktop */
     --chessboard-white-pawn-image: url("../assets/pieces/desktop/white_pawn.webp");
