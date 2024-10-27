@@ -113,7 +113,7 @@
     height:var(--chessboard-board-size);
     gap: 0!important;
     cursor: pointer!important;
-    border: 2px solid var(--chessboard-border-color);
+    outline: 2px solid var(--chessboard-border-color);
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -122,6 +122,7 @@
     user-select: none;
     position:relative;
     background-size: cover;
+    box-sizing: border-box;
 }
 
 #chessboard::after{
