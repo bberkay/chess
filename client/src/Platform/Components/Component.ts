@@ -9,7 +9,7 @@ export abstract class Component {
     /**
      * Render the component's html.
      */
-    protected abstract renderComponent(): void;
+    protected abstract renderComponent(...args: unknown[]): void;
 
     /**
      * Handle the operation of the component.

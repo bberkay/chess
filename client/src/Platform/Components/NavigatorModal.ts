@@ -42,25 +42,30 @@ export class NavigatorModal extends Component {
      */
     constructor() {
         super();
-        this.loadCSS("navigator-modal.css");
     }
 
     /**
      * This function renders the navigator modal.
      */
-    protected renderComponent(): void {
+    protected renderComponent(
+        title: string,
+        content: string,
+        closeable: boolean = false,
+        backdrop: boolean = true
+    ): void {
         this.loadHTML(
             NAVIGATOR_MODAL_ID,
             `
-            <div class="navigator-modal navigator-modal--glass">
-                <div class="navigator-modal-bg">
-                    <img src="./assets/images/result-screen-bg-icon.png" alt="Chessboard">
-                </div>
-                <div class="navigator-modal-title"></div>
-                <div class="navigator-modal-content"></div>
+            <div class="navigator-modal ${
+                backdrop ? "navigator-modal--glass" : ""
+            } ${closeable ? "closeable" : ""}">
+                <div class="navigator-modal-bg"></div>
+                <div class="navigator-modal-title">${title}</div>
+                <div class="navigator-modal-content">${content}</div>
             </div>
         `
         );
+        this.loadCSS("navigator-modal.css");
     }
 
     /**
@@ -98,18 +103,7 @@ export class NavigatorModal extends Component {
         this.hide();
         window.scrollTo(0, 0);
 
-        this.loadHTML(
-            NAVIGATOR_MODAL_ID,
-            `
-            <div class="navigator-modal ${
-                backdrop ? "navigator-modal--glass" : ""
-            } ${closeable ? "closeable" : ""}">
-                <div class="navigator-modal-bg"></div>
-                <div class="navigator-modal-title">${title}</div>
-                <div class="navigator-modal-content">${content}</div>
-            </div>
-        `
-        );
+        this.renderComponent(title, content, closeable, backdrop);
 
         const modal = document.querySelector(
             ".navigator-modal"
