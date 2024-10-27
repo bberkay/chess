@@ -167,7 +167,7 @@ export class Chess {
             this.getGameAsJsonNotation()
         );
         this.logger.save(
-            `Game saved to cache as json notation[${JSON.stringify(position)}]`
+            `Game saved to cache as json notation`
         );
 
         document.dispatchEvent(new Event(ChessEvent.onGameCreated));

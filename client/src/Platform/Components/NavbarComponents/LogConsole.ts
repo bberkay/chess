@@ -25,6 +25,8 @@ export class LogConsole extends NavbarComponent {
 
     private config: Config = DEFAULT_CONFIG;
 
+    private _lastLogIndex: number = 0;
+
     /**
      * Constructor of the LogConsole class.
      */
@@ -33,10 +35,17 @@ export class LogConsole extends NavbarComponent {
         this.renderComponent();
         document.addEventListener("DOMContentLoaded", () => {
             this.stream();
-            document.addEventListener(
-                LoggerEvent.LogAdded,
-                this.stream.bind(this)
-            );
+
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+            const debounce = (func: Function, wait: number) => {
+                let timeout: number;
+                return  (...args: unknown[]) => {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => func.apply(this, args), wait) as unknown as number;
+                };
+            }
+            const debouncedStream = debounce(this.stream.bind(this), 500);
+            document.addEventListener(LoggerEvent.LogAdded, debouncedStream);
         });
     }
 
@@ -260,19 +269,16 @@ export class LogConsole extends NavbarComponent {
         this._createLogMessage(newAddedLog);
         this._createLogMessagesEventListeners();
 
-        if (Logger.messages().length > 1000) this.clear();
+        if (Logger.messages().length > 300) this.clear();
     }
 
     /**
      * This function clears the log console.
      */
     public clear(): void {
+        this._lastLogIndex = 0;
         Logger.clear();
-
-        // Clear the log list.
         document.getElementById("log-list")!.innerHTML = "";
-
-        // Clear the log file.
         document.getElementById("log-file")!.innerHTML = "";
     }
 
