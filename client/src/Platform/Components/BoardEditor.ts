@@ -72,7 +72,6 @@ export class BoardEditor extends Component {
     constructor(chess: Chess) {
         super();
         this.chess = chess;
-        this.loadCSS("board-editor.css");
         this.renderComponent();
         this.loadLocalStorage();
     }
@@ -106,6 +105,7 @@ export class BoardEditor extends Component {
           </div>
         `
         );
+        this.loadCSS("board-editor/board-creator.css");
 
         document
             .getElementById("fen-notation")!
@@ -241,6 +241,7 @@ export class BoardEditor extends Component {
             </div>
         `
         );
+        this.loadCSS("board-editor/piece-creator.css");
     }
 
     /**
