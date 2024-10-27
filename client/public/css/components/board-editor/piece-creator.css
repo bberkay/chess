@@ -3,61 +3,61 @@
  * @see For more information about this component check file: src\Platform\Components\BoardEditor.ts
  */
 
-#piece-creator{
-    & .selected-option{
-        background-color: var(--component-active-color);;
+#piece-creator {
+    & .selected-option {
+        background-color: var(--component-active-color);
     }
 
-    #piece-table{
+    #piece-table {
         width: var(--board-editor-table-width);
         height: calc(var(--chessboard-board-size) - 52px);
         max-height: calc(var(--chessboard-board-size) - 52px);
         background-color: var(--accent-color);
         color: var(--text-color);
-        border:1px solid var(--border-color);
+        border: 1px solid var(--border-color);
         user-select: none;
         box-shadow: 0 0 5px var(--shadow-color);
-    
-        & tbody{
+
+        & tbody {
             overflow: hidden;
             scrollbar-width: thin;
-            width:100%;
-            display:block;
+            width: 100%;
+            display: block;
             height: calc(var(--chessboard-board-size) - 95px);
         }
-    
-        & tr{
-            display:table;
+
+        & tr {
+            display: table;
             table-layout: fixed;
-            width:100%;
-    
-            & th{
-                padding:7px 5px;
+            width: 100%;
+
+            & th {
+                padding: 7px 5px;
                 background-color: var(--component-color);
-                border:1px solid var(--border-color);
+                border: 1px solid var(--border-color);
             }
-    
-            & td{
+
+            & td {
                 text-align: center;
                 position: relative;
-                width:calc((var(--chessboard-board-size) / 9) + 5px);
+                width: calc((var(--chessboard-board-size) / 9) + 5px);
                 /*height:calc((var(--chessboard-board-size) / 10) + 15px);*/
                 height: 100%;
                 background-color: var(--component-color);
-                border:1px solid var(--border-color);
+                border: 1px solid var(--border-color);
                 cursor: pointer;
-    
-                &:hover{
+
+                &:hover {
                     background-color: var(--component-active-color);
                 }
             }
         }
-    
-        & tbody tr{
+
+        & tbody tr {
             height: calc((var(--chessboard-board-size) - 95px) / 6);
         }
-    
-        & .piece-option{
+
+        & .piece-option {
             white-space: nowrap;
             display: flex;
             justify-content: center;
@@ -65,16 +65,16 @@
             flex-direction: column;
             width: 100%;
             height: 100%;
-    
-            & .piece{
+
+            & .piece {
                 background-position: center;
                 background-size: contain;
                 background-repeat: no-repeat;
                 width: 100%;
                 height: 100%;
                 position: initial;
-                margin: 0.4rem 0.5rem;            
-                margin-top:auto;
+                margin: 0.4rem 0.5rem;
+                margin-top: auto;
             }
         }
     }
@@ -83,38 +83,38 @@
 /**
  * Utility Menu
  */
-#piece-creator .utility-menu{
+#piece-creator .utility-menu {
     display: flex;
     justify-content: space-between;
     width: calc(100% - 12px);
     background-color: var(--accent-color);
     border: 1px solid var(--border-color);
-    border-top:none;
+    border-top: none;
     padding: 5px;
     box-shadow: 0 0 5px var(--shadow-color);
 }
 
-#piece-creator .utility-menu.utility-toggle-menu{
+#piece-creator .utility-menu.utility-toggle-menu {
     display: none;
     box-shadow: 0 0 5px var(--shadow-color);
 
-    & .utility-toggle-menu-section{
+    & .utility-toggle-menu-section {
         display: none;
         justify-content: space-between;
         align-items: center;
         width: 100%;
         gap: 5px;
 
-        & button{
+        & button {
             flex-grow: 1;
         }
 
-        &.active{
+        &.active {
             display: flex;
         }
     }
 
-    &.visible{
+    &.visible {
         display: flex;
     }
 }
@@ -123,18 +123,18 @@
  * ------------------ Responsive ------------------- 
  *             700px - 900px - 1250px
  */
- @media screen and (max-width: 900px) {
-    #piece-table{
-        width:100%;
+@media screen and (max-width: 900px) {
+    #piece-table {
+        width: 100%;
     }
 
-    #piece-creator .utility-menu{
+    #piece-creator .utility-menu {
         justify-content: center;
         gap: 1rem;
     }
 
-    #piece-creator .utility-toggle-menu-section{
-        justify-content: center!important;
+    #piece-creator .utility-toggle-menu-section {
+        justify-content: center !important;
         gap: 1rem;
     }
 }

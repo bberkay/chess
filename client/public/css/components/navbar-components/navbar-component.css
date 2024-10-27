@@ -2,37 +2,37 @@
  * CSS codes of the every navbar component
  * @see For more information about this component check file: src\Platform\NavbarComponents
  */
- .navbar-component{
-    background-color:var(--accent-color);
-    border:1px solid var(--border-color);
+.navbar-component {
+    background-color: var(--accent-color);
+    border: 1px solid var(--border-color);
     height: calc(var(--chessboard-board-size) + 5px);
     width: var(--navbar-component-width);
     min-width: var(--navbar-component-width);
     max-width: calc(var(--chessboard-board-size) - 50px);
-    color: var(--text-color);;
+    color: var(--text-color);
     visibility: visible;
     box-shadow: 0 0 5px var(--shadow-color);
-    
-    &.hidden{
-        visibility: hidden!important;
-        height: 0!important;
-        border: none!important;
+
+    &.hidden {
+        visibility: hidden !important;
+        height: 0 !important;
+        border: none !important;
     }
 }
 
- /** 
+/** 
  * ------------------ Responsive ------------------- 
  *             700px - 900px - 1250px
  */
 @media screen and (min-width: 900px) and (max-width: 1250px) {
-    .navbar-component{
+    .navbar-component {
         width: var(--chessboard-board-size);
         max-width: var(--chessboard-board-size);
     }
 }
 
 @media screen and (max-width: 900px) {
-    .navbar-component{
+    .navbar-component {
         width: 100%;
         min-width: 0;
         max-width: var(--chessboard-board-size);
@@ -40,7 +40,7 @@
     }
 }
 @media screen and (min-width: 700px) and (max-width: 900px) {
-    .navbar-component{
+    .navbar-component {
         max-width: calc(var(--chessboard-board-size) + 6px);
     }
 }

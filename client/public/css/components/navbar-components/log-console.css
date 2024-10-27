@@ -3,44 +3,44 @@
  * @see For more information about this component check file: src\Platform\Components\LogConsole.ts
  */
 
-#log-console{
-    background-color:var(--accent-color);
-    border:1px solid var(--border-color);
+#log-console {
+    background-color: var(--accent-color);
+    border: 1px solid var(--border-color);
     color: var(--text-color);
     font-family: var(--log-console-font-family);
     resize: horizontal;
 }
 
 /* Body */
-#log-console{
-    & .log-console-header-body-separator{
+#log-console {
+    & .log-console-header-body-separator {
         background-color: var(--accent-color);
         height: 5px;
     }
 
-    & #log-console-body{
+    & #log-console-body {
         height: calc(var(--chessboard-board-size) - 48px);
-        width:auto;
+        width: auto;
         overflow-y: scroll;
         overflow-x: hidden;
 
-        & ul{
-            margin:5px 20px 5px -20px;
+        & ul {
+            margin: 5px 20px 5px -20px;
             list-style: none;
 
-            & li{
+            & li {
                 cursor: pointer;
                 transition: 0.1s;
                 margin: 7px 0;
 
-                & span{
+                & span {
                     font-family: var(--log-console-font-family);
                     font-weight: bold;
 
-                    &:hover{
+                    &:hover {
                         text-decoration: underline;
 
-                        & .tooltip-toggle{
+                        & .tooltip-toggle {
                             text-decoration: underline;
                         }
                     }
@@ -48,67 +48,67 @@
             }
         }
     }
-} 
+}
 
 /* ------------------- Tooltip ------------------- */
-#log-console{
-    & #log-console-body{
-        & .tooltip-toggle{
+#log-console {
+    & #log-console-body {
+        & .tooltip-toggle {
             position: relative;
             display: inline-block;
-            font-style:italic;
-            border-bottom:1px dotted var(--text-color);
-    
-            &:hover{
+            font-style: italic;
+            border-bottom: 1px dotted var(--text-color);
+
+            &:hover {
                 background-color: var(--dark-gray-opaque-color);
-    
-                & .tooltip-container{
-                    display:block;
+
+                & .tooltip-container {
+                    display: block;
                 }
             }
         }
-    
-        & .tooltip-container{
-            left:50%;
-            transform:translate(-50%, 0);
-            position:absolute;
-            z-index:var(--log-console-tooltip-z-index);
-            display:none;
+
+        & .tooltip-container {
+            left: 50%;
+            transform: translate(-50%, 0);
+            position: absolute;
+            z-index: var(--log-console-tooltip-z-index);
+            display: none;
         }
-    
-        & .tooltip-text{
-            padding:10px 20px;
-            color:var(--text-color);
-            background-color:var(--component-opaque-color);
-            font-weight:normal;
-            font-size:var(--log-console-font-size);
-            box-sizing:border-box;
-            border:1px solid var(--border-color);
-            font-style:normal;
-            text-decoration: none!important;
+
+        & .tooltip-text {
+            padding: 10px 20px;
+            color: var(--text-color);
+            background-color: var(--component-opaque-color);
+            font-weight: normal;
+            font-size: var(--log-console-font-size);
+            box-sizing: border-box;
+            border: 1px solid var(--border-color);
+            font-style: normal;
+            text-decoration: none !important;
             max-height: calc(var(--chessboard-board-size) / 2);
             overflow-y: auto;
             margin-top: 5px;
             position: relative;
-    
-            & span:hover{
+
+            & span:hover {
                 text-decoration: none;
             }
         }
-    
+
         /* Opening locations of tooltip */
-        & .tooltip-container--left{
+        & .tooltip-container--left {
             left: auto;
             transform: none;
             right: 0;
         }
-    
-        & .tooltip-container--top{
+
+        & .tooltip-container--top {
             top: auto;
             bottom: 100%;
         }
 
-        & .tooltip-container--right{
+        & .tooltip-container--right {
             left: 0;
             transform: none;
         }
@@ -117,48 +117,47 @@
 
 /* ------------------- Footer ------------------- */
 #log-console {
-    & #log-console-footer{
-        background-color:var(--accent-color);
-        display:flex;
-        width:100%;
-        border-top:1px solid var(--border-color);
+    & #log-console-footer {
+        background-color: var(--accent-color);
+        display: flex;
+        width: 100%;
+        border-top: 1px solid var(--border-color);
     }
 
-    & #log-console-footer-content{
-        background-color:var(--button-bg-color);
-        border:1px solid var(--border-color);
-        margin:3px;
+    & #log-console-footer-content {
+        background-color: var(--button-bg-color);
+        border: 1px solid var(--border-color);
+        margin: 3px;
         color: var(--text-color);
-        width:100%;
-        font-size:var(--log-console-font-size);
+        width: 100%;
+        font-size: var(--log-console-font-size);
         font-family: var(--log-console-font-family);
         overflow-x: auto;
-        text-wrap:nowrap;
+        text-wrap: nowrap;
         display: flex;
         align-items: center;
         padding-left: 10px;
     }
 
-    & #log-console-footer-btn button{
+    & #log-console-footer-btn button {
         margin: 3px 0 3px 3px;
     }
 }
 
-
 /* Show Square ids on chess board when hovering on log console */
-#chessboard .square-id{
-    position:absolute;
-    right:0;
-    bottom:0;
-    padding:5px;
-    min-width:13px;
+#chessboard .square-id {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    padding: 5px;
+    min-width: 13px;
     background-color: var(--black-opaque-color);
-    color:var(--white-color);
-    text-align:center;
-    margin:7px;
-    font-size:var(--log-console-square-id-font-size);
+    color: var(--white-color);
+    text-align: center;
+    margin: 7px;
+    font-size: var(--log-console-square-id-font-size);
     font-family: var(--log-console-font-family);
-    z-index:var(--log-console-square-id-z-index);
+    z-index: var(--log-console-square-id-z-index);
 }
 
 /** 
@@ -166,25 +165,25 @@
  *             700px - 900px - 1250px
  */
 @media screen and (max-width: 900px) {
-    #log-console{
-        & #log-console-body{
+    #log-console {
+        & #log-console-body {
             height: calc(var(--chessboard-board-size) / 2);
         }
     }
 
-    #log-console #log-console-body .tooltip-text{
+    #log-console #log-console-body .tooltip-text {
         max-height: calc(var(--chessboard-board-size) / 1.5);
     }
 }
 
 @media screen and (min-width: 700px) and (max-width: 900px) {
-    #log-console #log-console-body{
+    #log-console #log-console-body {
         height: calc(var(--chessboard-board-size) / 1.5);
     }
 }
 
 @media screen and (max-width: 700px) {
-    #log-console #log-console-body{
+    #log-console #log-console-body {
         height: calc(var(--notation-table-height) + 150px);
     }
 }

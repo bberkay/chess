@@ -3,12 +3,12 @@
  * @see For more information about this component check file: src\Platform\Components\BoardEditor.ts
  */
 
- #board-editor .board-creator{
+#board-editor .board-creator {
     display: none;
-    border:1px solid var(--border-color);
+    border: 1px solid var(--border-color);
     box-shadow: 0 0 5px var(--shadow-color);
 
-    &.visible{
+    &.visible {
         display: flex;
     }
 }
@@ -18,7 +18,7 @@
  *             700px - 900px - 1250px
  */
 @media screen and (max-width: 900px) {
-    #board-editor{
-        width:100%;
+    #board-editor {
+        width: 100%;
     }
 }

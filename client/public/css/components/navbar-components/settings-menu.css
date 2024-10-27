@@ -2,19 +2,19 @@
  * CSS codes of SettingsMenu component
  * @see For more information about this component check file: src\Platform\Components\NavbarComponents\SettingsMenu.ts
  */
-#settings-menu{
-    background-color:var(--accent-color);
-    border:1px solid var(--border-color);
+#settings-menu {
+    background-color: var(--accent-color);
+    border: 1px solid var(--border-color);
     color: var(--text-color);
     resize: horizontal;
 }
 
-#settings-body{
+#settings-body {
     padding: 1.5rem;
     padding-top: 1.25rem;
     padding-bottom: 0.5rem;
     height: calc(var(--chessboard-board-size) - 87px);
-    width:auto;
+    width: auto;
     overflow-y: scroll;
     overflow-x: hidden;
 
@@ -23,13 +23,13 @@
         padding: 0.75rem 1rem 0rem 1rem;
         margin-bottom: 1rem;
         font-size: var(--settings-menu-fieldset-font-size);
-        
+
         & legend {
             font-size: var(--settings-menu-legend-font-size);
         }
     }
 
-    & .settings-item{
+    & .settings-item {
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -39,26 +39,26 @@
     }
 }
 
-#settings-footer{
+#settings-footer {
     padding: 10px;
 
-    & .settings-utilities{
+    & .settings-utilities {
         width: 100%;
         display: flex;
         gap: 5px;
 
-        & button{
+        & button {
             flex-grow: 1;
         }
     }
 }
 
- /** 
+/** 
  * ------------------ Responsive ------------------- 
  *             700px - 900px - 1250px
  */
 @media screen and (max-width: 700px) {
-    #settings-body{
+    #settings-body {
         padding: 1rem;
         padding-top: 1.25rem;
         padding-bottom: 0.5rem;

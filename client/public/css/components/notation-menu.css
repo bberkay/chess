@@ -3,116 +3,125 @@
  * @see For more information about this component check file: src\Platform\Components\NotationTable.ts
  */
 
-#notation-menu{
+#notation-menu {
     height: var(--chessboard-board-size);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
 }
 
-#notation-table{
+#notation-table {
     width: var(--notation-table-width);
-    font-size:var(--notation-table-font-size);
+    font-size: var(--notation-table-font-size);
     background-color: var(--accent-color);
     color: var(--text-color);
-    border:1px solid  var(--border-color);
+    border: 1px solid var(--border-color);
     box-shadow: 0 0 5px var(--shadow-color);
 
-    & tbody{
+    & tbody {
         max-height: var(--notation-table-height);
         overflow-y: scroll;
         overflow-x: hidden;
-        width:100%;
+        width: 100%;
         height: var(--notation-table-height);
-        display:block;
+        display: block;
     }
 
-    & tr{
-        display:table;
+    & tr {
+        display: table;
         table-layout: fixed;
-        width:100%;
+        width: 100%;
 
-        & th{
-            padding:10px 5px;
-            padding-bottom:3px;
+        & th {
+            padding: 10px 5px;
+            padding-bottom: 3px;
             background-color: var(--component-color);
-            border:1px solid var(--border-color);
+            border: 1px solid var(--border-color);
         }
 
-        & td{
+        & td {
             text-align: center;
-            padding:3px 5px;
+            padding: 3px 5px;
             cursor: pointer;
             height: var(--notation-table-piece-icon-size);
 
-            & .piece-icon{
+            & .piece-icon {
                 font-size: var(--notation-table-piece-icon-size);
                 line-height: 1;
             }
 
-            & .move{
+            & .move {
                 line-height: 1;
             }
         }
 
-        &:nth-child(odd) td:has(span){
+        &:nth-child(odd) td:has(span) {
             background-color: var(--accent-color);
-            border:1px solid var(--accent-color);
+            border: 1px solid var(--accent-color);
         }
 
-        & td:has(span){
+        & td:has(span) {
             background-color: var(--component-color);
-            border:1px solid var(--border-color);
+            border: 1px solid var(--border-color);
         }
 
-        & td.current-move{
-            background-color: var(--primary-color)!important;
-            border:1px solid var(--primary-color);
+        & td.current-move {
+            background-color: var(--primary-color) !important;
+            border: 1px solid var(--primary-color);
         }
 
-        & td:has(.move):hover{
-            background-color:  var(--component-active-color);
+        & td:has(.move):hover {
+            background-color: var(--component-active-color);
         }
     }
 }
 
 /* Make first column narrower than others */
-#notation-table tr th:nth-child(1), #notation-table tr td:nth-child(1) { width: 20% }
-#notation-table tr th:nth-child(2), #notation-table tr th:nth-child(3) { width: 40% }
-#notation-table tr td:nth-child(2), #notation-table tr td:nth-child(3) { width: 40% }
+#notation-table tr th:nth-child(1),
+#notation-table tr td:nth-child(1) {
+    width: 20%;
+}
+#notation-table tr th:nth-child(2),
+#notation-table tr th:nth-child(3) {
+    width: 40%;
+}
+#notation-table tr td:nth-child(2),
+#notation-table tr td:nth-child(3) {
+    width: 40%;
+}
 
 /**
  * Player Score Section
  */
 .player-section {
-    display:flex;
+    display: flex;
     flex-direction: column;
 
-    &.hidden{
+    &.hidden {
         opacity: 0;
     }
 
-    & .player-name-container{
-        display:flex;
+    & .player-name-container {
+        display: flex;
         justify-content: space-between;
         align-items: stretch;
         background-color: var(--accent-color);
-        border:1px solid var(--border-color);
+        border: 1px solid var(--border-color);
         padding: 4px;
         box-shadow: 0 0 5px var(--shadow-color);
-        
-        & .player-name{
+
+        & .player-name {
             padding: 10px 10px;
             padding-bottom: 7px;
             background-color: var(--component-color);
-            border:1px solid var(--border-color);
+            border: 1px solid var(--border-color);
             border-right: none;
             font-weight: bold;
             font-size: var(--notation-menu-player-name-font-size);
             width: 75%;
         }
 
-        & .duration{
+        & .duration {
             font-size: var(--notation-menu-duration-font-size);
             font-weight: bold;
             display: flex;
@@ -125,88 +134,88 @@
             padding-left: 5px;
             padding-right: 5px;
 
-            &.hidden{
-                background-color: var(--component-color)!important;
+            &.hidden {
+                background-color: var(--component-color) !important;
                 color: var(--component-color);
                 border-left: none;
                 border-right: none;
                 user-select: none;
             }
-            
-            & .decisecond{
+
+            & .decisecond {
                 font-size: var(--notation-menu-decisecond-font-size);
                 margin-left: 2px;
                 margin-top: -5px;
                 padding-top: 0;
                 margin-bottom: 3px;
-                display:none;
+                display: none;
 
-                &.active{
+                &.active {
                     display: inline;
                 }
             }
         }
 
-        & .duration:has(.decisecond.active){
+        & .duration:has(.decisecond.active) {
             background-color: var(--danger-color);
         }
 
-        & .player-status{
+        & .player-status {
             background-color: var(--component-color);
-            border:1px solid var(--border-color);
+            border: 1px solid var(--border-color);
             width: 10%;
             display: flex;
             justify-content: center;
-            border-left:none;
+            border-left: none;
             align-items: center;
             height: auto;
 
-            & .status-icon{
+            & .status-icon {
                 width: 10px;
                 height: 10px;
                 border-radius: 50%;
-                border:1px solid var(--no-status-color);
+                border: 1px solid var(--no-status-color);
 
-                &.online{
-                    border:none;
+                &.online {
+                    border: none;
                     background-color: var(--online-status-color);
                 }
 
-                &.offline{
-                    border:none;
+                &.offline {
+                    border: none;
                     background: var(--offline-status-color);
                 }
             }
         }
     }
 
-    &:not(:first-of-type){
-        & .player-name-container{
+    &:not(:first-of-type) {
+        & .player-name-container {
             order: 1;
         }
     }
 
-    &#white-player-section.your-turn-effect .player-name{
-        border-left:4px solid var(--chessboard-white-square-color);
+    &#white-player-section.your-turn-effect .player-name {
+        border-left: 4px solid var(--chessboard-white-square-color);
     }
 
-    &#black-player-section.your-turn-effect .player-name{
-        border-left:4px solid var(--chessboard-black-square-color);
+    &#black-player-section.your-turn-effect .player-name {
+        border-left: 4px solid var(--chessboard-black-square-color);
     }
 
-    & .score-table{
-        font-weight:bold;
+    & .score-table {
+        font-weight: bold;
         display: flex;
         align-items: center;
         height: var(--score-table-piece-icons-size);
         padding: 2px 0;
 
-        & .piece-icon{
+        & .piece-icon {
             font-size: var(--score-table-piece-icons-size);
             font-weight: normal;
         }
 
-        & .score{
+        & .score {
             font-size: var(--score-table-score-font-size);
             margin-top: 2px;
             margin-left: 2px;
@@ -217,7 +226,7 @@
 /**
  * Utility Menu
  */
-#notation-menu .utility-menu{
+#notation-menu .utility-menu {
     display: flex;
     justify-content: space-between;
     background-color: var(--accent-color);
@@ -225,59 +234,60 @@
     padding: 4px;
     box-shadow: 0 0 5px var(--shadow-color);
 
-    & button{
-        padding:7px 10px;
+    & button {
+        padding: 7px 10px;
         font-size: var(--utility-menu-font-size);
 
-        &.hidden{
+        &.hidden {
             display: none;
         }
     }
 }
 
-#notation-menu .utility-menu:has(.utility-toggle-menu-section.confirmation.active){
+#notation-menu
+    .utility-menu:has(.utility-toggle-menu-section.confirmation.active) {
     & button {
         border: 1px solid var(--warning-color);
     }
 }
 
-#notation-menu .utility-menu.utility-toggle-menu{
+#notation-menu .utility-menu.utility-toggle-menu {
     opacity: 0;
     box-shadow: 0 0 5px var(--shadow-color);
 
-    & .utility-toggle-menu-section{
+    & .utility-toggle-menu-section {
         display: none;
         justify-content: space-between;
         align-items: center;
         width: 100%;
         gap: 5px;
 
-        & button{
+        & button {
             flex-grow: 1;
         }
-        
-        &.active{
+
+        &.active {
             display: flex;
         }
     }
 
-    & .utility-toggle-menu-section#offer-utility-menu{
+    & .utility-toggle-menu-section#offer-utility-menu {
         flex-direction: column;
         text-align: center;
 
-        & .offer-buttons{
+        & .offer-buttons {
             display: flex;
             justify-content: space-between;
             align-items: center;
             width: 100%;
             gap: 5px;
 
-            & button{
+            & button {
                 flex-grow: 1;
             }
         }
 
-        & .offer-message{
+        & .offer-message {
             font-size: var(--utility-menu-offer-message-font-size);
             font-weight: bold;
             color: var(--text-color);
@@ -285,7 +295,7 @@
         }
     }
 
-    &.visible{
+    &.visible {
         opacity: 1;
     }
 }
@@ -295,42 +305,42 @@
  *             700px - 900px - 1250px
  */
 @media screen and (max-width: 900px) {
-    #notation-table{
-        width:100%;
+    #notation-table {
+        width: 100%;
     }
 
-    #notation-menu .utility-menu{
+    #notation-menu .utility-menu {
         justify-content: center;
         gap: 1rem;
     }
 
-    #notation-menu .utility-toggle-menu-section{
-        justify-content: center!important;
+    #notation-menu .utility-toggle-menu-section {
+        justify-content: center !important;
         gap: 1rem;
     }
 
-    .player-section{
+    .player-section {
         display: flex;
         justify-content: space-between;
         flex-direction: row;
-        
-        &:first-of-type{
+
+        &:first-of-type {
             margin-bottom: 0.5rem;
         }
 
-        &:not(:first-of-type){
+        &:not(:first-of-type) {
             margin-top: 0.5rem;
 
-            & .player-name-container{
+            & .player-name-container {
                 order: -1;
             }
         }
 
-        & .player-name-container{
+        & .player-name-container {
             width: 50%;
         }
 
-        & .score-table{
+        & .score-table {
             width: auto;
             margin: 0;
             height: auto;
@@ -339,28 +349,28 @@
 }
 
 @media screen and (max-width: 700px) {
-    .player-section{
+    .player-section {
         display: flex;
         justify-content: space-between;
         flex-direction: column;
-        
-        &:first-of-type{
+
+        &:first-of-type {
             margin-bottom: 0.5rem;
         }
 
-        &:not(:first-of-type){
+        &:not(:first-of-type) {
             margin-top: 0.5rem;
-            
-            & .player-name-container{
+
+            & .player-name-container {
                 order: 1;
             }
         }
 
-        & .player-name-container{
+        & .player-name-container {
             width: auto;
         }
 
-        & .score-table{
+        & .score-table {
             width: auto;
             margin: 0;
             height: var(--score-table-piece-icons-size);

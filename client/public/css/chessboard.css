@@ -3,7 +3,7 @@
  * @see For more information, check file: src\Chess\Board\Chessboard.ts
  */
 
-:root{
+:root {
     /**
      * All sizes are will be calculated based on the board size.
      * For example, if the board size is 800px, the square size 
@@ -13,45 +13,45 @@
     --chessboard-board-size: 600px;
 
     /* Colors, use hex code */
-    --chessboard-default-white-square-color: #879A86;
-    --chessboard-default-black-square-color: #647A65;
-    --chessboard-default-border-color: #FFFFFFBB;
-    --chessboard-white-square-color: #879A86;
-    --chessboard-black-square-color: #647A65;
-    --chessboard-border-color: #FFFFFFBB;
+    --chessboard-default-white-square-color: #879a86;
+    --chessboard-default-black-square-color: #647a65;
+    --chessboard-default-border-color: #ffffffbb;
+    --chessboard-white-square-color: #879a86;
+    --chessboard-black-square-color: #647a65;
+    --chessboard-border-color: #ffffffbb;
 
     /* Effects, use hex code */
-    --chessboard-default-selected-color: #57CE9240;
+    --chessboard-default-selected-color: #57ce9240;
     --chessboard-default-preselected-color: #888888;
-    --chessboard-default-playable-color: #57CE92;
+    --chessboard-default-playable-color: #57ce92;
     --chessboard-default-preplayable-color: #888888;
     --chessboard-default-preplayed-color: #888888;
-    --chessboard-default-checked-color: #DF3030;
-    --chessboard-default-disabled-color: #000000AD;
-    --chessboard-default-hovering-color: #246D49;
+    --chessboard-default-checked-color: #df3030;
+    --chessboard-default-disabled-color: #000000ad;
+    --chessboard-default-hovering-color: #246d49;
     --chessboard-default-prehovering-color: #888888;
-    --chessboard-default-from-color: #367B96;
-    --chessboard-default-to-color: #26AED885;
-    --chessboard-default-winner-color: #FFD900;
-    --chessboard-selected-color: #57CE9240;
+    --chessboard-default-from-color: #367b96;
+    --chessboard-default-to-color: #26aed885;
+    --chessboard-default-winner-color: #ffd900;
+    --chessboard-selected-color: #57ce9240;
     --chessboard-preselected-color: #888888;
-    --chessboard-winner-color: #FFD900;
-    --chessboard-playable-color: #57CE92;
+    --chessboard-winner-color: #ffd900;
+    --chessboard-playable-color: #57ce92;
     --chessboard-preplayable-color: #888888;
     --chessboard-preplayed-color: #888888;
-    --chessboard-from-color: #367B96;
-    --chessboard-to-color: #26A5D885;
-    --chessboard-checked-color: #DF3030;
-    --chessboard-hovering-color: #246D49;
+    --chessboard-from-color: #367b96;
+    --chessboard-to-color: #26a5d885;
+    --chessboard-checked-color: #df3030;
+    --chessboard-hovering-color: #246d49;
     --chessboard-prehovering-color: #888888;
-    --chessboard-disabled-color: #000000AD;
+    --chessboard-disabled-color: #000000ad;
 
     /* Promotion Menu, use hex code */
-    --chessboard-default-promotion-option-color: #D3D3D3;
-    --chessboard-default-promotion-option-outline-color: #B7B7B7;
+    --chessboard-default-promotion-option-color: #d3d3d3;
+    --chessboard-default-promotion-option-outline-color: #b7b7b7;
     --chessboard-default-promotion-option-shadow-color: #000000;
-    --chessboard-promotion-option-color: #D3D3D3;
-    --chessboard-promotion-option-outline-color: #B7B7B7;
+    --chessboard-promotion-option-color: #d3d3d3;
+    --chessboard-promotion-option-outline-color: #b7b7b7;
     --chessboard-promotion-option-shadow-color: #000000;
 
     /* White Pieces - For Desktop */
@@ -85,8 +85,8 @@
     --chessboard-move-to-top: 0;
 }
 
-@media only screen and (hover: none) and (pointer: coarse){
-    :root{
+@media only screen and (hover: none) and (pointer: coarse) {
+    :root {
         /* White Pieces - For Mobile */
         --chessboard-white-pawn-image: url("../assets/pieces/mobile/white_pawn.webp");
         --chessboard-white-rook-image: url("../assets/pieces/mobile/white_rook.webp");
@@ -109,10 +109,10 @@
 #chessboard {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
-    width:var(--chessboard-board-size);
-    height:var(--chessboard-board-size);
-    gap: 0!important;
-    cursor: pointer!important;
+    width: var(--chessboard-board-size);
+    height: var(--chessboard-board-size);
+    gap: 0 !important;
+    cursor: pointer !important;
     outline: 2px solid var(--chessboard-border-color);
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
@@ -120,19 +120,21 @@
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
-    position:relative;
+    position: relative;
     background-size: cover;
     box-sizing: border-box;
 }
 
-#chessboard::after{
-    content: '';
+#chessboard::after {
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
     width: var(--chessboard-board-size);
     height: var(--chessboard-board-size);
-    background-image: var(--chessboard-noise-effect-image);
+    background-image: image-set(
+        var(--chessboard-noise-effect-image) type("image/webp")
+    );
     opacity: 0.4;
     filter: brightness(0);
     pointer-events: none;
@@ -140,273 +142,300 @@
 
 /* -------------- Board Styles -------------- */
 #chessboard {
-    & .square{
+    & .square {
         position: relative;
-        width:calc((var(--chessboard-board-size)) / 8);
-        height:calc((var(--chessboard-board-size)) / 8);
+        width: calc((var(--chessboard-board-size)) / 8);
+        height: calc((var(--chessboard-board-size)) / 8);
         box-shadow: inset 0 0 0 1px var(--chessboard-square-shadow-color);
         text-align: center;
-        margin:0!important;
-        cursor: pointer!important;
+        margin: 0 !important;
+        cursor: pointer !important;
     }
 
-    & .square--black{
-        background-color:var(--chessboard-black-square-color);
+    & .square--black {
+        background-color: var(--chessboard-black-square-color);
     }
 
-    & .square--white{
-        background-color:var(--chessboard-white-square-color);
+    & .square--white {
+        background-color: var(--chessboard-white-square-color);
     }
 
-    & .row-coordinate{
-        position:absolute;
-        right:0;
-        margin-right:0.4vw;
-        font-size:calc(var(--chessboard-board-size) / 50);
-        margin-top:0.3vw;
+    & .row-coordinate {
+        position: absolute;
+        right: 0;
+        margin-right: 0.4vw;
+        font-size: calc(var(--chessboard-board-size) / 50);
+        margin-top: 0.3vw;
         font-weight: bold;
     }
 
-    & .square--black .row-coordinate{
-        color:var(--chessboard-white-square-color);
+    & .square--black .row-coordinate {
+        color: var(--chessboard-white-square-color);
         filter: brightness(1.2);
     }
 
-    & .square--white .row-coordinate{
-        color:var(--chessboard-black-square-color);
+    & .square--white .row-coordinate {
+        color: var(--chessboard-black-square-color);
         filter: brightness(0.9);
     }
 
-    & .column-coordinate{
-        position:absolute;
-        bottom:0;
-        font-size:calc(var(--chessboard-board-size) / 50);
-        margin-left:0.4vw;
-        margin-bottom:0.2vw;
+    & .column-coordinate {
+        position: absolute;
+        bottom: 0;
+        font-size: calc(var(--chessboard-board-size) / 50);
+        margin-left: 0.4vw;
+        margin-bottom: 0.2vw;
         font-weight: bold;
     }
 
-    & .square--black .column-coordinate{
-        color:var(--chessboard-white-square-color);
+    & .square--black .column-coordinate {
+        color: var(--chessboard-white-square-color);
         filter: brightness(1.2);
     }
 
-    & .square--white .column-coordinate{
-        color:var(--chessboard-black-square-color);
+    & .square--white .column-coordinate {
+        color: var(--chessboard-black-square-color);
         filter: brightness(0.9);
     }
 }
 
 /* -------------- Piece Styles -------------- */
 /* Generic piece style */
-.piece{
+.piece {
     background-position: center;
-    background-size:cover;
+    background-size: cover;
     background-repeat: no-repeat;
-    width:calc(var(--chessboard-board-size) / 9);
-    height:calc(var(--chessboard-board-size) / 10);
+    width: calc(var(--chessboard-board-size) / 9);
+    height: calc(var(--chessboard-board-size) / 10);
     position: absolute;
-    z-index:var(--chessboard-piece-z-index);
-    left:5%;
-    top:10%;
-    cursor: pointer!important;
+    z-index: var(--chessboard-piece-z-index);
+    left: 5%;
+    top: 10%;
+    cursor: pointer !important;
 
-    &.dragging, &.ghost {
+    &.dragging,
+    &.ghost {
         opacity: 0.5;
     }
 
-    &.promotion-option{
-        z-index:var(--chessboard-promotion-option-z-index)!important;
-        position:inherit;
+    &.promotion-option {
+        z-index: var(--chessboard-promotion-option-z-index) !important;
+        position: inherit;
         background-color: var(--chessboard-promotion-option-color);
         margin-left: 8%;
         margin-top: 3%;
         width: calc(var(--chessboard-board-size) / 11);
         height: calc(var(--chessboard-board-size) / 11);
         outline: 4px solid var(--chessboard-promotion-option-outline-color);
-        border:1px solid var(--chessboard-border-color);
+        border: 1px solid var(--chessboard-border-color);
 
-        &:hover{
-            box-shadow: 0 5px 15px var(--chessboard-promotion-option-shadow-color);
+        &:hover {
+            box-shadow: 0 5px 15px
+                var(--chessboard-promotion-option-shadow-color);
         }
     }
 }
 
 /* Animation for piece movement, don't change this */
-@keyframes move{
+@keyframes move {
     0% {
-        left:var(--chessboard-move-from-left);
-        top:var(--chessboard-move-from-top);
+        left: var(--chessboard-move-from-left);
+        top: var(--chessboard-move-from-top);
     }
     100% {
-        left:var(--chessboard-move-to-left);
-        top:var(--chessboard-move-to-top);
+        left: var(--chessboard-move-to-left);
+        top: var(--chessboard-move-to-top);
     }
 }
 
 /* White pieces */
-[data-piece="Rook"][data-color="White"]{
-    background-image:var(--chessboard-white-rook-image);
+[data-piece="Rook"][data-color="White"] {
+    background-image: image-set(
+        var(--chessboard-white-rook-image) type("image/webp")
+    );
 }
 
-[data-piece="Knight"][data-color="White"]{
-    background-image:var(--chessboard-white-knight-image);
+[data-piece="Knight"][data-color="White"] {
+    background-image: image-set(
+        var(--chessboard-white-knight-image) type("image/webp")
+    );
 }
 
-[data-piece="Bishop"][data-color="White"]{
-    background-image:var(--chessboard-white-bishop-image);
+[data-piece="Bishop"][data-color="White"] {
+    background-image: image-set(
+        var(--chessboard-white-bishop-image) type("image/webp")
+    );
 }
 
-[data-piece="Queen"][data-color="White"]{
-    background-image:var(--chessboard-white-queen-image);
+[data-piece="Queen"][data-color="White"] {
+    background-image: image-set(
+        var(--chessboard-white-queen-image) type("image/webp")
+    );
 }
 
-[data-piece="King"][data-color="White"]{
-    background-image:var(--chessboard-white-king-image);
+[data-piece="King"][data-color="White"] {
+    background-image: image-set(
+        var(--chessboard-white-king-image) type("image/webp")
+    );
 }
 
-[data-piece="Pawn"][data-color="White"]{
-    background-image:var(--chessboard-white-pawn-image);
+[data-piece="Pawn"][data-color="White"] {
+    background-image: image-set(
+        var(--chessboard-white-pawn-image) type("image/webp")
+    );
 }
 
 /* Black pieces */
-[data-piece="Rook"][data-color="Black"]{
-    background-image:var(--chessboard-black-rook-image);
+[data-piece="Rook"][data-color="Black"] {
+    background-image: image-set(
+        var(--chessboard-black-rook-image) type("image/webp")
+    );
 }
 
-[data-piece="Knight"][data-color="Black"]{
-    background-image:var(--chessboard-black-knight-image);
+[data-piece="Knight"][data-color="Black"] {
+    background-image: image-set(
+        var(--chessboard-black-knight-image) type("image/webp")
+    );
 }
 
-[data-piece="Bishop"][data-color="Black"]{
-    background-image:var(--chessboard-black-bishop-image);
+[data-piece="Bishop"][data-color="Black"] {
+    background-image: image-set(
+        var(--chessboard-black-bishop-image) type("image/webp")
+    );
 }
 
-[data-piece="Queen"][data-color="Black"]{
-    background-image:var(--chessboard-black-queen-image);
+[data-piece="Queen"][data-color="Black"] {
+    background-image: image-set(
+        var(--chessboard-black-queen-image) type("image/webp")
+    );
 }
 
-[data-piece="King"][data-color="Black"]{
-    background-image:var(--chessboard-black-king-image);
+[data-piece="King"][data-color="Black"] {
+    background-image: image-set(
+        var(--chessboard-black-king-image) type("image/webp")
+    );
 }
 
-[data-piece="Pawn"][data-color="Black"]{
-    background-image:var(--chessboard-black-pawn-image);
+[data-piece="Pawn"][data-color="Black"] {
+    background-image: image-set(
+        var(--chessboard-black-pawn-image) type("image/webp")
+    );
 }
 
 /* -------------- Effects Styles -------------- */
 #chessboard:not(:has(.square-effect.hidden)) {
-    & .square-effect.hidden{
-        display:none;
+    & .square-effect.hidden {
+        display: none;
     }
 
-    & .square-effect-layer{
+    & .square-effect-layer {
         position: absolute;
-        width:100%;
-        height:100%;
+        width: 100%;
+        height: 100%;
         box-shadow: inset 0 0 0 1px var(--chessboard-square-shadow-color);
         text-align: center;
-        margin:0!important;
-        cursor: pointer!important;
+        margin: 0 !important;
+        cursor: pointer !important;
         background-color: transparent;
         z-index: var(--chessboard-square-effect-layer-z-index);
         pointer-events: auto;
     }
 
-    & .square:has(.square-effect--from .square-effect-layer){
+    & .square:has(.square-effect--from .square-effect-layer) {
         background-color: var(--chessboard-from-color);
     }
 
-    & .square:has(.square-effect--to .square-effect-layer){
+    & .square:has(.square-effect--to .square-effect-layer) {
         background-color: var(--chessboard-to-color);
     }
-    
-    & .square:has(.square-effect--selected .square-effect-layer){
+
+    & .square:has(.square-effect--selected .square-effect-layer) {
         background-color: var(--chessboard-selected-color);
     }
 
-    & .square:has(.square-effect--preselected .square-effect-layer){
+    & .square:has(.square-effect--preselected .square-effect-layer) {
         background-color: var(--chessboard-preselected-color);
     }
 
-    & .square:has(.square-effect--preplayed .square-effect-layer){
+    & .square:has(.square-effect--preplayed .square-effect-layer) {
         background-color: var(--chessboard-preplayed-color);
     }
 
-    & .square:has(
-        .square-effect--playable .square-effect-layer:hover,
-        .square-effect--killable .square-effect-layer:hover
-    ){
+    &
+        .square:has(
+            .square-effect--playable .square-effect-layer:hover,
+            .square-effect--killable .square-effect-layer:hover
+        ) {
         background-color: var(--chessboard-hovering-color);
     }
 
-    & .square:has(.square-effect--preplayable .square-effect-layer:hover){
+    & .square:has(.square-effect--preplayable .square-effect-layer:hover) {
         background-color: var(--chessboard-prehovering-color);
     }
 
-    & .square-effect--playable .square-effect-icon, 
-    & .square-effect--preplayable .square-effect-icon{
-        content: '';
+    & .square-effect--playable .square-effect-icon,
+    & .square-effect--preplayable .square-effect-icon {
+        content: "";
         position: absolute;
         top: 50%;
         left: 50%;
-        width:calc((var(--chessboard-board-size) - 2px) / 23);
-        height:calc((var(--chessboard-board-size) - 2px) / 23);
+        width: calc((var(--chessboard-board-size) - 2px) / 23);
+        height: calc((var(--chessboard-board-size) - 2px) / 23);
         background-color: transparent;
         box-shadow: none;
         border-radius: 50%;
         transform: translate(-50%, -50%);
     }
-    
-    & .square-effect--playable .square-effect-icon{
-        background-color: var(--chessboard-playable-color)!important;
+
+    & .square-effect--playable .square-effect-icon {
+        background-color: var(--chessboard-playable-color) !important;
     }
 
-    & .square-effect--preplayable .square-effect-icon{
-        background-color: var(--chessboard-preplayable-color)!important;
+    & .square-effect--preplayable .square-effect-icon {
+        background-color: var(--chessboard-preplayable-color) !important;
     }
 
-    & .square-effect--killable .square-effect-icon::before, 
+    & .square-effect--killable .square-effect-icon::before,
     & .square-effect--prekillable .square-effect-icon::before,
-    & .square-effect--prekilled .square-effect-icon::before{
-        content: '';
+    & .square-effect--prekilled .square-effect-icon::before {
+        content: "";
         position: absolute;
         top: 50%;
         left: 50%;
-        width:calc(100% + 1px);
-        height:calc(100% + 1px);
+        width: calc(100% + 1px);
+        height: calc(100% + 1px);
         box-shadow: none;
         transform: translate(-50%, -50%);
     }
 
-    & .square-effect--killable .square-effect-icon::before{
+    & .square-effect--killable .square-effect-icon::before {
         background-color: var(--chessboard-playable-color);
     }
 
-    & .square-effect--prekillable .square-effect-icon::before{
+    & .square-effect--prekillable .square-effect-icon::before {
         background-color: var(--chessboard-preplayable-color);
     }
 
     & .square-effect--killable .square-effect-icon::after,
     & .square-effect--prekillable .square-effect-icon::after,
-    & .square-effect--prekilled .square-effect-icon::after{
-        content: '';
+    & .square-effect--prekilled .square-effect-icon::after {
+        content: "";
         position: absolute;
         top: 50%;
         left: 50%;
-        width:100%;
-        height:100%;
+        width: 100%;
+        height: 100%;
         border-radius: 50%;
         transform: translate(-50%, -50%);
     }
 
     & .square--black .square-effect--killable .square-effect-icon::after,
-    & .square--black .square-effect--prekillable .square-effect-icon::after{
+    & .square--black .square-effect--prekillable .square-effect-icon::after {
         background-color: var(--chessboard-black-square-color);
     }
 
     & .square--white .square-effect--killable .square-effect-icon::after,
-    & .square--white .square-effect--prekillable .square-effect-icon::after{
+    & .square--white .square-effect--prekillable .square-effect-icon::after {
         background-color: var(--chessboard-white-square-color);
     }
 
@@ -414,40 +443,42 @@
         background-color: var(--chessboard-hovering-color);
     }
 
-    & .square:has(.square-effect--prekillable:hover) .square-effect-icon::after {
+    &
+        .square:has(.square-effect--prekillable:hover)
+        .square-effect-icon::after {
         background-color: var(--chessboard-prehovering-color);
     }
 
-    & .square:has(.square-effect--checked .square-effect-layer){
-        box-shadow:inset 0 0 15px var(--chessboard-checked-color)!important;
+    & .square:has(.square-effect--checked .square-effect-layer) {
+        box-shadow: inset 0 0 15px var(--chessboard-checked-color) !important;
     }
-    
-    & .square:has(.square-effect--disabled .square-effect-layer){
-        box-shadow:inset 0 0 100px var(--chessboard-disabled-color);
 
-        & .piece{
+    & .square:has(.square-effect--disabled .square-effect-layer) {
+        box-shadow: inset 0 0 100px var(--chessboard-disabled-color);
+
+        & .piece {
             opacity: 0.5;
         }
     }
 
-    & .square:has(.square-effect--selected .piece){
+    & .square:has(.square-effect--selected .piece) {
         opacity: 0.4;
     }
 
-    & .square:has(.square-effect--selected span){
+    & .square:has(.square-effect--selected span) {
         opacity: 0.2;
     }
 
-    & .square:has(.square-effect--winner .square-effect-layer){
-        & .piece{
-            width:calc(var(--chessboard-board-size) / 11);
-            height:calc(var(--chessboard-board-size) / 11);
-            left:14%;
-            top:8%;
+    & .square:has(.square-effect--winner .square-effect-layer) {
+        & .piece {
+            width: calc(var(--chessboard-board-size) / 11);
+            height: calc(var(--chessboard-board-size) / 11);
+            left: 14%;
+            top: 8%;
         }
 
-        & .square-effect-icon::before{
-            content: '';
+        & .square-effect-icon::before {
+            content: "";
             position: absolute;
             top: 70%;
             left: 22.5%;
@@ -459,8 +490,8 @@
             opacity: 0.3;
         }
 
-        & .square-effect-icon::after{
-            content: '';
+        & .square-effect-icon::after {
+            content: "";
             position: absolute;
             width: calc((var(--chessboard-board-size) - 2px) / 14);
             height: calc((var(--chessboard-board-size) - 2px) / 35);
@@ -468,23 +499,23 @@
             top: 35%;
             border-radius: 50%;
             background-color: transparent;
-            box-shadow: 0 0 12px 6px #FFF, 
-                        0 0 20px 10px var(--chessboard-winner-color);
-        } 
+            box-shadow: 0 0 12px 6px #fff,
+                0 0 20px 10px var(--chessboard-winner-color);
+        }
     }
 
-    & .square:has(.square-effect--winner-animation .square-effect-layer){
-        & .piece{
+    & .square:has(.square-effect--winner-animation .square-effect-layer) {
+        & .piece {
             animation: piece-idle 2.5s infinite;
         }
 
-        & .square-effect-icon::before{
+        & .square-effect-icon::before {
             animation: shadow-idle 2.5s infinite;
         }
 
-        & .square-effect-icon::after{
-            animation: glow 2.5s infinite, glow-idle 2.5s infinite; 
-        } 
+        & .square-effect-icon::after {
+            animation: glow 2.5s infinite, glow-idle 2.5s infinite;
+        }
     }
 }
 
@@ -492,25 +523,25 @@
 avoid changing */
 @keyframes glow {
     0% {
-        box-shadow: 0 0 12px 6px #FFF, 
-                    0 0 20px 10px var(--chessboard-winner-color);
+        box-shadow: 0 0 12px 6px #fff,
+            0 0 20px 10px var(--chessboard-winner-color);
     }
     50% {
-        box-shadow: 0 0 10px 5px #FFF, 
-                    0 0 15px 7px var(--chessboard-winner-color);
+        box-shadow: 0 0 10px 5px #fff,
+            0 0 15px 7px var(--chessboard-winner-color);
     }
     100% {
-        box-shadow: 0 0 12px 6px #FFF, 
-                    0 0 20px 10px var(--chessboard-winner-color);
+        box-shadow: 0 0 12px 6px #fff,
+            0 0 20px 10px var(--chessboard-winner-color);
     }
 }
 
 /* Animation for piece's idle 
 movement, avoid changing */
-@keyframes piece-idle{
+@keyframes piece-idle {
     0% {
         transform: translateY(-15%);
-    } 
+    }
     50% {
         transform: translateY(0);
     }
@@ -535,7 +566,7 @@ idle movement, avoid changing */
 
 /* Animation for shadow's idle movement,
 avoid changing */
-@keyframes shadow-idle{
+@keyframes shadow-idle {
     0% {
         transform: scale(0.8);
     }
@@ -552,13 +583,13 @@ avoid changing */
  *             700px - 900px - 1250px
  */
 @media screen and (max-width: 900px) {
-    :root{
+    :root {
         --chessboard-board-size: calc(100vw - 5rem);
     }
 }
 
 @media screen and (max-width: 700px) {
-    :root{
+    :root {
         --chessboard-board-size: calc(100vw - 1.1rem);
     }
 }

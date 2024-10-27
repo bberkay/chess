@@ -3,7 +3,7 @@
  * @see For more information about this component check file: src\Platform\Components\Navbar.ts
  */
 
-#navbar{
+#navbar {
     background-color: var(--accent-color);
     color: var(--text-color);
     border: 1px solid var(--border-color);
@@ -13,11 +13,11 @@
     box-shadow: 0 0 5px var(--shadow-color);
 }
 
-#navbar .navbar-buttons{
+#navbar .navbar-buttons {
     display: flex;
     gap: 4px;
 
-    & button{
+    & button {
         flex-grow: 1;
         box-sizing: border-box;
     }
@@ -28,14 +28,14 @@
  *             700px - 900px - 1250px
  */
 @media screen and (min-width: 900px) and (max-width: 1250px) {
-    #navbar{
+    #navbar {
         width: calc(var(--chessboard-board-size) - 8px);
         max-width: calc(var(--chessboard-board-size) - 8px);
     }
 }
 
 @media screen and (max-width: 900px) {
-    #navbar{
+    #navbar {
         width: calc(100% - 8px);
         min-width: 0;
         max-width: calc(var(--chessboard-board-size) - 8px);
@@ -43,7 +43,7 @@
 }
 
 @media screen and (min-width: 700px) and (max-width: 900px) {
-    #navbar{
+    #navbar {
         max-width: calc(var(--chessboard-board-size) - 2px);
     }
 }

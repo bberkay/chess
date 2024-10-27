@@ -3,7 +3,7 @@
  * @see For more information about this component check file: src\Platform\Components\NavigatorModal.ts
  */
 
-.navigator-modal{
+.navigator-modal {
     box-shadow: none;
     background-color: var(--accent-opaque-color);
     color: var(--text-color);
@@ -13,45 +13,46 @@
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    z-index:var(--navigator-modal-z-index)!important;
-    overflow: hidden; 
+    z-index: var(--navigator-modal-z-index) !important;
+    overflow: hidden;
     padding: 2rem;
 
-    & button{
-        border:1px solid var(--accent-color);
+    & button {
+        border: 1px solid var(--accent-color);
         background-color: var(--accent-opaque-color);
     }
 
-    & a{
+    & a {
         color: var(--text-color);
 
-        &:hover{
+        &:hover {
             filter: brightness(0.9);
         }
 
-        &:active{
+        &:active {
             filter: brightness(0.8);
         }
     }
 
-    & .navigator-modal-title{
+    & .navigator-modal-title {
         font-size: var(--navigator-modal-title-font-size);
         font-weight: bold;
         margin-top: 3px;
     }
 
-    & .navigator-modal-content{
+    & .navigator-modal-content {
         font-size: var(--navigator-modal-content-font-size);
-        z-index:var(--navigator-modal-z-index)!important;
-        
-        & button, & span{
+        z-index: var(--navigator-modal-z-index) !important;
+
+        & button,
+        & span {
             margin-top: 25px;
             font-size: var(--navigator-modal-content-small-font-size);
         }
     }
 }
 
-.navigator-modal .navigator-modal-bg{
+.navigator-modal .navigator-modal-bg {
     background-image: url("../../assets/images/result-screen-bg-icon-dark.png");
     background-size: cover;
     background-repeat: no-repeat;
@@ -66,15 +67,15 @@
 }
 
 .navigator-modal:not(.navigator-modal--glass) {
-    border-left: none!important;
+    border-left: none !important;
 
-    .navigator-modal-bg{
+    .navigator-modal-bg {
         width: 100px;
         height: 105px;
     }
 }
 
-.navigator-modal--glass{
+.navigator-modal--glass {
     box-shadow: 0 4px 30px var(--glass-box-shadow-color);
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
@@ -86,91 +87,92 @@
     left: 50%;
     transform: translate(-50%, -50%);
 
-    & .navigator-modal-content{
+    & .navigator-modal-content {
         margin-top: 25px;
 
-        & button, & span{
+        & button,
+        & span {
             margin-top: 0px;
         }
     }
 
-    & button{
+    & button {
         background: var(--glass-component-bg-color);
         border: 1px solid var(--glass-component-bg-color);
         color: var(--glass-text-color);
-        transition: background-color .15s ease;
+        transition: background-color 0.15s ease;
         border-radius: 5px;
 
-        &:hover{
+        &:hover {
             background-color: var(--glass-component-active-bg-color);
         }
 
-        &[data-selected="true"]{
+        &[data-selected="true"] {
             background-color: var(--glass-component-active-bg-color);
         }
     }
 
-    & input{
+    & input {
         background: var(--glass-component-bg-color);
         border: 1px solid var(--glass-component-bg-color);
         color: var(--glass-text-color);
-        transition: background-color .15s ease;
+        transition: background-color 0.15s ease;
         border-radius: 5px;
         width: fit-content;
     }
 }
 
 @media (prefers-color-scheme: dark) {
-    .navigator-modal:not(.navigator-modal--glass){
+    .navigator-modal:not(.navigator-modal--glass) {
         box-shadow: 0 0 5px var(--black-color);
         border: 1px solid var(--border-color);
     }
 
     .navigator-modal .navigator-modal-bg,
-    .navigator-modal--glass .navigator-modal-bg{
+    .navigator-modal--glass .navigator-modal-bg {
         background-image: url("../../assets/images/result-screen-bg-icon-light.png");
     }
 }
 
 @media (prefers-color-scheme: light) {
     .navigator-modal .navigator-modal-bg,
-    .navigator-modal--glass .navigator-modal-bg{
+    .navigator-modal--glass .navigator-modal-bg {
         background-image: url("../../assets/images/result-screen-bg-icon-dark.png");
     }
 }
 
-body[data-color-scheme="dark"]{
-    & .navigator-modal:not(.navigator-modal--glass){
+body[data-color-scheme="dark"] {
+    & .navigator-modal:not(.navigator-modal--glass) {
         box-shadow: 0 0 5px var(--black-color);
         border: 1px solid var(--border-color);
     }
 
     & .navigator-modal .navigator-modal-bg,
-    & .navigator-modal--glass .navigator-modal-bg{
+    & .navigator-modal--glass .navigator-modal-bg {
         background-image: url("../../assets/images/result-screen-bg-icon-light.png");
     }
 }
 
-body[data-color-scheme="light"]{
+body[data-color-scheme="light"] {
     & .navigator-modal .navigator-modal-bg,
-    & .navigator-modal--glass .navigator-modal-bg{
+    & .navigator-modal--glass .navigator-modal-bg {
         background-image: url("../../assets/images/result-screen-bg-icon-dark.png");
     }
 }
 
-.navigator-modal--error{
-    border: 1px solid  var(--glass-error-bg-color);
-    background:  var(--glass-error-bg-color);
+.navigator-modal--error {
+    border: 1px solid var(--glass-error-bg-color);
+    background: var(--glass-error-bg-color);
 
-    & button{
+    & button {
         width: 100%;
     }
 }
 
-.navigator-modal-bg-layer{
+.navigator-modal-bg-layer {
     display: none;
     overflow: hidden;
-    z-index:var(--navigator-modal-backdrop-z-index);
+    z-index: var(--navigator-modal-backdrop-z-index);
     position: fixed;
     top: 0;
     left: 0;
@@ -180,7 +182,7 @@ body[data-color-scheme="light"]{
     backdrop-filter: blur(1px);
     -webkit-backdrop-filter: blur(1px);
 
-    &.show{
+    &.show {
         display: block;
     }
 }
@@ -190,24 +192,24 @@ body[data-color-scheme="light"]{
  *             700px - 900px - 1250px
  */
 @media screen and (max-width: 1250px) {
-    body:has(.navigator-modal-bg-layer){
+    body:has(.navigator-modal-bg-layer) {
         overflow: hidden;
     }
 
-    .navigator-modal-bg-layer{
+    .navigator-modal-bg-layer {
         position: absolute;
     }
 }
 
 @media screen and (max-width: 550px) {
-    .navigator-modal--glass{
+    .navigator-modal--glass {
         margin: 1rem;
         top: 30%;
         left: 5%;
         right: 5%;
         transform: scale(1);
 
-        & .navigator-modal-bg{
+        & .navigator-modal-bg {
             left: -10%;
         }
     }
