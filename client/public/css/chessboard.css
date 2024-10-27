@@ -55,20 +55,20 @@
     --chessboard-promotion-option-shadow-color: #000;
 
     /* White Pieces - For Desktop */
-    --chessboard-white-pawn-image: url("../assets/pieces/desktop/white_pawn.png");
-    --chessboard-white-rook-image: url("../assets/pieces/desktop/white_rook.png");
-    --chessboard-white-knight-image: url("../assets/pieces/desktop/white_knight.png");
-    --chessboard-white-bishop-image: url("../assets/pieces/desktop/white_bishop.png");
-    --chessboard-white-queen-image: url("../assets/pieces/desktop/white_queen.png");
-    --chessboard-white-king-image: url("../assets/pieces/desktop/white_king.png");
+    --chessboard-white-pawn-image: url("../assets/pieces/desktop/white_pawn.webp");
+    --chessboard-white-rook-image: url("../assets/pieces/desktop/white_rook.webp");
+    --chessboard-white-knight-image: url("../assets/pieces/desktop/white_knight.webp");
+    --chessboard-white-bishop-image: url("../assets/pieces/desktop/white_bishop.webp");
+    --chessboard-white-queen-image: url("../assets/pieces/desktop/white_queen.webp");
+    --chessboard-white-king-image: url("../assets/pieces/desktop/white_king.webp");
 
     /* Black Pieces - For Desktop */
-    --chessboard-black-pawn-image: url("../assets/pieces/desktop/black_pawn.png");
-    --chessboard-black-rook-image: url("../assets/pieces/desktop/black_rook.png");
-    --chessboard-black-knight-image: url("../assets/pieces/desktop/black_knight.png");
-    --chessboard-black-bishop-image: url("../assets/pieces/desktop/black_bishop.png");
-    --chessboard-black-queen-image: url("../assets/pieces/desktop/black_queen.png");
-    --chessboard-black-king-image: url("../assets/pieces/desktop/black_king.png");
+    --chessboard-black-pawn-image: url("../assets/pieces/desktop/black_pawn.webp");
+    --chessboard-black-rook-image: url("../assets/pieces/desktop/black_rook.webp");
+    --chessboard-black-knight-image: url("../assets/pieces/desktop/black_knight.webp");
+    --chessboard-black-bishop-image: url("../assets/pieces/desktop/black_bishop.webp");
+    --chessboard-black-queen-image: url("../assets/pieces/desktop/black_queen.webp");
+    --chessboard-black-king-image: url("../assets/pieces/desktop/black_king.webp");
 
     /* Background */
     --chessboard-noise-effect-image: url("../assets/images/chessboard-noise-effect.webp");
@@ -88,20 +88,20 @@
 @media only screen and (hover: none) and (pointer: coarse){
     :root{
         /* White Pieces - For Mobile */
-        --chessboard-white-pawn-image: url("../assets/pieces/mobile/white_pawn.png");
-        --chessboard-white-rook-image: url("../assets/pieces/mobile/white_rook.png");
-        --chessboard-white-knight-image: url("../assets/pieces/mobile/white_knight.png");
-        --chessboard-white-bishop-image: url("../assets/pieces/mobile/white_bishop.png");
-        --chessboard-white-queen-image: url("../assets/pieces/mobile/white_queen.png");
-        --chessboard-white-king-image: url("../assets/pieces/mobile/white_king.png");
+        --chessboard-white-pawn-image: url("../assets/pieces/mobile/white_pawn.webp");
+        --chessboard-white-rook-image: url("../assets/pieces/mobile/white_rook.webp");
+        --chessboard-white-knight-image: url("../assets/pieces/mobile/white_knight.webp");
+        --chessboard-white-bishop-image: url("../assets/pieces/mobile/white_bishop.webp");
+        --chessboard-white-queen-image: url("../assets/pieces/mobile/white_queen.webp");
+        --chessboard-white-king-image: url("../assets/pieces/mobile/white_king.webp");
 
         /* Black Pieces - For Mobile */
-        --chessboard-black-pawn-image: url("../assets/pieces/mobile/black_pawn.png");
-        --chessboard-black-rook-image: url("../assets/pieces/mobile/black_rook.png");
-        --chessboard-black-knight-image: url("../assets/pieces/mobile/black_knight.png");
-        --chessboard-black-bishop-image: url("../assets/pieces/mobile/black_bishop.png");
-        --chessboard-black-queen-image: url("../assets/pieces/mobile/black_queen.png");
-        --chessboard-black-king-image: url("../assets/pieces/mobile/black_king.png");
+        --chessboard-black-pawn-image: url("../assets/pieces/mobile/black_pawn.webp");
+        --chessboard-black-rook-image: url("../assets/pieces/mobile/black_rook.webp");
+        --chessboard-black-knight-image: url("../assets/pieces/mobile/black_knight.webp");
+        --chessboard-black-bishop-image: url("../assets/pieces/mobile/black_bishop.webp");
+        --chessboard-black-queen-image: url("../assets/pieces/mobile/black_queen.webp");
+        --chessboard-black-king-image: url("../assets/pieces/mobile/black_king.webp");
     }
 }
 
