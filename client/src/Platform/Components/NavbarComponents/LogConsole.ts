@@ -210,7 +210,6 @@ export class LogConsole extends NavbarComponent {
         newAddedLogs.forEach((log: HTMLElement) => {
             log.querySelectorAll(".tooltip-toggle").forEach(
                 (tooltip_toggle) => {
-                    console.log(tooltip_toggle);
                     tooltip_toggle.addEventListener("mouseover", () => {
                         if (this.config.showSquareIds) {
                             squares!.forEach((square: HTMLElement) => {
