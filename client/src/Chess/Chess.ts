@@ -96,9 +96,9 @@ export class Chess {
                 )!;
                 this.addBotToCurrentGame(botAttributes);
                 this.logger.save(
-                    `Bot[${JSON.stringify(
+                    `Bot-ts-${JSON.stringify(
                         botAttributes
-                    )}] found in cache and added to the game`
+                    )}-te- found in cache and added to the game`
                 );
             }
             this.logger.save("Game loaded from cache");
@@ -156,7 +156,7 @@ export class Chess {
         }
 
         this.logger.save(
-            `Game successfully created on Chessboard and status[${this.engine.getGameStatus()}] shown`
+            `Game successfully created on Chessboard and status-ts-${this.engine.getGameStatus()}-te- shown`
         );
 
         this.initBoardListener();
@@ -185,7 +185,7 @@ export class Chess {
         this._lastCreatedBotAttributes = this._bot.getAttributes();
         this.board.disablePreSelection(this._bot.color);
         this.logger.save(
-            `Bot[${this._bot.color}] created with difficulty[${this._bot.difficulty}]`
+            `Bot-ts-${this._bot.color}-te- created with difficulty-ts-${this._bot.difficulty}-te-`
         );
 
         // First move
@@ -234,11 +234,11 @@ export class Chess {
         this.board.createPiece(color, pieceType, square);
         this.engine.createPiece(color, pieceType, square);
         this.logger.save(
-            `Piece[${JSON.stringify({
+            `Piece-ts-${JSON.stringify({
                 color,
                 pieceType,
                 square,
-            })}] created on board and engine`
+            })}-te- created on board and engine`
         );
         document.dispatchEvent(
             new CustomEvent(ChessEvent.onPieceCreated, {
@@ -257,7 +257,7 @@ export class Chess {
     public removePiece(square: Square): void {
         this.board.removePiece(square);
         this.engine.removePiece(square);
-        this.logger.save(`Piece[${square}] removed from board and engine`);
+        this.logger.save(`Piece-ts-${square}-te- removed from board and engine`);
         document.dispatchEvent(
             new CustomEvent(ChessEvent.onPieceRemoved, {
                 detail: { square: square },
@@ -339,7 +339,7 @@ export class Chess {
     private handleOnPieceSelected(squareId: Square): void {
         this._selectedSquare = squareId;
         this.board.highlightMoves(this.engine.getMoves(this._selectedSquare!));
-        this.logger.save(`Piece[${squareId}] selected on the board`);
+        this.logger.save(`Piece-ts-${squareId}-te- selected on the board`);
         document.dispatchEvent(
             new CustomEvent(ChessEvent.onPieceSelected, {
                 detail: { square: squareId },
@@ -356,7 +356,7 @@ export class Chess {
             this.engine.getMoves(this._preSelectedSquare!, true),
             true
         );
-        this.logger.save(`Piece[${squareId}] pre selected on the board`);
+        this.logger.save(`Piece-ts-${squareId}-te- pre selected on the board`);
         document.dispatchEvent(
             new CustomEvent(ChessEvent.onPieceSelected, {
                 detail: { square: squareId },
@@ -416,7 +416,7 @@ export class Chess {
                 ? Color.Black
                 : Color.White
         ].push(preMove);
-        this.logger.save(`Pre-move[${JSON.stringify(preMove)}] saved`);
+        this.logger.save(`Pre-move-ts-${JSON.stringify(preMove)}-te- saved`);
         document.dispatchEvent(
             new CustomEvent(ChessEvent.onPieceSelected, {
                 detail: { square: squareId },
@@ -493,7 +493,7 @@ export class Chess {
 
         await this.board.playMove(from, to, moveType);
         this.logger.save(
-            `Move[${JSON.stringify({ from, to })}] played on board and engine`
+            `Move-ts-${JSON.stringify({ from, to })}-te- played on board and engine`
         );
         this.finishTurn();
         document.dispatchEvent(
@@ -517,7 +517,7 @@ export class Chess {
         setTimeout(async () => {
             await this.playMove(from, to, type);
             this.logger.save(
-                `Pre-move[${JSON.stringify({ from, to, type })}] played`
+                `Pre-move-ts-${JSON.stringify({ from, to, type })}-te- played`
             );
             document.dispatchEvent(
                 new CustomEvent(ChessEvent.onPieceMovedByPlayer, {

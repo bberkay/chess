@@ -261,7 +261,7 @@ export class ChessEngine extends BoardManager {
                 moveType as MoveType
             ]!) {
                 if (move === this.playedTo) {
-                    this.logger.save(`Move type[${moveType}] is found`);
+                    this.logger.save(`Move type-ts-${moveType}-te- is found`);
                     return moveType as MoveType;
                 }
             }
@@ -269,11 +269,11 @@ export class ChessEngine extends BoardManager {
 
         // If the given move is not in the currentMoves, return null.
         this.logger.save(
-            `Move type is not found because the given move[${
+            `Move type is not found because the given move-ts-${
                 this.playedTo
-            }] is not in the current moves[${JSON.stringify(
+            }-te- is not in the current moves-ts-${JSON.stringify(
                 this.currentMoves[square]
-            )}]`
+            )}-te-`
         );
         return null;
     }
@@ -287,7 +287,7 @@ export class ChessEngine extends BoardManager {
     ): Moves | null {
         if (isPreCalculation) {
             this.logger.save(
-                `Pre-calculation of moves of the square[${square}] is started`
+                `Pre-calculation of moves of the square-ts-${square}-te- is started`
             );
             return this.moveEngine.getMoves(square, !isPreCalculation);
         }
@@ -307,17 +307,17 @@ export class ChessEngine extends BoardManager {
             this.currentMoves[square] ?? this.moveEngine.getMoves(square);
         this.logger.save(
             Object.hasOwn(this.currentMoves, square)
-                ? `Moves of the square[${square}] is found from calculated moves[${JSON.stringify(
+                ? `Moves of the square-ts-${square}-te- is found from calculated moves-ts-${JSON.stringify(
                       this.currentMoves
-                  )}]`
-                : `Moves of the square[${square}] is calculated by move engine`
+                  )}-te-`
+                : `Moves of the square-ts-${square}-te- is calculated by move engine`
         );
 
         // Save the moves to the calculatedMoves.
         this.logger.save(
-            `Moves of the square is saved to calculated moves(or updated)[${JSON.stringify(
+            `Moves of the square is saved to calculated moves-ts-${JSON.stringify(
                 this.currentMoves
-            )}]`
+            )}-te-`
         );
 
         // Return the moves.
@@ -428,7 +428,7 @@ export class ChessEngine extends BoardManager {
                 case MoveType.Normal:
                     this._doNormalMove(from, to, true);
                     this.logger.save(
-                        `Piece moved to target square[${to}] on engine`
+                        `Piece moved to target square-ts-${to}-te- on engine`
                     );
                     break;
             }
@@ -576,7 +576,7 @@ export class ChessEngine extends BoardManager {
             Number(this.playedFrom) > Number(this.playedTo)
                 ? CastlingSide.Long
                 : CastlingSide.Short;
-        this.logger.save(`Castling type determined[${castlingSide}] on engine`);
+        this.logger.save(`Castling type determined-ts-${castlingSide}-te- on engine`);
 
         // Find the target rook square if it is clicked two square left or right of the king
         // instead of the rook square itself.
@@ -602,7 +602,7 @@ export class ChessEngine extends BoardManager {
                 : Number(this.playedFrom) + 2;
         this._doNormalMove(this.playedFrom as Square, kingNewSquare as Square);
         this.logger.save(
-            `King moved to target square[${kingNewSquare}] on engine`
+            `King moved to target square-ts-${kingNewSquare}-te- on engine`
         );
 
         /**
@@ -633,7 +633,7 @@ export class ChessEngine extends BoardManager {
             (BoardQuerier.getTurnColor() + CastlingSide.Long) as CastlingType
         );
         this.logger.save(
-            `Rook moved to target square and castling[${castlingSide}] move is saved.`
+            `Rook moved to target square and castling-ts-${castlingSide}-te- move is saved.`
         );
 
         // Set the current move for the move history.
@@ -649,7 +649,7 @@ export class ChessEngine extends BoardManager {
     private _doEnPassant(): void {
         this._doNormalMove(this.playedFrom as Square, this.playedTo as Square);
         this.logger.save(
-            `Piece moved to target square[${this.playedTo}] on engine`
+            `Piece moved to target square-ts-${this.playedTo}-te- on engine`
         );
 
         /**
@@ -671,7 +671,7 @@ export class ChessEngine extends BoardManager {
         // Remove the killed piece.
         super.removePieceModel(killedPieceSquare);
         this.logger.save(
-            `Captured piece by en passant move is found on square[${killedPieceSquare}] and removed on engine`
+            `Captured piece by en passant move is found on square-ts-${killedPieceSquare}-te- and removed on engine`
         );
 
         // Set the current move for the move history.
@@ -692,7 +692,7 @@ export class ChessEngine extends BoardManager {
             true
         );
         this.logger.save(
-            `Piece moved to target square[${this.playedTo}] on engine`
+            `Piece moved to target square-ts-${this.playedTo}-te- on engine`
         );
         this.isPromoteWaiting = true;
     }
@@ -724,7 +724,7 @@ export class ChessEngine extends BoardManager {
         // Remove the pawn.
         super.removePieceModel(firstSquareOfRow);
         this.logger.save(
-            `Promoted Pawn is removed from square[${to}] on engine`
+            `Promoted Pawn is removed from square-ts-${to}-te- on engine`
         );
 
         /**
@@ -758,7 +758,7 @@ export class ChessEngine extends BoardManager {
             ([6, 3].includes(clickedRow) ? PieceType.Bishop : null) ||
             ([5, 4].includes(clickedRow) ? PieceType.Knight : null))!;
         this.logger.save(
-            `Promoted piece type[${selectedPromote}] is determined by clicked row[${clickedRow}] on engine`
+            `Promoted piece type-ts-${selectedPromote}-te- is determined by clicked row-ts-${clickedRow}-te- on engine`
         );
 
         // Get the player's color.
@@ -772,7 +772,7 @@ export class ChessEngine extends BoardManager {
         );
         this.updateScores(firstSquareOfRow);
         this.logger.save(
-            `Player's[${playerColor}] Piece[${selectedPromote}] created on square[${to}] on engine`
+            `Player's-ts-${playerColor}-te- Piece-ts-${selectedPromote}-te- created on square-ts-${to}-te- on engine`
         );
 
         // Finish the promotion.
@@ -810,7 +810,7 @@ export class ChessEngine extends BoardManager {
             this.saveAlgebraicNotation(this.moveNotation);
             this.saveMove(this.playedFrom as Square, this.playedTo as Square);
             this.logger.save(
-                `Turn[${BoardQuerier.getTurnColor()}] is finished`
+                `Turn-ts-${BoardQuerier.getTurnColor()}-te- is finished`
             );
             return;
         }
@@ -843,7 +843,7 @@ export class ChessEngine extends BoardManager {
         this.moveNotation = "";
         this.saveCurrentBoard();
         this.logger.save(
-            `Turn controls done. Turn[${BoardQuerier.getTurnColor()}] is finished`
+            `Turn controls done. Turn-ts-${BoardQuerier.getTurnColor()}-te- is finished`
         );
     }
 
@@ -893,7 +893,7 @@ export class ChessEngine extends BoardManager {
 
         this.timerMap![playerColor].intervalId = intervalId;
         this.logger.save(
-            `Timers are handled. Player[${playerColor}] timer is started and opponent[${opponentColor}] timer is paused`
+            `Timers are handled. Player-ts-${playerColor}-te- timer is started and opponent-ts-${opponentColor}-te- timer is paused`
         );
     }
 
@@ -921,7 +921,7 @@ export class ChessEngine extends BoardManager {
         this.setGameStatus(winner);
 
         this.logger.save(
-            `Player[${BoardQuerier.getTurnColor()}] is timeover and game status is set to ${winner}`
+            `Player-ts-${BoardQuerier.getTurnColor()}-te- is timeover and game status is set to ${winner}`
         );
         this.finishTurn();
     }
@@ -1004,7 +1004,7 @@ export class ChessEngine extends BoardManager {
                     : GameStatus.ReadyToStart
             );
             this.logger.save(
-                `Game status set to ${BoardQuerier.getBoardStatus()} because board is playable.`
+                `Game status set to-ts-${BoardQuerier.getBoardStatus()}-te- because board is playable.`
             );
         } else {
             this.setGameStatus(
@@ -1047,9 +1047,9 @@ export class ChessEngine extends BoardManager {
             true
         ) as Square[];
         this.logger.save(
-            `Threatening squares[${JSON.stringify(
+            `Threatening squares-ts-${JSON.stringify(
                 threateningSquares
-            )}] are found by king's square[${kingSquare}]`
+            )}-te- are found by king's square-ts-${kingSquare}-te-`
         );
 
         const checkEnum: GameStatus =
@@ -1061,7 +1061,7 @@ export class ChessEngine extends BoardManager {
                 ? GameStatus.BlackVictory
                 : GameStatus.WhiteVictory;
         this.logger.save(
-            `Check[${checkEnum}] and Checkmate[${checkmateEnum}] enums are found by player's color[${BoardQuerier.getTurnColor()}]`
+            `Check-ts-${checkEnum}-te- and Checkmate-ts-${checkmateEnum}-te- enums are found by player's color-ts-${BoardQuerier.getTurnColor()}-te-`
         );
 
         /**
@@ -1088,9 +1088,9 @@ export class ChessEngine extends BoardManager {
         movesOfKing = movesOfKing ?? { Normal: [] };
         this.currentMoves[kingSquare!] = movesOfKing;
         this.logger.save(
-            `Moves of the king[${kingSquare}] are calculated and saved to calculated moves[${JSON.stringify(
+            `Moves of the king-ts-${kingSquare}-te- are calculated and saved to calculated moves-ts-${JSON.stringify(
                 movesOfKing
-            )}]`
+            )}-te-`
         );
 
         // Check the checkmate and stalemate status.
@@ -1264,9 +1264,9 @@ export class ChessEngine extends BoardManager {
                 this.currentMoves[lastPlayerMove]![MoveType.EnPassant]![0]!
             );
             this.logger.save(
-                `En passant move[${this.currentMoves[lastPlayerMove]![
+                `En passant move-ts-${this.currentMoves[lastPlayerMove]![
                     MoveType.EnPassant
-                ]![0]!}] is found and set on fen notation`
+                ]![0]!}-te- is found and set on fen notation`
             );
             return;
         }
@@ -1280,9 +1280,9 @@ export class ChessEngine extends BoardManager {
         ) {
             this.setEnPassant(lastPlayerMoves[MoveType.EnPassant]![0]!);
             this.logger.save(
-                `En passant move[${lastPlayerMoves[
+                `En passant move-ts-${lastPlayerMoves[
                     MoveType.EnPassant
-                ]![0]!}] is calculated and set on fen notation`
+                ]![0]!}-te- is calculated and set on fen notation`
             );
         }
     }

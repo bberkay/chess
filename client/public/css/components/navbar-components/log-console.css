@@ -85,9 +85,8 @@
             box-sizing:border-box;
             border:1px solid var(--border-color);
             font-style:normal;
-            white-space: pre;
             text-decoration: none!important;
-            max-height: calc(var(--chessboard-board-size) / 2.5); /* log console height and board size are equal */
+            max-height: calc(var(--chessboard-board-size) / 2);
             overflow-y: auto;
             margin-top: 5px;
             position: relative;

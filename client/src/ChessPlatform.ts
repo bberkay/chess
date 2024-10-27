@@ -672,7 +672,7 @@ export class ChessPlatform {
         LocalStorage.save(LocalStorageKey.LastLobbyConnection, wsData);
         LocalStorage.save(LocalStorageKey.LastPlayerName, player.name);
         this.logger.save(
-            `Lobby created and connected [${lobbyId}] as ${player.name}.`
+            `Lobby created and connected-ts-${lobbyId}-te- as ${player.name}.`
         );
         return { lobbyId, player };
     }
@@ -694,7 +694,7 @@ export class ChessPlatform {
         LocalStorage.save(LocalStorageKey.LastLobbyConnection, wsData);
         LocalStorage.save(LocalStorageKey.LastPlayerName, player.name);
         this.logger.save(
-            `Connected to the lobby[${lobbyId}] as ${player.name}.`
+            `Connected to the lobby-ts-${lobbyId}-te- as ${player.name}.`
         );
         return { lobbyId, player };
     }

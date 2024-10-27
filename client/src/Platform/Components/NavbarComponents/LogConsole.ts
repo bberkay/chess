@@ -39,11 +39,14 @@ export class LogConsole extends NavbarComponent {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
             const debounce = (func: Function, wait: number) => {
                 let timeout: number;
-                return  (...args: unknown[]) => {
+                return (...args: unknown[]) => {
                     clearTimeout(timeout);
-                    timeout = setTimeout(() => func.apply(this, args), wait) as unknown as number;
+                    timeout = setTimeout(
+                        () => func.apply(this, args),
+                        wait
+                    ) as unknown as number;
                 };
-            }
+            };
             const debouncedStream = debounce(this.stream.bind(this), 500);
             document.addEventListener(LoggerEvent.LogAdded, debouncedStream);
         });
@@ -81,19 +84,16 @@ export class LogConsole extends NavbarComponent {
     }
 
     /**
-     * Convert the values between "[]" in log message to tooltips.
-     *
-     * For example:
-     * Log: Enums[WhiteInCheck, BlackVictory] are found by player's color[White].
-     * Return: <span class = "variable-tooltip" data-tooltip-value="[WhiteInCheck, BlackVictory]>Enums</span>
-     * are found by player's <span class = "variable-tooltip" data-tooltip-value="[White]">color</span>
+     * Create log messages in the log console body.
      */
-    private _createLogMessage(log: { source: string; message: string }): void {
+    private _createLogMessages(
+        logs: { source: string; message: string }[]
+    ): void {
         /**
          * This function parses and stringifies the value, if
          * value is string it returns the value without parsing.
          */
-        function parseAndStringify(value: string): string {
+        const parseAndStringify = (value: string): string => {
             try {
                 value = JSON.parse(value);
             } catch {
@@ -101,54 +101,59 @@ export class LogConsole extends NavbarComponent {
             }
 
             return JSON.stringify(value, undefined, 2);
-        }
+        };
+
+        /**
+         * This function generates a tooltip toggle element with 
+         * the title and content.
+         * For Example:
+         * `title` is someone and `content` is [{name: "someone"}}] =>
+         * <div class = 'tooltip-toggle'>
+         *   <span>someone</span>
+         *    <div class = "tooltip-container">
+         *       <div class = "tooltip-text">
+         *           <pre>{name: "someone"}</pre>
+         *       </div>
+         *    </div>
+         * </div>
+         */
+        const generateTooltipToggle = (title:string, content: string): string => {
+            return `<div class = 'tooltip-toggle'>
+                        ${title}
+                        <div class = "tooltip-container">
+                            <div class = "tooltip-text">
+                                <pre>${parseAndStringify(content)}</pre>
+                            </div>
+                        </div>
+                    </div>`;
+        };
+
+        /**
+         * This function generates source element with the source value.
+         * For example:
+         * source is "src/Platform/Components/NavbarComponents/LogConsole.ts" =>
+         * &#x2022 <strong data-log-source="src/Platform/Components/NavbarComponents/LogConsole.ts">
+         *     [LogConsole]
+         * </strong>
+         */
+        const generateSource = (source: string): string => {
+            return `&#x2022 <strong data-log-source="${source}">[${source
+                .replace(".ts", "")
+                .split("/")
+                .pop()}] </strong>`;
+        };
 
         const logListElement: HTMLElement =
             document.getElementById("log-list")!;
-        const words: string[] = log.message.split(" ");
-        for (let i = 0; i < words.length; i++) {
-            const originalWord: string = words[i];
-            /**
-             * When we split the log message with " " character, the values between "[]" will be split.
-             * So we need to merge the split values. For example, if the log message is:
-             * Enums[WhiteInCheck, BlackVictory] are found by player's color[White].
-             * The words array will be:
-             * ["Enums[WhiteInCheck,", "BlackVictory]", "are", "found", "by", "player's", "color[White]."]
-             * So we need to merge "Enums[WhiteInCheck," and "BlackVictory]" to "Enums[WhiteInCheck, BlackVictory]".
-             * And we need to remove the "BlackVictory]" from the array.
-             */
-            if (words[i].includes("[") && !words[i].includes("]")) {
-                words[i] += " " + words[i + 1];
-                log.message = log.message.replace(words[i + 1], "");
-            }
-
-            // Convert the values between "[]" to tooltips.
-            if (words[i].includes("[") && words[i].includes("]")) {
-                words[i] = words[i].replace(
-                    words[i].slice(0, words[i].indexOf("[") + 1),
-                    ""
-                );
-                words[i] = words[i].slice(0, words[i].lastIndexOf("]"));
-                const tooltipVariable: string = `<div class = "tooltip-container"><div class = "tooltip-text"><pre>${parseAndStringify(
-                    words[i]
-                )}</pre></div></div>`;
-                log.message = log.message.replace(
-                    originalWord,
-                    `<div class = 'tooltip-toggle'>${originalWord.replace(
-                        `[${words[i]}]`,
-                        ""
-                    )} ${tooltipVariable}</div>`
-                );
-            }
+        for (const log of logs) {
+            const logElement = document.createElement("li");
+            logElement.innerHTML = `${generateSource(log.source)}`;
+            logElement.innerHTML += log.message.replace(
+                /\b(\w+)\s*-ts-(.*?)-te-/g,
+                (match, prevWord, content) => `${generateTooltipToggle(prevWord, content)}`
+            );
+            logListElement.appendChild(logElement);
         }
-
-        const logElement = document.createElement("li");
-        logElement.innerHTML = `&#x2022 <strong data-log-source="${
-            log.source
-        }">[${log.source.replace(".ts", "").split("/").pop()}] </strong><span>${
-            log.message
-        }</span>`;
-        logListElement.appendChild(logElement);
 
         document.getElementById("log-console-body")!.scrollTop =
             logListElement!.scrollHeight;
@@ -159,102 +164,107 @@ export class LogConsole extends NavbarComponent {
      * interactive.
      */
     private _createLogMessagesEventListeners(): void {
+        const logConsoleBody: HTMLElement =
+            document.getElementById("log-console-body")!;
+        const logBodyRect: DOMRect = logConsoleBody.getBoundingClientRect();
+
         /**
          * This function calculates the opening location of the tooltip.
          * If the tooltip is out of the log list, this function returns
          * the location where the tooltip should be opened like ["top", "right"]
          * or ["bottom", "left"] etc.
          */
-        function calculateOpeningLocation(
+        const calculateOpeningLocation = (
             tooltip_toggle: HTMLElement
-        ): string[] {
+        ): string[] => {
             const openingLocation = [];
-            const logBodyRect: DOMRect = document
-                .getElementById("log-console-body")!
-                .getBoundingClientRect();
             const tooltipRect: DOMRect = (
                 tooltip_toggle.querySelector(".tooltip-text") as HTMLElement
             ).getBoundingClientRect();
 
-            // Vertical location of the tooltip
-            if (tooltipRect.bottom > logBodyRect.bottom)
-                openingLocation.push("top");
-            else openingLocation.push("bottom");
-
-            // Horizontal location of the tooltip
-            if (tooltipRect.left < logBodyRect.left)
-                openingLocation.push("right");
-            else if (tooltipRect.right > logBodyRect.right)
-                openingLocation.push("left");
-            else openingLocation.push("center");
+            openingLocation.push(
+                tooltipRect.bottom > logBodyRect.bottom ? "top" : "bottom"
+            );
+            openingLocation.push(
+                tooltipRect.left <= logBodyRect.left
+                    ? "right"
+                    : tooltipRect.right >= logBodyRect.right
+                    ? "left"
+                    : "center"
+            );
 
             return openingLocation;
-        }
+        };
 
-        const lastLog: HTMLElement = document.getElementById("log-list")!
-            .lastElementChild as HTMLElement;
+        const logSourceAddressBar: HTMLElement =
+            document.getElementById("log-file")!;
+        const newAddedLogs: HTMLElement[] = Array.from(
+            document.getElementById("log-list")!.querySelectorAll("li")
+        ).slice(this._lastLogIndex);
         const squares: NodeListOf<HTMLElement> | null = this.config
             .showSquareIds
             ? document.querySelectorAll(".square")
             : null;
-
+        
         // Tooltipts
-        lastLog
-            .querySelectorAll(".tooltip-toggle")
-            .forEach((tooltip_toggle) => {
-                // square ids and tooltip location added when the mouse is over the tooltip.
-                tooltip_toggle.addEventListener("mouseover", () => {
-                    if (this.config.showSquareIds) {
-                        squares!.forEach((square: HTMLElement) => {
-                            square.innerHTML += `<div class = "square-id">${square.getAttribute(
-                                "data-square-id"
-                            )}</div>`;
-                        });
-                    }
-
-                    const openingLocation: string[] = calculateOpeningLocation(
-                        tooltip_toggle as HTMLElement
-                    );
-                    if (openingLocation.length == 0) return;
-                    tooltip_toggle
-                        .querySelector(".tooltip-container")!
-                        .classList.add(
-                            `tooltip-container--${openingLocation[0]}`,
-                            `tooltip-container--${openingLocation[1]}`
-                        );
-                });
-
-                tooltip_toggle.addEventListener("mouseout", () => {
-                    if (this.config.showSquareIds)
-                        document
-                            .querySelectorAll(".square-id")
-                            .forEach((element) => {
-                                element.remove();
+        newAddedLogs.forEach((log: HTMLElement) => {
+            log.querySelectorAll(".tooltip-toggle").forEach(
+                (tooltip_toggle) => {
+                    console.log(tooltip_toggle);
+                    tooltip_toggle.addEventListener("mouseover", () => {
+                        if (this.config.showSquareIds) {
+                            squares!.forEach((square: HTMLElement) => {
+                                square.innerHTML += `<div class = "square-id">${square.getAttribute(
+                                    "data-square-id"
+                                )}</div>`;
                             });
+                        }
 
-                    tooltip_toggle
-                        .querySelector(".tooltip-container")!
-                        .classList.remove(
-                            "tooltip-container--top",
-                            "tooltip-container--bottom",
-                            "tooltip-container--left",
-                            "tooltip-container--right",
-                            "tooltip-container--center"
-                        );
-                });
+                        const openingLocation: string[] =
+                            calculateOpeningLocation(
+                                tooltip_toggle as HTMLElement
+                            );
+                        if (openingLocation.length == 0) return;
+                        tooltip_toggle
+                            .querySelector(".tooltip-container")!
+                            .classList.add(
+                                `tooltip-container--${openingLocation[0]}`,
+                                `tooltip-container--${openingLocation[1]}`
+                            );
+                    });
+
+                    tooltip_toggle.addEventListener("mouseout", () => {
+                        if (this.config.showSquareIds)
+                            document
+                                .getElementById("chessboard")!
+                                .querySelectorAll(".square-id")
+                                .forEach((element) => {
+                                    element.remove();
+                                });
+
+                        tooltip_toggle
+                            .querySelector(".tooltip-container")!
+                            .classList.remove(
+                                "tooltip-container--top",
+                                "tooltip-container--bottom",
+                                "tooltip-container--left",
+                                "tooltip-container--right",
+                                "tooltip-container--center"
+                            );
+                    });
+                }
+            );
+
+            // Log source address bar
+            const logSource: HTMLElement = log.querySelector(
+                "[data-log-source]"
+            ) as HTMLElement;
+            if (!logSource) return;
+
+            log.addEventListener("mouseover", () => {
+                logSourceAddressBar.innerHTML =
+                    logSource.getAttribute("data-log-source")!;
             });
-
-        // Log source address bar
-        const logSourceAddressBar: HTMLElement =
-            document.getElementById("log-file")!;
-        const logSource: HTMLElement = lastLog.querySelector(
-            "[data-log-source]"
-        ) as HTMLElement;
-        if (!logSource) return;
-
-        lastLog.addEventListener("mouseover", () => {
-            logSourceAddressBar.innerHTML =
-                logSource.getAttribute("data-log-source")!;
         });
     }
 
@@ -262,13 +272,15 @@ export class LogConsole extends NavbarComponent {
      * This function adds a log to the log console.
      */
     private stream(): void {
-        const newAddedLog: { source: string; message: string } =
-            Logger.messages()[Logger.messages().length - 1];
-        if (newAddedLog === undefined) return;
+        if (Logger.messages().length <= this._lastLogIndex) {
+            this._lastLogIndex = Logger.messages().length;
+            return;
+        }
 
-        this._createLogMessage(newAddedLog);
+        this._createLogMessages(Logger.messages().slice(this._lastLogIndex));
         this._createLogMessagesEventListeners();
 
+        this._lastLogIndex = Logger.messages().length;
         if (Logger.messages().length > 300) this.clear();
     }
 
@@ -276,8 +288,8 @@ export class LogConsole extends NavbarComponent {
      * This function clears the log console.
      */
     public clear(): void {
-        this._lastLogIndex = 0;
         Logger.clear();
+        this._lastLogIndex = 0;
         document.getElementById("log-list")!.innerHTML = "";
         document.getElementById("log-file")!.innerHTML = "";
     }
