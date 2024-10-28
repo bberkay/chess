@@ -7,11 +7,51 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
     <title>Chess Platform</title>
-    <link rel="stylesheet" href="./public/css/layout.css">
+    <link rel="preload" href="./public/css/layout.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="./public/js/layout.js" as="script">
     <link rel="preload" href="./public/css/elements.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="./public/css/elements.css"></noscript>
+    <noscript>
+        <style>
+            body {
+                display: flex!important;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                width: 100vw;
+                background-color: light-dark(#222, #FFF);
+                overflow: hidden!important;
+                color: light-dark(#FFF, #222);
+                font-size: 1.5rem;
+                text-align: center;
+                margin: 0;
+            }
+
+            .no-js-error {
+                background-color: #491217;
+                border: 1px solid #842029;
+                box-shadow: 0 0 10px 5px #1D1D1D;
+                padding: 20px;
+                width: 80%;
+                max-width: 700px;
+                margin-top: -10%;
+                padding-bottom: 2rem;
+                display: block!important;
+            }
+
+            main {
+                display: none;
+            }
+        </style>
+    </noscript>
 </head>
 <body>
+    <div class="no-js-error" style="display: none;">
+        <h1>⚠ JavaScript Error!</h1>
+        <span>This website requires JavaScript.</span> 
+        <br>
+        <small>Please enable JavaScript in your browser settings to continue.</small>
+    </div>
+
     <main>
         <div class="left">
             <div id="navbar"></div>
@@ -32,7 +72,7 @@
     </main>
 
 
-    <script src="./js/layout.js"></script>
+    <script src="./public/js/layout.js" defer></script>
     <script type="module">
         import { ChessPlatform } from "./src/ChessPlatform";
 
