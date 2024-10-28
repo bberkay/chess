@@ -109,14 +109,13 @@ export class ChessBoard {
      */
     constructor() {
         this._loadCSS();
-        document.addEventListener("DOMContentLoaded", () => {
-            const catchFirstClick = () => {
-                this._hasEverClicked = true;
-                document.body.removeEventListener("click", catchFirstClick);
-            }
 
-            document.body.addEventListener("click", catchFirstClick);
-        });
+        const catchFirstClick = () => {
+            this._hasEverClicked = true;
+            document.body.removeEventListener("click", catchFirstClick);
+        }
+
+        document.body.addEventListener("click", catchFirstClick);
     }
 
     /**
