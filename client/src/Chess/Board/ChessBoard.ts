@@ -873,7 +873,7 @@ export class ChessBoard {
     ): Promise<void> {
         return new Promise((resolve) => {
             const toSquareContent = square.querySelector(`.piece`);
-            // FIXME: .piece[data-color="${this.getPieceColor(piece) === Color.White ? Color.Black : Color.White}"]
+            // .piece[data-color="${this.getPieceColor(piece) === Color.White ? Color.Black : Color.White}"]
 
             if (
                 toSquareContent &&
