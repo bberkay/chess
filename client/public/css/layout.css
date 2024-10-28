@@ -259,7 +259,7 @@ button {
 
 /* Utility */
 .border-inset {
-    border: 2px solid var(--input-border-color);
+    border: 3px solid var(--input-border-color);
 }
 
 /* ------------------- Main ------------------- */
