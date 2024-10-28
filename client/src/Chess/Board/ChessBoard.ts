@@ -74,7 +74,6 @@ export class ChessBoard {
      */
     private config: Config = DEFAULT_CONFIG;
 
-    private _hasEverClicked: boolean = false;
     private _turnColor: Color.White | Color.Black = Color.White;
     private _isMouseUpEventBound: boolean = false;
     private _disabledPreSelectionColor: Color | null = null;
@@ -109,13 +108,6 @@ export class ChessBoard {
      */
     constructor() {
         this._loadCSS();
-
-        const catchFirstClick = () => {
-            this._hasEverClicked = true;
-            document.body.removeEventListener("click", catchFirstClick);
-        }
-
-        document.body.addEventListener("click", catchFirstClick);
     }
 
     /**
@@ -1743,7 +1735,7 @@ export class ChessBoard {
      * This function plays the given sound.
      */
     public playSound(name: SoundEffect): void {
-        if (!this.config.enableSoundEffects || !this._hasEverClicked) 
+        if (!this.config.enableSoundEffects) 
             return;
 
         const audio = new Audio(this.sounds[name]);
@@ -1751,7 +1743,7 @@ export class ChessBoard {
             audio.remove();
         });
         audio.play().catch((error) => {
-            console.error("Error while playing sound: ", error);
+            console.warn(error);
             audio.remove();
         });
     }
