@@ -15,7 +15,7 @@ import {
 import { Component } from "./Component";
 import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage";
 import {
-    BOARD_EDITOR_ID,
+    BOARD_CREATOR_ID,
     PIECE_CREATOR_ID,
     NOTATION_MENU_ID,
 } from "@Platform/Consts";
@@ -57,7 +57,7 @@ function isEditorModeEnable() {
  * This class provide a form to create a new board.
  */
 export class BoardEditor extends Component {
-    public readonly id: string = BOARD_EDITOR_ID;
+    public readonly id: string = isEditorModeEnable() ? PIECE_CREATOR_ID : BOARD_CREATOR_ID;
     private readonly chess: Chess;
 
     private static _isEditorModeEnable: boolean = false;
@@ -81,7 +81,7 @@ export class BoardEditor extends Component {
      */
     protected renderComponent(): void {
         this.loadHTML(
-            BOARD_EDITOR_ID,
+            BOARD_CREATOR_ID,
             `
           <div class = "board-creator ${BoardCreatorMode.Template}">
               <div class = "border-inset"><button data-menu-operation="${

@@ -325,11 +325,11 @@
         flex-direction: row;
 
         &:first-of-type {
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
         }
 
         &:not(:first-of-type) {
-            margin-top: 0.5rem;
+            margin-top: 0.75rem;
 
             & .player-name-container {
                 order: -1;

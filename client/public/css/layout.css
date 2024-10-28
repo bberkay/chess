@@ -316,14 +316,11 @@ main {
 }
 
 /* ------------------- Components ------------------- */
-#board-editor {
+#board-creator {
     margin-top: 0.5rem;
 }
 
-#notation-menu {
-    margin-left: 0.5rem;
-}
-
+#notation-menu,
 #piece-creator {
     margin-left: 0.5rem;
 }
@@ -361,7 +358,7 @@ main {
             flex-direction: column;
             position: initial;
 
-            & #board-editor {
+            & #board-creator {
                 margin-top: 0rem;
                 margin-bottom: 0.5rem;
             }
@@ -392,12 +389,12 @@ main {
 
 @media screen and (max-width: 900px) {
     main {
-        margin-top: 0.5rem;
+        margin-top: 0rem;
         flex-direction: column;
         width: 100%;
     }
 
-    #board-editor {
+    #board-creator {
         margin-bottom: 0.5rem;
     }
 

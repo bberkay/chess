@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 const reOrderLayoutForMobile = () => {
     document.querySelector(".right").append(
-        document.getElementById("board-editor")
+        document.getElementById("board-creator")
     );
 
     document.querySelector(".left").append(
@@ -74,7 +74,7 @@ const reOrderLayoutForTablet = () => {
     );
 
     document.querySelector(".center").prepend(
-        document.getElementById("board-editor")
+        document.getElementById("board-creator")
     );
 
     if(document.querySelector("#notation-menu .player-section"))
@@ -91,7 +91,7 @@ const reOrderLayoutForTablet = () => {
 
 const reOrderLayoutForDesktop = () => {
     document.querySelector(".center").append(
-        document.getElementById("board-editor")
+        document.getElementById("board-creator")
     );
 
     document.querySelector(".left").append(
