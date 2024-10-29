@@ -243,20 +243,19 @@ export class ChessPlatform {
                 SERVER_ADDRESS + "?lobbyId=" + lobbyId
             );
             if (!response.ok) {
-                if (showAsError)
-                    this.platform.navigatorModal.showError(
-                        "The lobby id is invalid."
-                    );
                 this.terminateAndCleanupConnection();
+                const error = await response.text();
+                if (showAsError)
+                    this.platform.navigatorModal.showError(error);
                 return null;
             }
-        } catch (error) {
-            console.log("error", error);
+        } catch (error: unknown) {
+            this.terminateAndCleanupConnection();
             if (showAsError)
                 this.platform.navigatorModal.showError(
-                    "The lobby id cannot be checked."
+                    "An error occurred while checking the lobby id: " +
+                        (error as Error).message
                 );
-            this.terminateAndCleanupConnection();
             return null;
         }
 

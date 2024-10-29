@@ -113,12 +113,12 @@ function validate(params: BaseWebSocketReqParams): Response | boolean {
     console.log("Validations: ", validations);
 
     const errors: Record<string, string> = {
-        name: `Invalid request. playerName length must be between ${MIN_PLAYER_NAME_LENGTH} and ${MAX_PLAYER_NAME_LENGTH}.`,
-        lobbyId: `Invalid request. lobbyId length must be ${GU_ID_LENGTH} length and lobby must be exist.`,
-        token: `Invalid request. token length must be ${GU_ID_LENGTH}.`,
-        board: "Invalid request. board length must be less than 100.",
-        remaining: `Invalid request. remaining must be a number between ${MIN_TOTAL_TIME} and ${MAX_TOTAL_TIME}.`,
-        increment: `Invalid request. increment must be a number between ${MIN_INCREMENT_TIME} and ${MAX_INCREMENT_TIME}.`,
+        name: `Invalid request. "playerName" length must be between ${MIN_PLAYER_NAME_LENGTH} and ${MAX_PLAYER_NAME_LENGTH}.`,
+        lobbyId: `Invalid request. "lobbyId" length must be ${GU_ID_LENGTH} length and lobby must be exist.`,
+        token: `Invalid request. "token" length must be ${GU_ID_LENGTH}.`,
+        board: `Invalid request. "board" length must be less than 100.`,
+        remaining: `Invalid request. "remaining" must be a number between ${MIN_TOTAL_TIME} and ${MAX_TOTAL_TIME}.`,
+        increment: `Invalid request. "increment" must be a number between ${MIN_INCREMENT_TIME} and ${MAX_INCREMENT_TIME}.`,
     };
 
     for (const key in validations) {
@@ -139,19 +139,19 @@ function validateCombination(
 ): Response | boolean {
     if (params.name && params.token)
         return new Response(
-            "Invalid request. name and token cannot be used together.",
+            `Invalid request. "name" and "token" cannot be used together.`,
             { status: 400 }
         );
 
     if (!params.name && !params.token)
         return new Response(
-            "Invalid request. name or token must be provided.",
+            `Invalid request. "name" or "token" must be provided.`,
             { status: 400 }
         );
 
     if (params.token && !params.lobbyId)
         return new Response(
-            "Invalid request. token must be used with lobbyId.",
+            `Invalid request. "token" must be used with "lobbyId".`,
             { status: 400 }
         );
 
@@ -160,7 +160,7 @@ function validateCombination(
         (!params.name || params.lobbyId || params.token)
     )
         return new Response(
-            "Invalid request. board, remaining, increment can only be used when creating a new lobby.",
+            `Invalid request. "board", "remaining", "increment" can only be used when creating a new lobby.`,
             { status: 400 }
         );
 
@@ -170,7 +170,7 @@ function validateCombination(
         (!params.board || !params.remaining || !params.increment)
     )
         return new Response(
-            "Invalid request. board, remaining, increment must be provided when creating a new lobby.",
+            `Invalid request. "board", "remaining", "increment" must be provided when creating a new lobby.`,
             { status: 400 }
         );
 
@@ -413,8 +413,24 @@ const server = Bun.serve<WebSocketData>({
 
         // Handle the parameters and get
         // lobbyId and (token or name).
-        const params = handleParameters(req);
-        if (params instanceof Response) return params;
+        let params: {
+            lobbyId: string;
+            token: string;
+            name: string;
+            id?: string;
+        };
+        try {
+            const handlingResponse = handleParameters(req);
+            if (handlingResponse instanceof Response) return handlingResponse;
+            params = handlingResponse;
+        } catch (e: unknown) {
+            return new Response(
+                e instanceof Error
+                    ? e.message
+                    : "An error occured while handling the parameters.",
+                { status: 500 }
+            );
+        }
 
         const { lobbyId, token, name, id } = params;
 
@@ -700,7 +716,14 @@ function handleMessage(ws: RWebSocket, message: string): void {
                 break;
         }
     } catch (e: unknown) {
-        ws.send(WsCommand.error({ message: e instanceof Error ? e.message : `An error occured while processing the ${command}.` }));
+        ws.send(
+            WsCommand.error({
+                message:
+                    e instanceof Error
+                        ? e.message
+                        : `An error occured while processing the ${command}.`,
+            })
+        );
         return;
     }
 }
