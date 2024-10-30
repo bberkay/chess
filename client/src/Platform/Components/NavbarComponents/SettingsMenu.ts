@@ -4,7 +4,6 @@ import { SETTINGS_MENU_ID } from "@Platform/Consts";
 import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage";
 import { Chess } from "@Chess/Chess";
 import {
-    MovementType,
     PieceAnimationSpeed,
     Config as ChessBoardConfig,
     DEFAULT_CONFIG as DEFAULT_SETTINGS_CHESSBOARD,
@@ -23,11 +22,31 @@ import {
 import { Formatter } from "@Platform/Utils/Formatter";
 
 /**
- * A union type that contains all the config types
- * to change the settings of every configurable
- * component of the chess platform.
+ * Defines available configuration operations for modifying settings 
+ * on the chessboard, log console, or notation menu.
  */
-export type Settings = ChessBoardConfig & LogConsoleConfig & NotationMenuConfig;
+type SettingsConfigOperation = SettingsMenuOperation.ChangeBoardSetting | SettingsMenuOperation.ChangeLogConsoleSetting | SettingsMenuOperation.ChangeNotationMenuSetting;
+
+/**
+ * Represents configuration types for different components (chessboard, log console, notation menu).
+ */
+type Config = ChessBoardConfig | LogConsoleConfig | NotationMenuConfig;
+
+/**
+ * Maps each configuration operation to its specific `Config`, 
+ * covering all settings in the chess platform.
+ */
+export type Settings = Record<SettingsConfigOperation, Config>;
+
+/**
+ * Keys for accessing specific properties within any configuration in `Settings`.
+ */
+type SettingKey = keyof Settings[SettingsConfigOperation];
+
+/**
+ * Represents all possible values within any configuration in `Settings`.
+ */
+type SettingValue = Settings[SettingsConfigOperation][keyof Settings[SettingsConfigOperation]];
 
 /**
  * This class provide a menu to change the settings
@@ -58,11 +77,22 @@ export class SettingsMenu extends NavbarComponent {
      * the default settings to the local storage.
      */
     private loadLocalStorage(): void {
-        if (!LocalStorage.isExist(LocalStorageKey.Settings)) {
+        const settings = LocalStorage.load(LocalStorageKey.Settings);
+        if (!settings) {
             LocalStorage.save(
                 LocalStorageKey.Settings,
                 this.getDefaultSettings()
             );
+        } else {
+            for (const config in settings) {
+                for(const [settingKey, settingValue] of Object.entries(settings[config as SettingsConfigOperation])) {
+                    this.saveSetting(
+                        config as SettingsConfigOperation, 
+                        settingKey as SettingKey,
+                        settingValue as SettingValue
+                    )
+                }
+            }
         }
     }        
 
@@ -71,9 +101,9 @@ export class SettingsMenu extends NavbarComponent {
      */
     private getDefaultSettings(): Settings {
         return {
-            ...DEFAULT_SETTINGS_CHESSBOARD,
-            ...DEFAULT_SETTINGS_LOG_CONSOLE,
-            ...DEFAULT_SETTINGS_NOTATION_MENU,
+            [SettingsMenuOperation.ChangeBoardSetting]: DEFAULT_SETTINGS_CHESSBOARD,
+            [SettingsMenuOperation.ChangeLogConsoleSetting]: DEFAULT_SETTINGS_LOG_CONSOLE,
+            [SettingsMenuOperation.ChangeNotationMenuSetting]: DEFAULT_SETTINGS_NOTATION_MENU,
         };
     }
 
@@ -82,20 +112,6 @@ export class SettingsMenu extends NavbarComponent {
      */
     protected renderComponent(): void {
         const currentSettings = LocalStorage.load(LocalStorageKey.Settings)!;
-        type SettingKey = keyof typeof currentSettings;
-        const currentSettingsKeyProxy = new Proxy(
-            currentSettings as Record<SettingKey, unknown>,
-            {
-                get(target, prop: SettingKey): SettingKey {
-                    if (prop in target) {
-                        return prop;
-                    }
-                    throw new Error(
-                        "The given setting is not a valid setting."
-                    );
-                },
-            }
-        ) as Record<SettingKey, SettingKey>;
 
         /**
          * Generate a toggle setting with the given values.
@@ -107,7 +123,7 @@ export class SettingsMenu extends NavbarComponent {
          * It will be also checked if the setting is enabled or not.
          */
         const generateToggleSetting = (
-            operation: SettingsMenuOperation,
+            operation: SettingsConfigOperation,
             settingKey: SettingKey,
             settingValue: boolean
         ): string => {
@@ -139,7 +155,7 @@ export class SettingsMenu extends NavbarComponent {
             values: string[]
         ): string => {
             return `
-            <span>${Formatter.camelCaseToPascalCase(settingKey)}</span>
+            <span>${Formatter.pascalCaseToTitleCase(settingKey)}</span>
             <div class="dropdown">
                 <button class="dropdown-button"><span class="dropdown-title">${Formatter.camelCaseToTitleCase(
                     settingValue
@@ -159,77 +175,71 @@ export class SettingsMenu extends NavbarComponent {
             `;
         };
 
+        /**
+         * This function retrieves the available options for a specific setting key within a given operation.
+         * 
+         * @template T - Represents the type of `SettingsConfigOperation`.
+         * @template K - Represents the valid keys for a specific `T` configuration.
+         * @param {T} operation - The configuration group operation.
+         * @param {K} settingKey - The specific key for the setting.
+         * @returns {string[]} An array of available options for the setting key, or an empty array if invalid.
+        */
+        const getCompleteEnumValues = <T extends SettingsConfigOperation, K extends keyof Settings[T]>(operation: T, settingKey: K): string[] => {
+            const currentSettingsKeyProxy = new Proxy(
+                currentSettings[operation] as Record<SettingKey, unknown>,
+                {
+                    get(target, prop: SettingKey): SettingKey | undefined {
+                        if (prop in target) {
+                            return prop;
+                        }
+                    },
+                }
+            ) as Record<SettingKey, SettingKey>;
+            
+            if (!currentSettingsKeyProxy) return [];
+            if (!Object.hasOwn(currentSettingsKeyProxy, settingKey)) return [];
+            
+            switch (settingKey) {
+                case (currentSettingsKeyProxy as ChessBoardConfig).pieceAnimationSpeed:
+                    return Object.values(PieceAnimationSpeed);
+                case (currentSettingsKeyProxy as NotationMenuConfig).algebraicNotationStyle:
+                    return Object.values(AlgebraicNotationStyle);
+                default:
+                    return [];
+            }
+        }
+
         this.loadHTML(
             SETTINGS_MENU_ID,
             `
             <div id="settings-body">
-                <fieldset>
-                    <legend>Board</legend>
-                    <div class="settings-item">
-                        ${generateToggleSetting(
-                            SettingsMenuOperation.ChangeBoardSetting,
-                            currentSettingsKeyProxy.enableSoundEffects,
-                            currentSettings.enableSoundEffects
-                        )}
-                    </div>
-                    <div class="settings-item">
-                        ${generateToggleSetting(
-                            SettingsMenuOperation.ChangeBoardSetting,
-                            currentSettingsKeyProxy.enablePreSelection,
-                            currentSettings.enablePreSelection
-                        )}
-                    </div>
-                    <div class="settings-item">
-                        ${generateToggleSetting(
-                            SettingsMenuOperation.ChangeBoardSetting,
-                            currentSettingsKeyProxy.showHighlights,
-                            currentSettings.showHighlights
-                        )}
-                    </div>
-                    <div class="settings-item">
-                        ${generateToggleSetting(
-                            SettingsMenuOperation.ChangeBoardSetting,
-                            currentSettingsKeyProxy.enableWinnerAnimation,
-                            currentSettings.enableWinnerAnimation
-                        )}
-                    </div>
-                    <div class="settings-item">
-                        ${generateDropdownSetting(
-                            SettingsMenuOperation.ChangeBoardSetting,
-                            currentSettingsKeyProxy.movementType,
-                            currentSettings.movementType,
-                            Object.values(MovementType)
-                        )}
-                    </div>
-                    <div class="settings-item">
-                        ${generateDropdownSetting(
-                            SettingsMenuOperation.ChangeBoardSetting,
-                            currentSettingsKeyProxy.pieceAnimationSpeed,
-                            currentSettings.pieceAnimationSpeed,
-                            Object.values(PieceAnimationSpeed)
-                        )}
-                    </div>
-                </fieldset>
-                <fieldset>
-                    <legend>Notation Menu</legend>
-                    <div class="settings-item">
-                        ${generateDropdownSetting(
-                            SettingsMenuOperation.ChangeNotationMenuSetting,
-                            currentSettingsKeyProxy.algebraicNotationStyle,
-                            currentSettings.algebraicNotationStyle,
-                            Object.values(AlgebraicNotationStyle)
-                        )}
-                    </div>
-                </fieldset>
-                <fieldset>
-                    <legend>Log Console</legend>
-                    <div class="settings-item">
-                        ${generateToggleSetting(
-                            SettingsMenuOperation.ChangeLogConsoleSetting,
-                            currentSettingsKeyProxy.showSquareIds,
-                            currentSettings.showSquareIds
-                        )}
-                    </div>
+                ${Object.entries(currentSettings).map(([settingConfigOperation, settingKeyValuePair]) => {
+                    return `
+                    <fieldset>
+                        <legend>${Formatter.camelCaseToTitleCase(settingConfigOperation.replace("Change", "").replace("Setting", ""))}</legend>
+                        ${Object.entries(settingKeyValuePair).map(([settingKey, settingValue]) => {
+                            return `
+                            <div class="settings-item">
+                                ${typeof settingValue === "boolean"
+                                    ? generateToggleSetting(
+                                        settingConfigOperation as SettingsConfigOperation, 
+                                        settingKey as SettingKey,
+                                        settingValue
+                                    ) : generateDropdownSetting(
+                                        settingConfigOperation as SettingsConfigOperation,
+                                        settingKey as SettingKey,
+                                        settingValue as string,
+                                        getCompleteEnumValues(
+                                            settingConfigOperation as SettingsConfigOperation, 
+                                            settingKey as SettingKey
+                                        )
+                                    )
+                                }
+                            </div>
+                            `
+                        }).join("")}
+                    </fieldset>`
+                }).join("")}
                 </fieldset>
             </div>
             <div id="settings-footer">
@@ -254,13 +264,15 @@ export class SettingsMenu extends NavbarComponent {
      */
     private loadSettings(): void {
         const settings = LocalStorage.load(LocalStorageKey.Settings);
-        for (const setting in settings) {
-            const settingItem = document.querySelector(
-                `#${SETTINGS_MENU_ID} [data-setting-key="${setting}"]`
-            );
-            if (settingItem) {
+        for (const config in settings) {
+            for(const [settingKey, settingValue] of Object.entries(settings[config as SettingsConfigOperation])) {
+                const settingItem = document.querySelector(
+                    `#${SETTINGS_MENU_ID} [data-setting-key="${settingKey}"]`
+                );
+                if (!settingItem) continue;
+                
                 if (settingItem.getAttribute("type") === "checkbox") {
-                    if (settings[setting as keyof Settings]) {
+                    if (settingValue) {
                         settingItem.setAttribute("checked", "");
                     } else {
                         settingItem.removeAttribute("checked");
@@ -268,7 +280,7 @@ export class SettingsMenu extends NavbarComponent {
                 } else if (settingItem.tagName === "BUTTON") {
                     if (
                         settingItem.textContent &&
-                        settings[setting as keyof Settings] ===
+                        settingValue ===
                             Formatter.titleCaseToCamelCase(
                                 settingItem.textContent
                             )
@@ -293,20 +305,49 @@ export class SettingsMenu extends NavbarComponent {
     /**
      * Save given setting to the local storage.
      */
-    private saveSetting<K extends keyof Settings>(
-        setting: K,
-        newValue: Settings[K]
+    private saveSetting<T extends SettingsConfigOperation, K extends keyof Settings[T]>(
+        configOperation: T,
+        settingKey: K,
+        settingValue: Settings[T][K]
     ): void {
         const settings = LocalStorage.isExist(LocalStorageKey.Settings)
             ? LocalStorage.load(LocalStorageKey.Settings)!
             : this.getDefaultSettings()!;
 
-        if (Object.keys(settings).indexOf(setting) === -1)
+        if (Object.keys(settings).indexOf(configOperation) === -1)
             throw new Error(
-                "The given operation is not a valid setting operation."
+                "The given operation is not a valid setting config operation."
             );
 
-        settings[setting] = newValue;
+        if(!Object.hasOwn(settings[configOperation], settingKey))
+            throw new Error(
+                "The given setting does not exist in the given config."
+            );
+
+        // Handling across the classes
+        switch (configOperation) {
+            case SettingsMenuOperation.ChangeBoardSetting:
+                (this.getClassInstanceByType(Chess) as Chess)?.board.setConfig({
+                    [settingKey]: settingValue,
+                });
+                break;
+            case SettingsMenuOperation.ChangeLogConsoleSetting:
+                (
+                    this.getClassInstanceByType(LogConsole) as LogConsole
+                ).setConfig({
+                    [settingKey]: settingValue,
+                });
+                break;
+            case SettingsMenuOperation.ChangeNotationMenuSetting:
+                (
+                    this.getClassInstanceByType(NotationMenu) as NotationMenu
+                ).setConfig({
+                    [settingKey]: settingValue,
+                });
+                break;
+        }
+
+        settings[configOperation][settingKey] = settingValue;
         LocalStorage.save(LocalStorageKey.Settings, settings);
     }
 
@@ -360,49 +401,31 @@ export class SettingsMenu extends NavbarComponent {
                 return;
         }
 
-        if (!(menuItem instanceof HTMLElement))
-            throw new Error("The given menu item is not an HTMLElement.");
-
-        const settingKey = menuItem.getAttribute(
-            "data-setting-key"
-        ) as keyof Settings;
-        const settingValue =
-            menuItem.getAttribute("type") === "checkbox"
-                ? menuItem.getAttribute("checked") === null
-                : menuItem.textContent
-                ? Formatter.titleCaseToCamelCase(menuItem.textContent).trim()
-                : "";
-
-        if (!settingKey || !settingValue)
+        if (!(menuItem instanceof HTMLElement)) 
             throw new Error(
                 "The setting key or value is not found. Please check the given menu item and its data-setting-key and data-setting-value attributes."
             );
 
-        switch (operation) {
-            case SettingsMenuOperation.ChangeBoardSetting:
-                (this.getClassInstanceByType(Chess) as Chess)?.board.setConfig({
-                    [settingKey]: settingValue,
-                });
-                break;
-            case SettingsMenuOperation.ChangeLogConsoleSetting:
-                (
-                    this.getClassInstanceByType(LogConsole) as LogConsole
-                ).setConfig({
-                    [settingKey]: settingValue,
-                });
-                break;
-            case SettingsMenuOperation.ChangeNotationMenuSetting:
-                (
-                    this.getClassInstanceByType(NotationMenu) as NotationMenu
-                ).setConfig({
-                    [settingKey]: settingValue,
-                });
-                break;
+        const settingKey = menuItem.getAttribute(
+            "data-setting-key"
+        ) as keyof Settings;
+        
+        let settingValue = null;
+        if (menuItem.getAttribute("type") === "checkbox") {
+            settingValue = !menuItem.hasAttribute("checked");
+        } else if (menuItem.tagName === "BUTTON" && menuItem.textContent) {
+            settingValue = Formatter.titleCaseToCamelCase(menuItem.textContent).trim()
         }
+        
+        if (!settingKey || settingValue == null)
+            throw new Error(
+                "The setting key or value is not found. Please check the given menu item and its data-setting-key and data-setting-value attributes."
+            );
 
         this.saveSetting(
-            settingKey as keyof Settings,
-            settingValue as Settings[typeof settingKey]
+            operation, 
+            settingKey as SettingKey,
+            settingValue as SettingValue
         );
-    }
+    }   
 }

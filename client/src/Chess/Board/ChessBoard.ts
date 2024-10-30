@@ -23,16 +23,6 @@ import { Converter } from "../Utils/Converter.ts";
 import { Logger } from "@Services/Logger.ts";
 
 /**
- * Movement type of the pieces on the chess board
- * like only click, only drag or both.
- */
-export enum MovementType {
-    Both = "Both",
-    OnlyClick = "OnlyClick",
-    OnlyDrag = "OnlyDrag",
-}
-
-/**
  * Animation speed of the pieces on the chess board.
  */
 export enum PieceAnimationSpeed {
@@ -49,7 +39,6 @@ export interface Config {
     enablePreSelection: boolean;
     showHighlights: boolean;
     enableWinnerAnimation: boolean;
-    movementType: MovementType;
     pieceAnimationSpeed: PieceAnimationSpeed;
 }
 
@@ -61,7 +50,6 @@ export const DEFAULT_CONFIG: Config = {
     enablePreSelection: true,
     showHighlights: true,
     enableWinnerAnimation: true,
-    movementType: MovementType.Both,
     pieceAnimationSpeed: PieceAnimationSpeed.Medium,
 };
 
@@ -128,7 +116,7 @@ export class ChessBoard {
      */
     public setConfig(config: Partial<ChessBoard["config"]>): void {
         this.config = { ...this.config, ...config };
-
+        console.log(this.config);
         // Update the board according to the new configuration.
         if (config.enableWinnerAnimation === false) {
             this.removeEffectFromAllSquares([SquareEffect.WinnerAnimation]);
@@ -406,8 +394,7 @@ export class ChessBoard {
             return;
         }
 
-        if (this.config.movementType !== MovementType.OnlyClick)
-            this.stickPieceToCursor(mouseDownEvent, square);
+        this.stickPieceToCursor(mouseDownEvent, square);
 
         if (
             [SquareClickMode.PreSelected, SquareClickMode.Selected].includes(
@@ -457,8 +444,6 @@ export class ChessBoard {
             squareClickMode: SquareClickMode
         ) => void
     ): void {
-        if (this.config.movementType === MovementType.OnlyDrag) return;
-
         const squareClickMode = this.getSquareClickMode(square);
 
         if (
@@ -495,8 +480,6 @@ export class ChessBoard {
             squareClickMode: SquareClickMode
         ) => void
     ): void {
-        if (this.config.movementType === MovementType.OnlyClick) return;
-
         if (document.querySelector(".piece.cloned"))
             this.dropPiece(mouseUpEvent);
 

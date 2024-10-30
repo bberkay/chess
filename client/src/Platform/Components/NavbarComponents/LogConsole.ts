@@ -201,12 +201,9 @@ export class LogConsole extends NavbarComponent {
         const newAddedLogs: HTMLElement[] = Array.from(
             document.getElementById("log-list")!.querySelectorAll("li")
         ).slice(this._lastLogIndex);
-        const squares: NodeListOf<HTMLElement> | null = this.config
-            .showSquareIds
-            ? document.querySelectorAll(".square")
-            : null;
         
-        // Tooltipts
+        // Tooltips
+        const squares: NodeListOf<HTMLElement> | null = document.querySelectorAll(".square");
         newAddedLogs.forEach((log: HTMLElement) => {
             log.querySelectorAll(".tooltip-toggle").forEach(
                 (tooltip_toggle) => {

@@ -23,7 +23,6 @@ export enum LocalStorageKey {
 
 /**
  * Type mapping for local storage data types.
- * TODO: Add comments for each key.
  */
 type LocalStorageData = {
     [LocalStorageKey.WasWelcomeModalShown]: boolean;
