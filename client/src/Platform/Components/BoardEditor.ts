@@ -144,12 +144,6 @@ export class BoardEditor extends Component {
             PIECE_CREATOR_ID,
             `
             <table id = "piece-table">
-                <thead>
-                    <tr>
-                        <th>White</th>
-                        <th>Black</th>
-                    </tr>
-                </thead>
                 <tbody id = "piece-options">
                     <tr>
                         <td>
@@ -563,7 +557,7 @@ export class BoardEditor extends Component {
      */
     @isEditorModeEnable()
     private removePiece(squareElement: HTMLElement): void {
-        if (!this.chess.board.getSquareId(squareElement)) return;
+        if (!squareElement || !this.chess.board.getSquareId(squareElement)) return;
 
         this.chess.removePiece(
             this.chess.board.getSquareId(squareElement) as Square
