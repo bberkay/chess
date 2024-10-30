@@ -117,14 +117,24 @@ export class ChessBoard {
     public setConfig(config: Partial<ChessBoard["config"]>): void {
         this.config = { ...this.config, ...config };
         
-        // Update the board according to the new configuration.
+        // Handle the configuration changes.
         if (config.enableWinnerAnimation === false) {
             this.removeEffectFromAllSquares([SquareEffect.WinnerAnimation]);
-        } else if (config.showHighlights === false) {
+        } else if (config.enableWinnerAnimation) {
+            const currentWinner = this.findSquareByEffect(SquareEffect.Winner);
+            if(currentWinner) {
+                this.addSquareEffects(
+                    currentWinner,    
+                    SquareEffect.WinnerAnimation
+                );
+            }
+        }
+        
+        if (config.showHighlights === false) {
             document.querySelectorAll(".square-effect").forEach((layer) => {
                 layer.classList.add("hidden");
             });
-        } else if (this.config.showHighlights) {
+        } else if (config.showHighlights) {
             document.querySelectorAll(".square-effect").forEach((layer) => {
                 layer.classList.remove("hidden");
             });
@@ -1670,6 +1680,17 @@ export class ChessBoard {
     }
 
     /**
+     * This function removes all effects of the given square element or id(squareID).
+     */
+    public findSquareByEffect(effect: SquareEffect): HTMLDivElement | null {
+        const square = document.querySelector(`.square .square-effect--${effect}`);
+        if(!square) 
+            return null;
+
+        return square.parentElement as HTMLDivElement;
+    }
+
+    /**
      * This function clears the effect of the given square element or id(squareID).
      * @example removeEffectOfSquare(1, SquareEffect.Select); // Removes the select effect of the square with id 1.
      * @example removeEffectOfSquare(1); // Removes all effects of the square with id 1.
@@ -1722,6 +1743,7 @@ export class ChessBoard {
             return;
 
         const audio = new Audio(this.sounds[name]);
+        console.log(audio);
         audio.addEventListener("ended", () => {
             audio.remove();
         });
