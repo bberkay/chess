@@ -116,20 +116,20 @@ export class ChessBoard {
      */
     public setConfig(config: Partial<ChessBoard["config"]>): void {
         this.config = { ...this.config, ...config };
-        
+
         // Handle the configuration changes.
         if (config.enableWinnerAnimation === false) {
             this.removeEffectFromAllSquares([SquareEffect.WinnerAnimation]);
         } else if (config.enableWinnerAnimation) {
             const currentWinner = this.findSquareByEffect(SquareEffect.Winner);
-            if(currentWinner) {
+            if (currentWinner) {
                 this.addSquareEffects(
-                    currentWinner,    
+                    currentWinner,
                     SquareEffect.WinnerAnimation
                 );
             }
         }
-        
+
         if (config.showHighlights === false) {
             document.querySelectorAll(".square-effect").forEach((layer) => {
                 layer.classList.add("hidden");
@@ -261,7 +261,7 @@ export class ChessBoard {
         square: HTMLDivElement | HTMLElement | Element | Square
     ): void {
         if (typeof square == "number") square = this.getSquareElement(square);
-        if(!square) return;
+        if (!square) return;
         const piece = square.querySelector(".piece");
         if (piece) piece.remove();
     }
@@ -495,54 +495,50 @@ export class ChessBoard {
             this.dropPiece(mouseUpEvent);
 
         const { clientX, clientY } = this._getPointerCoordinates(mouseUpEvent);
-        let targetSquare = document.elementFromPoint(
-            clientX + window.scrollX,
-            clientY + window.scrollY
-        );
-        if (targetSquare && targetSquare.closest("#chessboard")) {
-            targetSquare = this.getClosestSquareElement(
-                targetSquare as HTMLElement
-            ) as HTMLElement;
-            if (targetSquare) {
-                const targetSquareClickMode =
-                    this.getSquareClickMode(targetSquare);
-                const targetSquareEffects = this.getSquareEffects(targetSquare);
+        let targetSquare = document.elementFromPoint(clientX, clientY);
+        if(!targetSquare || !targetSquare.closest("#chessboard")) return;
+        
+        targetSquare = this.getClosestSquareElement(
+            targetSquare as HTMLElement
+        ) as HTMLElement;
+        if (!targetSquare) return;
 
-                if (
-                    targetSquareClickMode == SquareClickMode.Clear &&
-                    (targetSquareEffects.includes(SquareEffect.Selected) ||
-                        targetSquareEffects.includes(SquareEffect.PreSelected))
-                )
-                    this.refresh();
+        const targetSquareClickMode =
+            this.getSquareClickMode(targetSquare);
+        const targetSquareEffects = this.getSquareEffects(targetSquare);
 
-                if (
-                    ![
-                        SquareClickMode.PreSelect,
-                        SquareClickMode.Select,
-                        SquareClickMode.PreSelected,
-                        SquareClickMode.Selected,
-                        SquareClickMode.Clear,
-                        SquareClickMode.Disable,
-                    ].includes(targetSquareClickMode)
-                ) {
-                    const targetSquareId = this.getSquareId(targetSquare);
-                    if (targetSquareClickMode.startsWith("Pre")) {
-                        this.highlightPreMove(
-                            targetSquareId,
-                            targetSquareClickMode
-                        );
-                        onPiecePreMovedByDragging!(
-                            targetSquareId,
-                            targetSquareClickMode
-                        );
-                    } else {
-                        onPieceMovedByDragging!(
-                            targetSquareId,
-                            targetSquareClickMode
-                        );
-                    }
-                }
-            }
+        if (
+            targetSquareClickMode == SquareClickMode.Clear &&
+            (targetSquareEffects.includes(SquareEffect.Selected) ||
+                targetSquareEffects.includes(SquareEffect.PreSelected))
+        )
+            this.refresh();
+
+        if([
+            SquareClickMode.PreSelect,
+            SquareClickMode.Select,
+            SquareClickMode.PreSelected,
+            SquareClickMode.Selected,
+            SquareClickMode.Clear,
+            SquareClickMode.Disable,
+        ].includes(targetSquareClickMode))
+            return;
+
+        const targetSquareId = this.getSquareId(targetSquare);
+        if (targetSquareClickMode.startsWith("Pre")) {
+            this.highlightPreMove(
+                targetSquareId,
+                targetSquareClickMode
+            );
+            onPiecePreMovedByDragging!(
+                targetSquareId,
+                targetSquareClickMode
+            );
+        } else {
+            onPieceMovedByDragging!(
+                targetSquareId,
+                targetSquareClickMode
+            );
         }
     }
 
@@ -638,69 +634,65 @@ export class ChessBoard {
         const originalPiece = document.querySelector(
             ".piece.dragging"
         ) as HTMLElement;
-        const clonedPiece = document.querySelector(
-            ".piece.cloned"
-        ) as HTMLElement;
-        if (clonedPiece) {
-            clonedPiece.remove();
-
-            const { clientX, clientY } = this._getPointerCoordinates(upEvent);
-            let targetSquare: Element | null = document.elementFromPoint(
-                clientX + window.scrollX,
-                clientY + window.scrollY
-            );
-            if (targetSquare) {
-                targetSquare = this.getClosestSquareElement(
-                    targetSquare as HTMLElement
-                ) as HTMLElement;
-                if (!targetSquare) return;
-
-                if (targetSquare.className.includes("piece"))
-                    targetSquare = this.getSquareElementOfPiece(targetSquare);
-
-                if (targetSquare && targetSquare.className.includes("square")) {
-                    const targetSquareClickMode =
-                        this.getSquareClickMode(targetSquare);
-                    if (
-                        [
-                            SquareClickMode.Play,
-                            SquareClickMode.Promotion,
-                            SquareClickMode.PrePlay,
-                            SquareClickMode.PrePromotion,
-                        ].includes(targetSquareClickMode)
-                    ) {
-                        const isPreMove =
-                            targetSquareClickMode.startsWith("Pre");
-                        const targetPiece =
-                            targetSquare.querySelector(".piece");
-                        if (targetPiece && !isPreMove) {
-                            targetSquare.removeChild(targetPiece);
-                            this.playSound(SoundEffect.Capture);
-                        }
-
-                        if (!isPreMove) {
-                            targetSquare.appendChild(originalPiece);
-                        } else if (!targetPiece) {
-                            this.createPiece(
-                                this.getPieceColor(originalPiece),
-                                this.getPieceType(originalPiece),
-                                this.getSquareId(targetSquare),
-                                true
-                            );
-                        }
-
-                        if (!targetPiece && !isPreMove)
-                            this.playSound(SoundEffect.Move);
-                    }
-                }
-            }
-        }
 
         if (originalPiece) originalPiece.classList.remove("dragging");
         document.removeEventListener(
             this._isTouchDevice() ? "touchmove" : "mousemove",
             this._bindDragPiece
         );
+
+        const clonedPiece = document.querySelector(
+            ".piece.cloned"
+        ) as HTMLElement;
+        if (!clonedPiece) return;
+        clonedPiece.remove();
+
+        const { clientX, clientY } = this._getPointerCoordinates(upEvent);
+        let targetSquare: Element | null = document.elementFromPoint(
+            clientX,
+            clientY
+        );
+
+        targetSquare = targetSquare
+            ? this.getClosestSquareElement(targetSquare as HTMLElement)
+            : null;
+        if (!targetSquare) return;
+
+        if (targetSquare.className.includes("piece"))
+            targetSquare = this.getSquareElementOfPiece(targetSquare);
+
+        if (!targetSquare || !targetSquare.className.includes("square")) return;
+
+        const targetSquareClickMode = this.getSquareClickMode(targetSquare);
+        if (
+            ![
+                SquareClickMode.Play,
+                SquareClickMode.Promotion,
+                SquareClickMode.PrePlay,
+                SquareClickMode.PrePromotion,
+            ].includes(targetSquareClickMode)
+        )
+            return;
+
+        const isPreMove = targetSquareClickMode.startsWith("Pre");
+        const targetPiece = targetSquare.querySelector(".piece");
+        if (targetPiece && !isPreMove) {
+            targetSquare.removeChild(targetPiece);
+            this.playSound(SoundEffect.Capture);
+        }
+
+        if (!isPreMove) {
+            targetSquare.appendChild(originalPiece);
+        } else if (!targetPiece) {
+            this.createPiece(
+                this.getPieceColor(originalPiece),
+                this.getPieceType(originalPiece),
+                this.getSquareId(targetSquare),
+                true
+            );
+        }
+
+        if (!isPreMove && !targetPiece) this.playSound(SoundEffect.Move);
     }
 
     /**
@@ -780,7 +772,9 @@ export class ChessBoard {
         }
 
         this.logger.save(
-            `Possible moves-ts-${JSON.stringify(moves)}-te- highlighted on board.`
+            `Possible moves-ts-${JSON.stringify(
+                moves
+            )}-te- highlighted on board.`
         );
     }
 
@@ -952,7 +946,9 @@ export class ChessBoard {
          */
         const castlingSide: CastlingSide =
             fromSquareId > toSquareId ? CastlingSide.Long : CastlingSide.Short;
-        this.logger.save(`Castling type determined-ts-${castlingSide}-te- on board`);
+        this.logger.save(
+            `Castling type determined-ts-${castlingSide}-te- on board`
+        );
 
         // Find the target rook square if it is clicked two square left or right of the king
         // instead of the rook square itself.
@@ -1684,9 +1680,10 @@ export class ChessBoard {
      * This function removes all effects of the given square element or id(squareID).
      */
     public findSquareByEffect(effect: SquareEffect): HTMLDivElement | null {
-        const square = document.querySelector(`.square .square-effect--${effect}`);
-        if(!square) 
-            return null;
+        const square = document.querySelector(
+            `.square .square-effect--${effect}`
+        );
+        if (!square) return null;
 
         return square.parentElement as HTMLDivElement;
     }
@@ -1740,8 +1737,7 @@ export class ChessBoard {
      * This function plays the given sound.
      */
     public playSound(name: SoundEffect): void {
-        if (!this.config.enableSoundEffects) 
-            return;
+        if (!this.config.enableSoundEffects) return;
 
         const audio = new Audio(this.sounds[name]);
         audio.addEventListener("ended", () => {
