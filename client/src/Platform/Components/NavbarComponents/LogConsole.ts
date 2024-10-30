@@ -47,7 +47,7 @@ export class LogConsole extends NavbarComponent {
                     ) as unknown as number;
                 };
             };
-            const debouncedStream = debounce(this.stream.bind(this), 500);
+            const debouncedStream = debounce(this.stream.bind(this), 250);
             document.addEventListener(LoggerEvent.LogAdded, debouncedStream);
         });
     }
