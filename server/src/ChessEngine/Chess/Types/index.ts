@@ -284,6 +284,12 @@ export enum ChessEvent {
     onPieceMovedByOpponent = "onPieceMovedByOpponent",
 
     /**
+     * Triggered when the player take back or forward a move.
+     * @Event
+     */
+    onTakeBackOrForward = "onTakeBackOrForward",
+
+    /**
      * On bot added to the game.
      * @CustomEvent
      * @param {Color} color - The color of the bot.
