@@ -2,14 +2,6 @@ import { Color, Move } from "@Chess/Types";
 import { Converter } from "@Chess/Utils/Converter";
 
 /**
- * Default difficulty multiplier is 5.
- *
- * For more information about depth:
- * https://official-stockfish.github.io/docs/stockfish-wiki/UCI-&-Commands.html#go
- */
-const DIFFICULTY_MULTIPLIER = 3;
-
-/**
  * Difficulty levels for the bot.
  * Easy: Skill Level (1 * DIFFICULTY_MULTIPLIER)
  * Medium: Skill Level (2 * DIFFICULTY_MULTIPLIER)
@@ -46,6 +38,24 @@ export type BotAttributes = {
 };
 
 /**
+ * Default difficulty multiplier is 5.
+ *
+ * For more information about depth:
+ * https://official-stockfish.github.io/docs/stockfish-wiki/UCI-&-Commands.html#go
+ */
+const DIFFICULTY_MULTIPLIER = 3;
+
+/**
+ * Default bot attributes. If the user does not provide
+ * any or provides invalid attributes, the bot will use
+ * these default attributes.
+ */
+const DEFAULT_BOT_ATTRIBUTES: BotAttributes = {
+    color: BotColor.Random,
+    difficulty: BotDifficulty.Medium,
+};
+
+/**
  * Bot class that controls the chess engine's behavior.
  * This bot uses the Stockfish engine (via WebAssembly if available) to compute
  * moves based on a specified difficulty.
@@ -69,6 +79,7 @@ export class Bot {
         this.isWasmSupported ? "stockfish.wasm.js" : "stockfish.js"
     }`;
 
+    private _difficultyValue: number = 0;
     private _bestMove: Move | Move[] | null = null;
 
     /**
@@ -79,25 +90,30 @@ export class Bot {
         if (
             attributes.difficulty < BotDifficulty.Easy ||
             attributes.difficulty > BotDifficulty.Hard
-        )
-            throw new Error(
-                "Difficulty must be between 1(easy), 2(medium), or 3(hard)"
+        ) {
+            console.error(
+                `Difficulty must be between 1(easy), 2(medium), or 3(hard). Defaulting to ${DEFAULT_BOT_ATTRIBUTES.difficulty}.`
             );
+            attributes.difficulty = DEFAULT_BOT_ATTRIBUTES.difficulty;
+        }
 
         if (
             attributes.color !== BotColor.Random &&
             attributes.color !== BotColor.White &&
             attributes.color !== BotColor.Black
-        )
-            throw new Error(
-                "Color must be BotColor.Random, BotColor.White/Color.White, or BotColor.Black/Color.Black"
+        ){
+            console.error(
+                `Color must be BotColor.Random, BotColor.White/Color.White, or BotColor.Black/Color.Black. Defaulting to ${DEFAULT_BOT_ATTRIBUTES.color}.`
             );
+            attributes.color = DEFAULT_BOT_ATTRIBUTES.color;
+        }
 
         if (attributes.color === BotColor.Random)
             attributes.color = Math.random() < 0.5 ? Color.White : Color.Black;
 
         this.color = attributes.color as Color;
-        this.difficulty = attributes.difficulty * DIFFICULTY_MULTIPLIER;
+        this.difficulty = attributes.difficulty;
+        this._difficultyValue = this.difficulty * DIFFICULTY_MULTIPLIER;
     }
 
     /**
@@ -106,7 +122,7 @@ export class Bot {
     public getAttributes(): BotAttributes {
         return {
             color: this.color,
-            difficulty: this.difficulty,
+            difficulty: this.difficulty
         };
     }
 
@@ -122,7 +138,7 @@ export class Bot {
         this.stockfish.postMessage("uci");
         this.stockfish.postMessage("ucinewgame");
         this.stockfish.postMessage(
-            "setoption name Skill Level value " + this.difficulty
+            "setoption name Skill Level value " + this._difficultyValue
         );
     }
 
