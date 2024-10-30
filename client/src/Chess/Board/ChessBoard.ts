@@ -116,7 +116,7 @@ export class ChessBoard {
      */
     public setConfig(config: Partial<ChessBoard["config"]>): void {
         this.config = { ...this.config, ...config };
-        console.log(this.config);
+        
         // Update the board according to the new configuration.
         if (config.enableWinnerAnimation === false) {
             this.removeEffectFromAllSquares([SquareEffect.WinnerAnimation]);

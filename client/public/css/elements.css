@@ -172,7 +172,7 @@ input[type="range"]::-moz-range-thumb {
     right: 0;
     bottom: 0;
     background-color: var(--border-color);
-    -webkit-transition: 0.4s;
+    -webkit-transition: 0.3s;
     transition: 0.4s;
     border-radius: 34px;
 }
@@ -185,8 +185,8 @@ input[type="range"]::-moz-range-thumb {
     left: 2px;
     bottom: 2px;
     background-color: var(--white-color);
-    -webkit-transition: 0.4s;
-    transition: 0.4s;
+    -webkit-transition: 0.3s;
+    transition: 0.3s;
     border-radius: 50%;
 }
 
