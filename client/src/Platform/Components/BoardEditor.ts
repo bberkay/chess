@@ -443,7 +443,6 @@ export class BoardEditor extends Component {
         fenNotation: string | StartPosition | null = null
     ): void {
         fenNotation = fenNotation || this.getShownFen();
-        fenNotation = fenNotation.replace(" b ", " w ");
         fenNotation = fenNotation.replace(/\d+ \d+$/, "0 1");
         this.chess.createGame(fenNotation);
         this._prepareBoardEditorForGame();
