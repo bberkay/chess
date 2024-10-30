@@ -375,7 +375,7 @@ export class ChessPlatform {
     private cancelLobby(): void {
         LocalStorage.clear(LocalStorageKey.LastLobbyConnection);
         this.platform.navigatorModal.hide();
-        this.socket?.close();
+        this.terminateAndCleanupConnection();
         this.platform.notationMenu.displayNewGameUtilityMenu();
         this.chess.board.lock();
     }

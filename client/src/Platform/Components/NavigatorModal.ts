@@ -171,10 +171,7 @@ export class NavigatorModal extends Component {
      * Go back to the previous state of the modal.
      */
     public undo(): void {
-        document.querySelector(".navigator-modal-title")!.innerHTML =
-            this.lastNavigatorModalTitle;
-        document.querySelector(".navigator-modal-content")!.innerHTML =
-            this.lastNavigatorModalContent;
+        this.show(this.lastNavigatorModalTitle, this.lastNavigatorModalContent);
     }
 
     /**
