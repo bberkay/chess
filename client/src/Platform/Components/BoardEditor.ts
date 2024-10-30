@@ -283,8 +283,6 @@ export class BoardEditor extends Component {
         this.removePieceEditor();
         this.disableBoardObserver();
         BoardEditor._isEditorModeEnable = false;
-
-        this.createBoard();
     }
 
     /**
