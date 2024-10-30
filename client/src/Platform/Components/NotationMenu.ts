@@ -69,7 +69,6 @@ export class NotationMenu extends Component {
     private _activeUtilityMenu: UtilityMenuType = UtilityMenuType.NewGame;
     private _prevActiveUtilityMenu: UtilityMenuType | null = null;
     private _confirmedOperation: NotationMenuOperation | null = null;
-    private _isUndoButtonShown: boolean = false;
 
     /**
      * Constructor of the NotationMenu class.
@@ -133,13 +132,11 @@ export class NotationMenu extends Component {
         const moveHistoryLength = this.chess.getMoveHistory().length;
         return `
             ${
-                moveHistoryLength < 1 && !this._isUndoButtonShown
+                moveHistoryLength < 1
                     ? `<button class="menu-item" data-menu-operation="${NotationMenuOperation.AbortGame}"  data-tooltip-text="Abort the Game">&#x2715; Abort</button>`
                     : `<button class="menu-item" data-menu-operation="${
                           NotationMenuOperation.SendUndoOffer
-                      }" ${
-                          moveHistoryLength < 1 ? `disabled="true"` : ``
-                      } data-tooltip-text="Send Undo Offer">↺ Undo</button>`
+                      }" data-tooltip-text="Send Undo Offer">↺ Undo</button>`
             }
             <button class="menu-item" data-menu-operation="${
                 NotationMenuOperation.SendDrawOffer
@@ -157,13 +154,11 @@ export class NotationMenu extends Component {
         const moveHistoryLength = this.chess.getMoveHistory().length;
         return `
             ${
-                moveHistoryLength < 1 && !this._isUndoButtonShown
+                moveHistoryLength < 1
                     ? `<button class="menu-item" data-menu-operation="${NotationMenuOperation.AbortGame}"  data-tooltip-text="Abort the Game">&#x2715; Abort</button>`
                     : `<button class="menu-item" data-menu-operation="${
                           NotationMenuOperation.UndoMove
-                      }" ${
-                          moveHistoryLength < 1 ? `disabled="true"` : ``
-                      } data-tooltip-text="Take Back Last Move">↺ Undo</button>`
+                      }" data-tooltip-text="Take Back Last Move">↺ Undo</button>`
             }
             <button class="menu-item" data-menu-operation="${
                 NotationMenuOperation.Resign
@@ -830,8 +825,6 @@ export class NotationMenu extends Component {
     public displayOnlineGameUtilityMenu(): void {
         this.resetConfirmedOperation();
 
-        this._isUndoButtonShown ||= this.chess.getMoveHistory().length >= 1;
-
         document
             .querySelector(".utility-toggle-menu-section.active")!
             .classList.remove("active");
@@ -853,8 +846,6 @@ export class NotationMenu extends Component {
      */
     public displaySingleplayerGameUtilityMenu(): void {
         this.resetConfirmedOperation();
-
-        this._isUndoButtonShown ||= this.chess.getMoveHistory().length >= 1;
 
         document
             .querySelector(".utility-toggle-menu-section.active")!
@@ -901,7 +892,7 @@ export class NotationMenu extends Component {
     public update(force: boolean = false): void {
         const moveCount = this.chess.getMoveHistory().length;
 
-        if (moveCount > 0 && !this._isUndoButtonShown) {
+        if (moveCount > 0) {
             // Rerender the online game utility menu to show the undo button
             // instead of the abort button.
             if (
