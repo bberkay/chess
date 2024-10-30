@@ -506,7 +506,7 @@ function joinLobby(ws: RWebSocket): void {
                 : WsCommand.connected({ lobbyId, player })
         );
         SocketManager.addSocket(ws.data.lobbyId, ws.data.player.token, ws);
-        if (lobby.isBothPlayersOnline()) startGame(lobby!);
+        if (lobby.isBothPlayersOnline() || lobby.isGameReallyStarted()) startGame(lobby!);
     } else {
         console.log("Joining the lobby failed: ", lobbyId, player);
     }
@@ -572,7 +572,7 @@ function startGame(lobby: Lobby): void {
         );
 
         monitorGameTimeExpiration(lobby);
-    } else if (isGameAlreadyStarted || !lobby.isBothPlayersOffline()) {
+    } else if (isGameAlreadyStarted) {
         // One of the players is should be reconnected to the game.
         // send current board and durations to the reconnected player.
         console.log("Reconnecting player to the game: ", lobby.id);

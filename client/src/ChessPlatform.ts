@@ -122,13 +122,14 @@ export class ChessPlatform {
             const lsLobbyId = LocalStorage.load(
                 LocalStorageKey.LastLobbyConnection
             )?.lobbyId;
-            const lobbyId = this.getLobbyIdFromUrl() || lsLobbyId;
+            const urlLobbyId = this.getLobbyIdFromUrl();
+            const lobbyId = urlLobbyId || lsLobbyId;
             if (!lobbyId) return;
 
-            const isLobbyIdValid = await this.checkLobbyId(lobbyId, !lsLobbyId);
+            const isLobbyIdValid = await this.checkLobbyId(lobbyId, urlLobbyId !== null);
             if (!isLobbyIdValid) return;
 
-            if (!lsLobbyId) this.platform.navigatorModal.showJoinLobby();
+            if (!lsLobbyId || lsLobbyId !== lobbyId) this.platform.navigatorModal.showJoinLobby();
             else this.reconnectLobby();
         };
 
