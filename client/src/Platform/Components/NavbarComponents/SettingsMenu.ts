@@ -255,41 +255,6 @@ export class SettingsMenu extends NavbarComponent {
         `
         );
         this.loadCSS("settings-menu.css");
-        this.loadSettings();
-    }
-
-    /**
-     * Show the saved settings on the settings menu if they
-     * exist in local storage. If not, show the default settings.
-     */
-    private loadSettings(): void {
-        const settings = LocalStorage.load(LocalStorageKey.Settings);
-        for (const config in settings) {
-            for(const [settingKey, settingValue] of Object.entries(settings[config as SettingsConfigOperation])) {
-                const settingItem = document.querySelector(
-                    `#${SETTINGS_MENU_ID} [data-setting-key="${settingKey}"]`
-                );
-                if (!settingItem) continue;
-                
-                if (settingItem.getAttribute("type") === "checkbox") {
-                    if (settingValue) {
-                        settingItem.setAttribute("checked", "");
-                    } else {
-                        settingItem.removeAttribute("checked");
-                    }
-                } else if (settingItem.tagName === "BUTTON") {
-                    if (
-                        settingItem.textContent &&
-                        settingValue ===
-                            Formatter.titleCaseToCamelCase(
-                                settingItem.textContent
-                            )
-                    ) {
-                        settingItem.classList.add("selected");
-                    }
-                }
-            }
-        }
     }
 
     /**
@@ -387,6 +352,7 @@ export class SettingsMenu extends NavbarComponent {
         operation: SettingsMenuOperation,
         menuItem: HTMLElement
     ): void {
+        // Operation handles here if it is not a config operation.
         switch (operation) {
             case SettingsMenuOperation.ClearCache:
                 LocalStorage.clear();
@@ -397,10 +363,12 @@ export class SettingsMenu extends NavbarComponent {
                     LocalStorageKey.Settings,
                     this.getDefaultSettings()
                 );
-                this.loadSettings();
+                this.renderComponent();
+                this.loadLocalStorage();
                 return;
         }
 
+        // Operation handles here if it is a config operation.
         if (!(menuItem instanceof HTMLElement)) 
             throw new Error(
                 "The setting key or value is not found. Please check the given menu item and its data-setting-key and data-setting-value attributes."
