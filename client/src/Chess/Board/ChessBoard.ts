@@ -261,6 +261,7 @@ export class ChessBoard {
         square: HTMLDivElement | HTMLElement | Element | Square
     ): void {
         if (typeof square == "number") square = this.getSquareElement(square);
+        if(!square) return;
         const piece = square.querySelector(".piece");
         if (piece) piece.remove();
     }
@@ -1743,7 +1744,6 @@ export class ChessBoard {
             return;
 
         const audio = new Audio(this.sounds[name]);
-        console.log(audio);
         audio.addEventListener("ended", () => {
             audio.remove();
         });

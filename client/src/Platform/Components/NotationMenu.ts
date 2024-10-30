@@ -482,7 +482,6 @@ export class NotationMenu extends Component {
                         ).indexOf(clickedNotation)
                     );
                     this.highlightNotation(clickedNotation);
-                    this.setScore(this.chess.getScores());
                 }
             });
         } else if (notationCount !== this.chess.getAlgebraicNotation().length) {
@@ -931,7 +930,7 @@ export class NotationMenu extends Component {
         // is started from a specific position.
         // but there is no need to update the notations
         // because there can't be any notation.
-        this.setScore(this.chess.getScores());
+        this.setScore(this.chess.getScores(false));
 
         if (!force && (moveCount == 0 || moveCount == this.moveCount)) return;
 

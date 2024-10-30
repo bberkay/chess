@@ -103,6 +103,7 @@ export class Platform {
                 ChessEvent.onPieceRemoved,
                 ChessEvent.onPieceSelected,
                 ChessEvent.onPieceMoved,
+                ChessEvent.onTakeBackOrForward,
                 ChessEvent.onGameOver,
             ];
 
@@ -365,7 +366,7 @@ export class Platform {
         if (!BoardEditor.isEditorModeEnable()) {
             this.notationMenu.update();
 
-            const gameStatus = this.chess.getGameStatus();
+            const gameStatus = this.chess.getGameStatus(false);
             if (
                 [
                     GameStatus.BlackVictory,

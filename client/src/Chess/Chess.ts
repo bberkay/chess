@@ -663,6 +663,8 @@ export class Chess {
 
         if (moveIndex == this.engine.getMoveHistory().length - 1)
             this.board.unlock();
+
+        document.dispatchEvent(new Event(ChessEvent.onTakeBackOrForward));
     }
 
     /**
@@ -704,16 +706,10 @@ export class Chess {
     }
 
     /**
-     * Get scores of the current board.
-     *
-     * @param {boolean} shownBoard Retrieves the scores of the current board,
-     * even if it reflects a previous state. For example, if the player has
-     * taken back 2 moves, this method will return the scores of the board
-     * after those 2 moves have been undone. If `shownBoard` is false, it
-     * will return the scores of the latest board.
+     * Get scores of the given board.
      */
-    public getScores(shownBoard: boolean = false): Scores {
-        if (!shownBoard || this._currentTakeBackCount == 0)
+    public getScores(ignoreTakeBack: boolean = true): Scores {
+        if (ignoreTakeBack || this._currentTakeBackCount == 0)
             return this.engine.getScores();
 
         return this.engine.getBoardHistory()[
@@ -724,14 +720,13 @@ export class Chess {
     /**
      * Get the turn color of current board.
      *
-     * @param {boolean} shownBoard Retrieves the color of the current turn,
-     * even if it reflects a previous state. For example, if the player has
-     * taken back 2 moves, this method will return the color of the board
-     * after those 2 moves have been undone. If `shownBoard` is false, it
-     * will return the color of the latest board.
+     * @param {boolean} ignoreTakeBack If it is true then it will ignore
+     * the current take back count and return the turn color of the latest
+     * board. If it is false then it will return the turn color of the taken
+     * back board.
      */
-    public getTurnColor(shownBoard: boolean = false): Color {
-        if (!shownBoard || this._currentTakeBackCount == 0)
+    public getTurnColor(ignoreTakeBack: boolean = true): Color {
+        if (ignoreTakeBack || this._currentTakeBackCount == 0)
             return this.engine.getTurnColor();
 
         return this.engine.getBoardHistory()[
@@ -742,14 +737,13 @@ export class Chess {
     /**
      * Get the game status of the current board.
      *
-     * @param {boolean} shownBoard Retrieves the game status of the current board,
-     * even if it reflects a previous state. For example, if the player has taken
-     * back 2 moves, this method will return the game status of the board after
-     * those 2 moves have been undone. If `shownBoard` is false, it will return
-     * the game status of the latest board.
+     * @param {boolean} ignoreTakeBack If it is true then it will ignore
+     * the current take back count and return the turn color of the latest
+     * board. If it is false then it will return the turn color of the taken
+     * back board.
      */
-    public getGameStatus(shownBoard: boolean = false): GameStatus {
-        if (!shownBoard || this._currentTakeBackCount == 0)
+    public getGameStatus(ignoreTakeBack: boolean = true): GameStatus {
+        if (ignoreTakeBack || this._currentTakeBackCount == 0)
             return this.engine.getGameStatus();
 
         return this.engine.getBoardHistory()[
@@ -760,16 +754,15 @@ export class Chess {
     /**
      * Get algebraic notation of the current board.
      *
-     * @param {boolean} shownBoard Retrieves the algebraic notation of the current
-     * board, even if it reflects a previous state. For example, if the player has
-     * taken back 2 moves, this method will return the algebraic notation of the board
-     * after those 2 moves have been undone. If `shownBoard` is false, it will return
-     * the algebraic notation of the latest board.
+     * @param {boolean} ignoreTakeBack If it is true then it will ignore
+     * the current take back count and return the turn color of the latest
+     * board. If it is false then it will return the turn color of the taken
+     * back board.
      */
     public getAlgebraicNotation(
-        shownBoard: boolean = false
+        ignoreTakeBack: boolean = true
     ): ReadonlyArray<string> {
-        if (!shownBoard || this._currentTakeBackCount == 0)
+        if (ignoreTakeBack || this._currentTakeBackCount == 0)
             return this.engine.getAlgebraicNotation();
 
         return this.engine.getBoardHistory()[
@@ -780,14 +773,13 @@ export class Chess {
     /**
      * Get the move history of the current board.
      *
-     * @param {boolean} shownBoard Retrieves the move history of the current board,
-     * even if it reflects a previous state. For example, if the player has taken back
-     * 2 moves, this method will return the move history of the board after those 2 moves
-     * have been undone. If `shownBoard` is false, it will return the move history of
-     * the latest board.
+     * @param {boolean} ignoreTakeBack If it is true then it will ignore
+     * the current take back count and return the turn color of the latest
+     * board. If it is false then it will return the turn color of the taken
+     * back board.
      */
-    public getMoveHistory(shownBoard: boolean = false): ReadonlyArray<Move> {
-        if (!shownBoard || this._currentTakeBackCount == 0)
+    public getMoveHistory(ignoreTakeBack: boolean = true): ReadonlyArray<Move> {
+        if (ignoreTakeBack || this._currentTakeBackCount == 0)
             return this.engine.getMoveHistory();
 
         return this.engine.getBoardHistory()[
@@ -798,14 +790,13 @@ export class Chess {
     /**
      * This function returns the current game as fen notation.
      *
-     * @param {boolean} shownBoard Retrieves the fen notation of the current board,
-     * even if it reflects a previous state. For example, if the player has taken back
-     * 2 moves, this method will return the fen notation of the board after those 2 moves
-     * have been undone. If `shownBoard` is false, it will return the fen notation of
-     * the latest board.
+     * @param {boolean} ignoreTakeBack If it is true then it will ignore
+     * the current take back count and return the turn color of the latest
+     * board. If it is false then it will return the turn color of the taken
+     * back board.
      */
-    public getGameAsFenNotation(shownBoard: boolean = false): string {
-        if (!shownBoard || this._currentTakeBackCount == 0)
+    public getGameAsFenNotation(ignoreTakeBack: boolean = true): string {
+        if (ignoreTakeBack || this._currentTakeBackCount == 0)
             return this.engine.getGameAsFenNotation();
 
         return Converter.jsonToFen(
@@ -820,14 +811,13 @@ export class Chess {
     /**
      * This function returns the current game as json notation.
      *
-     * @param {boolean} shownBoard Retrieves the json notation of the current board,
-     * even if it reflects a previous state. For example, if the player has taken back
-     * 2 moves, this method will return the json notation of the board after those 2 moves
-     * have been undone. If `shownBoard` is false, it will return the json notation of
-     * the latest board.
+     * @param {boolean} ignoreTakeBack If it is true then it will ignore
+     * the current take back count and return the turn color of the latest
+     * board. If it is false then it will return the turn color of the taken
+     * back board.
      */
-    public getGameAsJsonNotation(shownBoard: boolean = false): JsonNotation {
-        if (!shownBoard || this._currentTakeBackCount == 0)
+    public getGameAsJsonNotation(ignoreTakeBack: boolean = true): JsonNotation {
+        if (ignoreTakeBack || this._currentTakeBackCount == 0)
             return this.engine.getGameAsJsonNotation();
 
         return this.engine.getBoardHistory()[
@@ -838,14 +828,13 @@ export class Chess {
     /**
      * This function returns the current game as ascii notation.
      *
-     * @param {boolean} shownBoard Retrieves the ascii notation of the current board,
-     * even if it reflects a previous state. For example, if the player has taken back
-     * 2 moves, this method will return the ascii notation of the board after those 2 moves
-     * have been undone. If `shownBoard` is false, it will return the ascii notation of
-     * the latest board.
+     * @param {boolean} ignoreTakeBack If it is true then it will ignore
+     * the current take back count and return the turn color of the latest
+     * board. If it is false then it will return the turn color of the taken
+     * back board.
      */
-    public getGameAsASCII(shownBoard: boolean = false): string {
-        if (!shownBoard || this._currentTakeBackCount == 0)
+    public getGameAsASCII(ignoreTakeBack: boolean = true): string {
+        if (ignoreTakeBack || this._currentTakeBackCount == 0)
             return this.engine.getGameAsASCII();
 
         return Converter.jsonToASCII(

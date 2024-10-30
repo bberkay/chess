@@ -743,7 +743,7 @@ export class BoardEditor extends Component {
         const inputElement = document.querySelector(
             `.${BoardCreatorMode.Custom} input`
         ) as HTMLInputElement;
-        inputElement.value = this.chess.getGameAsFenNotation();
+        inputElement.value = this.chess.getGameAsFenNotation(false);
 
         if (BoardEditor.isEditorModeEnable()) {
             if (
