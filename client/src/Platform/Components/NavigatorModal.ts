@@ -116,11 +116,11 @@ export class NavigatorModal extends Component {
             const chessboard = document.getElementById("chessboard") as HTMLElement;
             setTimeout(() => {
                 modal.style.left = `${
-                    chessboard.offsetWidth / 2 - modal.offsetWidth / 2
+                    chessboard.offsetLeft + chessboard.offsetWidth / 2 - modal.offsetWidth / 2
                 }px`;
 
                 modal.style.top = `${
-                    chessboard.offsetHeight / 2 - modal.offsetHeight / 2
+                    chessboard.offsetTop + chessboard.offsetHeight / 2 - modal.offsetHeight / 2
                 }px`;
             }, 10);
         }
