@@ -31,7 +31,7 @@ enum UtilityMenuType {
  * - OnlyText: "Qf3"
  * - WithIcons: "&#9819;f3"
  */
-export enum AlgebraicNotationStyle {
+export enum NotationStyle {
     OnlyText = "OnlyText",
     WithIcons = "WithIcons",
 }
@@ -40,14 +40,14 @@ export enum AlgebraicNotationStyle {
  * Represents the configuration of the notation menu.
  */
 export interface Config {
-    algebraicNotationStyle: AlgebraicNotationStyle;
+    notationStyle: NotationStyle;
 }
 
 /**
  * Default configuration of the notation menu.
  */
 export const DEFAULT_CONFIG: Config = {
-    algebraicNotationStyle: AlgebraicNotationStyle.WithIcons,
+    notationStyle: NotationStyle.WithIcons,
 };
 
 /**
@@ -92,7 +92,7 @@ export class NotationMenu extends Component {
         this.config = { ...this.config, ...config };
 
         // Update the notation table according to the new configuration.
-        if (config.algebraicNotationStyle) {
+        if (config.notationStyle) {
             document.getElementById("notations")!.innerHTML = "";
             this.setNotations(this.chess.getAlgebraicNotation());
         }
@@ -436,8 +436,8 @@ export class NotationMenu extends Component {
         if (notationMenu.innerHTML == "") {
             for (let i = 0; i < notations.length; i += 1) {
                 const notationUnicoded = formatUnicodeNotation(
-                    this.config.algebraicNotationStyle ===
-                        AlgebraicNotationStyle.WithIcons
+                    this.config.notationStyle ===
+                        NotationStyle.WithIcons
                         ? this.convertStringNotationToUnicodedNotation(
                               notations[i]
                           )
@@ -483,8 +483,8 @@ export class NotationMenu extends Component {
             const lastRow: HTMLElement =
                 notationMenu.lastElementChild as HTMLElement;
             const lastNotation: string = formatUnicodeNotation(
-                this.config.algebraicNotationStyle ===
-                    AlgebraicNotationStyle.WithIcons
+                this.config.notationStyle ===
+                    NotationStyle.WithIcons
                     ? this.convertStringNotationToUnicodedNotation(
                           notations[notations.length - 1]
                       )

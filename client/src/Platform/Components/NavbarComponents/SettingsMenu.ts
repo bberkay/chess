@@ -4,7 +4,7 @@ import { SETTINGS_MENU_ID } from "@Platform/Consts";
 import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage";
 import { Chess } from "@Chess/Chess";
 import {
-    PieceAnimationSpeed,
+    AnimationSpeed,
     Config as ChessBoardConfig,
     DEFAULT_CONFIG as DEFAULT_SETTINGS_CHESSBOARD,
 } from "@Chess/Board/ChessBoard";
@@ -15,7 +15,7 @@ import {
 } from "./LogConsole";
 import {
     NotationMenu,
-    AlgebraicNotationStyle,
+    NotationStyle,
     Config as NotationMenuConfig,
     DEFAULT_CONFIG as DEFAULT_SETTINGS_NOTATION_MENU,
 } from "../NotationMenu";
@@ -200,10 +200,10 @@ export class SettingsMenu extends NavbarComponent {
             if (!Object.hasOwn(currentSettingsKeyProxy, settingKey)) return [];
             
             switch (settingKey) {
-                case (currentSettingsKeyProxy as ChessBoardConfig).pieceAnimationSpeed:
-                    return Object.values(PieceAnimationSpeed);
-                case (currentSettingsKeyProxy as NotationMenuConfig).algebraicNotationStyle:
-                    return Object.values(AlgebraicNotationStyle);
+                case (currentSettingsKeyProxy as ChessBoardConfig).animationSpeed:
+                    return Object.values(AnimationSpeed);
+                case (currentSettingsKeyProxy as NotationMenuConfig).notationStyle:
+                    return Object.values(NotationStyle);
                 default:
                     return [];
             }

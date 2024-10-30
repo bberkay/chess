@@ -25,7 +25,7 @@ import { Logger } from "@Services/Logger.ts";
 /**
  * Animation speed of the pieces on the chess board.
  */
-export enum PieceAnimationSpeed {
+export enum AnimationSpeed {
     Slow = "Slow",
     Medium = "Medium",
     Fast = "Fast",
@@ -39,7 +39,7 @@ export interface Config {
     enablePreSelection: boolean;
     showHighlights: boolean;
     enableWinnerAnimation: boolean;
-    pieceAnimationSpeed: PieceAnimationSpeed;
+    animationSpeed: AnimationSpeed;
 }
 
 /**
@@ -50,7 +50,7 @@ export const DEFAULT_CONFIG: Config = {
     enablePreSelection: true,
     showHighlights: true,
     enableWinnerAnimation: true,
-    pieceAnimationSpeed: PieceAnimationSpeed.Medium,
+    animationSpeed: AnimationSpeed.Medium,
 };
 
 /**
@@ -67,10 +67,10 @@ export class ChessBoard {
     private _disabledPreSelectionColor: Color | null = null;
     private _lockedSquaresModes: { [squareId: string]: SquareClickMode } = {};
     private _isBoardMoveEventBound: boolean = false;
-    private _pieceAnimationSpeeds: Record<PieceAnimationSpeed, string> = {
-        [PieceAnimationSpeed.Slow]: "0.25s",
-        [PieceAnimationSpeed.Medium]: "0.15s",
-        [PieceAnimationSpeed.Fast]: "0.05s",
+    private _animationSpeeds: Record<AnimationSpeed, string> = {
+        [AnimationSpeed.Slow]: "0.25s",
+        [AnimationSpeed.Medium]: "0.15s",
+        [AnimationSpeed.Fast]: "0.05s",
     };
 
     private readonly _bindDragPiece: (e: MouseEvent | TouchEvent) => void =
@@ -894,7 +894,7 @@ export class ChessBoard {
             piece.style.top = `${pieceRect.top + window.scrollY}px`;
             piece.style.left = `${pieceRect.left + window.scrollX}px`;
             piece.style.animation = `move ${
-                this._pieceAnimationSpeeds[this.config.pieceAnimationSpeed]
+                this._animationSpeeds[this.config.animationSpeed]
             } ease-in-out forwards`;
             piece.style.setProperty(
                 "--chessboard-move-from-left",
