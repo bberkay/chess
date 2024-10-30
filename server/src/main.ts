@@ -667,7 +667,13 @@ function handleMessage(ws: RWebSocket, message: string): void {
         !lobby ||
         !lobby.canPlayerParticipate(
             player,
-            ![WsTitle.PlayAgainOffered, WsTitle.PlayAgainAccepted].includes(
+            ![
+                WsTitle.PlayAgainOffered, 
+                WsTitle.PlayAgainAccepted,
+                WsTitle.OfferCancelled,
+                WsTitle.SentOfferCancelled,
+                WsTitle.SentOfferDeclined,
+            ].includes(
                 command
             )
         )
