@@ -113,19 +113,16 @@ export class NavigatorModal extends Component {
             this.showModalBackdrop();
         } else {
             // center the modal to the chessboard if it is not backdrop.
-            const chessboard = document.getElementById(
-                "chessboard"
-            ) as HTMLElement;
-            modal.style.left = `${
-                chessboard.offsetLeft +
-                chessboard.offsetWidth / 2 -
-                modal.offsetWidth / 2
-            }px`;
-            modal.style.top = `${
-                chessboard.offsetTop +
-                chessboard.offsetWidth / 2 -
-                modal.offsetHeight / 2
-            }px`;
+            const chessboard = document.getElementById("chessboard") as HTMLElement;
+            setTimeout(() => {
+                modal.style.left = `${
+                    chessboard.offsetWidth / 2 - modal.offsetWidth / 2
+                }px`;
+
+                modal.style.top = `${
+                    chessboard.offsetHeight / 2 - modal.offsetHeight / 2
+                }px`;
+            }, 10);
         }
 
         setTimeout(() => {
