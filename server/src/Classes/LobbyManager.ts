@@ -77,7 +77,7 @@ export class LobbyManager {
 
         if (
             lobby.isBothPlayersOffline() &&
-            (lobby.isGameFinished() || !lobby.isGameStarted())
+            (lobby.isGameFinished() || !lobby.isGameReallyStarted())
         ) {
             console.log("Lobby is dead. Deleting...: ", lobbyId);
             this.lobbies.delete(lobbyId);

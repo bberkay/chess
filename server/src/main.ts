@@ -264,7 +264,7 @@ function getLobbyJoiningData(
     if (!lobby) return new Response("Lobby not found.", { status: 404 });
 
     if (lobby.isGameStarted())
-        return new Response("Lobby is already started to play or finished.", {
+        return new Response("Lobby is already started to play.", {
             status: 400,
         });
 
@@ -495,7 +495,7 @@ function joinLobby(ws: RWebSocket): void {
         return;
     }
     isLobbyJustCreated =
-        lobby.getLastConnectedPlayerColor() === null && !lobby.isGameStarted();
+        !lobby.isBothPlayersOnline() && !lobby.isGameStarted();
     console.log("Is Lobby Just Created: ", isLobbyJustCreated);
     if (LobbyManager.joinLobby(lobbyId, player)) {
         console.log("Connection opened: ", lobbyId, player.name);
@@ -567,7 +567,7 @@ function startGame(lobby: Lobby): void {
                     name: blackPlayer.name,
                     isOnline: blackPlayer.isOnline,
                 },
-                game: lobby.getCurrentGame(),
+                game: lobby.getGameAsJsonNotation(),
             } as WsStartedData)
         );
 
@@ -603,7 +603,7 @@ function startGame(lobby: Lobby): void {
                     name: blackPlayer.name,
                     isOnline: blackPlayer.isOnline,
                 },
-                game: lobby.getCurrentGame(),
+                game: lobby.getGameAsJsonNotation(),
             } as WsStartedData)
         );
 
@@ -874,7 +874,7 @@ function undo(lobby: Lobby): void {
     server.publish(
         lobby.id,
         WsCommand.undoAccepted({
-            board: lobby.getCurrentGame(true) as string,
+            board: lobby.getGameAsFenNotation(),
             undoColor: lobby.getCurrentUndoOffer() as Color,
         })
     );

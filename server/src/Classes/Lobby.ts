@@ -88,14 +88,25 @@ export class Lobby {
     }
 
     /**
-     * Get the current board of the game.
+     * Get the current board as json notation.
      */
-    public getCurrentGame(asFen: boolean = false): string | JsonNotation {
-        return this.isGameStarted()
-            ? asFen
-                ? this.chessEngine.getGameAsFenNotation()
-                : this.chessEngine.getGameAsJsonNotation()
-            : (this.getInitialBoard() as string);
+    public getGameAsJsonNotation(): JsonNotation {
+        return this.isGameStarted() 
+            ? this.chessEngine.getGameAsJsonNotation() 
+            : typeof this.getInitialBoard() === "string" 
+                ? Converter.fenToJson(this.getInitialBoard() as string)
+                : this.getInitialBoard() as JsonNotation;
+    }
+
+    /**
+     * Get the current board as fen notation.
+     */
+    public getGameAsFenNotation(): string {
+        return this.isGameStarted() 
+            ? this.chessEngine.getGameAsFenNotation() 
+            : typeof this.getInitialBoard() === "string"
+                ? this.getInitialBoard() as string
+                : Converter.jsonToFen(this.getInitialBoard() as JsonNotation);
     }
 
     /**
@@ -398,10 +409,19 @@ export class Lobby {
     }
 
     /**
-     * Check if the game is already started.
+     * Check if the game is started. The game becomes started
+     * when both players are online and engine is created.
      */
     public isGameStarted(): boolean {
         return this._isGameStarted;
+    }
+
+    /**
+     * Check if the game is really started. The game becomes really
+     * started when both players make their first moves.
+     */
+    public isGameReallyStarted(): boolean {
+        return this.isGameStarted() && this.chessEngine.getMoveHistory().length > 1;
     }
 
     /**
