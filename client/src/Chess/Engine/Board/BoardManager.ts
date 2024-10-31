@@ -282,6 +282,7 @@ export class BoardManager extends Board {
      * Add move to algebraic notation
      */
     protected saveAlgebraicNotation(move: string): void {
+        if(!move.trim()) return;
         Board.algebraicNotation.push(move);
     }
 
