@@ -448,12 +448,12 @@ export class Chess {
                 }
                 return;
             };
-
-            if (
-                getPieceType(move[0].from) == PieceType.King &&
-                Math.abs(move[0].from - move[0].to) > 1
-            )
-                move[0].type = MoveType.Castling;
+            
+            if (getPieceType(move[0].from) == PieceType.King){
+                const kingFromTo = Math.abs(move[0].from - move[0].to);
+                if(kingFromTo > 1 && kingFromTo < 6)
+                    move[0].type = MoveType.Castling;                    
+            }
 
             move.forEach((moveObject: Move) => {
                 this.playMove(
