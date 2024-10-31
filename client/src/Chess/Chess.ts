@@ -319,14 +319,15 @@ export class Chess {
                     GameStatus.BlackVictory,
                     GameStatus.WhiteVictory,
                     GameStatus.Draw,
-                ].includes(this.engine.getGameStatus()) &&
-                !this._isGameOver
+                ].includes(this.engine.getGameStatus())
             ) {
                 clearInterval(interval);
-                this.finishTurn();
-                this.logger.save(
-                    "Game finished because of one of the player has no more time"
-                );
+                if(!this._isGameOver){
+                    this.finishTurn();
+                    this.logger.save(
+                        "Game finished because of one of the player has no more time"
+                    );
+                }
             }
         }, 1000);
 
