@@ -34,17 +34,6 @@ import { Flattener } from "./Move/Utils/Flattener.ts";
 import { Logger } from "@Services/Logger.ts";
 
 /**
- * MoveValidationError class is used when the given 
- * move is not valid.
- */
-export class MoveValidationError extends Error {
-    constructor(message: string) {
-        super(message);
-        this.name = "MoveValidationError";
-    }
-}
-
-/**
  * This class provides users to create and manage a game(does not include board or other ui elements).
  */
 export class ChessEngine extends BoardManager {
@@ -156,7 +145,7 @@ export class ChessEngine extends BoardManager {
         if (!BoardQuerier.getDurations())
             throw new Error("Durations are not set");
 
-        if (!this.timerMap) throw new Error("Timers are not created");
+        if (!this.timerMap) throw new TimerNotAvailableError("Timers are not available");
 
         return {
             [Color.White]: this.timerMap.White.timer.get(),
@@ -1391,5 +1380,27 @@ export class ChessEngine extends BoardManager {
      */
     public getScores(): Readonly<Scores> {
         return BoardQuerier.getScores();
+    }
+}
+
+/**
+ * MoveValidationError class is used when the given 
+ * move is not valid.
+ */
+export class MoveValidationError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = "MoveValidationError";
+    }
+}
+
+/**
+ * TimerNotAvailableError class is used when the timer
+ * is not available(anymore) for the game.
+ */
+export class TimerNotAvailableError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = "TimerNotAvailableError";
     }
 }

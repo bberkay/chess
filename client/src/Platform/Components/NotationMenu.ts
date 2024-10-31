@@ -10,6 +10,7 @@ import { SocketOperation } from "../../Types";
 import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage.ts";
 import { NOTATION_MENU_ID } from "@Platform/Consts";
 import { SoundEffect } from "@Chess/Board/Types/index.ts";
+import { TimerNotAvailableError } from "@ChessPlatform/Chess/Engine/ChessEngine.ts";
 
 /**
  * Represents the type of the utility menu.
@@ -1151,16 +1152,8 @@ export class NotationMenu extends Component {
 
         let isDecisecondActive = false;
         this._activeIntervalId = setInterval(() => {
-            if (
-                [
-                    GameStatus.BlackInCheck,
-                    GameStatus.WhiteInCheck,
-                    GameStatus.InPlay,
-                ].includes(this.chess.getGameStatus())
-            )
-                clearInterval(this._activeIntervalId);
-
-            const [minutes, seconds, deciseconds] =
+            try{
+                const [minutes, seconds, deciseconds] =
                 this.formatRemainingTimeForTimer(
                     Math.round(this.chess.getPlayersRemainingTime()[color])
                 );
@@ -1178,6 +1171,11 @@ export class NotationMenu extends Component {
                     isDecisecondActive = true;
                 }
                 playerDecisecond.textContent = "." + deciseconds;
+            }
+            }catch(e){
+                if(e instanceof TimerNotAvailableError){
+                    this.stopOpponentTimerIfActive();
+                }
             }
         }, 100) as unknown as number;
     }
