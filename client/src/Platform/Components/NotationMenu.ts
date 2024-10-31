@@ -64,6 +64,7 @@ export class NotationMenu extends Component {
 
     private config: Config = DEFAULT_CONFIG;
     
+
     private moveCount: number = 0;
     private _activeIntervalId: number = -1;
     private _activeUtilityMenu: UtilityMenuType = UtilityMenuType.NewGame;
@@ -134,9 +135,7 @@ export class NotationMenu extends Component {
             ${
                 moveHistoryLength < 1
                     ? `<button class="menu-item" data-menu-operation="${NotationMenuOperation.AbortGame}"  data-tooltip-text="Abort the Game">&#x2715; Abort</button>`
-                    : `<button class="menu-item" data-menu-operation="${
-                          NotationMenuOperation.SendUndoOffer
-                      }" data-tooltip-text="Send Undo Offer">↺ Undo</button>`
+                    : `<button class="menu-item" data-menu-operation="${NotationMenuOperation.SendUndoOffer}" data-tooltip-text="Send Undo Offer">↺ Undo</button>`
             }
             <button class="menu-item" data-menu-operation="${
                 NotationMenuOperation.SendDrawOffer
@@ -156,9 +155,7 @@ export class NotationMenu extends Component {
             ${
                 moveHistoryLength < 1
                     ? `<button class="menu-item" data-menu-operation="${NotationMenuOperation.AbortGame}"  data-tooltip-text="Abort the Game">&#x2715; Abort</button>`
-                    : `<button class="menu-item" data-menu-operation="${
-                          NotationMenuOperation.UndoMove
-                      }" data-tooltip-text="Take Back Last Move">↺ Undo</button>`
+                    : `<button class="menu-item" data-menu-operation="${NotationMenuOperation.UndoMove}" data-tooltip-text="Take Back Last Move">↺ Undo</button>`
             }
             <button class="menu-item" data-menu-operation="${
                 NotationMenuOperation.Resign
@@ -436,8 +433,7 @@ export class NotationMenu extends Component {
         if (notationMenu.innerHTML == "") {
             for (let i = 0; i < notations.length; i += 1) {
                 const notationUnicoded = formatUnicodeNotation(
-                    this.config.notationStyle ===
-                        NotationStyle.WithIcons
+                    this.config.notationStyle === NotationStyle.WithIcons
                         ? this.convertStringNotationToUnicodedNotation(
                               notations[i]
                           )
@@ -483,8 +479,7 @@ export class NotationMenu extends Component {
             const lastRow: HTMLElement =
                 notationMenu.lastElementChild as HTMLElement;
             const lastNotation: string = formatUnicodeNotation(
-                this.config.notationStyle ===
-                    NotationStyle.WithIcons
+                this.config.notationStyle === NotationStyle.WithIcons
                     ? this.convertStringNotationToUnicodedNotation(
                           notations[notations.length - 1]
                       )
@@ -1156,6 +1151,15 @@ export class NotationMenu extends Component {
 
         let isDecisecondActive = false;
         this._activeIntervalId = setInterval(() => {
+            if (
+                [
+                    GameStatus.BlackInCheck,
+                    GameStatus.WhiteInCheck,
+                    GameStatus.InPlay,
+                ].includes(this.chess.getGameStatus())
+            )
+                clearInterval(this._activeIntervalId);
+
             const [minutes, seconds, deciseconds] =
                 this.formatRemainingTimeForTimer(
                     Math.round(this.chess.getPlayersRemainingTime()[color])
