@@ -293,6 +293,7 @@ export class ChessPlatform {
      * It sends the necessary parameters like player name, board settings, and time control.
      */
     private _createLobby(createLobbyReqParams: CreateLobbyReqParams): void {
+        this.removeLobbyIdFromUrl();
         this.createAndHandleWebSocket(
             new URLSearchParams(Object.entries(createLobbyReqParams)).toString()
         );
