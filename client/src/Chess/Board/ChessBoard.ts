@@ -1057,6 +1057,9 @@ export class ChessBoard {
         const { color, type, square } =
             this._findPromotedOptionBySquare(selectedSquare);
 
+        //this.removePiece(square);
+        const promotedPawn = document.querySelector("body > .piece");
+        if(promotedPawn) promotedPawn.remove();
         this.createPiece(color, type, square);
         this.playSound(SoundEffect.Promote);
         this.closePromotionMenu();
