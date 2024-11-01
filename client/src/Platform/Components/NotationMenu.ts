@@ -128,7 +128,7 @@ export class NotationMenu extends Component {
 
         updateTriggers.forEach((trigger) => {
             document.addEventListener(trigger, () => {
-                if (document.getElementById(PIECE_CREATOR_ID)!.innerHTML !== "")
+                if (document.getElementById(PIECE_CREATOR_ID)!.innerHTML === "")
                     this.update();
             });
         });
