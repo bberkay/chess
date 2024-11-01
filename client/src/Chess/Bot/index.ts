@@ -149,7 +149,7 @@ export class Bot {
     public async getMove(fen: string): Promise<Move | Move[]> {
         return new Promise((resolve) => {
             this.stockfish.postMessage("position fen " + fen);
-            this.stockfish.postMessage("go movetime 500");
+            this.stockfish.postMessage("go movetime 1000");
 
             const listener = (event: MessageEvent) => {
                 const line = event.data;

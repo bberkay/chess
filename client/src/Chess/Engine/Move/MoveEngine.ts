@@ -208,8 +208,7 @@ export class MoveEngine {
         // Add left en passant move to the pawn's moves.
         const leftEnPassant: Square | null =
             this.moveExtender.getLeftEnPassantMove(
-                this.pieceSquare!,
-                pieceSensitivity
+                this.pieceSquare!
             );
         if (leftEnPassant)
             route[moveDirection.leftDiagonal]!.push(leftEnPassant);
@@ -217,8 +216,7 @@ export class MoveEngine {
         // Add right en passant move to the pawn's moves.
         const rightEnPassant: Square | null =
             this.moveExtender.getRightEnPassantMove(
-                this.pieceSquare!,
-                pieceSensitivity
+                this.pieceSquare!
             );
         if (rightEnPassant)
             route[moveDirection.rightDiagonal]!.push(rightEnPassant);

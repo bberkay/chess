@@ -3,7 +3,6 @@ import {
     Color,
     EnPassantDirection,
     GameStatus,
-    Move,
     PieceIcon,
     PieceType,
     Square,
@@ -174,19 +173,8 @@ export class MoveExtender {
      */
     private calculateEnPassantMove(
         square: Square,
-        direction: EnPassantDirection,
-        pieceSensitivity: boolean = true
+        direction: EnPassantDirection
     ): Square | null {
-        /**
-         * Rules for en passant:
-         * 1. The pawn must be on its fifth rank.
-         * 2. The enemy pawn must be on an adjacent square to the moving pawn.
-         * 3. The enemy pawn must have just moved two squares in a single move.
-         * 4. The en passant capture must be made on the very next turn.
-         *
-         * @see for more information about en passant https://en.wikipedia.org/wiki/En_passant
-         */
-
         const pawn: Piece | null = BoardQuerier.getPieceOnSquare(square);
         if (!pawn || pawn.getType() != PieceType.Pawn) return null;
 
@@ -197,10 +185,8 @@ export class MoveExtender {
         )
             return null;
 
-        // Find needed information for checking rules.
+        // Find en passant move
         const color: Color = pawn.getColor();
-        const pawnRow: number = Locator.getRow(square);
-        const enPassantRow: number = color == Color.White ? 4 : 5;
         const enPassantMove: Square =
             direction == EnPassantDirection.Left
                 ? color == Color.White
@@ -208,45 +194,13 @@ export class MoveExtender {
                     : square + 7
                 : color == Color.White
                 ? square - 7
-                : square + 9; // back diagonal square of the enemy pawn.
+                : square + 9;
 
-        // Check fen notation for en passant availability when the game is loaded from fen notation.
-        if (
-            BoardQuerier.getAlgebraicNotation().length == 0 &&
-            BoardQuerier.getGame().enPassant == enPassantMove
-        )
+        // Check fen notation for en passant availability 
+        if (BoardQuerier.getGame().enPassant == enPassantMove)
             return enPassantMove;
 
-        const pawnOnItsFifthRank = pawnRow == enPassantRow;
-        if (!pawnOnItsFifthRank) return null;
-
-        // No need to check any further if the piece sensitivity is false.
-        if (!pieceSensitivity) return enPassantMove;
-
-        const enemyPawn: number =
-            direction == EnPassantDirection.Left ? square - 1 : square + 1;
-        const enemyPawnOnAdjacentSquare = BoardQuerier.isSquareHasPiece(
-            enemyPawn,
-            color == Color.White ? Color.Black : Color.White,
-            [PieceType.Pawn]
-        );
-        if (!enemyPawnOnAdjacentSquare) return null;
-
-        const moveHistory: Array<Move> = BoardQuerier.getMoveHistory();
-        const enemyPawnMovedTwoSquares =
-            moveHistory.filter(
-                (move) =>
-                    move.from ==
-                        enemyPawn + (color == Color.White ? -16 : +16) &&
-                    move.to === enemyPawn + (color == Color.White ? -8 : +8)
-            ).length == 0;
-        if (!enemyPawnMovedTwoSquares) return null;
-
-        const enPassantCaptureOnNextTurn =
-            moveHistory[moveHistory.length - 1].to === enemyPawn;
-        if (!enPassantCaptureOnNextTurn) return null;
-
-        return enPassantMove;
+        return null;
     }
 
     /**
@@ -254,13 +208,11 @@ export class MoveExtender {
      * @see src/Chess/Engine/Move/Helper/MoveExtender.ts For more information.
      */
     public getLeftEnPassantMove(
-        square: Square,
-        pieceSensitivity: boolean = true
+        square: Square
     ): Square | null {
         return this.calculateEnPassantMove(
             square,
-            EnPassantDirection.Left,
-            pieceSensitivity
+            EnPassantDirection.Left
         );
     }
 
@@ -269,13 +221,11 @@ export class MoveExtender {
      * @see src/Chess/Engine/Move/Helper/MoveExtender.ts For more information.
      */
     public getRightEnPassantMove(
-        square: Square,
-        pieceSensitivity: boolean = true
+        square: Square
     ): Square | null {
         return this.calculateEnPassantMove(
             square,
-            EnPassantDirection.Right,
-            pieceSensitivity
+            EnPassantDirection.Right
         );
     }
 }

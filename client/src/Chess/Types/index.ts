@@ -209,6 +209,7 @@ export enum StartPosition {
     Checkmate = "k7/8/4rp2/8/8/8/1R5K/1R6 w - - 0 1",
     AdjacentCheckmate = "rnbqkbnr/ppppp1pp/8/8/2B2Q2/8/PPPPPPPP/RNB1K1NR w KQkq - 0 1",
     Stalemate = "k7/5R2/6p1/8/6P1/8/7K/1R6 w - - 0 1",
+    EnPassantCheckmate= "r3k2r/pbppqpb1/1pn3p1/7p/4p1n1/1PP4N/PB1P1PPP/2QRKR2 w - - 0 1"
 }
 
 /**

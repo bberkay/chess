@@ -1219,60 +1219,40 @@ export class ChessEngine extends BoardManager {
     /**
      * Get possible en passant moves of enemy and
      * add/update them in the fen notation.
+     * @see for more information about en passant https://en.wikipedia.org/wiki/En_passant
      */
     private checkEnPassant(): void {
-        if (BoardQuerier.getAlgebraicNotation().length < 2) {
+        if(BoardQuerier.getEnPassant() !== null){
+            this.setEnPassant(null);
+            this.logger.save("undone en passant move removed from fen notation");
+        }
+
+        const moveHistoryLength = BoardQuerier.getMoveHistory().length;
+        if(moveHistoryLength < 1) {
             this.logger.save("Not enough moves for possible en passant move");
             return;
         }
 
-        // Get the last two moves and check the last move is pawn move or not.
-        const lastTwoMove: Square[] = BoardQuerier.getAlgebraicNotation()
-            .slice(-2)
-            .map((move) => Converter.squareToSquareID(move));
-        const lastPlayerMove: Square = lastTwoMove[0];
-        if (
-            BoardQuerier.getPieceOnSquare(lastPlayerMove)?.getType() !=
-                PieceType.Pawn ||
-            BoardQuerier.getPieceOnSquare(lastTwoMove[1])?.getType() !=
-                PieceType.Pawn ||
-            Locator.getRow(lastPlayerMove) !=
-                (BoardQuerier.getTurnColor() == Color.White ? 4 : 5) // fifth row
-        ) {
+        const lastMove = BoardQuerier.getMoveHistory()[moveHistoryLength - 1];
+        const lastMovedPiece = BoardQuerier.getPieceOnSquare(lastMove.to)!;
+        if((lastMovedPiece.getType() !== PieceType.Pawn)
+        || (Math.abs(lastMove.to - lastMove.from) !== 16)){
             this.setEnPassant(null);
-            this.logger.save("En passant move is not found");
+            this.logger.save("En passant move chance is not found");
             return;
         }
 
-        if (
-            Object.hasOwn(this.currentMoves, lastPlayerMove) &&
-            this.currentMoves[lastPlayerMove]![MoveType.EnPassant] &&
-            this.currentMoves[lastPlayerMove]![MoveType.EnPassant]!.length > 0
-        ) {
-            this.setEnPassant(
-                this.currentMoves[lastPlayerMove]![MoveType.EnPassant]![0]!
-            );
-            this.logger.save(
-                `En passant move-ts-${this.currentMoves[lastPlayerMove]![
-                    MoveType.EnPassant
-                ]![0]!}-te- is found and set on fen notation`
-            );
-            return;
-        }
-
-        const lastPlayerMoves: Moves =
-            this.moveEngine.getMoves(lastPlayerMove)!;
-        if (
-            lastPlayerMoves &&
-            Object.hasOwn(lastPlayerMoves, MoveType.EnPassant) &&
-            lastPlayerMoves[MoveType.EnPassant]!.length > 0
-        ) {
-            this.setEnPassant(lastPlayerMoves[MoveType.EnPassant]![0]!);
-            this.logger.save(
-                `En passant move-ts-${lastPlayerMoves[
-                    MoveType.EnPassant
-                ]![0]!}-te- is calculated and set on fen notation`
-            );
+        const lastMovedPawnColor = lastMovedPiece.getColor();
+        if(Locator.getRow(lastMove.to) === (lastMovedPawnColor === Color.White ? 5 : 4)){
+            const rightSquare = BoardQuerier.getPieceOnSquare(lastMove.to + 1);
+            const leftSquare = BoardQuerier.getPieceOnSquare(lastMove.to - 1);
+            if((rightSquare && rightSquare.getType() === PieceType.Pawn && rightSquare.getColor() !== lastMovedPawnColor)
+            || (leftSquare && leftSquare.getType() === PieceType.Pawn && leftSquare.getColor() !== lastMovedPawnColor)){
+                const enPassantMove = lastMove.to + (lastMovedPawnColor === Color.White ? 8 : -8);
+                this.setEnPassant(enPassantMove);
+                this.logger.save(`En passant move-ts-${enPassantMove}-te- is found and set on fen notation`);
+                return;
+            }
         }
     }
 
