@@ -450,10 +450,13 @@ export class Chess {
                 return;
             };
             
+            const pieceFromToDifference = Math.abs(move[0].from - move[0].to);
             if (getPieceType(move[0].from) == PieceType.King){
-                const kingFromTo = Math.abs(move[0].from - move[0].to);
-                if(kingFromTo > 1 && kingFromTo < 6)
+                if(pieceFromToDifference > 1 && pieceFromToDifference < 6)
                     move[0].type = MoveType.Castling;                    
+            } else if (getPieceType(move[0].from) == PieceType.Pawn){
+                if(pieceFromToDifference != 8 && pieceFromToDifference != 16)
+                    move[0].type = MoveType.EnPassant;
             }
 
             move.forEach((moveObject: Move) => {
