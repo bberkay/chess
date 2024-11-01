@@ -838,9 +838,6 @@ export class ChessPlatform {
         webSocketEndpoint: string
     ): void {
         this.chess.takeBack(true, (wsData as WsUndoData).undoColor);
-        this.platform.notationMenu.deleteLastNotation(
-            (wsData as WsUndoData).undoColor
-        );
         this.platform.notationMenu.goBack();
         this.platform.notationMenu.update();
         if ((wsData as WsUndoData).board !== this.chess.getGameAsFenNotation())

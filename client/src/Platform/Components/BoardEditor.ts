@@ -5,6 +5,7 @@ import {
 } from "../Types";
 import { Chess } from "@Chess/Chess";
 import {
+    ChessEvent,
     Color,
     GameStatus,
     JsonNotation,
@@ -73,7 +74,29 @@ export class BoardEditor extends Component {
         super();
         this.chess = chess;
         this.renderComponent();
+        this.addEventListeners();
         this.loadLocalStorage();
+    }
+
+    /**
+     * This function adds event listeners that are related to the notation menu.
+     */
+    private addEventListeners(): void {
+        const updateTriggers = [
+            ChessEvent.onGameCreated,
+            ChessEvent.onPieceCreated,
+            ChessEvent.onPieceRemoved,
+            ChessEvent.onPieceMoved,
+            ChessEvent.onTakeBack,
+            ChessEvent.onTakeBackOrForward,
+            ChessEvent.onGameOver,
+        ];
+
+        updateTriggers.forEach((trigger) => {
+            document.addEventListener(trigger, () => {
+                this.updateFen();
+            });
+        });
     }
 
     /**

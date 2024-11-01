@@ -61,7 +61,7 @@ export class Platform {
         this.chess = chess;
         this.boardEditor = new BoardEditor(this.chess);
         this.notationMenu = new NotationMenu(this.chess);
-        this.navigatorModal = new NavigatorModal();
+        this.navigatorModal = new NavigatorModal(this.chess);
         this.appearanceMenu = new AppearanceMenu();
         this.logConsole = new LogConsole();
         this.aboutMenu = new AboutMenu();
@@ -89,33 +89,6 @@ export class Platform {
      * handling the menu operations.
      */
     private init(): void {
-        /**
-         * Listen actions/clicks of user on menu squares for
-         * updating the notation menu, log console etc.
-         */
-        const listenBoardChanges = () => {
-            // First time update
-            this.boardEditor.updateFen();
-
-            const updateComponentTriggers = [
-                ChessEvent.onGameCreated,
-                ChessEvent.onPieceCreated,
-                ChessEvent.onPieceRemoved,
-                ChessEvent.onPieceSelected,
-                ChessEvent.onPieceMoved,
-                ChessEvent.onTakeBackOrForward,
-                ChessEvent.onGameOver,
-            ];
-
-            updateComponentTriggers.forEach((trigger) => {
-                document.addEventListener(trigger, () => {
-                    this.updateComponents();
-                });
-            });
-
-            this.logger.save("Board changes are listening...");
-        };
-
         /**
          * Find the menu operations and bind them to the menu
          * items. When the user clicks on the menu item, the
@@ -175,8 +148,6 @@ export class Platform {
          */
         document.addEventListener("DOMContentLoaded", () => {
             bindMenuOperations();
-            listenBoardChanges();
-            this.updateComponents();
         });
 
         this.logger.save(
@@ -357,39 +328,6 @@ export class Platform {
     }
 
     /**
-     * Update the components of the menu, for example
-     * update the notation menu and print the logs of the game on log
-     * console after the move is made.
-     */
-    private updateComponents(): void {
-        this.boardEditor.updateFen();
-        if (!BoardEditor.isEditorModeEnable()) {
-            this.notationMenu.update();
-
-            const gameStatus = this.chess.getGameStatus(false);
-            if (
-                [
-                    GameStatus.BlackVictory,
-                    GameStatus.WhiteVictory,
-                    GameStatus.Draw,
-                ].includes(gameStatus)
-            )
-                this.navigatorModal.showGameOver(gameStatus);
-            else if (gameStatus === GameStatus.NotReady)
-                this.navigatorModal.showBoardNotReady();
-        }
-    }
-
-    /**
-     * Clear the components of the menu like log console,
-     * notation menu etc.
-     */
-    private clearComponents() {
-        this.logConsole.clear();
-        if (!BoardEditor.isEditorModeEnable()) this.notationMenu.clear();
-    }
-
-    /**
      * Create a new game and update the components of the menu.
      */
     private _createBoardAndHandleComponents(
@@ -397,7 +335,8 @@ export class Platform {
     ): void {
         this.navigatorModal.hide();
         this.navbar.showComponent(this.logConsole);
-        this.clearComponents();
+        this.logConsole.clear();
+        if (!BoardEditor.isEditorModeEnable()) this.notationMenu.clear();
         this.boardEditor.createBoard(notation);
         this.logger.save(`Board is created and components are updated.`);
     }
@@ -509,10 +448,8 @@ export class Platform {
                         ? Color.Black
                         : Color.White;
                 this.chess.takeBack(true, playerColor);
-                this.notationMenu.deleteLastNotation(playerColor);
             } else {
                 this.chess.takeBack(true);
-                this.notationMenu.deleteLastNotation();
             }
             this.notationMenu.goBack();
             this.notationMenu.update();
@@ -542,7 +479,6 @@ export class Platform {
         this.chess.engine.setGameStatus(GameStatus.Draw);
         this.chess.finishTurn();
         this.navigatorModal.showGameOverAsAborted();
-        this.notationMenu.displayPlayAgainUtilityMenu();
     }
 
     /**
@@ -570,7 +506,6 @@ export class Platform {
         );
         this.chess.finishTurn();
         this.navigatorModal.showGameOverAsResigned(resignColor);
-        this.notationMenu.displayPlayAgainUtilityMenu();
     }
 
     /**

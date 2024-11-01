@@ -215,7 +215,7 @@ export class AppearanceMenu extends NavbarComponent {
     }
 
     /**
-     * This function adds event listeners to the appearance menu.
+     * This function adds event listeners that are related to the appearance menu.
      */
     private addEventListeners(): void {
         document

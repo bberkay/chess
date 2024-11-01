@@ -573,6 +573,12 @@ export class Chess {
                 LocalStorageKey.LastBoard,
                 this.engine.getGameAsJsonNotation()
             );
+
+            document.dispatchEvent(
+                new CustomEvent(ChessEvent.onTakeBack, {
+                    detail: { undoColor },
+                })
+            );
         } else {
             this.goToSpecificMove(
                 this.engine.getMoveHistory().length -

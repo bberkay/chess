@@ -1,4 +1,4 @@
-import { Color, GameStatus, PieceIcon, PieceType, Scores } from "@Chess/Types";
+import { ChessEvent, Color, GameStatus, PieceIcon, PieceType, Scores } from "@Chess/Types";
 import { Component } from "./Component.ts";
 import { Chess } from "@Chess/Chess.ts";
 import {
@@ -8,7 +8,7 @@ import {
 } from "../Types";
 import { SocketOperation } from "../../Types";
 import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage.ts";
-import { NOTATION_MENU_ID } from "@Platform/Consts";
+import { NOTATION_MENU_ID, PIECE_CREATOR_ID } from "@Platform/Consts";
 import { SoundEffect } from "@Chess/Board/Types/index.ts";
 import { TimerNotAvailableError } from "@ChessPlatform/Chess/Engine/ChessEngine.ts";
 
@@ -80,6 +80,7 @@ export class NotationMenu extends Component {
         this.chess = chess;
         this.loadCSS("notation-menu.css");
         this.renderComponent();
+        this.addEventListeners();
         this.loadLocalStorage();
         this.addShortcutListeners();
         document.addEventListener("DOMContentLoaded", () => {
@@ -98,6 +99,39 @@ export class NotationMenu extends Component {
             document.getElementById("notations")!.innerHTML = "";
             this.setNotations(this.chess.getAlgebraicNotation());
         }
+    }
+
+    /**
+     * This function adds event listeners that are related to the notation menu.
+     */
+    private addEventListeners(): void {
+        document.addEventListener(ChessEvent.onGameOver, (() => {
+            this.stopOpponentTimerIfActive();
+            this.displayPlayAgainUtilityMenu();     
+        }) as EventListener);
+
+        document.addEventListener(ChessEvent.onTakeBack, ((
+            event: CustomEvent
+        ) => {
+            this.deleteLastNotation(event.detail.undoColor);
+        }) as EventListener);
+
+        const updateTriggers = [
+            ChessEvent.onGameCreated,
+            ChessEvent.onPieceCreated,
+            ChessEvent.onPieceRemoved,
+            ChessEvent.onPieceMoved,
+            ChessEvent.onTakeBackOrForward,
+            ChessEvent.onTakeBack,
+            ChessEvent.onGameOver,
+        ];
+
+        updateTriggers.forEach((trigger) => {
+            document.addEventListener(trigger, () => {
+                if (document.getElementById(PIECE_CREATOR_ID)!.innerHTML !== "")
+                    this.update();
+            });
+        });
     }
 
     /**
@@ -525,7 +559,7 @@ export class NotationMenu extends Component {
      * @example deleteLastNotation(Color.Black) deletes the last black notation.
      * @example deleteLastNotation() deletes the last notation.
      */
-    public deleteLastNotation(color: Color | null = null): void {
+    private deleteLastNotation(color: Color | null = null): void {
         const notationMenu: HTMLElement = document.getElementById("notations")!;
         const lastRow = notationMenu.lastElementChild as HTMLElement;
 

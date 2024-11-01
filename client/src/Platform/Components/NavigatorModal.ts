@@ -2,7 +2,8 @@ import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage";
 import { SocketOperation } from "../../Types";
 import { BoardEditorOperation, NavigatorModalOperation } from "../Types";
 import { Component } from "./Component";
-import { Color, Duration, GameStatus } from "@Chess/Types";
+import { Chess } from "@Chess/Chess.ts";
+import { ChessEvent, Color, Duration, GameStatus } from "@Chess/Types";
 import { BotAttributes, BotColor, BotDifficulty } from "@Chess/Bot";
 import {
     DEFULT_PLAYER_NAME,
@@ -22,6 +23,8 @@ import {
  */
 export class NavigatorModal extends Component {
     public readonly id: string = NAVIGATOR_MODAL_ID;
+    private readonly chess: Chess;
+
     private readonly _boundCloseModalOnOutsideClick: (
         event: MouseEvent
     ) => void = this.closeModalOnOutsideClick.bind(this);
@@ -40,8 +43,33 @@ export class NavigatorModal extends Component {
     /**
      * Constructor of the NavigatorModal class.
      */
-    constructor() {
+    constructor(chess: Chess) {
         super();
+        this.chess = chess;
+        this.addEventListeners();
+    }
+
+    /**
+     * This function adds event listeners that are related to the navigator modal.
+     */
+    private addEventListeners(): void {
+        document.addEventListener(ChessEvent.onGameCreated, (() => {
+            const gameStatus = this.chess.getGameStatus();
+            if (gameStatus === GameStatus.NotReady)
+                this.showBoardNotReady();
+        }) as EventListener);
+
+        document.addEventListener(ChessEvent.onGameOver, (() => {
+            const gameStatus = this.chess.getGameStatus();
+            if (
+                [
+                    GameStatus.BlackVictory,
+                    GameStatus.WhiteVictory,
+                    GameStatus.Draw,
+                ].includes(gameStatus)
+            )
+                this.showGameOver(gameStatus);
+        }) as EventListener);
     }
 
     /**
