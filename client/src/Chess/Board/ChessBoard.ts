@@ -865,7 +865,6 @@ export class ChessBoard {
                     this.removePiece(
                         this.getSquareElementOfPiece(toSquareContent)
                     );
-                if (playMoveSound) this.playSound(SoundEffect.Capture);
             } else if (playMoveSound) {
                 this.playSound(SoundEffect.Move);
             }
