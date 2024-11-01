@@ -105,9 +105,9 @@ export class MoveExtender {
             if (
                 notation.includes(kingIcon) ||
                 (notation.includes(rookIcon + "a") &&
-                    castlingSide == CastlingSide.Long) || // Vertical moves of the rook.
+                    castlingSide == CastlingSide.Long) ||
                 (notation.includes(rookIcon + "h") &&
-                    castlingSide == CastlingSide.Short) // Same as above.
+                    castlingSide == CastlingSide.Short)
             )
                 return null;
 

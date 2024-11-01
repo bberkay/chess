@@ -292,8 +292,9 @@ export class ChessEngine extends BoardManager {
             return null;
         }
 
-        this.currentMoves[square] =
-            this.currentMoves[square] ?? this.moveEngine.getMoves(square);
+        this.currentMoves[square] = Object.hasOwn(this.currentMoves, square) 
+            ? this.currentMoves[square] 
+            : this.moveEngine.getMoves(square);
         this.logger.save(
             Object.hasOwn(this.currentMoves, square)
                 ? `Moves of the square-ts-${square}-te- is found from calculated moves-ts-${JSON.stringify(
@@ -807,23 +808,10 @@ export class ChessEngine extends BoardManager {
         this.saveMove(this.playedFrom!, this.playedTo!, this.moveType);
         this.changeTurn();
 
+        this.checkEnPassant();
         this.checkGameStatus();
         this.saveAlgebraicNotation(this.moveNotation);
-
-        // Check the en passant and castling status after the
-        // algebraic notation is saved because these statuses
-        // are checking the last move that is saved to the
-        // algebraic notation.
-        if (
-            [
-                GameStatus.InPlay,
-                GameStatus.WhiteInCheck,
-                GameStatus.BlackInCheck,
-            ].includes(BoardQuerier.getBoardStatus())
-        ) {
-            this.checkEnPassant();
-            this.checkCastling();
-        }
+        this.checkCastling();
 
         // Game might be playing without timers
         if (this.timerMap) this.updateTimersIfExists();
@@ -913,6 +901,46 @@ export class ChessEngine extends BoardManager {
             `Player-ts-${BoardQuerier.getTurnColor()}-te- is timeover and game status is set to ${winner}`
         );
         this.finishTurn();
+    }
+
+    /**
+     * Get possible en passant moves of enemy and
+     * add/update them in the fen notation.
+     * @see for more information about en passant https://en.wikipedia.org/wiki/En_passant
+     */
+    private checkEnPassant(): void {
+        if(BoardQuerier.getEnPassant() !== null){
+            this.setEnPassant(null);
+            this.logger.save("undone en passant move removed from fen notation");
+        }
+
+        const moveHistoryLength = BoardQuerier.getMoveHistory().length;
+        if(moveHistoryLength < 1) {
+            this.logger.save("Not enough moves for possible en passant move");
+            return;
+        }
+
+        const lastMove = BoardQuerier.getMoveHistory()[moveHistoryLength - 1];
+        const lastMovedPiece = BoardQuerier.getPieceOnSquare(lastMove.to);
+        if(!lastMovedPiece || lastMovedPiece.getType() !== PieceType.Pawn
+        || Math.abs(lastMove.to - lastMove.from) !== 16){
+            this.setEnPassant(null);
+            this.logger.save("En passant move chance is not found");
+            return;
+        }
+
+        const lastMovedPawnColor = lastMovedPiece.getColor();
+        if(Locator.getRow(lastMove.to) === (lastMovedPawnColor === Color.White ? 5 : 4)){
+            const rightSquare = BoardQuerier.getPieceOnSquare(lastMove.to + 1);
+            const leftSquare = BoardQuerier.getPieceOnSquare(lastMove.to - 1);
+            if((rightSquare && rightSquare.getType() === PieceType.Pawn && rightSquare.getColor() !== lastMovedPawnColor)
+            || (leftSquare && leftSquare.getType() === PieceType.Pawn && leftSquare.getColor() !== lastMovedPawnColor)){
+                const enPassantMove = lastMove.to + (lastMovedPawnColor === Color.White ? 8 : -8);
+                this.setEnPassant(enPassantMove);
+                this.logger.save(`En passant move-ts-${enPassantMove}-te- is found and set on fen notation`);
+                return;
+            }
+        }
     }
 
     /**
@@ -1217,48 +1245,9 @@ export class ChessEngine extends BoardManager {
     }
 
     /**
-     * Get possible en passant moves of enemy and
-     * add/update them in the fen notation.
-     * @see for more information about en passant https://en.wikipedia.org/wiki/En_passant
-     */
-    private checkEnPassant(): void {
-        if(BoardQuerier.getEnPassant() !== null){
-            this.setEnPassant(null);
-            this.logger.save("undone en passant move removed from fen notation");
-        }
-
-        const moveHistoryLength = BoardQuerier.getMoveHistory().length;
-        if(moveHistoryLength < 1) {
-            this.logger.save("Not enough moves for possible en passant move");
-            return;
-        }
-
-        const lastMove = BoardQuerier.getMoveHistory()[moveHistoryLength - 1];
-        const lastMovedPiece = BoardQuerier.getPieceOnSquare(lastMove.to)!;
-        if((lastMovedPiece.getType() !== PieceType.Pawn)
-        || (Math.abs(lastMove.to - lastMove.from) !== 16)){
-            this.setEnPassant(null);
-            this.logger.save("En passant move chance is not found");
-            return;
-        }
-
-        const lastMovedPawnColor = lastMovedPiece.getColor();
-        if(Locator.getRow(lastMove.to) === (lastMovedPawnColor === Color.White ? 5 : 4)){
-            const rightSquare = BoardQuerier.getPieceOnSquare(lastMove.to + 1);
-            const leftSquare = BoardQuerier.getPieceOnSquare(lastMove.to - 1);
-            if((rightSquare && rightSquare.getType() === PieceType.Pawn && rightSquare.getColor() !== lastMovedPawnColor)
-            || (leftSquare && leftSquare.getType() === PieceType.Pawn && leftSquare.getColor() !== lastMovedPawnColor)){
-                const enPassantMove = lastMove.to + (lastMovedPawnColor === Color.White ? 8 : -8);
-                this.setEnPassant(enPassantMove);
-                this.logger.save(`En passant move-ts-${enPassantMove}-te- is found and set on fen notation`);
-                return;
-            }
-        }
-    }
-
-    /**
      * Check the castling moves of the players and
      * update them in the fen notation.
+     * @see For more information about castling, see https://en.wikipedia.org/wiki/Castling
      */
     private checkCastling(): void {
         if (
@@ -1286,7 +1275,7 @@ export class ChessEngine extends BoardManager {
             !BoardQuerier.getCastling()[shortCastling] &&
             !BoardQuerier.getCastling()[longCastling]
         ) {
-            this.logger.save("Castling moves are already disabled");
+            this.logger.save(`Castling moves-ts-${BoardQuerier.getCastling()}-te- are already disabled`);
             return;
         }
 
@@ -1296,7 +1285,7 @@ export class ChessEngine extends BoardManager {
             this.disableCastling(shortCastling);
             this.disableCastling(longCastling);
             this.logger.save(
-                "King is not it's starting square so castling moves are disabled"
+                `King-ts-${kingSquare}-te- is not it's starting square so castling moves are disabled`
             );
             return;
         }
@@ -1308,13 +1297,13 @@ export class ChessEngine extends BoardManager {
         if (!longRookPiece) {
             this.disableCastling(longCastling);
             this.logger.save(
-                "Long rook is not it's starting square so long castling move is disabled"
+                `Long rook-ts-${longCastling}-te- is not it's starting square so long castling move is disabled`
             );
         }
         if (!shortRookPiece) {
             this.disableCastling(shortCastling);
             this.logger.save(
-                "Short rook is not it's starting square so short castling move is disabled"
+                `Short rook-ts-${shortCastling}-te- is not it's starting square so short castling move is disabled`
             );
         }
     }
