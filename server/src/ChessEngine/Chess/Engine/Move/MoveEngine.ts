@@ -265,7 +265,8 @@ export class MoveEngine {
      */
     private getKnightMoves(pieceSensitivity: boolean = true): Moves | null {
         const route: Route = RouteCalculator.getKnightRoute(
-            this.pieceSquare!
+            this.pieceSquare!,
+            pieceSensitivity
         );
         if (!route) return null;
         return {

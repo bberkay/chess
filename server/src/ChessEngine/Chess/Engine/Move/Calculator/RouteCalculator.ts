@@ -34,7 +34,7 @@ export class RouteCalculator {
             case PieceType.Pawn:
                 return this.getPawnRoute(square, pieceSensitivity);
             case PieceType.Knight:
-                return this.getKnightRoute(square);
+                return this.getKnightRoute(square, pieceSensitivity);
             case PieceType.Bishop:
                 return this.getBishopRoute(square, pieceSensitivity);
             case PieceType.Rook:
@@ -81,7 +81,8 @@ export class RouteCalculator {
      * @See src/Chess/Engine/Move/Calculator/RouteCalculator.ts
      */
     public static getKnightRoute(
-        square: Square
+        square: Square,
+        pieceSensitivity: boolean = true
     ): Route {
         /**
          * Find player's color by given square. If square has no piece,
@@ -110,10 +111,7 @@ export class RouteCalculator {
                 false
             ),
         };
-        if(square == Square.g3){
-            console.log("this is the first path");
-            console.log(square, firstPath);
-        }
+
         /**
          * Now, get first squares of the firstPath's horizontal and vertical directions.
          * Example, if the firstPath is {MoveRoute.Bottom: [Square.b1, Square.b2], MoveRoute.Right: [Square.b2, Square.c2], ...},
@@ -147,7 +145,7 @@ export class RouteCalculator {
                     lastSquare,
                     playerColor,
                     1,
-                    false
+                    pieceSensitivity
                 );
             // If the path is horizontal, then get the vertical squares of last square of the path.
             else
@@ -155,7 +153,7 @@ export class RouteCalculator {
                     lastSquare,
                     playerColor,
                     1,
-                    false
+                    pieceSensitivity
                 );
 
             // Update the route
@@ -334,7 +332,7 @@ export class RouteCalculator {
                 distanceLimit,
                 pieceSensitivity
             ),
-            ...RouteCalculator.getKnightRoute(square),
+            ...RouteCalculator.getKnightRoute(square, false),
         };
     }
 }
