@@ -162,7 +162,6 @@ export class ChessPlatform {
                 if (!this.socket) return;
                 const { from, to } = event.detail;
                 this.socket?.send(WsCommand.moved({ from, to }));
-                this.chess.board.lock(false);
             }) as EventListener);
         };
 
@@ -837,9 +836,8 @@ export class ChessPlatform {
         wsData: WsUndoData,
         webSocketEndpoint: string
     ): void {
-        this.chess.takeBack(true, (wsData as WsUndoData).undoColor);
         this.platform.notationMenu.goBack();
-        this.platform.notationMenu.update();
+        this.chess.takeBack(true, (wsData as WsUndoData).undoColor);
         if ((wsData as WsUndoData).board !== this.chess.getGameAsFenNotation())
             this.resyncGameDueToMismatchedStatus(webSocketEndpoint);
     }
