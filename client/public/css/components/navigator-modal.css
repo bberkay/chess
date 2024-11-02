@@ -61,7 +61,7 @@
     width: 120px;
     height: 125px;
     opacity: 0.5;
-    left: -19%;
+    left: -10%;
     z-index: var(--navigator-modal-bgicon-z-index);
     font-size: var(--navigator-modal-icon-font-size);
 }

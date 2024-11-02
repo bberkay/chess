@@ -185,14 +185,14 @@ export class Chess {
         this._bot.start();
 
         this._lastCreatedBotAttributes = this._bot.getAttributes();
-        this.board.disablePreSelection(this._bot.color);
+        this.board.lockActionsForColor(this._bot.color);
         this.logger.save(
             `Bot-ts-${this._bot.color}-te- created with difficulty-ts-${this._bot.difficulty}-te-`
         );
 
         // First move
         if (this._bot.color == this.engine.getTurnColor()) {
-            this.board.lock(false);
+            this.board.lock();
             this.playBotIfExist();
         }
 
@@ -379,7 +379,8 @@ export class Chess {
         this.playMove(this._selectedSquare!, squareId);
         this._isNonDomMove = true;
 
-        if (this._bot) this.board.lock(false);
+        if (this.board.getLockedColor()) 
+            this.board.lock();
 
         document.dispatchEvent(
             new CustomEvent(ChessEvent.onPieceMovedByPlayer, {
@@ -572,9 +573,10 @@ export class Chess {
                     : 0);
             this._goToSpecificMove(moveIndex, false);
             this.engine.takeBack(undoColor);
-            // FIXME: Undo problemi burada.
+
             this.board.unlock();
             this.board.setTurnColor(this.engine.getTurnColor());
+
             LocalStorage.save(
                 LocalStorageKey.LastBoard,
                 this.engine.getGameAsJsonNotation()
@@ -649,7 +651,7 @@ export class Chess {
             return;
 
         if (moveIndex !== this.engine.getMoveHistory().length - 1)
-            this.board.lock();
+            this.board.lock(true);
 
         const snapshotMove = showMoveReanimation
             ? this.engine.getMoveHistory()[moveIndex]
@@ -730,11 +732,12 @@ export class Chess {
      * Get scores of the given board.
      */
     public getScores(ignoreTakeBack: boolean = true): Scores {
-        if (ignoreTakeBack || this._currentTakeBackCount == 0)
+        const isFirst = this.engine.getMoveHistory().length == 0;
+        if (ignoreTakeBack || this._currentTakeBackCount == 0 || isFirst)
             return this.engine.getScores();
-
+        
         return this.engine.getBoardHistory()[
-            this.engine.getMoveHistory().length - 1 - this._currentTakeBackCount
+            this.engine.getMoveHistory().length - this._currentTakeBackCount
         ].scores!;
     }
 
@@ -751,7 +754,7 @@ export class Chess {
             return this.engine.getTurnColor();
 
         return this.engine.getBoardHistory()[
-            this.engine.getMoveHistory().length - 1 - this._currentTakeBackCount
+            this.engine.getMoveHistory().length - this._currentTakeBackCount
         ].turn!;
     }
 
@@ -768,7 +771,7 @@ export class Chess {
             return this.engine.getGameStatus();
 
         return this.engine.getBoardHistory()[
-            this.engine.getMoveHistory().length - 1 - this._currentTakeBackCount
+            this.engine.getMoveHistory().length - this._currentTakeBackCount
         ].gameStatus!;
     }
 
@@ -787,7 +790,7 @@ export class Chess {
             return this.engine.getAlgebraicNotation();
 
         return this.engine.getBoardHistory()[
-            this.engine.getMoveHistory().length - 1 - this._currentTakeBackCount
+            this.engine.getMoveHistory().length - this._currentTakeBackCount
         ].algebraicNotation!;
     }
 
@@ -804,7 +807,7 @@ export class Chess {
             return this.engine.getMoveHistory();
 
         return this.engine.getBoardHistory()[
-            this.engine.getMoveHistory().length - 1 - this._currentTakeBackCount
+            this.engine.getMoveHistory().length - this._currentTakeBackCount
         ].moveHistory!;
     }
 
@@ -817,14 +820,13 @@ export class Chess {
      * back board.
      */
     public getGameAsFenNotation(ignoreTakeBack: boolean = true): string {
-        if (ignoreTakeBack || this._currentTakeBackCount == 0)
+        const isFirst = this.engine.getMoveHistory().length == 0;
+        if (ignoreTakeBack || this._currentTakeBackCount == 0 || isFirst)
             return this.engine.getGameAsFenNotation();
 
         return Converter.jsonToFen(
             this.engine.getBoardHistory()[
-                this.engine.getMoveHistory().length -
-                    1 -
-                    this._currentTakeBackCount
+                this.engine.getMoveHistory().length - this._currentTakeBackCount
             ]
         );
     }
@@ -842,7 +844,7 @@ export class Chess {
             return this.engine.getGameAsJsonNotation();
 
         return this.engine.getBoardHistory()[
-            this.engine.getMoveHistory().length - 1 - this._currentTakeBackCount
+            this.engine.getMoveHistory().length - this._currentTakeBackCount
         ];
     }
 
@@ -860,9 +862,7 @@ export class Chess {
 
         return Converter.jsonToASCII(
             this.engine.getBoardHistory()[
-                this.engine.getMoveHistory().length -
-                    1 -
-                    this._currentTakeBackCount
+                this.engine.getMoveHistory().length - this._currentTakeBackCount
             ]
         );
     }

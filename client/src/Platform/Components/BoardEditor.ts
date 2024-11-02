@@ -481,7 +481,7 @@ export class BoardEditor extends Component {
      */
     private _prepareBoardEditorForGame(): void {
         if (BoardEditor.isEditorModeEnable()) {
-            this.chess.board.lock();
+            this.chess.board.lock(true);
             this.chess.board.removeEffectFromAllSquares();
             this.addDragAndDropEventListeners();
             this.enableMovePieceCursorMode();

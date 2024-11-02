@@ -74,8 +74,8 @@ export class NotationMenu extends Component {
 
     private moveCount: number = 0;
     private _activeIntervalId: number = -1;
-    private _activeUtilityMenu: UtilityMenuType = UtilityMenuType.NewGame;
-    private _prevActiveUtilityMenu: UtilityMenuType | null = null;
+    private _shownUtilityMenu: UtilityMenuType = UtilityMenuType.NewGame;
+    private _activeUtilityMenu: UtilityMenuType | null = null;
     private _confirmedOperation: NotationMenuOperation | null = null;
 
     /**
@@ -171,10 +171,9 @@ export class NotationMenu extends Component {
      * Get default lobby utility menu content.
      */
     private getOnlineGameUtilityMenuContent(): string {
-        const moveHistoryLength = this.chess.getMoveHistory().length;
         return `
             ${
-                moveHistoryLength < 1
+                this.chess.getMoveHistory().length < 2
                     ? `<button class="menu-item" data-menu-operation="${NotationMenuOperation.AbortGame}"  data-tooltip-text="Abort the Game">&#x2715; Abort</button>`
                     : `<button class="menu-item" data-menu-operation="${NotationMenuOperation.SendUndoOffer}" data-tooltip-text="Send Undo Offer">↺ Undo</button>`
             }
@@ -191,10 +190,9 @@ export class NotationMenu extends Component {
      * Get default single player game utility menu content.
      */
     private getSingleplayerGameUtilityMenuContent(): string {
-        const moveHistoryLength = this.chess.getMoveHistory().length;
         return `
             ${
-                moveHistoryLength < 1
+                this.chess.getMoveHistory().length < 1
                     ? `<button class="menu-item" data-menu-operation="${NotationMenuOperation.AbortGame}"  data-tooltip-text="Abort the Game">&#x2715; Abort</button>`
                     : `<button class="menu-item" data-menu-operation="${NotationMenuOperation.UndoMove}" data-tooltip-text="Take Back Last Move">↺ Undo</button>`
             }
@@ -210,7 +208,7 @@ export class NotationMenu extends Component {
     private getPlayAgainUtilityMenuContent(): string {
         return `
             <button class="menu-item" data-menu-operation="${
-                this._prevActiveUtilityMenu === UtilityMenuType.OnlineGame
+                this._activeUtilityMenu === UtilityMenuType.OnlineGame
                     ? NotationMenuOperation.SendPlayAgainOffer
                     : NotationMenuOperation.PlayAgain
             }" data-tooltip-text="Play Again from Same Start">Play Again</button>
@@ -471,7 +469,7 @@ export class NotationMenu extends Component {
         const notationMenu: HTMLElement = document.getElementById("notations")!;
         const notationCount =
             notationMenu.querySelectorAll("td:has(.move)").length;
-        if (notationMenu.innerHTML == "") {
+        if (notationMenu.innerHTML.trim() === "") {
             for (let i = 0; i < notations.length; i += 1) {
                 const notationUnicoded = formatUnicodeNotation(
                     this.config.notationStyle === NotationStyle.WithIcons
@@ -568,11 +566,14 @@ export class NotationMenu extends Component {
     private deleteLastNotation(color: Color | null = null): void {
         const notationMenu: HTMLElement = document.getElementById("notations")!;
         const lastRow = notationMenu.lastElementChild as HTMLElement;
+        if (!lastRow) return;
 
+        const lastMoveLength = lastRow.querySelectorAll(".move").length;
+        this.moveCount -= lastMoveLength;
         if (color == Color.White) {
             lastRow.remove();
         } else {
-            if (lastRow.querySelectorAll(".move").length == 1) {
+            if (lastMoveLength == 1) {
                 lastRow.remove();
                 this.deleteLastNotation(color);
             } else {
@@ -852,6 +853,7 @@ export class NotationMenu extends Component {
             .getElementById(UtilityMenuType.NewGame)!
             .classList.add("active");
         this._activeUtilityMenu = UtilityMenuType.NewGame;
+        this._shownUtilityMenu = UtilityMenuType.NewGame;
     }
 
     /**
@@ -872,8 +874,8 @@ export class NotationMenu extends Component {
         document
             .getElementById(UtilityMenuType.OnlineGame)!
             .classList.add("active");
-        this._prevActiveUtilityMenu = UtilityMenuType.OnlineGame;
         this._activeUtilityMenu = UtilityMenuType.OnlineGame;
+        this._shownUtilityMenu = UtilityMenuType.OnlineGame;
     }
 
     /**
@@ -882,7 +884,7 @@ export class NotationMenu extends Component {
      */
     public displaySingleplayerGameUtilityMenu(): void {
         this.resetConfirmedOperation();
-
+        
         document
             .querySelector(".utility-toggle-menu-section.active")!
             .classList.remove("active");
@@ -894,8 +896,8 @@ export class NotationMenu extends Component {
         document
             .getElementById(UtilityMenuType.SingleplayerGame)!
             .classList.add("active");
-        this._prevActiveUtilityMenu = UtilityMenuType.SingleplayerGame;
         this._activeUtilityMenu = UtilityMenuType.SingleplayerGame;
+        this._shownUtilityMenu = UtilityMenuType.SingleplayerGame;
     }
 
     /**
@@ -917,7 +919,7 @@ export class NotationMenu extends Component {
         document
             .getElementById(UtilityMenuType.PlayAgain)!
             .classList.add("active");
-        this._activeUtilityMenu = UtilityMenuType.PlayAgain;
+        this._shownUtilityMenu = UtilityMenuType.PlayAgain;
     }
 
     /**
@@ -926,21 +928,6 @@ export class NotationMenu extends Component {
      * even if the notation is not changed.
      */
     public update(force: boolean = false): void {
-        const moveCount = this.chess.getMoveHistory().length;
-
-        if (moveCount > 0) {
-            // Rerender the online game utility menu to show the undo button
-            // instead of the abort button.
-            if (
-                this._prevActiveUtilityMenu ===
-                    UtilityMenuType.SingleplayerGame ||
-                this._activeUtilityMenu === UtilityMenuType.NewGame
-            )
-                this.displaySingleplayerGameUtilityMenu();
-            else if (this._prevActiveUtilityMenu === UtilityMenuType.OnlineGame)
-                this.displayOnlineGameUtilityMenu();
-        }
-
         if (
             [
                 GameStatus.WhiteVictory,
@@ -959,11 +946,11 @@ export class NotationMenu extends Component {
         // because there can't be any notation.
         this.setScore(this.chess.getScores(false));
 
+        const moveCount = this.chess.getMoveHistory().length;
         if (!force && (moveCount == 0 || moveCount == this.moveCount)) return;
 
-        this.activateUndoButtonAfterFirstMove();
+        this.handleAbortUndoButton();
         this.setNotations(this.chess.getAlgebraicNotation());
-
         this.changeIndicator();
 
         const playerTimer = document
@@ -986,20 +973,31 @@ export class NotationMenu extends Component {
     }
 
     /**
-     * Activate the undo button if the move history is not empty.
+     * Handle the abort or undo button. If the move count is
+     * enough for the undo then the undo button will be shown
+     * otherwise the abort button will be shown.
      */
-    private activateUndoButtonAfterFirstMove(): void {
-        if (this.chess.getMoveHistory().length < 1) return;
-
-        const undoButton = document.querySelector(`
-            .utility-toggle-menu-section.active [data-menu-operation="${
-                this._prevActiveUtilityMenu === UtilityMenuType.OnlineGame
-                    ? NotationMenuOperation.SendUndoOffer
-                    : NotationMenuOperation.UndoMove
-            }"]
+    private handleAbortUndoButton(): void {
+        const abortButton = document.querySelector(`
+            .utility-toggle-menu-section.active [data-menu-operation="${NotationMenuOperation.AbortGame}"]
         `);
-        if (undoButton && undoButton.getAttribute("disabled"))
-            undoButton.removeAttribute("disabled");
+        const newGameButton = document.querySelector(`
+            .utility-toggle-menu-section.active [data-menu-operation="${NavigatorModalOperation.ShowGameCreator}"]
+        `);
+
+        const minMoveCountForUndo = this._activeUtilityMenu === UtilityMenuType.OnlineGame ? 2 : 1;
+        if (abortButton || newGameButton) {
+            if(this.chess.getMoveHistory().length >= minMoveCountForUndo) {
+                if (this._activeUtilityMenu === UtilityMenuType.OnlineGame) {
+                    this.displayOnlineGameUtilityMenu();
+                } else if (
+                    this._activeUtilityMenu === UtilityMenuType.SingleplayerGame
+                    || this._activeUtilityMenu === UtilityMenuType.NewGame
+                ) {
+                    this.displaySingleplayerGameUtilityMenu();
+                }
+            }
+        } 
     }
 
     /**
@@ -1323,7 +1321,7 @@ export class NotationMenu extends Component {
         // operation.
         setTimeout(() => {
             confirmButton.setAttribute(
-                this._prevActiveUtilityMenu === UtilityMenuType.OnlineGame
+                this._activeUtilityMenu === UtilityMenuType.OnlineGame
                     ? "data-socket-operation"
                     : "data-menu-operation",
                 confirmationOperation
@@ -1378,7 +1376,7 @@ export class NotationMenu extends Component {
         acceptButton.textContent = "Accept";
         acceptButton.setAttribute("data-tooltip-text", "Accept Offer");
         acceptButton.setAttribute(
-            this._prevActiveUtilityMenu === UtilityMenuType.OnlineGame
+            this._activeUtilityMenu === UtilityMenuType.OnlineGame
                 ? "data-socket-operation"
                 : "data-menu-operation",
             offerOperation
@@ -1499,7 +1497,7 @@ export class NotationMenu extends Component {
      * the offer or sender cancels the offer.
      */
     public goBack(): void {
-        switch (this._activeUtilityMenu) {
+        switch (this._shownUtilityMenu) {
             case UtilityMenuType.NewGame:
                 this.displayNewGameUtilityMenu();
                 break;

@@ -358,7 +358,7 @@ export class Platform {
         }
 
         this._createBoardAndHandleComponents(createdGame.game);
-        this.chess.board.disablePreSelection(
+        this.chess.board.lockActionsForColor(
             playerColor === Color.White ? Color.Black : Color.White
         );
         this.notationMenu.displayOnlineGameUtilityMenu();
@@ -372,7 +372,7 @@ export class Platform {
         if (playerColor === Color.Black) this._flipBoardAndComponents();
 
         if (playerColor !== this.chess.getTurnColor())
-            this.chess.board.lock(false);
+            this.chess.board.lock();
         else this.chess.board.unlock();
 
         this.logger.save(`Online game is created and components are updated.`);
@@ -452,7 +452,6 @@ export class Platform {
                 this.chess.takeBack(true);
             }
             this.notationMenu.goBack();
-            this.notationMenu.update();
         }
     }
 

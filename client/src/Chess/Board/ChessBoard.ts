@@ -64,7 +64,7 @@ export class ChessBoard {
 
     private _turnColor: Color.White | Color.Black = Color.White;
     private _isMouseUpEventBound: boolean = false;
-    private _disabledPreSelectionColor: Color | null = null;
+    private _lockedColor: Color | null = null;
     private _lockedSquaresModes: { [squareId: string]: SquareClickMode } = {};
     private _isBoardMoveEventBound: boolean = false;
     private _animationSpeeds: Record<AnimationSpeed, string> = {
@@ -148,7 +148,7 @@ export class ChessBoard {
         this._turnColor = Color.White;
         this._lockedSquaresModes = {};
         this._isBoardMoveEventBound = false;
-        this._disabledPreSelectionColor = null;
+        this._lockedColor = null;
         this.logger.save("Properties of the board are cleared.");
     }
 
@@ -275,15 +275,12 @@ export class ChessBoard {
             const square = this.getSquareElementOfPiece(pieceElement);
             const pieceColor = this.getPieceColor(square);
             if (!pieceElement.className.includes("promotion-option")) {
-                if (pieceColor === this._turnColor && !this.isLocked())
+                if(pieceColor === this._lockedColor)
+                    this.setSquareClickMode(square, SquareClickMode.Disable);
+                else if (pieceColor === this._turnColor && !this.isLocked())
                     this.setSquareClickMode(square, SquareClickMode.Select);
                 else
-                    this.setSquareClickMode(
-                        square,
-                        this._disabledPreSelectionColor == pieceColor
-                            ? SquareClickMode.Disable
-                            : SquareClickMode.PreSelect
-                    );
+                    this.setSquareClickMode(square, SquareClickMode.PreSelect);
             }
         });
     }
@@ -1254,9 +1251,10 @@ export class ChessBoard {
      * Lock board interactions.
      */
     public lock(
-        disablePreSelection: boolean = true,
+        disablePreSelection: boolean = false,
         showDisabledEffect: boolean = false
     ): void {
+        console.log(new Error().stack)
         if (this.isLocked()) return;
 
         this.getAllSquares().forEach((square) => {
@@ -1270,18 +1268,12 @@ export class ChessBoard {
             if (!disablePreSelection) {
                 if (
                     this.getPieceElementOnSquare(square) &&
-                    this.getPieceColor(square) !==
-                        this._disabledPreSelectionColor
+                    this.getPieceColor(square) !== this.getLockedColor()
                 )
                     return;
             }
 
-            this.setSquareClickMode(
-                square,
-                !disablePreSelection
-                    ? SquareClickMode.Clear
-                    : SquareClickMode.Disable
-            );
+            this.setSquareClickMode(square, SquareClickMode.Disable);
         });
     }
 
@@ -1473,11 +1465,18 @@ export class ChessBoard {
     }   
 
     /**
-     * Disable the preselection of the given color pieces.
+     * Disable actions of the pieces of the given color on the board.
      */
-    public disablePreSelection(color: Color): void {
-        this._disabledPreSelectionColor = color;
+    public lockActionsForColor(color: Color): void {
+        this._lockedColor = color;
         this.setTurnColor(this._turnColor);
+    }
+
+    /**
+     * Get the color of the disabled pieces.
+     */
+    public getLockedColor(): Color | null {
+        return this._lockedColor;
     }
 
     /**

@@ -115,6 +115,7 @@
             padding-bottom: 7px;
             background-color: var(--component-color);
             border: 1px solid var(--border-color);
+            border-left: 4px solid transparent;
             border-right: none;
             font-weight: bold;
             font-size: var(--notation-menu-player-name-font-size);
