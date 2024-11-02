@@ -34,7 +34,7 @@ export class RouteCalculator {
             case PieceType.Pawn:
                 return this.getPawnRoute(square, pieceSensitivity);
             case PieceType.Knight:
-                return this.getKnightRoute(square, pieceSensitivity);
+                return this.getKnightRoute(square);
             case PieceType.Bishop:
                 return this.getBishopRoute(square, pieceSensitivity);
             case PieceType.Rook:
@@ -81,8 +81,7 @@ export class RouteCalculator {
      * @See src/Chess/Engine/Move/Calculator/RouteCalculator.ts
      */
     public static getKnightRoute(
-        square: Square,
-        pieceSensitivity: boolean = true
+        square: Square
     ): Route {
         /**
          * Find player's color by given square. If square has no piece,
@@ -111,7 +110,10 @@ export class RouteCalculator {
                 false
             ),
         };
-
+        if(square == Square.g3){
+            console.log("this is the first path");
+            console.log(square, firstPath);
+        }
         /**
          * Now, get first squares of the firstPath's horizontal and vertical directions.
          * Example, if the firstPath is {MoveRoute.Bottom: [Square.b1, Square.b2], MoveRoute.Right: [Square.b2, Square.c2], ...},
@@ -130,7 +132,7 @@ export class RouteCalculator {
                 firstPath[path as MoveRoute]![
                     firstPath[path as MoveRoute]!.length - 1
                 ];
-
+            
             /**
              * Get the horizontal and vertical squares of the last square of the path.
              * Example, if the path is MoveRoute.Bottom and the squares are [Square.b1, Square.b2],
@@ -145,7 +147,7 @@ export class RouteCalculator {
                     lastSquare,
                     playerColor,
                     1,
-                    pieceSensitivity
+                    false
                 );
             // If the path is horizontal, then get the vertical squares of last square of the path.
             else
@@ -153,7 +155,7 @@ export class RouteCalculator {
                     lastSquare,
                     playerColor,
                     1,
-                    pieceSensitivity
+                    false
                 );
 
             // Update the route
@@ -332,7 +334,7 @@ export class RouteCalculator {
                 distanceLimit,
                 pieceSensitivity
             ),
-            ...RouteCalculator.getKnightRoute(square, pieceSensitivity),
+            ...RouteCalculator.getKnightRoute(square),
         };
     }
 }

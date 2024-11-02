@@ -1,4 +1,11 @@
-import { ChessEvent, Color, GameStatus, PieceIcon, PieceType, Scores } from "@Chess/Types";
+import {
+    ChessEvent,
+    Color,
+    GameStatus,
+    PieceIcon,
+    PieceType,
+    Scores,
+} from "@Chess/Types";
 import { Component } from "./Component.ts";
 import { Chess } from "@Chess/Chess.ts";
 import {
@@ -64,7 +71,6 @@ export class NotationMenu extends Component {
     private readonly chess: Chess;
 
     private config: Config = DEFAULT_CONFIG;
-    
 
     private moveCount: number = 0;
     private _activeIntervalId: number = -1;
@@ -107,7 +113,7 @@ export class NotationMenu extends Component {
     private addEventListeners(): void {
         document.addEventListener(ChessEvent.onGameOver, (() => {
             this.stopOpponentTimerIfActive();
-            this.displayPlayAgainUtilityMenu();     
+            this.displayPlayAgainUtilityMenu();
         }) as EventListener);
 
         document.addEventListener(ChessEvent.onTakeBack, ((
@@ -1186,28 +1192,28 @@ export class NotationMenu extends Component {
 
         let isDecisecondActive = false;
         this._activeIntervalId = setInterval(() => {
-            try{
+            try {
                 const [minutes, seconds, deciseconds] =
-                this.formatRemainingTimeForTimer(
-                    Math.round(this.chess.getPlayersRemainingTime()[color])
-                );
+                    this.formatRemainingTimeForTimer(
+                        Math.round(this.chess.getPlayersRemainingTime()[color])
+                    );
 
-            if (minutes < 0 || seconds < 0 || deciseconds < 0) return;
+                if (minutes < 0 || seconds < 0 || deciseconds < 0) return;
 
-            playerMinuteSecond.textContent = `${minutes
-                .toString()
-                .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+                playerMinuteSecond.textContent = `${minutes
+                    .toString()
+                    .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
 
-            if (minutes <= 0 && seconds <= 10) {
-                if (!isDecisecondActive) {
-                    this.chess.board.playSound(SoundEffect.LowTime);
-                    playerDecisecond.classList.add("active");
-                    isDecisecondActive = true;
+                if (minutes <= 0 && seconds <= 10) {
+                    if (!isDecisecondActive) {
+                        this.chess.board.playSound(SoundEffect.LowTime);
+                        playerDecisecond.classList.add("active");
+                        isDecisecondActive = true;
+                    }
+                    playerDecisecond.textContent = "." + deciseconds;
                 }
-                playerDecisecond.textContent = "." + deciseconds;
-            }
-            }catch(e){
-                if(e instanceof TimerNotAvailableError){
+            } catch (e) {
+                if (e instanceof TimerNotAvailableError) {
                     this.stopOpponentTimerIfActive();
                 }
             }

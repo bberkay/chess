@@ -16,6 +16,7 @@ import {
     MAX_INCREMENT_TIME,
     MIN_INCREMENT_TIME,
     NAVIGATOR_MODAL_ID,
+    PIECE_CREATOR_ID,
 } from "@Platform/Consts";
 
 /**
@@ -54,21 +55,25 @@ export class NavigatorModal extends Component {
      */
     private addEventListeners(): void {
         document.addEventListener(ChessEvent.onGameCreated, (() => {
-            const gameStatus = this.chess.getGameStatus();
-            if (gameStatus === GameStatus.NotReady)
-                this.showBoardNotReady();
+            if (document.getElementById(PIECE_CREATOR_ID)!.innerHTML === "") {
+                const gameStatus = this.chess.getGameStatus();
+                if (gameStatus === GameStatus.NotReady)
+                    this.showBoardNotReady();
+            }
         }) as EventListener);
 
         document.addEventListener(ChessEvent.onGameOver, (() => {
-            const gameStatus = this.chess.getGameStatus();
-            if (
-                [
-                    GameStatus.BlackVictory,
-                    GameStatus.WhiteVictory,
-                    GameStatus.Draw,
-                ].includes(gameStatus)
-            )
-                this.showGameOver(gameStatus);
+            if (document.getElementById(PIECE_CREATOR_ID)!.innerHTML === "") {
+                const gameStatus = this.chess.getGameStatus();
+                if (
+                    [
+                        GameStatus.BlackVictory,
+                        GameStatus.WhiteVictory,
+                        GameStatus.Draw,
+                    ].includes(gameStatus)
+                )
+                    this.showGameOver(gameStatus);
+            }
         }) as EventListener);
     }
 
@@ -141,14 +146,20 @@ export class NavigatorModal extends Component {
             this.showModalBackdrop();
         } else {
             // center the modal to the chessboard if it is not backdrop.
-            const chessboard = document.getElementById("chessboard") as HTMLElement;
+            const chessboard = document.getElementById(
+                "chessboard"
+            ) as HTMLElement;
             setTimeout(() => {
                 modal.style.left = `${
-                    chessboard.offsetLeft + chessboard.offsetWidth / 2 - modal.offsetWidth / 2
+                    chessboard.offsetLeft +
+                    chessboard.offsetWidth / 2 -
+                    modal.offsetWidth / 2
                 }px`;
 
                 modal.style.top = `${
-                    chessboard.offsetTop + chessboard.offsetHeight / 2 - modal.offsetHeight / 2
+                    chessboard.offsetTop +
+                    chessboard.offsetHeight / 2 -
+                    modal.offsetHeight / 2
                 }px`;
             }, 10);
         }

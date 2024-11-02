@@ -327,8 +327,7 @@ export class ChessBoard {
         onPieceSelected: (squareId: Square) => void;
         onPiecePreSelected: (squareId: Square) => void;
         onPieceMoved: (
-            squareId: Square,
-            squareClickMode: SquareClickMode
+            squareId: Square
         ) => void;
         onPiecePreMoved: (
             squareId: Square,
@@ -780,9 +779,8 @@ export class ChessBoard {
 
     /**
      * This function moves the piece from the given square to the given square on the chess board.
-     * @param {MoveType|null} moveType - If it is not given the function will determine the
-     * move type by checking the square click mode of the target square(`to`). Mostly, this
-     * parameter is used by the bot/system/server etc.
+     * @param {MoveType|null} moveType The type of the move to prevent recalculation
+     * if calculated before.
      */
     public async playMove(
         from: Square,
@@ -859,12 +857,14 @@ export class ChessBoard {
                 this.getPieceColor(toSquareContent) !==
                     this.getPieceColor(piece)
             ) {
-                // This is the case when the player captures
-                // the opponent's piece by drag and drop.
-                if (!piece)
+                if (!piece) {
+                    // This is the case when the player captures
+                    // the opponent's piece by drag and drop.
                     this.removePiece(
                         this.getSquareElementOfPiece(toSquareContent)
                     );
+                }
+                if(playMoveSound) this.playSound(SoundEffect.Capture);
             } else if (playMoveSound) {
                 this.playSound(SoundEffect.Move);
             }
@@ -1466,6 +1466,13 @@ export class ChessBoard {
     }
 
     /**
+     * Is the promotion menu shown on the board?
+     */
+    public isPromotionMenuShown(): boolean {
+        return document.querySelector(".promotion-option") !== null;
+    }   
+
+    /**
      * Disable the preselection of the given color pieces.
      */
     public disablePreSelection(color: Color): void {
@@ -1736,7 +1743,9 @@ export class ChessBoard {
     }
 
     /**
-     * This function plays the given sound.
+     * This function plays the given sound. If the sound 
+     * is disabled in the config then the sound will 
+     * not be played.
      */
     public playSound(name: SoundEffect): void {
         if (!this.config.enableSoundEffects) return;
@@ -1745,6 +1754,7 @@ export class ChessBoard {
         audio.addEventListener("ended", () => {
             audio.remove();
         });
+
         audio.play().catch((error) => {
             console.warn(error);
             audio.remove();

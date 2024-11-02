@@ -41,17 +41,18 @@ export class Chess {
     public readonly engine: ChessEngine = new ChessEngine();
     public readonly board: ChessBoard = new ChessBoard();
 
-    private _bot: Bot | null = null;
-    private _lastCreatedBotAttributes: BotAttributes | null = null;
+    private _isNonDomMove: boolean = true;
+    private _isLastNonDomMovePromotion: boolean = false;
     private _selectedSquare: Square | null = null;
-    private _isPromotionScreenOpen: boolean = false;
     private _preSelectedSquare: Square | null = null;
     private _preMoves: { [key in Color]: Move[] } = {
         [Color.Black]: [],
         [Color.White]: [],
     };
+    private _bot: Bot | null = null;
+    private _lastCreatedBotAttributes: BotAttributes | null = null;
     private _currentTakeBackCount: number = 0;
-    private _isGameOver: boolean = false;
+    private _gameTimeMonitorIntervalId: number = -1;
 
     public readonly logger: Logger = new Logger("src/Chess/Chess.ts");
 
@@ -67,14 +68,17 @@ export class Chess {
      * This function resets the properties of the Chess class.
      */
     private resetProperties(): void {
+        this._isNonDomMove = true;
+        this._isLastNonDomMovePromotion = false;
         this._selectedSquare = null;
-        this._isGameOver = false;
-        this._lastCreatedBotAttributes = null;
-        this._isPromotionScreenOpen = false;
         this._preSelectedSquare = null;
         this._preMoves = { [Color.Black]: [], [Color.White]: [] };
-        this._currentTakeBackCount = 0;
         this.terminateBotIfExist();
+        this._lastCreatedBotAttributes = null;
+        this._currentTakeBackCount = 0;
+        if (this._gameTimeMonitorIntervalId !== -1)
+            clearInterval(this._gameTimeMonitorIntervalId);
+        this._gameTimeMonitorIntervalId = -1;
         this.logger.save("Properties reset");
     }
 
@@ -160,15 +164,13 @@ export class Chess {
         );
 
         this.initBoardListener();
-        this.monitorGameTimeExpiration();
+        this.monitorPlayerDurationsIfExist();
 
         LocalStorage.save(
             LocalStorageKey.LastBoard,
             this.getGameAsJsonNotation()
         );
-        this.logger.save(
-            `Game saved to cache as json notation`
-        );
+        this.logger.save(`Game saved to cache as json notation`);
 
         document.dispatchEvent(new Event(ChessEvent.onGameCreated));
     }
@@ -257,7 +259,9 @@ export class Chess {
     public removePiece(square: Square): void {
         this.board.removePiece(square);
         this.engine.removePiece(square);
-        this.logger.save(`Piece-ts-${square}-te- removed from board and engine`);
+        this.logger.save(
+            `Piece-ts-${square}-te- removed from board and engine`
+        );
         document.dispatchEvent(
             new CustomEvent(ChessEvent.onPieceRemoved, {
                 detail: { square: square },
@@ -281,11 +285,8 @@ export class Chess {
             onPiecePreSelected: (squareId: Square) => {
                 this.handleOnPiecePreSelected(squareId);
             },
-            onPieceMoved: (
-                squareId: Square,
-                squareClickMode: SquareClickMode
-            ) => {
-                this.handleOnPieceMoved(squareId, squareClickMode);
+            onPieceMoved: (squareId: Square) => {
+                this.handleOnPieceMoved(squareId);
             },
             onPiecePreMoved: (
                 squareId: Square,
@@ -309,11 +310,17 @@ export class Chess {
     }
 
     /**
-     * This function initializes the listener for engine's
-     * actions on chessboard to make a move on engine and board.
+     * This function monitors the players' durations
+     * if game has durations.
      */
-    private monitorGameTimeExpiration(): void {
-        const interval = setInterval(() => {
+    private monitorPlayerDurationsIfExist(): void {
+        if (
+            this.engine.getDurations() === null &&
+            this._gameTimeMonitorIntervalId !== -1
+        )
+            return;
+
+        this._gameTimeMonitorIntervalId = setInterval(() => {
             if (
                 [
                     GameStatus.BlackVictory,
@@ -321,15 +328,14 @@ export class Chess {
                     GameStatus.Draw,
                 ].includes(this.engine.getGameStatus())
             ) {
-                clearInterval(interval);
-                if(!this._isGameOver){
-                    this.finishTurn();
-                    this.logger.save(
-                        "Game finished because of one of the player has no more time"
-                    );
-                }
+                clearInterval(this._gameTimeMonitorIntervalId);
+                this._gameTimeMonitorIntervalId = -1;
+                this.finishTurn();
+                this.logger.save(
+                    "Game over. Game time monitor interval cleared"
+                );
             }
-        }, 1000);
+        }, 1000) as unknown as number;
 
         this.logger.save("Engine listener initialized");
     }
@@ -368,14 +374,10 @@ export class Chess {
     /**
      * Handle the moved piece on the board and engine.
      */
-    private handleOnPieceMoved(
-        squareId: Square,
-        squareClickMode: SquareClickMode
-    ): void {
-        this._isPromotionScreenOpen =
-            squareClickMode == SquareClickMode.Promotion;
-
+    private handleOnPieceMoved(squareId: Square): void {
+        this._isNonDomMove = false;
         this.playMove(this._selectedSquare!, squareId);
+        this._isNonDomMove = true;
 
         if (this._bot) this.board.lock(false);
 
@@ -426,64 +428,41 @@ export class Chess {
     }
 
     /**
-     * Play the bot's move if it exists and it is
-     * bot's turn.
-     */
-    private playBotIfExist(): void {
-        if (!this._bot || this.engine.getTurnColor() != this._bot.color) return;
-
-        this._bot.getMove(this.engine.getGameAsFenNotation()).then((move) => {
-            // If found move is promotion then move will be Move[].
-            // Check _doPromote() function in ChessEngine.ts for more
-            // information.
-            if (!Array.isArray(move)) move = [move];
-
-            /**
-             * Get the piece type of the given square.
-             */
-            const getPieceType = (square: Square): PieceType | undefined => {
-                for (const piece of this.engine.getGameAsJsonNotation().board) {
-                    if (piece.square === square) {
-                        return piece.type;
-                    }
-                }
-                return;
-            };
-            
-            const pieceFromToDifference = Math.abs(move[0].from - move[0].to);
-            if (getPieceType(move[0].from) == PieceType.King){
-                if(pieceFromToDifference > 1 && pieceFromToDifference < 6)
-                    move[0].type = MoveType.Castling;                    
-            } else if (getPieceType(move[0].from) == PieceType.Pawn){
-                if(pieceFromToDifference != 8 && pieceFromToDifference != 16)
-                    move[0].type = MoveType.EnPassant;
-            }
-
-            move.forEach((moveObject: Move) => {
-                this.playMove(
-                    moveObject.from,
-                    moveObject.to,
-                    Object.hasOwn(moveObject, "type") ? moveObject.type : null
-                );
-            });
-
-            this.board.unlock();
-        });
-    }
-
-    /**
      * Play a move on the board and engine.
      * @param {MoveType|null} moveType - If it is not given the function will determine the
      * move type by checking the square click mode of the target square(`to`). Mostly, this
      * parameter is used by the bot/system/server etc. so try to avoid using it.
      */
-    public async playMove(
-        from: Square,
-        to: Square,
-        moveType: MoveType | null = null
-    ): Promise<void> {
+    public async playMove(from: Square, to: Square): Promise<void> {
+        let moveType: MoveType | null = null;        
         try {
-            this.engine.playMove(from, to);
+            if (this._isNonDomMove) {
+                if(this._isLastNonDomMovePromotion) {
+                    moveType = MoveType.Promote
+                    this.logger.save(
+                        `Non-dom move wanted to play from ${from} to ${to}. So, move type is found-ts-${moveType}-te- without needing to pre-calculation`
+                    );
+                } else {
+                    moveType = this.engine.checkAndFindMoveType(from, to);
+                    if (moveType === null) {
+                        const preCalculatedMoves = this.engine.getMoves(from);
+                        moveType = this.engine.checkAndFindMoveType(from, to);
+                        this.logger.save(
+                            `Non-dom move wanted to play from ${from} to ${to}. So, moves are pre-calculated-ts-${JSON.stringify(
+                                preCalculatedMoves
+                            )}-te- and move type is found-ts-${moveType}-te-`
+                        );
+                    } else {
+                        this.logger.save(
+                            `Non-dom move wanted to play from ${from} to ${to}. So, move type is found-ts-${moveType}-te- without needing to pre-calculation`
+                        );
+                    }
+                }
+
+                this._isLastNonDomMovePromotion = moveType === MoveType.Promotion;
+            }
+
+            this.engine.playMove(from, to, moveType);
             this._preSelectedSquare = null;
         } catch (e) {
             if (
@@ -497,7 +476,10 @@ export class Chess {
 
         await this.board.playMove(from, to, moveType);
         this.logger.save(
-            `Move-ts-${JSON.stringify({ from, to })}-te- played on board and engine`
+            `Move-ts-${JSON.stringify({
+                from,
+                to,
+            })}-te- played on board and engine`
         );
         this.finishTurn();
         document.dispatchEvent(
@@ -505,6 +487,27 @@ export class Chess {
                 detail: { from: from, to: to },
             })
         );
+    }
+
+    /**
+     * Play the bot's move if it exists and it is
+     * bot's turn.
+     */
+    private playBotIfExist(): void {
+        if (!this._bot || this.engine.getTurnColor() != this._bot.color) return;
+
+        this._bot.getMove(this.engine.getGameAsFenNotation()).then((move) => {
+            // If found move is promotion then move will be Move[].
+            // Check _doPromote() function in ChessEngine.ts for more
+            // information.
+            if (!Array.isArray(move)) move = [move];
+
+            move.forEach((moveObject: Move) => {
+                this.playMove(moveObject.from, moveObject.to);
+            });
+
+            this.board.unlock();
+        });
     }
 
     /**
@@ -519,7 +522,7 @@ export class Chess {
             preMovesOfPlayer.length > 1 ? preMovesOfPlayer.slice(1) : [];
 
         setTimeout(async () => {
-            await this.playMove(from, to, type);
+            await this.playMove(from, to);
             this.logger.save(
                 `Pre-move-ts-${JSON.stringify({ from, to, type })}-te- played`
             );
@@ -567,9 +570,9 @@ export class Chess {
                 (!undoColor || undoColor === this.engine.getTurnColor()
                     ? 2
                     : 0);
-            this.goToSpecificMove(moveIndex, false);
+            this._goToSpecificMove(moveIndex, false);
             this.engine.takeBack(undoColor);
-
+            // FIXME: Undo problemi burada.
             this.board.unlock();
             this.board.setTurnColor(this.engine.getTurnColor());
             LocalStorage.save(
@@ -612,6 +615,18 @@ export class Chess {
 
     /**
      * Go to the specific move by the given move index.
+     */
+    public goToSpecificMove(moveIndex: number): void {
+        this._goToSpecificMove(moveIndex);
+
+        if (moveIndex == this.engine.getMoveHistory().length - 1)
+            this.board.unlock();
+
+        document.dispatchEvent(new Event(ChessEvent.onTakeBackOrForward));
+    }
+
+    /**
+     * Go to the specific move by the given move index.
      * @param {number} moveIndex - The index of the move
      * @param {boolean} showMoveReanimation - If it is true
      * then it will create the pieces on the board by the
@@ -619,7 +634,7 @@ export class Chess {
      * 's last move. If it is false then it will just create the
      * pieces on the board by the given `move index`.
      */
-    public goToSpecificMove(
+    private _goToSpecificMove(
         moveIndex: number,
         showMoveReanimation: boolean = true
     ): void {
@@ -670,11 +685,6 @@ export class Chess {
 
         this.board.showStatus(snapshot.gameStatus!);
         this._currentTakeBackCount = newTakeBackCount;
-
-        if (moveIndex == this.engine.getMoveHistory().length - 1)
-            this.board.unlock();
-
-        document.dispatchEvent(new Event(ChessEvent.onTakeBackOrForward));
     }
 
     /**
@@ -695,15 +705,16 @@ export class Chess {
             LocalStorage.clear(LocalStorageKey.LastBoard);
             this.terminateBotIfExist();
             this.logger.save("Game over");
+            if (this._gameTimeMonitorIntervalId !== -1)
+                clearInterval(this._gameTimeMonitorIntervalId);
             document.dispatchEvent(new Event(ChessEvent.onGameOver));
-            this._isGameOver = true;
             return;
         }
 
-        this._selectedSquare = this._isPromotionScreenOpen
+        this._selectedSquare = this.board.isPromotionMenuShown()
             ? this._selectedSquare
             : null;
-        if (!this._isPromotionScreenOpen) {
+        if (!this.board.isPromotionMenuShown()) {
             this.board.setTurnColor(this.engine.getTurnColor());
             this.playBotIfExist();
             this.playPreMoveIfExist();

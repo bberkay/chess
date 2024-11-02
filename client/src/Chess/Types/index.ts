@@ -209,7 +209,10 @@ export enum StartPosition {
     Checkmate = "k7/8/4rp2/8/8/8/1R5K/1R6 w - - 0 1",
     AdjacentCheckmate = "rnbqkbnr/ppppp1pp/8/8/2B2Q2/8/PPPPPPPP/RNB1K1NR w KQkq - 0 1",
     Stalemate = "k7/5R2/6p1/8/6P1/8/7K/1R6 w - - 0 1",
-    EnPassantCheckmate= "r3k2r/pbppqpb1/1pn3p1/7p/4p1n1/1PP4N/PB1P1PPP/2QRKR2 w - - 0 1"
+    EnPassantCheckmate = "r3k2r/pbppqpb1/1pn3p1/7p/4p1n1/1PP4N/PB1P1PPP/2QRKR2 w - - 0 1",
+    ShortCastlingCheckmate = "r3k2r/pp5p/2p1p1pn/8/8/1QPpq2P/PP4P1/R4K1R b kq - 0 1",
+    LongCastlingCheckmate = "rn3r2/pbppq1p1/1p2pN2/8/3P2NP/6P1/PPP1BP1R/R3K1k1 w Q - 0 1",
+    KnightPromotionCheckmate = "8/5P1k/8/8/3B4/4B3/8/1K4R1 w - - 0 1"
 }
 
 /**

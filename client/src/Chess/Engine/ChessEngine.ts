@@ -221,17 +221,20 @@ export class ChessEngine extends BoardManager {
     }
 
     /**
-     * This function checks and find the given move. For example,
-     * if the given move is not in the currentMoves, it returns false.
-     * Otherwise, it returns the move type.
+     * This function checks and find the given move.
+     * @param {Square} from The square of the piece that will be moved.
+     * @param {Square} to The target square of the piece.
+     * @example checkAndFindMove(Square.e2, Square.e4) // Returns MoveType.Normal
+     * @example checkAndFindMove(Square.e1, Square.g1) // Returns MoveType.Castling
+     * @example checkAndFindMove(Square.e7, Square.e8) // Returns MoveType.Promotion
      */
-    private checkAndFindMoveType(square: Square): MoveType | null {
+    public checkAndFindMoveType(from: Square, to: Square): MoveType | null {
         /**
          * If currentMoves is null, then return false. Because,
          * there is no moves for the given square.
          * @see getMoves function.
          */
-        if (!Object.hasOwn(this.currentMoves, square)) {
+        if (!Object.hasOwn(this.currentMoves, from)) {
             this.logger.save(
                 "Move type is not found because there is no selected square"
             );
@@ -239,17 +242,13 @@ export class ChessEngine extends BoardManager {
         }
 
         // Find the given move in the currentMoves.
-        for (const moveType in this.currentMoves[square]) {
-            // If the move type is null or undefined then skip the loop.
-            if (!this.currentMoves[square]?.[moveType as MoveType]) continue;
+        for (const moveType in this.currentMoves[from]) {
+            if (!this.currentMoves[from]?.[moveType as MoveType]) continue;
 
-            // Loop through the moves of the move type.
-            if (!this.currentMoves[square]?.[moveType as MoveType]) continue;
-
-            for (const move of this.currentMoves[square]![
+            for (const move of this.currentMoves[from]![
                 moveType as MoveType
             ]!) {
-                if (move === this.playedTo) {
+                if (move === to) {
                     this.logger.save(`Move type-ts-${moveType}-te- is found`);
                     return moveType as MoveType;
                 }
@@ -259,9 +258,9 @@ export class ChessEngine extends BoardManager {
         // If the given move is not in the currentMoves, return null.
         this.logger.save(
             `Move type is not found because the given move-ts-${
-                this.playedTo
+                to
             }-te- is not in the current moves-ts-${JSON.stringify(
-                this.currentMoves[square]
+                this.currentMoves[from]
             )}-te-`
         );
         return null;
@@ -356,8 +355,10 @@ export class ChessEngine extends BoardManager {
 
     /**
      * This function plays the given move.
+     * @param {MoveType|null} moveType The type of the move to prevent recalculation
+     * if calculated before.
      */
-    public playMove(from: Square, to: Square): void {
+    public playMove(from: Square, to: Square, moveType: MoveType | null = null): void {
         if (
             [
                 GameStatus.NotReady,
@@ -401,11 +402,15 @@ export class ChessEngine extends BoardManager {
             this._doPromote(to);
             this.moveType = MoveType.Promote;
         } else {
-            const move: MoveType | null = this.checkAndFindMoveType(from);
-            if (!move) throw new MoveValidationError("Move is not valid");
-            this.moveType = move;
-
-            switch (move) {
+            if(!moveType) {
+                const moveType: MoveType | null = this.checkAndFindMoveType(from, to);
+                if (!moveType) throw new MoveValidationError("Move is not valid");
+                this.moveType = moveType;
+            } else {
+                this.moveType = moveType;
+            }
+            
+            switch (this.moveType) {
                 case MoveType.Castling:
                     this._doCastling();
                     break;
