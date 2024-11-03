@@ -1254,7 +1254,6 @@ export class ChessBoard {
         disablePreSelection: boolean = false,
         showDisabledEffect: boolean = false
     ): void {
-        console.log(new Error().stack)
         if (this.isLocked()) return;
 
         this.getAllSquares().forEach((square) => {

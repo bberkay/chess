@@ -50,6 +50,10 @@
             font-size: var(--navigator-modal-content-small-font-size);
         }
     }
+
+    &.hidden {
+        visibility: hidden;
+    }
 }
 
 .navigator-modal .navigator-modal-bg {
@@ -61,7 +65,7 @@
     width: 120px;
     height: 125px;
     opacity: 0.5;
-    left: -10%;
+    left: -50px;
     z-index: var(--navigator-modal-bgicon-z-index);
     font-size: var(--navigator-modal-icon-font-size);
 }
@@ -169,7 +173,7 @@ body[data-color-scheme="light"] {
     }
 }
 
-.navigator-modal-bg-layer {
+.navigator-modal-backdrop {
     display: none;
     overflow: hidden;
     z-index: var(--navigator-modal-backdrop-z-index);
@@ -192,11 +196,11 @@ body[data-color-scheme="light"] {
  *             700px - 900px - 1250px
  */
 @media screen and (max-width: 1250px) {
-    body:has(.navigator-modal-bg-layer) {
+    body:has(.navigator-modal-backdrop) {
         overflow: hidden;
     }
 
-    .navigator-modal-bg-layer {
+    .navigator-modal-backdrop {
         position: absolute;
     }
 }

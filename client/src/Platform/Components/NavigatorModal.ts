@@ -84,14 +84,16 @@ export class NavigatorModal extends Component {
         title: string,
         content: string,
         closeable: boolean = false,
-        backdrop: boolean = true
+        backdrop: boolean = true,
+        hidden: boolean = false,
     ): void {
         this.loadHTML(
             NAVIGATOR_MODAL_ID,
             `
             <div class="navigator-modal ${
                 backdrop ? "navigator-modal--glass" : ""
-            } ${closeable ? "closeable" : ""}">
+            } ${closeable ? "closeable" : ""} ${
+                hidden ? "hidden" : ""}">
                 <div class="navigator-modal-bg"></div>
                 <div class="navigator-modal-title">${title}</div>
                 <div class="navigator-modal-content">${content}</div>
@@ -105,13 +107,13 @@ export class NavigatorModal extends Component {
      * Add the backdrop to the modal.
      */
     private showModalBackdrop(): void {
-        let modalBgLayer = document.querySelector(".navigator-modal-bg-layer")!;
-        if (!modalBgLayer) {
-            modalBgLayer = document.createElement("div");
-            modalBgLayer.classList.add("navigator-modal-bg-layer");
-            document.body.appendChild(modalBgLayer);
-            modalBgLayer.classList.add("show");
-        }
+        if (document.querySelector(".navigator-modal-backdrop"))
+            return;
+
+        const modalBgLayer = document.createElement("div");
+        modalBgLayer.classList.add("navigator-modal-backdrop");
+        document.body.appendChild(modalBgLayer);
+        modalBgLayer.classList.add("show");
     }
 
     /**
@@ -119,7 +121,7 @@ export class NavigatorModal extends Component {
      */
     private hideModalBackdrop(): void {
         const modalBgLayer = document.querySelector(
-            ".navigator-modal-bg-layer"
+            ".navigator-modal-backdrop"
         );
         if (modalBgLayer) modalBgLayer.remove();
     }
@@ -131,12 +133,12 @@ export class NavigatorModal extends Component {
         title: string,
         content: string,
         closeable: boolean = false,
-        backdrop: boolean = true
+        backdrop: boolean = true,
     ): void {
         this.hide();
         window.scrollTo(0, 0);
 
-        this.renderComponent(title, content, closeable, backdrop);
+        this.renderComponent(title, content, closeable, backdrop, !backdrop);
 
         const modal = document.querySelector(
             ".navigator-modal"
@@ -145,10 +147,13 @@ export class NavigatorModal extends Component {
         if (backdrop) {
             this.showModalBackdrop();
         } else {
-            // center the modal to the chessboard if it is not backdrop.
+            // Center the modal on the chessboard if the backdrop is not shown.
+            // If the backdrop is not shown, the modal will be rendered as hidden.
+            // after the centering, show the modal.
             const chessboard = document.getElementById(
                 "chessboard"
             ) as HTMLElement;
+
             setTimeout(() => {
                 modal.style.left = `${
                     chessboard.offsetLeft +
@@ -161,6 +166,8 @@ export class NavigatorModal extends Component {
                     chessboard.offsetHeight / 2 -
                     modal.offsetHeight / 2
                 }px`;
+
+                modal.classList.remove("hidden");
             }, 10);
         }
 
