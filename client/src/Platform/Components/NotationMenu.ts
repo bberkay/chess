@@ -112,7 +112,7 @@ export class NotationMenu extends Component {
      */
     private addEventListeners(): void {
         document.addEventListener(ChessEvent.onGameOver, (() => {
-            this.stopOpponentTimerIfActive();
+            this.stopOpponentTimerIfActive(true);
             this.displayPlayAgainUtilityMenu();
         }) as EventListener);
 
@@ -1235,11 +1235,22 @@ export class NotationMenu extends Component {
      * Stop the oppenent's timer. Clearing the active
      * interval id is enough to stop the timer because
      * only one timer/interval can be active at a time.
+     * @param {boolean} showAsZero If showAsZero is true then
+     * the active timer will be shown as 00:00.0. This is used
+     * when there is a mismatch between the client and server like
+     * when client receives the game over message from the server
+     * while there is a time left on the active timer. In this case,
+     * the active timer should be shown as 00:00.0.
      */
-    private stopOpponentTimerIfActive(): void {
+    private stopOpponentTimerIfActive(showAsZero: boolean = false): void {
         document
             .querySelectorAll(".player-section .duration.active")
             .forEach((playerTimer) => {
+                if (showAsZero) {
+                    playerTimer.querySelector(".minute-second")!.textContent =
+                        "00:00";
+                    playerTimer.querySelector(".decisecond")!.textContent = ".0";
+                }
                 playerTimer.classList.remove("active");
             });
 
