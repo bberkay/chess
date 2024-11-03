@@ -1,9 +1,9 @@
 /**
  * @module Chess
- * @description This module provides users to a playable chess game on the web by connecting ChessEngine and ChessBoard with CacheManager.
- * @version 1.0.0
+ * @description This module provides users to a playable chess game on the web by
+ * connecting `ChessEngine` and `ChessBoard` with `LocalStorage`.
  * @author Berkay Kaya <berkaykayaforbusiness@outlook.com> (https://bberkay.github.io)
- * @url https://github.com/bberkay/chess-platform
+ * @url https://github.com/bberkay/chess
  * @license MIT
  */
 

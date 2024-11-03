@@ -1,7 +1,7 @@
 /**
  * @module ChessEngine
- * @description This module provides users to create and manage a chess game(does not include board or other ui components).
- * @version 1.0.0
+ * @description This module provides users to create and manage a chess 
+ * game(does not include board or other ui components).
  * @author Berkay Kaya <berkaykayaforbusiness@outlook.com> (https://bberkay.github.io)
  * @url https://github.com/bberkay/chess
  * @license MIT

@@ -1,9 +1,9 @@
 /**
  * @module Platform
- * @description This class is the main class of the chess platform menu. It provides the components of the menu and connections between the chess and menu.
- * @version 1.0.0
+ * @description This module provides components like notation menu, board editor etc.
+ * to enrich the user experience by using the `Chess` class's methods.
  * @author Berkay Kaya <berkaykayaforbusiness@outlook.com> (https://bberkay.github.io)
- * @url https://github.com/bberkay/chess-platform
+ * @url https://github.com/bberkay/chess
  * @license MIT
  */
 
