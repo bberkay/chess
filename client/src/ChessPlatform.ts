@@ -126,10 +126,14 @@ export class ChessPlatform {
             const lobbyId = urlLobbyId || lsLobbyId;
             if (!lobbyId) return;
 
-            const isLobbyIdValid = await this.checkLobbyId(lobbyId, urlLobbyId !== null);
+            const isLobbyIdValid = await this.checkLobbyId(
+                lobbyId,
+                urlLobbyId !== null
+            );
             if (!isLobbyIdValid) return;
 
-            if (!lsLobbyId || lsLobbyId !== lobbyId) this.platform.navigatorModal.showJoinLobby();
+            if (!lsLobbyId || lsLobbyId !== lobbyId)
+                this.platform.navigatorModal.showJoinLobby();
             else this.reconnectLobby();
         };
 
@@ -245,8 +249,7 @@ export class ChessPlatform {
             if (!response.ok) {
                 this.terminateAndCleanupConnection();
                 const error = await response.text();
-                if (showAsError)
-                    this.platform.navigatorModal.showError(error);
+                if (showAsError) this.platform.navigatorModal.showError(error);
                 return null;
             }
         } catch (error: unknown) {
@@ -466,8 +469,15 @@ export class ChessPlatform {
      * new game utility menu.
      */
     private terminateAndCleanupConnection(resetPlatform: boolean = true): void {
-        this.socket?.close();
-        this.socket = null;
+        if (this.socket) {
+            this.socket.onclose = () => {
+                this.socket = null;
+                this.terminateAndCleanupConnection(resetPlatform);
+            };
+            this.socket.close();
+            return;
+        }
+
         LocalStorage.clear(LocalStorageKey.LastLobbyConnection);
         this.removeLobbyIdFromUrl();
         if (resetPlatform) {
@@ -498,8 +508,12 @@ export class ChessPlatform {
             throw new Error("The WebSocket URL is too long.");
 
         if (this.socket) {
+            this.socket.onclose = () => {
+                this.socket = null;
+                this.createAndHandleWebSocket(webSocketEndpoint);
+            };
             this.socket.close();
-            this.socket = null;
+            return;
         }
 
         const webSocketUrl =
