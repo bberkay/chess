@@ -132,7 +132,9 @@
     left: 0;
     width: var(--chessboard-board-size);
     height: var(--chessboard-board-size);
-    background-image: var(--chessboard-noise-effect-image);
+    background-image: image-set(
+        var(--chessboard-noise-effect-image) type("image/webp")
+    );
     opacity: 0.4;
     filter: brightness(0);
     pointer-events: none;
@@ -248,52 +250,76 @@
 
 /* White pieces */
 [data-piece="Rook"][data-color="White"] {
-    background-image: var(--chessboard-white-rook-image)
+    background-image: image-set(
+        var(--chessboard-white-rook-image) type("image/webp")
+    );
 }
 
 [data-piece="Knight"][data-color="White"] {
-    background-image: var(--chessboard-white-knight-image)
+    background-image: image-set(
+        var(--chessboard-white-knight-image) type("image/webp")
+    );
 }
 
 [data-piece="Bishop"][data-color="White"] {
-    background-image: var(--chessboard-white-bishop-image)
+    background-image: image-set(
+        var(--chessboard-white-bishop-image) type("image/webp")
+    );
 }
 
 [data-piece="Queen"][data-color="White"] {
-    background-image: var(--chessboard-white-queen-image)
+    background-image: image-set(
+        var(--chessboard-white-queen-image) type("image/webp")
+    );
 }
 
 [data-piece="King"][data-color="White"] {
-    background-image: var(--chessboard-white-king-image)
+    background-image: image-set(
+        var(--chessboard-white-king-image) type("image/webp")
+    );
 }
 
 [data-piece="Pawn"][data-color="White"] {
-    background-image: var(--chessboard-white-pawn-image)
+    background-image: image-set(
+        var(--chessboard-white-pawn-image) type("image/webp")
+    );
 }
 
 /* Black pieces */
 [data-piece="Rook"][data-color="Black"] {
-    background-image: var(--chessboard-black-rook-image)
+    background-image: image-set(
+        var(--chessboard-black-rook-image) type("image/webp")
+    );
 }
 
 [data-piece="Knight"][data-color="Black"] {
-    background-image: var(--chessboard-black-knight-image)
+    background-image: image-set(
+        var(--chessboard-black-knight-image) type("image/webp")
+    );
 }
 
 [data-piece="Bishop"][data-color="Black"] {
-    background-image: var(--chessboard-black-bishop-image)
+    background-image: image-set(
+        var(--chessboard-black-bishop-image) type("image/webp")
+    );
 }
 
 [data-piece="Queen"][data-color="Black"] {
-    background-image: var(--chessboard-black-queen-image)
+    background-image: image-set(
+        var(--chessboard-black-queen-image) type("image/webp")
+    );
 }
 
 [data-piece="King"][data-color="Black"] {
-    background-image: var(--chessboard-black-king-image)
+    background-image: image-set(
+        var(--chessboard-black-king-image) type("image/webp")
+    );
 }
 
 [data-piece="Pawn"][data-color="Black"] {
-    background-image: var(--chessboard-black-pawn-image)
+    background-image: image-set(
+        var(--chessboard-black-pawn-image) type("image/webp")
+    );
 }
 
 /* -------------- Effects Styles -------------- */
