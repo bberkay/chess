@@ -57,7 +57,7 @@ import {
     isInRange,
     updateKeys,
 } from "./Classes/Helper";
-import { CORS_HEADERS, MAX_PAYLOAD_LENGTH, SERVER_PORT } from "./Consts";
+import { CORS_HEADERS, MAX_IDLE_TIMEOUT, MAX_PAYLOAD_LENGTH, SERVER_PORT } from "./Consts";
 import { ALLOWED_ORIGINS } from "./Consts";
 import {
     GU_ID_LENGTH,
@@ -474,7 +474,7 @@ const server = Bun.serve<WebSocketData>({
                 leaveLobby(ws);
         },
         maxPayloadLength: MAX_PAYLOAD_LENGTH,
-        idleTimeout: 960,
+        idleTimeout: MAX_IDLE_TIMEOUT,
     },
 });
 
