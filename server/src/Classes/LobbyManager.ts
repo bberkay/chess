@@ -2,7 +2,7 @@ import type { Player } from "../Types";
 import { JsonNotation, StartPosition, Duration } from "@Chess/Types";
 import { Lobby } from "./Lobby";
 import { createRandomId } from "./Helper";
-import { GU_ID_LENGTH } from "../Consts";
+import { GU_ID_LENGTH, DESTROY_INACTIVE_LOBBY_TIMEOUT } from "../Consts";
 
 /**
  * This class manages the lobbies of the game.
@@ -81,6 +81,18 @@ export class LobbyManager {
         ) {
             console.log("Lobby is dead. Deleting...: ", lobbyId);
             this.lobbies.delete(lobbyId);
+        }
+    }
+
+    /**
+     * Clear the lobbies that are not active for a long time.
+     * This method should be called periodically.
+     */
+    static clearInactiveLobbies(): void {
+        for (const [lobbyId, lobby] of this.lobbies) {
+            if (lobby.updatedAt + DESTROY_INACTIVE_LOBBY_TIMEOUT < Date.now()) {
+                this.lobbies.delete(lobbyId);
+            }
         }
     }
 }

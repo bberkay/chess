@@ -18,6 +18,8 @@ import { createRandomId, deepFreeze } from "./Helper";
  */
 export class Lobby {
     public readonly id: string;
+    public readonly createdAt: number = Date.now();
+    private _updatedAt: number = Date.now();
 
     private whitePlayer: Player | null = null;
     private blackPlayer: Player | null = null;
@@ -47,6 +49,20 @@ export class Lobby {
             [Color.White]: initialDuration,
             [Color.Black]: initialDuration,
         };
+    }
+
+    /**
+     * Get the last updated time of the lobby.
+     */
+    public get updatedAt(): number {
+        return this._updatedAt;
+    }
+
+    /**
+     * Update the last updated time of the lobby.
+     */
+    private updateUpdatedAt(): void {
+        this._updatedAt = Date.now();
     }
 
     /**
@@ -516,6 +532,7 @@ export class Lobby {
                 ? GameStatus.BlackVictory
                 : GameStatus.WhiteVictory
         );
+        this.updateUpdatedAt();
     }
 
     /**
@@ -524,6 +541,7 @@ export class Lobby {
      */
     public draw(): void {
         this.chessEngine.setGameStatus(GameStatus.Draw);
+        this.updateUpdatedAt();
     }
 
     /**
@@ -532,6 +550,7 @@ export class Lobby {
      */
     public undo(): void {
         this.chessEngine.takeBack(this.currentUndoOffer);
+        this.updateUpdatedAt();
     }
 
     /**
@@ -540,6 +559,7 @@ export class Lobby {
     public makeMove(from: Square, to: Square): void {
         if (!this.isGameStarted()) return;
         this.chessEngine.playMove(from, to);
+        this.updateUpdatedAt();
     }
 
     /**
@@ -556,6 +576,7 @@ export class Lobby {
             durations: JSON.parse(JSON.stringify(this.getInitialDurations())),
         });
         this._isGameStarted = true;
+        this.updateUpdatedAt();
     }
 
     /**
@@ -565,5 +586,6 @@ export class Lobby {
         this._isGameStarted = false;
         this.clearGameTimeMonitorInterval();
         this.disableOfferCooldown();
+        this.updateUpdatedAt();
     }
 }
