@@ -43,7 +43,15 @@ export type BotAttributes = {
  * For more information about depth:
  * https://official-stockfish.github.io/docs/stockfish-wiki/UCI-&-Commands.html#go
  */
-const DIFFICULTY_MULTIPLIER = 3;
+const DIFFICULTY_MULTIPLIER = 5;
+
+/**
+ * Default time for the bot to calculate the move.
+ * 
+ * For more information about movetime:
+ * https://official-stockfish.github.io/docs/stockfish-wiki/UCI-&-Commands.html#go
+ */
+const GO_MOVETIME_MS = 1000;
 
 /**
  * Default bot attributes. If the user does not provide
@@ -138,7 +146,7 @@ export class Bot {
         this.stockfish.postMessage("uci");
         this.stockfish.postMessage("ucinewgame");
         this.stockfish.postMessage(
-            "setoption name Skill Level value " + this._difficultyValue
+            "setoption name Skill Level value " + this._difficultyValue.toString()
         );
     }
 
@@ -149,7 +157,7 @@ export class Bot {
     public async getMove(fen: string): Promise<Move | Move[]> {
         return new Promise((resolve) => {
             this.stockfish.postMessage("position fen " + fen);
-            this.stockfish.postMessage("go movetime 1000");
+            this.stockfish.postMessage("go movetime " + GO_MOVETIME_MS.toString());
 
             const listener = (event: MessageEvent) => {
                 const line = event.data;

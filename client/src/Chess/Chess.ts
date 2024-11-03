@@ -30,6 +30,12 @@ import { Logger } from "@Services/Logger.ts";
 import { Bot, BotAttributes } from "./Bot";
 
 /**
+ * Delay time for the pre-move. Pre move will be played 
+ * after this delay time if it exists.
+ */
+const PRE_MOVE_DELAY = 100;
+
+/**
  * This class provides users to a playable chess game on the web by connecting ChessEngine and ChessBoard. Also,
  * it uses LocalStorage which provides users to save the game to the cache and load the game from the cache and Logger
  * which provides users to log the game.
@@ -475,19 +481,20 @@ export class Chess {
             }
         }
 
-        await this.board.playMove(from, to, moveType);
-        this.logger.save(
-            `Move-ts-${JSON.stringify({
-                from,
-                to,
-            })}-te- played on board and engine`
-        );
-        this.finishTurn();
-        document.dispatchEvent(
-            new CustomEvent(ChessEvent.onPieceMoved, {
-                detail: { from: from, to: to },
-            })
-        );
+        this.board.playMove(from, to, moveType).then(() => {
+            this.logger.save(
+                `Move-ts-${JSON.stringify({
+                    from,
+                    to,
+                })}-te- played on board and engine`
+            );
+            this.finishTurn();
+            document.dispatchEvent(
+                new CustomEvent(ChessEvent.onPieceMoved, {
+                    detail: { from: from, to: to },
+                })
+            );
+        });
     }
 
     /**
@@ -532,7 +539,7 @@ export class Chess {
                     detail: { from, to, type },
                 })
             );
-        }, 100);
+        }, PRE_MOVE_DELAY);
     }
 
     /**

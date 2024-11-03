@@ -54,6 +54,13 @@ export const DEFAULT_CONFIG: Config = {
 };
 
 /**
+ * Animation speeds of the pieces on the chess board.
+ */
+const SLOW_ANIMATION_SPEED_IN_SECONDS = 0.25;
+const MEDIUM_ANIMATION_SPEED_IN_SECONDS = 0.15;
+const FAST_ANIMATION_SPEED_IN_SECONDS = 0.05;
+
+/**
  * This class provides users to create and manage a chess board(does not include any mechanic/logic).
  */
 export class ChessBoard {
@@ -68,9 +75,9 @@ export class ChessBoard {
     private _lockedSquaresModes: { [squareId: string]: SquareClickMode } = {};
     private _isBoardMoveEventBound: boolean = false;
     private _animationSpeeds: Record<AnimationSpeed, string> = {
-        [AnimationSpeed.Slow]: "0.25s",
-        [AnimationSpeed.Medium]: "0.15s",
-        [AnimationSpeed.Fast]: "0.05s",
+        [AnimationSpeed.Slow]: SLOW_ANIMATION_SPEED_IN_SECONDS.toString() + "s",
+        [AnimationSpeed.Medium]: MEDIUM_ANIMATION_SPEED_IN_SECONDS.toString() + "s",
+        [AnimationSpeed.Fast]: FAST_ANIMATION_SPEED_IN_SECONDS.toString() + "s",
     };
 
     private readonly _bindDragPiece: (e: MouseEvent | TouchEvent) => void =
@@ -800,10 +807,10 @@ export class ChessBoard {
             moveType ?? this.getSquareClickMode(toSquare);
         switch (finalMoveType) {
             case SquareClickMode.Castling:
-                this._doCastling(fromSquare, toSquare);
+                await this._doCastling(fromSquare, toSquare);
                 break;
             case SquareClickMode.EnPassant:
-                this._doEnPassant(fromSquare, toSquare);
+                await this._doEnPassant(fromSquare, toSquare);
                 break;
             case SquareClickMode.Promotion:
                 this._doPromotion(fromSquare, toSquare, moveType === null);
@@ -924,10 +931,10 @@ export class ChessBoard {
     /**
      * Do the castling move on the chess board.
      */
-    private _doCastling(
+    private async _doCastling(
         fromSquare: HTMLDivElement,
         toSquare: HTMLDivElement
-    ): void {
+    ): Promise<void> {
         const fromSquareId: number = this.getSquareId(fromSquare);
         let toSquareId: number = this.getSquareId(toSquare);
 
@@ -985,7 +992,7 @@ export class ChessBoard {
             castlingSide == CastlingSide.Long
                 ? kingNewSquare + 1
                 : kingNewSquare - 1;
-        this._doNormalMove(
+        await this._doNormalMove(
             this.getSquareElement(rook),
             this.getSquareElement(rookNewSquare),
             false
@@ -999,25 +1006,11 @@ export class ChessBoard {
     /**
      * Do the en passant move on the chess board.
      */
-    private _doEnPassant(
+    private async _doEnPassant(
         fromSquare: HTMLDivElement,
         toSquare: HTMLDivElement
-    ): void {
-        this._doNormalMove(fromSquare, toSquare);
-        this.logger.save(
-            `Piece moved to target square-ts-${this.getSquareId(
-                toSquare
-            )}-te- on board`
-        );
-
-        /**
-         * Get the square of the killed piece by adding 8 to
-         * the target square. If toSquare is in the 3rd row
-         * then toSquare has white pawn add 8 otherwise toSquare
-         * has black pawn subtract 8.
-         * @see For more information about en passant, see https://en.wikipedia.org/wiki/En_passant
-         * @see For more information about the square ids, see src/Chess/Types/index.ts
-         */
+    ): Promise<void> {
+        // Remove the captured piece 
         const toSquareID = this.getSquareId(toSquare);
         const killedPieceSquare =
             toSquareID + (Math.ceil(toSquareID / 8) == 3 ? 8 : -8);
@@ -1025,6 +1018,14 @@ export class ChessBoard {
         this.playSound(SoundEffect.Capture);
         this.logger.save(
             `Captured piece by en passant move is found on square-ts-${killedPieceSquare}-te- and removed on board`
+        );
+        
+        // Move the piece to the target square
+        await this._doNormalMove(fromSquare, toSquare);
+        this.logger.save(
+            `Piece moved to target square-ts-${this.getSquareId(
+                toSquare
+            )}-te- on board`
         );
     }
 
