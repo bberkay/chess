@@ -117,8 +117,8 @@ export abstract class Component {
                     tooltipTimeout = setTimeout(() => {
                         tooltipElement.classList.add("active");
                         tooltipElement.textContent = tooltipText;
+                    }, TOOLTIP_SHOW_DELAY_MS);
                 });
-                }, TOOLTIP_SHOW_DELAY_MS);
 
                 menuItem.addEventListener("mouseout", function () {
                     clearTimeout(tooltipTimeout);
