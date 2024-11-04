@@ -3,6 +3,7 @@
  */
 export const ALLOWED_ORIGINS = [
     'http://localhost:5173',
+    'https://chess-a66i.onrender.com',
 ];
 
 export const CORS_HEADERS: Record<string, string> = {

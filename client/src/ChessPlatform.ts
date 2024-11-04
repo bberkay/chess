@@ -298,6 +298,10 @@ export class ChessPlatform {
      */
     private _createLobby(createLobbyReqParams: CreateLobbyReqParams): void {
         this.removeLobbyIdFromUrl();
+        this.platform.navigatorModal.showLoading(
+            "Creating a new lobby. Please wait the server to respond..."
+        );
+
         this.createAndHandleWebSocket(
             new URLSearchParams(Object.entries(createLobbyReqParams)).toString()
         );
@@ -312,6 +316,7 @@ export class ChessPlatform {
         this._createLobby({
             name: playerName || DEFULT_PLAYER_NAME,
             board:
+                LocalStorage.load(LocalStorageKey.LastBoard) || 
                 this.platform.boardEditor.getSavedFen() ||
                 StartPosition.Standard,
             remaining: (duration.remaining || DEFAULT_TOTAL_TIME).toString(),
@@ -326,6 +331,10 @@ export class ChessPlatform {
      * It sends the necessary parameters like player name and lobby ID.
      */
     private _joinLobby(joinLobbyReqParams: JoinLobbyReqParams): void {
+        this.platform.navigatorModal.showLoading(
+            "Joining the lobby. Please wait the server to respond..."
+        );
+
         this.createAndHandleWebSocket(
             new URLSearchParams(Object.entries(joinLobbyReqParams)).toString()
         );
@@ -352,6 +361,10 @@ export class ChessPlatform {
     private _reconnectLobby(
         reconnectLobbyReqParams: ReconnectLobbyReqParams
     ): void {
+        this.platform.navigatorModal.showLoading(
+            "Reconnecting to the lobby. Please wait the server to respond..."
+        );
+
         this.createAndHandleWebSocket(
             new URLSearchParams(
                 Object.entries(reconnectLobbyReqParams)
@@ -531,6 +544,8 @@ export class ChessPlatform {
         this.socket.onopen = () => {
             player = null;
             shouldTerminateConnectionOnClose = false;
+            this.reconnectionAttemptRemaining = RECONNECTION_ATTEMPT_LIMIT;
+            this.platform.navigatorModal.hide();
         };
 
         this.socket.onmessage = (event) => {

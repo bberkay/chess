@@ -200,20 +200,6 @@ export class NavigatorModal extends Component {
     }
 
     /**
-     * Hide the modal.
-     */
-    public hide(): void {
-        document.removeEventListener(
-            "click",
-            this._boundCloseModalOnOutsideClick
-        );
-        const navigatorModal = document.querySelector(".navigator-modal");
-        if (!navigatorModal) return;
-        navigatorModal.remove();
-        this.hideModalBackdrop();
-    }
-
-    /**
      * Go back to the previous state of the modal.
      */
     public undo(): void {
@@ -747,6 +733,38 @@ export class NavigatorModal extends Component {
         document
             .querySelector(".navigator-modal")!
             .classList.add("navigator-modal--error");
+    }
+
+    /**
+     * Show the loading screen.
+     */
+    public showLoading(message: string): void {
+        this.show(
+            "Loading",
+            `
+            <div style="margin-bottom:15px"><span>${message}</span></div>
+            <div class="loader"></div>
+            <div style="text-align:center;margin-top:15px;">
+                <button class="button--text" data-menu-operation="${NavigatorModalOperation.Hide}">
+                    Cancel
+                </button>
+            </div>
+            `
+        );
+    }
+    
+    /**
+     * Hide the modal.
+     */
+    public hide(): void {
+        document.removeEventListener(
+            "click",
+            this._boundCloseModalOnOutsideClick
+        );
+        const navigatorModal = document.querySelector(".navigator-modal");
+        if (!navigatorModal) return;
+        navigatorModal.remove();
+        this.hideModalBackdrop();
     }
 
     /**
