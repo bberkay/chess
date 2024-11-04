@@ -75,9 +75,8 @@ export abstract class Component {
     private createTooltipsIfThereAre(componentId: string): void {
         const component = document.getElementById(componentId);
         if (!component) return;
-
-        // A quite unsettling way to wait for the component's corrent(last) width to
-        // be calculated before checking if the text fits in the parent element.
+        
+        // An ugly and unstable way to wait for the component to be rendered.
         setTimeout(() => {
             for (const menuItem of component.querySelectorAll(
                 "[data-tooltip-text]"
