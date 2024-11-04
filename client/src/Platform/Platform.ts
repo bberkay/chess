@@ -146,10 +146,7 @@ export class Platform {
         /**
          * Initialize the platform components.
          */
-        document.addEventListener("DOMContentLoaded", () => {
-            bindMenuOperations();
-        });
-
+        bindMenuOperations();
         this.logger.save(
             "Cache is checked, last game/lobby is loaded if exists. Menu operations are binded."
         );

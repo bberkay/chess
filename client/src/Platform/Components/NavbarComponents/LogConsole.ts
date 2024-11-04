@@ -33,23 +33,21 @@ export class LogConsole extends NavbarComponent {
     constructor() {
         super();
         this.renderComponent();
-        document.addEventListener("DOMContentLoaded", () => {
-            this.stream();
+        this.stream();
 
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-            const debounce = (func: Function, wait: number) => {
-                let timeout: number;
-                return (...args: unknown[]) => {
-                    clearTimeout(timeout);
-                    timeout = setTimeout(
-                        () => func.apply(this, args),
-                        wait
-                    ) as unknown as number;
-                };
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+        const debounce = (func: Function, wait: number) => {
+            let timeout: number;
+            return (...args: unknown[]) => {
+                clearTimeout(timeout);
+                timeout = setTimeout(
+                    () => func.apply(this, args),
+                    wait
+                ) as unknown as number;
             };
-            const debouncedStream = debounce(this.stream.bind(this), 250);
-            document.addEventListener(LoggerEvent.LogAdded, debouncedStream);
-        });
+        };
+        const debouncedStream = debounce(this.stream.bind(this), 250);
+        document.addEventListener(LoggerEvent.LogAdded, debouncedStream);
     }
 
     /**

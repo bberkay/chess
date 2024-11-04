@@ -89,9 +89,7 @@ export class NotationMenu extends Component {
         this.addEventListeners();
         this.loadLocalStorage();
         this.addShortcutListeners();
-        document.addEventListener("DOMContentLoaded", () => {
-            this.update(true);
-        });
+        this.update(true);
     }
 
     /**
