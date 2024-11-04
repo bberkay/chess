@@ -54,6 +54,8 @@
     --score-table-score-font-size: 15px;
 
     /* Navigator Modal */
+    --navigator-modal-board-modal-width: 200px;
+    --navigator-modal-board-modal-height: 50px;
     --navigator-modal-icon-font-size: 100px;
     --navigator-modal-title-font-size: 35px;
     --navigator-modal-content-font-size: 18px;

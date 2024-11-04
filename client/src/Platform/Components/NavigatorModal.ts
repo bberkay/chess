@@ -29,6 +29,9 @@ export class NavigatorModal extends Component {
     private readonly _boundCloseModalOnOutsideClick: (
         event: MouseEvent
     ) => void = this.closeModalOnOutsideClick.bind(this);
+    private readonly _rootComputedStyle: CSSStyleDeclaration = getComputedStyle(
+        document.documentElement
+    );
 
     private lastNavigatorModalTitle: string = "";
     private lastNavigatorModalContent: string = "";
@@ -85,15 +88,14 @@ export class NavigatorModal extends Component {
         content: string,
         closeable: boolean = false,
         backdrop: boolean = true,
-        hidden: boolean = false,
+        hidden: boolean = false
     ): void {
         this.loadHTML(
             NAVIGATOR_MODAL_ID,
             `
             <div class="navigator-modal ${
-                backdrop ? "navigator-modal--glass" : ""
-            } ${closeable ? "closeable" : ""} ${
-                hidden ? "hidden" : ""}">
+                backdrop ? "navigator-modal--glass" : "navigator-modal--board"
+            } ${closeable ? "closeable" : ""} ${hidden ? "hidden" : ""}">
                 <div class="navigator-modal-bg"></div>
                 <div class="navigator-modal-title">${title}</div>
                 <div class="navigator-modal-content">${content}</div>
@@ -107,8 +109,7 @@ export class NavigatorModal extends Component {
      * Add the backdrop to the modal.
      */
     private showModalBackdrop(): void {
-        if (document.querySelector(".navigator-modal-backdrop"))
-            return;
+        if (document.querySelector(".navigator-modal-backdrop")) return;
 
         const modalBgLayer = document.createElement("div");
         modalBgLayer.classList.add("navigator-modal-backdrop");
@@ -133,7 +134,7 @@ export class NavigatorModal extends Component {
         title: string,
         content: string,
         closeable: boolean = false,
-        backdrop: boolean = true,
+        backdrop: boolean = true
     ): void {
         this.hide();
         window.scrollTo(0, 0);
@@ -154,21 +155,29 @@ export class NavigatorModal extends Component {
                 "chessboard"
             ) as HTMLElement;
 
-            setTimeout(() => {
-                modal.style.left = `${
-                    chessboard.offsetLeft +
-                    chessboard.offsetWidth / 2 -
-                    modal.offsetWidth / 2
-                }px`;
+            const modalWidth = parseInt(
+                this._rootComputedStyle.getPropertyValue(
+                    "--navigator-modal-board-modal-width"
+                )
+            );
+            modal.style.left = `${
+                chessboard.offsetLeft +
+                chessboard.offsetWidth / 2 -
+                modalWidth / 2
+            }px`;
 
-                modal.style.top = `${
-                    chessboard.offsetTop +
-                    chessboard.offsetHeight / 2 -
-                    modal.offsetHeight / 2
-                }px`;
+            const modalHeight = parseInt(
+                this._rootComputedStyle.getPropertyValue(
+                    "--navigator-modal-board-modal-height"
+                )
+            );
+            modal.style.top = `${
+                chessboard.offsetTop +
+                chessboard.offsetHeight / 2 -
+                modalHeight / 2
+            }px`;
 
-                modal.classList.remove("hidden");
-            }, 10);
+            modal.classList.remove("hidden");
         }
 
         setTimeout(() => {
@@ -752,7 +761,7 @@ export class NavigatorModal extends Component {
             `
         );
     }
-    
+
     /**
      * Hide the modal.
      */

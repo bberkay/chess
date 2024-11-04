@@ -50,6 +50,11 @@ type SettingKey = keyof Settings[SettingsConfigOperation];
 type SettingValue = Settings[SettingsConfigOperation][keyof Settings[SettingsConfigOperation]];
 
 /**
+ * Delay in milliseconds before reloading the page after clearing the cache.
+ */
+const CACHE_RELOAD_DELAY_MS = 500;
+
+/**
  * This class provide a menu to change the settings
  * of the game and the platform itself.
  */
@@ -361,7 +366,7 @@ export class SettingsMenu extends NavbarComponent {
         switch (operation) {
             case SettingsMenuOperation.ClearCache:
                 LocalStorage.clear();
-                setTimeout(() => { window.location.reload() }, 500);
+                setTimeout(() => { window.location.reload() }, CACHE_RELOAD_DELAY_MS);
                 return;
             case SettingsMenuOperation.ResetSettings:
                 LocalStorage.save(

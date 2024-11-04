@@ -18,6 +18,11 @@ export const DEFAULT_CONFIG: Config = {
 };
 
 /**
+ * The debounce time for waiting log messages to be added.
+ */
+const LOG_DEBOUNCE_TIME_MS = 250;
+
+/**
  * This class provide a menu to show the logs.
  */
 export class LogConsole extends NavbarComponent {
@@ -46,7 +51,7 @@ export class LogConsole extends NavbarComponent {
                 ) as unknown as number;
             };
         };
-        const debouncedStream = debounce(this.stream.bind(this), 250);
+        const debouncedStream = debounce(this.stream.bind(this), LOG_DEBOUNCE_TIME_MS);
         document.addEventListener(LoggerEvent.LogAdded, debouncedStream);
     }
 

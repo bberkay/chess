@@ -1,6 +1,11 @@
 import { MenuOperation, PlatformEvent } from "@Platform/Types";
 
 /**
+ * The delay time to show the tooltip.
+ */
+const TOOLTIP_SHOW_DELAY_MS = 500;
+
+/**
  * Component abstract class. All components must inherit from this class.
  */
 export abstract class Component {
@@ -112,8 +117,8 @@ export abstract class Component {
                     tooltipTimeout = setTimeout(() => {
                         tooltipElement.classList.add("active");
                         tooltipElement.textContent = tooltipText;
-                    }, 500);
                 });
+                }, TOOLTIP_SHOW_DELAY_MS);
 
                 menuItem.addEventListener("mouseout", function () {
                     clearTimeout(tooltipTimeout);

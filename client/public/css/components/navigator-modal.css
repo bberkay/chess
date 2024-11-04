@@ -71,8 +71,6 @@
 }
 
 .navigator-modal:not(.navigator-modal--glass) {
-    border-left: none !important;
-
     .navigator-modal-bg {
         width: 100px;
         height: 105px;
@@ -124,6 +122,11 @@
         border-radius: 5px;
         width: fit-content;
     }
+}
+
+.navigator-modal--board{
+    width: var(--navigator-modal-board-modal-width);
+    height: var(--navigator-modal-board-modal-height);
 }
 
 @media (prefers-color-scheme: dark) {
