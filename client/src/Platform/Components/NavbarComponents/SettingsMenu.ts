@@ -20,6 +20,7 @@ import {
     DEFAULT_CONFIG as DEFAULT_SETTINGS_NOTATION_MENU,
 } from "../NotationMenu";
 import { Formatter } from "@Platform/Utils/Formatter";
+import { Component } from "../Component";
 
 /**
  * Defines available configuration operations for modifying settings 
@@ -54,20 +55,23 @@ type SettingValue = Settings[SettingsConfigOperation][keyof Settings[SettingsCon
  */
 export class SettingsMenu extends NavbarComponent {
     public readonly id: string = SETTINGS_MENU_ID;
-    private _classes: object[] = [];
+    private readonly chess: Chess;
+    
+    private _components: Component[] = [];
 
     /**
      * Constructor of the SettingsMenu class.
      */
-    constructor(...classes: object[]) {
+    constructor(chess: Chess, ...components: Component[]) {
         super();
+        this.chess = chess;
 
-        for (const classInstance of classes) {
-            if (!(classInstance instanceof Object))
-                throw new Error("The given object is not an Object.");
-            this._classes.push(classInstance);
+        for (const component of components) {
+            if (!(component instanceof Component))
+                throw new Error("The given object is not an instance of Component.");
+            this._components.push(component);
         }
-
+        
         this.loadLocalStorage();
     }
 
@@ -258,12 +262,13 @@ export class SettingsMenu extends NavbarComponent {
     }
 
     /**
-     * Get the class instance by its class type.
+     * Get the component instance by its class type. Like `LogConsole` 
+     * or `NotationMenu`.
      */
     // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-    private getClassInstanceByType(classType: Function): object | null {
+    private getComponentInstanceByType(classType: Function): object | null {
         return (
-            this._classes.find((c: object) => c instanceof classType) || null
+            this._components.find((c: object) => c instanceof classType) || null
         );
     }
 
@@ -292,20 +297,20 @@ export class SettingsMenu extends NavbarComponent {
         // Handling across the classes
         switch (configOperation) {
             case SettingsMenuOperation.ChangeBoardSetting:
-                (this.getClassInstanceByType(Chess) as Chess)?.board.setConfig({
+                this.chess.board.setConfig({
                     [settingKey]: settingValue,
                 });
                 break;
             case SettingsMenuOperation.ChangeLogConsoleSetting:
                 (
-                    this.getClassInstanceByType(LogConsole) as LogConsole
+                    this.getComponentInstanceByType(LogConsole) as LogConsole
                 ).setConfig({
                     [settingKey]: settingValue,
                 });
                 break;
             case SettingsMenuOperation.ChangeNotationMenuSetting:
                 (
-                    this.getClassInstanceByType(NotationMenu) as NotationMenu
+                    this.getComponentInstanceByType(NotationMenu) as NotationMenu
                 ).setConfig({
                     [settingKey]: settingValue,
                 });
