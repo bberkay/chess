@@ -51,7 +51,7 @@ export class ChessEngine extends BoardManager {
     private threefoldRepetitionHistory: Array<string> = [];
     private timerMap: Record<
         Color,
-        { intervalId: number | null; timer: Timer }
+        { intervalId: number | undefined; timer: Timer }
     > | null = null;
     public readonly logger: Logger = new Logger(
         "src/Chess/Engine/ChessEngine.ts"
@@ -185,14 +185,14 @@ export class ChessEngine extends BoardManager {
                     durations[Color.White].remaining,
                     durations[Color.White].increment
                 ),
-                intervalId: null,
+                intervalId: undefined,
             },
             [Color.Black]: {
                 timer: new Timer(
                     durations[Color.Black].remaining,
                     durations[Color.Black].increment
                 ),
-                intervalId: null,
+                intervalId: undefined,
             },
         };
 
