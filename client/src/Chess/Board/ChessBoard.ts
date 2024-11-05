@@ -269,7 +269,7 @@ export class ChessBoard {
     ): void {
         if (typeof square == "number") square = this.getSquareElement(square);
         if (!square) return;
-        const piece = square.querySelector(".piece");
+        const piece = square.querySelector(".piece:not(.ghost)");
         if (piece) piece.remove();
     }
 
@@ -755,7 +755,7 @@ export class ChessBoard {
 
             for (const move of moves[moveType as MoveType]!) {
                 const square = this.getSquareElement(move);
-                const squareContent = square.querySelector(".piece");
+                const squareContent = square.querySelector(".piece:not(.ghost)");
                 this.addSquareEffects(
                     move,
                     squareContent
@@ -853,7 +853,7 @@ export class ChessBoard {
         playMoveSound: boolean = true
     ): Promise<void> {
         return new Promise((resolve) => {
-            const toSquareContent = square.querySelector(`.piece`);
+            const toSquareContent = square.querySelector(`.piece:not(.ghost)`);
             // .piece[data-color="${this.getPieceColor(piece) === Color.White ? Color.Black : Color.White}"]
 
             if (
@@ -1490,7 +1490,7 @@ export class ChessBoard {
      * Get all pieces on the board.
      */
     public getAllPieces(): NodeListOf<HTMLDivElement> {
-        return document.querySelectorAll("#chessboard .piece");
+        return document.querySelectorAll("#chessboard .piece:not(.ghost)");
     }
 
     /**
@@ -1525,7 +1525,9 @@ export class ChessBoard {
         return (
             squareElement.className.includes("piece")
                 ? squareElement
-                : squareElement.querySelector(".piece")
+                : !squareElement.className.includes("ghost") 
+                    ? squareElement.querySelector(".piece") 
+                    : squareElement
         ) as HTMLDivElement;
     }
 
