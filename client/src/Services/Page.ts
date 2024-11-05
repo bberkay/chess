@@ -10,10 +10,10 @@ export enum PageTitle{
     WaitingGameToStart = "Waiting for Game to Start",
     GameStarted = "Game Started",
     OpponentTurn = "Waiting for Opponent",
-    YourTurn = "Your Turn, Make a Move",
+    YourTurn = "Your Turn",
     GameOver = "Game Over",
-    LobbyCreating = "Creating Lobby, Please Wait...",
-    JoiningLobby = "Joining Game, Waiting for Server..."
+    LobbyCreating = "Creating Lobby...",
+    JoiningLobby = "Joining Game..."
 }
 
 /**
