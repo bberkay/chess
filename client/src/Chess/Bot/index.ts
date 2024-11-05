@@ -84,7 +84,7 @@ export class Bot {
             Uint8Array.of(0x0, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00)
         );
     public readonly stockfishPath: string = `${
-        import.meta.env.MODE === "development" ? "Stockfish" : "js/stockfish"
+        import.meta.env.MODE === "development" ? "./Stockfish" : "./js/stockfish"
     }/${
         this.isWasmSupported ? "stockfish.wasm.js" : "stockfish.js"
     }`;
