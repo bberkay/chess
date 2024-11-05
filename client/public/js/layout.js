@@ -1,115 +1,55 @@
 // Layout.js is responsible for reordering the layout 
 // of the page based on the screen size.
 
-let isOrderedForMobile = false;
-let isOrderedForDesktop = false;
-let isOrderedForTablet = false;
+const left = document.querySelector(".left");
+const center = document.querySelector(".center");
+const right = document.querySelector(".right");
+const boardCreator = document.getElementById("board-creator");
+const navbarComponents = [
+    document.getElementById("navbar"),
+    document.getElementById("log-console"),
+    document.getElementById("appearance-menu"),
+    document.getElementById("settings-menu"),
+    document.getElementById("about-menu")
+]
 
-document.addEventListener("DOMContentLoaded", function() {
-    if (window.innerWidth < 900){
-        reOrderLayoutForMobile();    
-        isOrderedForMobile = true;
-    }
-    else if(window.innerWidth < 1250){
-        reOrderLayoutForTablet();
-        isOrderedForTablet = true;   
-    }
-    else{
-        // default layout is for desktop
-        isOrderedForDesktop = true
-    }
+let breakpointCircle = true;
+document.addEventListener("DOMContentLoaded", () => {
+    reorder(true);
 
-    window.addEventListener("resize", function() {
-        if (window.innerWidth < 900) {
-            if(!isOrderedForMobile) reOrderLayoutForMobile();  
-            isOrderedForMobile = true;  
-            isOrderedForDesktop = false;
-            isOrderedForTablet = false;
-        } else if(window.innerWidth < 1250) {
-            if(!isOrderedForTablet) reOrderLayoutForTablet();
-            isOrderedForTablet = true;
-            isOrderedForMobile = false;
-            isOrderedForDesktop = false;
-        }else{
-            if(!isOrderedForDesktop) reOrderLayoutForDesktop();
-            isOrderedForDesktop = true;
-            isOrderedForMobile = false;
-            isOrderedForTablet = false;
-        }
+    window.addEventListener("resize", () => {
+        reorder();   
     });
 });
 
-const reOrderLayoutForMobile = () => {
-    document.querySelector(".right").append(
-        document.getElementById("board-creator")
-    );
-
-    document.querySelector(".left").append(
-        document.getElementById("navbar"),
-        document.getElementById("log-console"),
-        document.getElementById("appearance-menu"),
-        document.getElementById("settings-menu"),
-        document.getElementById("about-menu")
-    );
-
-    if(document.getElementById("piece-creator").innerHTML)
-        return;
+const reorder = (isFirstTime = false) => {
+    const isMobile = window.innerWidth < 900;
+    const isTablet = window.innerWidth >= 900 && window.innerWidth < 1250;
+    const isDesktop = window.innerWidth >= 1250;
     
-    document.getElementById("chessboard").before(
-        document.querySelector(".player-section")
-    );
-
-    document.getElementById("chessboard").after(
-        document.querySelector(".player-section:not(:first-child)")
-    );
+    if(isMobile && (breakpointCircle || isFirstTime)){
+        reorderLayoutForMobile();
+        breakpointCircle = false;
+    } else if(isTablet && (!breakpointCircle || isFirstTime)){
+        reorderLayoutForTablet();
+        breakpointCircle = true;
+    } else if(isDesktop && (breakpointCircle || isFirstTime)){
+        reorderLayoutForDesktop();
+        breakpointCircle = false;
+    }
 }
 
-const reOrderLayoutForTablet = () => {
-    document.querySelector(".center").append(
-        document.getElementById("navbar"),
-        document.getElementById("log-console"),
-        document.getElementById("appearance-menu"),
-        document.getElementById("settings-menu"),
-        document.getElementById("about-menu")
-    );
-
-    document.querySelector(".center").prepend(
-        document.getElementById("board-creator")
-    );
-
-    if(document.querySelector("#notation-menu .player-section"))
-        return;
-    
-    document.getElementById("notation-menu").prepend(
-        document.querySelector(".player-section")
-    );
-
-    document.getElementById("notation-menu").append(
-        document.querySelector(".player-section")
-    );
+const reorderLayoutForMobile = () => {
+    right.append(boardCreator);
+    left.append(...navbarComponents);
 }
 
-const reOrderLayoutForDesktop = () => {
-    document.querySelector(".center").append(
-        document.getElementById("board-creator")
-    );
+const reorderLayoutForTablet = () => {
+    center.append(...navbarComponents);
+    center.prepend(boardCreator);
+}
 
-    document.querySelector(".left").append(
-        document.getElementById("navbar"),
-        document.getElementById("log-console"),
-        document.getElementById("appearance-menu"),
-        document.getElementById("settings-menu"),
-        document.getElementById("about-menu")
-    );
-    
-    if(document.getElementById("piece-creator").innerHTML || document.querySelector("#notation-menu .player-section"))
-        return;
-
-    document.getElementById("notation-menu").prepend(
-        document.querySelector(".player-section")
-    );
-
-    document.getElementById("notation-menu").append(
-        document.querySelector(".player-section")
-    );
+const reorderLayoutForDesktop = () => {
+    center.append(boardCreator);
+    left.append(...navbarComponents);
 }

@@ -371,6 +371,36 @@ export class NotationMenu extends Component {
                 </div>
         `
         );
+        
+        const chessboard = document.getElementById("chessboard")!;
+        const notationMenu = document.getElementById(NOTATION_MENU_ID)!; 
+        let breakpointCircle = true;
+        const reorder = (isFirstTime: boolean = false) => {
+            const isMobile = window.innerWidth < 900;
+            const isTablet = window.innerWidth >= 900 && window.innerWidth < 1250;
+            const isDesktop = window.innerWidth >= 1250;
+            
+            if(isMobile && (breakpointCircle || isFirstTime)){
+                chessboard.before(document.querySelector(".player-section:first-child")!);
+                chessboard.after(document.querySelector(".player-section:last-child")!);
+                breakpointCircle = false;
+            } else if(isTablet && (!breakpointCircle || isFirstTime)){
+                notationMenu.prepend(document.querySelector(".player-section:first-child")!);
+                notationMenu.append(
+                    document.querySelector("#chessboard ~ .player-section") || 
+                    document.querySelector(".player-section:last-child")!
+                );
+                breakpointCircle = true;
+            } else if(isDesktop && (breakpointCircle || isFirstTime)){
+                notationMenu.prepend(document.querySelector(".player-section:first-child")!);
+                notationMenu.append(document.querySelector(".player-section:last-child")!);
+                breakpointCircle = false;
+            }
+        }
+        reorder(true);
+        window.addEventListener("resize", () => {
+            reorder();
+        });
     }
 
     /**
