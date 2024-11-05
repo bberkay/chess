@@ -55,15 +55,13 @@ const reOrderLayoutForMobile = () => {
     if(document.getElementById("piece-creator").innerHTML)
         return;
     
-    const firstPlayerSection = document.querySelector(".player-section");
-    if(firstPlayerSection){
-        document.getElementById("chessboard").before(firstPlayerSection);
-    }
+    document.getElementById("chessboard").before(
+        document.querySelector(".player-section")
+    );
 
-    const secondPlayerSection = document.querySelector(".player-section:not(:first-child)");
-    if(secondPlayerSection){
-        document.getElementById("chessboard").before(secondPlayerSection);
-    }
+    document.getElementById("chessboard").after(
+        document.querySelector(".player-section:not(:first-child)")
+    );
 }
 
 const reOrderLayoutForTablet = () => {
@@ -81,20 +79,14 @@ const reOrderLayoutForTablet = () => {
 
     if(document.querySelector("#notation-menu .player-section"))
         return;
+    
+    document.getElementById("notation-menu").prepend(
+        document.querySelector(".player-section")
+    );
 
-    const firstPlayerSection = document.querySelector(".player-section");
-    if(firstPlayerSection){
-        document.getElementById("notation-menu").prepend(
-            firstPlayerSection
-        );
-    }
-
-    const secondPlayerSection = document.querySelector(".player-section");
-    if(secondPlayerSection){
-        document.getElementById("notation-menu").append(
-            secondPlayerSection
-        );
-    }
+    document.getElementById("notation-menu").append(
+        document.querySelector(".player-section")
+    );
 }
 
 const reOrderLayoutForDesktop = () => {
@@ -113,17 +105,11 @@ const reOrderLayoutForDesktop = () => {
     if(document.getElementById("piece-creator").innerHTML || document.querySelector("#notation-menu .player-section"))
         return;
 
-    const firstPlayerSection = document.querySelector(".player-section");
-    if(firstPlayerSection){
-        document.getElementById("notation-menu").prepend(
-            firstPlayerSection
-        );
-    }
-    
-    const secondPlayerSection = document.querySelector(".player-section");
-    if(secondPlayerSection){
-        document.getElementById("notation-menu").append(
-            secondPlayerSection
-        );
-    }
+    document.getElementById("notation-menu").prepend(
+        document.querySelector(".player-section")
+    );
+
+    document.getElementById("notation-menu").append(
+        document.querySelector(".player-section")
+    );
 }
