@@ -45,6 +45,7 @@ import {
     WS_ENDPOINT_MAX_LENGTH,
 } from "./Consts";
 import { SocketOperation, WsTitle } from "./Types";
+import { Page, PageTitle } from "./Services/Page";
 
 /**
  * `ChessPlatform` is the main class of the app. It provides the connections 
@@ -124,7 +125,7 @@ export class ChessPlatform {
             const lsLobbyId = LocalStorage.load(
                 LocalStorageKey.LastLobbyConnection
             )?.lobbyId;
-            const urlLobbyId = this.getLobbyIdFromUrl();
+            const urlLobbyId = Page.getEndpoint();
             const lobbyId = urlLobbyId || lsLobbyId;
             if (!lobbyId) return;
 
@@ -134,8 +135,10 @@ export class ChessPlatform {
             );
             if (!isLobbyIdValid) return;
 
-            if (!lsLobbyId || lsLobbyId !== lobbyId)
+            if (!lsLobbyId || lsLobbyId !== lobbyId) {
+                Page.setTitle(PageTitle.JoinGame);
                 this.platform.navigatorModal.showJoinLobby();
+            }
             else this.reconnectLobby();
         };
 
@@ -245,9 +248,13 @@ export class ChessPlatform {
         showAsError: boolean = true
     ): Promise<string | null> {
         try {
+            this.platform.navigatorModal.showLoading(
+                "Checking the lobby id. Please wait..."
+            );
             const response = await fetch(
                 SERVER_ADDRESS + "?lobbyId=" + lobbyId
             );
+            this.platform.navigatorModal.hide();
             if (!response.ok) {
                 this.terminateAndCleanupConnection();
                 const error = await response.text();
@@ -255,6 +262,7 @@ export class ChessPlatform {
                 return null;
             }
         } catch (error: unknown) {
+            this.platform.navigatorModal.hide();
             this.terminateAndCleanupConnection();
             if (showAsError)
                 this.platform.navigatorModal.showError(
@@ -268,36 +276,12 @@ export class ChessPlatform {
     }
 
     /**
-     * Get the lobby id from the URL if exists.
-     */
-    private getLobbyIdFromUrl(): string | null {
-        return window.location.pathname.split("/").pop() || null;
-    }
-
-    /**
-     * Display the lobby id on the url.
-     */
-    private displayLobbyIdOnUrl(lobbyId: string): void {
-        const url = new URL(window.location.href);
-        url.pathname = lobbyId;
-        window.history.pushState({}, "", url.toString());
-    }
-
-    /**
-     * Remove the lobby id from the url.
-     */
-    private removeLobbyIdFromUrl(): void {
-        const url = new URL(window.location.href);
-        url.pathname = "/";
-        window.history.pushState({}, "", url.toString());
-    }
-
-    /**
      * Establishes a WebSocket connection for creating a new lobby.
      * It sends the necessary parameters like player name, board settings, and time control.
      */
     private _createLobby(createLobbyReqParams: CreateLobbyReqParams): void {
-        this.removeLobbyIdFromUrl();
+        Page.removeEndpoint();
+        Page.setTitle(PageTitle.LobbyCreating);
         this.platform.navigatorModal.showLoading(
             "Creating a new lobby. Please wait the server to respond..."
         );
@@ -305,6 +289,8 @@ export class ChessPlatform {
         this.createAndHandleWebSocket(
             new URLSearchParams(Object.entries(createLobbyReqParams)).toString()
         );
+
+        Page.setTitle(PageTitle.LobbyReady);
     }
 
     /**
@@ -316,8 +302,7 @@ export class ChessPlatform {
         this._createLobby({
             name: playerName || DEFULT_PLAYER_NAME,
             board:
-                LocalStorage.load(LocalStorageKey.LastBoard) || 
-                this.platform.boardEditor.getSavedFen() ||
+                this.platform.boardEditor.getCreatedBoard() ||
                 StartPosition.Standard,
             remaining: (duration.remaining || DEFAULT_TOTAL_TIME).toString(),
             increment: (
@@ -331,6 +316,7 @@ export class ChessPlatform {
      * It sends the necessary parameters like player name and lobby ID.
      */
     private _joinLobby(joinLobbyReqParams: JoinLobbyReqParams): void {
+        Page.setTitle(PageTitle.JoiningLobby);
         this.platform.navigatorModal.showLoading(
             "Joining the lobby. Please wait the server to respond..."
         );
@@ -338,13 +324,15 @@ export class ChessPlatform {
         this.createAndHandleWebSocket(
             new URLSearchParams(Object.entries(joinLobbyReqParams)).toString()
         );
+
+        Page.setTitle(PageTitle.WaitingGameToStart);
     }
 
     /**
      * Connect to the lobby with the given lobby id.
      */
     private joinLobby(): void {
-        const lobbyId = this.getLobbyIdFromUrl();
+        const lobbyId = Page.getEndpoint();
         if (!lobbyId) return;
 
         const playerName = this.platform.navigatorModal.getEnteredPlayerName();
@@ -361,6 +349,7 @@ export class ChessPlatform {
     private _reconnectLobby(
         reconnectLobbyReqParams: ReconnectLobbyReqParams
     ): void {
+        Page.setTitle(PageTitle.JoiningLobby);
         this.platform.navigatorModal.showLoading(
             "Reconnecting to the lobby. Please wait the server to respond..."
         );
@@ -494,7 +483,8 @@ export class ChessPlatform {
         }
 
         LocalStorage.clear(LocalStorageKey.LastLobbyConnection);
-        this.removeLobbyIdFromUrl();
+        Page.clearTitle();
+        Page.removeEndpoint();
         if (resetPlatform) {
             LocalStorage.clear(LocalStorageKey.LastBoard);
             this.platform.notationMenu.clear();
@@ -533,6 +523,7 @@ export class ChessPlatform {
 
         const webSocketUrl =
             WS_ADDRESS + (webSocketEndpoint ? "?" + webSocketEndpoint : "");
+        console.log("WebSocket URL:", webSocketUrl);
         this.socket = new WebSocket(webSocketUrl);
 
         let player: Player | null = null;
@@ -549,7 +540,7 @@ export class ChessPlatform {
         };
 
         this.socket.onmessage = (event) => {
-            //console.log("message:", event.data);
+            console.log("message:", event.data);
             const [wsCommand, wsData] = WsCommand.parse(event.data);
             switch (wsCommand) {
                 case WsTitle.Created:
@@ -699,7 +690,7 @@ export class ChessPlatform {
         this.platform.navigatorModal.showLobbyInfo(
             window.location.origin + "/" + lobbyId
         );
-        this.displayLobbyIdOnUrl(lobbyId);
+        Page.setEndpoint(lobbyId);
         LocalStorage.save(LocalStorageKey.LastLobbyConnection, wsData);
         LocalStorage.save(LocalStorageKey.LastPlayerName, player.name);
         this.logger.save(
@@ -721,7 +712,7 @@ export class ChessPlatform {
         player: Player;
     } {
         const { lobbyId, player } = wsData as WsConnectedData;
-        this.displayLobbyIdOnUrl(lobbyId);
+        Page.setEndpoint(lobbyId);
         LocalStorage.save(LocalStorageKey.LastLobbyConnection, wsData);
         LocalStorage.save(LocalStorageKey.LastPlayerName, player.name);
         this.logger.save(

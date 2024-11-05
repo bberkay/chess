@@ -221,7 +221,7 @@ function isParametersValid(req: Request): Response | WebSocketReqParams {
         remaining: url.searchParams.get("remaining") || "",
         increment: url.searchParams.get("increment") || "",
     };
-    console.log("Params: ", params);
+    console.log("Params: ", JSON.stringify(params));
     let validation = validate(params);
     if (validation instanceof Response) return validation;
 

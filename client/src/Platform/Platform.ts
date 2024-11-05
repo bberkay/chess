@@ -37,6 +37,7 @@ import { Logger } from "@Services/Logger";
 import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage.ts";
 import { SettingsMenu } from "./Components/NavbarComponents/SettingsMenu.ts";
 import { BotAttributes } from "@ChessPlatform/Chess/Bot/index.ts";
+import { Page, PageTitle } from "@ChessPlatform/Services/Page.ts";
 
 /**
  * This class is the main class of the chess platform menu.
@@ -306,7 +307,6 @@ export class Platform {
                 this._flipBoardAndComponents();
                 break;
             case BoardEditorOperation.CreateBoard:
-                this.boardEditor.saveFen();
                 this._createBoardAndHandleComponents();
                 break;
         }
@@ -349,10 +349,8 @@ export class Platform {
         },
         playerColor: Color
     ): void {
-        if (BoardEditor.isEditorModeEnable()) {
-            this.boardEditor.saveFen();
+        if (BoardEditor.isEditorModeEnable())
             this.boardEditor.disableEditorMode();
-        }
 
         this._createBoardAndHandleComponents(createdGame.game);
         this.chess.board.lockActionsForColor(
@@ -372,6 +370,10 @@ export class Platform {
             this.chess.board.lock();
         else this.chess.board.unlock();
 
+        Page.setTitle(this.chess.engine.getTurnColor() === playerColor
+                ? PageTitle.YourTurn
+                : PageTitle.OpponentTurn);
+                
         this.logger.save(`Online game is created and components are updated.`);
     }
 
@@ -388,10 +390,8 @@ export class Platform {
     private preparePlatformForSingleplayerGame(
         bot: boolean | BotAttributes
     ): void {
-        if (BoardEditor.isEditorModeEnable()) {
-            this.boardEditor.saveFen();
+        if (BoardEditor.isEditorModeEnable())
             this.boardEditor.disableEditorMode();
-        }
 
         let botAttributes =
             bot && typeof bot === "object"

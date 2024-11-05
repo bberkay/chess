@@ -12,7 +12,7 @@ export enum LocalStorageKey {
     WasWelcomeModalShown = "WasWelcomeModalShown",
     WasBoardEditorEnabled = "WasBoardEditorEnabled",
     LastBoard = "LastBoard",
-    LastSavedFen = "LastSavedFen",
+    LastCreatedBoard = "LastCreatedBoard",
     LastBot = "LastBot",
     LastLobbyConnection = "LastLobbyConnection",
     LastPlayerName = "LastPlayerName",
@@ -28,7 +28,7 @@ type LocalStorageData = {
     [LocalStorageKey.WasWelcomeModalShown]: boolean;
     [LocalStorageKey.WasBoardEditorEnabled]: boolean;
     [LocalStorageKey.LastBoard]: JsonNotation;
-    [LocalStorageKey.LastSavedFen]: string | null;
+    [LocalStorageKey.LastCreatedBoard]: string | null;
     [LocalStorageKey.LastBot]: BotAttributes | null;
     [LocalStorageKey.LastLobbyConnection]: WsCreatedData | null;
     [LocalStorageKey.LastPlayerName]: string | null;

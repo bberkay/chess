@@ -566,7 +566,10 @@ export class Lobby {
      * Start the game.
      */
     public startGame(): void {
-        if (!this.isGameReadyToStart()) return;
+        if (!this.isGameReadyToStart()) {
+            console.log("Game is not ready to start.");
+            return;
+        }
         this.disableOfferCooldown();
         this.flipColors();
         this.chessEngine.createGame({

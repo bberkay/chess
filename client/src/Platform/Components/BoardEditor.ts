@@ -62,7 +62,6 @@ export class BoardEditor extends Component {
     private readonly chess: Chess;
 
     private static _isEditorModeEnable: boolean = false;
-    private _savedFenNotation: string = StartPosition.Standard;
     private _boardEditorObserver: MutationObserver | null = null;
     private _currentBoardCreatorMode: BoardCreatorMode =
         BoardCreatorMode.Custom;
@@ -149,9 +148,6 @@ export class BoardEditor extends Component {
 
         if (LocalStorage.isExist(LocalStorageKey.WasBoardEditorEnabled))
             this.enableEditorMode();
-
-        if (LocalStorage.isExist(LocalStorageKey.LastSavedFen))
-            this.saveFen(LocalStorage.load(LocalStorageKey.LastSavedFen));
     }
 
     /**
@@ -497,7 +493,7 @@ export class BoardEditor extends Component {
     public createBoard(
         fenNotation: string | StartPosition | JsonNotation | null = null
     ): void {
-        this.chess.createGame(fenNotation || this.getSavedFen());
+        this.chess.createGame(fenNotation || this.getCreatedBoard());
         this._prepareBoardEditorForGame();
     }
 
@@ -604,7 +600,7 @@ export class BoardEditor extends Component {
      */
     @isEditorModeEnable()
     private resetBoard(): void {
-        this.createBoard(this.getSavedFen());
+        this.createBoard(this.getCreatedBoard());
     }
 
     /**
@@ -729,24 +725,14 @@ export class BoardEditor extends Component {
     }
 
     /**
-     * Load the saved FEN form value.
+     * Get the saved FEN notation from the local storage. If there 
+     * is no saved, it returns the shown FEN notation on the form.
      */
-    public getSavedFen(): string {
+    public getCreatedBoard(): string {
         return (
-            this._savedFenNotation ||
-            LocalStorage.load(LocalStorageKey.LastSavedFen) ||
+            LocalStorage.load(LocalStorageKey.LastCreatedBoard) ||
             this.getShownFen()
         );
-    }
-
-    /**
-     * Save the FEN form value to use it later.
-     * @param {string} fen - The FEN notation to save if it is
-     * not given then it saves the current FEN form value.
-     */
-    public saveFen(fen: string | null = null): void {
-        this._savedFenNotation = fen ? fen : this.getShownFen();
-        LocalStorage.save(LocalStorageKey.LastSavedFen, this._savedFenNotation);
     }
 
     /**

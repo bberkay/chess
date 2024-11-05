@@ -18,6 +18,7 @@ import {
     NAVIGATOR_MODAL_ID,
     PIECE_CREATOR_ID,
 } from "@Platform/Consts";
+import { REPOSITORY_URL } from "@ChessPlatform/Consts";
 
 /**
  * This class provide a menu to show the logs.
@@ -747,11 +748,23 @@ export class NavigatorModal extends Component {
     /**
      * Show the loading screen.
      */
-    public showLoading(message: string): void {
+    public showLoading(
+        message: string,
+        showProjectLink: boolean = true
+    ): void {
         this.show(
             "Loading",
             `
-            <div style="margin-bottom:15px"><span>${message}</span></div>
+            <div style="margin-bottom:15px">
+                <span>${message}</span>
+                ${
+                    showProjectLink
+                        ? `<br>
+                        <small>You can view the project on <a href="${REPOSITORY_URL}" target="_blank">GitHub</a>
+                        </small>`
+                        : ""
+                }
+            </div>
             <div class="loader"></div>
             <div style="text-align:center;margin-top:15px;">
                 <button class="button--text" data-menu-operation="${NavigatorModalOperation.Hide}">

@@ -27,6 +27,7 @@ import { SquareClickMode, SquareEffect } from "./Board/Types";
 import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage.ts";
 import { Converter } from "./Utils/Converter.ts";
 import { Logger } from "@Services/Logger.ts";
+import { Page, PageTitle } from "@Services/Page.ts";
 import { Bot, BotAttributes } from "./Bot";
 
 /**
@@ -118,6 +119,22 @@ export class Chess {
         }
     }
 
+    /** 
+     * This function handles the page title according to 
+     * the turn color.
+     */
+    private _handlePageTitle(): void {
+        if(this.board.getLockedColor()) {
+            Page.setTitle(this.engine.getTurnColor() === this.board.getLockedColor() 
+                ? PageTitle.OpponentTurn
+                : PageTitle.YourTurn);
+        } else {
+            Page.setTitle(Page.getTitle() === PageTitle.YourTurn
+                ? PageTitle.OpponentTurn
+                : PageTitle.YourTurn);
+        }
+    }
+
     /**
      * This function creates a new game with the given position(fen notation/string,
      * StartPosition/string or JsonNotation).
@@ -176,6 +193,13 @@ export class Chess {
             LocalStorageKey.LastBoard,
             this.getGameAsJsonNotation()
         );
+        LocalStorage.save(
+            LocalStorageKey.LastCreatedBoard,
+            this.getGameAsFenNotation()
+        )
+
+        Page.setTitle(PageTitle.GameStarted);
+        this._handlePageTitle();
         this.logger.save(`Game saved to cache as json notation`);
 
         document.dispatchEvent(new Event(ChessEvent.onGameCreated));
@@ -202,6 +226,7 @@ export class Chess {
             this.playBotIfExist();
         }
 
+        this._handlePageTitle();
         LocalStorage.save(LocalStorageKey.LastBot, this._bot.getAttributes());
         document.dispatchEvent(
             new CustomEvent(ChessEvent.onBotAdded, {
@@ -712,6 +737,7 @@ export class Chess {
         ) {
             this.logger.save("Game updated in cache after move");
             LocalStorage.clear(LocalStorageKey.LastBoard);
+            Page.setTitle(PageTitle.GameOver);
             this.terminateBotIfExist();
             this.logger.save("Game over");
             if (this._gameTimeMonitorIntervalId !== -1)
@@ -724,6 +750,7 @@ export class Chess {
             ? this._selectedSquare
             : null;
         if (!this.board.isPromotionMenuShown()) {
+            this._handlePageTitle();
             this.board.setTurnColor(this.engine.getTurnColor());
             this.playBotIfExist();
             this.playPreMoveIfExist();
