@@ -344,41 +344,76 @@
         pointer-events: auto;
     }
 
-    & .square:has(.square-effect--from .square-effect-layer) {
-        background-color: var(--chessboard-from-color);
-    }
+    & .square{
+        &:has(.square-effect--from .square-effect-layer) {
+            background-color: var(--chessboard-from-color);
+        }
 
-    & .square:has(.square-effect--to .square-effect-layer) {
-        background-color: var(--chessboard-to-color);
-    }
+        &:has(.square-effect--to .square-effect-layer) {
+            background-color: var(--chessboard-to-color);
+        }
 
-    & .square:has(.square-effect--selected .square-effect-layer) {
-        background-color: var(--chessboard-selected-color);
-    }
+        &:has(.square-effect--selected .square-effect-layer) {
+            background-color: var(--chessboard-selected-color);
+        }
 
-    & .square:has(.square-effect--preselected .square-effect-layer) {
-        background-color: var(--chessboard-preselected-color);
-    }
+        &:has(.square-effect--preselected .square-effect-layer) {
+            background-color: var(--chessboard-preselected-color);
+        }
 
-    & .square:has(.square-effect--preplayed .square-effect-layer) {
-        background-color: var(--chessboard-preplayed-color);
-    }
+        &:has(.square-effect--preplayed .square-effect-layer) {
+            background-color: var(--chessboard-preplayed-color);
+        }
 
-    & .square:has(
-        .square-effect--hovering.square-effect--preplayable,
-        .square-effect--preplayable .square-effect-layer:hover
-    ) {
-        background-color: var(--chessboard-prehovering-color);
-    }
+        &:has(
+            .square-effect--preplayable.square-effect--hovering,
+            .square-effect--preplayable .square-effect-layer:hover
+        ) {
+            background-color: var(--chessboard-prehovering-color);
+        }
 
-    &
-        .square:has(
-            .square-effect--hovering.square-effect--playable,
-            .square-effect--hovering.square-effect--killable,
+        &:has(
+            .square-effect--playable.square-effect--hovering,
+            .square-effect--killable.square-effect--hovering,
             .square-effect--playable .square-effect-layer:hover,
             .square-effect--killable .square-effect-layer:hover
         ) {
-        background-color: var(--chessboard-hovering-color);
+            background-color: var(--chessboard-hovering-color);
+        }
+
+        &:has(.square-effect--checked .square-effect-layer) {
+            box-shadow: inset 0 0 15px var(--chessboard-checked-color) !important;
+        }
+    
+        &:has(.square-effect--disabled .square-effect-layer) {
+            box-shadow: inset 0 0 100px var(--chessboard-disabled-color);
+    
+            & .piece {
+                opacity: 0.5;
+            }
+        }
+    
+        &:has(.square-effect--selected .piece) {
+            opacity: 0.4;
+        }
+    
+        &:has(.square-effect--selected span) {
+            opacity: 0.2;
+        }
+
+        &:has(
+            .square-effect--killable:hover,
+            .square-effect--killable.square-effect--hovering
+        ) .square-effect-icon::after {
+            background-color: var(--chessboard-hovering-color);
+        }
+
+        &:has(
+            .square-effect--prekillable:hover,
+            .square-effect--prekillable.square-effect--hovering
+        ) .square-effect-icon::after {
+            background-color: var(--chessboard-prehovering-color);
+        }
     }
 
     & .square-effect--playable .square-effect-icon,
@@ -445,42 +480,6 @@
     & .square--white .square-effect--killable .square-effect-icon::after,
     & .square--white .square-effect--prekillable .square-effect-icon::after {
         background-color: var(--chessboard-white-square-color);
-    }
-
-    &
-        .square:has(.square-effect--hovering.square-effect--killable)
-        .square-effect-icon::after,
-        .square:has(.square-effect--killable:hover)
-        .square-effect-icon::after {
-        background-color: var(--chessboard-hovering-color);
-    }
-
-    &
-        .square:has(.square-effect--hovering.square-effect--prekillable)
-        .square-effect-icon::after,
-        .square:has(.square-effect--prekillable:hover)
-        .square-effect-icon::after {
-        background-color: var(--chessboard-prehovering-color);
-    }
-
-    & .square:has(.square-effect--checked .square-effect-layer) {
-        box-shadow: inset 0 0 15px var(--chessboard-checked-color) !important;
-    }
-
-    & .square:has(.square-effect--disabled .square-effect-layer) {
-        box-shadow: inset 0 0 100px var(--chessboard-disabled-color);
-
-        & .piece {
-            opacity: 0.5;
-        }
-    }
-
-    & .square:has(.square-effect--selected .piece) {
-        opacity: 0.4;
-    }
-
-    & .square:has(.square-effect--selected span) {
-        opacity: 0.2;
     }
 
     & .square:has(.square-effect--winner .square-effect-layer) {
