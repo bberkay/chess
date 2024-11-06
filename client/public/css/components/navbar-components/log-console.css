@@ -9,6 +9,10 @@
     color: var(--text-color);
     font-family: var(--log-console-font-family);
     resize: horizontal;
+
+    & hr{
+        color: var(--component-active-color);
+    }
 }
 
 /* Body */

@@ -14,6 +14,7 @@ export default defineConfig({
       '@Chess': path.resolve(__dirname, 'src/Chess'),
       '@Platform': path.resolve(__dirname, 'src/Platform'),
       '@Services': path.resolve(__dirname, 'src/Services'),
+      '@Utils': path.resolve(__dirname, 'src/Utils'),
     },
   },
 });

@@ -71,7 +71,7 @@
     --chessboard-black-king-image: url("../assets/pieces/desktop/black_king.webp");
 
     /* Background */
-    --chessboard-noise-effect-image: url("../assets/images/chessboard-noise-effect.webp");
+    --chessboard-noise-effect-image: url("../assets/images/desktop/chessboard-noise-effect.png");
 
     /* Z-Index, avoid changing */
     --chessboard-piece-z-index: 5;
@@ -87,6 +87,8 @@
 
 @media only screen and (hover: none) and (pointer: coarse) {
     :root {
+        --chessboard-noise-effect-image: url("../assets/images/mobile/chessboard-noise-effect.png");
+
         /* White Pieces - For Mobile */
         --chessboard-white-pawn-image: url("../assets/pieces/mobile/white_pawn.webp");
         --chessboard-white-rook-image: url("../assets/pieces/mobile/white_rook.webp");
@@ -123,6 +125,7 @@
     position: relative;
     background-size: cover;
     box-sizing: border-box;
+    touch-action: none;
 }
 
 #chessboard::after {
@@ -361,16 +364,21 @@
         background-color: var(--chessboard-preplayed-color);
     }
 
+    & .square:has(
+        .square-effect--hovering.square-effect--preplayable,
+        .square-effect--preplayable .square-effect-layer:hover
+    ) {
+        background-color: var(--chessboard-prehovering-color);
+    }
+
     &
         .square:has(
+            .square-effect--hovering.square-effect--playable,
+            .square-effect--hovering.square-effect--killable,
             .square-effect--playable .square-effect-layer:hover,
             .square-effect--killable .square-effect-layer:hover
         ) {
         background-color: var(--chessboard-hovering-color);
-    }
-
-    & .square:has(.square-effect--preplayable .square-effect-layer:hover) {
-        background-color: var(--chessboard-prehovering-color);
     }
 
     & .square-effect--playable .square-effect-icon,
@@ -439,11 +447,17 @@
         background-color: var(--chessboard-white-square-color);
     }
 
-    & .square:has(.square-effect--killable:hover) .square-effect-icon::after {
+    &
+        .square:has(.square-effect--hovering.square-effect--killable)
+        .square-effect-icon::after,
+        .square:has(.square-effect--killable:hover)
+        .square-effect-icon::after {
         background-color: var(--chessboard-hovering-color);
     }
 
     &
+        .square:has(.square-effect--hovering.square-effect--prekillable)
+        .square-effect-icon::after,
         .square:has(.square-effect--prekillable:hover)
         .square-effect-icon::after {
         background-color: var(--chessboard-prehovering-color);

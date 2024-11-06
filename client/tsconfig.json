@@ -27,7 +27,8 @@
       "@ChessPlatform/*": ["src/*"],
       "@Chess/*": ["src/Chess/*"],
       "@Platform/*": ["src/Platform/*"],
-      "@Services/*": ["src/Services/*"]
+      "@Services/*": ["src/Services/*"],
+      "@Utils/*": ["src/Utils/*"],
     }
   },
   "include": ["src", "tests"]

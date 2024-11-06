@@ -169,7 +169,7 @@ export class Chess {
         this.engine.createGame(position);
         this.logger.save(`Game successfully created on ChessEngine`);
 
-        /*this.board.createGame(position);
+        this.board.createGame(position);
         this.board.setTurnColor(this.engine.getTurnColor());
         this.board.showStatus(this.engine.getGameStatus());
 
@@ -180,7 +180,7 @@ export class Chess {
         if (lastMove) {
             this.board.addSquareEffects(lastMove.from, SquareEffect.From);
             this.board.addSquareEffects(lastMove.to, SquareEffect.To);
-        }*/
+        }
 
         this.logger.save(
             `Game successfully created on Chessboard and status-ts-${this.engine.getGameStatus()}-te- shown`

@@ -57,7 +57,9 @@
 }
 
 .navigator-modal .navigator-modal-bg {
-    background-image: url("../../assets/images/result-screen-bg-icon-dark.png");
+    --result-screen-bg-icon-dark: url("../../assets/images/desktop/result-screen-bg-icon-dark.png");
+    --result-screen-bg-icon-light: url("../../assets/images/desktop/result-screen-bg-icon-light.png");
+    background-image: var(--result-screen-bg-icon);
     background-size: cover;
     background-repeat: no-repeat;
     content: "";
@@ -68,6 +70,13 @@
     left: -50px;
     z-index: var(--navigator-modal-bgicon-z-index);
     font-size: var(--navigator-modal-icon-font-size);
+}
+
+@media only screen and (hover: none) and (pointer: coarse) {
+    .navigator-modal .navigator-modal-bg {
+        --result-screen-bg-icon-dark: url("../../assets/images/mobile/result-screen-bg-icon-dark.png");
+        --result-screen-bg-icon-light: url("../../assets/images/mobile/result-screen-bg-icon-light.png");
+    }
 }
 
 .navigator-modal:not(.navigator-modal--glass) {
@@ -151,14 +160,14 @@
 
     .navigator-modal .navigator-modal-bg,
     .navigator-modal--glass .navigator-modal-bg {
-        background-image: url("../../assets/images/result-screen-bg-icon-light.png");
+        background-image: var(--result-screen-bg-icon-light);
     }
 }
 
 @media (prefers-color-scheme: light) {
     .navigator-modal .navigator-modal-bg,
     .navigator-modal--glass .navigator-modal-bg {
-        background-image: url("../../assets/images/result-screen-bg-icon-dark.png");
+        background-image: var(--result-screen-bg-icon-dark);
     }
 }
 
@@ -170,14 +179,14 @@ body[data-color-scheme="dark"] {
 
     & .navigator-modal .navigator-modal-bg,
     & .navigator-modal--glass .navigator-modal-bg {
-        background-image: url("../../assets/images/result-screen-bg-icon-light.png");
+        background-image: var(--result-screen-bg-icon-light);
     }
 }
 
 body[data-color-scheme="light"] {
     & .navigator-modal .navigator-modal-bg,
     & .navigator-modal--glass .navigator-modal-bg {
-        background-image: url("../../assets/images/result-screen-bg-icon-dark.png");
+        background-image: var(--result-screen-bg-icon-dark);
     }
 }
 

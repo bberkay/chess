@@ -2,6 +2,7 @@ import { LogConsoleOperation } from "../../Types";
 import { Logger, LoggerEvent } from "@Services/Logger";
 import { NavbarComponent } from "./NavbarComponent";
 import { LOG_CONSOLE_ID } from "@Platform/Consts";
+import { debounce } from "@ChessPlatform/Utils/Timing";
 
 /**
  * Represents the configuration of the log console.
@@ -40,19 +41,10 @@ export class LogConsole extends NavbarComponent {
         this.renderComponent();
         this.stream();
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-        const debounce = (func: Function, wait: number) => {
-            let timeout: number;
-            return (...args: unknown[]) => {
-                clearTimeout(timeout);
-                timeout = setTimeout(
-                    () => func.apply(this, args),
-                    wait
-                ) as unknown as number;
-            };
-        };
-        const debouncedStream = debounce(this.stream.bind(this), LOG_DEBOUNCE_TIME_MS);
-        document.addEventListener(LoggerEvent.LogAdded, debouncedStream);
+        document.addEventListener(
+            LoggerEvent.LogAdded, 
+            debounce(this.stream.bind(this), LOG_DEBOUNCE_TIME_MS)
+        );
     }
 
     /**
@@ -148,6 +140,7 @@ export class LogConsole extends NavbarComponent {
 
         const logListElement: HTMLElement =
             document.getElementById("log-list")!;
+        logListElement.appendChild(document.createElement("hr"));
         for (const log of logs) {
             const logElement = document.createElement("li");
             logElement.innerHTML = `${generateSource(log.source)}`;
