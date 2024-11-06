@@ -362,7 +362,7 @@ export class ChessBoard {
                         callbacks.onPiecePreSelected!,
                         callbacks.onPreMoveCanceled!
                     );
-                }
+                }, { passive: true }
             );
             square.addEventListener("click", () => {
                 if (!mouseUpTriggered)
@@ -371,7 +371,7 @@ export class ChessBoard {
                         callbacks.onPieceMoved,
                         callbacks.onPiecePreMoved
                     );
-            });
+            }, { passive: true });
         });
 
         if (!this._isMouseUpEventBound) {
@@ -385,7 +385,7 @@ export class ChessBoard {
                         callbacks.onPieceMoved,
                         callbacks.onPiecePreMoved
                     );
-                }
+                }, { passive: true }
             );
         }
 
@@ -588,9 +588,9 @@ export class ChessBoard {
         
         const eventType = this._isTouchDevice( )? "touchmove" : "mousemove";
         document.removeEventListener(eventType, this._boundDragPiece);
-        document.addEventListener(eventType, this._boundDragPiece);
+        document.addEventListener(eventType, this._boundDragPiece, { passive: true });
         document.removeEventListener(eventType, this._boundHoverSquare);
-        document.addEventListener(eventType, this._boundHoverSquare);
+        document.addEventListener(eventType, this._boundHoverSquare, { passive: true });
     }
 
     /**

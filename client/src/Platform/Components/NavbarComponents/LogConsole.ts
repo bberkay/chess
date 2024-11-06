@@ -140,7 +140,12 @@ export class LogConsole extends NavbarComponent {
 
         const logListElement: HTMLElement =
             document.getElementById("log-list")!;
-        logListElement.appendChild(document.createElement("hr"));
+        
+        const lastLogListElement: HTMLElement | null = logListElement.querySelector("li:last-child");
+        if (lastLogListElement) {
+            lastLogListElement.classList.add("log--last");
+        }
+
         for (const log of logs) {
             const logElement = document.createElement("li");
             logElement.innerHTML = `${generateSource(log.source)}`;

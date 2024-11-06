@@ -68,6 +68,7 @@
         & td.current-move {
             background-color: var(--primary-color) !important;
             border: 1px solid var(--primary-color);
+            color: var(--white-color);
         }
 
         & td:has(.move):hover {

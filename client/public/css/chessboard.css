@@ -107,10 +107,21 @@
     }
 }
 
+body::after{
+    position:absolute; 
+    width:0; 
+    height:0; 
+    overflow:hidden; 
+    z-index:-1;
+    content: var(--chessboard-noise-effect-image);
+}
+
 /* -------------- Chessboard -------------- */
 #chessboard {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
+    min-width: var(--chessboard-board-size);
+    min-height: var(--chessboard-board-size);
     width: var(--chessboard-board-size);
     height: var(--chessboard-board-size);
     gap: 0 !important;
@@ -136,7 +147,7 @@
     width: var(--chessboard-board-size);
     height: var(--chessboard-board-size);
     background-image: image-set(
-        var(--chessboard-noise-effect-image) type("image/webp")
+        var(--chessboard-noise-effect-image) type("image/png")
     );
     opacity: 0.4;
     filter: brightness(0);
