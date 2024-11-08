@@ -890,9 +890,9 @@ export class Chess {
      * board. If it is false then it will return the turn color of the taken
      * back board.
      */
-    public getGameAsASCII(ignoreTakeBack: boolean = true): string {
+    public getGameAsAscii(ignoreTakeBack: boolean = true): string {
         if (ignoreTakeBack || this._currentTakeBackCount == 0)
-            return this.engine.getGameAsASCII();
+            return this.engine.getGameAsAscii();
 
         return Converter.jsonToASCII(
             this.engine.getBoardHistory()[

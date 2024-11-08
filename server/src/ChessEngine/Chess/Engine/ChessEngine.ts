@@ -126,7 +126,7 @@ export class ChessEngine extends BoardManager {
     /**
      * This function returns the current game as ascii notation.
      */
-    public getGameAsASCII(): string {
+    public getGameAsAscii(): string {
         return Converter.jsonToASCII(BoardQuerier.getGame());
     }
 
