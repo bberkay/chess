@@ -1,3 +1,4 @@
+import { REPOSITORY_URL } from "@ChessPlatform/Consts";
 import { NavbarComponent } from "./NavbarComponent";
 import { ABOUT_MENU_ID } from "@Platform/Consts";
 
@@ -21,10 +22,11 @@ export class AboutMenu extends NavbarComponent {
         this.loadHTML(
             ABOUT_MENU_ID,
             `
-            <div id="about-body">
-                <h1>Chess Game</h1>
-                <p>Chess Game is a web application that allows you to play chess with your friends online.</p>
-                <p>Bun + TypeScript + Vite</p>
+            <div class="about-body">
+                <h1>Chess Platform</h1>
+                <p>Chess Platform is a web application (and portfolio project) that allows you to play chess against yourself, a friend, or the Stockfish engine with adjustable difficulty levels. While the project does not use advanced chess programming techniques (such as 0x88 or bitboards), it fully implements all chess rules. The client side is developed entirely in <b>TypeScript</b> and tested with <b>Vitest</b>, while the server side is built using <b>Bun.js</b>.</p>
+                <div class="about-bg-icon"></div>
+                <p class="repo">More information about the project can be found on the <a href="${REPOSITORY_URL}" target="_blank">GitHub repository</a>.</p>
             </div>
         `
         );
