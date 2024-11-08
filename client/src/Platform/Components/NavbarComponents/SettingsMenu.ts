@@ -6,6 +6,8 @@ import { Chess } from "@Chess/Chess";
 import {
     AnimationSpeed,
     Config as ChessBoardConfig,
+} from "@Chess/Board/Types";
+import {
     DEFAULT_CONFIG as DEFAULT_SETTINGS_CHESSBOARD,
 } from "@Chess/Board/ChessBoard";
 import {

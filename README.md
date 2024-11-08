@@ -17,37 +17,47 @@
 <img src="https://lh3.googleusercontent.com/fife/ALs6j_EerTgvp0M5HaiQqhCWn-J0F2OELeqlpgahKuYAtA20B_3O9bRpCqMyE_jAkSyRycLu8xhzQkJP_beVQLt7d5v_0qLD-hvx-07uphaq8zzWUqFQnddutr2MC5P0mjf5gYlDU2xwEpU0qn3JW5V4jf59Sb0XPY9OEOBTfgp1mp4WvPB323GL3gTMiFdVk4nIXJsbvrIqHjYUeXrEbrYay-y9k_6a8KwmqsPI-OzGnznlNulkFvsPLBcgUn-T7wj4a2GoCxItYBT9j8uWaYhzgXqxXUxfLt5Lh5fYYocdff-at0yzYiEJKH4DJlrXHNbM1Nz1zyPSCpDqIC3P3r9PjCquhO7eREvYtxHli7sD3SfEwVyKGcLNkPJ3sFrqSDIctWKdebLsxEW7l3elUj-cC-iaieS37URymEEcJbV7iV1hyok79wdcjpPkLC8fcGpBuV9GCBS5X1-19ksvxr-n0TdbynZd3a5Uq9TT4RVbu4ZK-XCkwgHz5lzza30GhfTWRU9c6B1gWfB98PkZ9tHIiYQUa74q-F153wwarfb84Xvw8-YRIy7Uxy_ev_azIwDPgB16o33LhmqS-RkrDVasWScP-0EFOWp4n-6aWo6ZW_buvYxzxUa63PK7geEAUXPPmfFCTDODgB2jiCZXjS9C3-TCfKpIDi7z0zLH4_hLmzXTAXfWSi9xuJMQrpoCm-PgXKfl7CH-x_eZioLFX18nE4CyAYc6DwImnhduAvxZ-8VN22Vg6zOSzoLhwMPveHoiB_m1qlkIHYuX4VB8aiOwlJy6999jRz-jnxx6V77XW9R9mQgI125obdTyFnX6vLaCJWvyfLCYJRwFyZXs9w5NKCdmqZp7zEb7nf2e8myYgrgQXAeqnnVVv45wQqF34SfrQQ7y3fbwo1_C7dFgCytscNsjwNfO2V3jkvusekdLrbUGXNC3Z3Q-bXJ4X8fuIopWQ5BRoOe_G5IknbihRnhInO5jSYUFpiweX_mg4ATIjK_RLE568v3LPnqowUDdPmBUwX7xXcsuY6dTiCz9FprHGOobZ_BcaK7QiXR37td1xD0GwEeF5_wqos2FNkYkIZJxYEHpIldvf8tzm5wzL8ROzwzWKlaRMwrwwV_hVzk5jHR3ADL4p-aoZ2JS57DN7PPbAvL5YfSxJs7LdZNFZdoO6_eYjCCG9qWNvkQ0mm52ZLFZMVxKxqg68mzDx4m5oRyqvmsnagkMFpbJuIYOv_320vhPXwQt6FUQNVekGdgyu_K0y2oZPeS4tG9UJDVz1x1l5iVSXKn8-qm7Yh54oL4PdZ_ypaX1XYXe2zqMU3yneLq1UvrXocqi9XFZXA0kJrUftoz5thUY6wMXXQT-RLqnDQ9gUuHIO1lb2JjfoBBDN4iBNGstutazBPpGA1o7vO-7PAsSTy9BFSIe-3FZsmZZQAR8lSGOz9NJDs11IukLOF16umG76EmYJXzAq9d95WnKIsf_X12carT9YaasRelQpjJhkU4DNsiEiGKh7-wDc88CzBW1Wm3BDGueKcLcg78Ed1S1SwecekaD5FbjaavPSw_gtnAOB0sbBUEyYJamk-Vt8_H3cutukNywI9CPVPf6G-S00h-kVybenA=w1280-h937" alt="chess-platform-page" border="0">
 <h3>Features</h3>
 <ul>
-    <li>by <a href = "https://github.com/bberkay/chess-platform/tree/main/src">ChessPlatform</a>
-        <ul>
-            <li>Connection between Platform and Chess</li>
-        </ul>
-    </li>
-    <li>by <a href = "https://github.com/bberkay/chess-platform/tree/main/src/Chess">Chess</a>
-        <ul>
-            <li><b>General Rules:</b> Check, Checkmate, Stalemate.</li>
-            <li><b>Other Rules:</b> <a href = "https://en.wikipedia.org/wiki/Threefold_repetition">Threefold repetition</a>, <a href = "https://en.wikipedia.org/wiki/Fifty-move_rule">Fifty-move rule</a>.</li>
-            <li><b>Board:</b> Includes animations and sounds for moves. Also, easily customizable from <a href = "https://github.com/bberkay/chess-platform/blob/main/public/css/chessboard.css">css</a>.</li>
-            <li><b>Move Calculation</b>: Calculation and validation of every piece.</li>
-            <li><b>Special Moves:</b> <a href = "https://en.wikipedia.org/wiki/Castling">Castling</a>, <a href = "https://en.wikipedia.org/wiki/Promotion_(chess)">Promotion</a>, <a href = "https://en.wikipedia.org/wiki/En_passant">En Passant</a>.</li>
-            <li><b>Score Calculation:</b> For more information check <a href = "https://en.wikipedia.org/wiki/Chess_piece_relative_value">this.</a></li>
-            <li><b>Algebraic Notation:</b> For more information check <a href = "https://en.wikipedia.org/wiki/Algebraic_notation_(chess)">this.</a></li>
-            <li><b>Fen Notation:</b> For more information check <a href = "https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation">this.</a></li>
-            <li><b>Caching:</b> With active-passive options.</li>
-            <li><b>Logging:</b> Detailed descriptions of calculation in engine and board.</li>
-            <li><b>Standalone Versions:</b> For use just board or engine.</li>
-        </ul>
-    </li>
-    <li>by <a href = "https://github.com/bberkay/chess-platform/tree/main/src/Platform">Platform</a>
-        <ul>
-            <li><b>Notation Table:</b> Shows the algebraic notation calculated by chess on UI.</li>
-            <li><b>Score Section:</b> Shows the score calculated by chess on UI.</li>
-            <li><b>Game Creator:</b> Input for custom fen notation and select box for some template fen notations.</li>
-            <li><b>Log Console:</b> Shows the log created by chess on UI in every action.</li>
-        </ul>
-    </li>   
+  <li><b>Board:</b> Includes animations and sounds for normal moves and pre-moves. Can be flipped. Supports drag-and-drop on both desktop and mobile. Easily <a href = "https://github.com/bberkay/chess/blob/main/public/css/chessboard.css">customizable</a> and configurable.</li>
+  <li><b>Standard Mechanics:</b> 
+    <ul>
+      <li>Move Calculation/Validation and special moves like <a href = "https://en.wikipedia.org/wiki/Castling">Castling</a>, <a href = "https://en.wikipedia.org/wiki/Promotion_(chess)">Promotion</a>, <a href = "https://en.wikipedia.org/wiki/En_passant">En Passant</a>.</li>
+      <li>Check, Checkmate, Stalemate, <a href = "https://en.wikipedia.org/wiki/Threefold_repetition">Threefold Repetition</a>, <a href = "https://en.wikipedia.org/wiki/Fifty-move_rule">Fifty-move Rule</a>, <a href = "https://support.chess.com/en/articles/8705277-what-does-insufficient-mating-material-mean">Insufficient Material</a>.</li>
+      <li><a href = "https://en.wikipedia.org/wiki/Chess_piece_relative_value">Score Calculation</a>, <a href = "https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation">Fen Notation</a>, <a href = "https://en.wikipedia.org/wiki/Algebraic_notation_(chess)">Algebraic Notation</a>.</li>
+      <li>Time Control</li>
+    </ul>
+  <li><b>Extended Mechanics:</b>
+    <ul>
+      <li>Pre-Move for every type of move like normal, castling, en passant and promotion/promote (to any type of piece). Supports multiple pre-moves and can be canceled of course.</li>
+      <li>Abort, Resign and Draw, Undo and Play again offers.</li>
+      <li>Going back and forward in the move history.</li>
+    </ul>
+  <li><b>Game Modes:</b> 
+    <ul>
+      <li><b>Play by Yourself</b>: Play by yourself or against a friend on the same device.</li>
+      <li><b>Play against Friend</b>: Play against a friend on different devices by creating a lobby or joining an existing one.</li>
+      <li><b>Play against Bot</b>: Play against the Stockfish engine with <a href="https://github.com/bberkay/chess/blob/main/client/src/Chess/Bot/index.ts">adjustable</a> difficulty levels.</li>
+    </ul>
+  </li>
+  <li><b>Components:</b> 
+    <ul>
+      <li><a href="https://github.com/bberkay/chess/blob/main/client/src/Platform/Components/NotationMenu.ts"><b>Notation Table</b></a>: Shows move history and provides navigation on it. Also, shows the scores, players, durations
+      and provides actions according to the game mode like draw if it is multiplayer game or abort if it is solo game.</li>
+      <li><a href="https://github.com/bberkay/chess/blob/main/client/src/Platform/Components/BoardEditor.ts"><b>Board Editor</b></a>: Provides editable board for creating custom positions and starting games from them.</li>
+      <li><a href="https://github.com/bberkay/chess/blob/main/client/src/Platform/Components/NavbarComponents/LogConsole.ts"><b>Log Console</b></a>: Shows the log of every operation and their details that are done</li>
+      <li><a href="https://github.com/bberkay/chess/blob/main/client/src/Platform/Components/NavbarComponents/AppearanceMenu.ts"><b>Appearance Menu</b></a>: Provides board and theme customization without changing the css file.</li>
+      <li><a href="https://github.com/bberkay/chess/blob/main/client/src/Platform/Components/NavbarComponents/SettingsMenu.ts"><b>Settings Menu</b></a>: For changing the configurations of the chess and components like closing sound effects or changing the notation style.</li>
+    </ul>
+  </li>
+  <li><b>Others:</b>
+    <ul>
+      <li>Responsive design for different devices.</li>
+      <li>Light, Dark and System theme support.</li>
+      <li>Cache system for saving the game, custom settings or appearance etc.</li>
+      <li>Reconnection system for multiplayer games.</li>
+    </ul>
 </ul>
 <h3>Architecture</h3>
-<h5><i>Technologies: HTML, CSS, JS, TypeScript, Node, Vite, Vitest</i></h5>
+<h5><i>Technologies: TypeScript, Bun, Vite, Vitest</i></h5>
 <p>In this section, I will explain the project's architecture without going into too much detail as much as possible. As I mentioned in the introduction, the project currently consists of two main parts and the third part that provides connection between main parts and manages the app.</p>
 <ul>
     <li>

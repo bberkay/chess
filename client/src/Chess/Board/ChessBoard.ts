@@ -18,30 +18,16 @@ import {
     Square,
     StartPosition,
 } from "../Types";
-import { SoundEffect, SquareClickMode, SquareEffect } from "./Types";
+import { 
+    Config,
+    AnimationSpeed,
+    SoundEffect, 
+    SquareClickMode, 
+    SquareEffect 
+} from "./Types";
 import { Converter } from "../Utils/Converter.ts";
 import { Logger } from "@Services/Logger.ts";
 import { throttle } from "@ChessPlatform/Utils/Timing.ts";
-
-/**
- * Animation speed of the pieces on the chess board.
- */
-export enum AnimationSpeed {
-    Slow = "Slow",
-    Medium = "Medium",
-    Fast = "Fast",
-}
-
-/**
- * Configuration of the chess board.
- */
-export interface Config {
-    enableSoundEffects: boolean;
-    enablePreSelection: boolean;
-    showHighlights: boolean;
-    enableWinnerAnimation: boolean;
-    animationSpeed: AnimationSpeed;
-}
 
 /**
  * Default configuration of the chess board.

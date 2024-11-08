@@ -1,4 +1,24 @@
 /**
+ * Animation speed of the pieces on the chess board.
+ */
+export enum AnimationSpeed {
+    Slow = "Slow",
+    Medium = "Medium",
+    Fast = "Fast",
+}
+
+/**
+ * Configuration of the chess board.
+ */
+export interface Config {
+    enableSoundEffects: boolean;
+    enablePreSelection: boolean;
+    showHighlights: boolean;
+    enableWinnerAnimation: boolean;
+    animationSpeed: AnimationSpeed;
+}
+
+/**
  * @description SquareEffect enum for the effects of the move/square.
  * @see src/Chess/Board/ChessBoard.ts For more information.
  */
