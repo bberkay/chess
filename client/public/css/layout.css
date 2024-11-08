@@ -76,6 +76,10 @@
     --navigator-modal-bgicon-z-index: 14; /* Higher than everything except navigator-modal-z-index */
     --navigator-modal-backdrop-z-index: 13; /* Higher than everything except navigator-modal-bgicon-z-index */
 
+    /* Background Images */
+    --king-icon-dark: url("../../assets/images/desktop/king-icon-dark.png");
+    --king-icon-light: url("../../assets/images/desktop/king-icon-light.png");
+
     /* Standard colors, avoid changing */
     --white-color: #fff;
     --black-color: #000;
@@ -115,6 +119,13 @@
     }
 }
 
+@media only screen and (hover: none) and (pointer: coarse) {
+    :root{
+        --king-icon-dark: url("../../assets/images/mobile/king-icon-dark.png");
+        --king-icon-light: url("../../assets/images/mobile/king-icon-light.png");
+    }
+}
+
 /* ------------------- Themes ------------------- */
 body {
     --bg-color: light-dark(#f5f5f5, #141414);
@@ -146,21 +157,25 @@ body {
 
 @media (prefers-color-scheme: light) {
     body {
+        --king-icon: var(--king-icon-dark);
         --linear-gradient: var(--linear-gradient-light);
     }
 }
 
 @media (prefers-color-scheme: dark) {
     body {
+        --king-icon: var(--king-icon-light);
         --linear-gradient: var(--linear-gradient-dark);
     }
 }
 
 body[data-color-scheme="light"] {
+    --king-icon: var(--king-icon-dark);
     --linear-gradient: var(--linear-gradient-light);
 }
 
 body[data-color-scheme="dark"] {
+    --king-icon: var(--king-icon-light);
     --linear-gradient: var(--linear-gradient-dark);
 }
 

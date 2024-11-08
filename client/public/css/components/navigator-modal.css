@@ -57,9 +57,7 @@
 }
 
 .navigator-modal .navigator-modal-bg {
-    --result-screen-bg-icon-dark: url("../../assets/images/desktop/result-screen-bg-icon-dark.png");
-    --result-screen-bg-icon-light: url("../../assets/images/desktop/result-screen-bg-icon-light.png");
-    background-image: var(--result-screen-bg-icon);
+    background-image: var(--king-icon);
     background-size: cover;
     background-repeat: no-repeat;
     content: "";
@@ -70,13 +68,6 @@
     left: -50px;
     z-index: var(--navigator-modal-bgicon-z-index);
     font-size: var(--navigator-modal-icon-font-size);
-}
-
-@media only screen and (hover: none) and (pointer: coarse) {
-    .navigator-modal .navigator-modal-bg {
-        --result-screen-bg-icon-dark: url("../../assets/images/mobile/result-screen-bg-icon-dark.png");
-        --result-screen-bg-icon-light: url("../../assets/images/mobile/result-screen-bg-icon-light.png");
-    }
 }
 
 .navigator-modal:not(.navigator-modal--glass) {
@@ -95,6 +86,10 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+
+    & .navigator-modal-bg {
+        background-image: var(--king-icon-light);
+    }
 
     &::before{
         content: "";
@@ -157,36 +152,12 @@
         box-shadow: 0 0 5px var(--black-color);
         border: 1px solid var(--border-color);
     }
-
-    .navigator-modal .navigator-modal-bg,
-    .navigator-modal--glass .navigator-modal-bg {
-        background-image: var(--result-screen-bg-icon-light);
-    }
-}
-
-@media (prefers-color-scheme: light) {
-    .navigator-modal .navigator-modal-bg,
-    .navigator-modal--glass .navigator-modal-bg {
-        background-image: var(--result-screen-bg-icon-dark);
-    }
 }
 
 body[data-color-scheme="dark"] {
     & .navigator-modal:not(.navigator-modal--glass) {
         box-shadow: 0 0 5px var(--black-color);
         border: 1px solid var(--border-color);
-    }
-
-    & .navigator-modal .navigator-modal-bg,
-    & .navigator-modal--glass .navigator-modal-bg {
-        background-image: var(--result-screen-bg-icon-light);
-    }
-}
-
-body[data-color-scheme="light"] {
-    & .navigator-modal .navigator-modal-bg,
-    & .navigator-modal--glass .navigator-modal-bg {
-        background-image: var(--result-screen-bg-icon-dark);
     }
 }
 
