@@ -11,7 +11,7 @@
 import { Chess } from "@Chess/Chess";
 import { Platform } from "@Platform/Platform.ts";
 import { Logger } from "@Services/Logger";
-import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage.ts";
+import { Storage, StorageKey } from "@Services/Storage";
 import { ChessEvent, Color, GameStatus, StartPosition } from "@Chess/Types";
 import {
     DEFULT_PLAYER_NAME,
@@ -43,8 +43,8 @@ import {
     WS_ADDRESS,
     WS_ENDPOINT_MAX_LENGTH,
 } from "./Consts";
-import { SocketOperation, WsTitle } from "./Types";
-import { Page, PageTitle } from "./Services/Page";
+import { SocketEvent, SocketOperation, WsTitle } from "./Types";
+import { Page } from "@Global/Page";
 
 /**
  * `ChessPlatform` is the main class of the app. It provides the connections
@@ -69,6 +69,7 @@ export class ChessPlatform {
      * Constructor of the ChessPlatform class.
      */
     constructor() {
+        Page.initEventListeners();
         this.chess = new Chess();
         this.platform = new Platform(this.chess);
         this.init();
@@ -127,8 +128,8 @@ export class ChessPlatform {
          * Connect to the last connection if exists.
          */
         const connectToLastConnectionOrLobbyUrl = async () => {
-            const lsLobbyId = LocalStorage.load(
-                LocalStorageKey.LastLobbyConnection
+            const lsLobbyId = Storage.load(
+                StorageKey.LastLobbyConnection
             )?.lobbyId;
             const urlLobbyId = Page.getEndpoint();
             const lobbyId = urlLobbyId || lsLobbyId;
@@ -141,7 +142,6 @@ export class ChessPlatform {
             if (!isLobbyIdValid) return;
 
             if (!lsLobbyId || lsLobbyId !== lobbyId) {
-                Page.setTitle(PageTitle.JoinGame);
                 this.platform.navigatorModal.showJoinLobby();
             } else this._reconnectLobby();
         };
@@ -196,9 +196,9 @@ export class ChessPlatform {
         ) as SocketOperation;
         if (
             operation != SocketOperation.CancelLobby &&
-            LocalStorage.isExist(LocalStorageKey.WasBoardEditorEnabled)
+            Storage.isExist(StorageKey.WasBoardEditorEnabled)
         )
-            LocalStorage.clear(LocalStorageKey.WasBoardEditorEnabled);
+            Storage.clear(StorageKey.WasBoardEditorEnabled);
 
         switch (operation) {
             case SocketOperation.CreateLobby:
@@ -298,9 +298,7 @@ export class ChessPlatform {
     /**
      * Establishes a WebSocket connection for creating a new lobby.
      */
-    public createLobby(createLobbyReqParams: CreateLobbyReqParams): void {
-        Page.removeEndpoint();
-        Page.setTitle(PageTitle.LobbyCreating);
+    public createLobby(createLobbyReqParams: CreateLobbyReqParams): void {        
         this.platform.navigatorModal.showLoading(
             "Creating a new lobby. Please wait the server to respond..."
         );
@@ -309,7 +307,7 @@ export class ChessPlatform {
             new URLSearchParams(Object.entries(createLobbyReqParams)).toString()
         );
 
-        Page.setTitle(PageTitle.LobbyReady);
+        document.dispatchEvent(new Event(SocketEvent.onCreatingLobby));
     }
 
     /**
@@ -335,7 +333,6 @@ export class ChessPlatform {
      * Establishes a WebSocket connection for joining an existing lobby.
      */
     public joinLobby(joinLobbyReqParams: JoinLobbyReqParams): void {
-        Page.setTitle(PageTitle.JoiningLobby);
         this.platform.navigatorModal.showLoading(
             "Joining the lobby. Please wait the server to respond..."
         );
@@ -344,7 +341,11 @@ export class ChessPlatform {
             new URLSearchParams(Object.entries(joinLobbyReqParams)).toString()
         );
 
-        Page.setTitle(PageTitle.WaitingGameToStart);
+        document.dispatchEvent(
+            new CustomEvent(SocketEvent.onJoiningLobby, {
+                detail: joinLobbyReqParams.lobbyId,
+            })
+        );
     }
 
     /**
@@ -369,7 +370,6 @@ export class ChessPlatform {
     private reconnectLobby(
         reconnectLobbyReqParams: ReconnectLobbyReqParams
     ): void {
-        Page.setTitle(PageTitle.JoiningLobby);
         this.platform.navigatorModal.showLoading(
             "Reconnecting to the lobby. Please wait the server to respond..."
         );
@@ -379,16 +379,22 @@ export class ChessPlatform {
                 Object.entries(reconnectLobbyReqParams)
             ).toString()
         );
+
+        document.dispatchEvent(
+            new CustomEvent(SocketEvent.onJoiningLobby, {
+                detail: reconnectLobbyReqParams.lobbyId
+            })
+        );
     }
 
     /**
      * Reconnect the last lobby that the user connected.
      */
     private _reconnectLobby(): void {
-        if (!LocalStorage.isExist(LocalStorageKey.LastLobbyConnection)) return;
+        if (!Storage.isExist(StorageKey.LastLobbyConnection)) return;
 
-        const lastLobbyConnection = LocalStorage.load(
-            LocalStorageKey.LastLobbyConnection
+        const lastLobbyConnection = Storage.load(
+            StorageKey.LastLobbyConnection
         ) as WsCreatedData;
         this.reconnectLobby({
             lobbyId: lastLobbyConnection.lobbyId,
@@ -400,11 +406,12 @@ export class ChessPlatform {
      * Cancel the game and close the socket connection
      */
     public cancelLobby(): void {
-        LocalStorage.clear(LocalStorageKey.LastLobbyConnection);
+        Storage.clear(StorageKey.LastLobbyConnection);
         this.platform.navigatorModal.hide();
         this.terminateConnection();
         this.platform.notationMenu.displayNewGameUtilityMenu();
         this.chess.board.lock();
+        document.dispatchEvent(new Event(SocketEvent.onLobbyCancelled));
     }
 
     /**
@@ -502,11 +509,10 @@ export class ChessPlatform {
             return;
         }
 
-        LocalStorage.clear(LocalStorageKey.LastLobbyConnection);
-        Page.clearTitle();
-        Page.removeEndpoint();
+        Storage.clear(StorageKey.LastLobbyConnection);
+        document.dispatchEvent(new Event(SocketEvent.onConnectionTerminated));
         if (resetPlatform) {
-            LocalStorage.clear(LocalStorageKey.LastBoard);
+            Storage.clear(StorageKey.LastBoard);
             this.platform.notationMenu.clear();
         }
     }
@@ -717,9 +723,14 @@ export class ChessPlatform {
         this.platform.navigatorModal.showLobbyInfo(
             window.location.origin + "/" + lobbyId
         );
-        Page.setEndpoint(lobbyId);
-        LocalStorage.save(LocalStorageKey.LastLobbyConnection, wsCreatedData);
-        LocalStorage.save(LocalStorageKey.LastPlayerName, player.name);
+        
+        Storage.save(StorageKey.LastLobbyConnection, wsCreatedData);
+        Storage.save(StorageKey.LastPlayerName, player.name);
+        document.dispatchEvent(
+            new CustomEvent(SocketEvent.onLobbyCreated, {
+                detail: lobbyId,
+            })
+        );
         this.logger.save(
             `Lobby created and connected-ts-${lobbyId}-te- as ${player.name}.`
         );
@@ -739,9 +750,9 @@ export class ChessPlatform {
         player: Player;
     } {
         const { lobbyId, player } = wsConnectedData;
-        Page.setEndpoint(lobbyId);
-        LocalStorage.save(LocalStorageKey.LastLobbyConnection, wsConnectedData);
-        LocalStorage.save(LocalStorageKey.LastPlayerName, player.name);
+        Storage.save(StorageKey.LastLobbyConnection, wsConnectedData);
+        Storage.save(StorageKey.LastPlayerName, player.name);
+        document.dispatchEvent(new Event(SocketEvent.onLobbyJoined));
         this.logger.save(
             `Connected to the lobby-ts-${lobbyId}-te- as ${player.name}.`
         );

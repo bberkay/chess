@@ -34,11 +34,9 @@ import { LogConsole } from "./Components/NavbarComponents/LogConsole";
 import { AboutMenu } from "./Components/NavbarComponents/AboutMenu.ts";
 import { AppearanceMenu } from "./Components/NavbarComponents/AppearanceMenu.ts";
 import { Logger } from "@Services/Logger";
-import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage.ts";
+import { Storage, StorageKey } from "@Services/Storage";
 import { SettingsMenu } from "./Components/NavbarComponents/SettingsMenu.ts";
 import { BotAttributes } from "@ChessPlatform/Chess/Bot/index.ts";
-import { Page, PageTitle } from "@ChessPlatform/Services/Page.ts";
-
 /**
  * This class is the main class of the chess platform menu.
  * It provides the components of the menu and connections between the chess and menu.
@@ -81,7 +79,7 @@ export class Platform {
 
         //For testing purposes
         document.addEventListener("keydown", (event) => {
-            if (event.ctrlKey && event.key === " ") LocalStorage.clear();
+            if (event.ctrlKey && event.key === " ") Storage.clear();
         });
     }
 
@@ -353,7 +351,7 @@ export class Platform {
             this.boardEditor.disableEditorMode();
 
         this._createBoardAndHandleComponents(createdGame.game);
-        this.chess.board.lockActionsForColor(
+        this.chess.board.lockActionsOfColor(
             playerColor === Color.White ? Color.Black : Color.White
         );
         this.notationMenu.displayOnlineGameUtilityMenu();
@@ -369,10 +367,6 @@ export class Platform {
         if (playerColor !== this.chess.getTurnColor())
             this.chess.board.lock();
         else this.chess.board.unlock();
-
-        Page.setTitle(this.chess.engine.getTurnColor() === playerColor
-                ? PageTitle.YourTurn
-                : PageTitle.OpponentTurn);
                 
         this.logger.save(`Online game is created and components are updated.`);
     }
@@ -411,7 +405,7 @@ export class Platform {
         this.notationMenu.setTurnIndicator(this.chess.getTurnColor());
 
         this.logger.save(`Editor mode is disabled and board is now playable.`);
-        LocalStorage.clear(LocalStorageKey.WasBoardEditorEnabled);
+        Storage.clear(StorageKey.WasBoardEditorEnabled);
         document.dispatchEvent(new Event(PlatformEvent.onBoardCreated));
     }
 

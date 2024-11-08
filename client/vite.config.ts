@@ -15,6 +15,7 @@ export default defineConfig({
       '@Platform': path.resolve(__dirname, 'src/Platform'),
       '@Services': path.resolve(__dirname, 'src/Services'),
       '@Utils': path.resolve(__dirname, 'src/Utils'),
+      '@Global': path.resolve(__dirname, 'src/Global'),
     },
   },
 });

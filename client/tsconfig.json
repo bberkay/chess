@@ -29,6 +29,7 @@
       "@Platform/*": ["src/Platform/*"],
       "@Services/*": ["src/Services/*"],
       "@Utils/*": ["src/Utils/*"],
+      "@Global/*": ["src/Global/*"],
     }
   },
   "include": ["src", "tests"]

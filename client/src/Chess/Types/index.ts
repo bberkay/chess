@@ -294,7 +294,6 @@ export enum ChessEvent {
      */
     onTakeBackOrForward = "onTakeBackOrForward",
 
-
     /**
      * Triggered when the player take back a move on the board
      * and the engine.

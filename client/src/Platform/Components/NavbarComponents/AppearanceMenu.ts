@@ -1,6 +1,6 @@
 import { NavbarComponent } from "./NavbarComponent";
 import { AppearanceMenuOperation } from "../../Types";
-import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage";
+import { Storage, StorageKey } from "@Services/Storage";
 import { APPEARANCE_MENU_ID } from "@Platform/Consts";
 import { Formatter } from "@Platform/Utils/Formatter";
 
@@ -35,15 +35,15 @@ export class AppearanceMenu extends NavbarComponent {
      * Load the appearance from the local storage.
      */
     private loadLocalStorage(): void {
-        if (LocalStorage.isExist(LocalStorageKey.Theme)) {
-            this.changeTheme(LocalStorage.load(LocalStorageKey.Theme));
+        if (Storage.isExist(StorageKey.Theme)) {
+            this.changeTheme(Storage.load(StorageKey.Theme));
         } else {
             this.changeTheme(Theme.System);
         }
 
-        if (LocalStorage.isExist(LocalStorageKey.CustomAppearance)) {
-            const customAppearance = LocalStorage.load(
-                LocalStorageKey.CustomAppearance
+        if (Storage.isExist(StorageKey.CustomAppearance)) {
+            const customAppearance = Storage.load(
+                StorageKey.CustomAppearance
             );
             for (const customColor in customAppearance) {
                 this.addCustomAppearanceStyle(
@@ -277,8 +277,8 @@ export class AppearanceMenu extends NavbarComponent {
             `--chessboard-${varName}: ${value};` + (isExist ? "" : "}")
         );
 
-        LocalStorage.save(LocalStorageKey.CustomAppearance, {
-            ...LocalStorage.load(LocalStorageKey.CustomAppearance),
+        Storage.save(StorageKey.CustomAppearance, {
+            ...Storage.load(StorageKey.CustomAppearance),
             [varName]: value,
         });
     }
@@ -288,9 +288,9 @@ export class AppearanceMenu extends NavbarComponent {
      */
     private loadColorPalette(): void {
         let customAppearance;
-        if (LocalStorage.isExist(LocalStorageKey.CustomAppearance))
-            customAppearance = LocalStorage.load(
-                LocalStorageKey.CustomAppearance
+        if (Storage.isExist(StorageKey.CustomAppearance))
+            customAppearance = Storage.load(
+                StorageKey.CustomAppearance
             );
 
         for (const colorPicker of document.querySelectorAll(
@@ -352,7 +352,7 @@ export class AppearanceMenu extends NavbarComponent {
                     Formatter.camelCaseToTitleCase(Theme.Light) + " Mode";
         }
 
-        LocalStorage.save(LocalStorageKey.Theme, this.currentTheme);
+        Storage.save(StorageKey.Theme, this.currentTheme);
     }
 
     /**
@@ -381,7 +381,7 @@ export class AppearanceMenu extends NavbarComponent {
                 this.changeTheme();
                 break;
             case AppearanceMenuOperation.Reset:
-                LocalStorage.clear(LocalStorageKey.CustomAppearance);
+                Storage.clear(StorageKey.CustomAppearance);
                 this.loadColorPalette();
                 break;
         }

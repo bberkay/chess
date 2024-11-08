@@ -14,7 +14,7 @@ import {
     NotationMenuOperation,
 } from "../Types";
 import { SocketOperation } from "../../Types";
-import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage.ts";
+import { Storage, StorageKey } from "@Services/Storage";
 import { NOTATION_MENU_ID, PIECE_CREATOR_ID } from "@Platform/Consts";
 import { SoundEffect } from "@Chess/Board/Types/index.ts";
 import { TimerNotAvailableError } from "@ChessPlatform/Chess/Engine/ChessEngine.ts";
@@ -142,17 +142,17 @@ export class NotationMenu extends Component {
      * Load the local storage data.
      */
     private loadLocalStorage(): void {
-        if (LocalStorage.isExist(LocalStorageKey.WasBoardEditorEnabled))
+        if (Storage.isExist(StorageKey.WasBoardEditorEnabled))
             this.hidePlayerCards();
 
-        if (LocalStorage.isExist(LocalStorageKey.LastBoard)) {
-            if (LocalStorage.isExist(LocalStorageKey.LastLobbyConnection))
+        if (Storage.isExist(StorageKey.LastBoard)) {
+            if (Storage.isExist(StorageKey.LastLobbyConnection))
                 this.displayOnlineGameUtilityMenu();
             else this.displayNewGameUtilityMenu();
         }
 
-        if (LocalStorage.isExist(LocalStorageKey.LastBot)) {
-            const botAttributes = LocalStorage.load(LocalStorageKey.LastBot)!;
+        if (Storage.isExist(StorageKey.LastBot)) {
+            const botAttributes = Storage.load(StorageKey.LastBot)!;
             if (botAttributes.color === Color.White) this.flip();
             this.displaySingleplayerGameUtilityMenu();
         }

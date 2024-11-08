@@ -1,7 +1,7 @@
 /**
  * @module Chess
  * @description This module provides users to a playable chess game on the web by
- * connecting `ChessEngine` and `ChessBoard` with `LocalStorage`.
+ * connecting `ChessEngine` and `ChessBoard` with `Storage`.
  * @author Berkay Kaya <berkaykayaforbusiness@outlook.com> (https://bberkay.github.io)
  * @url https://github.com/bberkay/chess
  * @license MIT
@@ -24,10 +24,9 @@ import {
 import { ChessEngine, MoveValidationError } from "./Engine/ChessEngine";
 import { ChessBoard } from "./Board/ChessBoard";
 import { SquareClickMode, SquareEffect } from "./Board/Types";
-import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage.ts";
+import { Storage, StorageKey } from "@Services/Storage";
 import { Converter } from "./Utils/Converter.ts";
 import { Logger } from "@Services/Logger.ts";
-import { Page, PageTitle } from "@Services/Page.ts";
 import { Bot, BotAttributes } from "./Bot";
 
 /**
@@ -38,7 +37,7 @@ const PRE_MOVE_DELAY = 100;
 
 /**
  * This class provides users to a playable chess game on the web by connecting ChessEngine and ChessBoard. Also,
- * it uses LocalStorage which provides users to save the game to the cache and load the game from the cache and Logger
+ * it uses Storage which provides users to save the game to the cache and load the game from the cache and Logger
  * which provides users to log the game.
  */
 export class Chess {
@@ -92,18 +91,18 @@ export class Chess {
     /**
      * This function checks the cache and loads the game from the cache if there is a game in the cache.
      * @returns Returns true if there is a game in the cache, otherwise returns false.
-     * @see For more information about cache management check `src/Services/LocalStorage.ts`
+     * @see For more information about cache management check `src/Services/Storage`
      */
     public checkAndLoadGameFromCache(): void {
         // If there is a game in the cache, load it.
-        if (LocalStorage.isExist(LocalStorageKey.LastBoard)) {
+        if (Storage.isExist(StorageKey.LastBoard)) {
             this.logger.save("Game loading from cache...");
             this.createGame(
-                LocalStorage.load(LocalStorageKey.LastBoard) as JsonNotation
+                Storage.load(StorageKey.LastBoard) as JsonNotation
             );
-            if (LocalStorage.isExist(LocalStorageKey.LastBot)) {
-                const botAttributes = LocalStorage.load(
-                    LocalStorageKey.LastBot
+            if (Storage.isExist(StorageKey.LastBot)) {
+                const botAttributes = Storage.load(
+                    StorageKey.LastBot
                 )!;
                 this.addBotToCurrentGame(botAttributes);
                 this.logger.save(
@@ -116,22 +115,6 @@ export class Chess {
         } else {
             this.createGame();
             this.logger.save("No game found in cache, created a standard game");
-        }
-    }
-
-    /** 
-     * This function handles the page title according to 
-     * the turn color.
-     */
-    private _handlePageTitle(): void {
-        if(this.board.getLockedColor()) {
-            Page.setTitle(this.engine.getTurnColor() === this.board.getLockedColor() 
-                ? PageTitle.OpponentTurn
-                : PageTitle.YourTurn);
-        } else {
-            Page.setTitle(Page.getTitle() === PageTitle.YourTurn
-                ? PageTitle.OpponentTurn
-                : PageTitle.YourTurn);
         }
     }
 
@@ -189,17 +172,15 @@ export class Chess {
         this.initBoardListener();
         this.monitorPlayerDurationsIfExist();
 
-        LocalStorage.save(
-            LocalStorageKey.LastBoard,
+        Storage.save(
+            StorageKey.LastBoard,
             this.getGameAsJsonNotation()
         );
-        LocalStorage.save(
-            LocalStorageKey.LastCreatedBoard,
+        Storage.save(
+            StorageKey.LastCreatedBoard,
             this.getGameAsFenNotation()
         )
 
-        Page.setTitle(PageTitle.GameStarted);
-        this._handlePageTitle();
         this.logger.save(`Game saved to cache as json notation`);
 
         document.dispatchEvent(new Event(ChessEvent.onGameCreated));
@@ -215,7 +196,7 @@ export class Chess {
         this._bot.start();
 
         this._lastCreatedBotAttributes = this._bot.getAttributes();
-        this.board.lockActionsForColor(this._bot.color);
+        this.board.lockActionsOfColor(this._bot.color);
         this.logger.save(
             `Bot-ts-${this._bot.color}-te- created with difficulty-ts-${this._bot.difficulty}-te-`
         );
@@ -226,8 +207,7 @@ export class Chess {
             this.playBotIfExist();
         }
 
-        this._handlePageTitle();
-        LocalStorage.save(LocalStorageKey.LastBot, this._bot.getAttributes());
+        Storage.save(StorageKey.LastBot, this._bot.getAttributes());
         document.dispatchEvent(
             new CustomEvent(ChessEvent.onBotAdded, {
                 detail: { color: this._bot.color },
@@ -252,7 +232,7 @@ export class Chess {
 
         this._bot.terminate();
         this._bot = null;
-        LocalStorage.clear(LocalStorageKey.LastBot);
+        Storage.clear(StorageKey.LastBot);
         this.logger.save("Bot terminated");
     }
 
@@ -278,8 +258,8 @@ export class Chess {
                 detail: { square: square },
             })
         );
-        LocalStorage.save(
-            LocalStorageKey.LastBoard,
+        Storage.save(
+            StorageKey.LastBoard,
             this.engine.getGameAsJsonNotation()
         );
     }
@@ -298,8 +278,8 @@ export class Chess {
                 detail: { square: square },
             })
         );
-        LocalStorage.save(
-            LocalStorageKey.LastBoard,
+        Storage.save(
+            StorageKey.LastBoard,
             this.engine.getGameAsJsonNotation()
         );
     }
@@ -540,6 +520,11 @@ export class Chess {
             });
 
             this.board.unlock();
+            document.dispatchEvent(
+                new CustomEvent(ChessEvent.onPieceMovedByOpponent, {
+                    detail: { from: move[move.length - 1].from, to: move[move.length - 1].to },
+                })
+            );
         });
     }
 
@@ -609,8 +594,8 @@ export class Chess {
             this.board.unlock();
             this.board.setTurnColor(this.engine.getTurnColor());
 
-            LocalStorage.save(
-                LocalStorageKey.LastBoard,
+            Storage.save(
+                StorageKey.LastBoard,
                 this.engine.getGameAsJsonNotation()
             );
 
@@ -736,8 +721,7 @@ export class Chess {
             ].includes(gameStatus)
         ) {
             this.logger.save("Game updated in cache after move");
-            LocalStorage.clear(LocalStorageKey.LastBoard);
-            Page.setTitle(PageTitle.GameOver);
+            Storage.clear(StorageKey.LastBoard);
             this.terminateBotIfExist();
             this.logger.save("Game over");
             if (this._gameTimeMonitorIntervalId !== -1)
@@ -750,13 +734,12 @@ export class Chess {
             ? this._selectedSquare
             : null;
         if (!this.board.isPromotionMenuShown()) {
-            this._handlePageTitle();
             this.board.setTurnColor(this.engine.getTurnColor());
             this.playBotIfExist();
             this.playPreMoveIfExist();
             this.logger.save("Game updated in cache after move");
-            LocalStorage.save(
-                LocalStorageKey.LastBoard,
+            Storage.save(
+                StorageKey.LastBoard,
                 this.engine.getGameAsJsonNotation()
             );
         }

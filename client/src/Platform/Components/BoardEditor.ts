@@ -14,7 +14,7 @@ import {
     StartPosition,
 } from "@Chess/Types";
 import { Component } from "./Component";
-import { LocalStorage, LocalStorageKey } from "@Services/LocalStorage";
+import { Storage, StorageKey } from "@Services/Storage";
 import {
     BOARD_CREATOR_ID,
     PIECE_CREATOR_ID,
@@ -141,12 +141,12 @@ export class BoardEditor extends Component {
      * if there is a game in the cache.
      */
     private loadLocalStorage(): void {
-        if (LocalStorage.isExist(LocalStorageKey.LastBot)) {
-            const botAttributes = LocalStorage.load(LocalStorageKey.LastBot)!;
+        if (Storage.isExist(StorageKey.LastBot)) {
+            const botAttributes = Storage.load(StorageKey.LastBot)!;
             if (botAttributes.color === Color.White) this.flip();
         }
 
-        if (LocalStorage.isExist(LocalStorageKey.WasBoardEditorEnabled))
+        if (Storage.isExist(StorageKey.WasBoardEditorEnabled))
             this.enableEditorMode();
     }
 
@@ -280,7 +280,7 @@ export class BoardEditor extends Component {
         this.enableBoardCreator();
         this.createEditableBoard();
         this.enableBoardObserver();
-        LocalStorage.save(LocalStorageKey.WasBoardEditorEnabled, true);
+        Storage.save(StorageKey.WasBoardEditorEnabled, true);
     }
 
     /**
@@ -730,7 +730,7 @@ export class BoardEditor extends Component {
      */
     public getCreatedBoard(): string {
         return (
-            LocalStorage.load(LocalStorageKey.LastCreatedBoard) ||
+            Storage.load(StorageKey.LastCreatedBoard) ||
             this.getShownFen()
         );
     }

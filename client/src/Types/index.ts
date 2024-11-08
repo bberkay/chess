@@ -23,6 +23,52 @@ export enum SocketOperation {
 }
 
 /**
+ * SocketEvent enum is used to define the events
+ * that are triggered by the ChessPlatform.
+ * @enum {string}
+ */
+export enum SocketEvent {
+    /**
+     * Triggered when waiting server response
+     * to create the lobby.
+     * @Event
+     */
+    onCreatingLobby = "onCreatingLobby",
+
+    /**
+     * Triggered when the lobby is created successfully.
+     * @Event
+     */
+    onLobbyCreated = "onLobbyCreated",
+
+    /**
+     * Triggered when waiting server response 
+     * to join the lobby.
+     * @CustomEvent
+     * @param {string} lobbyId - The lobby id.
+     */
+    onJoiningLobby = "onJoiningLobby",
+
+    /**
+     * Triggered when the lobby is joined.
+     * @Event
+     */
+    onLobbyJoined = "onLobbyJoined",
+
+    /**
+     * Triggered when the lobby is cancelled.
+     * @Event
+     */
+    onLobbyCancelled = "onLobbyCancelled",
+
+    /**
+     * Triggered when the active connection is closed.
+     * @Event
+     */
+    onConnectionTerminated = "onConnectionTerminated",
+}
+
+/**
  * Player interface for the player data.
  */
 export interface Player {

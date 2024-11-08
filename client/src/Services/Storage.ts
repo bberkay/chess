@@ -8,7 +8,7 @@ import { Settings } from "@Platform/Components/NavbarComponents/SettingsMenu";
  * Enum for the local storage keys.
  * Add new keys here.
  */
-export enum LocalStorageKey {
+export enum StorageKey {
     WasWelcomeModalShown = "WasWelcomeModalShown",
     WasBoardEditorEnabled = "WasBoardEditorEnabled",
     LastBoard = "LastBoard",
@@ -24,36 +24,40 @@ export enum LocalStorageKey {
 /**
  * Type mapping for local storage data types.
  */
-type LocalStorageData = {
-    [LocalStorageKey.WasWelcomeModalShown]: boolean;
-    [LocalStorageKey.WasBoardEditorEnabled]: boolean;
-    [LocalStorageKey.LastBoard]: JsonNotation;
-    [LocalStorageKey.LastCreatedBoard]: string | null;
-    [LocalStorageKey.LastBot]: BotAttributes | null;
-    [LocalStorageKey.LastLobbyConnection]: WsCreatedData | null;
-    [LocalStorageKey.LastPlayerName]: string | null;
-    [LocalStorageKey.CustomAppearance]: Record<string, string>;
-    [LocalStorageKey.Theme]: Theme;
-    [LocalStorageKey.Settings]: Settings;
+type StorageData = {
+    [StorageKey.WasWelcomeModalShown]: boolean;
+    [StorageKey.WasBoardEditorEnabled]: boolean;
+    [StorageKey.LastBoard]: JsonNotation;
+    [StorageKey.LastCreatedBoard]: string | null;
+    [StorageKey.LastBot]: BotAttributes | null;
+    [StorageKey.LastLobbyConnection]: WsCreatedData | null;
+    [StorageKey.LastPlayerName]: string | null;
+    [StorageKey.CustomAppearance]: Record<string, string>;
+    [StorageKey.Theme]: Theme;
+    [StorageKey.Settings]: Settings;
 };
+
+/**
+ * Expiration time for the local storage data.
+ */
+const EXPIRATION_TIME = 1000 * 60 * 60 * 24 * 7; // 7 days
 
 /**
  * This static class provides the methods for storing and
  * retrieving data from the local storage.
  */
-export class LocalStorage {
-    // Name of the layer.
-    private static expirationTime: number = 1000 * 60 * 60 * 24 * 7; // 7 days
+export class Storage {
+    private static expirationTime: number = EXPIRATION_TIME;
 
     /**
      * Stores the data in the local storage.
      */
-    public static save<K extends LocalStorageKey>(key: K, value: LocalStorageData[K]): void {
+    public static save<K extends StorageKey>(key: K, value: StorageData[K]): void {
         localStorage.setItem(
             key,
             JSON.stringify({
                 value: value,
-                expiration: new Date().getTime() + LocalStorage.expirationTime,
+                expiration: new Date().getTime() + Storage.expirationTime,
             })
         );
     }
@@ -61,28 +65,28 @@ export class LocalStorage {
     /**
      * Returns the data from the local storage.
      */
-    public static load<K extends LocalStorageKey>(key: K): LocalStorageData[K] | null {
-        if (!LocalStorage.isExist(key)) return null;
+    public static load<K extends StorageKey>(key: K): StorageData[K] | null {
+        if (!Storage.isExist(key)) return null;
         const data = JSON.parse(localStorage.getItem(key)!);
         if (data === null || data.expiration < new Date().getTime()) {
-            LocalStorage.clear();
+            Storage.clear();
             return null;
         }
 
-        return data.value as LocalStorageData[K];
+        return data.value as StorageData[K];
     }
 
     /**
      * Returns true if the local storage contains given key.
      */
-    public static isExist(key: LocalStorageKey): boolean {
+    public static isExist(key: StorageKey): boolean {
         return localStorage.getItem(key) !== null;
     }
 
     /**
      * Clear the local storage.
      */
-    public static clear(key: LocalStorageKey | null = null): void {
+    public static clear(key: StorageKey | null = null): void {
         if (key !== null) localStorage.removeItem(key);
         else localStorage.clear();
     }
