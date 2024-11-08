@@ -183,22 +183,22 @@ classDiagram
   <body>
     <!-- Chess and Components -->
     <main>
-        <div class="left">
-            <div id="navbar"></div>
-            <div id="log-console"></div>
-            <div id="settings-menu"></div>
-            <div id="appearance-menu"></div>
-            <div id="about-menu"></div>
-        </div>
-        <div class="center">
-            <div id="chessboard"></div>
-            <div id="navigator-modal"></div>
-            <div id="board-creator"></div>
-        </div>
-        <div class="right">
-            <div id="notation-menu"></div>
-            <div id="piece-creator"></div>
-        </div>
+      <div class="left">
+        <div id="navbar"></div>
+        <div id="log-console"></div>
+        <div id="settings-menu"></div>
+        <div id="appearance-menu"></div>
+        <div id="about-menu"></div>
+      </div>
+      <div class="center">
+        <div id="chessboard"></div>
+        <div id="navigator-modal"></div>
+        <div id="board-creator"></div>
+      </div>
+      <div class="right">
+        <div id="notation-menu"></div>
+        <div id="piece-creator"></div>
+      </div>
     </main>
 
     <!-- Initiate Chess Platform -->
@@ -210,51 +210,123 @@ classDiagram
        * will load it. Otherwise, platform will create
        * a new standard game.
        */
-      const chessPlatform = new ChessPlatform(); 
+      const chessPlatform = new ChessPlatform();
     </script>
   </body>
 </html>
 ```
+
 <p>This is also current usage in <a href = "https://github.com/bberkay/chess/blob/main/client/src/index.html">index.html</a> of the <a href = "#chess-platform">Live Demo</a>.</p>
 <p>
 <h4>Method List of ChessPlatform</h4>
 <span>Most (but not all) of the public methods you can use within the <code>ChessPlatform</code> class.</span><br/>
-<small>You can see the types marked in <i>italic</i> from <a href = "https://github.com/bberkay/chess/blob/main/client/src/Types/index.ts">here</a> and more detailed explanation of the methods from <a href = "
+<small>You can see the custom <code>ChessPlatform</code> types in <a href = "https://github.com/bberkay/chess/blob/main/client/src/Types/index.ts">here</a> and more detailed explanation of the methods in <a href = "
 https://github.com/bberkay/chess/blob/main/client/src/ChessPlatform.ts">here</a>.</small>
 </p>
 
 ```javascript
 /**
- * Add custom callbacks to the WebSocket events. 
+ * Add custom callbacks to the WebSocket events.
  * Does not override the default callbacks.
  * */
 bindSocketOperationCallbacks(
-  onOpen: (() => void) | null = null, 
-  onMessage: (<T extends WsTitle>(wsTitle: T, wsData: WsData<T>) => void) | null = null, 
-  onError: (() => void) | null = null, 
+  onOpen: (() => void) | null = null,
+  onMessage: (
+    <T extends WsTitle>(
+      wsTitle: T, 
+      wsData: WsData<T>
+    ) => void) | null = null,
+  onError: (() => void) | null = null,
   onClose: (() => void) | null = null
-): void 
-```
+): void
 
-<ul>
-    <li>
-    <code>bindSocketOperationCallbacks(onOpen: (() => void) | null = null, onMessage: (<i>&lt;T extends WsTitle&gt;</i>(wsTitle: <i>T</i>, wsData: <i>WsData&lt;T&gt;</i>) => void) | null = null, onError: (() => void) | null = null, onClose: (() => void) | null = null): void</code><br/>Add custom callbacks to the WebSocket events. Does not override the default callbacks.
-    </li>
-    <li><code>createLobby(createLobbyReqParams: <i>CreateLobbyReqParams</i>): void</code><br/> Establishes a WebSocket connection for creating a new lobby.</li>
-    <li><code>joinLobby(joinLobbyReqParams: <i>JoinLobbyReqParams</i>): void</code><br/> Establishes a WebSocket connection for joining an existing lobby.</li>
-    <li><code>cancelLobby(): void</code><br/> Cancel the game and close the socket connection.</li>
-    <li><code>abortGame(): void</code><br/> Abort the game and send the abort command to the server.</li>
-    <li><code>resign(): void</code><br/> Resign the game and send the resign command to the server.</li>
-    <li><code>sendPlayAgainOffer(): void</code><br/> Send the play again offer to the opponent.</li>
-    <li><code>sendDrawOffer(): void</code><br/> Send the draw offer to the opponent.</li>
-    <li><code>sendUndoOffer(): void</code><br/> Send the undo move offer to the opponent.</li>
-    <li><code>acceptDrawOffer(): void</code><br/> Accept the draw offer from the opponent.</li>
-    <li><code>acceptPlayAgainOffer(): void</code><br/> Accept the play again offer from the opponent.</li>
-    <li><code>acceptUndoOffer(): void</code><br/> Accept the undo move offer from the opponent.</li>
-    <li><code>cancelOffer(): void</code><br/> Cancel the offer that sent to the opponent.</li>
-    <li><code>declineSentOffer(): void</code><br/> Decline the sent offer from the opponent.</li>
-    <li><code>terminateConnection(resetPlatform: boolean = true): void</code><br/> Clear the last connection restore the platform components.</li>
-</ul>
+/**
+ * Establishes a WebSocket connection for 
+ * creating a new lobby.
+ */
+createLobby(
+  createLobbyReqParams: CreateLobbyReqParams
+): void
+
+/**
+ * Establishes a WebSocket connection for 
+ * joining an existing lobby.
+ */
+joinLobby(
+  joinLobbyReqParams: JoinLobbyReqParams
+): void
+
+/**
+ * Cancel the game and close the socket 
+ * connection.
+ */
+cancelLobby(): void
+
+/**
+ * Abort the game and send the abort 
+ * command to the server.
+ */
+abortGame(): void
+
+/**
+ * Resign the game and send the resign 
+ * command to the server.
+ */
+resign(): void
+
+/**
+ * Send the play again offer to 
+ * the opponent.
+ */
+sendPlayAgainOffer(): void
+
+/**
+ * Send the draw offer to the opponent.
+ */
+sendDrawOffer(): void
+
+/**
+ * Send the undo move offer to the
+ * opponent.
+ */
+sendUndoOffer(): void
+
+/**
+ * Accept the draw offer from the 
+ * opponent.
+ */
+acceptDrawOffer(): void
+
+/**
+ * Accept the play again offer from 
+ * the opponent.
+ */
+acceptPlayAgainOffer(): void
+
+/**
+ * Accept the undo move offer from 
+ * the opponent.
+ */
+acceptUndoOffer(): void
+
+/**
+ * Cancel the offer that sent to 
+ * the opponent.
+ */
+cancelOffer(): void
+
+/**
+ * Decline the sent offer from 
+ * the opponent.
+ */
+declineSentOffer(): void
+
+/**
+ * Clear the last connection restore 
+ * the platform components.
+ */
+terminateConnection(resetPlatform: boolean = true): void
+```
 
 <h4>Chess(without Platform)</h4>
 
@@ -270,7 +342,11 @@ bindSocketOperationCallbacks(
     <!-- Initiate Chess without Platform -->
     <script type="module" async>
       import { Chess } from '@Chess/Chess';
-      import { BotAttributes, BotDifficulty, BotColor } from '@Chess/Bot';
+      import { 
+        BotAttributes, 
+        BotDifficulty, 
+        BotColor 
+      } from '@Chess/Bot';
       import { Color, Square } from '@Chess/Types';
 
       // If there is a game in cache, then chess
@@ -299,36 +375,161 @@ bindSocketOperationCallbacks(
 </html>
 ```
 
-<p>For other custom events check the <code>ChessEvent</code> from: <a href="https://github.com/bberkay/chess/blob/main/client/src/Chess/Types/index.ts">./client/src/Chess/Types/index.ts</a></p>
 <h4>Method List of Chess</h4>
 <p>
 <span>Most (but not all) of the public methods you can use within the <code>Chess</code> class.</span><br/>
-<small>You can see the types marked in <i>italic</i> from <a href = "https://github.com/bberkay/chess/blob/main/client/src/Chess/Types/index.ts">here</a> and more detailed explanation of the methods from <a href = "
+<small>You can see the custom <code>Chess</code> types from <a href = "https://github.com/bberkay/chess/blob/main/client/src/Chess/Types/index.ts">here</a> and more detailed explanation of the methods from <a href = "
 https://github.com/bberkay/chess/blob/main/client/src/Chess/Chess.ts">here</a>.</small>
 </p>
-<ul>
-    <li><code>createGame(position: <i>JsonNotation</i> | <i>StartPosition</i> | string = <i>StartPosition.Standard</i>, durations: <i>Durations</i> | null = null): void</code> <br/> Creates a new game with the given position and durations.</li>
-    <li><code>createPiece(color: <i>Color</i>, type: <i>PieceType</i>, square: <i>Square</i>): void</code><br/>
-    Creates a new piece with the given color, type and square.</li>
-    <li><code>removePiece(square: <i>Square</i>): void</code><br/> Removes the piece on the given square.</li>
-    <li><code>addBotTuCurrentGame(botAttributes: <i>BotAttributes</i>): void</code><br/> Adds a bot to the current game with the given attributes.</li>
-    <li><code>getLastCreatedBotAttributes():  <i>BotAttributes</i> | null</code><br/> Returns the last created bot's attributes if there is any.</li>
-    <li><code>terminateBotIfExist(): void</code><br/> Terminates the bot if there is any.</li>
-    <li><code>takeBack(onEngine: boolean = false, undoColor: <i>Color</i> | null = null): void</code><br/> Takes back the last move.</li>
-    <li><code>takeForward(): void</code><br/> Takes forward the last taken back move.</li>
-    <li><code>goToSpecificMove(moveIndex: number): void</code><br/> Goes to the specific move by the given index.</li>
-    <li><code>getDurations(): <i>Durations</i> | null</code><br/> Returns the durations of the game if the durations are set.</li>
-    <li><code>getPlayersRemainingTime(): <i>RemainingTimes</i></code><br/> Returns the remaining times of the players if the durations are set.</li>
-    <li><code>getTurnColor(ignoreTakeBack: boolean = true): <i>Color</i></code><br/> Returns the color of the current turn or taken back board's, if <code>ignoreTakeBack</code> is <code>false</code>.</li>
-    <li><code>getGameStatus(ignoreTakeBack: boolean = true): <i>GameStatus</i></code><br/> Returns the status of the current game or taken back board's.</li>
-    <li><code>getAlgebraicNotation(ignoreTakeBack: boolean = true): ReadonlyArray&lt;string&gt;</code><br/> Returns the algebraic notation of the current game or taken back board's.</li>
-    <li><code>getMoveHistory(ignoreTakeBack: boolean = true): ReadonlyArray<i>&lt;Move&gt;</i></code><br/> Returns the move history of the current game or taken back board's.</li>
-    <li><code>getScores(ignoreTakeBack: boolean = true): Readonly<i>&lt;Scores&gt;</i></code><br/> Returns the scores of the current game or taken back board's.</li>
-    <li><code>getGameAsFenNotation(ignoreTakeBack: boolean = true): string</code><br/> Returns the fen notation of the current game or taken back board's.</li>
-    <li><code>getGameAsJsonNotation(ignoreTakeBack: boolean = true): <i>JsonNotation</i></code><br/> Returns the json notation of the current game or taken back board's.</li>
-    <li><code>getGameAsAscii(ignoreTakeBack: boolean = true): string</code><br/> Returns the ASCII representation of the current game or taken back board's.</li>
-    <li><code>getBoardHistory(): ReadonlyArray<i>&lt;JsonNotation&gt;</i></code><br/> Returns the board history of the current game. After every move, the board is saved as json notation.</li>
-</ul>
+
+```javascript
+/**
+ * Creates a new game with the given position 
+ * and durations.
+ */
+createGame(
+  position: JsonNotation
+          | StartPosition
+          | string = StartPosition.Standard,
+  durations: Durations | null = null
+): void
+
+/**
+ * Creates a new piece with the given color, 
+ * type and square.
+ */
+createPiece(
+  color: Color, 
+  type: PieceType, 
+  square: Square
+): void
+
+/**
+ * Removes the piece on the given square.
+ */
+removePiece(square: Square): void
+
+/**
+ * Adds a bot to the current game with the 
+ * given attributes.
+ */
+addBotToCurrentGame(
+  botAttributes: BotAttributes
+): void
+
+/**
+ * Returns the last created bot's attributes 
+ * if there is any.
+ */
+getLastCreatedBotAttributes(): BotAttributes | null
+
+/**
+ * Terminates the bot if there is any.
+ */
+terminateBotIfExist(): void
+
+/**
+ * Takes back the last move.
+ */
+takeBack(
+  onEngine: boolean = false, 
+  undoColor: Color | null = null
+): void
+
+/**
+ * Takes forward the last taken back move.
+ */
+takeForward(): void
+
+/**
+ * Goes to the specific move by the given index.
+ */
+goToSpecificMove(moveIndex: number): void
+
+/**
+ * Returns the durations of the game if 
+ * the `durations` are set.
+ */
+getDurations(): Durations | null
+
+/**
+ * Returns the remaining times of the players 
+ * if the `durations` are set.
+ */
+getPlayersRemainingTime(): RemainingTimes
+
+/**
+ * Returns the color of the current turn 
+ * or taken back board's, if `ignoreTakeBack` 
+ * is `false`.
+ */
+getTurnColor(
+  ignoreTakeBack: boolean = true
+): Color
+
+/**
+ * Returns the status of the current game 
+ * or taken back board's.
+ */
+getGameStatus(
+  ignoreTakeBack: boolean = true
+): GameStatus
+
+/**
+ * Returns the algebraic notation of the 
+ * current game or taken back board's.
+ */
+getAlgebraicNotation(
+  ignoreTakeBack: boolean = true
+): ReadonlyArray<string>
+
+/**
+ * Returns the move history of the 
+ * current game or taken back board's.
+ */
+getMoveHistory(
+  ignoreTakeBack: boolean = true
+): ReadonlyArray<Move>
+
+/**
+ * Returns the scores of the current 
+ * game or taken back board's.
+ */
+getScores(
+  ignoreTakeBack: boolean = true
+): Readonly<Scores>
+
+/**
+ * Returns the fen notation of the current 
+ * game or taken back board's.
+ */
+getGameAsFenNotation(
+  ignoreTakeBack: boolean = true
+): string
+
+/**
+ * Returns the json notation of the current 
+ * game or taken back board's.
+ */
+getGameAsJsonNotation(
+  ignoreTakeBack: boolean = true
+): JsonNotation
+
+/**
+ * Returns the ASCII representation of the 
+ * current game or taken back board's.
+ */
+getGameAsAscii(
+  ignoreTakeBack: boolean = true
+): string
+
+/**
+ * Returns the board history of the current 
+ * game. After every move, the board is saved 
+ * as json notation.
+ */
+getBoardHistory(): ReadonlyArray<JsonNotation>
+```
 
 <h4>ChessBoard(Standalone)</h4>
 
@@ -367,7 +568,10 @@ https://github.com/bberkay/chess/blob/main/client/src/Chess/Chess.ts">here</a>.<
       // This is a basic example:
       let selectedSquare: Square | null = null;
       let preSelectedSquare: Square | null = null;
-      let preMoves: { selectedSquare: Square, targetSquare: Square }[] = [];
+      let preMoves: { 
+        selectedSquare: Square, 
+        targetSquare: Square 
+      }[] = [];
       chessBoard.bindMoveEventCallbacks({
         onPieceSelected: (squareId: Square) => {
           selectedSquare = squareId;
@@ -406,39 +610,206 @@ https://github.com/bberkay/chess/blob/main/client/src/Chess/Chess.ts">here</a>.<
 <h4>Method List of ChessBoard</h4>
 <p>
 <span>Most (but not all) of the public methods you can use within the <code>ChessBoard</code> class.</span><br/>
-<small>You can see the types marked in <i>italic</i> from <a href = "https://github.com/bberkay/chess/blob/main/client/src/Chess/Board/Types/index.ts">here</a> and more detailed explanation of the methods from <a href = "
+<small>You can see the custom <code>ChessBoard</code> types in <a href = "https://github.com/bberkay/chess/blob/main/client/src/Chess/Board/Types/index.ts">here</a> and more detailed explanation of the methods in <a href = "
 https://github.com/bberkay/chess/blob/main/client/src/Chess/Board/ChessBoard.ts">here</a>.</small>
 </p>
-<ul>
-    <li><code>setConfig(config: Partial&lt;ChessBoard["config"]&gt;): void</code><br/> Set the configuration of the chess board.</li>
-    <li><code>createGame(position: <i>JsonNotation</i> | <i>StartPosition</i> | string = <i>StartPosition.Standard</i>): void</code> <br/> Creates a new game with the given position.</li>
-    <li><code>createPiece(color: <i>Color</i>, type: <i>PieceType</i>, square: <i>Square</i>, isGhost: boolean = false): void</code><br/> Creates a new piece with the given color, type and square.</li>
-    <li><code>removePiece(square: HTMLDivElement | HTMLElement | Element | <i>Square</i>): void</code><br/> Removes the piece on the given square.</li>
-    <li><code>setTurnColor(color: <i>Color</i>): void</code><br/> Sets the turn color of the board.</li>
-    <li><code>bindMoveEventCallbacks(callbacks: { onPieceSelected?: (squareId: <i>Square</i>) => void; onPiecePreSelected?: (squareId: <i>Square</i>) => void; onPieceMoved?: (squareId: <i>Square</i>) => void; onPiecePreMoved?: (squareId: <i>Square</i>, squareClickMode: <i>SquareClickMode</i>) => void; onPreMoveCanceled?: () => void }): void</code><br/> Bind functions to the specific events of the chess board. Does not override the previous event bindings.</li>
-    <li><code>highlightMoves(moves: <i>Moves</i> | null = null, isPreMove: boolean = false): void</code><br/> Highlights the moves on the board.</li>
-    <li><code>refresh(savePreMoveEffects: boolean = false): void</code><br/> Refreshes the board.</li>
-    <li><code>flip(): void</code><br/> Flips the board.</li>
-    <li><code>isFlipped(): boolean</code><br/> Returns whether the board is flipped or not.</li>
-    <li><code>lock(disablePreSelection: boolean = false, showDisabledEffect: boolean = false): void</code><br/> Locks the board.</li>
-    <li><code>isLocked(): boolean</code><br/> Returns whether the board is locked or not.</li>
-    <li><code>showStatus(status: <i>GameStatus</i>): void</code><br/> Shows the status on the board.</li>
-    <li><code>showPromotionMenu(promotionSquare: HTMLElement | <i>Square</i>): void</code><br/> Shows the promotion menu on the given square.</li>
-    <li><code>closePromotionMenu(): void</code><br/> Closes the promotion menu.</li>
-    <li><code>isPromotionMenuShown(): boolean</code><br/> Returns whether the promotion menu is shown or not.</li>
-    <li><code>lockActionsOfColor(color: <i>Color</i>): void</code><br/> Locks the actions for the given color.</li>
-    <li><code>getLockedColor(): <i>Color</i> | null</code><br/> Returns the locked color if there is any.</li>
-    <li><code>getAllSquares(): NodeListOf&lt;HTMLDivElement&gt;</code><br/> Returns all the squares of the board.</li>
-    <li><code>getAllPieces(): NodeListOf&lt;HTMLDivElement&gt;</code><br/> Returns all the pieces of the board.</li>
-    <li><code>getClosestSquareElement(element: HTMLElement): HTMLElement | null</code><br/> Returns the closest square element of the given element.</li>
-    <li><code>getPieceElementOnSquare(squareElement: HTMLDivElement | Element | <i>Square</i>): HTMLDivElement</code><br/> Returns the piece element of the given square.</li>
-    <li><code>getSelectedSquareElement(): HTMLDivElement | null</code><br/> Returns the selected square element if there is any.</li>
-    <li><code>getPieceColor(squareOrPieceElement: HTMLDivElement | Element | <i>Square</i>): <i>Color</i></code><br/> Returns the color of the piece on the given square.</li>
-    <li><code>getPieceType(squareOrPieceElement: HTMLDivElement | Element | <i>Square</i>): <i>PieceType</i></code><br/> Returns the type of the piece on the given square.</li>
-    <li><code>getSquareElementOfPiece(pieceElement: HTMLDivElement | Element): HTMLDivElement</code><br/> Returns the square element of the given piece.</li>
-    <li><code>getSquareId(squareElement: HTMLDivElement | Element): <i>Square</i></code><br/> Returns the square id of the given square element.</li>
-    <li><code>getSquareClickMode(square:<i>Square</i> | HTMLDivElement | Element): <i>SquareClickMode</i></code><br/> Returns the click mode of the given square.</li>
-</ul>
+
+```javascript
+/**
+ * Set the configuration of the chess board.
+ */
+setConfig(
+  config: Partial<ChessBoard["config"]>
+): void
+
+/**
+ * Creates a new game with the given position.
+ */
+createGame(
+  position: JsonNotation 
+          | StartPosition 
+          | string = StartPosition.Standard
+): void
+
+/**
+ * Creates a new piece with the given color, 
+ * type and square.
+ */
+createPiece(
+  color: Color, 
+  type: PieceType, 
+  square: Square, 
+  isGhost: boolean = false
+): void
+
+/**
+ * Removes the piece on the given square.
+ */
+removePiece(
+  square: HTMLDivElement 
+        | HTMLElement 
+        | Element 
+        | Square
+): void
+
+/**
+ * Sets the turn color of the board.
+ */
+setTurnColor(color: Color): void
+
+/**
+ * Bind functions to the specific events 
+ * of the chess board. Does not override 
+ * the previous event bindings.
+ */
+bindMoveEventCallbacks(
+    callbacks: { 
+      onPieceSelected?: (squareId: Square) => void; 
+      onPiecePreSelected?: (squareId: Square) => void; 
+      onPieceMoved?: (squareId: Square) => void; 
+      onPiecePreMoved?: (
+        squareId: Square, 
+        squareClickMode: SquareClickMode
+      ) => void; 
+      onPreMoveCanceled?: () => void 
+    }
+): void
+
+/**
+ * Highlights the moves on the board.
+ */
+highlightMoves(
+  moves: Moves | null = null, 
+  isPreMove: boolean = false
+): void
+
+/**
+ * Refreshes the board.
+ */
+refresh(savePreMoveEffects: boolean = false): void
+
+/**
+ * Flips the board.
+ */
+flip(): void
+
+/**
+ * Returns whether the board is flipped or not.
+ */
+isFlipped(): boolean
+
+/**
+ * Locks the board.
+ */
+lock(
+  disablePreSelection: boolean = false, 
+  showDisabledEffect: boolean = false
+): void
+
+/**
+ * Returns whether the board is locked or not.
+ */
+isLocked(): boolean
+
+/**
+ * Shows the status on the board.
+ */
+showStatus(status: GameStatus): void
+
+/**
+ * Shows the promotion menu on the given square.
+ */
+showPromotionMenu(
+  promotionSquare: HTMLElement | Square
+): void
+
+/**
+ * Closes the promotion menu.
+ */
+closePromotionMenu(): void
+
+/**
+ * Returns whether the promotion menu is shown or not.
+ */
+isPromotionMenuShown(): boolean
+
+/**
+ * Locks the actions for the given color.
+ */
+lockActionsOfColor(color: Color): void
+
+/**
+ * Returns the locked color if there is any.
+ */
+getLockedColor(): Color | null
+
+/**
+ * Returns all the squares of the board.
+ */
+getAllSquares(): NodeListOf<HTMLDivElement>
+
+/**
+ * Returns all the pieces of the board.
+ */
+getAllPieces(): NodeListOf<HTMLDivElement>
+
+/**
+ * Returns the closest square element of the 
+ * given element.
+ */
+getClosestSquareElement(
+  element: HTMLElement
+): HTMLElement | null
+
+/**
+ * Returns the piece element of the given square.
+ */
+getPieceElementOnSquare(
+  squareElement: HTMLDivElement | Element | Square
+): HTMLDivElement
+
+/**
+ * Returns the selected square element if 
+ * there is any.
+ */
+getSelectedSquareElement(): HTMLDivElement | null
+
+/**
+ * Returns the color of the piece on the given
+ * square.
+ */
+getPieceColor(
+  squareOrPieceElement: HTMLDivElement | Element | Square
+): Color
+
+/**
+ * Returns the type of the piece on the given square.
+ */
+getPieceType(
+  squareOrPieceElement: HTMLDivElement | Element | Square
+): PieceType
+
+/**
+ * Returns the square element of the given piece.
+ */
+getSquareElementOfPiece(
+  pieceElement: HTMLDivElement | Element
+): HTMLDivElement
+
+/**
+ * Returns the square id of the given square element.
+ */
+getSquareId(
+  squareElement: HTMLDivElement | Element
+): Square
+
+/**
+ * Returns the click mode of the given square.
+ */
+getSquareClickMode(
+  square: Square | HTMLDivElement | Element
+): SquareClickMode
+```
 
 <h4>ChessEngine(Standalone)</h4>
 
@@ -490,32 +861,127 @@ console.log(chessEngine.getGameAsAscii());
 <h4>Method List of ChessEngine</h4>
 <p>
 <span>Most (but not all) of the public methods you can use within the <code>ChessEngine</code> class.</span><br/>
-<small>You can see the types marked in <i>italic</i> from <a href = "https://github.com/bberkay/chess/blob/main/client/src/Chess/Engine/Types/index.ts">here</a> and more detailed explanation of the methods from <a href = "
+<small>You can see the custom <code>ChessEngine</code> types marked in <a href = "https://github.com/bberkay/chess/blob/main/client/src/Chess/Engine/Types/index.ts">here</a> and more detailed explanation of the methods in <a href = "
 https://github.com/bberkay/chess/blob/main/client/src/Chess/Engine/ChessEngine.ts">here</a>.</small>
 </p>
-<ul>
-    <li><code>createGame(position: <i>JsonNotation</i> | <i>StartPosition</i> | string = <i>StartPosition.Standard</i>): void</code> <br/> Creates a new game with the given position.</li>
-    <li><code>createPiece(color: <i>Color</i>, type: <i>PieceType</i>, square: <i>Square</i>): void</code><br/>
-    Creates a new piece with the given color, type and square.</li>
-    <li><code>removePiece(square: <i>Square</i>): void</code><br/> Removes the piece on the given square.</li>
-    <li><code>getMoves(square: <i>Square</i>, isPreCalculation: boolean = false): Moves | null</code><br/> Returns the moves of the piece on the given square.</li>
-    <li><code>playMove(from: <i>Square</i>, to: <i>Square</i>, moveType: <i>MoveType</i> | null = null): void</code><br/> Plays the move on the engine with the given squares.</li>
-    <li><code>takeBack(undoColor: <i>Color</i> | null = null): void</code><br/> Takes back the last move.</li>
-    <li><code>getDurations(): <i>Durations</i> | null</code><br/> Returns the durations of the game if the durations are set.</li>
-    <li><code>getPlayersRemainingTime(): <i>RemainingTimes</i></code><br/> Returns the remaining times of the players if the durations are set.</li>
-    <li><code>getTurnColor(): <i>Color</i></code><br/> Returns the color of the current turn.</li>
-    <li><code>getGameStatus(): <i>GameStatus</i></code><br/> Returns the status of the current game.</li>
-    <li><code>getAlgebraicNotation(): ReadonlyArray&lt;string&gt;</code><br/> Returns the algebraic notation of the current game.</li>
-    <li><code>getMoveHistory(): ReadonlyArray<i>&lt;Move&gt;</i></code><br/> Returns the move history of the current game.</li>
-    <li><code>getBoardHistory(): ReadonlyArray<i>&lt;JsonNotation&gt;</i></code><br/> Returns the board history of the current game. After every move, the board is saved as json notation.</li>
-    <li><code>getScores(): Readonly<i>&lt;Scores&gt;</i></code><br/> Returns the scores of the current game.</li>
-    <li><code>getGameAsFenNotation(): string</code><br/> Returns the fen notation of the current game.</li>
-    <li><code>getGameAsJsonNotation(): <i>JsonNotation</i></code><br/> Returns the json notation of the current game.</li>
-    <li><code>getGameAsAscii(): string</code><br/> Returns the ASCII representation of the current game.</li>
-</ul>
+
+```javascript
+/**
+ * Creates a new game with the given position.
+ */
+createGame(
+  position: JsonNotation 
+          | StartPosition 
+          | string = StartPosition.Standard
+): void
+
+/**
+ * Creates a new piece with the given color, 
+ * type and square.
+ */
+createPiece(
+  color: Color, 
+  type: PieceType, 
+  square: Square
+): void
+
+/**
+ * Removes the piece on the given square.
+ */
+removePiece(square: Square): void
+
+/**
+ * Returns the moves of the piece on the 
+ * given square.
+ */
+getMoves(
+  square: Square, 
+  isPreCalculation: boolean = false
+): Moves | null
+
+/**
+ * Plays the move on the engine with the 
+ * given squares.
+ */
+playMove(
+  from: Square, 
+  to: Square, 
+  moveType: MoveType | null = null
+): void
+
+/**
+ * Takes back the last move.
+ */
+takeBack(undoColor: Color | null = null): void
+
+/**
+ * Returns the durations of the game if 
+ * the durations are set.
+ */
+getDurations(): Durations | null
+
+/**
+ * Returns the remaining times of the players 
+ * if the durations are set.
+ */
+getPlayersRemainingTime(): RemainingTimes
+
+/**
+ * Returns the color of the current turn.
+ */
+getTurnColor(): Color
+
+/**
+ * Returns the status of the current game.
+ */
+getGameStatus(): GameStatus
+
+/**
+ * Returns the algebraic notation of the 
+ * current game.
+ */
+getAlgebraicNotation(): ReadonlyArray<string>
+
+/**
+ * Returns the move history of the current 
+ * game.
+ */
+getMoveHistory(): ReadonlyArray<Move>
+
+/**
+ * Returns the board history of the current 
+ * game. After every move, the board is saved 
+ * as json notation.
+ */
+getBoardHistory(): ReadonlyArray<JsonNotation>
+
+/**
+ * Returns the scores of the current game.
+ */
+getScores(): Readonly<Scores>
+
+/**
+ * Returns the fen notation of the 
+ * current game.
+ */
+getGameAsFenNotation(): string
+
+/**
+ * Returns the json notation of the 
+ * current game.
+ */
+getGameAsJsonNotation(): JsonNotation
+
+/**
+ * Returns the ASCII representation of 
+ * the current game.
+ */
+getGameAsAscii(): string
+```
+
 <p>Check <a href="https://github.com/bberkay/chess/blob/main/client/src/Chess/Chess.ts">Chess.ts</a> for more ready-to-play implementation.</p>
 <h3>Testing</h3>
-<p>Chess Platform is tested with <i>Vitest</i>. Tests consist mostly of engine tests like move calculation, move validation, checkmate, stalemate, etc. Also, there are some tests for converting operations like fen notation to <a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Types/index.ts#L78">json notation</a>.
+<p>Chess Platform is tested with <i>Vitest</i>. Tests consist mostly of engine tests like <b>move calculation</b>, <b>move validation</b>, <b>checkmate</b>, <b>stalemate</b>, etc. Also, there are some tests for converting operations like <b>fen notation</b> to <code><a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Types/index.ts#L78">JsonNotation</a></code>
 </p>
 <span>All the tests can be run with the following command.</span>
 <br/>
