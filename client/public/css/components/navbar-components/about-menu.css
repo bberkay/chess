@@ -14,47 +14,24 @@
         padding-bottom: 0;
     }
 
-    & p{
-        line-height: 1.5;
+    & p.intro{
+        line-height: 1.7;
         padding: 5px 20px;
         padding-top: 0;
-            
-        &.repo{
-            text-align: center;
-            background-color: var(--component-color);
-            border-top: 1px solid var(--border-color);
-            border-bottom: 1px solid var(--border-color);
-            padding: 10px 20px;
-            position: relative;
-
-            & a{
-                color: var(--link-color);
-            }
-        }
+        background-color: var(--component-color);
+        border-top: 1px solid var(--border-color);
+        border-bottom: 1px solid var(--border-color);
+        padding: 10px 20px;
+        position: relative;
     }
 
-    & .about-body{
-        height: 65%;
-    }
+    & p.repo{
+        text-align: center;
+        padding: 5px 20px;
+        margin-top: 20px;
 
-    & .about-bg-icon{
-        height: 36%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
-        
-        &::after{
-            content: "";
-            /* Yer değiştirmeli ve bu yol muhabbeti halledilmeli /*/
-            background-image: url("../../../assets/images/desktop/king-icon-light.png");
-            background-size: 100px;
-            background-repeat: no-repeat;
-            background-position: center;
-            width: 100px;
-            height: 100px;
-            position: absolute;
-            opacity: 0.1;
+        & a{
+            color: var(--link-color);
         }
     }
 }

@@ -112,10 +112,14 @@
 
     & body[data-color-scheme="light"] {
         color-scheme: light;
+        --king-icon: var(--king-icon-dark);
+        --linear-gradient: var(--linear-gradient-light);
     }
-
+    
     & body[data-color-scheme="dark"] {
         color-scheme: dark;
+        --king-icon: var(--king-icon-light);
+        --linear-gradient: var(--linear-gradient-dark);
     }
 }
 
@@ -123,6 +127,20 @@
     :root{
         --king-icon-dark: url("../../assets/images/mobile/king-icon-dark.png");
         --king-icon-light: url("../../assets/images/mobile/king-icon-light.png");
+    }
+}
+
+@media (prefers-color-scheme: light) {
+    body {
+        --king-icon: var(--king-icon-dark);
+        --linear-gradient: var(--linear-gradient-light);
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    body {
+        --king-icon: var(--king-icon-light);
+        --linear-gradient: var(--linear-gradient-dark);
     }
 }
 
@@ -153,30 +171,6 @@ body {
         rgba(34, 34, 34, 1) 35%,
         rgba(20, 20, 20, 1) 100%
     );
-}
-
-@media (prefers-color-scheme: light) {
-    body {
-        --king-icon: var(--king-icon-dark);
-        --linear-gradient: var(--linear-gradient-light);
-    }
-}
-
-@media (prefers-color-scheme: dark) {
-    body {
-        --king-icon: var(--king-icon-light);
-        --linear-gradient: var(--linear-gradient-dark);
-    }
-}
-
-body[data-color-scheme="light"] {
-    --king-icon: var(--king-icon-dark);
-    --linear-gradient: var(--linear-gradient-light);
-}
-
-body[data-color-scheme="dark"] {
-    --king-icon: var(--king-icon-light);
-    --linear-gradient: var(--linear-gradient-dark);
 }
 
 body {
