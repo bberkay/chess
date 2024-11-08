@@ -1490,7 +1490,7 @@ export class ChessBoard {
     /**
      * Disable actions of the pieces of the given color on the board.
      */
-    public lockActionsForColor(color: Color): void {
+    public lockActionsOfColor(color: Color): void {
         this._lockedColor = color;
         this.setTurnColor(this._turnColor);
     }
