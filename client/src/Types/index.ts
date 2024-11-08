@@ -163,10 +163,10 @@ export interface WsErrorData {
 }
 
 /**
- * WsData type for the data that can be
+ * WsDataUnion type for the data that can be
  * received from the WebSocket.
  */
-export type WsData =
+export type WsDataUnion =
     | WsCreatedData
     | WsConnectedData
     | WsStartedData
@@ -179,11 +179,35 @@ export type WsData =
     | WsErrorData;
 
 /**
+ * WsDataMap type that maps each WebSocket command title (WsTitle)
+ * to its corresponding data type.
+ */
+export type WsDataMap = {
+    [WsTitle.Created]: WsCreatedData;
+    [WsTitle.Connected]: WsConnectedData;
+    [WsTitle.Started]: WsStartedData;
+    [WsTitle.Finished]: WsFinishedData;
+    [WsTitle.Resigned]: WsResignedData;
+    [WsTitle.UndoAccepted]: WsUndoData;
+    [WsTitle.UndoOffered]: WsUndoData;
+    [WsTitle.Moved]: WsMovedData;
+    [WsTitle.Reconnected]: WsReconnectedData;
+    [WsTitle.Disconnected]: WsDisconnectedData;
+    [WsTitle.Error]: WsErrorData;
+};
+
+/**
+ * WsData type that retrieves the appropriate data type
+ * based on the provided WebSocket command title (WsTitle).
+ */
+export type WsData<T extends WsTitle> = T extends keyof WsDataMap ? WsDataMap[T] : never;
+
+/**
  * WsMessage type for the command and data that can be
  * sent to the client or received from the client.
  * @see src/Platform/Platform.ts
  */
-export type WsMessage = [WsTitle, WsData];
+export type WsMessage<T extends WsTitle> = [T, WsData<T>];
 
 /**
  * Represents the parameters required to create a

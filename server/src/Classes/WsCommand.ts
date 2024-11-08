@@ -124,10 +124,10 @@ export interface WsErrorData {
 }
 
 /**
- * WsData type for the data that can be
+ * WsDataUnion type for the data that can be
  * received from the WebSocket.
  */
-export type WsData =
+export type WsDataUnion =
     | WsCreatedData
     | WsConnectedData
     | WsStartedData
@@ -138,26 +138,51 @@ export type WsData =
     | WsReconnectedData
     | WsDisconnectedData
     | WsErrorData;
+    
+/**
+ * WsDataMap type that maps each WebSocket command title (WsTitle)
+ * to its corresponding data type.
+ */
+export type WsDataMap = {
+    [WsTitle.Created]: WsCreatedData;
+    [WsTitle.Connected]: WsConnectedData;
+    [WsTitle.Started]: WsStartedData;
+    [WsTitle.Finished]: WsFinishedData;
+    [WsTitle.Resigned]: WsResignedData;
+    [WsTitle.UndoAccepted]: WsUndoData;
+    [WsTitle.UndoOffered]: WsUndoData;
+    [WsTitle.Moved]: WsMovedData;
+    [WsTitle.Reconnected]: WsReconnectedData;
+    [WsTitle.Disconnected]: WsDisconnectedData;
+    [WsTitle.Error]: WsErrorData;
+};
+
+/**
+ * WsData type that retrieves the appropriate data type
+ * based on the provided WebSocket command title (WsTitle).
+ */
+export type WsData<T extends WsTitle> = T extends keyof WsDataMap ? WsDataMap[T] : never;
 
 /**
  * WsMessage type for the command and data that can be
  * sent to the client or received from the client.
  * @see src/Platform/Platform.ts
  */
-export type WsMessage = [WsTitle, WsData];
+export type WsMessage<T extends WsTitle> = [T, WsData<T>];
 
 /**
  * This class is used to create WebSocket commands
  * to send to the client.
  */
 export class WsCommand {
-    /**
+     /**
      * Create a WebSocket command with the given command and data.
-     * @example [Connected, {lobbyId: "1234", ...}]
+     * @example [Moved, {from: Square.a2, to: Square.a4}]
+     * @example [Resigned]
      */
-    private static _wsCommand(
-        title: WsTitle,
-        data: WsData | null = null
+     private static _wsCommand<T extends WsTitle>(
+        title: T,
+        data: WsData<T> | null = null
     ): string {
         if (Object.values(WsTitle).indexOf(title) === -1)
             throw new Error("Invalid command.");
@@ -295,11 +320,18 @@ export class WsCommand {
     }
 
     /**
-     * Parse the that is received from the client.
+     * Parse the websocket message from the server.
      * @param message "[Moved, {from: Square.a2, to: Square.a4}]"
      * @example [Moved, {from: Square.a2, to: Square.a4}]
      */
-    static parse(message: string): WsMessage {
-        return JSON.parse(message);
+    static parse<T extends WsTitle>(message: string): [T, WsData<T>] {
+        try {
+            return JSON.parse(message) as [T, WsData<T>];
+        } catch (error: unknown) {
+            throw new Error(
+                "Invalid WebSocket message, the message could not be parsed: " +
+                    (error instanceof Error ? error.message : "")
+            );
+        }
     }
 }
