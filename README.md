@@ -991,7 +991,7 @@ getGameAsAscii(): string
 
 <p>Check <a href="https://github.com/bberkay/chess/blob/main/client/src/Chess/Chess.ts">Chess.ts</a> for more ready-to-play implementation.</p>
 <h3>Testing</h3>
-<p>Chess Platform is tested with <i>Vitest</i>. Tests consist mostly of engine tests like <b>move calculation</b>, <b>move validation</b>, <b>checkmate</b>, <b>stalemate</b>, etc. Also, there are some tests for converting operations like <b>fen notation</b> to <code><a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Types/index.ts#L78">JsonNotation</a></code>
+<p>Chess Platform is tested with <i>Vitest</i>. Tests consist mostly of engine tests like <b>move calculation</b>, <b>move validation</b>, <b>checkmate</b>, <b>stalemate</b>, etc. Also, there are some tests for converting operations like <b>fen notation</b> to <code><a href = "https://github.com/bberkay/chess/blob/main/client/src/Chess/Types/index.ts">JsonNotation</a></code>
 </p>
 <span>All the tests can be run with the following command.</span>
 <br/>
