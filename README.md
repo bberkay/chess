@@ -1006,7 +1006,20 @@ getGameAsAscii(): string
 <span>All tests can be found in the <a href = "https://github.com/bberkay/chess/tree/main/client/tests">tests</a> directory.</span>
 
 <h3>Epilogue</h3>
-<p>...</p>
+<p>When I started this project, it was both to practice Javascript DOM and to test myself to see how I could write a chess algorithm. My main purpose was simply to write a board and a move engine that is as simple as possible, based entirely on functional programming, and contained within a single file. It was meant to be a project I could complete in 2-3 days/nights without needing much planning(and it did too).
+</p>
+<p>
+However, some time after developing the project, I decided to switch from Javascript to TypeScript and from functional programming to OOP to practice TypeScript and OOP, as well as to add mechanics like playing online and against Stockfish, which I had been intending to implement. 
+</p>
+<p>
+But I had probably made the wrong decision, because the project's current infrastructure wasn't well-suited for implementing these features, and solving the resulting implementation issues made the project more complex than it should have been.
+</p>
+<p>
+I think the development process lasted around 5 to 6 months, spread over 1.5 to 2 years, and in the end, releasing a working application is motivating. When I started the project, my goal was to practice, and I did. Maybe if I hadn't underestimated the project and had done the necessary planning from the start, I could have done even better, but perhaps the lack of planning worked out better because I encountered many problems and had to try and learn a lot of things to solve them.
+</p>
+<p>
+At the end of the day, I feel that I improved my JavaScript/TypeScript skills, and no matter how big or small the project is, I have experienced the kinds of issues that can arise from not defining the requirements/goals and ignoring the need to make a plan accordingly.
+</p>
 <h3>Sources</h3>
 <ul>
     <li><a href = "https://github.com/lichess-org/stockfish.js">Stockfish.js (Bot)</a></li>
