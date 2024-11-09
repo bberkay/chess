@@ -226,7 +226,7 @@ classDiagram
 </html>
 ```
 
-<p>This is also current usage in <a href = "https://github.com/bberkay/chess/blob/main/client/src/index.html">index.html</a> of the <a href = "#chess-platform">Live Demo</a>.</p>
+<p>This is also current usage in <a href = "https://github.com/bberkay/chess/blob/main/client/index.html">index.html</a> of the <a href = "#chess-platform">Live Demo</a>.</p>
 <p>
 <h4>Method List of ChessPlatform</h4>
 <span>Most (but not all) of the public methods you can use within the <code>ChessPlatform</code> class.</span><br/>
