@@ -34,7 +34,7 @@ import { LogConsole } from "./Components/NavbarComponents/LogConsole";
 import { AboutMenu } from "./Components/NavbarComponents/AboutMenu.ts";
 import { AppearanceMenu } from "./Components/NavbarComponents/AppearanceMenu.ts";
 import { Logger } from "@Services/Logger";
-import { Storage, StorageKey } from "@Services/Storage";
+import { Store, StoreKey } from "@Services/Store";
 import { SettingsMenu } from "./Components/NavbarComponents/SettingsMenu.ts";
 import { BotAttributes } from "@ChessPlatform/Chess/Bot/index.ts";
 /**
@@ -79,7 +79,7 @@ export class Platform {
 
         //For testing purposes
         document.addEventListener("keydown", (event) => {
-            if (event.ctrlKey && event.key === " ") Storage.clear();
+            if (event.ctrlKey && event.key === " ") Store.clear();
         });
     }
 
@@ -405,7 +405,7 @@ export class Platform {
         this.notationMenu.setTurnIndicator(this.chess.getTurnColor());
 
         this.logger.save(`Editor mode is disabled and board is now playable.`);
-        Storage.clear(StorageKey.WasBoardEditorEnabled);
+        Store.clear(StoreKey.WasBoardEditorEnabled);
         document.dispatchEvent(new Event(PlatformEvent.onBoardCreated));
     }
 

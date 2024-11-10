@@ -1,7 +1,7 @@
 import { NavbarOperation } from "@Platform/Types";
 import { Component } from "./Component";
 import { NavbarComponent } from "./NavbarComponents/NavbarComponent";
-import { Storage, StorageKey } from "@Services/Storage";
+import { Store, StoreKey } from "@Services/Store";
 import {
     ABOUT_MENU_ID,
     APPEARANCE_MENU_ID,
@@ -65,11 +65,11 @@ export class Navbar extends Component {
      */
     private loadLocalStorage(): void {
         // Welcome message
-        if (Storage.isExist(StorageKey.WasWelcomeModalShown))
+        if (Store.isExist(StoreKey.WasWelcomeModalShown))
             this.showComponent(this.getComponentByType(LogConsole));
         else {
             this.showComponent(this.getComponentByType(AboutMenu));
-            Storage.save(StorageKey.WasWelcomeModalShown, true);
+            Store.save(StoreKey.WasWelcomeModalShown, true);
         }
     }
 

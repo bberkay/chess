@@ -1,6 +1,6 @@
 import { NavbarComponent } from "./NavbarComponent";
 import { AppearanceMenuOperation } from "../../Types";
-import { Storage, StorageKey } from "@Services/Storage";
+import { Store, StoreKey } from "@Services/Store";
 import { APPEARANCE_MENU_ID } from "@Platform/Consts";
 import { Formatter } from "@Platform/Utils/Formatter";
 
@@ -35,15 +35,15 @@ export class AppearanceMenu extends NavbarComponent {
      * Load the appearance from the local storage.
      */
     private loadLocalStorage(): void {
-        if (Storage.isExist(StorageKey.Theme)) {
-            this.changeTheme(Storage.load(StorageKey.Theme));
+        if (Store.isExist(StoreKey.Theme)) {
+            this.changeTheme(Store.load(StoreKey.Theme));
         } else {
             this.changeTheme(Theme.System);
         }
 
-        if (Storage.isExist(StorageKey.CustomAppearance)) {
-            const customAppearance = Storage.load(
-                StorageKey.CustomAppearance
+        if (Store.isExist(StoreKey.CustomAppearance)) {
+            const customAppearance = Store.load(
+                StoreKey.CustomAppearance
             );
             for (const customColor in customAppearance) {
                 this.addCustomAppearanceStyle(
@@ -277,8 +277,8 @@ export class AppearanceMenu extends NavbarComponent {
             `--chessboard-${varName}: ${value};` + (isExist ? "" : "}")
         );
 
-        Storage.save(StorageKey.CustomAppearance, {
-            ...Storage.load(StorageKey.CustomAppearance),
+        Store.save(StoreKey.CustomAppearance, {
+            ...Store.load(StoreKey.CustomAppearance),
             [varName]: value,
         });
     }
@@ -288,9 +288,9 @@ export class AppearanceMenu extends NavbarComponent {
      */
     private loadColorPalette(): void {
         let customAppearance;
-        if (Storage.isExist(StorageKey.CustomAppearance))
-            customAppearance = Storage.load(
-                StorageKey.CustomAppearance
+        if (Store.isExist(StoreKey.CustomAppearance))
+            customAppearance = Store.load(
+                StoreKey.CustomAppearance
             );
 
         for (const colorPicker of document.querySelectorAll(
@@ -352,7 +352,7 @@ export class AppearanceMenu extends NavbarComponent {
                     Formatter.camelCaseToTitleCase(Theme.Light) + " Mode";
         }
 
-        Storage.save(StorageKey.Theme, this.currentTheme);
+        Store.save(StoreKey.Theme, this.currentTheme);
     }
 
     /**
@@ -381,7 +381,7 @@ export class AppearanceMenu extends NavbarComponent {
                 this.changeTheme();
                 break;
             case AppearanceMenuOperation.Reset:
-                Storage.clear(StorageKey.CustomAppearance);
+                Store.clear(StoreKey.CustomAppearance);
                 this.loadColorPalette();
                 break;
         }

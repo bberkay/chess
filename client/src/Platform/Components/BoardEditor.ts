@@ -14,7 +14,7 @@ import {
     StartPosition,
 } from "@Chess/Types";
 import { Component } from "./Component";
-import { Storage, StorageKey } from "@Services/Storage";
+import { Store, StoreKey } from "@Services/Store";
 import {
     BOARD_CREATOR_ID,
     PIECE_CREATOR_ID,
@@ -141,12 +141,12 @@ export class BoardEditor extends Component {
      * if there is a game in the cache.
      */
     private loadLocalStorage(): void {
-        if (Storage.isExist(StorageKey.LastBot)) {
-            const botAttributes = Storage.load(StorageKey.LastBot)!;
+        if (Store.isExist(StoreKey.LastBot)) {
+            const botAttributes = Store.load(StoreKey.LastBot)!;
             if (botAttributes.color === Color.White) this.flip();
         }
 
-        if (Storage.isExist(StorageKey.WasBoardEditorEnabled))
+        if (Store.isExist(StoreKey.WasBoardEditorEnabled))
             this.enableEditorMode();
     }
 
@@ -280,7 +280,7 @@ export class BoardEditor extends Component {
         this.enableBoardCreator();
         this.createEditableBoard();
         this.enableBoardObserver();
-        Storage.save(StorageKey.WasBoardEditorEnabled, true);
+        Store.save(StoreKey.WasBoardEditorEnabled, true);
     }
 
     /**
@@ -730,7 +730,7 @@ export class BoardEditor extends Component {
      */
     public getCreatedBoard(): string {
         return (
-            Storage.load(StorageKey.LastCreatedBoard) ||
+            Store.load(StoreKey.LastCreatedBoard) ||
             this.getShownFen()
         );
     }

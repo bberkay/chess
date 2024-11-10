@@ -11,7 +11,7 @@
 import { Chess } from "@Chess/Chess";
 import { Platform } from "@Platform/Platform.ts";
 import { Logger } from "@Services/Logger";
-import { Storage, StorageKey } from "@Services/Storage";
+import { Store, StoreKey } from "@Services/Store";
 import { ChessEvent, Color, GameStatus, StartPosition } from "@Chess/Types";
 import {
     DEFULT_PLAYER_NAME,
@@ -128,8 +128,8 @@ export class ChessPlatform {
          * Connect to the last connection if exists.
          */
         const connectToLastConnectionOrLobbyUrl = async () => {
-            const lsLobbyId = Storage.load(
-                StorageKey.LastLobbyConnection
+            const lsLobbyId = Store.load(
+                StoreKey.LastLobbyConnection
             )?.lobbyId;
             const urlLobbyId = Page.getEndpoint();
             const lobbyId = urlLobbyId || lsLobbyId;
@@ -196,9 +196,9 @@ export class ChessPlatform {
         ) as SocketOperation;
         if (
             operation != SocketOperation.CancelLobby &&
-            Storage.isExist(StorageKey.WasBoardEditorEnabled)
+            Store.isExist(StoreKey.WasBoardEditorEnabled)
         )
-            Storage.clear(StorageKey.WasBoardEditorEnabled);
+            Store.clear(StoreKey.WasBoardEditorEnabled);
 
         switch (operation) {
             case SocketOperation.CreateLobby:
@@ -391,10 +391,10 @@ export class ChessPlatform {
      * Reconnect the last lobby that the user connected.
      */
     private _reconnectLobby(): void {
-        if (!Storage.isExist(StorageKey.LastLobbyConnection)) return;
+        if (!Store.isExist(StoreKey.LastLobbyConnection)) return;
 
-        const lastLobbyConnection = Storage.load(
-            StorageKey.LastLobbyConnection
+        const lastLobbyConnection = Store.load(
+            StoreKey.LastLobbyConnection
         ) as WsCreatedData;
         this.reconnectLobby({
             lobbyId: lastLobbyConnection.lobbyId,
@@ -406,7 +406,7 @@ export class ChessPlatform {
      * Cancel the game and close the socket connection
      */
     public cancelLobby(): void {
-        Storage.clear(StorageKey.LastLobbyConnection);
+        Store.clear(StoreKey.LastLobbyConnection);
         this.platform.navigatorModal.hide();
         this.terminateConnection();
         this.platform.notationMenu.displayNewGameUtilityMenu();
@@ -509,10 +509,10 @@ export class ChessPlatform {
             return;
         }
 
-        Storage.clear(StorageKey.LastLobbyConnection);
+        Store.clear(StoreKey.LastLobbyConnection);
         document.dispatchEvent(new Event(SocketEvent.onConnectionTerminated));
         if (resetPlatform) {
-            Storage.clear(StorageKey.LastBoard);
+            Store.clear(StoreKey.LastBoard);
             this.platform.notationMenu.clear();
         }
     }
@@ -724,8 +724,8 @@ export class ChessPlatform {
             window.location.origin + "/" + lobbyId
         );
         
-        Storage.save(StorageKey.LastLobbyConnection, wsCreatedData);
-        Storage.save(StorageKey.LastPlayerName, player.name);
+        Store.save(StoreKey.LastLobbyConnection, wsCreatedData);
+        Store.save(StoreKey.LastPlayerName, player.name);
         document.dispatchEvent(
             new CustomEvent(SocketEvent.onLobbyCreated, {
                 detail: lobbyId,
@@ -750,8 +750,8 @@ export class ChessPlatform {
         player: Player;
     } {
         const { lobbyId, player } = wsConnectedData;
-        Storage.save(StorageKey.LastLobbyConnection, wsConnectedData);
-        Storage.save(StorageKey.LastPlayerName, player.name);
+        Store.save(StoreKey.LastLobbyConnection, wsConnectedData);
+        Store.save(StoreKey.LastPlayerName, player.name);
         document.dispatchEvent(new Event(SocketEvent.onLobbyJoined));
         this.logger.save(
             `Connected to the lobby-ts-${lobbyId}-te- as ${player.name}.`

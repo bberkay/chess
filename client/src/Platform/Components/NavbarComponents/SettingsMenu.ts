@@ -1,7 +1,7 @@
 import { NavbarComponent } from "./NavbarComponent";
 import { SettingsMenuOperation } from "@Platform/Types";
 import { SETTINGS_MENU_ID } from "@Platform/Consts";
-import { Storage, StorageKey } from "@Services/Storage";
+import { Store, StoreKey } from "@Services/Store";
 import { Chess } from "@Chess/Chess";
 import {
     AnimationSpeed,
@@ -88,10 +88,10 @@ export class SettingsMenu extends NavbarComponent {
      * the default settings to the local storage.
      */
     private loadLocalStorage(): void {
-        const settings = Storage.load(StorageKey.Settings);
+        const settings = Store.load(StoreKey.Settings);
         if (!settings) {
-            Storage.save(
-                StorageKey.Settings,
+            Store.save(
+                StoreKey.Settings,
                 this.getDefaultSettings()
             );
         } else {
@@ -122,7 +122,7 @@ export class SettingsMenu extends NavbarComponent {
      * This function renders the settings menu.
      */
     protected renderComponent(): void {
-        const currentSettings = Storage.load(StorageKey.Settings)!;
+        const currentSettings = Store.load(StoreKey.Settings)!;
 
         /**
          * Generate a toggle setting with the given values.
@@ -287,8 +287,8 @@ export class SettingsMenu extends NavbarComponent {
         settingKey: K,
         settingValue: Settings[T][K]
     ): void {
-        const settings = Storage.isExist(StorageKey.Settings)
-            ? Storage.load(StorageKey.Settings)!
+        const settings = Store.isExist(StoreKey.Settings)
+            ? Store.load(StoreKey.Settings)!
             : this.getDefaultSettings()!;
 
         if (Object.keys(settings).indexOf(configOperation) === -1)
@@ -325,7 +325,7 @@ export class SettingsMenu extends NavbarComponent {
         }
 
         settings[configOperation][settingKey] = settingValue;
-        Storage.save(StorageKey.Settings, settings);
+        Store.save(StoreKey.Settings, settings);
     }
 
     /**
@@ -367,12 +367,12 @@ export class SettingsMenu extends NavbarComponent {
         // Operation handles here if it is not a config operation.
         switch (operation) {
             case SettingsMenuOperation.ClearCache:
-                Storage.clear();
+                Store.clear();
                 setTimeout(() => { window.location.reload() }, CACHE_RELOAD_DELAY_MS);
                 return;
             case SettingsMenuOperation.ResetSettings:
-                Storage.save(
-                    StorageKey.Settings,
+                Store.save(
+                    StoreKey.Settings,
                     this.getDefaultSettings()
                 );
                 this.renderComponent();

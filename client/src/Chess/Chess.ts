@@ -1,7 +1,7 @@
 /**
  * @module Chess
  * @description This module provides users to a playable chess game on the web by
- * connecting `ChessEngine` and `ChessBoard` with `Storage`.
+ * connecting `ChessEngine` and `ChessBoard` with `Store`.
  * @author Berkay Kaya <berkaykayaforbusiness@outlook.com> (https://bberkay.github.io)
  * @url https://github.com/bberkay/chess
  * @license MIT
@@ -24,7 +24,7 @@ import {
 import { ChessEngine, MoveValidationError } from "./Engine/ChessEngine";
 import { ChessBoard } from "./Board/ChessBoard";
 import { SquareClickMode, SquareEffect } from "./Board/Types";
-import { Storage, StorageKey } from "@Services/Storage";
+import { Store, StoreKey } from "@Services/Store";
 import { Converter } from "./Utils/Converter.ts";
 import { Logger } from "@Services/Logger.ts";
 import { Bot, BotAttributes } from "./Bot";
@@ -37,7 +37,7 @@ const PRE_MOVE_DELAY = 100;
 
 /**
  * This class provides users to a playable chess game on the web by connecting ChessEngine and ChessBoard. Also,
- * it uses Storage which provides users to save the game to the cache and load the game from the cache and Logger
+ * it uses Store which provides users to save the game to the cache and load the game from the cache and Logger
  * which provides users to log the game.
  */
 export class Chess {
@@ -91,18 +91,18 @@ export class Chess {
     /**
      * This function checks the cache and loads the game from the cache if there is a game in the cache.
      * @returns Returns true if there is a game in the cache, otherwise returns false.
-     * @see For more information about cache management check `src/Services/Storage`
+     * @see For more information about cache management check `src/Services/Store`
      */
     public checkAndLoadGameFromCache(): void {
         // If there is a game in the cache, load it.
-        if (Storage.isExist(StorageKey.LastBoard)) {
+        if (Store.isExist(StoreKey.LastBoard)) {
             this.logger.save("Game loading from cache...");
             this.createGame(
-                Storage.load(StorageKey.LastBoard) as JsonNotation
+                Store.load(StoreKey.LastBoard) as JsonNotation
             );
-            if (Storage.isExist(StorageKey.LastBot)) {
-                const botAttributes = Storage.load(
-                    StorageKey.LastBot
+            if (Store.isExist(StoreKey.LastBot)) {
+                const botAttributes = Store.load(
+                    StoreKey.LastBot
                 )!;
                 this.addBotToCurrentGame(botAttributes);
                 this.logger.save(
@@ -172,12 +172,12 @@ export class Chess {
         this.initBoardListener();
         this.monitorPlayerDurationsIfExist();
 
-        Storage.save(
-            StorageKey.LastBoard,
+        Store.save(
+            StoreKey.LastBoard,
             this.getGameAsJsonNotation()
         );
-        Storage.save(
-            StorageKey.LastCreatedBoard,
+        Store.save(
+            StoreKey.LastCreatedBoard,
             this.getGameAsFenNotation()
         )
 
@@ -207,7 +207,7 @@ export class Chess {
             this.playBotIfExist();
         }
 
-        Storage.save(StorageKey.LastBot, this._bot.getAttributes());
+        Store.save(StoreKey.LastBot, this._bot.getAttributes());
         document.dispatchEvent(
             new CustomEvent(ChessEvent.onBotAdded, {
                 detail: { color: this._bot.color },
@@ -232,7 +232,7 @@ export class Chess {
 
         this._bot.terminate();
         this._bot = null;
-        Storage.clear(StorageKey.LastBot);
+        Store.clear(StoreKey.LastBot);
         this.logger.save("Bot terminated");
     }
 
@@ -258,8 +258,8 @@ export class Chess {
                 detail: { square: square },
             })
         );
-        Storage.save(
-            StorageKey.LastBoard,
+        Store.save(
+            StoreKey.LastBoard,
             this.engine.getGameAsJsonNotation()
         );
     }
@@ -278,8 +278,8 @@ export class Chess {
                 detail: { square: square },
             })
         );
-        Storage.save(
-            StorageKey.LastBoard,
+        Store.save(
+            StoreKey.LastBoard,
             this.engine.getGameAsJsonNotation()
         );
     }
@@ -594,8 +594,8 @@ export class Chess {
             this.board.unlock();
             this.board.setTurnColor(this.engine.getTurnColor());
 
-            Storage.save(
-                StorageKey.LastBoard,
+            Store.save(
+                StoreKey.LastBoard,
                 this.engine.getGameAsJsonNotation()
             );
 
@@ -721,7 +721,7 @@ export class Chess {
             ].includes(gameStatus)
         ) {
             this.logger.save("Game updated in cache after move");
-            Storage.clear(StorageKey.LastBoard);
+            Store.clear(StoreKey.LastBoard);
             this.terminateBotIfExist();
             this.logger.save("Game over");
             if (this._gameTimeMonitorIntervalId !== -1)
@@ -738,8 +738,8 @@ export class Chess {
             this.playBotIfExist();
             this.playPreMoveIfExist();
             this.logger.save("Game updated in cache after move");
-            Storage.save(
-                StorageKey.LastBoard,
+            Store.save(
+                StoreKey.LastBoard,
                 this.engine.getGameAsJsonNotation()
             );
         }

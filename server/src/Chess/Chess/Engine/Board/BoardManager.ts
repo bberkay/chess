@@ -12,7 +12,7 @@ import {
 } from "../../Types";
 import { BoardQuerier } from "./BoardQuerier.ts";
 import { PieceModel } from "../Models/PieceModel.ts";
-import { Piece } from "../Types";
+import { Piece } from "../Types/index.ts";
 
 /**
  * This class provides the board management of the game.

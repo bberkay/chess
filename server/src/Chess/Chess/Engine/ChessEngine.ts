@@ -24,7 +24,7 @@ import {
     StartPosition,
 } from "../Types";
 import { Timer } from "./Utils/Timer.ts";
-import { NotationSymbol, Piece } from "./Types";
+import { NotationSymbol, Piece } from "./Types/index.ts";
 import { MoveEngine } from "./Move/MoveEngine.ts";
 import { BoardManager } from "./Board/BoardManager.ts";
 import { Converter } from "../Utils/Converter";

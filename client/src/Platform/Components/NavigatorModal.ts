@@ -1,4 +1,4 @@
-import { Storage, StorageKey } from "@Services/Storage";
+import { Store, StoreKey } from "@Services/Store";
 import { SocketOperation } from "../../Types";
 import { BoardEditorOperation, NavigatorModalOperation } from "../Types";
 import { Component } from "./Component";
@@ -499,8 +499,8 @@ export class NavigatorModal extends Component {
             `<span>Enter your name: </span>
             <div class="input-group" style="padding-top:5px;padding-bottom:5px;">
                 <input type="text" id="player-name" placeholder="Your Name" value="${
-                    Storage.isExist(StorageKey.LastPlayerName)
-                        ? Storage.load(StorageKey.LastPlayerName)
+                    Store.isExist(StoreKey.LastPlayerName)
+                        ? Store.load(StoreKey.LastPlayerName)
                         : ""
                 }" maxlength="${MAX_PLAYER_NAME_LENGTH}" minlength="${MIN_PLAYER_NAME_LENGTH}" required>
                 <button type="submit" data-socket-operation="${
@@ -562,8 +562,8 @@ export class NavigatorModal extends Component {
             `<span>Enter your name: </span>
             <div class="input-group" style="padding-top:5px;padding-bottom:5px;">
                 <input type="text" id="player-name" placeholder="Your Name" value="${
-                    Storage.isExist(StorageKey.LastPlayerName)
-                        ? Storage.load(StorageKey.LastPlayerName)
+                    Store.isExist(StoreKey.LastPlayerName)
+                        ? Store.load(StoreKey.LastPlayerName)
                         : ""
                 }" maxlength="${MAX_PLAYER_NAME_LENGTH}" minlength="${MIN_PLAYER_NAME_LENGTH}" required>
                 <button type="submit" data-socket-operation="${
