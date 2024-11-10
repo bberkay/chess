@@ -57,81 +57,69 @@
     </ul>
 </ul>
 <h3>Architecture</h3>
-<h5><i>Technologies: TypeScript, Bun, Vite, Vitest</i></h5>
-<p>In this section, I will explain the project's architecture without going into too much detail as much as possible. As I mentioned in the introduction, the project currently consists of two main parts and the third part that provides connection between main parts and manages the app.</p>
+<h4>Client</h4>
 <ul>
-    <li>
-        <strong><a href = "https://github.com/bberkay/chess-platform/blob/main/src/ChessPlatform.ts">Chess Platform</a></strong><br/>
-        The part that provides connection between Platform and Chess. Creates Chess instance and provides it to Platform instance. So, chess methods can be used by platform's components. And by connecting Platform and Chess, it provides the start point for the project.
-    </li><br/>
-    <li>
-        <strong><a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Chess.ts">Chess</a></strong><br/>
-        Chess provides a playable game on web by using ChessEngine and ChessBoard instances. Also, has a Cache system for save the game and log system for save the details of every action.  
-        <br/>
+  <li><b><a href="https://github.com/bberkay/chess/blob/main/client/src/ChessPlatform.ts">ChessPlatform</a></b>
+    <ul>
+      <li>The main class on the client-side. It creates and controls the Chess and Platform based on user interactions. It connects to the server-side using websockets to enable online play. Events triggered through <code><a href="https://github.com/bberkay/chess/blob/main/client/src/Types/index.ts">SocketEvent</a></code> can be listened to, and variables such as the server address and port can be modified through <a href="https://github.com/bberkay/chess/blob/main/client/src/Consts/index.ts">Consts</a>.</li>
+      <li><b>WsCommand</b>: Located under ChessPlatform, this defines the communication language between the client-side and server-side.</li>
+    </ul>
+  </li>
+  <li>
+    <b><a href="https://github.com/bberkay/chess/blob/main/client/src/Chess/Chess.ts">Chess</a></b>
+    <ul>
+      <li>Provides a playable chess experience on the web using <code><a href="https://github.com/bberkay/chess/blob/main/client/src/Chess/Board/ChessBoard.ts">ChessBoard</a></code> and <code><a href="https://github.com/bberkay/chess/blob/main/client/src/Chess/Engine/ChessEngine.ts">ChessEngine</a></code> classes. It also supports <a href="https://github.com/bberkay/chess/blob/main/client/src/Chess/Bot/index.ts">Stockfish</a>. Manages game storage locally through <a href="https://github.com/bberkay/chess/blob/main/client/src/Services/Store.ts">Store</a>, and events triggered with <code><a href="https://github.com/bberkay/chess/blob/main/client/src/Chess/Types/index.ts">ChessEvent</a></code> can be listened to. It does not interact with any external classes outside of services.</li>
+      <li><b><a href="https://github.com/bberkay/chess/tree/main/client/src/Chess/Board">ChessBoard:</a></b> Provides the chessboard, pieces, sound effects, square effects, promotion menu, and game end animation. Does not interact with any mechanism or external classes, and is implemented as a standalone class without sub/helper classes, except for <code><a href="https://github.com/bberkay/chess/blob/main/client/src/Services/Logger.ts">Logger</a></code>.</li>
+      <li><b><a href="https://github.com/bberkay/chess/tree/main/client/src/Chess/Engine">ChessEngine:</a></b> Provides mechanisms for board control (such as piece positions), move calculation, and time control. It has sub/helper classes like <code>MoveEngine</code>, <code>BoardManager</code>, and <code>PieceModel</code>, which are used only within the <code><a href="https://github.com/bberkay/chess/blob/main/client/src/Chess/Engine/ChessEngine.ts">ChessEngine</a></code>. Only the <code><a href="https://github.com/bberkay/chess/blob/main/client/src/Services/Logger.ts">Logger</a></code> service is used externally.</li>
+    </ul>
+  </li>
+  <li>
+    <b><a href="https://github.com/bberkay/chess/blob/main/client/src/Platform/Platform.ts">Platform</a></b> 
+    <ul>
+      <li>Provides components aimed at enhancing the user experience by allowing the methods of the Chess class to be used in the interface. For example, the <code>NotationMenu</code> uses methods like <code>chess.takeForward</code> and <code>chess.takeBack</code> to view move history, or <code>BoardEditor</code> uses methods like <code>chess.createPiece</code> and <code>chess.removePiece</code> to create a board. Events triggered with <code><a href="https://github.com/bberkay/chess/blob/main/client/src/Platform/Types/index.ts">PlatformEvent</a></code> can be listened to, and component IDs and other variables can be modified through <a href="https://github.com/bberkay/chess/blob/main/client/src/Platform/Consts/index.ts">Consts</a>.</li>
+      <li><b><a href="https://github.com/bberkay/chess/tree/main/client/src/Platform/Components">Components:</a></b> Components derive from the <code><a href="https://github.com/bberkay/chess/blob/main/client/src/Platform/Components/Component.ts">Component</a></code> class and are rendered in the index.html file using HTML, CSS, and JavaScript. Components can communicate with the Chess class but do not communicate with other classes, including each other. They may use services.
         <ul>
-            <li>
-                <strong><a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Engine/ChessEngine.ts">ChessEngine</a></strong><br/>
-                ChessEngine provides the mechanism of the game. All the rules of chess are implemented in this class and can be used as standalone or directly by Chess class for playable game by connecting with ChessBoard.   
-            </li>
-            <li>
-                <strong><a href = "https://github.com/bberkay/chess-platform/blob/main/src/Chess/Board/ChessBoard.ts">ChessBoard</a></strong><br/>
-                ChessBoard provides the interactive chessboard that players can make actions but doesn't have any mechanism. ChessBoard can be used as standalone or directly by Chess class for playable game by connecting with ChessEngine. Also, both board and pieces can be visualized from <a href = "https://github.com/bberkay/chess-platform/tree/main/src/Chess/Board/Assets">assets.</a>
-            </li>
+          <li><b><a href="https://github.com/bberkay/chess/tree/main/client/src/Platform/Components/NavbarComponents">NavbarComponents:</a></b> A subcomponent type that derives from the <code><a href="https://github.com/bberkay/chess/blob/main/client/src/Platform/Components/NavbarComponents/NavbarComponent.ts">NavbarComponent</a></code> class. These components are located under the <code><a href="https://github.com/bberkay/chess/blob/main/client/src/Platform/Components/Navbar.ts">navbar</a></code> and differ from other classes only by being under the navbar.</li>
         </ul>
-    </li><br>
-    <li>
-        <strong><a href = "https://github.com/bberkay/chess-platform/blob/main/src/Platform/Platform.ts">Platform</a></strong><br/>
-        Platform provides some UI components by using chess instance that connected by Chess Platform. Currently, Platform has four components: Notation Table that shows every played move of players as algebraic notation, Score Section(comes with notation table) that shows score of every player, Game Creator that provide 2 different create form(used with fen notation) for users, and Log Console that shows the log of every action of players on UI by using chess instance's log system. 
-    </li>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <b><a href="https://github.com/bberkay/chess/tree/main/client/src/Services">Services</a></b> 
+    <ul>
+      <li><b><a href="https://github.com/bberkay/chess/blob/main/client/src/Services/Logger.ts">Logger:</a></b> A simple logging system that stores messages as objects with source and message keys, dispatching a <code>LoggerEvent.LogAdded</code> event for new logs.</li>
+      <li><b><a href="https://github.com/bberkay/chess/blob/main/client/src/Services/Store.ts">Store:</a></b> A strict storage mechanism that operates with predefined keys and types, not allowing the creation of new or invalid keys.</li>
+    </ul>
+  </li>
+  <li>
+    <b><a href="https://github.com/bberkay/chess/tree/main/client/src/Global">Global</a></b> 
+    <ul>
+      <li><b><a href="https://github.com/bberkay/chess/blob/main/client/src/Global/Page.ts">Page:</a></b> Controls the title and URL. Changes the page title based on events like <code>ChessEvent</code> and <code>PlatformEvent</code>. For example, when an event like <code>ChessEvent.onGameStarted</code> is dispatched, the page title is set to <code>PageTitle.GameStarted</code>.</li>
+    </ul>
+  </li>
 </ul>
 
-```mermaid
-classDiagram
-  class ChessPlatform {
-    + readonly chess: Chess
-    - readonly platform: Platform
-    + constructor()
-  }
-  class Chess {
-    - chessBoard: ChessBoard
-    - chessEngine: ChessEngine
-    + constructor()
-  }
-  class ChessEngine {
-    + constructor()
-  }
-  class ChessBoard {
-    + constructor()
-  }
-  class Platform {
-    - readonly chess: Chess
-    - notationTable: NotationTable
-    - gameCreator: GameCreator
-    - logConsole: LogConsole
-    + constructor()
-  }
-  class NotationTable {
-    - readonly chess: Chess
-    + constructor()
-  }
-  class GameCreator {
-    - readonly chess: Chess
-    + constructor()
-  }
-  class LogConsole {
-    - readonly chess: Chess
-    + constructor()
-  }
-
-  ChessPlatform *-- Chess
-  ChessPlatform *-- Platform
-  Chess "0..1" o-- "1" ChessBoard
-  Chess "0..1" o-- "1" ChessEngine
-  Platform "1" *-- "0..1" NotationTable
-  Platform "1" *-- "0..1" GameCreator
-  Platform "1" *-- "0..1" LogConsole
-
-```
+<h4>Server</h4>
+<ul>
+  <li><b><a href="https://github.com/bberkay/chess/blob/main/server/src/main.ts">Main</a></b>
+    <ul>
+      <li>This is the main file on the server-side. It handles all HTTP and websocket requests. It has a copy of the <code><a href="https://github.com/bberkay/chess/tree/main/server/src/Chess">ChessEngine</a></code> on the client-side to facilitate gameplay between players. Variables such as allowed origins and CORS headers can be modified via <a href="">Consts</a>.</li>
+      <li><b><a href="https://github.com/bberkay/chess/blob/main/server/src/main.ts">WsCommand:</a></b> Like <code>ChessEngine</code>, this is a copy of <code>WsCommand</code> under <code>ChessPlatform</code> on the client-side.</li>
+    </ul>
+  </li>
+  <li>
+    <b><a href="https://github.com/bberkay/chess/tree/main/server/src/Managers">Managers</a></b>
+    <ul>
+      <li><b><a href="https://github.com/bberkay/chess/blob/main/server/src/Managers/LobbyManager.ts">LobbyManager:</a></b> This is the main class responsible for managing lobbies, such as creating new lobbies, adding players to lobbies, and deleting lobbies that are no longer in use. It is only used by the main file and does not interact with any other class.</li>
+      <li><b><a href="https://github.com/bberkay/chess/blob/main/server/src/Managers/SocketManager.ts">SocketManager</a></b>: Stores the sockets of users connected to a lobby according to lobby IDs and makes websocket connections accessible for both sides.</li>
+    </ul>
+  </li>
+  <li><b><a href="https://github.com/bberkay/chess/blob/main/server/src/Lobby/index.ts">Lobby</a></b>
+  <ul>
+      <li>This class represents the lobby, hosts players, and enables gameplay using <code>ChessEngine</code>. Each lobby corresponds to a lobby instance. It does not interact with any other class.</li>
+    </ul>
+  </li>
+</ul>
 
 <h3>Installation</h3>
 <ol>
@@ -243,7 +231,7 @@ bindSocketOperationCallbacks(
   onOpen: (() => void) | null = null,
   onMessage: (
     <T extends WsTitle>(
-      wsTitle: T, 
+      wsTitle: T,
       wsData: WsData<T>
     ) => void) | null = null,
   onError: (() => void) | null = null,
@@ -251,7 +239,7 @@ bindSocketOperationCallbacks(
 ): void
 
 /**
- * Establishes a WebSocket connection for 
+ * Establishes a WebSocket connection for
  * creating a new lobby.
  */
 createLobby(
@@ -259,7 +247,7 @@ createLobby(
 ): void
 
 /**
- * Establishes a WebSocket connection for 
+ * Establishes a WebSocket connection for
  * joining an existing lobby.
  */
 joinLobby(
@@ -267,25 +255,25 @@ joinLobby(
 ): void
 
 /**
- * Cancel the game and close the socket 
+ * Cancel the game and close the socket
  * connection.
  */
 cancelLobby(): void
 
 /**
- * Abort the game and send the abort 
+ * Abort the game and send the abort
  * command to the server.
  */
 abortGame(): void
 
 /**
- * Resign the game and send the resign 
+ * Resign the game and send the resign
  * command to the server.
  */
 resign(): void
 
 /**
- * Send the play again offer to 
+ * Send the play again offer to
  * the opponent.
  */
 sendPlayAgainOffer(): void
@@ -302,37 +290,37 @@ sendDrawOffer(): void
 sendUndoOffer(): void
 
 /**
- * Accept the draw offer from the 
+ * Accept the draw offer from the
  * opponent.
  */
 acceptDrawOffer(): void
 
 /**
- * Accept the play again offer from 
+ * Accept the play again offer from
  * the opponent.
  */
 acceptPlayAgainOffer(): void
 
 /**
- * Accept the undo move offer from 
+ * Accept the undo move offer from
  * the opponent.
  */
 acceptUndoOffer(): void
 
 /**
- * Cancel the offer that sent to 
+ * Cancel the offer that sent to
  * the opponent.
  */
 cancelOffer(): void
 
 /**
- * Decline the sent offer from 
+ * Decline the sent offer from
  * the opponent.
  */
 declineSentOffer(): void
 
 /**
- * Clear the last connection restore 
+ * Clear the last connection restore
  * the platform components.
  */
 terminateConnection(resetPlatform: boolean = true): void
@@ -352,10 +340,10 @@ terminateConnection(resetPlatform: boolean = true): void
     <!-- Initiate Chess without Platform -->
     <script type="module" async>
       import { Chess } from '@Chess/Chess';
-      import { 
-        BotAttributes, 
-        BotDifficulty, 
-        BotColor 
+      import {
+        BotAttributes,
+        BotDifficulty,
+        BotColor
       } from '@Chess/Bot';
       import { Color, Square } from '@Chess/Types';
 
@@ -394,7 +382,7 @@ https://github.com/bberkay/chess/blob/main/client/src/Chess/Chess.ts">here</a>.<
 
 ```javascript
 /**
- * Creates a new game with the given position 
+ * Creates a new game with the given position
  * and durations.
  */
 createGame(
@@ -405,12 +393,12 @@ createGame(
 ): void
 
 /**
- * Creates a new piece with the given color, 
+ * Creates a new piece with the given color,
  * type and square.
  */
 createPiece(
-  color: Color, 
-  type: PieceType, 
+  color: Color,
+  type: PieceType,
   square: Square
 ): void
 
@@ -420,7 +408,7 @@ createPiece(
 removePiece(square: Square): void
 
 /**
- * Adds a bot to the current game with the 
+ * Adds a bot to the current game with the
  * given attributes.
  */
 addBotToCurrentGame(
@@ -428,7 +416,7 @@ addBotToCurrentGame(
 ): void
 
 /**
- * Returns the last created bot's attributes 
+ * Returns the last created bot's attributes
  * if there is any.
  */
 getLastCreatedBotAttributes(): BotAttributes | null
@@ -442,7 +430,7 @@ terminateBotIfExist(): void
  * Takes back the last move.
  */
 takeBack(
-  onEngine: boolean = false, 
+  onEngine: boolean = false,
   undoColor: Color | null = null
 ): void
 
@@ -457,20 +445,20 @@ takeForward(): void
 goToSpecificMove(moveIndex: number): void
 
 /**
- * Returns the durations of the game if 
+ * Returns the durations of the game if
  * the `durations` are set.
  */
 getDurations(): Durations | null
 
 /**
- * Returns the remaining times of the players 
+ * Returns the remaining times of the players
  * if the `durations` are set.
  */
 getPlayersRemainingTime(): RemainingTimes
 
 /**
- * Returns the color of the current turn 
- * or taken back board's, if `ignoreTakeBack` 
+ * Returns the color of the current turn
+ * or taken back board's, if `ignoreTakeBack`
  * is `false`.
  */
 getTurnColor(
@@ -478,7 +466,7 @@ getTurnColor(
 ): Color
 
 /**
- * Returns the status of the current game 
+ * Returns the status of the current game
  * or taken back board's.
  */
 getGameStatus(
@@ -486,7 +474,7 @@ getGameStatus(
 ): GameStatus
 
 /**
- * Returns the algebraic notation of the 
+ * Returns the algebraic notation of the
  * current game or taken back board's.
  */
 getAlgebraicNotation(
@@ -494,7 +482,7 @@ getAlgebraicNotation(
 ): ReadonlyArray<string>
 
 /**
- * Returns the move history of the 
+ * Returns the move history of the
  * current game or taken back board's.
  */
 getMoveHistory(
@@ -502,7 +490,7 @@ getMoveHistory(
 ): ReadonlyArray<Move>
 
 /**
- * Returns the scores of the current 
+ * Returns the scores of the current
  * game or taken back board's.
  */
 getScores(
@@ -510,7 +498,7 @@ getScores(
 ): Readonly<Scores>
 
 /**
- * Returns the fen notation of the current 
+ * Returns the fen notation of the current
  * game or taken back board's.
  */
 getGameAsFenNotation(
@@ -518,7 +506,7 @@ getGameAsFenNotation(
 ): string
 
 /**
- * Returns the json notation of the current 
+ * Returns the json notation of the current
  * game or taken back board's.
  */
 getGameAsJsonNotation(
@@ -526,7 +514,7 @@ getGameAsJsonNotation(
 ): JsonNotation
 
 /**
- * Returns the ASCII representation of the 
+ * Returns the ASCII representation of the
  * current game or taken back board's.
  */
 getGameAsAscii(
@@ -534,8 +522,8 @@ getGameAsAscii(
 ): string
 
 /**
- * Returns the board history of the current 
- * game. After every move, the board is saved 
+ * Returns the board history of the current
+ * game. After every move, the board is saved
  * as json notation.
  */
 getBoardHistory(): ReadonlyArray<JsonNotation>
@@ -578,9 +566,9 @@ getBoardHistory(): ReadonlyArray<JsonNotation>
       // This is a basic example:
       let selectedSquare: Square | null = null;
       let preSelectedSquare: Square | null = null;
-      let preMoves: { 
-        selectedSquare: Square, 
-        targetSquare: Square 
+      let preMoves: {
+        selectedSquare: Square,
+        targetSquare: Square,
       }[] = [];
       chessBoard.bindMoveEventCallbacks({
         onPieceSelected: (squareId: Square) => {
@@ -636,19 +624,19 @@ setConfig(
  * Creates a new game with the given position.
  */
 createGame(
-  position: JsonNotation 
-          | StartPosition 
+  position: JsonNotation
+          | StartPosition
           | string = StartPosition.Standard
 ): void
 
 /**
- * Creates a new piece with the given color, 
+ * Creates a new piece with the given color,
  * type and square.
  */
 createPiece(
-  color: Color, 
-  type: PieceType, 
-  square: Square, 
+  color: Color,
+  type: PieceType,
+  square: Square,
   isGhost: boolean = false
 ): void
 
@@ -656,9 +644,9 @@ createPiece(
  * Removes the piece on the given square.
  */
 removePiece(
-  square: HTMLDivElement 
-        | HTMLElement 
-        | Element 
+  square: HTMLDivElement
+        | HTMLElement
+        | Element
         | Square
 ): void
 
@@ -668,20 +656,20 @@ removePiece(
 setTurnColor(color: Color): void
 
 /**
- * Bind functions to the specific events 
- * of the chess board. Does not override 
+ * Bind functions to the specific events
+ * of the chess board. Does not override
  * the previous event bindings.
  */
 bindMoveEventCallbacks(
-    callbacks: { 
-      onPieceSelected?: (squareId: Square) => void; 
-      onPiecePreSelected?: (squareId: Square) => void; 
-      onPieceMoved?: (squareId: Square) => void; 
+    callbacks: {
+      onPieceSelected?: (squareId: Square) => void;
+      onPiecePreSelected?: (squareId: Square) => void;
+      onPieceMoved?: (squareId: Square) => void;
       onPiecePreMoved?: (
-        squareId: Square, 
+        squareId: Square,
         squareClickMode: SquareClickMode
-      ) => void; 
-      onPreMoveCanceled?: () => void 
+      ) => void;
+      onPreMoveCanceled?: () => void
     }
 ): void
 
@@ -689,7 +677,7 @@ bindMoveEventCallbacks(
  * Highlights the moves on the board.
  */
 highlightMoves(
-  moves: Moves | null = null, 
+  moves: Moves | null = null,
   isPreMove: boolean = false
 ): void
 
@@ -712,7 +700,7 @@ isFlipped(): boolean
  * Locks the board.
  */
 lock(
-  disablePreSelection: boolean = false, 
+  disablePreSelection: boolean = false,
   showDisabledEffect: boolean = false
 ): void
 
@@ -764,7 +752,7 @@ getAllSquares(): NodeListOf<HTMLDivElement>
 getAllPieces(): NodeListOf<HTMLDivElement>
 
 /**
- * Returns the closest square element of the 
+ * Returns the closest square element of the
  * given element.
  */
 getClosestSquareElement(
@@ -779,7 +767,7 @@ getPieceElementOnSquare(
 ): HTMLDivElement
 
 /**
- * Returns the selected square element if 
+ * Returns the selected square element if
  * there is any.
  */
 getSelectedSquareElement(): HTMLDivElement | null
@@ -880,18 +868,18 @@ https://github.com/bberkay/chess/blob/main/client/src/Chess/Engine/ChessEngine.t
  * Creates a new game with the given position.
  */
 createGame(
-  position: JsonNotation 
-          | StartPosition 
+  position: JsonNotation
+          | StartPosition
           | string = StartPosition.Standard
 ): void
 
 /**
- * Creates a new piece with the given color, 
+ * Creates a new piece with the given color,
  * type and square.
  */
 createPiece(
-  color: Color, 
-  type: PieceType, 
+  color: Color,
+  type: PieceType,
   square: Square
 ): void
 
@@ -901,21 +889,21 @@ createPiece(
 removePiece(square: Square): void
 
 /**
- * Returns the moves of the piece on the 
+ * Returns the moves of the piece on the
  * given square.
  */
 getMoves(
-  square: Square, 
+  square: Square,
   isPreCalculation: boolean = false
 ): Moves | null
 
 /**
- * Plays the move on the engine with the 
+ * Plays the move on the engine with the
  * given squares.
  */
 playMove(
-  from: Square, 
-  to: Square, 
+  from: Square,
+  to: Square,
   moveType: MoveType | null = null
 ): void
 
@@ -925,13 +913,13 @@ playMove(
 takeBack(undoColor: Color | null = null): void
 
 /**
- * Returns the durations of the game if 
+ * Returns the durations of the game if
  * the durations are set.
  */
 getDurations(): Durations | null
 
 /**
- * Returns the remaining times of the players 
+ * Returns the remaining times of the players
  * if the durations are set.
  */
 getPlayersRemainingTime(): RemainingTimes
@@ -947,20 +935,20 @@ getTurnColor(): Color
 getGameStatus(): GameStatus
 
 /**
- * Returns the algebraic notation of the 
+ * Returns the algebraic notation of the
  * current game.
  */
 getAlgebraicNotation(): ReadonlyArray<string>
 
 /**
- * Returns the move history of the current 
+ * Returns the move history of the current
  * game.
  */
 getMoveHistory(): ReadonlyArray<Move>
 
 /**
- * Returns the board history of the current 
- * game. After every move, the board is saved 
+ * Returns the board history of the current
+ * game. After every move, the board is saved
  * as json notation.
  */
 getBoardHistory(): ReadonlyArray<JsonNotation>
@@ -971,19 +959,19 @@ getBoardHistory(): ReadonlyArray<JsonNotation>
 getScores(): Readonly<Scores>
 
 /**
- * Returns the fen notation of the 
+ * Returns the fen notation of the
  * current game.
  */
 getGameAsFenNotation(): string
 
 /**
- * Returns the json notation of the 
+ * Returns the json notation of the
  * current game.
  */
 getGameAsJsonNotation(): JsonNotation
 
 /**
- * Returns the ASCII representation of 
+ * Returns the ASCII representation of
  * the current game.
  */
 getGameAsAscii(): string
