@@ -19,7 +19,7 @@ export class AboutMenu extends NavbarComponent {
      * This function renders the about menu.
      */
     protected renderComponent(): void {
-        this.loadHTML(
+        /*this.loadHTML(
             ABOUT_MENU_ID,
             `
             <div class="about-body">
@@ -29,7 +29,7 @@ export class AboutMenu extends NavbarComponent {
             </div>
         `
         );
-        this.loadCSS("about-menu.css");
+        this.loadCSS("about-menu.css");*/
     }
 
     /**
