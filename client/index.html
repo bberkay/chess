@@ -57,37 +57,11 @@
     </div>
     <main>
         <div class="left">
-            <div id="navbar">
-                <div class="navbar-buttons">
-                    <button data-menu-operation="${NavbarOperation.ShowLogConsole}">Stream</button>
-                    <button data-menu-operation="${NavbarOperation.ShowAppearance}">Appearance</button>
-                    <button data-menu-operation="${NavbarOperation.ShowSettings}">Settings</button>
-                    <button data-menu-operation="${NavbarOperation.ShowAbout}">About</button>
-                </div>
-            </div>
-            <div id="log-console">
-                <div class="log-console-header-body-separator"></div>
-                <div id="log-console-body">
-                    <ul id = "log-list"></ul>
-                </div>
-                <div id="log-console-footer">
-                    <div id="log-console-footer-btn">
-                        <button data-menu-operation="${LogConsoleOperation.Clear}" data-tooltip-text="Clear Logs">Ⅹ</button>
-                    </div>
-                    <div id="log-console-footer-content">
-                        <span id = "log-file"></span>
-                    </div>
-                </div>
-            </div>
+            <div id="navbar"></div>
+            <div id="log-console"></div>
             <div id="settings-menu"></div>
             <div id="appearance-menu"></div>
-            <div id="about-menu">
-                <div class="about-body">
-                    <h1>Chess Platform</h1>
-                    <p class="intro">Chess Platform is a web application (and portfolio project) that allows you to play chess against yourself, a friend, or the Stockfish engine with adjustable difficulty levels. While the project does not use advanced chess programming techniques (such as 0x88 or bitboards), it fully implements all chess rules. The client side is developed entirely in <b>TypeScript</b> and tested with <b>Vitest</b>, while the server side is built using <b>Bun.js</b>.</p>
-                    <p class="repo">More information about the project can be found on the <a href="${REPOSITORY_URL}" target="_blank">GitHub repository</a>.</p>
-                </div>
-            </div>
+            <div id="about-menu"></div>
         </div>
         <div class="center">
             <div id="chessboard"></div>
