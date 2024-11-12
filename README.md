@@ -61,7 +61,7 @@
     </ul>
 </ul>
 <h2>Architecture</h2>
-<p>Check out <a href="">ARCHITECTURE.md</a> for more information about architecture and state diagrams.</p>
+<p>Check out <a href="https://github.com/bberkay/chess/blob/main/docs/ARCHITECTURE.md">ARCHITECTURE.md</a> for more information about architecture and state diagrams.</p>
 
 <h3>Client</h3>
 <ul>
@@ -177,7 +177,7 @@
     <small>Or build with <code>bun run build</code></small>
 </ol>
 <h2>Usage</h2>
-<p>Check out <a href="">USAGE.md</a> for more information about usage and method list of classes.</p>
+<p>Check out <a href="https://github.com/bberkay/chess/blob/main/docs/USAGE.md">USAGE.md</a> for more information about usage and method list of classes.</p>
 <h3>ChessPlatform(Full Version)</h3>
 
 ```html
