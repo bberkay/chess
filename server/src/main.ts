@@ -460,26 +460,50 @@ const server = Bun.serve<WebSocketData>({
     },
     websocket: {
         open(ws: RWebSocket) {
-            joinLobby(ws);
+            try{
+                joinLobby(ws);
+            }catch(e: unknown){
+                ws.send(WsCommand.error({
+                    message: e instanceof Error 
+                        ? e.message 
+                        : "An unexpected error occured while opening the websocket connection."
+                }));
+            }
         },
         message(ws: RWebSocket, message: string) {
-            console.log("Ws:", ws.data.player.name, "Message: ", message);
-            if (
-                SocketManager.getSocket(
-                    ws.data.lobbyId,
-                    ws.data.player.token
-                ) === ws
-            )
-                handleMessage(ws, message);
+            try{
+                console.log("Ws:", ws.data.player.name, "Message: ", message);
+                if (
+                    SocketManager.getSocket(
+                        ws.data.lobbyId,
+                        ws.data.player.token
+                    ) === ws
+                )
+                    handleMessage(ws, message);
+            }catch(e: unknown){
+                ws.send(WsCommand.error({
+                    message: e instanceof Error 
+                        ? e.message 
+                        : "An unexpected error occured while handling the websocket message."
+                }));
+            }
         },
         close(ws: RWebSocket) {
-            if (
-                SocketManager.getSocket(
-                    ws.data.lobbyId,
-                    ws.data.player.token
-                ) === ws
-            )
-                leaveLobby(ws);
+            try{
+                if (
+                    SocketManager.getSocket(
+                        ws.data.lobbyId,
+                        ws.data.player.token
+                    ) === ws
+                )
+                    leaveLobby(ws);
+            }catch(e: unknown){
+                ws.send(WsCommand.error({
+                    message: e instanceof Error 
+                        ? e.message 
+                        : "An unexpected error occured while handling the websocket message."
+                }));
+            }
         },
         maxPayloadLength: MAX_PAYLOAD_LENGTH,
         idleTimeout: MAX_IDLE_TIMEOUT,
