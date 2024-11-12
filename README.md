@@ -14,7 +14,7 @@
 <h2>Introduction</h2>
 <p>Chess Platform is a web application (a portfolio project) that allows you to play chess against yourself, a friend, or the Stockfish engine with adjustable difficulty levels. While the project does not use advanced chess programming techniques (such as 0x88 or bitboards), it fully implements all chess rules. The application is divided into three main components: Chess Platform, Platform, and Chess. Detailed information about these parts can be found in the <a href="#architecture">Architecture</a> section. The client side is developed entirely in <b>TypeScript</b> and tested with <b>Vitest</b>, while the server side is built using <b>Bun.js</b>.</p>
 </p>
-<img src="https://lh3.googleusercontent.com/fife/ALs6j_FY6MiI1S6ky8ycQi4BGTtStiTvLMv-mmBxt4ca_70csR0oYAdSxZgZ8dkKlb-4ntcgGHaPI0A60h6rcTKzPCcjE1hoU190CPzbOVp5JPZXWjn5QGWTBdOHoMxyYnQJM1kgjSmoTyAu5gJANb2NUcHD2MCBXC2dpxs9lpT8qvHt07ywYjj0ryTdGVm8QC728rqvSDsGCg5LXbQ9AnD1YROaV6i-G6mcO9YWFYPc3yuwkdKPZGia-EIRZdDzhRhJYhvqknvh4gKoWPW76c7X8c9G2YCksdqcVva2W7ia857jbh6wazFlwafAkJgDtGK5l1oC4HGRZy8JCzCQ99XwIaogL0k27x4lmDKEtpNvlkuw7ns3bnVmVtIGPSWcgF9VJisJa-bhIrkpwNeZ8DjssQlCaauDzIl9JEdQmA5tAwJkg1OV1J-5ehNnanbJO-NqzgtZHcDwkU5FP8JylgWhrT-Fo1joN0LEGdV4HdoWci5BvqwbcUK7fCX3vUKDpuHQBtIxe6XQWd274fKQ3xBsLGFKhgIDrcG55aFS3nS2RMHoFjANqgQyRQvLnB2Gq3tgrvkIuccOyZStZ_xruYsicxUpOb2Ibn1ycpvRpTMg_DAwTA6ENkMDCa8cDajyHF91uXbxKN2s-NYXN3duif741oohWL7LEp_gkRVI37ZMA-Tnb-ksg7puR2agAD6pNobYtF_8EMcNwllaSiHybMOPhcvBooLGfTYX4Sngm9wTHqAaKsCN03tyciLtNhYfSfHgZ6dUBKBcjJpySxmZaaKgSPD6MTZ9EMr5iTyDYehpgpfioziR4a_NJk8jko4CtV4gT5sT1MFwdSNDMBqHeYck4rLercIyErkg3wuygB3X-pfz-s4tQGh6VCYI58urq0tC4CDEhrwf1Uw8HT8Wjmp4kLnLYwsX_JniRa74LrHWHuF6O_j8wSiC-8wjXpSz4T8z80cbzEuJJKT1bsb0rpsL6VGkCpxJcdmqDqhBQmETVtGvDdt1GCwZYJD8tZfbzpRfAs3XDjHcUzEhdDvvLQZriarNDvPAOiONeEKBolVNxAqdvFSazNND0qLTRFy7bIFSCbtzutrC0nbspOE9D858nZSdll5uzKFCeMReCrj0FnhkqueUeOmgDyBJ9xvH7lmMlVaHqJlUsYLHTqR5Bl-rv4ynLENtlfaCE_n54iQrS3ubicrJm21iFxjYKVla_4dXx9ZGxt7jOJC5uj7lqscH33rDqLBOI2vOkIO4U2FRN6bOdlQFXDrboK8w8saKIBnZZomPS531M97stFaPIzx6gemx1w-HVbrYVqhfUnBy50-HL_EOYugGk1hrJ9vg8qDlcBZN1Qrw-o7tInRzM2nekUcJmZ4ZoLDnqsYXSQz1wQ_OatJLQAE15i0cBnxf-5ixWJKH2aQEjIYzdABZXFzMM0fzmrtNwkqZM8j2aGi4UWwNOwYa1BTpgzXhGNC44qJGCaBohNrMWIdWeT1OGoryfjxb5RKQKiF3qo_TOKjcl3P4YwcNTo8s7YVEDSky4nrxlTI-YYV0ciytNqsY9mw79Vh-DXTwS3rV0Pq9489laM5q91fdy4ozn76fPavUgOOV4olquC9BzjSGVBl8=w1538-h851" alt="chess-platform-preview" border="0">
+<img src="https://raw.githubusercontent.com/bberkay/chess/refs/heads/main/docs/chess-platform-preview.png" alt="chess-platform-preview" border="0">
 <h2>Features</h2>
 <ul>
   <li><b>Standard Mechanics:</b> 
@@ -61,6 +61,8 @@
     </ul>
 </ul>
 <h2>Architecture</h2>
+<p>Check out <a href="">ARCHITECTURE.md</a> for more information about architecture and state diagrams.</p>
+
 <h3>Client</h3>
 <ul>
   <li><b><a href="https://github.com/bberkay/chess/blob/main/client/src/ChessPlatform.ts">ChessPlatform</a></b>
@@ -102,7 +104,7 @@
     </ul>
   </li>
 </ul>
-<img src="https://lh3.googleusercontent.com/fife/ALs6j_HOK-dd24PZkApOkMarHvw-vXRujCmo6EmX7MrKOXAAGIvy3gJOu9cHbQHCtVGQU9rbHvFjbKPHOIgNjYmZIGAYs4x4XkpLUyzTNl-03V2UtdXAjYWbojiPdS4LR1uBDOxb_ffTR4akQsCFnE_JgZukdh17OJ55FbB89-cJYaC88vavtRCO4wS_J6YQNQuRGe24rtbRgrpgcVNsQt93hL1HRd6-LDhfUFo9iiiONfxnvI9r6esO11ZlkWIxKkHR4KSTS86vFsJ4ed17Tk6q0LanqV6l3Kw3J5o-g2EsWNb91Ybgfzja85FUjQMud8I0DvTRB-DCT-cUouxVtb8c6emiLidJfC7v-3L61xB-10Luo5rtuvl3YhH5g97aCIPW19J7KSJKPznF7Lve5yej2ty-2CAOh6pwZ8tBW8O4GqnXTeohGAEROqZ4uN-Wkb0S2vIRfxNJg51XGCL6FQXshUu1bWn8nnlYiYkyr5VwONvFQjKxDFZr4DoD4cwPk2bmIsFP5gNvP3Wz_eFy4q2aNsrjEgQEHnNCCQ3YVXRQvSXYyyd6nNyk1966anRnjpzXDpLsFgH0Y7K19V5pb7EZGL-iJJYvG3RxDUnuKE5lvZ-xW_By5HzdqwkN8RywUFRdhWnp26iK-DVe5F1rwSYKX0FTYZc171JW4bhy-85Wblw4l3e91z292vTrekc726rfefUpOx7AIVbge4ENgM_Zli7bR-nfW89GlOsqYxY3xxY70YUQeXy7FoOC0vzekaD2xOWQfWXdiWA8Pv5kShzV0uR3_wo-Bxb9EjxZcypiajBM-ewLAk9EWMjGzYphnnJJ9gomONP9LN5rUE1tFXjxVQuocH-H_EuVZ_D5Z4YtKiByEpngesl6vhn-xnSPWTIFjSUZU-Oc363J6D4XT7LwRUQbc7gZorm9s2umaRdZdOmIxHAtSgCQdF6ICUdFMof9ObiNt_Jn33_dR0qCiRCirWGUpGeNbcAnZXAUDg0WXnnYnEOHjprnvvZ3W87VTot2vbA_8H7GOkDd2wcBqQJwiSaguesRE3XLWOMmG2ZOh2_IXDb4VdmxTdO-HIRaPk6bY-lqVkY98UhHJfVe8UL2JLy27CS9pawbdaCdwk2Vjji6EdKwPdIifWj0ZZPnGIM4xohm-yRJwX-AFD-Fcg8XRUy0Jvo3TdnvrZphlQhE5y6zSw1yq1K6ZSMilY_E0eD-FCAJeuDmkZK6wPOIC_8UEXxl2rGp4W22OKZEcHJC5Cbm9iB72O1HU1irbYy1IW_je9QJmOjDkdjqHju-OV0KHG-NqWf6aT339Vlfhje1JDPt8Z2NCPM3F1jSOQltAMkYHtTt-y45yoaeC1jSxsYHDF1Kk00Jd4IDa9WiE3Jizkg1x7muMiM3aAxw8nIn1RDOsMZwa1UoB430SjgkRbJDAHAcCJbCWwOpKXmWJo1BqfQ7Wk_2B5HRfMbwBZSZ1xC8XDboRaHd77RgnLDUCWz4TwgJRkxFSTmaLBxuZDbDIXfQuptyLfn5goNy8mVd6X08VvhyK9f8l1gl4q5lv-KzGDZYGBz3CbcKi4sLgF0BtQFxUh6d5oYy0uJqWMqXTCd_Jx3p916w2ACAaKyd3Q=w1515-h806">
+<img src="https://raw.githubusercontent.com/bberkay/chess/refs/heads/main/docs/chess-platform-Client-Side-Architecture.drawio.png">
 
 <h3>Server</h3>
 <ul>
@@ -123,7 +125,7 @@
   <br/>This class represents the lobby, hosts players, and enables gameplay using <code>ChessEngine</code>. Each lobby corresponds to a lobby instance. It does not interact with any other class.
   </li>
 </ul>
-<img src="https://lh3.googleusercontent.com/fife/ALs6j_F6aZfw4KJlbGQhmymFufckqSCPqZpmnq3_gi_LbIL8dg9dkCb3Yt0ZMjrHkx-C9C1MXmszqQy-oEoARoyAiOtuVVvqBFLJjYHguZtDCWbMmDdY9RO3cc10dh7vJhmPOqHEht8ZOntj93VuV-oDDLNqt_T_fxF69k6Qenb64qxN0o9KUPwZfMh_UAa3jrI-8KqvT1Gdd7Xc_QQ5_lUmKfahAUHPwYOZ3-tOaK_k2y0r6KQdNNQoVuvT82Hu8Rm7ahQUtzFIQVeyDOCad4aC3SFKGqMCuz7lDvm6aoKrvBdXj4kTqXN4MopfGTTPZqqLFOtC19XYE44pSUrbjoX2LxMFUgLRwT45xXTyNivE2xHJvJ9LO43Bi-9_ncRDVia2cblOrp-UAG9HN7yGl489DO9IrJK_BM_vVX--LYmGwFmj5cdPMgDPoZJTjFv3jbatPfMXEMfvt94NOEfobj4KFxjIWmd6wjSxcL9c4Jj5kbXmJBU-zbsXAywFfUQUR54ZcEb852UVLUKQjDMz5w7srmsQiyjpsvSwPKtSWwpnqwwoYAwddrRnXwVVlysrSnWmO2Ooc09yfOvbym_vp0E9nbLDYsyKoo9zKz10mDhhRajfSeuf2ZOw2hAM2IXDV_bGMdVJLcv2JTNWJMY96KBtOvhmMtllnXZzEf2q1loXP_IQ1wZEuv66wU6raaJ3JHdi118v3gS6JjTe722G44LWBA-gQq1kkpKLawxGAZi3Zu8fjP_tYFCbdoNAiPlsuw29n6Zul-67HMVtUCP90TiisU6IBtaehOqU0sriDnUCoQvb6qkLXUEprOr8GyuQqJ-ybdvToLAABAgqlZw2FR3tjhG9WPuwUJ4FJxMoTIxh4R7Iev5Y5ersNbQaaQJTRFu33V3OPzAltVcBvCXvlVMLffxxfDQyNWrjI-MU0KpC8GPOUuPQCsmDIkeXPPzk9hAIWvbFmk8Fm0kjjy7cDEToG8Adid42ewNhUeZkBgn1tL8fyBGjcmpuwdMSJQ3P6P5s4Zno-5ZOT7ws9twoj0UxnRLsfOqrb3NnN_aDzNV9DpR5qIy-ue-JZIN6KlcTXC2eG2BApVHIN7M740BpiWwI5D3nu0iyYQfg6blIjC8Ij7LrLlsbSqweEhjpTLGJeGnTViucVemHnHv_Luu01n-TOt8xuVBAh5yz8p7bNZ2pjNu7IxCviodlCw9lRbokBZfPOGJWHqy5Ks8WuT12lHquKmO6DwA8S2c9g_7lNveD3bOuZzfiieVPmfSqS9lv6yzaeft8UwdbZE5AjGqM341wXT-2YkFBiiEMv2d0hm4cDkGgvYrUkDOZDqebOgSNFz2yMkjBqhZOhespUjRcPpatntj2I7vd_wuiZpfWBIb8KnF6EGKLE8FXvEcHXe49AgyIFNL_olNxDr2Z_P50vRwqJqyNUID-e0BIU3HUQdg18mm5Rnhds_MnSU7D-71MSPtKZCYwMlXB9WZfTIBgGKFebFbvc3kAjgQrqK__eyYARtXR-uo6kRvsLxeAQYQXgMtjbyZz8dJE74sWfgQ11NMZvRvUehU3Z-unXje2z-W35ckmko1wgidYzVlHVVY8ZOkxUvgo2o-xi4GzXWcysQ=w1515-h806">
+<img src="https://raw.githubusercontent.com/bberkay/chess/refs/heads/main/docs/chess-platform-Server-Side-Architecture.drawio.png">
 
 <h2>Installation</h2>
 <ol>
@@ -175,6 +177,7 @@
     <small>Or build with <code>bun run build</code></small>
 </ol>
 <h2>Usage</h2>
+<p>Check out <a href="">USAGE.md</a> for more information about usage and method list of classes.</p>
 <h3>ChessPlatform(Full Version)</h3>
 
 ```html
@@ -220,115 +223,6 @@
 
 <p>This is also current usage in <a href = "https://github.com/bberkay/chess/blob/main/client/index.html">index.html</a> of the <a href = "#chess-platform">Live Demo</a>.</p>
 <p>
-<h4>Method List of ChessPlatform</h4>
-<span>Most (but not all) of the public methods you can use within the <code>ChessPlatform</code> class.</span><br/>
-<small>You can see the custom <code>ChessPlatform</code> types in <a href = "https://github.com/bberkay/chess/blob/main/client/src/Types/index.ts">here</a> and more detailed explanation of the methods in <a href = "
-https://github.com/bberkay/chess/blob/main/client/src/ChessPlatform.ts">here</a>.</small>
-</p>
-
-```javascript
-/**
- * Add custom callbacks to the WebSocket events.
- * Does not override the default callbacks.
- * */
-bindSocketOperationCallbacks(
-  onOpen: (() => void) | null = null,
-  onMessage: (
-    <T extends WsTitle>(
-      wsTitle: T,
-      wsData: WsData<T>
-    ) => void) | null = null,
-  onError: (() => void) | null = null,
-  onClose: (() => void) | null = null
-): void
-
-/**
- * Establishes a WebSocket connection for
- * creating a new lobby.
- */
-createLobby(
-  createLobbyReqParams: CreateLobbyReqParams
-): void
-
-/**
- * Establishes a WebSocket connection for
- * joining an existing lobby.
- */
-joinLobby(
-  joinLobbyReqParams: JoinLobbyReqParams
-): void
-
-/**
- * Cancel the game and close the socket
- * connection.
- */
-cancelLobby(): void
-
-/**
- * Abort the game and send the abort
- * command to the server.
- */
-abortGame(): void
-
-/**
- * Resign the game and send the resign
- * command to the server.
- */
-resign(): void
-
-/**
- * Send the play again offer to
- * the opponent.
- */
-sendPlayAgainOffer(): void
-
-/**
- * Send the draw offer to the opponent.
- */
-sendDrawOffer(): void
-
-/**
- * Send the undo move offer to the
- * opponent.
- */
-sendUndoOffer(): void
-
-/**
- * Accept the draw offer from the
- * opponent.
- */
-acceptDrawOffer(): void
-
-/**
- * Accept the play again offer from
- * the opponent.
- */
-acceptPlayAgainOffer(): void
-
-/**
- * Accept the undo move offer from
- * the opponent.
- */
-acceptUndoOffer(): void
-
-/**
- * Cancel the offer that sent to
- * the opponent.
- */
-cancelOffer(): void
-
-/**
- * Decline the sent offer from
- * the opponent.
- */
-declineSentOffer(): void
-
-/**
- * Clear the last connection restore
- * the platform components.
- */
-terminateConnection(resetPlatform: boolean = true): void
-```
 
 <h3>Chess(without Platform)</h3>
 
@@ -375,162 +269,6 @@ terminateConnection(resetPlatform: boolean = true): void
     </script>
   </body>
 </html>
-```
-
-<h4>Method List of Chess</h4>
-<p>
-<span>Most (but not all) of the public methods you can use within the <code>Chess</code> class.</span><br/>
-<small>You can see the custom <code>Chess</code> types from <a href = "https://github.com/bberkay/chess/blob/main/client/src/Chess/Types/index.ts">here</a> and more detailed explanation of the methods from <a href = "
-https://github.com/bberkay/chess/blob/main/client/src/Chess/Chess.ts">here</a>.</small>
-</p>
-
-```javascript
-/**
- * Creates a new game with the given position
- * and durations.
- */
-createGame(
-  position: JsonNotation
-          | StartPosition
-          | string = StartPosition.Standard,
-  durations: Durations | null = null
-): void
-
-/**
- * Creates a new piece with the given color,
- * type and square.
- */
-createPiece(
-  color: Color,
-  type: PieceType,
-  square: Square
-): void
-
-/**
- * Removes the piece on the given square.
- */
-removePiece(square: Square): void
-
-/**
- * Adds a bot to the current game with the
- * given attributes.
- */
-addBotToCurrentGame(
-  botAttributes: BotAttributes
-): void
-
-/**
- * Returns the last created bot's attributes
- * if there is any.
- */
-getLastCreatedBotAttributes(): BotAttributes | null
-
-/**
- * Terminates the bot if there is any.
- */
-terminateBotIfExist(): void
-
-/**
- * Takes back the last move.
- */
-takeBack(
-  onEngine: boolean = false,
-  undoColor: Color | null = null
-): void
-
-/**
- * Takes forward the last taken back move.
- */
-takeForward(): void
-
-/**
- * Goes to the specific move by the given index.
- */
-goToSpecificMove(moveIndex: number): void
-
-/**
- * Returns the durations of the game if
- * the `durations` are set.
- */
-getDurations(): Durations | null
-
-/**
- * Returns the remaining times of the players
- * if the `durations` are set.
- */
-getPlayersRemainingTime(): RemainingTimes
-
-/**
- * Returns the color of the current turn
- * or taken back board's, if `ignoreTakeBack`
- * is `false`.
- */
-getTurnColor(
-  ignoreTakeBack: boolean = true
-): Color
-
-/**
- * Returns the status of the current game
- * or taken back board's.
- */
-getGameStatus(
-  ignoreTakeBack: boolean = true
-): GameStatus
-
-/**
- * Returns the algebraic notation of the
- * current game or taken back board's.
- */
-getAlgebraicNotation(
-  ignoreTakeBack: boolean = true
-): ReadonlyArray<string>
-
-/**
- * Returns the move history of the
- * current game or taken back board's.
- */
-getMoveHistory(
-  ignoreTakeBack: boolean = true
-): ReadonlyArray<Move>
-
-/**
- * Returns the scores of the current
- * game or taken back board's.
- */
-getScores(
-  ignoreTakeBack: boolean = true
-): Readonly<Scores>
-
-/**
- * Returns the fen notation of the current
- * game or taken back board's.
- */
-getGameAsFenNotation(
-  ignoreTakeBack: boolean = true
-): string
-
-/**
- * Returns the json notation of the current
- * game or taken back board's.
- */
-getGameAsJsonNotation(
-  ignoreTakeBack: boolean = true
-): JsonNotation
-
-/**
- * Returns the ASCII representation of the
- * current game or taken back board's.
- */
-getGameAsAscii(
-  ignoreTakeBack: boolean = true
-): string
-
-/**
- * Returns the board history of the current
- * game. After every move, the board is saved
- * as json notation.
- */
-getBoardHistory(): ReadonlyArray<JsonNotation>
 ```
 
 <h3>ChessBoard(Standalone)</h3>
@@ -609,210 +347,6 @@ getBoardHistory(): ReadonlyArray<JsonNotation>
 </html>
 ```
 
-<h4>Method List of ChessBoard</h4>
-<p>
-<span>Most (but not all) of the public methods you can use within the <code>ChessBoard</code> class.</span><br/>
-<small>You can see the custom <code>ChessBoard</code> types in <a href = "https://github.com/bberkay/chess/blob/main/client/src/Chess/Board/Types/index.ts">here</a> and more detailed explanation of the methods in <a href = "
-https://github.com/bberkay/chess/blob/main/client/src/Chess/Board/ChessBoard.ts">here</a>.</small>
-</p>
-
-```javascript
-/**
- * Set the configuration of the chess board.
- */
-setConfig(
-  config: Partial<ChessBoard["config"]>
-): void
-
-/**
- * Creates a new game with the given position.
- */
-createGame(
-  position: JsonNotation
-          | StartPosition
-          | string = StartPosition.Standard
-): void
-
-/**
- * Creates a new piece with the given color,
- * type and square.
- */
-createPiece(
-  color: Color,
-  type: PieceType,
-  square: Square,
-  isGhost: boolean = false
-): void
-
-/**
- * Removes the piece on the given square.
- */
-removePiece(
-  square: HTMLDivElement
-        | HTMLElement
-        | Element
-        | Square
-): void
-
-/**
- * Sets the turn color of the board.
- */
-setTurnColor(color: Color): void
-
-/**
- * Bind functions to the specific events
- * of the chess board. Does not override
- * the previous event bindings.
- */
-bindMoveEventCallbacks(
-    callbacks: {
-      onPieceSelected?: (squareId: Square) => void;
-      onPiecePreSelected?: (squareId: Square) => void;
-      onPieceMoved?: (squareId: Square) => void;
-      onPiecePreMoved?: (
-        squareId: Square,
-        squareClickMode: SquareClickMode
-      ) => void;
-      onPreMoveCanceled?: () => void
-    }
-): void
-
-/**
- * Highlights the moves on the board.
- */
-highlightMoves(
-  moves: Moves | null = null,
-  isPreMove: boolean = false
-): void
-
-/**
- * Refreshes the board.
- */
-refresh(savePreMoveEffects: boolean = false): void
-
-/**
- * Flips the board.
- */
-flip(): void
-
-/**
- * Returns whether the board is flipped or not.
- */
-isFlipped(): boolean
-
-/**
- * Locks the board.
- */
-lock(
-  disablePreSelection: boolean = false,
-  showDisabledEffect: boolean = false
-): void
-
-/**
- * Returns whether the board is locked or not.
- */
-isLocked(): boolean
-
-/**
- * Shows the status on the board.
- */
-showStatus(status: GameStatus): void
-
-/**
- * Shows the promotion menu on the given square.
- */
-showPromotionMenu(
-  promotionSquare: HTMLElement | Square
-): void
-
-/**
- * Closes the promotion menu.
- */
-closePromotionMenu(): void
-
-/**
- * Returns whether the promotion menu is shown or not.
- */
-isPromotionMenuShown(): boolean
-
-/**
- * Locks the actions for the given color.
- */
-lockActionsOfColor(color: Color): void
-
-/**
- * Returns the locked color if there is any.
- */
-getLockedColor(): Color | null
-
-/**
- * Returns all the squares of the board.
- */
-getAllSquares(): NodeListOf<HTMLDivElement>
-
-/**
- * Returns all the pieces of the board.
- */
-getAllPieces(): NodeListOf<HTMLDivElement>
-
-/**
- * Returns the closest square element of the
- * given element.
- */
-getClosestSquareElement(
-  element: HTMLElement
-): HTMLElement | null
-
-/**
- * Returns the piece element of the given square.
- */
-getPieceElementOnSquare(
-  squareElement: HTMLDivElement | Element | Square
-): HTMLDivElement
-
-/**
- * Returns the selected square element if
- * there is any.
- */
-getSelectedSquareElement(): HTMLDivElement | null
-
-/**
- * Returns the color of the piece on the given
- * square.
- */
-getPieceColor(
-  squareOrPieceElement: HTMLDivElement | Element | Square
-): Color
-
-/**
- * Returns the type of the piece on the given square.
- */
-getPieceType(
-  squareOrPieceElement: HTMLDivElement | Element | Square
-): PieceType
-
-/**
- * Returns the square element of the given piece.
- */
-getSquareElementOfPiece(
-  pieceElement: HTMLDivElement | Element
-): HTMLDivElement
-
-/**
- * Returns the square id of the given square element.
- */
-getSquareId(
-  squareElement: HTMLDivElement | Element
-): Square
-
-/**
- * Returns the click mode of the given square.
- */
-getSquareClickMode(
-  square: Square | HTMLDivElement | Element
-): SquareClickMode
-```
-
 <h3>ChessEngine(Standalone)</h3>
 
 ```typescript
@@ -860,128 +394,6 @@ console.log(chessEngine.getGameAsAscii());
 //   a   b   c   d   e   f   g   h
 ```
 
-<h4>Method List of ChessEngine</h4>
-<p>
-<span>Most (but not all) of the public methods you can use within the <code>ChessEngine</code> class.</span><br/>
-<small>You can see the custom <code>ChessEngine</code> types marked in <a href = "https://github.com/bberkay/chess/blob/main/client/src/Chess/Engine/Types/index.ts">here</a> and more detailed explanation of the methods in <a href = "
-https://github.com/bberkay/chess/blob/main/client/src/Chess/Engine/ChessEngine.ts">here</a>.</small>
-</p>
-
-```javascript
-/**
- * Creates a new game with the given position.
- */
-createGame(
-  position: JsonNotation
-          | StartPosition
-          | string = StartPosition.Standard
-): void
-
-/**
- * Creates a new piece with the given color,
- * type and square.
- */
-createPiece(
-  color: Color,
-  type: PieceType,
-  square: Square
-): void
-
-/**
- * Removes the piece on the given square.
- */
-removePiece(square: Square): void
-
-/**
- * Returns the moves of the piece on the
- * given square.
- */
-getMoves(
-  square: Square,
-  isPreCalculation: boolean = false
-): Moves | null
-
-/**
- * Plays the move on the engine with the
- * given squares.
- */
-playMove(
-  from: Square,
-  to: Square,
-  moveType: MoveType | null = null
-): void
-
-/**
- * Takes back the last move.
- */
-takeBack(undoColor: Color | null = null): void
-
-/**
- * Returns the durations of the game if
- * the durations are set.
- */
-getDurations(): Durations | null
-
-/**
- * Returns the remaining times of the players
- * if the durations are set.
- */
-getPlayersRemainingTime(): RemainingTimes
-
-/**
- * Returns the color of the current turn.
- */
-getTurnColor(): Color
-
-/**
- * Returns the status of the current game.
- */
-getGameStatus(): GameStatus
-
-/**
- * Returns the algebraic notation of the
- * current game.
- */
-getAlgebraicNotation(): ReadonlyArray<string>
-
-/**
- * Returns the move history of the current
- * game.
- */
-getMoveHistory(): ReadonlyArray<Move>
-
-/**
- * Returns the board history of the current
- * game. After every move, the board is saved
- * as json notation.
- */
-getBoardHistory(): ReadonlyArray<JsonNotation>
-
-/**
- * Returns the scores of the current game.
- */
-getScores(): Readonly<Scores>
-
-/**
- * Returns the fen notation of the
- * current game.
- */
-getGameAsFenNotation(): string
-
-/**
- * Returns the json notation of the
- * current game.
- */
-getGameAsJsonNotation(): JsonNotation
-
-/**
- * Returns the ASCII representation of
- * the current game.
- */
-getGameAsAscii(): string
-```
-
-<p>Check <a href="https://github.com/bberkay/chess/blob/main/client/src/Chess/Chess.ts">Chess.ts</a> for more ready-to-play implementation.</p>
 <h2>Testing</h2>
 <p>Chess Platform is tested with <i>Vitest</i>. Tests consist mostly of engine tests like <b>move calculation</b>, <b>move validation</b>, <b>checkmate</b>, <b>stalemate</b>, etc. Also, there are some tests for converting operations like <b>fen notation</b> to <code><a href = "https://github.com/bberkay/chess/blob/main/client/src/Chess/Types/index.ts">JsonNotation</a></code>
 </p>
