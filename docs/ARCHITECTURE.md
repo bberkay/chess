@@ -65,17 +65,19 @@
 </ul>
 <img src="https://raw.githubusercontent.com/bberkay/chess/refs/heads/main/docs/chess-platform-Server-Side-Architecture.drawio.png">
 
-<h3></h3>
+<h3>Diagrams</h3>
 <h4>Creating Lobby and Joining Lobby</h4>
-<p></p>
+<p>This diagram outlines the setup process for starting an online game session between two player, from creating lobby to
+startings game</p>
 <img src="https://raw.githubusercontent.com/bberkay/chess/refs/heads/main/docs/chess-platform-Preparing-Online-Game.drawio.png">
 
 <h4>Playing A Complete Game</h4>
-<p></p>
+<p>This diagram illustrates the core flow of gameplay, detailing how player moves/offers are sent 
+from one client to the server, validated, and then transmitted to the opponent.</p>
 <img src="https://raw.githubusercontent.com/bberkay/chess/refs/heads/main/docs/chess-platform-Playing-Online-Game.drawio.png">
 
 <h4>Disconnection and Reconnection</h4>
-<p></p>
+<p>This diagram covers the reconnection mechanism, showing how players can resume the game seamlessly after a disconnection, maintaining game state continuity</p>
 <img src="https://raw.githubusercontent.com/bberkay/chess/refs/heads/main/docs/chess-platform-Disconnection-Reconnection.drawio.png">
 
 <hr>

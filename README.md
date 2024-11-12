@@ -424,6 +424,9 @@ I think the development process lasted around 5 to 6 months, spread over 1.5 to 
 <p>
 At the end of the day, I feel that I improved my JavaScript/TypeScript skills, and no matter how big or small the project is, I have experienced the kinds of issues that can arise from not defining the requirements/goals and ignoring the need to make a plan accordingly.
 </p>
+<p>
+If you have reviewed the project and noticed any areas that are missing, incorrect, or could be improved, please don't hesitate to reach out. <a href="mailto:berkaykayaforbusiness@outlook.com">Contact</a> me, and thank you in advance for giving me the opportunity to improve myself
+</p>
 <h2>Sources</h2>
 <ul>
     <li><a href = "https://github.com/lichess-org/stockfish.js">Stockfish.js (Bot)</a></li>
