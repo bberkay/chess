@@ -77,6 +77,7 @@ export class Navbar extends Component {
      * This function renders the navbar.
      */
     protected renderComponent(): void {
+        /*
         this.loadHTML(
             NAVBAR_ID,
             `
@@ -88,7 +89,7 @@ export class Navbar extends Component {
             </div>
         `
         );
-        this.loadCSS("navbar.css");
+        this.loadCSS("navbar.css");*/
     }
 
     /**

@@ -38,7 +38,7 @@ export class LogConsole extends NavbarComponent {
      */
     constructor() {
         super();
-        this.renderComponent();
+        //this.renderComponent();
         this.stream();
 
         document.addEventListener(
