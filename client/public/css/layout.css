@@ -339,17 +339,6 @@ main {
 
 #navbar {
     margin-right: 0.5rem;
-    min-width: var(--navbar-width);
-}
-
-#log-console{
-    min-width: var(--navbar-width);
-    min-height: calc(var(--chessboard-board-size) - 48px);
-}
-
-#about-menu{
-    min-width: var(--navbar-width);
-    min-height: calc(var(--chessboard-board-size) - 48px);
 }
 
 /** 
