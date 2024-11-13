@@ -79,7 +79,7 @@ export class SettingsMenu extends NavbarComponent {
             this._components.push(component);
         }
         
-        this.loadLocalStorage();
+        //this.loadLocalStorage();
     }
 
     /**
