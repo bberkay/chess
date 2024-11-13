@@ -71,7 +71,7 @@ export class ChessPlatform {
     constructor() {
         Page.initEventListeners();
         this.chess = new Chess();
-        this.platform = new Platform(this.chess);
+        //this.platform = new Platform(this.chess);
         this.init();
     }
 
