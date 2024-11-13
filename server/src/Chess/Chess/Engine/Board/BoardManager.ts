@@ -12,7 +12,7 @@ import {
 } from "../../Types";
 import { BoardQuerier } from "./BoardQuerier.ts";
 import { PieceModel } from "../Models/PieceModel.ts";
-import { Piece } from "../Types/index.ts";
+import { Piece } from "../Types";
 
 /**
  * This class provides the board management of the game.
@@ -28,7 +28,7 @@ export class BoardManager extends Board {
     /**
      * This function creates a new board with the given json notation.
      */
-    protected createBoard(jsonNotation: JsonNotation): void {
+    public createBoard(jsonNotation: JsonNotation): void {
         // Reset board by setting all squares to null.
         for (const square in Board.currentBoard) {
             Board.currentBoard[Number(square) as Square] = null;
@@ -63,16 +63,16 @@ export class BoardManager extends Board {
      * {"color":Color.White, "type":PieceType.Pawn, "square":Square.b2}]); This will create two
      * white pawns on a2 and b2.
      */
-    protected createPieces(pieces: Pieces): void {
+    public createPieces(pieces: Pieces): void {
         for (const piece of pieces) {
-            this.createPieceModel(piece.color, piece.type, piece.square);
+            this.createPiece(piece.color, piece.type, piece.square);
         }
     }
 
     /**
      * This function creates a piece with the given color, type and square.
      */
-    protected createPieceModel(
+    public createPiece(
         color: Color,
         type: PieceType,
         square: Square
@@ -83,14 +83,14 @@ export class BoardManager extends Board {
     /**
      * Remove piece from square
      */
-    protected removePieceModel(square: Square): void {
+    public removePiece(square: Square): void {
         Board.currentBoard[square] = null;
     }
 
     /**
      * Add piece to square
      */
-    protected movePiece(from: Square, to: Square): void {
+    public movePiece(from: Square, to: Square): void {
         // Check if the square has a piece and get the piece.
         const fromPiece: Piece | null = BoardQuerier.getPieceOnSquare(from)!;
         const toPiece: Piece | null = BoardQuerier.getPieceOnSquare(to);
@@ -122,38 +122,31 @@ export class BoardManager extends Board {
     /**
      * Set en passant square
      */
-    protected setEnPassant(square: Square | null): void {
+    public setEnPassant(square: Square | null): void {
         Board.enPassant = square;
     }
 
     /**
      * Change castling availability
      */
-    protected disableCastling(castlingType: CastlingType): void {
+    public disableCastling(castlingType: CastlingType): void {
         Board.castling[castlingType] = false;
     }
 
     /**
      * Change color to oppenent's color and increase move count
      */
-    protected changeTurn(): void {
+    public changeTurn(): void {
         Board.currentTurn = BoardQuerier.getOpponentColor();
         Board.moveCount += Board.currentTurn === Color.White ? 1 : 0;
     }
-
-    /**
-     * Change turn color to the given color.
-     */
-    protected changeTurnColor(color: Color): void {
-        Board.currentTurn = color;
-    }
-
+    
     /**
      * Calculate the scores of the players by checking the pieces of the players.
      *
      * @see for more information about piece scores https://en.wikipedia.org/wiki/Chess_piece_relative_value
      */
-    protected calculateScores(): void {
+    private calculateScores(): void {
         Board.scores = {
             [Color.White]: { score: 0, pieces: [] },
             [Color.Black]: { score: 0, pieces: [] },
@@ -207,7 +200,7 @@ export class BoardManager extends Board {
      *
      * @see for more information about piece scores https://en.wikipedia.org/wiki/Chess_piece_relative_value
      */
-    protected updateScores(capturedOrPromotedSquare: Square): void {
+    public updateScores(capturedOrPromotedSquare: Square): void {
         const enemyColor: Color =
             Board.currentTurn == Color.White ? Color.Black : Color.White;
         let capturedOrPromotedPiece: Piece | null =
@@ -272,7 +265,7 @@ export class BoardManager extends Board {
     /**
      * Update remaining time of the player.
      */
-    protected updateRemainingTime(player: Color, remainingTime: number): void {
+    public updateRemainingTime(player: Color, remainingTime: number): void {
         if (!Board.durations) return;
 
         Board.durations[player].remaining = remainingTime;
@@ -281,7 +274,7 @@ export class BoardManager extends Board {
     /**
      * Add move to algebraic notation
      */
-    protected saveAlgebraicNotation(move: string): void {
+    public saveAlgebraicNotation(move: string): void {
         if(!move.trim()) return;
         Board.algebraicNotation.push(move);
     }
@@ -289,7 +282,7 @@ export class BoardManager extends Board {
     /**
      * Add move to move history
      */
-    protected saveMove(
+    public saveMove(
         from: Square,
         to: Square,
         type: MoveType | null = null
@@ -302,7 +295,7 @@ export class BoardManager extends Board {
     /**
      * Save board to history
      */
-    protected saveCurrentBoard(): void {
+    public saveCurrentBoard(): void {
         const game = BoardQuerier.getGame();
         delete game.boardHistory;
         Board.boardHistory.push(JSON.parse(JSON.stringify(game)));
@@ -311,7 +304,7 @@ export class BoardManager extends Board {
     /**
      * Set game status
      */
-    protected setGameStatus(gameStatus: GameStatus): void {
+    public setGameStatus(gameStatus: GameStatus): void {
         Board.gameStatus = gameStatus;
     }
 }

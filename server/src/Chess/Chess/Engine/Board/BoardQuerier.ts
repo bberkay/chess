@@ -10,7 +10,7 @@ import {
     Scores,
     Square,
 } from "../../Types";
-import { MoveRoute, Piece, Route } from "../Types/index.ts";
+import { MoveRoute, Piece, Route } from "../Types";
 import { RouteCalculator } from "../Move/Calculator/RouteCalculator.ts";
 import { Flattener } from "../Move/Utils/Flattener.ts";
 

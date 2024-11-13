@@ -53,7 +53,8 @@ export enum LoggerEvent{
 }
 
 /**
- * This static class provides a logging system.
+ * This static class provides a logger instance
+ * for logging system
  */
 export class Logger{
     private logName: string;

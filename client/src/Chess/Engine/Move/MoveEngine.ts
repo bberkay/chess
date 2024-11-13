@@ -4,8 +4,8 @@ import { BoardQuerier } from "../Board/BoardQuerier.ts";
 import { Locator } from "./Utils/Locator.ts";
 import { RouteCalculator } from "./Calculator/RouteCalculator.ts";
 import { Flattener } from "./Utils/Flattener.ts";
-import { MoveExtender } from "./Helper/MoveExtender.ts";
-import { MoveFilterer } from "./Helper/MoveFilterer.ts";
+import { MoveExtender } from "./Core/MoveExtender.ts";
+import { MoveFilterer } from "./Core/MoveFilterer.ts";
 
 /**
  * This class calculates the possible moves of the pieces.

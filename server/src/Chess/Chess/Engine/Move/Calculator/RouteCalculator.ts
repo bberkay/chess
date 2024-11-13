@@ -1,5 +1,5 @@
 import { Color, PieceType, Square } from "../../../Types";
-import { MoveRoute, Piece, Route } from "../../Types/index.ts";
+import { MoveRoute, Piece, Route } from "../../Types";
 import { DirectionCalculator } from "./DirectionCalculator.ts";
 import { Flattener } from "../Utils/Flattener.ts";
 import { BoardQuerier } from "../../Board/BoardQuerier.ts";
