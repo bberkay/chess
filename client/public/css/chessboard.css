@@ -118,6 +118,13 @@ body::after{
 
 /* -------------- Chessboard -------------- */
 #chessboard {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    min-width: var(--chessboard-board-size);
+    min-height: var(--chessboard-board-size);
+    width: var(--chessboard-board-size);
+    height: var(--chessboard-board-size);
+    content: "";
     gap: 0 !important;
     cursor: pointer !important;
     outline: 2px solid var(--chessboard-border-color);

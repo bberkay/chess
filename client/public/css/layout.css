@@ -328,15 +328,6 @@ main {
 }
 
 /* ------------------- Components ------------------- */
-#chessboard{
-    display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    width: 600px;
-    height: 600px;
-    content: "";
-    outline:1px solid red;
-}
-
 #board-creator {
     margin-top: 0.5rem;
     outline:1px solid pink;
@@ -349,23 +340,23 @@ main {
 }
 
 #notation-menu{
-    height: 600px;
+    height: var(--chessboard-board-size);
     outline: 1px solid green;
     min-width: var(--notation-table-width);
 }
 
 #navbar {
     margin-right: 0.5rem;
-    height: 41px;
+    height: 40px;
     width: calc(var(--navbar-width) - 8px);
     outline: 1px solid yellow;
 }
 
 #about-menu{
-    height: calc(600px + 5px);
+    height: calc(var(--chessboard-board-size) + 5px);
     width: var(--navbar-component-width);
     min-width: var(--navbar-component-width);
-    max-width: calc(600px - 50px);
+    max-width: calc(var(--chessboard-board-size) - 50px);
     outline: 1px solid blue;
 }
 

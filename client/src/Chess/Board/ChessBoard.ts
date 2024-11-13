@@ -89,27 +89,6 @@ export class ChessBoard {
     );
 
     /**
-     * Constructor of the class which load css file of
-     * the chess board.
-     */
-    constructor() {
-        this._loadCSS();
-    }
-
-    /**
-     * This function loads the css file of the chess board.
-     */
-    private _loadCSS(): void {
-        if (document.getElementById("chessboard-css")) return;
-
-        const link: HTMLLinkElement = document.createElement("link");
-        link.id = "chessboard-css";
-        link.rel = "stylesheet";
-        link.href = "./css/chessboard.css";
-        document.head.appendChild(link);
-    }
-
-    /**
      * Set the configuration of the chess board.
      */
     public setConfig(config: Partial<ChessBoard["config"]>): void {
