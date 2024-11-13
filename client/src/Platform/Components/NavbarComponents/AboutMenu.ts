@@ -1,4 +1,4 @@
-import { REPOSITORY_URL } from "@ChessPlatform/Consts";
+//import { REPOSITORY_URL } from "@ChessPlatform/Consts";
 import { NavbarComponent } from "./NavbarComponent";
 import { ABOUT_MENU_ID } from "@Platform/Consts";
 
@@ -19,7 +19,7 @@ export class AboutMenu extends NavbarComponent {
      * This function renders the about menu.
      */
     protected renderComponent(): void {
-        this.loadHTML(
+        /*this.loadHTML(
             ABOUT_MENU_ID,
             `
             <div class="about-body">
@@ -28,7 +28,7 @@ export class AboutMenu extends NavbarComponent {
                 <p class="repo">More information about the project can be found on the <a href="${REPOSITORY_URL}" target="_blank">GitHub repository</a>.</p>
             </div>
         `
-        );
+        );*/
         this.loadCSS("about-menu.css");
     }
 
