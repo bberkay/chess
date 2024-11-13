@@ -333,7 +333,7 @@ main {
 #board-creator {
     margin-top: 0.5rem;
     height: var(--board-creator-table-height);
-    outline: 1px solid green;
+    outline: 1px solid red;
 }
 
 #notation-menu,
@@ -354,7 +354,7 @@ main {
     outline: 1px solid yellow;
 }
 
-#about-menu{
+.left > div:not(#navbar) {
     height: calc(var(--component-height) + 5px);
     width: var(--navbar-component-width);
     min-width: var(--navbar-component-width);
