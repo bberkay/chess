@@ -11,6 +11,7 @@
     --font-family: "Roboto", sans-serif;
 
     /* Sizes */
+    --component-height: 600px; /* better to keep it same as chessboard-board-size */
     --component-font-size: 15px;
     --component-small-font-size: 14px;
 
@@ -340,7 +341,7 @@ main {
 }
 
 #notation-menu{
-    height: var(--chessboard-board-size);
+    height: var(--component-height);
     min-width: var(--notation-table-width);
 }
 
@@ -351,10 +352,10 @@ main {
 }
 
 #about-menu{
-    height: calc(var(--chessboard-board-size) + 5px);
+    height: calc(var(--component-height) + 5px);
     width: var(--navbar-component-width);
     min-width: var(--navbar-component-width);
-    max-width: calc(var(--chessboard-board-size) - 50px);
+    max-width: calc(var(--component-height) - 50px);
 }
 
 /** 
