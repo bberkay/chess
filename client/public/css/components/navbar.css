@@ -9,9 +9,7 @@
     border: 1px solid var(--border-color);
     border-bottom: none;
     padding: 4px;
-    width: calc(var(--navbar-width) - 8px);
     box-shadow: 0 0 5px var(--shadow-color);
-    height: 41px;
 }
 
 #navbar .navbar-buttons {
@@ -28,23 +26,3 @@
  * ------------------ Responsive ------------------- 
  *             700px - 900px - 1250px
  */
-@media screen and (min-width: 900px) and (max-width: 1250px) {
-    #navbar {
-        width: calc(var(--chessboard-board-size) - 8px);
-        max-width: calc(var(--chessboard-board-size) - 8px);
-    }
-}
-
-@media screen and (max-width: 900px) {
-    #navbar {
-        width: calc(100% - 8px);
-        min-width: 0;
-        max-width: calc(var(--chessboard-board-size) - 8px);
-    }
-}
-
-@media screen and (min-width: 700px) and (max-width: 900px) {
-    #navbar {
-        max-width: calc(var(--chessboard-board-size) - 2px);
-    }
-}

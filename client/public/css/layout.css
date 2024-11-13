@@ -351,7 +351,7 @@ main {
     width: calc(var(--navbar-width) - 8px);
 }
 
-#about-menu{
+.left > div:not(#navbar) {
     height: calc(var(--component-height) + 5px);
     width: var(--navbar-component-width);
     min-width: var(--navbar-component-width);
@@ -374,11 +374,6 @@ main {
             order: 3;
             margin-top: 0.5rem;
             flex-basis: 100%;
-
-            & #navbar {
-                margin-top: 0.5rem;
-                margin-right: 0;
-            }
         }
 
         & .center {
@@ -395,7 +390,14 @@ main {
             & #navbar {
                 margin-top: 0.5rem;
                 margin-right: 0;
+                width: calc(var(--component-height) - 8px);
+                max-width: calc(var(--component-height) - 8px);
             }
+        }
+
+        & .center > div:not(#navbar) {
+            width: var(--component-height);
+            max-width: var(--component-height);
         }
 
         & .right {
@@ -425,10 +427,17 @@ main {
 
     #board-creator {
         margin-bottom: 0.5rem;
+        width: 100%;
     }
 
     & #navbar {
         margin-right: 0;
+        width: calc(100% - 8px);
+    }
+
+    & .left > div:not(#navbar) {
+        width: 100%;
+        height: auto;
     }
 
     #notation-menu,
@@ -437,6 +446,7 @@ main {
         margin-top: 0.5rem;
         margin-bottom: 0.5rem;
         height: auto !important;
+        width: 100%;
     }
 
     /* Reorder for mobile */
@@ -450,5 +460,15 @@ main {
     }
     main .left {
         order: 3;
+    }
+}
+
+@media screen and (min-width: 700px) and (max-width: 900px) {
+    #navbar {
+        width: calc(100% - 8px);
+    }
+
+    & .left > div:not(#navbar) {
+        max-width: 100%;
     }
 }

@@ -17,8 +17,7 @@ import { Component } from "./Component";
 import { Store, StoreKey } from "@Services/Store";
 import {
     BOARD_CREATOR_ID,
-    PIECE_CREATOR_ID,
-    NOTATION_MENU_ID,
+    PIECE_CREATOR_ID
 } from "@Platform/Consts";
 
 /**
@@ -155,10 +154,6 @@ export class BoardEditor extends Component {
      */
     private createPieceEditor(): void {
         if (!BoardEditor.isEditorModeEnable()) return;
-        document.getElementById(NOTATION_MENU_ID)!.style.display = "none";
-        document.querySelector("#black-score-section")?.remove();
-        document.querySelector("#white-score-section")?.remove();
-
         this.loadHTML(
             PIECE_CREATOR_ID,
             `
@@ -263,7 +258,6 @@ export class BoardEditor extends Component {
     @isEditorModeEnable()
     private removePieceEditor(): void {
         document.getElementById(PIECE_CREATOR_ID)!.innerHTML = "";
-        document.getElementById(NOTATION_MENU_ID)!.style.display = "flex";
     }
 
     /**

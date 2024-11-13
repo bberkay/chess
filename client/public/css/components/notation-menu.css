@@ -98,7 +98,7 @@
     flex-direction: column;
 
     &.hidden {
-        opacity: 0;
+        display: none;
     }
 
     & .player-name-container {

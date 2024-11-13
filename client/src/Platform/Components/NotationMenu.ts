@@ -15,7 +15,7 @@ import {
 } from "../Types";
 import { SocketOperation } from "../../Types";
 import { Store, StoreKey } from "@Services/Store";
-import { NOTATION_MENU_ID, PIECE_CREATOR_ID } from "@Platform/Consts";
+import { NOTATION_MENU_ID } from "@Platform/Consts";
 import { SoundEffect } from "@Chess/Board/Types/index.ts";
 import { TimerNotAvailableError } from "@ChessPlatform/Chess/Engine/ChessEngine.ts";
 
@@ -132,7 +132,7 @@ export class NotationMenu extends Component {
 
         updateTriggers.forEach((trigger) => {
             document.addEventListener(trigger, () => {
-                if (document.getElementById(PIECE_CREATOR_ID)!.innerHTML === "")
+                if (!Store.load(StoreKey.WasBoardEditorEnabled))
                     this.update();
             });
         });
@@ -142,8 +142,9 @@ export class NotationMenu extends Component {
      * Load the local storage data.
      */
     private loadLocalStorage(): void {
-        if (Store.isExist(StoreKey.WasBoardEditorEnabled))
-            this.hidePlayerCards();
+        if (Store.isExist(StoreKey.WasBoardEditorEnabled)){
+            this.hide();
+        }
 
         if (Store.isExist(StoreKey.LastBoard)) {
             if (Store.isExist(StoreKey.LastLobbyConnection))
@@ -1552,6 +1553,22 @@ export class NotationMenu extends Component {
         }
 
         this.resetConfirmedOperation();
+    }
+
+    /**
+     * Hide the notation menu.
+     */
+    public hide(): void {
+        this.hidePlayerCards();
+        (document.getElementById(NOTATION_MENU_ID)! as HTMLElement).style.display = "none";
+    }
+
+    /**
+     * Hide the notation menu.
+     */
+    public show(): void {
+        (document.getElementById(NOTATION_MENU_ID)! as HTMLElement).style.display = "flex";
+        this.showPlayerCards();
     }
 
     /**

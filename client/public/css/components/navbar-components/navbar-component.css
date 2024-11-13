@@ -20,23 +20,3 @@
  * ------------------ Responsive ------------------- 
  *             700px - 900px - 1250px
  */
-@media screen and (min-width: 900px) and (max-width: 1250px) {
-    .navbar-component {
-        width: var(--chessboard-board-size);
-        max-width: var(--chessboard-board-size);
-    }
-}
-
-@media screen and (max-width: 900px) {
-    .navbar-component {
-        width: 100%;
-        min-width: 0;
-        max-width: var(--chessboard-board-size);
-        height: auto;
-    }
-}
-@media screen and (min-width: 700px) and (max-width: 900px) {
-    .navbar-component {
-        max-width: calc(var(--chessboard-board-size) + 6px);
-    }
-}

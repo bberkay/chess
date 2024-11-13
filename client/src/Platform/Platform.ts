@@ -316,6 +316,7 @@ export class Platform {
      * the log console and etc.
      */
     private _enableBoardEditorAndHanleComponents(): void {
+        this.notationMenu.hide();
         this.navigatorModal.hide();
         this.logConsole.clear();
         this.boardEditor.enableEditorMode();
@@ -331,7 +332,11 @@ export class Platform {
         this.navigatorModal.hide();
         this.navbar.showComponent(this.logConsole);
         this.logConsole.clear();
-        if (!BoardEditor.isEditorModeEnable()) this.notationMenu.clear();
+        if (!BoardEditor.isEditorModeEnable()) {
+            this.notationMenu.clear();
+        } else {
+            this.notationMenu.hide();
+        }
         this.boardEditor.createBoard(notation);
         this.logger.save(`Board is created and components are updated.`);
     }
@@ -347,8 +352,10 @@ export class Platform {
         },
         playerColor: Color
     ): void {
-        if (BoardEditor.isEditorModeEnable())
+        if (BoardEditor.isEditorModeEnable()){
             this.boardEditor.disableEditorMode();
+            this.notationMenu.show();
+        }
 
         this._createBoardAndHandleComponents(createdGame.game);
         this.chess.board.lockActionsOfColor(
@@ -384,8 +391,10 @@ export class Platform {
     private preparePlatformForSingleplayerGame(
         bot: boolean | BotAttributes
     ): void {
-        if (BoardEditor.isEditorModeEnable())
+        if (BoardEditor.isEditorModeEnable()){
             this.boardEditor.disableEditorMode();
+            this.notationMenu.show();
+        }
 
         let botAttributes =
             bot && typeof bot === "object"

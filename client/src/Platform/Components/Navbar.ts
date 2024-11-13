@@ -39,9 +39,8 @@ export class Navbar extends Component {
         }
 
         this.addNavbarComponentClass();
-        //this.hideComponents();
-        //this.loadLocalStorage();
-        this.showComponent(this.getComponentByType(AboutMenu));
+        this.hideComponents();
+        this.loadLocalStorage();
     }
 
     /**
