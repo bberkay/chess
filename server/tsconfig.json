@@ -26,7 +26,6 @@
     "baseUrl": ".",
     "paths": {
       "@Chess/*": ["src/Chess/*"],
-      "@Services/*": ["src/Chess/Services/*"],
       "@Lobby": ["src/Lobby/index.ts"],
       "@Utils/*": ["src/Utils/*"],
       "@Consts": ["src/Consts/index.ts"]

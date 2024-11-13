@@ -148,7 +148,7 @@
                 <code>bun install</code>
             </li>
             <li>
-                Run the server
+                Run the server.
                 <br/>
                 <code>bun run src/main.ts</code>
             </li>
@@ -168,13 +168,20 @@
                 <code>bun install</code>
             </li>
             <li>
-                Run the project
+                Run the project as <code>dev</code>.
                 <br/>
                 <code>bun run dev</code>
+                <br/><i>or</i>
+            </li>
+            <li>
+                Build the project and preview.
+                <br/>
+                <code>bun run build</code>
+                <br/>
+                <code>bun run preview</code>
             </li>
         </ol>
     </li>
-    <small>Or build with <code>bun run build</code></small>
 </ol>
 <h2>Usage</h2>
 <p>Check out <a href="https://github.com/bberkay/chess/blob/main/docs/USAGE.md">USAGE.md</a> for more information about usage and method list of classes.</p>

@@ -31,33 +31,39 @@ import { Converter } from "../Utils/Converter";
 import { BoardQuerier } from "./Board/BoardQuerier.ts";
 import { Locator } from "./Move/Utils/Locator.ts";
 import { Flattener } from "./Move/Utils/Flattener.ts";
-import { Logger } from "@Services/Logger.ts";
 
 /**
  * This class provides users to create and manage a game(does not include board or other ui elements).
  */
 export class ChessEngine {
-    /**
-     * Properties of the ChessEngine class.
-     */
     private readonly moveEngine: MoveEngine = new MoveEngine();
     private readonly boardManager: BoardManager = new BoardManager();
+
     private playedFrom: Square | null = null;
     private playedTo: Square | null = null;
     private moveType: MoveType | null = null;
     private moveNotation: string = "";
     private currentMoves: { [key in Square]?: Moves | null } = {};
-    private isPromoteWaiting: boolean = false;
-    private isBoardPlayable: boolean = false;
-    private threefoldRepetitionHistory: Array<string> = [];
     private timerMap: Record<
         Color,
         { intervalId: number | undefined; timer: Timer }
     > | null = null;
-    public readonly logger: Logger = new Logger(
-        "src/Chess/Engine/ChessEngine.ts"
-    );
 
+    private _isPromoteWaiting: boolean = false;
+    private _isBoardPlayable: boolean = false;
+    private _threefoldRepetitionHistory: Array<string> = [];
+
+    public readonly logger: { save: ( log: string ) => void} | null = null;
+
+    /**
+     * Constructor of the ChessEngine
+     * @param logger - Optional logging function to handle log messages. 
+     * If provided, it is wrapped in a save method to facilitate log saving. 
+     */
+    constructor(logger: (( log: string ) => void) | null = null) {
+        if(logger) this.logger = { save: (log: string) => { logger(log) }};
+    }
+    
     /**
      * This function creates a new game that can be played by two players.
      *
@@ -77,7 +83,7 @@ export class ChessEngine {
         this.checkGameStatus();
         this.createTimersIfGiven();
         if (this.getBoardHistory().length === 0) this.boardManager.saveCurrentBoard();
-        this.logger.save("Game is created");
+        this.logger?.save("Game is created");
     }
 
     /**
@@ -158,10 +164,10 @@ export class ChessEngine {
         this.moveType = null;
         this.moveNotation = "";
         this.currentMoves = {};
-        this.isPromoteWaiting = false;
-        this.isBoardPlayable = false;
-        this.threefoldRepetitionHistory = [];
-        this.logger.save(
+        this._isPromoteWaiting = false;
+        this._isBoardPlayable = false;
+        this._threefoldRepetitionHistory = [];
+        this.logger?.save(
             "Game properties set to default on ChessEngine, timers and bot are destroyed if they are created"
         );
     }
@@ -191,7 +197,7 @@ export class ChessEngine {
         };
 
         this.updateTimersIfExists();
-        this.logger.save(
+        this.logger?.save(
             "Timers are created and updated according to the turn color"
         );
     }
@@ -211,7 +217,7 @@ export class ChessEngine {
             clearInterval(this.timerMap.Black.intervalId);
 
         this.timerMap = null;
-        this.logger.save("White and Black timers are destroyed");
+        this.logger?.save("White and Black timers are destroyed");
     }
 
     /**
@@ -229,7 +235,7 @@ export class ChessEngine {
          * @see getMoves function.
          */
         if (!Object.hasOwn(this.currentMoves, from)) {
-            this.logger.save(
+            this.logger?.save(
                 "Move type is not found because there is no selected square"
             );
             return null;
@@ -243,14 +249,14 @@ export class ChessEngine {
                 moveType as MoveType
             ]!) {
                 if (move === to) {
-                    this.logger.save(`Move type-ts-${moveType}-te- is found`);
+                    this.logger?.save(`Move type-ts-${moveType}-te- is found`);
                     return moveType as MoveType;
                 }
             }
         }
 
         // If the given move is not in the currentMoves, return null.
-        this.logger.save(
+        this.logger?.save(
             `Move type is not found because the given move-ts-${
                 to
             }-te- is not in the current moves-ts-${JSON.stringify(
@@ -268,16 +274,16 @@ export class ChessEngine {
         isPreCalculation: boolean = false
     ): Moves | null {
         if (isPreCalculation) {
-            this.logger.save(
+            this.logger?.save(
                 `Pre-calculation of moves of the square-ts-${square}-te- is started`
             );
             return this.moveEngine.getMoves(square, !isPreCalculation);
         }
 
-        if (!this.isBoardPlayable || !BoardQuerier.isSquareSelectable(square)) {
-            this.logger.save(
+        if (!this._isBoardPlayable || !BoardQuerier.isSquareSelectable(square)) {
+            this.logger?.save(
                 `Moves of the square is not found because ${
-                    !this.isBoardPlayable
+                    !this._isBoardPlayable
                         ? `board is not playable`
                         : ` square[${square}] is not selectable`
                 }`
@@ -288,7 +294,7 @@ export class ChessEngine {
         this.currentMoves[square] = Object.hasOwn(this.currentMoves, square) 
             ? this.currentMoves[square] 
             : this.moveEngine.getMoves(square);
-        this.logger.save(
+        this.logger?.save(
             Object.hasOwn(this.currentMoves, square)
                 ? `Moves of the square-ts-${square}-te- is found from calculated moves-ts-${JSON.stringify(
                       this.currentMoves
@@ -297,14 +303,14 @@ export class ChessEngine {
         );
 
         // Save the moves to the calculatedMoves.
-        this.logger.save(
+        this.logger?.save(
             `Moves of the square is saved to calculated moves-ts-${JSON.stringify(
                 this.currentMoves
             )}-te-`
         );
 
         // Return the moves.
-        this.logger.save("Calculation of moves of the square is finished");
+        this.logger?.save("Calculation of moves of the square is finished");
         return this.currentMoves[square]!;
     }
 
@@ -361,7 +367,7 @@ export class ChessEngine {
                 GameStatus.BlackVictory,
             ].includes(BoardQuerier.getBoardStatus())
         ) {
-            this.logger.save(
+            this.logger?.save(
                 "Move is not played because game is not started or game is finished."
             );
             return;
@@ -369,14 +375,14 @@ export class ChessEngine {
 
         if (this.getGameStatus() == GameStatus.ReadyToStart) {
             this.boardManager.setGameStatus(GameStatus.InPlay);
-            this.logger.save(
+            this.logger?.save(
                 "Game status set to in play because game is started"
             );
         }
 
         if (!this.currentMoves || !Object.hasOwn(this.currentMoves, from)) {
             this.currentMoves[from] = this.getMoves(from);
-            this.logger.save(
+            this.logger?.save(
                 "Moves of the square is not calculated so calculate the moves"
             );
         }
@@ -384,7 +390,7 @@ export class ChessEngine {
         this.playedFrom = from!;
         this.playedTo = to!;
 
-        if (this.isPromoteWaiting) {
+        if (this._isPromoteWaiting) {
             /**
              * If the given move is a promote move(not promotion),
              * then promote the piece and return. Because, promote
@@ -416,7 +422,7 @@ export class ChessEngine {
                     break;
                 case MoveType.Normal:
                     this._doNormalMove(from, to, true);
-                    this.logger.save(
+                    this.logger?.save(
                         `Piece moved to target square-ts-${to}-te- on engine`
                     );
                     break;
@@ -427,7 +433,7 @@ export class ChessEngine {
          * If move is promotion move, then don't change the turn.
          * Because, user must promote the piece.
          */
-        if (!this.isPromoteWaiting) this.finishTurn();
+        if (!this._isPromoteWaiting) this.finishTurn();
     }
 
     /**
@@ -565,7 +571,7 @@ export class ChessEngine {
             Number(this.playedFrom) > Number(this.playedTo)
                 ? CastlingSide.Long
                 : CastlingSide.Short;
-        this.logger.save(`Castling type determined-ts-${castlingSide}-te- on engine`);
+        this.logger?.save(`Castling type determined-ts-${castlingSide}-te- on engine`);
 
         // Find the target rook square if it is clicked two square left or right of the king
         // instead of the rook square itself.
@@ -590,7 +596,7 @@ export class ChessEngine {
                 ? Number(this.playedFrom) - 2
                 : Number(this.playedFrom) + 2;
         this._doNormalMove(this.playedFrom as Square, kingNewSquare as Square);
-        this.logger.save(
+        this.logger?.save(
             `King moved to target square-ts-${kingNewSquare}-te- on engine`
         );
 
@@ -621,7 +627,7 @@ export class ChessEngine {
         this.boardManager.disableCastling(
             (BoardQuerier.getTurnColor() + CastlingSide.Long) as CastlingType
         );
-        this.logger.save(
+        this.logger?.save(
             `Rook moved to target square and castling-ts-${castlingSide}-te- move is saved.`
         );
 
@@ -637,7 +643,7 @@ export class ChessEngine {
      */
     private _doEnPassant(): void {
         this._doNormalMove(this.playedFrom as Square, this.playedTo as Square);
-        this.logger.save(
+        this.logger?.save(
             `Piece moved to target square-ts-${this.playedTo}-te- on engine`
         );
 
@@ -659,7 +665,7 @@ export class ChessEngine {
 
         // Remove the killed piece.
         this.boardManager.removePiece(killedPieceSquare);
-        this.logger.save(
+        this.logger?.save(
             `Captured piece by en passant move is found on square-ts-${killedPieceSquare}-te- and removed on engine`
         );
 
@@ -680,10 +686,10 @@ export class ChessEngine {
             this.playedTo as Square,
             true
         );
-        this.logger.save(
+        this.logger?.save(
             `Piece moved to target square-ts-${this.playedTo}-te- on engine`
         );
-        this.isPromoteWaiting = true;
+        this._isPromoteWaiting = true;
     }
 
     /**
@@ -712,7 +718,7 @@ export class ChessEngine {
 
         // Remove the pawn.
         this.boardManager.removePiece(firstSquareOfRow);
-        this.logger.save(
+        this.logger?.save(
             `Promoted Pawn is removed from square-ts-${to}-te- on engine`
         );
 
@@ -746,7 +752,7 @@ export class ChessEngine {
             ([7, 2].includes(clickedRow) ? PieceType.Rook : null) ||
             ([6, 3].includes(clickedRow) ? PieceType.Bishop : null) ||
             ([5, 4].includes(clickedRow) ? PieceType.Knight : null))!;
-        this.logger.save(
+        this.logger?.save(
             `Promoted piece type-ts-${selectedPromote}-te- is determined by clicked row-ts-${clickedRow}-te- on engine`
         );
 
@@ -760,13 +766,13 @@ export class ChessEngine {
             firstSquareOfRow
         );
         this.boardManager.updateScores(firstSquareOfRow);
-        this.logger.save(
+        this.logger?.save(
             `Player's-ts-${playerColor}-te- Piece-ts-${selectedPromote}-te- created on square-ts-${to}-te- on engine`
         );
 
         // Finish the promotion.
-        this.isPromoteWaiting = false;
-        this.logger.save("Promotion is finished on engine");
+        this._isPromoteWaiting = false;
+        this.logger?.save("Promotion is finished on engine");
 
         // Set the current move for the move history.
         this.moveNotation +=
@@ -787,7 +793,7 @@ export class ChessEngine {
         // and check the game is finished(if game is finished here
         // then it must be a timeover).
         this.currentMoves = {};
-        this.isBoardPlayable = false;
+        this._isBoardPlayable = false;
         if (
             [
                 GameStatus.WhiteVictory,
@@ -798,7 +804,7 @@ export class ChessEngine {
             // Timeover situation comes here.
             this.boardManager.saveAlgebraicNotation(this.moveNotation);
             this.boardManager.saveMove(this.playedFrom as Square, this.playedTo as Square);
-            this.logger.save(
+            this.logger?.save(
                 `Turn-ts-${BoardQuerier.getTurnColor()}-te- is finished`
             );
             return;
@@ -818,7 +824,7 @@ export class ChessEngine {
         // Clear the move notation for the next turn.
         this.moveNotation = "";
         this.boardManager.saveCurrentBoard();
-        this.logger.save(
+        this.logger?.save(
             `Turn controls done. Turn-ts-${BoardQuerier.getTurnColor()}-te- is finished`
         );
     }
@@ -832,7 +838,7 @@ export class ChessEngine {
         if (!this.timerMap) return;
 
         if (BoardQuerier.getMoveCount() < 2) {
-            this.logger.save(
+            this.logger?.save(
                 "Timers are not handled because move count is less than 2"
             );
             return;
@@ -868,7 +874,7 @@ export class ChessEngine {
         }, 100) as unknown as number;
 
         this.timerMap![playerColor].intervalId = intervalId;
-        this.logger.save(
+        this.logger?.save(
             `Timers are handled. Player-ts-${playerColor}-te- timer is started and opponent-ts-${opponentColor}-te- timer is paused`
         );
     }
@@ -896,7 +902,7 @@ export class ChessEngine {
                 : GameStatus.BlackVictory;
         this.boardManager.setGameStatus(winner);
 
-        this.logger.save(
+        this.logger?.save(
             `Player-ts-${BoardQuerier.getTurnColor()}-te- is timeover and game status is set to ${winner}`
         );
         this.finishTurn();
@@ -910,12 +916,12 @@ export class ChessEngine {
     private checkEnPassant(): void {
         if(BoardQuerier.getEnPassant() !== null){
             this.boardManager.setEnPassant(null);
-            this.logger.save("undone en passant move removed from fen notation");
+            this.logger?.save("undone en passant move removed from fen notation");
         }
 
         const moveHistoryLength = BoardQuerier.getMoveHistory().length;
         if(moveHistoryLength < 1) {
-            this.logger.save("Not enough moves for possible en passant move");
+            this.logger?.save("Not enough moves for possible en passant move");
             return;
         }
 
@@ -924,7 +930,7 @@ export class ChessEngine {
         if(!lastMovedPiece || lastMovedPiece.getType() !== PieceType.Pawn
         || Math.abs(lastMove.to - lastMove.from) !== 16){
             this.boardManager.setEnPassant(null);
-            this.logger.save("En passant move chance is not found");
+            this.logger?.save("En passant move chance is not found");
             return;
         }
 
@@ -936,7 +942,7 @@ export class ChessEngine {
             || (leftSquare && leftSquare.getType() === PieceType.Pawn && leftSquare.getColor() !== lastMovedPawnColor)){
                 const enPassantMove = lastMove.to + (lastMovedPawnColor === Color.White ? 8 : -8);
                 this.boardManager.setEnPassant(enPassantMove);
-                this.logger.save(`En passant move-ts-${enPassantMove}-te- is found and set on fen notation`);
+                this.logger?.save(`En passant move-ts-${enPassantMove}-te- is found and set on fen notation`);
                 return;
             }
         }
@@ -965,11 +971,11 @@ export class ChessEngine {
             Converter.jsonToFen(BoardQuerier.getGame()) ==
             StartPosition.Standard
         ) {
-            this.logger.save(
+            this.logger?.save(
                 "Game status will not be checked because board is the standard position."
             );
             this.boardManager.setGameStatus(GameStatus.ReadyToStart);
-            this.isBoardPlayable = true;
+            this._isBoardPlayable = true;
             return;
         }
 
@@ -999,11 +1005,11 @@ export class ChessEngine {
                 whitePawnOnPromotionRow.length > 0 ||
                 blackPawnOnPromotionRow.length > 0
             ) {
-                this.logger.save(
+                this.logger?.save(
                     "Game status set to not ready because there is a pawn on the promotion row."
                 );
                 this.boardManager.setGameStatus(GameStatus.NotReady);
-                this.isBoardPlayable = false;
+                this._isBoardPlayable = false;
                 return;
             }
         }
@@ -1012,14 +1018,14 @@ export class ChessEngine {
          * If board is not on the standard position then check the board is playable or not.
          * If the board is not ready to play then continue is unnecessary.
          */
-        this.isBoardPlayable = BoardQuerier.isBoardPlayable();
-        if (this.isBoardPlayable) {
+        this._isBoardPlayable = BoardQuerier.isBoardPlayable();
+        if (this._isBoardPlayable) {
             this.boardManager.setGameStatus(
                 BoardQuerier.getBoardStatus() != GameStatus.NotReady
                     ? BoardQuerier.getBoardStatus()
                     : GameStatus.ReadyToStart
             );
-            this.logger.save(
+            this.logger?.save(
                 `Game status set to-ts-${BoardQuerier.getBoardStatus()}-te- because board is playable.`
             );
         } else {
@@ -1032,8 +1038,8 @@ export class ChessEngine {
                     ? GameStatus.Draw
                     : GameStatus.NotReady
             );
-            this.isBoardPlayable = false;
-            this.logger.save(
+            this._isBoardPlayable = false;
+            this.logger?.save(
                 `Game status is not checked because board is not playable so checkGameStatus calculation is unnecessary.`
             );
             return;
@@ -1062,7 +1068,7 @@ export class ChessEngine {
             BoardQuerier.getOpponentColor(),
             true
         ) as Square[];
-        this.logger.save(
+        this.logger?.save(
             `Threatening squares-ts-${JSON.stringify(
                 threateningSquares
             )}-te- are found by king's square-ts-${kingSquare}-te-`
@@ -1076,7 +1082,7 @@ export class ChessEngine {
             BoardQuerier.getTurnColor() == Color.White
                 ? GameStatus.BlackVictory
                 : GameStatus.WhiteVictory;
-        this.logger.save(
+        this.logger?.save(
             `Check-ts-${checkEnum}-te- and Checkmate-ts-${checkmateEnum}-te- enums are found by player's color-ts-${BoardQuerier.getTurnColor()}-te-`
         );
 
@@ -1103,7 +1109,7 @@ export class ChessEngine {
         let movesOfKing: Moves | null = this.moveEngine.getMoves(kingSquare!)!;
         movesOfKing = movesOfKing ?? { Normal: [] };
         this.currentMoves[kingSquare!] = movesOfKing;
-        this.logger.save(
+        this.logger?.save(
             `Moves of the king-ts-${kingSquare}-te- are calculated and saved to calculated moves-ts-${JSON.stringify(
                 movesOfKing
             )}-te-`
@@ -1125,7 +1131,7 @@ export class ChessEngine {
                  * @see For more information about check mate please check the https://en.wikipedia.org/wiki/Checkmate
                  */
                 this.boardManager.setGameStatus(checkmateEnum);
-                this.logger.save(
+                this.logger?.save(
                     "Game status set to checkmate because king has no moves and threatened by more than one piece(double check)"
                 );
             } else {
@@ -1154,7 +1160,7 @@ export class ChessEngine {
 
                     // If piece has at least one move then the game is in play status.
                     if (moves.length > 0) {
-                        this.logger.save(
+                        this.logger?.save(
                             "Doubly Check and Stalemate is not satisfied."
                         );
                         isAnyMoveFound = true;
@@ -1169,12 +1175,12 @@ export class ChessEngine {
                 if (!isAnyMoveFound) {
                     if (BoardQuerier.getBoardStatus() != checkEnum) {
                         this.boardManager.setGameStatus(GameStatus.Draw);
-                        this.logger.save(
+                        this.logger?.save(
                             "Game status set to draw because king and any other pieces have no moves(stalemate)"
                         );
                     } else {
                         this.boardManager.setGameStatus(checkmateEnum);
-                        this.logger.save(
+                        this.logger?.save(
                             "Game status is set to checkmate because king has no moves and threat can't be blocked or killed by player's pieces."
                         );
                     }
@@ -1202,11 +1208,11 @@ export class ChessEngine {
          *
          * @see For more information about threefold repetition rule, see https://en.wikipedia.org/wiki/Threefold_repetition
          */
-        this.threefoldRepetitionHistory.push(
+        this._threefoldRepetitionHistory.push(
             this.getGameAsFenNotation().split(" ")[0]
         );
-        if (this.threefoldRepetitionHistory.length > 15)
-            this.threefoldRepetitionHistory.shift();
+        if (this._threefoldRepetitionHistory.length > 15)
+            this._threefoldRepetitionHistory.shift();
 
         const notations: Array<string> = BoardQuerier.getAlgebraicNotation()
             .slice(-14)
@@ -1215,19 +1221,19 @@ export class ChessEngine {
         if (
             notations.filter((notation) => notation == this.moveNotation)
                 .length > 2 &&
-            this.threefoldRepetitionHistory.filter(
+            this._threefoldRepetitionHistory.filter(
                 (notation) => notation == currentBoard
             ).length > 2
         ) {
             // When the threefold repetition rule is satisfied then set the game status to draw.
             this.boardManager.setGameStatus(GameStatus.Draw);
             this.moveNotation = NotationSymbol.Draw;
-            this.logger.save(
+            this.logger?.save(
                 "Game status set to draw by threefold repetition rule"
             );
         }
 
-        this.logger.save("Threefold repetition rule is not satisfied.");
+        this.logger?.save("Threefold repetition rule is not satisfied.");
     }
 
     /**
@@ -1238,7 +1244,7 @@ export class ChessEngine {
         if (BoardQuerier.getHalfMoveCount() > 101) {
             this.boardManager.setGameStatus(GameStatus.Draw);
             this.moveNotation = NotationSymbol.Draw;
-            this.logger.save("Game status set to draw by half move count");
+            this.logger?.save("Game status set to draw by half move count");
             return;
         }
     }
@@ -1256,7 +1262,7 @@ export class ChessEngine {
                 GameStatus.BlackInCheck,
             ].includes(BoardQuerier.getBoardStatus())
         ) {
-            this.logger.save(
+            this.logger?.save(
                 "Castling moves are not checked because game is not playable"
             );
             return;
@@ -1274,7 +1280,7 @@ export class ChessEngine {
             !BoardQuerier.getCastling()[shortCastling] &&
             !BoardQuerier.getCastling()[longCastling]
         ) {
-            this.logger.save(`Castling moves-ts-${BoardQuerier.getCastling()}-te- are already disabled`);
+            this.logger?.save(`Castling moves-ts-${BoardQuerier.getCastling()}-te- are already disabled`);
             return;
         }
 
@@ -1283,7 +1289,7 @@ export class ChessEngine {
         if (!kingPiece) {
             this.boardManager.disableCastling(shortCastling);
             this.boardManager.disableCastling(longCastling);
-            this.logger.save(
+            this.logger?.save(
                 `King-ts-${kingSquare}-te- is not it's starting square so castling moves are disabled`
             );
             return;
@@ -1295,13 +1301,13 @@ export class ChessEngine {
         const shortRookPiece = BoardQuerier.getPieceOnSquare(shortRookSquare);
         if (!longRookPiece) {
             this.boardManager.disableCastling(longCastling);
-            this.logger.save(
+            this.logger?.save(
                 `Long rook-ts-${longCastling}-te- is not it's starting square so long castling move is disabled`
             );
         }
         if (!shortRookPiece) {
             this.boardManager.disableCastling(shortCastling);
-            this.logger.save(
+            this.logger?.save(
                 `Short rook-ts-${shortCastling}-te- is not it's starting square so short castling move is disabled`
             );
         }

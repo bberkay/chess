@@ -44,8 +44,8 @@ export class Chess {
     /**
      * Properties of the Chess class.
      */
-    public readonly engine: ChessEngine = new ChessEngine();
-    public readonly board: ChessBoard = new ChessBoard();
+    public readonly engine: ChessEngine;
+    public readonly board: ChessBoard;
 
     private _isNonDomMove: boolean = true;
     private _isLastNonDomMovePromotion: boolean = false;
@@ -66,6 +66,10 @@ export class Chess {
      * Constructor of the Chess class.
      */
     constructor() {
+        const engineLogger = new Logger("src/Chess/Engine/ChessEngine.ts");
+        this.engine = new ChessEngine((log: string) => { engineLogger.save(log) } );
+        const boardLogger =  new Logger("src/Chess/Board/ChessBoard.ts");
+        this.board = new ChessBoard((log: string) => { boardLogger.save(log) } );
         this.logger.save("Chess class initialized");
         this.checkAndLoadGameFromCache();
     }

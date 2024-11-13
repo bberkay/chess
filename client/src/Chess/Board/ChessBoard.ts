@@ -26,7 +26,6 @@ import {
     SquareEffect 
 } from "./Types";
 import { Converter } from "../Utils/Converter.ts";
-import { Logger } from "@Services/Logger.ts";
 import { throttle } from "@ChessPlatform/Utils/Timing.ts";
 
 /**
@@ -51,9 +50,6 @@ const FAST_ANIMATION_SPEED_IN_SECONDS = 0.05;
  * This class provides users to create and manage a chess board(does not include any mechanic/logic).
  */
 export class ChessBoard {
-    /**
-     * Properties of the ChessBoard class.
-     */
     private config: Config = DEFAULT_CONFIG;
 
     private _turnColor: Color.White | Color.Black = Color.White;
@@ -84,9 +80,16 @@ export class ChessBoard {
         End: "./assets/sounds/game-end.mp3",
     };
 
-    public readonly logger: Logger = new Logger(
-        "src/Chess/Board/ChessBoard.ts"
-    );
+    public readonly logger: { save: ( log: string ) => void} | null = null;
+
+    /**
+     * Constructor of the ChessEngine
+     * @param logger - Optional logging function to handle log messages. 
+     * If provided, it is wrapped in a save method to facilitate log saving. 
+     */
+    constructor(logger: (( log: string ) => void) | null = null) {
+        if(logger) this.logger = { save: (log: string) => { logger(log) }};
+    }
 
     /**
      * Set the configuration of the chess board.
@@ -126,7 +129,7 @@ export class ChessBoard {
         this._lockedSquaresModes = {};
         this._isBoardMoveEventBound = false;
         this._lockedColor = null;
-        this.logger.save("Properties of the board are cleared.");
+        this.logger?.save("Properties of the board are cleared.");
     }
 
     /**
@@ -138,14 +141,14 @@ export class ChessBoard {
         this.clearProperties();
 
         this.createBoard();
-        this.logger.save("Chessboard created.");
+        this.logger?.save("Chessboard created.");
 
         this.createPieces(
             typeof position == "string"
                 ? Converter.fenToJson(position).board
                 : position.board
         );
-        this.logger.save("Pieces created on ChessBoard.");
+        this.logger?.save("Pieces created on ChessBoard.");
 
         this.playSound(SoundEffect.Start);
     }
@@ -355,7 +358,7 @@ export class ChessBoard {
             );
         }
 
-        this.logger.save("Move event callbacks bound to the board.");
+        this.logger?.save("Move event callbacks bound to the board.");
     }
 
     /**
@@ -522,7 +525,7 @@ export class ChessBoard {
             selectedSquare,
             preSelect ? SquareEffect.PreSelected : SquareEffect.Selected
         );
-        this.logger.save(`Square-ts-${squareID}-te- selected on board.`);
+        this.logger?.save(`Square-ts-${squareID}-te- selected on board.`);
     }
 
     /**
@@ -761,7 +764,7 @@ export class ChessBoard {
             }
         }
 
-        this.logger.save(
+        this.logger?.save(
             `Possible moves-ts-${JSON.stringify(
                 moves
             )}-te- highlighted on board.`
@@ -779,14 +782,14 @@ export class ChessBoard {
         moveType: MoveType | null = null
     ): Promise<void> {
         this.removeEffectFromAllSquares();
-        this.logger.save(
+        this.logger?.save(
             `From-ts-${from}-te-, To-ts-${to}-te- and Checked Square's(if exits) effects are cleaned.`
         );
         const fromSquare: HTMLDivElement = this.getSquareElement(from);
         const toSquare: HTMLDivElement = this.getSquareElement(to);
         this.addSquareEffects(fromSquare, SquareEffect.From);
         this.addSquareEffects(toSquare, SquareEffect.To);
-        this.logger.save(
+        this.logger?.save(
             `Moved From and Moved To effects given the From-ts-${from}-te- and To-ts-${from}-te- squares.`
         );
 
@@ -824,7 +827,7 @@ export class ChessBoard {
         ) as HTMLDivElement;
         if (!piece) return;
         await this._animatePieceToSquare(piece, toSquare, playMoveSound);
-        this.logger.save(
+        this.logger?.save(
             `Piece moved to target square-ts-${this.getSquareId(
                 toSquare
             )}-te- on board`
@@ -861,7 +864,7 @@ export class ChessBoard {
             }
 
             if (!piece) return;
-            this.logger.save(
+            this.logger?.save(
                 `Target square-ts-${this.getSquareId(square)}-te- cleared`
             );
 
@@ -936,7 +939,7 @@ export class ChessBoard {
          */
         const castlingSide: CastlingSide =
             fromSquareId > toSquareId ? CastlingSide.Long : CastlingSide.Short;
-        this.logger.save(
+        this.logger?.save(
             `Castling type determined-ts-${castlingSide}-te- on board`
         );
 
@@ -962,7 +965,7 @@ export class ChessBoard {
                 ? fromSquareId - 2
                 : fromSquareId + 2;
         this._doNormalMove(fromSquare, this.getSquareElement(kingNewSquare));
-        this.logger.save(
+        this.logger?.save(
             `King moved to target square-ts-${kingNewSquare}-te- by determined castling type-ts-${castlingSide}-te- on board`
         );
 
@@ -985,7 +988,7 @@ export class ChessBoard {
             false
         );
         this.playSound(SoundEffect.Castle);
-        this.logger.save(
+        this.logger?.save(
             `Rook moved to target square-ts-${rookNewSquare}-te- by determined castling type-ts-${castlingSide}-te- on board`
         );
     }
@@ -1003,13 +1006,13 @@ export class ChessBoard {
             toSquareID + (Math.ceil(toSquareID / 8) == 3 ? 8 : -8);
         this.removePiece(killedPieceSquare);
         this.playSound(SoundEffect.Capture);
-        this.logger.save(
+        this.logger?.save(
             `Captured piece by en passant move is found on square-ts-${killedPieceSquare}-te- and removed on board`
         );
 
         // Move the piece to the target square
         await this._doNormalMove(fromSquare, toSquare);
-        this.logger.save(
+        this.logger?.save(
             `Piece moved to target square-ts-${this.getSquareId(
                 toSquare
             )}-te- on board`
@@ -1026,7 +1029,7 @@ export class ChessBoard {
     ): void {
         //this._doNormalMove(fromSquare, toSquare)
         this.removePiece(fromSquare);
-        this.logger.save(
+        this.logger?.save(
             `Piece moved to target square-ts-${this.getSquareId(
                 toSquare
             )}-te- on board`
@@ -1050,7 +1053,7 @@ export class ChessBoard {
 
         // Set the square effect of the promoted square on the last row.
         this.addSquareEffects(square, SquareEffect.To);
-        this.logger.save(
+        this.logger?.save(
             `Player's-ts-${color}-te- Piece-ts-${type}-te- created on square-ts-${square}-te- on board`
         );
     }
@@ -1162,13 +1165,13 @@ export class ChessBoard {
             if (currentId !== i + Math.abs(loopRange[2])) {
                 const newCorrectId = i + loopRange[2];
                 this.setSquareId(squares[i], newCorrectId);
-                this.logger.save(
+                this.logger?.save(
                     `ID of square's fixed from-ts-${currentId}-te- to-ts-${newCorrectId}-te- on board`
                 );
             }
         }
         this.setTurnColor(this._turnColor);
-        this.logger.save(
+        this.logger?.save(
             "Board refreshed. Playable, Killable, Selected effects removed."
         );
     }
@@ -1308,7 +1311,7 @@ export class ChessBoard {
                 SquareEffect.Checked
             );
             this.playSound(SoundEffect.Check);
-            this.logger.save(
+            this.logger?.save(
                 `King's square-ts-${this.getSquareId(
                     checkedKingSquare
                 )}-te- found on DOM and Checked effect added`
@@ -1357,7 +1360,7 @@ export class ChessBoard {
                     );
             });
             this.playSound(SoundEffect.End);
-            this.logger.save("Game ended. Board locked.");
+            this.logger?.save("Game ended. Board locked.");
         }
     }
 
@@ -1375,7 +1378,7 @@ export class ChessBoard {
 
         if (!isPrePromotion) {
             this.removePiece(promotionSquare);
-            this.logger.save(
+            this.logger?.save(
                 `Promoted Pawn is removed from square-ts-${square}-te- on board`
             );
         }
@@ -1385,7 +1388,7 @@ export class ChessBoard {
          * move pieces while choosing promotion piece.
          */
         this.lock(!isPrePromotion, true);
-        this.logger.save("Board locked for promotion screen");
+        this.logger?.save("Board locked for promotion screen");
 
         const PROMOTION_TYPES: Array<string> = [
             PieceType.Queen,
@@ -1420,7 +1423,7 @@ export class ChessBoard {
                     : SquareClickMode.Promote
             );
         }
-        this.logger.save("Promotion screen showed on board.");
+        this.logger?.save("Promotion screen showed on board.");
     }
 
     /**
@@ -1435,14 +1438,14 @@ export class ChessBoard {
             promotionOption.remove();
         });
 
-        this.logger.save("Promotion screen closed.");
+        this.logger?.save("Promotion screen closed.");
 
         /**
          * Enable the board. If the player choose a promotion piece then
          * allow player to interact with the board.
          */
         this.unlock();
-        this.logger.save("Board unlocked after promotion screen closed.");
+        this.logger?.save("Board unlocked after promotion screen closed.");
     }
 
     /**
