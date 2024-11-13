@@ -11,7 +11,7 @@
 
     &.hidden {
         visibility: hidden !important;
-        /*height: 0 !important;*/
+        height: 0 !important;
         border: none !important;
     }
 }

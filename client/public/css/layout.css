@@ -328,8 +328,18 @@ main {
 }
 
 /* ------------------- Components ------------------- */
+#chessboard{
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    width: 600px;
+    height: 600px;
+    content: "";
+    outline:1px solid red;
+}
+
 #board-creator {
     margin-top: 0.5rem;
+    outline:1px solid pink;
 }
 
 #notation-menu,
@@ -338,18 +348,24 @@ main {
 }
 
 #notation-menu{
-    height: var(--chessboard-board-size);
+    height: 600px;
+    outline: 1px solid green;
+    min-width: var(--notation-table-width);
 }
 
 #navbar {
     margin-right: 0.5rem;
+    height: 41px;
+    width: calc(var(--navbar-width) - 8px);
+    outline: 1px solid yellow;
 }
 
-#log-console, #about-menu{
-    height: calc(var(--chessboard-board-size) + 5px);
+#about-menu{
+    height: calc(600px + 5px);
     width: var(--navbar-component-width);
     min-width: var(--navbar-component-width);
-    max-width: calc(var(--chessboard-board-size) - 50px);
+    max-width: calc(600px - 50px);
+    outline: 1px solid blue;
 }
 
 /** 
