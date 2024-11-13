@@ -340,6 +340,7 @@ main {
 #board-creator {
     margin-top: 0.5rem;
     outline:1px solid pink;
+    height: 50px;
 }
 
 #notation-menu,
