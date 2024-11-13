@@ -75,7 +75,7 @@ export class LogConsole extends NavbarComponent {
             </div>
         `
         );
-        this.loadCSS("log-console.css");
+        //this.loadCSS("log-console.css");
     }
 
     /**

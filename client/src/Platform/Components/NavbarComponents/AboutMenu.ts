@@ -29,7 +29,7 @@ export class AboutMenu extends NavbarComponent {
             </div>
         `
         );
-        this.loadCSS("about-menu.css");
+        //this.loadCSS("about-menu.css");
     }
 
     /**

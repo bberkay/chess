@@ -85,11 +85,11 @@ export class NotationMenu extends Component {
         super();
         this.chess = chess;
         //this.loadCSS("notation-menu.css");
-        //this.renderComponent();
+        this.renderComponent();
         this.addEventListeners();
-        //this.loadLocalStorage();
+        this.loadLocalStorage();
         this.addShortcutListeners();
-        //this.update(true);
+        this.update(true);
     }
 
     /**

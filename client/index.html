@@ -47,6 +47,11 @@
             }
         </style>
     </noscript>
+    <link rel="preload" href="./public/css/components/navbar-components/navbar-component.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="./public/css/components/navbar-components/about-menu.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="./public/css/components/navbar-components/log-console.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="./public/css/components/board-editor/board-creator.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="./public/css/components/notation-menu.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
 </head>
 <body>
     <div class="no-js-error" style="display: none;">
@@ -57,19 +62,33 @@
     </div>
     <main>
         <div class="left">
-            <div id="navbar"></div>
-            <div id="log-console"></div>
-            <div id="settings-menu"></div>
-            <div id="appearance-menu"></div>
-            <div id="about-menu"></div>
+            <div id="navbar">
+                <div class="navbar-placeholder"></div>
+            </div>
+            <div id="log-console">
+                <div class="navbar-component-placeholder"></div>
+            </div>
+            <div id="settings-menu">
+                <div class="navbar-component-placeholder"></div>
+            </div>
+            <div id="appearance-menu">
+                <div class="navbar-component-placeholder"></div>
+            </div>
+            <div id="about-menu">
+                <div class="navbar-component-placeholder"></div>
+            </div>
         </div>
         <div class="center">
             <div id="chessboard"></div>
             <div id="navigator-modal"></div>
-            <div id="board-creator"></div>
+            <div id="board-creator">
+                <div class="board-creator-placeholder"></div>
+            </div>
         </div>
         <div class="right">
-            <div id="notation-menu"></div>
+            <div id="notation-menu">
+                <div class="notation-menu-placeholder"></div>
+            </div>
             <div id="piece-creator"></div>
         </div>
     </main>

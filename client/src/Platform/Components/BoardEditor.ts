@@ -127,7 +127,7 @@ export class BoardEditor extends Component {
           </div>
         `
         );
-        this.loadCSS("board-editor/board-creator.css");
+        //this.loadCSS("board-editor/board-creator.css");
 
         document
             .getElementById("fen-notation")!
