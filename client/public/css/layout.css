@@ -339,15 +339,17 @@ main {
 
 #navbar {
     margin-right: 0.5rem;
-
-    & .navbar-placeholder{
-        min-width: calc(var(--navbar-width) - 8px);
-    }
+    min-width: var(--navbar-width);
 }
 
-.navbar-component-placeholder{
-    min-width: var(--navbar-component-width);
-    min-height: calc(var(--chessboard-board-size) + 5px);
+#log-console{
+    min-width: var(--navbar-width);
+    min-height: calc(var(--chessboard-board-size) - 48px);
+}
+
+#about-menu{
+    min-width: var(--navbar-width);
+    min-height: calc(var(--chessboard-board-size) - 48px);
 }
 
 /** 
