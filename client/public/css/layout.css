@@ -347,6 +347,11 @@ main {
     min-height: calc(var(--chessboard-board-size) - 48px);
 }
 
+#about-menu{
+    min-width: var(--navbar-width);
+    min-height: calc(var(--chessboard-board-size) - 48px);
+}
+
 /** 
  * ------------------ Responsive ------------------- 
  *             700px - 900px - 1250px
