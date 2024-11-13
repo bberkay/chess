@@ -337,8 +337,19 @@ main {
     margin-left: 0.5rem;
 }
 
+#notation-menu{
+    height: var(--chessboard-board-size);
+}
+
 #navbar {
     margin-right: 0.5rem;
+}
+
+#log-console, #about-menu{
+    height: calc(var(--chessboard-board-size) + 5px);
+    width: var(--navbar-component-width);
+    min-width: var(--navbar-component-width);
+    max-width: calc(var(--chessboard-board-size) - 50px);
 }
 
 /** 
