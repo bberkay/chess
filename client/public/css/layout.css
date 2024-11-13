@@ -333,6 +333,7 @@ main {
 #board-creator {
     margin-top: 0.5rem;
     height: var(--board-creator-table-height);
+    outline: 1px solid green;
 }
 
 #notation-menu,
@@ -343,19 +344,22 @@ main {
 #notation-menu{
     height: var(--component-height);
     min-width: var(--notation-table-width);
+    outline: 1px solid blue;
 }
 
 #navbar {
     margin-right: 0.5rem;
     height: var(--navbar-height);
     width: calc(var(--navbar-width) - 8px);
+    outline: 1px solid yellow;
 }
 
-.left > div:not(#navbar) {
+#about-menu{
     height: calc(var(--component-height) + 5px);
     width: var(--navbar-component-width);
     min-width: var(--navbar-component-width);
     max-width: calc(var(--component-height) - 50px);
+    outline: 1px solid red;
 }
 
 /** 
