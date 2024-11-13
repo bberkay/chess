@@ -7,9 +7,9 @@ import {
     JsonNotation,
     Square,
     StartPosition,
-} from "@Chess/Chess/Types";
-import { ChessEngine } from "@Chess/Chess/Engine/ChessEngine";
-import { Converter } from "@Chess/Chess/Utils/Converter";
+} from "@Chess/Types";
+import { ChessEngine } from "@Chess/Engine/ChessEngine";
+import { Converter } from "@Chess/Utils/Converter";
 import { GU_ID_LENGTH } from "src/Consts";
 import { createRandomId, deepFreeze } from "@Utils/Helper";
 

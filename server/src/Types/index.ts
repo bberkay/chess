@@ -1,5 +1,5 @@
 import type { ServerWebSocket } from "bun";
-import { Color, JsonNotation, Square, GameStatus } from "@Chess/Chess/Types";
+import { Color, JsonNotation, Square, GameStatus } from "@Chess/Types";
 
 /**
  * Player interface for the player data.

@@ -62,8 +62,8 @@ import {
     WsReconnectedData,
     WsErrorData
 } from "./Types";
-import type { Square } from "@Chess/Chess/Types";
-import { Color } from "@Chess/Chess/Types";
+import type { Square } from "@Chess/Types";
+import { Color } from "@Chess/Types";
 import { LobbyManager } from "./Managers/LobbyManager";
 import {
     createRandomId,
