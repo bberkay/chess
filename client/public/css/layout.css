@@ -7,8 +7,6 @@
  */
 
 :root {
-    --chessboard-board-size: 600px;
-    
     /* Fonts */
     --font-family: "Roboto", sans-serif;
 
@@ -18,6 +16,7 @@
 
     /* Navbar */
     --navbar-width: 400px;
+    --navbar-height: 40px;
 
     /* Navbar Component */
     --navbar-component-width: 400px; /* better to keep it same as navbar-width */
@@ -41,8 +40,8 @@
     --connections-menu-player-duration-decisecond-font-size: 0.7rem;
 
     /* Board Editor */
-    --board-editor-table-height: 240px;
-    --board-editor-table-width: 230px;
+    --board-creator-table-height: 50px;
+    --piece-creator-table-width: 230px;
 
     /* Notation Menu */
     --notation-table-height: 240px;
@@ -332,8 +331,7 @@ main {
 /* ------------------- Components ------------------- */
 #board-creator {
     margin-top: 0.5rem;
-    outline:1px solid pink;
-    height: 50px;
+    height: var(--board-creator-table-height);
 }
 
 #notation-menu,
@@ -343,15 +341,13 @@ main {
 
 #notation-menu{
     height: var(--chessboard-board-size);
-    outline: 1px solid green;
     min-width: var(--notation-table-width);
 }
 
 #navbar {
     margin-right: 0.5rem;
-    height: 40px;
+    height: var(--navbar-height);
     width: calc(var(--navbar-width) - 8px);
-    outline: 1px solid yellow;
 }
 
 #about-menu{
@@ -359,7 +355,6 @@ main {
     width: var(--navbar-component-width);
     min-width: var(--navbar-component-width);
     max-width: calc(var(--chessboard-board-size) - 50px);
-    outline: 1px solid blue;
 }
 
 /** 

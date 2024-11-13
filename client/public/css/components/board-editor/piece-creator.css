@@ -9,7 +9,7 @@
     }
 
     #piece-table {
-        width: var(--board-editor-table-width);
+        width: var(--piece-creator-table-width);
         height: calc(var(--chessboard-board-size) - 52px);
         max-height: calc(var(--chessboard-board-size) - 52px);
         background-color: var(--accent-color);
