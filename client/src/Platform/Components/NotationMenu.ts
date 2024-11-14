@@ -271,25 +271,51 @@ export class NotationMenu extends Component {
      * This function render the notation table.
      */
     protected renderComponent(): void {
+        const blackPlayerSection = `
+            <div class="player-section your-turn-effect" id="black-player-section">
+                <div class="player-name-container">
+                    <div class="player-name" id="black-player-name">
+                        Black Player
+                    </div> 
+                    <div class="duration hidden" id="black-player-duration">
+                        <div style="display: flex;align-items: end;">
+                            <span class="minute-second">00:00</span> <small class="decisecond">.00</small>
+                        </div>
+                    </div>
+                    <div class="player-status">
+                        <span class="status-icon" id="black-player-status"></span>
+                    </div>
+                </div>
+                <div class="score-table" id="white-captured-pieces"></div>
+            </div>
+        ` ;
+
+        const whitePlayerSection = `
+            <div class="player-section your-turn-effect" id="white-player-section">
+                <div class="player-name-container">
+                    <div class="player-name" id="white-player-name">
+                        White Player
+                    </div> 
+                    <div class="duration hidden" id="white-player-duration">
+                        <div style="display: flex;align-items: end;">
+                            <span class="minute-second">00:00</span> <small class="decisecond">.00</small>
+                        </div>
+                    </div>
+                    <div class="player-status">
+                        <span class="status-icon" id="white-player-status"></span>
+                    </div>
+                </div>
+                <div class="score-table" id="black-captured-pieces"></div>
+            </div>
+        `;
+
+        let whitePlayerSectionMobileLoadingContainer = document.getElementById("white-player-section-mobile-loading-container");
+        let blackPlayerSectionMobileLoadingContainer = document.getElementById("black-player-section-mobile-loading-container");
+        const isMobileView = window.innerWidth < 900;
         this.loadHTML(
             NOTATION_MENU_ID,
             `
-                <div class="player-section your-turn-effect" id="black-player-section">
-                    <div class="player-name-container">
-                        <div class="player-name" id="black-player-name">
-                            Black Player
-                        </div> 
-                        <div class="duration hidden" id="black-player-duration">
-                            <div style="display: flex;align-items: end;">
-                                <span class="minute-second">00:00</span> <small class="decisecond">.00</small>
-                            </div>
-                        </div>
-                        <div class="player-status">
-                            <span class="status-icon" id="black-player-status"></span>
-                        </div>
-                    </div>
-                    <div class="score-table" id="white-captured-pieces"></div>
-                </div>
+                ${!isMobileView || !blackPlayerSectionMobileLoadingContainer ? blackPlayerSection : ""}
                 <div>
                     <table id = "notation-table">
                         <thead>
@@ -354,24 +380,21 @@ export class NotationMenu extends Component {
                         </div>
                     </div>
                 </div>
-                <div class="player-section your-turn-effect" id="white-player-section">
-                    <div class="player-name-container">
-                        <div class="player-name" id="white-player-name">
-                            White Player
-                        </div> 
-                        <div class="duration hidden" id="white-player-duration">
-                            <div style="display: flex;align-items: end;">
-                                <span class="minute-second">00:00</span> <small class="decisecond">.00</small>
-                            </div>
-                        </div>
-                        <div class="player-status">
-                            <span class="status-icon" id="white-player-status"></span>
-                        </div>
-                    </div>
-                    <div class="score-table" id="black-captured-pieces"></div>
-                </div>
+                ${!isMobileView || !whitePlayerSectionMobileLoadingContainer ? whitePlayerSection : ""}
         `
         );
+        
+        if (isMobileView) {
+            if(whitePlayerSectionMobileLoadingContainer)
+                this.loadHTML("white-player-section-mobile-loading-container", whitePlayerSection);
+            if(blackPlayerSectionMobileLoadingContainer) 
+                this.loadHTML("black-player-section-mobile-loading-container", blackPlayerSection);
+        } else {
+            whitePlayerSectionMobileLoadingContainer?.remove();
+            blackPlayerSectionMobileLoadingContainer?.remove();
+            whitePlayerSectionMobileLoadingContainer = null;
+            blackPlayerSectionMobileLoadingContainer = null;
+        }
         
         const chessboard = document.getElementById("chessboard")!;
         const notationMenu = document.getElementById(NOTATION_MENU_ID)!; 
@@ -383,7 +406,7 @@ export class NotationMenu extends Component {
             
             if(isMobile && (breakpointCircle || isFirstTime)){
                 chessboard.before(document.querySelector(".player-section:first-child")!);
-                chessboard.after(document.querySelector(".player-section:last-child")!);
+                chessboard.after(document.querySelector(".player-section:last-child")! || "");
                 breakpointCircle = false;
             } else if(isTablet && (!breakpointCircle || isFirstTime)){
                 notationMenu.prepend(document.querySelector(".player-section:first-child")!);
@@ -398,8 +421,21 @@ export class NotationMenu extends Component {
                 breakpointCircle = false;
             }
         }
-        reorder(true);
+
+        if(isMobileView && (!whitePlayerSectionMobileLoadingContainer || !blackPlayerSectionMobileLoadingContainer)){
+            reorder(true);
+        } 
+
         window.addEventListener("resize", () => {
+            if (whitePlayerSectionMobileLoadingContainer) {
+                whitePlayerSectionMobileLoadingContainer.outerHTML = whitePlayerSectionMobileLoadingContainer.innerHTML;
+                whitePlayerSectionMobileLoadingContainer = null; 
+            }
+            if (blackPlayerSectionMobileLoadingContainer) {
+                blackPlayerSectionMobileLoadingContainer.outerHTML = blackPlayerSectionMobileLoadingContainer.innerHTML;
+                blackPlayerSectionMobileLoadingContainer = null;
+            }
+
             reorder();
         });
     }

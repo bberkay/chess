@@ -6,7 +6,7 @@
  * chessboard. For the chessboard, see chessboard.css
  */
 
-:root {
+ :root {
     /* Fonts */
     --font-family: "Roboto", sans-serif;
 
@@ -330,9 +330,16 @@ main {
 }
 
 /* ------------------- Components ------------------- */
-#board-creator {
+#board-creator, 
+#board-creator-mobile-loading-container,
+#board-creator-tablet-loading-container {
     margin-top: 0.5rem;
     height: var(--board-creator-table-height);
+}
+
+#board-creator-mobile-loading-container,
+#board-creator-tablet-loading-container {
+    display:none;
 }
 
 #notation-menu,
@@ -351,18 +358,17 @@ main {
     width: calc(var(--navbar-width) - 8px);
 }
 
-#about-menu {
+.left > div:not(#navbar):has(div){ 
     height: calc(var(--component-height) + 5px);
     width: var(--navbar-component-width);
     min-width: var(--navbar-component-width);
-    max-width: calc(var(--component-height) - 50px);
 }
 
 /** 
  * ------------------ Responsive ------------------- 
  *             700px - 900px - 1250px
  */
-@media screen and (min-width: 900px) and (max-width: 1250px) {
+ @media screen and (min-width: 900px) and (max-width: 1250px) {
     main {
         padding: 1rem;
         margin-top: 0;
@@ -382,7 +388,8 @@ main {
             flex-direction: column;
             position: initial;
 
-            & #board-creator {
+            & #board-creator,
+            & #board-creator-tablet-loading-container {
                 margin-top: 0rem;
                 margin-bottom: 0.5rem;
             }
@@ -395,7 +402,7 @@ main {
             }
         }
 
-        & .center > div:not(#navbar) {
+        & .center > div:not(#navbar):has(div) {
             width: var(--component-height);
             max-width: var(--component-height);
         }
@@ -408,6 +415,16 @@ main {
                 margin-top: 55px;
             }
         }
+
+        & #board-creator, 
+        & #board-creator-mobile-loading-container {
+            display:none;
+        }
+        
+        & #board-creator:has(div),
+        & #board-creator-tablet-loading-container {
+            display: flex;
+        }
     }
 }
 
@@ -415,6 +432,14 @@ main {
     main {
         padding: 1.75rem;
         margin-right: 0;
+    }
+
+    #navbar {
+        width: calc(100% - 8px);
+    }
+
+    & .left > div:not(#navbar):has(div) {
+        max-width: 100%;
     }
 }
 
@@ -425,9 +450,18 @@ main {
         width: 100%;
     }
 
-    #board-creator {
+    #board-creator, 
+    #board-creator-tablet-loading-container {
         margin-bottom: 0.5rem;
         width: 100%;
+        display: none;
+    }
+
+    #board-creator:has(div), 
+    #board-creator-mobile-loading-container {
+        margin-bottom: 0.5rem;
+        width: 100%;
+        display: flex;
     }
 
     & #navbar {
@@ -435,7 +469,7 @@ main {
         width: calc(100% - 8px);
     }
 
-    & .left > div:not(#navbar) {
+    & .left > div:not(#navbar):has(div) {
         width: 100%;
         height: auto;
     }
@@ -445,8 +479,19 @@ main {
         margin-left: 0;
         margin-top: 0.5rem;
         margin-bottom: 0.5rem;
-        height: auto !important;
         width: 100%;
+    }
+
+    #piece-creator{
+        height: auto !important;
+    }
+
+    #notation-menu{
+        height: calc(var(--notation-table-height) + 135px);
+    }
+
+    .player-section-mobile-loading-container{
+        height: 55px;
     }
 
     /* Reorder for mobile */
@@ -463,12 +508,8 @@ main {
     }
 }
 
-@media screen and (min-width: 700px) and (max-width: 900px) {
-    #navbar {
-        width: calc(100% - 8px);
-    }
-
-    & .left > div:not(#navbar) {
-        max-width: 100%;
+@media screen and (max-width: 700px) {
+    .player-section-mobile-loading-container{
+        height: 75px;
     }
 }

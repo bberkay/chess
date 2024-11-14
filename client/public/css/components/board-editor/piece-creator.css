@@ -3,7 +3,7 @@
  * @see For more information about this component check file: src\Platform\Components\BoardEditor.ts
  */
 
-#piece-creator {
+ #piece-creator {
     & .selected-option {
         background-color: var(--component-active-color);
     }

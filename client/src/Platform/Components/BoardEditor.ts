@@ -101,8 +101,16 @@ export class BoardEditor extends Component {
      * This function renders the game creator.
      */
     protected renderComponent(): void {
+        let boardCreatorMobileLoadingContainer = document.getElementById(`${BOARD_CREATOR_ID}-mobile-loading-container`);
+        let boardCreatorTabletLoadingContainer = document.getElementById(`${BOARD_CREATOR_ID}-tablet-loading-container`);
+        const isMobileView = window.innerWidth < 900;
+        const isTabletView = window.innerWidth >= 900 && window.innerWidth < 1250;
         this.loadHTML(
-            BOARD_CREATOR_ID,
+            isMobileView && boardCreatorMobileLoadingContainer 
+                ? boardCreatorMobileLoadingContainer!.id 
+                : isTabletView && boardCreatorTabletLoadingContainer 
+                    ? boardCreatorTabletLoadingContainer!.id
+                        : BOARD_CREATOR_ID,
             `
           <div class = "board-creator ${BoardCreatorMode.Template}">
               <div class = "border-inset"><button data-menu-operation="${
@@ -133,6 +141,27 @@ export class BoardEditor extends Component {
             .addEventListener("focus", (e) => {
                 (e.target as HTMLInputElement).select();
             });
+
+        const removeLoadingContainer = () => {
+            if (boardCreatorMobileLoadingContainer || boardCreatorTabletLoadingContainer) {
+                if(isMobileView || isTabletView) {
+                    document.getElementById(BOARD_CREATOR_ID)!.append(
+                        ...(
+                            isMobileView 
+                                ? boardCreatorMobileLoadingContainer!.childNodes
+                                : boardCreatorTabletLoadingContainer!.childNodes 
+                        )
+                    );
+                }
+                boardCreatorMobileLoadingContainer?.remove();
+                boardCreatorMobileLoadingContainer = null;
+                boardCreatorTabletLoadingContainer?.remove();
+                boardCreatorTabletLoadingContainer = null;
+                window.removeEventListener("resize", removeLoadingContainer);
+            }
+        }
+
+        window.addEventListener("resize", removeLoadingContainer);
     }
 
     /**

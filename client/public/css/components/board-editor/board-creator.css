@@ -2,7 +2,9 @@
  * CSS codes of Board Editor component
  * @see For more information about this component check file: src\Platform\Components\BoardEditor.ts
  */
-#board-creator{
+ #board-creator, 
+ #board-creator-mobile-loading-container,
+ #board-creator-tablet-loading-container{
     position: relative;
 
     & .board-creator {

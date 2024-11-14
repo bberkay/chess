@@ -3,7 +3,7 @@
  * @see For more information about this component check file: src\Platform\Components\NotationTable.ts
  */
 
-#notation-menu {
+ #notation-menu {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -347,6 +347,20 @@
             height: auto;
         }
     }
+    
+    .player-section-mobile-loading-container {
+        &:first-of-type .player-section {
+            margin-bottom: 0.75rem;
+        }
+
+        &:not(:first-of-type) .player-section{
+            margin-top: 0.75rem;
+
+            & .player-name-container {
+                order: -1;
+            }
+        }
+    }
 }
 
 @media screen and (max-width: 700px) {
@@ -375,6 +389,20 @@
             width: auto;
             margin: 0;
             height: var(--score-table-piece-icons-size);
+        }
+    }
+
+    .player-section-mobile-loading-container {
+        &:first-of-type .player-section {
+            margin-bottom: 0.5rem;
+        }
+
+        &:not(:first-of-type) .player-section{
+            margin-top: 0.5rem;
+
+            & .player-name-container {
+                order: 1;
+            }
         }
     }
 }
