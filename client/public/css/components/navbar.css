@@ -3,7 +3,7 @@
  * @see For more information about this component check file: src\Platform\Components\Navbar.ts
  */
 
-#navbar {
+ #navbar {
     background-color: var(--accent-color);
     color: var(--text-color);
     border: 1px solid var(--border-color);

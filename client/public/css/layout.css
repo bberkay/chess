@@ -6,7 +6,7 @@
  * chessboard. For the chessboard, see chessboard.css
  */
 
- :root {
+:root {
     /* Fonts */
     --font-family: "Roboto", sans-serif;
 
@@ -334,6 +334,7 @@ main {
 #board-creator-mobile-loading-container,
 #board-creator-tablet-loading-container {
     margin-top: 0.5rem;
+    outline:1px solid yellow;
     height: var(--board-creator-table-height);
 }
 
@@ -350,18 +351,21 @@ main {
 #notation-menu{
     height: var(--component-height);
     min-width: var(--notation-table-width);
+    outline:1px solid blue;
 }
 
 #navbar {
     margin-right: 0.5rem;
     height: var(--navbar-height);
     width: calc(var(--navbar-width) - 8px);
+    outline:1px solid green;
 }
 
 .left > div:not(#navbar):has(div){ 
     height: calc(var(--component-height) + 5px);
     width: var(--navbar-component-width);
     min-width: var(--navbar-component-width);
+    outline:1px solid red;
 }
 
 /** 
@@ -492,6 +496,7 @@ main {
 
     .player-section-mobile-loading-container{
         height: 55px;
+        outline: 1px solid orange;
     }
 
     /* Reorder for mobile */
@@ -511,5 +516,6 @@ main {
 @media screen and (max-width: 700px) {
     .player-section-mobile-loading-container{
         height: 75px;
+        outline: 1px solid orange;
     }
 }

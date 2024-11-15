@@ -3,7 +3,7 @@
  * @see For more information, check file: src\Chess\Board\Chessboard.ts
  */
 
-:root {
+ :root {
     /**
      * All sizes are will be calculated based on the board size.
      * For example, if the board size is 800px, the square size 

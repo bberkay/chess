@@ -3,7 +3,7 @@
  * @see For more information about this component check file: src\Platform\Components\LogConsole.ts
  */
 
-#log-console {
+ #log-console {
     background-color: var(--accent-color);
     border: 1px solid var(--border-color);
     color: var(--text-color);

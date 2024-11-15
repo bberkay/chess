@@ -2,7 +2,7 @@
  * CSS codes of AppearanceMenu component
  * @see For more information about this component check file: src\Platform\Components\NavbarComponents\AppearanceMenu.ts
  */
-#appearance-menu {
+ #appearance-menu {
     background-color: var(--accent-color);
     border: 1px solid var(--border-color);
     color: var(--text-color);

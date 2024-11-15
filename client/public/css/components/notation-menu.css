@@ -3,7 +3,7 @@
  * @see For more information about this component check file: src\Platform\Components\NotationTable.ts
  */
 
- #notation-menu {
+#notation-menu {
     display: flex;
     flex-direction: column;
     justify-content: space-between;

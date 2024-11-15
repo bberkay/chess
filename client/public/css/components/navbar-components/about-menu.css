@@ -2,7 +2,7 @@
  * CSS codes of AboutMenu component
  * @see For more information about this component check file: src\Platform\Components\NavbarComponents\AboutMenu.ts
  */
-#about-menu {
+ #about-menu {
     background-color: var(--accent-color);
     border: 1px solid var(--border-color);
     color: var(--text-color);
