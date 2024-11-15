@@ -79,8 +79,8 @@
     --navigator-modal-backdrop-z-index: 13; /* Higher than everything except navigator-modal-bgicon-z-index */
 
     /* Background Images */
-    --king-icon-dark: url("../../assets/images/desktop/king-icon-dark.png");
-    --king-icon-light: url("../../assets/images/desktop/king-icon-light.png");
+    --king-icon-dark: url("../assets/images/desktop/king-icon-dark.png");
+    --king-icon-light: url("../assets/images/desktop/king-icon-light.png");
 
     /* Standard colors, avoid changing */
     --white-color: #fff;
@@ -127,8 +127,8 @@
 
 @media only screen and (hover: none) and (pointer: coarse) {
     :root{
-        --king-icon-dark: url("../../assets/images/mobile/king-icon-dark.png");
-        --king-icon-light: url("../../assets/images/mobile/king-icon-light.png");
+        --king-icon-dark: url("../assets/images/mobile/king-icon-dark.png");
+        --king-icon-light: url("../assets/images/mobile/king-icon-light.png");
     }
 }
 
