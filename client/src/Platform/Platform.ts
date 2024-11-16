@@ -334,8 +334,12 @@ export class Platform {
         this.logConsole.clear();
         if (!BoardEditor.isEditorModeEnable()) {
             this.notationMenu.clear();
+            this.boardEditor.createBoard(notation);
         } else {
             this.notationMenu.hide();
+            if(notation && typeof notation !== "string")
+                throw new Error("Notation type must be string while piece editor is active.");
+            this.boardEditor.createEditableBoard(notation);
         }
         this.boardEditor.createBoard(notation);
         this.logger.save(`Board is created and components are updated.`);

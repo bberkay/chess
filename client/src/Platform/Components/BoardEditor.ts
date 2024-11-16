@@ -481,7 +481,7 @@ export class BoardEditor extends Component {
      * This function creates a new editable board
      * for the board editor.
      */
-    private createEditableBoard(
+    public createEditableBoard(
         fenNotation: string | StartPosition | null = null
     ): void {
         fenNotation = fenNotation || this.getShownFen();
