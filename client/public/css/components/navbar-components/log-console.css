@@ -36,6 +36,7 @@
         height: 32px;
         width: 32px;
         padding: 0;
+        transition: opacity 0.2s ease;
 
         &.hidden{
             opacity: 0;

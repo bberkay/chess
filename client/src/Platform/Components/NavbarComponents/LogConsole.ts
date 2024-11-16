@@ -179,7 +179,9 @@ export class LogConsole extends NavbarComponent {
             logListElement.appendChild(logElement);
         }
 
-        this.down();
+        setTimeout(() => {
+            this.down();
+        }, 100)
     }
 
     /**
@@ -317,8 +319,9 @@ export class LogConsole extends NavbarComponent {
         const logConsoleBody = document.getElementById("log-console-body");
         const logConsoleList = document.getElementById("log-list");
         if(logConsoleBody && logConsoleList) {
-            logConsoleBody.scrollTop = logConsoleList.scrollHeight;
-            this._getDownButton()?.classList.add("hidden");
+            logConsoleBody.scrollTo({ top: logConsoleBody.scrollHeight, behavior: "smooth" });
+            logConsoleList.scrollTo({ top: logConsoleList.scrollHeight, behavior: "smooth" });
+            this._getDownButton()!.classList.add("hidden");
         }
     }
 
