@@ -24,6 +24,11 @@ export const DEFAULT_CONFIG: Config = {
 const LOG_DEBOUNCE_TIME_MS = 250;
 
 /**
+ * Threshold in pixels to activate the down button near the bottom.
+ */
+const LOG_DOWN_ACTIVATION_THRESHOLD = 50;
+
+/**
  * This class provide a menu to show the logs.
  */
 export class LogConsole extends NavbarComponent {
@@ -65,6 +70,7 @@ export class LogConsole extends NavbarComponent {
             <div id="log-console-body">
                 <ul id = "log-list"></ul>
             </div>
+            <button class="down-button hidden" data-menu-operation="${LogConsoleOperation.Down}" data-tooltip-text="Show Last Logs">⋁</button>
             <div id="log-console-footer">
                 <div id="log-console-footer-btn">
                     <button data-menu-operation="${LogConsoleOperation.Clear}" data-tooltip-text="Clear Logs">Ⅹ</button>
@@ -76,6 +82,23 @@ export class LogConsole extends NavbarComponent {
         `
         );
         this.loadCSS("log-console.css");
+
+        const logConsoleBody = document.getElementById("log-console-body");
+        const downButton = this._getDownButton();
+        if(!logConsoleBody || !downButton)
+            return;
+
+        logConsoleBody!.addEventListener("scroll", debounce(() => {
+            if(!logConsoleBody || !downButton)
+                return;
+            
+            const isNearBottom = logConsoleBody.scrollHeight - logConsoleBody.scrollTop <= logConsoleBody.clientHeight + LOG_DOWN_ACTIVATION_THRESHOLD;
+            if (isNearBottom) {
+                downButton.classList.add("hidden");
+            } else {
+                downButton.classList.remove("hidden");
+            }
+        }, 250));
     }
 
     /**
@@ -156,8 +179,7 @@ export class LogConsole extends NavbarComponent {
             logListElement.appendChild(logElement);
         }
 
-        document.getElementById("log-console-body")!.scrollTop =
-            logListElement!.scrollHeight;
+        this.down();
     }
 
     /**
@@ -282,6 +304,25 @@ export class LogConsole extends NavbarComponent {
     }
 
     /**
+     * Returns the down button.
+     */
+    private _getDownButton(): HTMLElement | null {
+        return document.querySelector(`[data-menu-operation="${LogConsoleOperation.Down}"]`);
+    }
+
+    /**
+     * Scrolls to the bottom of the log console and hides the down button.
+     */
+    public down(): void {
+        const logConsoleBody = document.getElementById("log-console-body");
+        const logConsoleList = document.getElementById("log-list");
+        if(logConsoleBody && logConsoleList) {
+            logConsoleBody.scrollTop = logConsoleList.scrollHeight;
+            this._getDownButton()?.classList.add("hidden");
+        }
+    }
+
+    /**
      * This function clears the log console.
      */
     public clear(): void {
@@ -312,6 +353,9 @@ export class LogConsole extends NavbarComponent {
         switch (operation) {
             case LogConsoleOperation.Clear:
                 this.clear();
+                break;
+            case LogConsoleOperation.Down:
+                this.down();
                 break;
         }
     }

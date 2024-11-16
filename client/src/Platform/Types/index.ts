@@ -89,6 +89,7 @@ export enum NavigatorModalOperation {
  */
 export enum LogConsoleOperation {
     Clear = "Clear",
+    Down = "Down"
 }
 
 /**

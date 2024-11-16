@@ -17,9 +17,30 @@
 
 /* Body */
 #log-console {
+    position: relative;
+
     & .log-console-header-body-separator {
         background-color: var(--accent-color);
         height: 5px;
+    }
+
+    & .down-button {
+        border-radius: 50%;
+        border:1px solid var(--border-color);
+        background-color: var(--component-color);
+        color: var(--text-color);
+        position: absolute;
+        left: 50%;
+        transform: translate(-50%, 0);
+        margin-top: -45px;
+        height: 32px;
+        width: 32px;
+        padding: 0;
+
+        &.hidden{
+            opacity: 0;
+            z-index: -1;
+        }
     }
 
     & #log-console-body {
