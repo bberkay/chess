@@ -78,9 +78,9 @@ export class Platform {
         this.init();
 
         //For testing purposes
-        document.addEventListener("keydown", (event) => {
-            if (event.ctrlKey && event.key === " ") Store.clear();
-        });
+        //document.addEventListener("keydown", (event) => {
+        //    if (event.ctrlKey && event.key === " ") Store.clear();
+        //});
     }
 
     /**
@@ -143,11 +143,21 @@ export class Platform {
         }) as EventListener);
 
         /**
-         * Initialize the platform components.
+         * Show the log console when there is a move 
+         * for first time after the platform is initialized.
          */
+        const showLogConsoleOnMove = () => {
+            if(this.navbar.getShownComponent() !== this.logConsole) {
+                this.navbar.showComponent(this.logConsole);
+            }
+
+            document.removeEventListener(ChessEvent.onPieceMoved, showLogConsoleOnMove);
+        }
+        document.addEventListener(ChessEvent.onPieceMoved, showLogConsoleOnMove);
+
         bindMenuOperations();
         this.logger.save(
-            "Cache is checked, last game/lobby is loaded if exists. Menu operations are binded."
+            "Platform Events are added. Menu operations are binded. Platform is initialized."
         );
     }
 
@@ -341,7 +351,6 @@ export class Platform {
                 throw new Error("Notation type must be string while piece editor is active.");
             this.boardEditor.createEditableBoard(notation);
         }
-        this.boardEditor.createBoard(notation);
         this.logger.save(`Board is created and components are updated.`);
     }
 

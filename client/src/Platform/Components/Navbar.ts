@@ -121,6 +121,7 @@ export class Navbar extends Component {
             );
 
         this.hideComponents();
+        this._showNavbarButtonAsActive(navbarComponent);
         navbarComponent.show();
 
         this._currentlyShownComponent = navbarComponent;
@@ -135,6 +136,38 @@ export class Navbar extends Component {
         });
 
         this._currentlyShownComponent = null;
+    }
+
+    /**
+     * Get shown component.
+     */
+    public getShownComponent(): NavbarComponent | null {
+        return this._currentlyShownComponent;
+    }
+
+    /**
+     * Add `active` class to clicked navbar button.
+     */
+    private _showNavbarButtonAsActive(navbarComponent: NavbarComponent): void {
+        let navbarOperation;
+        switch(navbarComponent) {
+            case this.getComponentByType(LogConsole):
+                navbarOperation = NavbarOperation.ShowLogConsole;
+                break;
+            case this.getComponentByType(AppearanceMenu):
+                navbarOperation = NavbarOperation.ShowAppearance;
+                break;
+            case this.getComponentByType(AboutMenu):
+                navbarOperation = NavbarOperation.ShowAbout;
+                break;
+            case this.getComponentByType(SettingsMenu):
+                navbarOperation = NavbarOperation.ShowSettings;
+                break;
+        }
+        if(navbarOperation) {
+            document.querySelector(`.navbar-buttons button.active`)?.classList.remove("active");
+            document.querySelector(`.navbar-buttons [data-menu-operation="${navbarOperation}"]`)?.classList.add("active");
+        }
     }
 
     /**

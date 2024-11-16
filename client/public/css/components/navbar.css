@@ -19,6 +19,10 @@
     & button {
         flex-grow: 1;
         box-sizing: border-box;
+
+        &.active{
+            background-color: var(--component-active-color);
+        }
     }
 }
 
