@@ -31,18 +31,19 @@ export enum SocketEvent {
     /**
      * Triggered when waiting server response
      * to create the lobby.
-     * @Event
+     * @CustomEvent
      */
     onCreatingLobby = "onCreatingLobby",
 
     /**
      * Triggered when the lobby is created successfully.
-     * @Event
+     * @CustomEvent
+     * @param {string} lobbyId - The lobby id.
      */
     onLobbyCreated = "onLobbyCreated",
 
     /**
-     * Triggered when waiting server response 
+     * Triggered when waiting server response
      * to join the lobby.
      * @CustomEvent
      * @param {string} lobbyId - The lobby id.

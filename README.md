@@ -1,5 +1,5 @@
 <h1 align = "center">Chess Platform</h1>
-<p><a href = "https://chess-a66i.onrender.com">Live Demo</a>. (Server connections may be slow since I uploaded the demo to a free render account)</p>
+<p><a href = "https://chess-a66i.onrender.com">Live Demo</a>. (Server connections may be slow since I uploaded the demo to a free render account. To avoid problems that may arise due to a slow connection, I recommend that you download the project to your machine and try it.)</p>
 <h2>Table of Contents </h2>
 <ol>
     <li><a href = "#introduction">Introduction</a></li>
@@ -17,7 +17,7 @@
 <img src="https://raw.githubusercontent.com/bberkay/chess/refs/heads/main/docs/chess-platform-preview.png" alt="chess-platform-preview" border="0">
 <h2>Features</h2>
 <ul>
-  <li><b>Standard Mechanics:</b> 
+  <li><b>Standard Mechanics:</b>
     <ul>
       <li>Move Calculation/Validation and special moves like <a href = "https://en.wikipedia.org/wiki/Castling">Castling</a>, <a href = "https://en.wikipedia.org/wiki/Promotion_(chess)">Promotion</a>, <a href = "https://en.wikipedia.org/wiki/En_passant">En Passant</a>.</li>
       <li>Check, Checkmate, Stalemate, <a href = "https://en.wikipedia.org/wiki/Threefold_repetition">Threefold Repetition</a>, <a href = "https://en.wikipedia.org/wiki/Fifty-move_rule">Fifty-move Rule</a>, <a href = "https://support.chess.com/en/articles/8705277-what-does-insufficient-mating-material-mean">Insufficient Material</a>.</li>
@@ -31,18 +31,18 @@
       <li>Going back and forward in the move history.</li>
     </ul>
   </li>
-  <li><b>Board:</b> 
+  <li><b>Board:</b>
   <ul><li>Includes animations and sounds for normal moves and pre-moves. Can be flipped. Supports drag-and-drop on both desktop and mobile. Easily <a href = "https://github.com/bberkay/chess/blob/main/client/public/css/chessboard.css">customizable</a> and <a href = "https://github.com/bberkay/chess/blob/main/client/src/Chess/Board/Types/index.ts">configurable</a>.</li>
   </ul>
   </li>
-  <li><b>Game Modes:</b> 
+  <li><b>Game Modes:</b>
     <ul>
       <li><b>Play by Yourself</b>: Play by yourself or against a friend on the same device.</li>
       <li><b>Play against Friend</b>: Play against a friend on different devices by creating a lobby or joining an existing one.</li>
       <li><b>Play against Bot</b>: Play against the Stockfish engine with <a href="https://github.com/bberkay/chess/blob/main/client/src/Chess/Bot/index.ts">adjustable</a> difficulty levels.</li>
     </ul>
   </li>
-  <li><b>Components:</b> 
+  <li><b>Components:</b>
     <ul>
       <li><a href="https://github.com/bberkay/chess/blob/main/client/src/Platform/Components/NotationMenu.ts"><b>Notation Table</b></a>: Shows move history and provides navigation on it. Also, shows the scores, players, durations
       and provides actions according to the game mode like draw if it is multiplayer game or abort if it is solo game.</li>
@@ -80,7 +80,7 @@
     </ul>
   </li>
   <li>
-    <b><a href="https://github.com/bberkay/chess/blob/main/client/src/Platform/Platform.ts">Platform</a></b> 
+    <b><a href="https://github.com/bberkay/chess/blob/main/client/src/Platform/Platform.ts">Platform</a></b>
       <br/>Provides components aimed at enhancing the user experience by allowing the methods of the Chess class to be used in the interface. For example, the <code>NotationMenu</code> uses methods like <code>chess.takeForward</code> and <code>chess.takeBack</code> to view move history, or <code>BoardEditor</code> uses methods like <code>chess.createPiece</code> and <code>chess.removePiece</code> to create a board. Events triggered with <code><a href="https://github.com/bberkay/chess/blob/main/client/src/Platform/Types/index.ts">PlatformEvent</a></code> can be listened to, and component IDs and other variables can be modified through <a href="https://github.com/bberkay/chess/blob/main/client/src/Platform/Consts/index.ts">Consts</a>.
     <ul>
       <li><b><a href="https://github.com/bberkay/chess/tree/main/client/src/Platform/Components">Components:</a></b> Components derive from the <code><a href="https://github.com/bberkay/chess/blob/main/client/src/Platform/Components/Component.ts">Component</a></code> class and are rendered in the index.html file using HTML, CSS, and JavaScript. Components can communicate with the Chess class but do not communicate with other classes, including each other. They may use services.
@@ -91,14 +91,14 @@
     </ul>
   </li>
   <li>
-    <b><a href="https://github.com/bberkay/chess/tree/main/client/src/Services">Services</a></b> 
+    <b><a href="https://github.com/bberkay/chess/tree/main/client/src/Services">Services</a></b>
     <ul>
       <li><b><a href="https://github.com/bberkay/chess/blob/main/client/src/Services/Logger.ts">Logger:</a></b> A simple logging system that stores messages as objects with source and message keys, dispatching a <code>LoggerEvent.LogAdded</code> event for new logs.</li>
       <li><b><a href="https://github.com/bberkay/chess/blob/main/client/src/Services/Store.ts">Store:</a></b> A strict storage mechanism that operates with predefined keys and types, not allowing the creation of new or invalid keys.</li>
     </ul>
   </li>
   <li>
-    <b><a href="https://github.com/bberkay/chess/tree/main/client/src/Global">Global</a></b> 
+    <b><a href="https://github.com/bberkay/chess/tree/main/client/src/Global">Global</a></b>
     <ul>
       <li><b><a href="https://github.com/bberkay/chess/blob/main/client/src/Global/Page.ts">Page:</a></b> Controls the title and URL. Changes the page title based on events like <code>ChessEvent</code> and <code>PlatformEvent</code>. For example, when an event like <code>ChessEvent.onGameStarted</code> is dispatched, the page title is set to <code>PageTitle.GameStarted</code>.</li>
     </ul>
@@ -420,7 +420,7 @@ console.log(chessEngine.getGameAsAscii());
 <p>When I started this project, it was both to practice Javascript DOM and to test myself to see how I could write a chess algorithm. My main purpose was simply to write a board and a move engine that is as simple as possible, based entirely on functional programming, and contained within a single file. It was meant to be a project I could complete in 2-3 days/nights without needing much planning(and it did too).
 </p>
 <p>
-However, some time after developing the project, I decided to switch from Javascript to TypeScript and from functional programming to OOP to practice TypeScript and OOP, as well as to add mechanics like playing online and against Stockfish, which I had been intending to implement. 
+However, some time after developing the project, I decided to switch from Javascript to TypeScript and from functional programming to OOP to practice TypeScript and OOP, as well as to add mechanics like playing online and against Stockfish, which I had been intending to implement.
 </p>
 <p>
 But I had probably made the wrong decision, because the project's current infrastructure wasn't well-suited for implementing these features, and solving the resulting implementation issues made the project more complex than it should have been.

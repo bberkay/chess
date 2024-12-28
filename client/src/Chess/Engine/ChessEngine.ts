@@ -1,6 +1,6 @@
 /**
  * @module ChessEngine
- * @description This module provides users to create and manage a chess 
+ * @description This module provides users to create and manage a chess
  * game(does not include board or other ui components).
  * @author Berkay Kaya <berkaykayaforbusiness@outlook.com> (https://bberkay.github.io)
  * @url https://github.com/bberkay/chess
@@ -57,13 +57,13 @@ export class ChessEngine {
 
     /**
      * Constructor of the ChessEngine
-     * @param logger - Optional logging function to handle log messages. 
-     * If provided, it is wrapped in a save method to facilitate log saving. 
+     * @param logger - Optional logging function to handle log messages.
+     * If provided, it is wrapped in a save method to facilitate log saving.
      */
     constructor(logger: (( log: string ) => void) | null = null) {
         if(logger) this.logger = { save: (log: string) => { logger(log) }};
     }
-    
+
     /**
      * This function creates a new game that can be played by two players.
      *
@@ -291,8 +291,8 @@ export class ChessEngine {
             return null;
         }
 
-        this.currentMoves[square] = Object.hasOwn(this.currentMoves, square) 
-            ? this.currentMoves[square] 
+        this.currentMoves[square] = Object.hasOwn(this.currentMoves, square)
+            ? this.currentMoves[square]
             : this.moveEngine.getMoves(square);
         this.logger?.save(
             Object.hasOwn(this.currentMoves, square)
@@ -409,7 +409,7 @@ export class ChessEngine {
             } else {
                 this.moveType = moveType;
             }
-            
+
             switch (this.moveType) {
                 case MoveType.Castling:
                     this._doCastling();
@@ -1358,7 +1358,7 @@ export class ChessEngine {
 }
 
 /**
- * MoveValidationError class is used when the given 
+ * MoveValidationError class is used when the given
  * move is not valid.
  */
 export class MoveValidationError extends Error {

@@ -3,7 +3,7 @@ import { DEFAULT_TITLE } from "@ChessPlatform/Consts";
 import { SocketEvent } from "@ChessPlatform/Types";
 
 /**
- * PageTitle enum is used to manage the title of the 
+ * PageTitle enum is used to manage the title of the
  * page.
  */
 export enum PageTitle{
@@ -19,7 +19,7 @@ export enum PageTitle{
 }
 
 /**
- * Page class is used to manage the title of the 
+ * Page class is used to manage the title of the
  * page and the endpoint.
  */
 export class Page{
@@ -30,7 +30,7 @@ export class Page{
      * based on various socket and game events.
      */
     static initEventListeners(){
-        if(Page.isEventListenersInitialized) 
+        if(Page.isEventListenersInitialized)
             throw new Error("Event listeners are already initialized.");
 
         document.addEventListener(SocketEvent.onCreatingLobby, (() => {
@@ -38,7 +38,8 @@ export class Page{
             Page.setTitle(PageTitle.LobbyCreating);
         }) as EventListener);
 
-        document.addEventListener(SocketEvent.onLobbyCreated, (() => {
+        document.addEventListener(SocketEvent.onLobbyCreated, ((event: CustomEvent) => {
+            Page.setEndpoint(event.detail.lobbyId);
             Page.setTitle(PageTitle.LobbyReady);
         }) as EventListener);
 
@@ -55,7 +56,7 @@ export class Page{
             Page.setDefaultTitle();
             Page.removeEndpoint();
         }) as EventListener);
-        
+
         document.addEventListener(SocketEvent.onConnectionTerminated, (() => {
             Page.setDefaultTitle();
             Page.removeEndpoint();
@@ -64,15 +65,15 @@ export class Page{
         document.addEventListener(ChessEvent.onGameCreated, (() => {
             Page.setTitle(PageTitle.GameStarted);
         }) as EventListener);
-        
+
         document.addEventListener(ChessEvent.onPieceMovedByPlayer, (() => {
-            // getTitle() == OpponentTurn condition is used for the case 
+            // getTitle() == OpponentTurn condition is used for the case
             // when the player plays on "Play By Yourself" mode.
             Page.setTitle(Page.getTitle() === PageTitle.OpponentTurn
                 ? PageTitle.YourTurn
                 : PageTitle.OpponentTurn);
         }) as EventListener);
-        
+
         document.addEventListener(ChessEvent.onPieceMovedByOpponent, (() => {
             Page.setTitle(PageTitle.YourTurn);
         }) as EventListener);
@@ -116,6 +117,9 @@ export class Page{
      * setEndpoint method is used to set the endpoint of the page.
      */
     static setEndpoint(endpoint: string): void {
+        if (!endpoint)
+            return;
+
         const url = new URL(window.location.href);
         url.pathname = endpoint;
         window.history.pushState({}, "", url.toString());

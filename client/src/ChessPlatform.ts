@@ -298,7 +298,7 @@ export class ChessPlatform {
     /**
      * Establishes a WebSocket connection for creating a new lobby.
      */
-    public createLobby(createLobbyReqParams: CreateLobbyReqParams): void {        
+    public createLobby(createLobbyReqParams: CreateLobbyReqParams): void {
         this.platform.navigatorModal.showLoading(
             "Creating a new lobby. Please wait the server to respond..."
         );
@@ -343,7 +343,7 @@ export class ChessPlatform {
 
         document.dispatchEvent(
             new CustomEvent(SocketEvent.onJoiningLobby, {
-                detail: joinLobbyReqParams.lobbyId,
+                detail: { lobbyId: joinLobbyReqParams.lobbyId },
             })
         );
     }
@@ -382,7 +382,7 @@ export class ChessPlatform {
 
         document.dispatchEvent(
             new CustomEvent(SocketEvent.onJoiningLobby, {
-                detail: reconnectLobbyReqParams.lobbyId
+                detail: { lobbyId: reconnectLobbyReqParams.lobbyId }
             })
         );
     }
@@ -723,12 +723,12 @@ export class ChessPlatform {
         this.platform.navigatorModal.showLobbyInfo(
             window.location.origin + "/" + lobbyId
         );
-        
+
         Store.save(StoreKey.LastLobbyConnection, wsCreatedData);
         Store.save(StoreKey.LastPlayerName, player.name);
         document.dispatchEvent(
             new CustomEvent(SocketEvent.onLobbyCreated, {
-                detail: lobbyId,
+                detail: { lobbyId },
             })
         );
         this.logger.save(
