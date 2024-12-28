@@ -426,7 +426,7 @@ However, some time after developing the project, I decided to switch from Javasc
 But I had probably made the wrong decision, because the project's current infrastructure wasn't well-suited for implementing these features, and solving the resulting implementation issues made the project more complex than it should have been.
 </p>
 <p>
-I think the development process lasted around 4 to 5 months, spread over 1.5 to 2 years, and in the end, releasing a working application is motivating. When I started the project, my goal was to practice, and I did. Maybe if I hadn't underestimated the project and had done the necessary planning from the start, I could have done even better, but perhaps the lack of planning worked out better because I encountered many problems and had to try and learn a lot of things to solve them.
+When I started the project, my goal was to practice, and I did. Maybe if I hadn't underestimated the project and had done the necessary planning from the start, I could have done even better, but perhaps the lack of planning worked out better because I encountered many problems and had to try and learn a lot of things to solve them.
 </p>
 <p>
 At the end of the day, I feel that I improved my JavaScript/TypeScript skills, and no matter how big or small the project is, I have experienced the kinds of issues that can arise from not defining the requirements/goals and ignoring the need to make a plan accordingly.
