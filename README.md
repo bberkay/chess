@@ -1,5 +1,5 @@
 <h1 align = "center">Chess Platform</h1>
-<p><a href = "https://chess-a66i.onrender.com">Live Demo</a>. (Server connections may be slow since I uploaded the demo to a free render account. To avoid problems that may arise due to a slow connection, I recommend that you download the project to your machine and try it.)</p>
+<p><a href = "https://chess-pearl-xi.vercel.app">Live Demo</a>. (Server connections may be slow since I uploaded the server-side to a free render account. To avoid problems that may arise due to a slow connection, I recommend that you download the project to your machine and try it.)</p>
 <h2>Table of Contents </h2>
 <ol>
     <li><a href = "#introduction">Introduction</a></li>
