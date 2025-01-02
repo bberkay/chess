@@ -4,6 +4,7 @@
 export const ALLOWED_ORIGINS = [
     'http://localhost:5173',
     'https://chess-a66i.onrender.com',
+	  'https://chess-pearl-xi.vercel.app/'
 ];
 
 export const CORS_HEADERS: Record<string, string> = {
@@ -36,3 +37,4 @@ export const DESTROY_INACTIVE_LOBBY_TIMEOUT = 1000 * 60 * 60 * 24; // 24 hours
  * General Settings
  */
 export const GU_ID_LENGTH = 6; // General Use ID Length
+
