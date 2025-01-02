@@ -6,10 +6,11 @@ export const DEFAULT_TITLE = "Chess Platform";
 /**
  * Server Settings
  */
-export const SERVER_ADDRESS = import.meta.env.NODE_ENV === "development"
+const isDevelopment = window.location.hostname === "localhost";
+export const SERVER_ADDRESS = isDevelopment
     ? "http://localhost:3000"
     : "https://chess-server-3j94.onrender.com";
-export const WS_ADDRESS = import.meta.env.NODE_ENV === "development"
+export const WS_ADDRESS = isDevelopment
     ? "ws://localhost:3000"
     : "wss://chess-server-3j94.onrender.com";
 export const WS_ENDPOINT_MAX_LENGTH = 1000;
