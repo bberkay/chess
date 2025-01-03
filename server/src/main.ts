@@ -72,7 +72,6 @@ import {
     updateKeys,
 } from "./Utils/Helper";
 import { CORS_HEADERS, MAX_IDLE_TIMEOUT, MAX_PAYLOAD_LENGTH, SERVER_PORT } from "./Consts";
-import { ALLOWED_ORIGINS } from "./Consts";
 import {
     GU_ID_LENGTH,
     MAX_PLAYER_NAME_LENGTH,
@@ -394,23 +393,11 @@ function isHttpRequest(req: Request): boolean {
 }
 
 /**
- * Check if the origin is allowed to connect.
- */
-function isOriginAllowed(req: Request): boolean {
-    const origin = req.headers.get("origin") || "";
-    if (!origin) return false;
-    return ALLOWED_ORIGINS.includes(origin);
-}
-
-/**
  * Server instance.
  */
 const server = Bun.serve<WebSocketData>({
     port: SERVER_PORT,
     fetch(req: Request, server: Server) {
-        if (!isOriginAllowed(req))
-            return new Response("Invalid origin.", { status: 403 });
-
         if (isHttpRequest(req)) return handleHttpRequest(req);
 
         if (!isWebSocketRequest(req))
