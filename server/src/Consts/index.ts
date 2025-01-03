@@ -1,12 +1,6 @@
 /**
  * Server Settings
  */
-export const ALLOWED_ORIGINS = [
-    'http://localhost:5173',
-    'https://chess-a66i.onrender.com',
-	  'https://chess-pearl-xi.vercel.app/'
-];
-
 export const CORS_HEADERS: Record<string, string> = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'OPTIONS, GET, POST',
