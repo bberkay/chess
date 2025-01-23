@@ -168,17 +168,9 @@
                 <code>bun install</code>
             </li>
             <li>
-                Run the project as <code>dev</code>.
-                <br/>
-                <code>bun run dev</code>
-                <br/><i>or</i>
-            </li>
-            <li>
-                Build the project and preview.
-                <br/>
-                <code>bun run build</code>
-                <br/>
-                <code>bun run preview</code>
+                Run the project with <code>bun run dev</code>
+                <br/> or <br/>  
+                Build the project and preview with <code>bun run build && bun run preview</code>
             </li>
         </ol>
     </li>
