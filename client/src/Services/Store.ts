@@ -69,21 +69,24 @@ export class Store {
      * Returns the data from the local storage.
      */
     public static load<K extends StoreKey>(key: K): StoreData[K] | null {
-        if (!Store.isExist(key)) return null;
-        const data = JSON.parse(localStorage.getItem(key)!);
-        if (data === null || data.expiration < new Date().getTime()) {
-            Store.clear();
-            return null;
-        }
-
-        return data.value as StoreData[K];
+        return !Store.isExist(key)
+            ? null
+            : JSON.parse(localStorage.getItem(key)!).value as StoreData[K];
     }
 
     /**
      * Returns true if the local storage contains given key.
      */
     public static isExist(key: StoreKey): boolean {
-        return localStorage.getItem(key) !== null;
+        const data = localStorage.getItem(key);
+        if (!data) return false;
+
+        if (JSON.parse(data).expiration < new Date().getTime()) {
+            Store.clear();
+            return false;
+        }
+
+        return true;
     }
 
     /**
