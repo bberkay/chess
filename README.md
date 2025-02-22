@@ -104,7 +104,7 @@
     </ul>
   </li>
 </ul>
-<img src="https://raw.githubusercontent.com/bberkay/chess/refs/heads/main/docs/chess-platform-Client-Side-Architecture.drawio.png">
+<img src="https://raw.githubusercontent.com/bberkay/chess/refs/heads/main/docs/chess-platform-Client-Side-Architecture.png">
 
 <h3>Server</h3>
 <ul>
@@ -125,7 +125,7 @@
   <br/>This class represents the lobby, hosts players, and enables gameplay using <code>ChessEngine</code>. Each lobby corresponds to a lobby instance. It does not interact with any other class.
   </li>
 </ul>
-<img src="https://raw.githubusercontent.com/bberkay/chess/refs/heads/main/docs/chess-platform-Server-Side-Architecture.drawio.png">
+<img src="https://raw.githubusercontent.com/bberkay/chess/refs/heads/main/docs/chess-platform-Server-Side-Architecture.png">
 
 <h2>Installation</h2>
 <ol>
