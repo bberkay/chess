@@ -11,6 +11,18 @@
     <link rel="preload" href="./public/css/layout.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="preload" href="./js/layout.js" as="script">
     <link rel="preload" href="./public/css/elements.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <style>
+        #demo-info {
+            background-color: var(--component-color);
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            margin-bottom: 2rem;
+
+            & a {
+                color: var(--link-color);
+            }
+        }
+    </style>
     <noscript>
         <style>
             body {
@@ -22,8 +34,9 @@
                 background-color: light-dark(#222, #FFF);
                 overflow: hidden!important;
                 color: light-dark(#FFF, #222);
-                font-size: 1.5rem;
+                font-size: 1.2rem;
                 text-align: center;
+                font-family: 'Roboto', sans-serif;
                 margin: 0;
             }
 
@@ -39,7 +52,7 @@
                 display: block!important;
 
                 & h1{
-                    margin-top: 0.5rem;
+                    margin-top: 1rem;
                 }
             }
 
@@ -52,9 +65,14 @@
 <body>
     <div class="no-js-error" style="display: none;">
         <h1>⚠ JavaScript Error!</h1>
-        <span>This website requires JavaScript.</span> 
+        <span>This app requires JavaScript.</span>
         <br>
         <small>Please enable JavaScript in your browser settings to continue.</small>
+    </div>
+    <div id="demo-info" style="display: none;">
+        <b># Demo Info:</b> Please note that this project is running on a free hosting service. To prevent potential
+        hosting-related performance issues, I recommend <a href="https://github.com/bberkay/chess?tab=readme-ov-file#installation" target="_blank">
+        cloning the repository and running it locally</a>.
     </div>
     <main>
         <div class="left">
@@ -86,6 +104,11 @@
     <script src="./js/layout.js" defer></script>
     <script type="module" async>
         import { ChessPlatform } from "./src/ChessPlatform";
+
+        const IS_DEMO_APP = true;
+        if (IS_DEMO_APP) {
+            document.getElementById("demo-info").style.display = "block";
+        }
 
         const chessPlatform = new ChessPlatform();
     </script>

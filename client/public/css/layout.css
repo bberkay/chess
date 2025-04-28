@@ -1,8 +1,8 @@
 /**
  * CSS codes of the layout of the application. Mostly
  * mostly contains the colors, width, height, font-size
- * of the components and the layout of the application. 
- * Not the components itself and can't change the 
+ * of the components and the layout of the application.
+ * Not the components itself and can't change the
  * chessboard. For the chessboard, see chessboard.css
  */
 
@@ -117,7 +117,7 @@
         --king-icon: var(--king-icon-dark);
         --linear-gradient: var(--linear-gradient-light);
     }
-    
+
     & body[data-color-scheme="dark"] {
         color-scheme: dark;
         --king-icon: var(--king-icon-light);
@@ -197,7 +197,10 @@ body {
     background-color: var(--bg-color);
     color: var(--text-color);
     font-family: var(--font-family);
-    display: flex;
+
+    & main {
+        display: flex;
+    }
 }
 
 /* Button, Input, Select */
@@ -330,7 +333,7 @@ main {
 }
 
 /* ------------------- Components ------------------- */
-#board-creator, 
+#board-creator,
 #board-creator-mobile-loading-container,
 #board-creator-tablet-loading-container {
     margin-top: 0.5rem;
@@ -361,15 +364,15 @@ main {
     /*outline:1px solid green;*/
 }
 
-.left > div:not(#navbar):has(div){ 
+.left > div:not(#navbar):has(div){
     height: calc(var(--component-height) + 5px);
     width: var(--navbar-component-width);
     min-width: var(--navbar-component-width);
     /*outline:1px solid red;*/
 }
 
-/** 
- * ------------------ Responsive ------------------- 
+/**
+ * ------------------ Responsive -------------------
  *             700px - 900px - 1250px
  */
  @media screen and (min-width: 900px) and (max-width: 1250px) {
@@ -420,11 +423,11 @@ main {
             }
         }
 
-        & #board-creator, 
+        & #board-creator,
         & #board-creator-mobile-loading-container {
             display:none;
         }
-        
+
         & #board-creator:has(div),
         & #board-creator-tablet-loading-container {
             display: flex;
@@ -454,14 +457,14 @@ main {
         width: 100%;
     }
 
-    #board-creator, 
+    #board-creator,
     #board-creator-tablet-loading-container {
         margin-bottom: 0.5rem;
         width: 100%;
         display: none;
     }
 
-    #board-creator:has(div), 
+    #board-creator:has(div),
     #board-creator-mobile-loading-container {
         margin-bottom: 0.5rem;
         width: 100%;
