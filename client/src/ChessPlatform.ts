@@ -320,7 +320,7 @@ export class ChessPlatform {
         this.createLobby({
             name: playerName || DEFULT_PLAYER_NAME,
             board:
-                this.platform.boardEditor.getCreatedBoard() ||
+                Store.load(StoreKey.LastCreatedBoard) ||
                 StartPosition.Standard,
             remaining: (duration.remaining || DEFAULT_TOTAL_TIME).toString(),
             increment: (

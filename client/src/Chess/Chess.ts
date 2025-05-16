@@ -30,7 +30,7 @@ import { Logger } from "@Services/Logger.ts";
 import { Bot, BotAttributes } from "./Bot";
 
 /**
- * Delay time for the pre-move. Pre move will be played 
+ * Delay time for the pre-move. Pre move will be played
  * after this delay time if it exists.
  */
 const PRE_MOVE_DELAY = 100;
@@ -266,6 +266,10 @@ export class Chess {
             StoreKey.LastBoard,
             this.engine.getGameAsJsonNotation()
         );
+        Store.save(
+            StoreKey.LastCreatedBoard,
+            this.engine.getGameAsFenNotation()
+        );
     }
 
     /**
@@ -394,7 +398,7 @@ export class Chess {
         this.playMove(this._selectedSquare!, squareId);
         this._isNonDomMove = true;
 
-        if (this.board.getLockedColor()) 
+        if (this.board.getLockedColor())
             this.board.lock();
 
         document.dispatchEvent(
@@ -450,7 +454,7 @@ export class Chess {
      * parameter is used by the bot/system/server etc. so try to avoid using it.
      */
     public async playMove(from: Square, to: Square): Promise<void> {
-        let moveType: MoveType | null = null;        
+        let moveType: MoveType | null = null;
         try {
             if (this._isNonDomMove) {
                 if(this._isLastNonDomMovePromotion) {
@@ -756,7 +760,7 @@ export class Chess {
         const isFirst = this.engine.getMoveHistory().length == 0;
         if (ignoreTakeBack || this._currentTakeBackCount == 0 || isFirst)
             return this.engine.getScores();
-        
+
         return this.engine.getBoardHistory()[
             this.engine.getMoveHistory().length - this._currentTakeBackCount
         ].scores!;

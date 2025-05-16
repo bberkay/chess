@@ -143,7 +143,7 @@ export class Platform {
         }) as EventListener);
 
         /**
-         * Show the log console when there is a move 
+         * Show the log console when there is a move
          * for first time after the platform is initialized.
          */
         const showLogConsoleOnMove = () => {
@@ -202,7 +202,7 @@ export class Platform {
                 menuOperation as LogConsoleOperation
             );
             /*this.handleLogConsoleOperation(
-                menuOperation as LogConsoleOperation, 
+                menuOperation as LogConsoleOperation,
                 menuItem
             );*/
         } else if (Object.hasOwn(AppearanceMenuOperation, menuOperation)) {
@@ -210,7 +210,7 @@ export class Platform {
                 menuOperation as AppearanceMenuOperation
             );
             /*this.handleAppearanceMenuOperation(
-                menuOperation as AppearanceMenuOperation, 
+                menuOperation as AppearanceMenuOperation,
                 menuItem
             );*/
         } else if (Object.hasOwn(SettingsMenuOperation, menuOperation)) {
@@ -219,7 +219,7 @@ export class Platform {
                 menuItem
             );
             /*this.handleSettingsMenuOperation(
-                menuOperation as SettingsMenuOperation, 
+                menuOperation as SettingsMenuOperation,
                 menuItem
             );*/
         } else if (Object.hasOwn(NavigatorModalOperation, menuOperation)) {
@@ -387,13 +387,12 @@ export class Platform {
         if (playerColor !== this.chess.getTurnColor())
             this.chess.board.lock();
         else this.chess.board.unlock();
-                
+
         this.logger.save(`Online game is created and components are updated.`);
     }
 
     /**
      * Create a new game and update the components of the menu.
-     * @param fenNotation The FEN notation of the game.
      * @param {boolean|BotAttributes} bot
      * If the boolean is true, the settings will be taken from the navigator modal
      * or this.chess.getBotSettings() method(the last bot created bot's settings if exists).

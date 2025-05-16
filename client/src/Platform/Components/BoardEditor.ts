@@ -22,7 +22,7 @@ import {
 
 /**
  * Represents the modes of the board creator.
- * Custom mode is for creating a board with a 
+ * Custom mode is for creating a board with a
  * custom FEN notation through the input field.
  * Template mode is for creating a board with a
  * template FEN notation through the select field.
@@ -106,9 +106,9 @@ export class BoardEditor extends Component {
         const isMobileView = window.innerWidth < 900;
         const isTabletView = window.innerWidth >= 900 && window.innerWidth < 1250;
         this.loadHTML(
-            isMobileView && boardCreatorMobileLoadingContainer 
-                ? boardCreatorMobileLoadingContainer!.id 
-                : isTabletView && boardCreatorTabletLoadingContainer 
+            isMobileView && boardCreatorMobileLoadingContainer
+                ? boardCreatorMobileLoadingContainer!.id
+                : isTabletView && boardCreatorTabletLoadingContainer
                     ? boardCreatorTabletLoadingContainer!.id
                         : BOARD_CREATOR_ID,
             `
@@ -147,9 +147,9 @@ export class BoardEditor extends Component {
                 if(isMobileView || isTabletView) {
                     document.getElementById(BOARD_CREATOR_ID)!.append(
                         ...(
-                            isMobileView 
+                            isMobileView
                                 ? boardCreatorMobileLoadingContainer!.childNodes
-                                : boardCreatorTabletLoadingContainer!.childNodes 
+                                : boardCreatorTabletLoadingContainer!.childNodes
                         )
                     );
                 }
@@ -516,7 +516,7 @@ export class BoardEditor extends Component {
     public createBoard(
         fenNotation: string | StartPosition | JsonNotation | null = null
     ): void {
-        this.chess.createGame(fenNotation || this.getCreatedBoard());
+        this.chess.createGame(fenNotation || this.getShownFen());
         this._prepareBoardEditorForGame();
     }
 
@@ -614,7 +614,9 @@ export class BoardEditor extends Component {
      */
     @isEditorModeEnable()
     private clearBoard(): void {
+        const tempLastCreatedBoard = Store.load(StoreKey.LastCreatedBoard);
         this.createBoard(StartPosition.Empty);
+        Store.save(StoreKey.LastCreatedBoard, tempLastCreatedBoard);
     }
 
     /**
@@ -623,7 +625,9 @@ export class BoardEditor extends Component {
      */
     @isEditorModeEnable()
     private resetBoard(): void {
-        this.createBoard(this.getCreatedBoard());
+        this.createBoard(
+            Store.load(StoreKey.LastCreatedBoard) || StartPosition.Standard
+        );
     }
 
     /**
@@ -745,17 +749,6 @@ export class BoardEditor extends Component {
             ).value;
 
         return formValue!;
-    }
-
-    /**
-     * Get the saved FEN notation from the local storage. If there 
-     * is no saved, it returns the shown FEN notation on the form.
-     */
-    public getCreatedBoard(): string {
-        return (
-            Store.load(StoreKey.LastCreatedBoard) ||
-            this.getShownFen()
-        );
     }
 
     /**
