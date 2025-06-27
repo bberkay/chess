@@ -401,7 +401,8 @@ export class Platform {
      * If the boolean is false, the game will be created without bot.
      */
     private preparePlatformForSingleplayerGame(
-        bot: boolean | BotAttributes
+        notation: string | StartPosition | JsonNotation | null = null,
+        bot: boolean | BotAttributes = false,
     ): void {
         if (BoardEditor.isEditorModeEnable()){
             this.boardEditor.disableEditorMode();
@@ -413,7 +414,7 @@ export class Platform {
                 ? bot
                 : this.navigatorModal.getCreatedBotSettings();
 
-        this._createBoardAndHandleComponents();
+        this._createBoardAndHandleComponents(notation);
         this.notationMenu.displaySingleplayerGameUtilityMenu();
 
         if (bot) {
@@ -434,14 +435,14 @@ export class Platform {
      * Create a new game and update the components of the menu.
      */
     private preparePlatformForSingleplayerGameByYourself(): void {
-        this.preparePlatformForSingleplayerGame(false);
+        this.preparePlatformForSingleplayerGame();
     }
 
     /**
      * Create a new game and update the components of the menu.
      */
     private preparePlatformForSingleplayerGameAgainstBot(): void {
-        this.preparePlatformForSingleplayerGame(true);
+        this.preparePlatformForSingleplayerGame(null, true);
     }
 
     /**
@@ -524,8 +525,8 @@ export class Platform {
      * update the components.
      */
     private _playAgainSingleplayerGame(): void {
-        const botAttributes = this.chess.getLastCreatedBotAttributes();
+        const botAttributes = this.chess.getLastCreatedBotAttributes() ?? false;
         if(botAttributes) botAttributes.color = botAttributes.color == Color.White ? Color.Black : Color.White;
-        this.preparePlatformForSingleplayerGame(botAttributes ?? false);
+        this.preparePlatformForSingleplayerGame(this.chess.getBoardHistory()[0], botAttributes);
     }
 }
