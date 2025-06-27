@@ -285,7 +285,10 @@ main {
     display: flex;
     width: 100%;
     justify-content: center;
-    margin-right: 5%;
+
+    & .left {
+        margin-left: -5%;
+    }
 
     & .center {
         position: relative;

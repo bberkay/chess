@@ -6,7 +6,7 @@
  :root {
     /**
      * All sizes are will be calculated based on the board size.
-     * For example, if the board size is 800px, the square size 
+     * For example, if the board size is 800px, the square size
      * will be 100px(1/8 of the board size), font size will be 16px(1/50 of
       the board size), and the piece size will be 80px(1/10 of the board size).
      */
@@ -108,10 +108,10 @@
 }
 
 body::after{
-    position:absolute; 
-    width:0; 
-    height:0; 
-    overflow:hidden; 
+    position:absolute;
+    width:0;
+    height:0;
+    overflow:hidden;
     z-index:-1;
     content: var(--chessboard-noise-effect-image);
 }
@@ -231,6 +231,13 @@ body::after{
     &.dragging,
     &.ghost {
         opacity: 0.5;
+    }
+
+    &.ghost.pre-promote {
+        top: 3%;
+        left: 3%;
+        width: calc(calc(var(--chessboard-board-size) / 9) / 3);
+        height: calc(calc(var(--chessboard-board-size) / 9) / 3);
     }
 
     &.promotion-option {
@@ -546,7 +553,7 @@ body::after{
     }
 }
 
-/* Animation for winner effect, 
+/* Animation for winner effect,
 avoid changing */
 @keyframes glow {
     0% {
@@ -563,7 +570,7 @@ avoid changing */
     }
 }
 
-/* Animation for piece's idle 
+/* Animation for piece's idle
 movement, avoid changing */
 @keyframes piece-idle {
     0% {
@@ -577,7 +584,7 @@ movement, avoid changing */
     }
 }
 
-/* Animation for glowing effect's 
+/* Animation for glowing effect's
 idle movement, avoid changing */
 @keyframes glow-idle {
     0% {
@@ -605,8 +612,8 @@ avoid changing */
     }
 }
 
-/** 
- * ------------------ Responsive ------------------- 
+/**
+ * ------------------ Responsive -------------------
  *             700px - 900px - 1250px
  */
 @media screen and (max-width: 900px) {

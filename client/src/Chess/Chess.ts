@@ -449,9 +449,6 @@ export class Chess {
 
     /**
      * Play a move on the board and engine.
-     * @param {MoveType|null} moveType - If it is not given the function will determine the
-     * move type by checking the square click mode of the target square(`to`). Mostly, this
-     * parameter is used by the bot/system/server etc. so try to avoid using it.
      */
     public async playMove(from: Square, to: Square): Promise<void> {
         let moveType: MoveType | null = null;
@@ -548,15 +545,20 @@ export class Chess {
             preMovesOfPlayer.length > 1 ? preMovesOfPlayer.slice(1) : [];
 
         setTimeout(async () => {
-            await this.playMove(from, to);
-            this.logger.save(
-                `Pre-move-ts-${JSON.stringify({ from, to, type })}-te- played`
-            );
-            document.dispatchEvent(
-                new CustomEvent(ChessEvent.onPieceMovedByPlayer, {
-                    detail: { from, to, type },
-                })
-            );
+            try {
+                await this.playMove(from, to);
+                this.logger.save(
+                    `Pre-move-ts-${JSON.stringify({ from, to, type })}-te- played`
+                );
+                document.dispatchEvent(
+                    new CustomEvent(ChessEvent.onPieceMovedByPlayer, {
+                        detail: { from, to, type },
+                    })
+                );
+            } catch (err) {
+                if (!(err instanceof MoveValidationError))
+                    throw err;
+            }
         }, PRE_MOVE_DELAY);
     }
 
