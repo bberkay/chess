@@ -1,6 +1,10 @@
-<h1>Usage</h1>
-<p>For general information about the project check out <a href="https://github.com/bberkay/chess/tree/main">README.md</a>.
-<h2>ChessPlatform(Full Version)</h2>
+Usage
+=====
+
+For general information about the project check out [README.md](https://github.com/bberkay/chess/tree/main).
+
+ChessPlatform(Full Version)
+---------------------------
 
 ```html
 <html>
@@ -43,13 +47,11 @@
 </html>
 ```
 
-<p>This is also current usage in <a href = "https://github.com/bberkay/chess/blob/main/client/index.html">index.html</a> of the <a href = "#chess-platform">Live Demo</a>.</p>
-<p>
-<h4>Method List of ChessPlatform</h4>
-<span>Most (but not all) of the public methods you can use within the <code>ChessPlatform</code> class.</span><br/>
-<small>You can see the custom <code>ChessPlatform</code> types in <a href = "https://github.com/bberkay/chess/blob/main/client/src/Types/index.ts">here</a> and more detailed explanation of the methods in <a href = "
-https://github.com/bberkay/chess/blob/main/client/src/ChessPlatform.ts">here</a>.</small>
-</p>
+This is also current usage in [index.html](https://github.com/bberkay/chess/blob/main/client/index.html) of the [Live Demo](https://github.com/bberkay/chess/blob/main/README.md#chess-platform).
+
+### Method List of ChessPlatform
+
+Most (but not all) of the public methods you can use within the `ChessPlatform` class. You can see the custom `ChessPlatform` types in [here](https://github.com/bberkay/chess/blob/main/client/src/Types/index.ts) and more detailed explanation of the methods in [here](https://github.com/bberkay/chess/blob/main/client/src/ChessPlatform.ts).
 
 ```javascript
 /**
@@ -155,7 +157,8 @@ declineSentOffer(): void
 terminateConnection(resetPlatform: boolean = true): void
 ```
 
-<h3>Chess(without Platform)</h3>
+Chess (without Platform)
+---------------------------
 
 ```html
 <html>
@@ -202,12 +205,9 @@ terminateConnection(resetPlatform: boolean = true): void
 </html>
 ```
 
-<h4>Method List of Chess</h4>
-<p>
-<span>Most (but not all) of the public methods you can use within the <code>Chess</code> class.</span><br/>
-<small>You can see the custom <code>Chess</code> types from <a href = "https://github.com/bberkay/chess/blob/main/client/src/Chess/Types/index.ts">here</a> and more detailed explanation of the methods from <a href = "
-https://github.com/bberkay/chess/blob/main/client/src/Chess/Chess.ts">here</a>.</small>
-</p>
+### Method List of Chess
+
+Most (but not all) of the public methods you can use within the `Chess` class. You can see the custom `Chess` types from [here](https://github.com/bberkay/chess/blob/main/client/src/Chess/Types/index.ts) and more detailed explanation of the methods from [here](https://github.com/bberkay/chess/blob/main/client/src/Chess/Chess.ts).
 
 ```javascript
 /**
@@ -358,7 +358,8 @@ getGameAsAscii(
 getBoardHistory(): ReadonlyArray<JsonNotation>
 ```
 
-<h3>ChessBoard(Standalone)</h3>
+ChessBoard (Standalone)
+---------------------------
 
 ```html
 <html>
@@ -434,12 +435,9 @@ getBoardHistory(): ReadonlyArray<JsonNotation>
 </html>
 ```
 
-<h4>Method List of ChessBoard</h4>
-<p>
-<span>Most (but not all) of the public methods you can use within the <code>ChessBoard</code> class.</span><br/>
-<small>You can see the custom <code>ChessBoard</code> types in <a href = "https://github.com/bberkay/chess/blob/main/client/src/Chess/Board/Types/index.ts">here</a> and more detailed explanation of the methods in <a href = "
-https://github.com/bberkay/chess/blob/main/client/src/Chess/Board/ChessBoard.ts">here</a>.</small>
-</p>
+### Method List of ChessBoard
+
+Most (but not all) of the public methods you can use within the `ChessBoard` class. You can see the custom `ChessBoard` types in [here](https://github.com/bberkay/chess/blob/main/client/src/Chess/Board/Types/index.ts) and more detailed explanation of the methods in [here](https://github.com/bberkay/chess/blob/main/client/src/Chess/Board/ChessBoard.ts).
 
 ```javascript
 /**
@@ -638,7 +636,8 @@ getSquareClickMode(
 ): SquareClickMode
 ```
 
-<h3>ChessEngine(Standalone)</h3>
+ChessEngine(Standalone)
+---------------------------
 
 ```typescript
 // somefile.ts/somefile.js
@@ -685,12 +684,9 @@ console.log(chessEngine.getGameAsAscii());
 //   a   b   c   d   e   f   g   h
 ```
 
-<h4>Method List of ChessEngine</h4>
-<p>
-<span>Most (but not all) of the public methods you can use within the <code>ChessEngine</code> class.</span><br/>
-<small>You can see the custom <code>ChessEngine</code> types marked in <a href = "https://github.com/bberkay/chess/blob/main/client/src/Chess/Engine/Types/index.ts">here</a> and more detailed explanation of the methods in <a href = "
-https://github.com/bberkay/chess/blob/main/client/src/Chess/Engine/ChessEngine.ts">here</a>.</small>
-</p>
+### Method List of ChessEngine
+
+Most (but not all) of the public methods you can use within the `ChessEngine` class. You can see the custom `ChessEngine` types marked in [here](https://github.com/bberkay/chess/blob/main/client/src/Chess/Engine/Types/index.ts) and more detailed explanation of the methods in [here](https://github.com/bberkay/chess/blob/main/client/src/Chess/Engine/ChessEngine.ts).
 
 ```javascript
 /**
@@ -806,6 +802,8 @@ getGameAsJsonNotation(): JsonNotation
 getGameAsAscii(): string
 ```
 
-<p>Check <a href="https://github.com/bberkay/chess/blob/main/client/src/Chess/Chess.ts">Chess.ts</a> for more ready-to-play implementation.</p>
-<hr>
+Check [Chess.ts](https://github.com/bberkay/chess/blob/main/client/src/Chess/Chess.ts) for more ready-to-play implementation.
+
+---
+
 <h5 align="center"><a href="mailto:berkaykayaforbusiness@outlook.com">berkaykayaforbusiness@outlook.com</a></h5>
