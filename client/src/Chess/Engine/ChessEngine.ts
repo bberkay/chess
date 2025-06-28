@@ -143,7 +143,7 @@ export class ChessEngine {
      */
     public getPlayersRemainingTime(): RemainingTimes {
         if (!BoardQuerier.getDurations())
-            throw new Error("Durations are not set");
+            throw new DurationsAreNotSet("Durations are not set");
 
         if (!this.timerMap) throw new TimerNotAvailableError("Timers are not available");
 
@@ -1376,5 +1376,16 @@ export class TimerNotAvailableError extends Error {
     constructor(message: string) {
         super(message);
         this.name = "TimerNotAvailableError";
+    }
+}
+
+/**
+ * TimerNotAvailableError class is used when the timer
+ * is not available(anymore) for the game.
+ */
+export class DurationsAreNotSet extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = "DurationsAreNotSet";
     }
 }

@@ -123,7 +123,8 @@ export enum EnPassantDirection {
 export type Moves = { [key in MoveType]?: Array<Square> };
 
 /**
- * Duration type mostly for the initial duration of the players.
+ * Duration type mostly for the initial duration(in milliseconds)
+ * of the players.
  * @see For more information, check src/Chess.ts
  */
 export type Duration = { remaining: number; increment: number };
