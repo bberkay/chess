@@ -5,7 +5,7 @@
  * @see For more information about vitest, check https://vitest.dev/
  */
 
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 import { TestGame } from './types';
 import { MoveType, Square, StartPosition } from '@Chess/Types';
 import { ChessEngine } from '@Chess/Engine/ChessEngine';
@@ -147,32 +147,31 @@ const enPassantTestGames: TestGame[] = [
     }
 ];
 
-test('En Passant Moves', () => {
-    const engine = new ChessEngine();
+describe('En Passant Moves', () => {
     for(const game of enPassantTestGames)
     {
-        console.log("Testing:        " + game.title);
-        console.log("Initial Board:  " + game.board);
-        engine.createGame(game.board);
+        test(game.title, () => {
+            const engine = new ChessEngine();
+            engine.createGame(game.board);
+            console.log("Initial Board:  " + engine.getGameAsFenNotation());
 
-        for(const move of game.moves!) {
-            engine.playMove(move.from, move.to);
-        }
+            for(const move of game.moves!) {
+                engine.playMove(move.from, move.to);
+            }
 
-        console.log("Final Notation: " + engine.getAlgebraicNotation());
-        console.log("Final Board:    " + engine.getGameAsFenNotation());
+            console.log("Final Notation: " + engine.getAlgebraicNotation());
+            console.log("Final Board:    " + engine.getGameAsFenNotation());
 
-        /**
-         * Check the en passant move is equal to the expectation.
-         * "from: Square" means tested pawn's square.
-         * "to: []" means there is no en passant move.
-         * "to: [Square]" means there is en passant move.
-         */
-        if(typeof game.expectation === "string")
-            expect(engine.getGameAsFenNotation()).toEqual(game.expectation);
-        else
-            expect(engine.getMoves(game.expectation.from)![MoveType.EnPassant]).toEqual(game.expectation.to);
-        
-        console.log("--------------------------------------------------");
+            /**
+             * Check the en passant move is equal to the expectation.
+             * "from: Square" means tested pawn's square.
+             * "to: []" means there is no en passant move.
+             * "to: [Square]" means there is en passant move.
+             */
+            if(typeof game.expectation === "string")
+                expect(engine.getGameAsFenNotation()).toEqual(game.expectation);
+            else
+                expect(engine.getMoves(game.expectation.from)![MoveType.EnPassant]).toEqual(game.expectation.to);
+        });
     }
 });

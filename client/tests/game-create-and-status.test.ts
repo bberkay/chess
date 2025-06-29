@@ -5,7 +5,7 @@
  * @see For more information about vitest, check https://vitest.dev/
  */
 
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 import { TestGame } from './types';
 import { GameStatus } from '@Chess/Types';
 import { ChessEngine } from '@Chess/Engine/ChessEngine';
@@ -57,18 +57,16 @@ const games: TestGame[] = [
 ]
 
 // Test every status of the game
-test(`Game Status on Start`, () => {
-    // Create chess engine
-    const chessEngine = new ChessEngine();
-
+describe(`Game Status on Start`, () => {
     // Test every game
     for (const game of games) {
-        console.log("Testing: " + game.title);
-        console.log("Board:   " + game.board);
-        chessEngine.createGame(game.board);
+        test(game.title, () => {
+            // Create chess engine
+            const engine = new ChessEngine();
+            engine.createGame(game.board);
+            console.log("Initial Board:   " + engine.getGameAsFenNotation());
 
-        expect(chessEngine.getGameStatus()).toBe(game.expectation);
-
-        console.log("--------------------------------------------------");
+            expect(engine.getGameStatus()).toBe(game.expectation);
+        })
     }
 });

@@ -4,7 +4,7 @@
  * @see For more information about vitest, check https://vitest.dev/
  */
 
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 import { TestGame } from './types';
 import { ChessEngine } from '@Chess/Engine/ChessEngine';
 import { GameStatus, Square, StartPosition } from "@Chess/Types";
@@ -46,32 +46,32 @@ const fiftyMoveRuleTestGames: TestGame[] = [
 ]
 
 // Convert FEN to JSON
-test('Fifty Move Rule Test', () => {
-    const engine = new ChessEngine();
+describe('Fifty Move Rule Test', () => {
     for(const game of fiftyMoveRuleTestGames)
     {
-        console.log("Testing:        " + game.title);
-        console.log("Initial Board:  " + game.board);
-        engine.createGame(game.board);
+        test(game.title, () => {
+            const engine = new ChessEngine();
+            engine.createGame(game.board);
+            console.log("Initial Board:  " + engine.getGameAsFenNotation());
 
-        // Play moves
-        for (const move of game.moves!) {
-            engine.playMove(move.from, move.to);
-        }
+            // Play moves
+            for (const move of game.moves!) {
+                engine.playMove(move.from, move.to);
+            }
 
-        console.log("Final Notation: " + engine.getAlgebraicNotation());
-        console.log("Final Board:    " + engine.getGameAsFenNotation());
+            console.log("Final Notation: " + engine.getAlgebraicNotation());
+            console.log("Final Board:    " + engine.getGameAsFenNotation());
 
-        /**
-         * Check if the expectation is a number, if it is, then
-         * check if the half move count is equal to the expectation.
-         * If it is not, then check if the game status is equal to the expectation.
-         */
-        if(typeof game.expectation === "number")
-            expect(BoardQuerier.getHalfMoveCount()).toBe(game.expectation);
-        else
-            expect(engine.getGameStatus()).toBe(game.expectation);
+            /**
+             * Check if the expectation is a number, if it is, then
+             * check if the half move count is equal to the expectation.
+             * If it is not, then check if the game status is equal to the expectation.
+             */
+            if(typeof game.expectation === "number")
+                expect(BoardQuerier.getHalfMoveCount()).toBe(game.expectation);
+            else
+                expect(engine.getGameStatus()).toBe(game.expectation);
 
-        console.log("--------------------------------------------------");
+        });
     }
 });

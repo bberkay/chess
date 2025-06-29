@@ -4,7 +4,7 @@
  * @see For more information about vitest, check https://vitest.dev/
  */
 
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 import { TestGame } from './types';
 import { Square, StartPosition } from '@Chess/Types';
 import { ChessEngine } from '@Chess/Engine/ChessEngine';
@@ -62,25 +62,23 @@ const promotionTestGames: TestGame[] = [
 ]
 
 // Test for promotion move.
-test('Promote pawn to the every promotion option', () => {
-    const engine = new ChessEngine();
-
+describe('Promote pawn to the every promotion option', () => {
     for(const game of promotionTestGames){
-        console.log("Testing:        " + game.title);
-        console.log("Initial Board:  " + game.board);
-        engine.createGame(game.board);
+        test(game.title, () => {
+            const engine = new ChessEngine();
+            engine.createGame(game.board);
+            console.log("Initial Board:  " + engine.getGameAsFenNotation());
 
-        // Play moves
-        for (const move of game.moves!) {
-            engine.playMove(move.from, move.to);
-        }
+            // Play moves
+            for (const move of game.moves!) {
+                engine.playMove(move.from, move.to);
+            }
 
-        console.log("Final Notation: " + engine.getAlgebraicNotation());
-        console.log("Final Board:    " + engine.getGameAsFenNotation());
+            console.log("Final Notation: " + engine.getAlgebraicNotation());
+            console.log("Final Board:    " + engine.getGameAsFenNotation());
 
-        // Check the pawn is promoted to the current type of promotion.
-        expect(engine.getGameAsFenNotation()).toEqual(game.expectation!);
-        
-        console.log("--------------------------------------------------");
+            // Check the pawn is promoted to the current type of promotion.
+            expect(engine.getGameAsFenNotation()).toEqual(game.expectation!);
+        });
     }
 });

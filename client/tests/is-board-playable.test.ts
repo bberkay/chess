@@ -5,7 +5,7 @@
  * @see For more information about vitest, check https://vitest.dev/
  */
 
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 import { TestGame } from './types';
 import { GameStatus, Square } from '@Chess/Types';
 import { ChessEngine } from '@Chess/Engine/ChessEngine';
@@ -85,25 +85,22 @@ const games: TestGame[] = [
 ]
 
 // Test Playable/Unplayable Boards
-test(`Is Board Playable`, () => {
-    // Create chess engine
-    const chessEngine = new ChessEngine();
-
+describe(`Is Board Playable`, () => {
     // Test every game
     for (const game of games) {
-        console.log("Testing: " + game.title);
-        console.log("Board:   " + game.board);
-        chessEngine.createGame(game.board);
+        test(game.title, () => {
+            const engine = new ChessEngine();
+            engine.createGame(game.board);
+            console.log("Initial Board:   " + engine.getGameAsFenNotation());
 
-        // Make moves(if any)
-        if(game.moves!.length > 0){
-            for (const move of game.moves!) {
-                chessEngine.playMove(move.from, move.to);
+            // Make moves(if any)
+            if(game.moves!.length > 0){
+                for (const move of game.moves!) {
+                    engine.playMove(move.from, move.to);
+                }
             }
-        }
 
-        expect(chessEngine.getGameStatus()).toBe(game.expectation);
-
-        console.log("--------------------------------------------------");
+            expect(engine.getGameStatus()).toBe(game.expectation);
+        });
     }
 });

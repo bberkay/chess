@@ -5,7 +5,7 @@
  * @see For more information about vitest, check https://vitest.dev/
  */
 
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 import { TestGame } from './types';
 import { Moves, MoveType, Square } from '@Chess/Types';
 import { ChessEngine } from '@Chess/Engine/ChessEngine';
@@ -81,27 +81,26 @@ const mandatoryMovesTests: TestGame[] = [
 /**
  * Test file for move notation by playing a random game
  */
-test('Mandatory Moves Test', () => {
-    const engine = new ChessEngine();
+describe('Mandatory Moves Test', () => {
 
     for(const game of mandatoryMovesTests) {
-        console.log("Testing:        " + game.title);
-        console.log("Initial Board:  " + game.board);
-        engine.createGame(game.board);
+        test(game.title, () => {
+            const engine = new ChessEngine();
+            engine.createGame(game.board);
+            console.log("Initial Board:  " + engine.getGameAsFenNotation());
 
-        // Test every piece and its moves
-        for(const expectation of game.expectation){
-            const moves: Moves = engine.getMoves(Number(expectation.from) as Square)!;
-            console.log("From: " + expectation.from + " Moves: " + JSON.stringify(moves));
-            if(expectation.to === null){
-                const isOneOfThemTrue = moves === null || (moves && moves.Normal && moves.Normal.length === 0);
-                expect(isOneOfThemTrue).toBe(true);
+            // Test every piece and its moves
+            for(const expectation of game.expectation){
+                const moves: Moves = engine.getMoves(Number(expectation.from) as Square)!;
+                console.log("From: " + expectation.from + " Moves: " + JSON.stringify(moves));
+                if(expectation.to === null){
+                    const isOneOfThemTrue = moves === null || (moves && moves.Normal && moves.Normal.length === 0);
+                    expect(isOneOfThemTrue).toBe(true);
+                }
+                else{
+                    expect(moves![MoveType.Normal]!.sort()).toEqual(expectation.to.sort());
+                }
             }
-            else{
-                expect(moves![MoveType.Normal]!.sort()).toEqual(expectation.to.sort());
-            }
-        }
-
-        console.log("--------------------------------------------------");
+        });
     }
 });

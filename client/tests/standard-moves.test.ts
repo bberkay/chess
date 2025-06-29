@@ -4,7 +4,7 @@
  * @see For more information about vitest, check https://vitest.dev/
  */
 
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 import { TestGame } from './types';
 import { Moves, MoveType, Square } from '@Chess/Types';
 import { ChessEngine } from '@Chess/Engine/ChessEngine';
@@ -12,7 +12,7 @@ import { ChessEngine } from '@Chess/Engine/ChessEngine';
 /**
  * Random game with expected moves for some piece.
  */
-const game: TestGame = {
+const games: TestGame[] = [{
     title: "Standard Moves",
     board: 'rnbqkbnr/pppppppp/8/6B1/3P2B1/2NQ3P/PPP1PPP1/R3K1NR w KQkq - 0 1',
     expectation: [
@@ -67,24 +67,25 @@ const game: TestGame = {
             to: [Square.h4, Square.h6, Square.f6, Square.e7, Square.f4, Square.e3, Square.d2, Square.c1]
         }
     ]
-};
+}];
 
 // Tests
-test('Standard Moves', () => {
-    const engine = new ChessEngine();
-    console.log("Testing: " + game.title);
-    console.log("Board:   " + game.board);
-    engine.createGame(game.board);
+describe('Standard Moves', () => {
+    for(const game of games) {
+        test(game.title, () => {
+            const engine = new ChessEngine();
+            engine.createGame(game.board);
+            console.log("Board:   " + engine.getGameAsFenNotation());
 
-    // Test every piece and its moves
-    for(const expectation of game.expectation){
-        const moves: Moves = engine.getMoves(Number(expectation.from) as Square)!;
+            // Test every piece and its moves
+            for (const expectation of game.expectation) {
+                const moves: Moves = engine.getMoves(Number(expectation.from) as Square)!;
 
-        if(expectation.to === null)
-            expect(moves).toEqual(null);
-        else
-            expect(moves![MoveType.Normal]!.sort()).toEqual(expectation.to.sort());
+                if (expectation.to === null)
+                    expect(moves).toEqual(null);
+                else
+                    expect(moves![MoveType.Normal]!.sort()).toEqual(expectation.to.sort());
+            }
+        });
     }
-    
-    console.log("--------------------------------------------------");
 });

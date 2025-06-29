@@ -5,7 +5,7 @@
  * @see For more information about vitest, check https://vitest.dev/
  */
 
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 import { TestGame } from './types';
 import { Square, StartPosition } from '@Chess/Types';
 import { ChessEngine } from '@Chess/Engine/ChessEngine';
@@ -151,26 +151,25 @@ const algeNotTestGames: TestGame[] = [
 /**
  * Test file for move notation by playing a random game
  */
-test('Algebraic Notation Test', () => {
-    const engine = new ChessEngine();
+describe('Algebraic Notation Test', () => {
     for(const game of algeNotTestGames)
     {
-        console.log("Testing:        " + game.title);
-        console.log("Initial Board:  " + game.board);
-        engine.createGame(game.board);
+        test(game.title, () => {
+            const engine = new ChessEngine();
+            engine.createGame(game.board);
+            console.log("Initial Board:  " + engine.getGameAsFenNotation());
 
-        // Play the moves if there is any
-        for(const move of game.moves!)
-        {
-            engine.playMove(move.from, move.to);
-        }
+            // Play the moves if there is any
+            for(const move of game.moves!)
+            {
+                engine.playMove(move.from, move.to);
+            }
 
-        console.log("Final Notation: " + engine.getAlgebraicNotation());
-        console.log("Final Board:    " + engine.getGameAsFenNotation());
+            console.log("Final Notation: " + engine.getAlgebraicNotation());
+            console.log("Final Board:    " + engine.getGameAsFenNotation());
 
-        // Check the notation is equal to the expectation.
-        expect(engine.getAlgebraicNotation()).toEqual(game.expectation);
-
-        console.log("--------------------------------------------------");
+            // Check the notation is equal to the expectation.
+            expect(engine.getAlgebraicNotation()).toEqual(game.expectation);
+        });
     }
 });

@@ -4,7 +4,7 @@
  * @see For more information about vitest, check https://vitest.dev/
  */
 
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 import { TestGame } from './types';
 import { Converter } from '@Chess/Utils/Converter';
 import { Color, PieceType, Square, StartPosition } from '@Chess/Types';
@@ -109,26 +109,13 @@ const fenToJsonTest: TestGame[] = [
 ]
 
 // Convert FEN to JSON
-test('Convert FEN to JSON', () => {
+describe('Convert FEN to JSON and vice versa.', () => {
     fenToJsonTest.forEach(({title, board, expectation}) => {
-        console.log(`Testing: ${title}`);
-        expect(Converter.fenToJson(board as string)).toEqual(expectation);
-        console.log(`Passed`);
-        console.log("--------------------------------------------------");
-    });
-});
-
-/**
- * JSON Notation tests with expected FEN notation.
- */
-
-// NOTE: We don't need to create tests again because we can just use the same tests as above and reverse the parameters.
-// Convert JSON to FEN
-test('Convert JSON to FEN', () => {
-    fenToJsonTest.forEach(({title, board, expectation}) => {
-        console.log(`Testing: ${title}`);
-        expect(Converter.jsonToFen(expectation)).toEqual(board);
-
-        console.log("--------------------------------------------------");
+        test(title, () => {
+            const fen = board as string;
+            const json = Converter.fenToJson(fen);
+            expect(json).toEqual(expectation);
+            expect(Converter.jsonToFen(json)).toEqual(fen);
+        });
     });
 });

@@ -5,7 +5,7 @@
  * @see For more information about vitest, check https://vitest.dev/
  */
 
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 import { TestGame } from './types';
 import { Moves, MoveType, Square, StartPosition } from '@Chess/Types';
 import { ChessEngine } from '@Chess/Engine/ChessEngine';
@@ -56,22 +56,21 @@ const games: TestGame[] = [
     }
 ]
 
-test('King Protection Test', () => {
-    const engine = new ChessEngine();
-
+describe('King Protection Test', () => {
     for(const game of games){
-        console.log("Testing: " + game.title);
-        console.log("Board:   " + game.board);
-        engine.createGame(game.board);
+        test(game.title, () => {
+            const engine = new ChessEngine();
 
-        // Get moves for the piece that protect the king
-        const moves: Moves = engine.getMoves(Number(game.expectation.from) as Square)!;
+            engine.createGame(game.board);
+            console.log("Initial Board:   " + engine.getGameAsFenNotation());
 
-        if(game.expectation.to === null)
-            expect(moves).toEqual(null);
-        else
-            expect(moves![MoveType.Normal]!.sort()).toEqual(game.expectation.to.sort());
+            // Get moves for the piece that protect the king
+            const moves: Moves = engine.getMoves(Number(game.expectation.from) as Square)!;
 
-        console.log("--------------------------------------------------");
+            if(game.expectation.to === null)
+                expect(moves).toEqual(null);
+            else
+                expect(moves![MoveType.Normal]!.sort()).toEqual(game.expectation.to.sort());
+        })
     }
 });

@@ -4,7 +4,7 @@
  * @see For more information about vitest, check https://vitest.dev/
  */
 
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 import { TestGame } from './types';
 import { GameStatus, Square, StartPosition } from '@Chess/Types';
 import { ChessEngine } from '@Chess/Engine/ChessEngine';
@@ -67,27 +67,25 @@ const games: TestGame[] = [
 ]
 
 // Test every game
-test(`Random Games`, () => {
-    // Create chess engine
-    const engine = new ChessEngine();
-
+describe(`Random Games`, () => {
     // Test every game
     for (const game of games) {
-        console.log("Testing:        " + game.title);
-        console.log("Initial Board:  " + game.board);
-        engine.createGame(game.board);
-        
-        for (const move of game.moves!) {
-            engine.playMove(move.from, move.to);
-        }
+        test(game.title, () => {
+            // Create chess engine
+            const engine = new ChessEngine();
+            engine.createGame(game.board);
+            console.log("Initial Board:  " + engine.getGameAsFenNotation());
 
-        console.log("Final Notation: " + engine.getAlgebraicNotation());
-        console.log("Final Board:    " + engine.getGameAsFenNotation());
-        console.log("Final Status:   " + engine.getGameStatus());
+            for (const move of game.moves!) {
+                engine.playMove(move.from, move.to);
+            }
 
-        // Check if the game status is the expected
-        expect(engine.getGameStatus()).toBe(game.expectation);
-        
-        console.log("--------------------------------------------------");
+            console.log("Final Notation: " + engine.getAlgebraicNotation());
+            console.log("Final Board:    " + engine.getGameAsFenNotation());
+            console.log("Final Status:   " + engine.getGameStatus());
+
+            // Check if the game status is the expected
+            expect(engine.getGameStatus()).toBe(game.expectation);
+        });
     }
 });
