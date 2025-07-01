@@ -11,7 +11,7 @@ import {
 import { ChessEngine } from "@Chess/Engine/ChessEngine";
 import { Converter } from "@Chess/Utils/Converter";
 import { GU_ID_LENGTH } from "src/Consts";
-import { createRandomId, deepFreeze } from "@Utils/Helper";
+import { createRandomId, deepFreeze } from "@Utils";
 
 /**
  * This class represents the lobby of the game.
@@ -107,9 +107,9 @@ export class Lobby {
      * Get the current board as json notation.
      */
     public getGameAsJsonNotation(): JsonNotation {
-        return this.isGameStarted() 
-            ? this.chessEngine.getGameAsJsonNotation() 
-            : typeof this.getInitialBoard() === "string" 
+        return this.isGameStarted()
+            ? this.chessEngine.getGameAsJsonNotation()
+            : typeof this.getInitialBoard() === "string"
                 ? Converter.fenToJson(this.getInitialBoard() as string)
                 : this.getInitialBoard() as JsonNotation;
     }
@@ -118,8 +118,8 @@ export class Lobby {
      * Get the current board as fen notation.
      */
     public getGameAsFenNotation(): string {
-        return this.isGameStarted() 
-            ? this.chessEngine.getGameAsFenNotation() 
+        return this.isGameStarted()
+            ? this.chessEngine.getGameAsFenNotation()
             : typeof this.getInitialBoard() === "string"
                 ? this.getInitialBoard() as string
                 : Converter.jsonToFen(this.getInitialBoard() as JsonNotation);

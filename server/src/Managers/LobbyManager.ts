@@ -1,7 +1,7 @@
 import type { Player } from "../Types";
 import { JsonNotation, StartPosition, Duration } from "@Chess/Types";
 import { Lobby } from "@Lobby";
-import { createRandomId } from "@Utils/Helper";
+import { createRandomId } from "@Utils";
 import { GU_ID_LENGTH, DESTROY_INACTIVE_LOBBY_TIMEOUT } from "@Consts";
 
 /**

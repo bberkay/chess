@@ -27,7 +27,7 @@
     "paths": {
       "@Chess/*": ["src/Chess/*"],
       "@Lobby": ["src/Lobby/index.ts"],
-      "@Utils/*": ["src/Utils/*"],
+      "@Utils": ["src/Utils/index.ts"],
       "@Consts": ["src/Consts/index.ts"]
     }
   }

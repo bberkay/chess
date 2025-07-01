@@ -19,7 +19,7 @@ export interface CreateLobbyReqParams{
     board: string;
     remaining: string;
     increment: string;
-} 
+}
 
 /**
  * Parameters required to join an existing lobby.
@@ -36,6 +36,36 @@ export interface ReconnectLobbyReqParams{
     lobbyId: string;
     token: string;
 }
+
+/**
+ *
+ */
+export interface CreatedLobbyData {
+    lobbyId: string;
+    token: string;
+}
+
+/**
+ *
+ */
+export interface JoinedLobbyData {
+    lobbyId: string;
+    token: string;
+}
+
+/**
+ *
+ */
+export interface ReconnectedLobbyData {
+    lobbyId: string;
+    id: string;
+    name: string;
+}
+
+/**
+ *
+ */
+export type LobbyData = CreatedLobbyData & JoinedLobbyData & ReconnectedLobbyData;
 
 /**
  * Base interface that combines all WebSocket request parameter types.
@@ -203,7 +233,7 @@ export type WsDataUnion =
     | WsReconnectedData
     | WsDisconnectedData
     | WsErrorData;
-    
+
 /**
  * WsDataMap type that maps each WebSocket command title (WsTitle)
  * to its corresponding data type.
