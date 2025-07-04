@@ -806,4 +806,4 @@ Check [Chess.ts](https://github.com/bberkay/chess/blob/main/client/src/Chess/Che
 
 ---
 
-<h5 align="center"><a href="mailto:berkaykayaforbusiness@outlook.com">berkaykayaforbusiness@outlook.com</a></h5>
+<h5 align="center"><a href="mailto:berkaykayaforbusiness@gmail.com">berkaykayaforbusiness@gmail.com</a></h5>

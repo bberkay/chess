@@ -2,7 +2,7 @@
  * @module ChessBoard
  * @description This module provides users to create and manage a chess
  * board(does not include any mechanic/logic).
- * @author Berkay Kaya <berkaykayaforbusiness@outlook.com> (https://bberkay.github.io)
+ * @author Berkay Kaya <berkaykayaforbusiness@gmail.com> (https://bberkay.github.io)
  * @url https://github.com/bberkay/chess
  * @license MIT
  */

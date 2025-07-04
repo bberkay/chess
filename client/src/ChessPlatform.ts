@@ -4,7 +4,7 @@
  * the `Chess` and `Platform` classes and handles the WebSocket connections
  * between the client and server.
  * @url https://github.com/bberkay/chess
- * @author Berkay Kaya <berkaykayaforbusiness@outlook.com> (https://bberkay.github.io)
+ * @author Berkay Kaya <berkaykayaforbusiness@gmail.com> (https://bberkay.github.io)
  * @license MIT
  */
 

@@ -2,7 +2,7 @@
  * @module Platform
  * @description This module provides components like notation menu, board editor etc.
  * to enrich the user experience by using the `Chess` class's methods.
- * @author Berkay Kaya <berkaykayaforbusiness@outlook.com> (https://bberkay.github.io)
+ * @author Berkay Kaya <berkaykayaforbusiness@gmail.com> (https://bberkay.github.io)
  * @url https://github.com/bberkay/chess
  * @license MIT
  */

@@ -2,7 +2,7 @@
  * @module Chess
  * @description This module provides users to a playable chess game on the web by
  * connecting `ChessEngine` and `ChessBoard` with `Store`.
- * @author Berkay Kaya <berkaykayaforbusiness@outlook.com> (https://bberkay.github.io)
+ * @author Berkay Kaya <berkaykayaforbusiness@gmail.com> (https://bberkay.github.io)
  * @url https://github.com/bberkay/chess
  * @license MIT
  */
