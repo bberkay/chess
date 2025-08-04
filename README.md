@@ -58,14 +58,14 @@ Check out [ARCHITECTURE.md](https://github.com/bberkay/chess/blob/main/docs/ARCH
 
 ### Client
 
-*   **[ChessPlatform](https://github.com/bberkay/chess/blob/main/client/src/ChessPlatform.ts)**  
+*   **[ChessPlatform](https://github.com/bberkay/chess/blob/main/client/src/ChessPlatform.ts)**
     The main class on the client-side. It creates and controls the Chess and Platform based on user interactions. It connects to the server-side using websockets to enable online play. Events triggered through [`SocketEvent`](https://github.com/bberkay/chess/blob/main/client/src/Types/index.ts)` can be listened to, and variables such as the server address and port can be modified through [Consts](https://github.com/bberkay/chess/blob/main/client/src/Consts/index.ts).
     *   **WsCommand**: Located under ChessPlatform, this defines the communication language between the client-side and server-side.
-*   **[Chess](https://github.com/bberkay/chess/blob/main/client/src/Chess/Chess.ts)**  
+*   **[Chess](https://github.com/bberkay/chess/blob/main/client/src/Chess/Chess.ts)**
     Provides a playable chess experience on the web using [`ChessBoard`](https://github.com/bberkay/chess/blob/main/client/src/Chess/Board/ChessBoard.ts) and [`ChessEngine`](https://github.com/bberkay/chess/blob/main/client/src/Chess/Engine/ChessEngine.ts) classes. It also supports [Stockfish](https://github.com/bberkay/chess/blob/main/client/src/Chess/Bot/index.ts). Manages game storage locally through [Store](https://github.com/bberkay/chess/blob/main/client/src/Services/Store.ts), and events triggered with [`ChessEvent`](https://github.com/bberkay/chess/blob/main/client/src/Chess/Types/index.ts) can be listened to. It does not interact with any external classes outside of services.
     *   **[ChessBoard:](https://github.com/bberkay/chess/tree/main/client/src/Chess/Board)** Provides the chessboard, pieces, sound effects, square effects, promotion menu, and game end animation. Does not interact with any mechanism or external classes, and is implemented as a standalone class without sub/helper classes, except for [`Logger`](https://github.com/bberkay/chess/blob/main/client/src/Services/Logger.ts).
     *   **[ChessEngine:](https://github.com/bberkay/chess/tree/main/client/src/Chess/Engine)** Provides mechanisms for board control (such as piece positions), move calculation, and time control. It has sub/helper classes like `MoveEngine`, `BoardManager`, and `PieceModel`, which are used only within the [`ChessEngine`](https://github.com/bberkay/chess/blob/main/client/src/Chess/Engine/ChessEngine.ts). Only the [`Logger`](https://github.com/bberkay/chess/blob/main/client/src/Services/Logger.ts) service is used externally.
-*   **[Platform](https://github.com/bberkay/chess/blob/main/client/src/Platform/Platform.ts)**  
+*   **[Platform](https://github.com/bberkay/chess/blob/main/client/src/Platform/Platform.ts)**
     Provides components aimed at enhancing the user experience by allowing the methods of the Chess class to be used in the interface. For example, the `NotationMenu` uses methods like `chess.takeForward` and `chess.takeBack` to view move history, or `BoardEditor` uses methods like `chess.createPiece` and `chess.removePiece` to create a board. Events triggered with [`PlatformEvent`](https://github.com/bberkay/chess/blob/main/client/src/Platform/Types/index.ts) can be listened to, and component IDs and other variables can be modified through [Consts](https://github.com/bberkay/chess/blob/main/client/src/Platform/Consts/index.ts).
     *   **[Components:](https://github.com/bberkay/chess/tree/main/client/src/Platform/Components)** Components derive from the [`Component`](https://github.com/bberkay/chess/blob/main/client/src/Platform/Components/Component.ts) class and are rendered in the index.html file using HTML, CSS, and JavaScript. Components can communicate with the Chess class but do not communicate with other classes, including each other. They may use services.
         *   **[NavbarComponents:](https://github.com/bberkay/chess/tree/main/client/src/Platform/Components/NavbarComponents)** A subcomponent type that derives from the [`NavbarComponent`](https://github.com/bberkay/chess/blob/main/client/src/Platform/Components/NavbarComponents/NavbarComponent.ts) class. These components are located under the [`navbar`](https://github.com/bberkay/chess/blob/main/client/src/Platform/Components/Navbar.ts) and differ from other classes only by being under the navbar.
@@ -79,13 +79,13 @@ Check out [ARCHITECTURE.md](https://github.com/bberkay/chess/blob/main/docs/ARCH
 
 ### Server
 
-*   **[Main](https://github.com/bberkay/chess/blob/main/server/src/main.ts)**  
+*   **[Main](https://github.com/bberkay/chess/blob/main/server/src/main.ts)**
     This is the main file on the server-side. It handles all HTTP and websocket requests. It has a copy of the [`ChessEngine`](https://github.com/bberkay/chess/tree/main/server/src/Chess) on the client-side to facilitate gameplay between players. Variables such as allowed origins and CORS headers can be modified via Consts.
     *   **[WsCommand:](https://github.com/bberkay/chess/blob/main/server/src/main.ts)** Like `ChessEngine`, this is a copy of `WsCommand` under `ChessPlatform` on the client-side.
 *   **[Managers](https://github.com/bberkay/chess/tree/main/server/src/Managers)**
     *   **[LobbyManager:](https://github.com/bberkay/chess/blob/main/server/src/Managers/LobbyManager.ts)** This is the main class responsible for managing lobbies, such as creating new lobbies, adding players to lobbies, and deleting lobbies that are no longer in use. It is only used by the main file and does not interact with any other class.
     *   **[SocketManager](https://github.com/bberkay/chess/blob/main/server/src/Managers/SocketManager.ts)**: Stores the sockets of users connected to a lobby according to lobby IDs and makes websocket connections accessible for both sides.
-*   **[Lobby](https://github.com/bberkay/chess/blob/main/server/src/Lobby/index.ts)**  
+*   **[Lobby](https://github.com/bberkay/chess/blob/main/server/src/Lobby/index.ts)**
     This class represents the lobby, hosts players, and enables gameplay using `ChessEngine`. Each lobby corresponds to a lobby instance. It does not interact with any other class.
 
 ![](https://raw.githubusercontent.com/bberkay/chess/refs/heads/main/docs/chess-platform-Server-Side-Architecture.png)
@@ -93,22 +93,22 @@ Check out [ARCHITECTURE.md](https://github.com/bberkay/chess/blob/main/docs/ARCH
 Installation
 ------------
 
-1.  Clone the repository.  
+1.  Clone the repository.
     `git clone https://github.com/bberkay/chess.git`
 2.  Server
-    1.  Go to the server directory.  
+    1.  Go to the server directory.
         `cd server`
-    2.  Install the dependencies.  
+    2.  Install the dependencies.
         `bun install`
-    3.  Run the server.  
+    3.  Run the server.
         `bun run src/main.ts`
 3.  Client
-    1.  Go to the client directory.  
+    1.  Go to the client directory.
         `cd client`
-    2.  Install the dependencies.  
+    2.  Install the dependencies.
         `bun install`
-    3.  Run the project with `bun run dev`  
-        or  
+    3.  Run the project with `bun run dev`
+        or
         Build the project and preview with `bun run build && bun run preview`
 
 Usage
@@ -335,12 +335,12 @@ Testing
 
 Chess Platform is tested with _Vitest_. Tests consist mostly of engine tests like **move calculation**, **move validation**, **checkmate**, **stalemate**, etc. Also, there are some tests for converting operations like **fen notation** to [`JsonNotation`](https://github.com/bberkay/chess/blob/main/client/src/Chess/Types/index.ts)
 
-All the tests can be run with the following command.  
-`bun run test`  
-  
-Or run a specific test with the following command.  
-`bun run test en-passant`  
-  
+All the tests can be run with the following command.
+`bun run test`
+
+Or run a specific test with the following command.
+`bun run test en-passant`
+
 All tests can be found in the [tests](https://github.com/bberkay/chess/tree/main/client/tests) directory.
 
 Epilogue
@@ -356,7 +356,7 @@ When I started the project, my goal was to practice, and I did. Maybe if I hadn'
 
 At the end of the day, I feel that I improved my JavaScript/TypeScript skills, and no matter how big or small the project is, I have experienced the kinds of issues that can arise from not defining the requirements/goals and ignoring the need to make a plan accordingly.
 
-If you have reviewed the project and noticed any areas that are missing, incorrect, or could be improved, please don't hesitate to reach out. [Contact](mailto:berkaykayaforbusiness@outlook.com) me, and thank you in advance for giving me the opportunity to improve myself
+If you have reviewed the project and noticed any areas that are missing, incorrect, or could be improved, please don't hesitate to reach out. [Contact](mailto:berkaykayaforbusiness@gmail.com) me, and thank you in advance for giving me the opportunity to improve myself
 
 Sources
 -------

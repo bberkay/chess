@@ -1,3 +1,12 @@
+/**
+ * @module BunServer
+ * @description Sets up and starts the Bun HTTP and WebSocket server with custom routing,
+ * request handling, and error management for the chess platform backend.
+ * @author Berkay Kaya <berkaykayaforbusiness@gmail.com> (https://bberkay.github.io)
+ * @url https://github.com/bberkay/chess
+ * @license MIT
+ */
+
 import type { Server } from "bun";
 import { MAX_IDLE_TIMEOUT, MAX_PAYLOAD_LENGTH, SERVER_PORT } from "./Consts";
 import {

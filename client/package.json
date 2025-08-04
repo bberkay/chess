@@ -1,7 +1,7 @@
 {
   "name": "chess-platform",
   "version": "1.0.0",
-  "author": "Berkay Kaya <berkaykayaforbusiness@outlook.com> (https://bberkay.github.io/)",
+  "author": "Berkay Kaya <berkaykayaforbusiness@gmail.com> (https://bberkay.github.io/)",
   "devDependencies": {
     "@eslint/js": "^9.32.0",
     "@types/bun": "^1.2.19",
