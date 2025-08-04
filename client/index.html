@@ -17,6 +17,9 @@
             border: 1px solid var(--border-color);
             padding: 10px;
             margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
 
             & a {
                 color: var(--link-color);
@@ -70,9 +73,10 @@
         <small>Please enable JavaScript in your browser settings to continue.</small>
     </div>
     <div id="demo-info" style="display: none;">
-        <b>⚓</b> This project is running on a free hosting service. To prevent potential
+        <div class="demo-info-icon">⚓</div>
+        <div class="demo-info-text">This project is running on a free hosting service. To prevent potential
         hosting-related performance issues, I recommend <a href="https://github.com/bberkay/chess?tab=readme-ov-file#installation" target="_blank">
-        cloning the repository and running it locally</a>.
+        cloning the repository and running it locally</a>.</div>
     </div>
     <main>
         <div class="left">
@@ -107,7 +111,7 @@
 
         const IS_DEMO_APP = true;
         if (IS_DEMO_APP) {
-            document.getElementById("demo-info").style.display = "block";
+            document.getElementById("demo-info").style.display = "flex";
         }
 
         const chessPlatform = new ChessPlatform();

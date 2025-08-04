@@ -126,7 +126,7 @@
 }
 
 @media only screen and (hover: none) and (pointer: coarse) {
-    :root{
+    :root {
         --king-icon-dark: url("../assets/images/mobile/king-icon-dark.png");
         --king-icon-light: url("../assets/images/mobile/king-icon-light.png");
     }
@@ -286,10 +286,6 @@ main {
     width: 100%;
     justify-content: center;
 
-    & .left {
-        margin-left: -5%;
-    }
-
     & .center {
         position: relative;
     }
@@ -346,7 +342,7 @@ main {
 
 #board-creator-mobile-loading-container,
 #board-creator-tablet-loading-container {
-    display:none;
+    display: none;
 }
 
 #notation-menu,
@@ -354,7 +350,7 @@ main {
     margin-left: 0.5rem;
 }
 
-#notation-menu{
+#notation-menu {
     height: var(--component-height);
     min-width: var(--notation-table-width);
     /*outline:1px solid blue;*/
@@ -367,10 +363,9 @@ main {
     /*outline:1px solid green;*/
 }
 
-.left > div:not(#navbar):has(div){
+.left > div:not(#navbar):has(div) {
     height: calc(var(--component-height) + 5px);
     width: var(--navbar-component-width);
-    min-width: var(--navbar-component-width);
     /*outline:1px solid red;*/
 }
 
@@ -378,7 +373,15 @@ main {
  * ------------------ Responsive -------------------
  *             700px - 900px - 1250px
  */
- @media screen and (min-width: 900px) and (max-width: 1250px) {
+@media screen and (min-width: 1250px) {
+    main {
+        & .left {
+            margin-left: -5%;
+        }
+    }
+}
+
+@media screen and (min-width: 900px) and (max-width: 1250px) {
     main {
         padding: 1rem;
         margin-top: 0;
@@ -428,7 +431,7 @@ main {
 
         & #board-creator,
         & #board-creator-mobile-loading-container {
-            display:none;
+            display: none;
         }
 
         & #board-creator:has(div),
@@ -438,26 +441,12 @@ main {
     }
 }
 
-@media screen and (min-width: 700px) and (max-width: 900px) {
-    main {
-        padding: 1.75rem;
-        margin-right: 0;
-    }
-
-    #navbar {
-        width: calc(100% - 8px);
-    }
-
-    & .left > div:not(#navbar):has(div) {
-        max-width: 100%;
-    }
-}
-
 @media screen and (max-width: 900px) {
     main {
         margin-top: 0rem;
         flex-direction: column;
-        width: 100%;
+        padding: 1rem;
+        width: auto;
     }
 
     #board-creator,
@@ -492,15 +481,15 @@ main {
         width: 100%;
     }
 
-    #piece-creator{
+    #piece-creator {
         height: auto !important;
     }
 
-    #notation-menu{
+    #notation-menu {
         height: calc(var(--notation-table-height) + 135px);
     }
 
-    .player-section-mobile-loading-container{
+    .player-section-mobile-loading-container {
         height: 55px;
         /*outline: 1px solid orange;*/
     }
@@ -520,7 +509,12 @@ main {
 }
 
 @media screen and (max-width: 700px) {
-    .player-section-mobile-loading-container{
+    main {
+        padding: 0rem;
+        width: 100%;
+    }
+
+    .player-section-mobile-loading-container {
         height: 75px;
         /*outline: 1px solid orange;*/
     }
