@@ -1,26 +1,46 @@
 /**
- * Create a random id that consist of numbers with the
- * given length
+ * Get factorial of the given number.
+ */
+export function fact(n: number): number {
+    let res = 1;
+    for (let i = 1; i <= n; i++) {
+        res *= i;
+    }
+    return res;
+}
+
+/**
+ * Generates a random numeric ID string of the specified length.
+ * Ensures the generated ID is not in the `notThis` list, retrying if needed.
  */
 export function createRandomId(
     length: number,
-    notThis: string | string[] | null = null
+    notThis: string | string[] | null = null,
 ): string {
-    let result = "";
+    const MAX_RETRY = fact(length);
     const characters = "0123456789";
-    for (let i = 0; i < length; i++) {
-        result += characters.charAt(
-            Math.floor(Math.random() * characters.length)
-        );
+    notThis = typeof notThis === "string" ? [notThis] : notThis;
+
+    const create = () => {
+        let result: string = "";
+        for (let i = 0; i < length; i++) {
+            result += characters.charAt(
+                Math.floor(Math.random() * characters.length)
+            );
+        }
+        return result;
     }
 
-    if (notThis) {
-        if (typeof notThis === "string") notThis = [notThis];
-
-        if (notThis.includes(result)) return createRandomId(length, notThis);
+    for (let i = 1; i <= MAX_RETRY; i++) {
+        const randId = create();
+        if (!notThis || !notThis.includes(randId)) {
+            return randId;
+        }
     }
 
-    return result;
+    throw new Error(
+        `Failed to generate a unique ID of length ${length} after ${MAX_RETRY} attempts.`
+    );
 }
 
 /**
