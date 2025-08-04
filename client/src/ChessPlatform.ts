@@ -20,31 +20,34 @@ import {
 } from "@Platform/Consts";
 import { PlatformEvent } from "@Platform/Types";
 import type {
-    CreateLobbyReqParams,
-    Player,
-    WsData,
     WsConnectedData,
     WsDisconnectedData,
     WsErrorData,
     WsMovedData,
     WsReconnectedData,
     WsStartedData,
-    JoinLobbyReqParams,
-    ReconnectLobbyReqParams,
     WsFinishedData,
     WsResignedData,
     WsUndoData,
-    WsCreatedData
+    WsIncomingMessage,
+    WsOutgoingMessage,
+    Player,
 } from "./Types";
 import {
     RECONNECTION_ATTEMPT_LIMIT,
     RECONNECTION_TIMEOUT,
-    SERVER_ADDRESS,
     WS_ADDRESS,
-    WS_ENDPOINT_MAX_LENGTH,
 } from "./Consts";
 import { SocketEvent, SocketOperation, WsTitle } from "./Types";
 import { Page } from "@Global/Page";
+import {
+    ApiService,
+    GetQueryParams,
+    GetRoutes,
+    PostBody,
+    PostRoutes,
+} from "./Services/ApiService";
+import { createURLFromEntries, getPathSegment, getQueryParam } from "./Utils/Url";
 
 /**
  * `ChessPlatform` is the main class of the app. It provides the connections
@@ -56,12 +59,6 @@ export class ChessPlatform {
     public readonly platform: Platform;
     public readonly logger: Logger = new Logger("src/ChessPlatform.ts");
 
-    private _onOpen: (() => void) | null = null;
-    private _onMessage: (<T extends WsTitle>(wsTitle: T, wsData: WsData<T>) => void) |
-        null = null;
-    private _onError: (() => void) | null = null;
-    private _onClose: (() => void) | null = null;
-
     private socket: WebSocket | null = null;
     private reconnectionAttemptRemaining: number = RECONNECTION_ATTEMPT_LIMIT;
 
@@ -70,8 +67,8 @@ export class ChessPlatform {
      */
     constructor() {
         Page.initEventListeners();
-        this.chess = new Chess();
-        this.platform = new Platform(this.chess);
+        this.chess = new Chess(new Logger("src/Chess/Chess.ts").save);
+        this.platform = new Platform(this.chess, new Logger("src/Platform/Platform.ts").save);
         this.init();
     }
 
@@ -94,11 +91,11 @@ export class ChessPlatform {
                 });
 
             document.addEventListener(PlatformEvent.onOperationMounted, ((
-                event: CustomEvent
+                event: CustomEvent,
             ) => {
                 if (typeof event.detail.selector === "string") {
                     const socketOperations = document.querySelectorAll(
-                        `${event.detail.selector} [data-socket-operation]`
+                        `${event.detail.selector} [data-socket-operation]`,
                     );
                     if (!socketOperations) return;
                     socketOperations.forEach((menuItem) => {
@@ -109,13 +106,13 @@ export class ChessPlatform {
                 } else if (event.detail.selector instanceof HTMLElement) {
                     if (
                         !event.detail.selector.hasAttribute(
-                            "data-socket-operation"
+                            "data-socket-operation",
                         )
                     )
                         return;
                     event.detail.selector.addEventListener("click", () => {
                         this.handleSocketOperation(
-                            event.detail.selector as HTMLElement
+                            event.detail.selector as HTMLElement,
                         );
                     });
                 }
@@ -128,22 +125,24 @@ export class ChessPlatform {
          * Connect to the last connection if exists.
          */
         const connectToLastConnectionOrLobbyUrl = async () => {
-            const lsLobbyId = Store.load(
-                StoreKey.LastLobbyConnection
-            )?.lobbyId;
             const urlLobbyId = Page.getEndpoint();
-            const lobbyId = urlLobbyId || lsLobbyId;
+            const storedLobbyId = Store.load(
+                StoreKey.LastLobbyConnection,
+            )?.lobbyId;
+            const lobbyId = urlLobbyId || storedLobbyId;
             if (!lobbyId) return;
 
-            const isLobbyIdValid = await this.checkLobbyId(
-                lobbyId,
-                urlLobbyId !== null
+            const isLobbyIdValid = await this.checkLobby(
+                { pathParams: { lobbyId } },
+                urlLobbyId !== null,
             );
             if (!isLobbyIdValid) return;
 
-            if (!lsLobbyId || lsLobbyId !== lobbyId) {
+            if (!storedLobbyId || storedLobbyId !== lobbyId) {
                 this.platform.navigatorModal.showJoinLobby();
-            } else this._reconnectLobby();
+            } else {
+                this._reconnectLobby();
+            }
         };
 
         /**
@@ -170,11 +169,11 @@ export class ChessPlatform {
             }) as EventListener);
 
             document.addEventListener(ChessEvent.onPieceMovedByPlayer, ((
-                event: CustomEvent
+                event: CustomEvent,
             ) => {
                 if (!this.socket) return;
                 const { from, to } = event.detail;
-                this.socket?.send(WsCommand.moved({ from, to }));
+                this.socket?.send(WsCommand.create([WsTitle.Moved, { from, to }]));
             }) as EventListener);
         };
 
@@ -192,7 +191,7 @@ export class ChessPlatform {
      */
     private handleSocketOperation(socketOperationItem: HTMLElement): void {
         const operation = socketOperationItem.getAttribute(
-            "data-socket-operation"
+            "data-socket-operation",
         ) as SocketOperation;
         if (
             operation != SocketOperation.CancelLobby &&
@@ -205,7 +204,7 @@ export class ChessPlatform {
                 this._createLobby();
                 break;
             case SocketOperation.JoinLobby:
-                this._joinLobby();
+                this._connectLobby();
                 break;
             case SocketOperation.CancelLobby:
                 this.cancelLobby();
@@ -234,8 +233,8 @@ export class ChessPlatform {
             case SocketOperation.AcceptPlayAgainOffer:
                 this.acceptPlayAgainOffer();
                 break;
-            case SocketOperation.DeclineSentOffer:
-                this.declineSentOffer();
+            case SocketOperation.DeclineOffer:
+                this.declineOffer();
                 break;
             case SocketOperation.CancelOffer:
                 this.cancelOffer();
@@ -244,70 +243,81 @@ export class ChessPlatform {
     }
 
     /**
-     * Add custom callbacks to the WebSocket events. Does not
-     * override the default callbacks.
-     */
-    public bindSocketOperationCallbacks(
-        onOpen: (() => void) | null = null,
-        onMessage: (<T extends WsTitle>(wsTitle: T, wsData: WsData<T>) => void) | null = null,
-        onError: (() => void) | null = null,
-        onClose: (() => void) | null = null
-    ): void {
-        this._onOpen = onOpen;
-        this._onMessage = onMessage;
-        this._onError = onError;
-        this._onClose = onClose;
-    }
-
-    /**
      * Check the lobby id from the URL and return it if it exists
      * and is valid.
      */
-    private async checkLobbyId(
-        lobbyId: string,
-        showAsError: boolean = true
-    ): Promise<string | null> {
+    private async checkLobby(
+        checkLobbyReqParams: GetQueryParams[GetRoutes.CHECK_LOBBY],
+        showAsError: boolean = true,
+    ): Promise<boolean> {
         try {
             this.platform.navigatorModal.showLoading(
-                "Checking the lobby id. Please wait..."
+                "Checking the lobby id. Please wait...",
             );
-            const response = await fetch(
-                SERVER_ADDRESS + "?lobbyId=" + lobbyId
+            const response = await ApiService.get(
+                GetRoutes.CHECK_LOBBY,
+                checkLobbyReqParams,
             );
             this.platform.navigatorModal.hide();
-            if (!response.ok) {
+            if (!response.success) {
                 this.terminateConnection();
-                const error = await response.text();
-                if (showAsError) this.platform.navigatorModal.showError(error);
-                return null;
+                if (showAsError)
+                    this.platform.navigatorModal.showError(response.message);
             }
+            return response.success;
         } catch (error: unknown) {
             this.platform.navigatorModal.hide();
             this.terminateConnection();
             if (showAsError)
                 this.platform.navigatorModal.showError(
                     "An error occurred while checking the lobby id: " +
-                        (error as Error).message
+                        (error as Error).message,
                 );
-            return null;
+            return false;
         }
-
-        return lobbyId;
     }
 
     /**
-     * Establishes a WebSocket connection for creating a new lobby.
+     * Establishes a WebSocket connection for creating a new
+     * lobby.
+     *
+     * Parse the data, show the lobby info modal,
+     * lobby id on the url and save the last connection
+     * to the local storage.
      */
-    public createLobby(createLobbyReqParams: CreateLobbyReqParams): void {
+    public async createLobby(
+        createLobbyReqParams: PostBody[PostRoutes.CREATE_LOBBY],
+    ): Promise<void> {
         this.platform.navigatorModal.showLoading(
-            "Creating a new lobby. Please wait the server to respond..."
+            "Creating a new lobby. Please wait the server to respond...",
         );
-
-        this.createAndHandleWebSocket(
-            new URLSearchParams(Object.entries(createLobbyReqParams)).toString()
-        );
-
         document.dispatchEvent(new Event(SocketEvent.onCreatingLobby));
+
+        const response = await ApiService.post(
+            PostRoutes.CREATE_LOBBY,
+            createLobbyReqParams,
+        );
+        if (response.success && response.data) {
+            const { lobbyId, player } = response.data;
+            this.platform.navigatorModal.showLobbyInfo(
+                window.location.origin + "/" + lobbyId,
+            );
+
+            Store.save(StoreKey.LastLobbyConnection, response.data);
+            Store.save(StoreKey.LastPlayerName, player.name);
+            document.dispatchEvent(
+                new CustomEvent(SocketEvent.onLobbyCreated, {
+                    detail: { lobbyId },
+                }),
+            );
+            this.logger.save(
+                `Lobby created and connected-ts-${lobbyId}-te- as ${player.name}.`,
+            );
+
+            this.createAndHandleWebSocket(lobbyId, player);
+        } else {
+            this.platform.navigatorModal.showError(response.message);
+        }
     }
 
     /**
@@ -320,71 +330,90 @@ export class ChessPlatform {
         this.createLobby({
             name: playerName || DEFULT_PLAYER_NAME,
             board:
-                Store.load(StoreKey.LastCreatedBoard) ||
-                StartPosition.Standard,
-            remaining: (duration.remaining || DEFAULT_TOTAL_TIME).toString(),
-            increment: (
-                duration.increment || DEFAULT_INCREMENT_TIME
-            ).toString(),
-        } as CreateLobbyReqParams);
+                Store.load(StoreKey.LastCreatedBoard) || StartPosition.Standard,
+            remaining: duration.remaining || DEFAULT_TOTAL_TIME,
+            increment: duration.increment || DEFAULT_INCREMENT_TIME,
+        });
     }
 
     /**
      * Establishes a WebSocket connection for joining an existing lobby.
      */
-    public joinLobby(joinLobbyReqParams: JoinLobbyReqParams): void {
+    public async connectLobby(
+        connectLobbyReqParams: PostBody[PostRoutes.CONNECT_LOBBY],
+    ): Promise<void> {
         this.platform.navigatorModal.showLoading(
-            "Joining the lobby. Please wait the server to respond..."
+            "Joining the lobby. Please wait the server to respond...",
         );
-
-        this.createAndHandleWebSocket(
-            new URLSearchParams(Object.entries(joinLobbyReqParams)).toString()
-        );
-
         document.dispatchEvent(
             new CustomEvent(SocketEvent.onJoiningLobby, {
-                detail: { lobbyId: joinLobbyReqParams.lobbyId },
-            })
+                detail: { lobbyId: connectLobbyReqParams.lobbyId },
+            }),
         );
+        const response = await ApiService.post(
+            PostRoutes.CONNECT_LOBBY,
+            connectLobbyReqParams,
+        );
+        if (response.success && response.data) {
+            const { lobbyId, player } = response.data;
+
+            Store.save(StoreKey.LastLobbyConnection, response.data);
+            Store.save(StoreKey.LastPlayerName, player.name);
+            document.dispatchEvent(new Event(SocketEvent.onLobbyJoined));
+            this.logger.save(
+                `Connected to the lobby-ts-${lobbyId}-te- as ${player.name}.`,
+            );
+
+            this.createAndHandleWebSocket(lobbyId, player);
+        }
     }
 
     /**
      * Connect to the lobby with the given lobby id and player name
      * that entered by the user using the platform components.
      */
-    private _joinLobby(): void {
+    private _connectLobby(): void {
         const lobbyId = Page.getEndpoint();
         if (!lobbyId) return;
 
         const playerName = this.platform.navigatorModal.getEnteredPlayerName();
-        this.joinLobby({
+        this.connectLobby({
             name: playerName || DEFULT_PLAYER_NAME,
             lobbyId: lobbyId,
-        } as JoinLobbyReqParams);
+        });
     }
 
     /**
      * Establishes a WebSocket connection to reconnect to a previously joined lobby.
      * It uses the saved lobby ID and user token to restore the connection.
      */
-    private reconnectLobby(
-        reconnectLobbyReqParams: ReconnectLobbyReqParams
-    ): void {
+    private async reconnectLobby(
+        reconnectLobbyReqParams: PostBody[PostRoutes.RECONNECT_LOBBY],
+    ): Promise<void> {
         this.platform.navigatorModal.showLoading(
-            "Reconnecting to the lobby. Please wait the server to respond..."
+            "Reconnecting to the lobby. Please wait the server to respond...",
         );
-
-        this.createAndHandleWebSocket(
-            new URLSearchParams(
-                Object.entries(reconnectLobbyReqParams)
-            ).toString()
-        );
-
         document.dispatchEvent(
             new CustomEvent(SocketEvent.onJoiningLobby, {
-                detail: { lobbyId: reconnectLobbyReqParams.lobbyId }
-            })
+                detail: { lobbyId: reconnectLobbyReqParams.lobbyId },
+            }),
         );
+        const response = await ApiService.post(
+            PostRoutes.RECONNECT_LOBBY,
+            reconnectLobbyReqParams,
+        );
+        if (response.success && response.data) {
+            const { lobbyId, player } = response.data;
+
+            Store.save(StoreKey.LastLobbyConnection, response.data);
+            Store.save(StoreKey.LastPlayerName, player.name);
+            document.dispatchEvent(new Event(SocketEvent.onLobbyJoined));
+            this.logger.save(
+                `Reconnected to the lobby-ts-${lobbyId}-te- as ${player.name}.`,
+            );
+
+            this.createAndHandleWebSocket(lobbyId, player);
+        }
     }
 
     /**
@@ -393,13 +422,11 @@ export class ChessPlatform {
     private _reconnectLobby(): void {
         if (!Store.isExist(StoreKey.LastLobbyConnection)) return;
 
-        const lastLobbyConnection = Store.load(
-            StoreKey.LastLobbyConnection
-        ) as WsCreatedData;
+        const lastLobbyConnection = Store.load(StoreKey.LastLobbyConnection)!;
         this.reconnectLobby({
             lobbyId: lastLobbyConnection.lobbyId,
-            token: lastLobbyConnection.player.token,
-        } as ReconnectLobbyReqParams);
+            playerToken: lastLobbyConnection.player.token,
+        });
     }
 
     /**
@@ -418,14 +445,14 @@ export class ChessPlatform {
      * Abort the game and send the abort command to the server.
      */
     public abortGame(): void {
-        this.socket?.send(WsCommand.aborted());
+        this.socket?.send(WsCommand.create([WsTitle.Aborted]));
     }
 
     /**
      * Resign the game and send the resign command to the server.
      */
     public resign(): void {
-        this.socket?.send(WsCommand.resigned());
+        this.socket?.send(WsCommand.create([WsTitle.Resigned]));
     }
 
     /**
@@ -434,7 +461,7 @@ export class ChessPlatform {
     public sendPlayAgainOffer(): void {
         this.platform.navigatorModal.hide();
         this.platform.notationMenu.showPlayAgainSentFeedback();
-        this.socket?.send(WsCommand.playAgainOffered());
+        this.socket?.send(WsCommand.create([WsTitle.PlayAgainOffered]));
     }
 
     /**
@@ -442,7 +469,7 @@ export class ChessPlatform {
      */
     public sendDrawOffer(): void {
         this.platform.notationMenu.showDrawOfferSentFeedback();
-        this.socket?.send(WsCommand.drawOffered());
+        this.socket?.send(WsCommand.create([WsTitle.DrawOffered]));
     }
 
     /**
@@ -450,28 +477,28 @@ export class ChessPlatform {
      */
     public sendUndoOffer(): void {
         this.platform.notationMenu.showUndoOfferSentFeedback();
-        this.socket?.send(WsCommand.undoOffered());
+        this.socket?.send(WsCommand.create([WsTitle.UndoOffered]));
     }
 
     /**
      * Accept the draw offer from the opponent.
      */
     public acceptDrawOffer(): void {
-        this.socket?.send(WsCommand.drawAccepted());
+        this.socket?.send(WsCommand.create([WsTitle.DrawAccepted]));
     }
 
     /**
      * Accept the play again offer from the opponent.
      */
     public acceptPlayAgainOffer(): void {
-        this.socket?.send(WsCommand.playAgainAccepted());
+        this.socket?.send(WsCommand.create([WsTitle.PlayAgainAccepted]));
     }
 
     /**
      * Accept the undo move offer from the opponent.
      */
     public acceptUndoOffer(): void {
-        this.socket?.send(WsCommand.undoAccepted());
+        this.socket?.send(WsCommand.create([WsTitle.UndoAccepted]));
         this.platform.notationMenu.goBack();
     }
 
@@ -479,15 +506,15 @@ export class ChessPlatform {
      * Cancel the offer that sent to the opponent.
      */
     public cancelOffer(): void {
-        this.socket?.send(WsCommand.offerCanceled());
+        this.socket?.send(WsCommand.create([WsTitle.OfferCancelled]));
         this.platform.notationMenu.goBack();
     }
 
     /**
      * Decline the sent offer from the opponent.
      */
-    public declineSentOffer(): void {
-        this.socket?.send(WsCommand.sentOfferDeclined());
+    public declineOffer(): void {
+        this.socket?.send(WsCommand.create([WsTitle.OfferDeclined]));
         this.platform.notationMenu.goBack();
     }
 
@@ -518,90 +545,63 @@ export class ChessPlatform {
     }
 
     /**
-     * Resynchronize the game due to the mismatched status
-     * between the client and server. This function recreates
-     * the websocket connection and displays an error message
-     * about the mismatched status.
-     */
-    private resyncGameDueToMismatchedStatus(webSocketEndpoint: string): void {
-        this.createAndHandleWebSocket(webSocketEndpoint);
-        this.platform.navigatorModal.showError(
-            "Unexpected game status. Game status is not equal to the server's game status. The game created again according to the server's game status."
-        );
-    }
-
-    /**
      * Handle the websocket socket connection and listen the
      * messages from the server.
      */
-    private createAndHandleWebSocket(webSocketEndpoint: string): void {
-        if (webSocketEndpoint.length > Number(WS_ENDPOINT_MAX_LENGTH))
-            throw new Error("The WebSocket URL is too long.");
+    private createAndHandleWebSocket(lobbyId: string, player: Player): void {
+        const createWebSocketUrl = (lobbyId: string, playerToken: string) => {
+            return createURLFromEntries(
+                WS_ADDRESS,
+                lobbyId,
+                { playerToken }
+            )
+        }
 
         if (this.socket) {
             this.socket.onclose = () => {
                 this.socket = null;
-                this.createAndHandleWebSocket(webSocketEndpoint);
+                this.createAndHandleWebSocket(lobbyId, player);
             };
             this.socket.close();
             return;
         }
 
-        const webSocketUrl =
-            WS_ADDRESS + (webSocketEndpoint ? "?" + webSocketEndpoint : "");
-        //console.log("WebSocket URL:", webSocketUrl);
+        const webSocketUrl = createWebSocketUrl(lobbyId, player.token);
+        console.log("WebSocket URL:", webSocketUrl);
         this.socket = new WebSocket(webSocketUrl);
 
-        let player: Player | null = null;
         let shouldTerminateConnectionOnClose = false;
 
         /**
          * Handle the WebSocket connection events.
          */
         this.socket.onopen = () => {
-            player = null;
             shouldTerminateConnectionOnClose = false;
             this.reconnectionAttemptRemaining = RECONNECTION_ATTEMPT_LIMIT;
             this.platform.navigatorModal.hide();
-            if (this._onOpen !== null) this._onOpen();
         };
 
         this.socket.onmessage = (event) => {
             //console.log("message:", event.data);
             const [wsTitle, wsData] = WsCommand.parse(event.data);
             switch (wsTitle) {
-                case WsTitle.Created:
-                    ({ player } = this._handleCreatedCommand(
-                        wsData as WsCreatedData
-                    ));
-                    break;
                 case WsTitle.Connected:
-                    ({ player } = this._handleConnectedCommand(
-                        wsData as WsConnectedData
-                    ));
+                    this._handleConnectedCommand(wsData);
                     break;
                 case WsTitle.Disconnected:
-                    this._handleDisconnectedCommand(
-                        wsData as WsDisconnectedData
-                    );
+                    this._handleDisconnectedCommand(wsData);
                     break;
                 case WsTitle.Reconnected:
-                    this._handleReconnectedCommand(wsData as WsReconnectedData);
+                    this._handleReconnectedCommand(wsData);
                     break;
                 case WsTitle.Started:
-                    this._handleStartedCommand(
-                        wsData as WsStartedData,
-                        player!
-                    );
+                    this._handleStartedCommand(wsData, player);
                     break;
                 case WsTitle.Moved:
-                    this._handleMovedCommand(wsData as WsMovedData);
+                    this._handleMovedCommand(wsData);
                     break;
                 case WsTitle.Finished:
-                    this._handleFinishedCommand(
-                        wsData as WsFinishedData,
-                        webSocketEndpoint
-                    );
+                    this._handleFinishedCommand(wsData);
                     shouldTerminateConnectionOnClose = true;
                     break;
                 case WsTitle.Aborted:
@@ -609,7 +609,7 @@ export class ChessPlatform {
                     shouldTerminateConnectionOnClose = true;
                     break;
                 case WsTitle.Resigned:
-                    this._handleResignedCommand(wsData as WsResignedData);
+                    this._handleResignedCommand(wsData);
                     shouldTerminateConnectionOnClose = true;
                     break;
                 case WsTitle.DrawOffered:
@@ -623,25 +623,18 @@ export class ChessPlatform {
                     this._handleUndoOfferedCommand();
                     break;
                 case WsTitle.UndoAccepted:
-                    this._handleUndoAcceptedCommand(
-                        wsData as WsUndoData,
-                        webSocketEndpoint
-                    );
+                    this._handleUndoAcceptedCommand(wsData);
                     break;
                 case WsTitle.PlayAgainOffered:
                     this._handlePlayAgainOfferedCommand();
                     break;
                 case WsTitle.PlayAgainAccepted:
-                    this._handlePlayAgainAcceptedCommand(
-                        wsData as WsStartedData,
-                        player!
-                    );
                     break;
-                case WsTitle.SentOfferDeclined:
-                    this._handleSentOfferDeclinedCommand();
+                case WsTitle.OfferCancelled:
+                    this._handleOfferCancelledCommand();
                     break;
-                case WsTitle.SentOfferCancelled:
-                    this._handleSentOfferCancelledCommand();
+                case WsTitle.OfferDeclined:
+                    this._handleOfferDeclinedCommand();
                     break;
                 case WsTitle.Error:
                     this._handleErrorCommand(wsData as WsErrorData);
@@ -649,114 +642,84 @@ export class ChessPlatform {
                 default:
                     throw new Error("Invalid WebSocket command.");
             }
-
-            if (this._onMessage !== null) this._onMessage(wsTitle, wsData);
         };
 
         this.socket.onerror = () => {
             this.platform.navigatorModal.showError(
                 `An error occurred on the WebSocket connection. Retrying in <span id='reconnection-counter'></span> seconds...`,
-                false
+                false,
             );
             this.logger.save(
-                "An error occurred on the WebSocket connection. Retrying..."
+                "An error occurred on the WebSocket connection. Retrying...",
             );
 
             let remainingTime = RECONNECTION_TIMEOUT;
             const reconnectionTimeout = document.getElementById(
-                "reconnection-counter"
+                "reconnection-counter",
             );
-            if (reconnectionTimeout) {
-                const interval = window.setInterval(() => {
-                    if (remainingTime === 0 || !reconnectionTimeout) {
-                        reconnectionTimeout.innerText = "Reconnecting...";
-                        clearInterval(interval);
-                        remainingTime = RECONNECTION_TIMEOUT;
-                        const timeout = window.setTimeout(() => {
-                            this.platform.navigatorModal.hide();
-                            if (this.reconnectionAttemptRemaining > 0) {
-                                this.reconnectionAttemptRemaining--;
-                                this.createAndHandleWebSocket(
-                                    webSocketEndpoint
-                                );
-                            } else {
-                                this.platform.navigatorModal.showError(
-                                    "There is a problem with the WebSocket connection. Please try again later."
-                                );
-                                this.logger.save(
-                                    "There is a problem with the WebSocket connection. Please try again later."
-                                );
-                                this.terminateConnection();
-                                if (this._onError !== null) this._onError();
-                            }
-                            clearTimeout(timeout);
-                        }, RECONNECTION_TIMEOUT);
-                    }
-                    reconnectionTimeout.innerText = remainingTime.toString();
-                    remainingTime -= 1;
-                }, 1000);
-            }
+            if (!reconnectionTimeout) return;
+            const interval = window.setInterval(() => {
+                if (remainingTime === 0) {
+                    reconnectionTimeout.innerText = "Reconnecting...";
+                    remainingTime = RECONNECTION_TIMEOUT;
+                    clearInterval(interval);
+                    const timeout = window.setTimeout(() => {
+                        this.platform.navigatorModal.hide();
+                        if (this.reconnectionAttemptRemaining > 0) {
+                            this.reconnectionAttemptRemaining--;
+                            this.createAndHandleWebSocket(
+                                lobbyId, player
+                            );
+                        } else {
+                            this.platform.navigatorModal.showError(
+                                "There is a problem with the WebSocket connection. Please try again later.",
+                            );
+                            this.logger.save(
+                                "There is a problem with the WebSocket connection. Please try again later.",
+                            );
+                            this.terminateConnection();
+                        }
+                        clearTimeout(timeout);
+                    }, RECONNECTION_TIMEOUT);
+                }
+                reconnectionTimeout.innerText = remainingTime.toString();
+                remainingTime -= 1;
+            }, 1000);
         };
 
         this.socket.onclose = () => {
             if (shouldTerminateConnectionOnClose) {
                 this.terminateConnection();
                 shouldTerminateConnectionOnClose = false;
-                if (this._onClose !== null) this._onClose();
             }
         };
     }
 
     /**
-     * Handle the WsTitle.Created command
-     * that is received from the server.
-     *
-     * Parse the data, show the lobby info modal,
-     * lobby id on the url and save the last connection
-     * to the local storage.
+     * Resynchronize the game due to the mismatched status
+     * between the client and server. This function recreates
+     * the websocket connection and displays an error message
+     * about the mismatched status.
      */
-    private _handleCreatedCommand(wsCreatedData: WsCreatedData): {
-        lobbyId: string;
-        player: Player;
-    } {
-        const { lobbyId, player } = wsCreatedData;
-        this.platform.navigatorModal.showLobbyInfo(
-            window.location.origin + "/" + lobbyId
+    private resyncGameDueToMismatchedStatus(): void {
+        if (!this.socket) return;
+        this.reconnectLobby({
+            lobbyId: getPathSegment(this.socket.url) || "",
+            playerToken: getQueryParam(this.socket.url, "playerToken") || ""
+        });
+        this.platform.navigatorModal.showError(
+            "Unexpected game status. Game status is not equal to the server's game status. The game created again according to the server's game status.",
         );
-
-        Store.save(StoreKey.LastLobbyConnection, wsCreatedData);
-        Store.save(StoreKey.LastPlayerName, player.name);
-        document.dispatchEvent(
-            new CustomEvent(SocketEvent.onLobbyCreated, {
-                detail: { lobbyId },
-            })
-        );
-        this.logger.save(
-            `Lobby created and connected-ts-${lobbyId}-te- as ${player.name}.`
-        );
-        return { lobbyId, player };
     }
 
     /**
      * Handle the WsTitle.Connected command
      * that is received from the server.
      *
-     * Parse the data, show the lobby info modal,
-     * lobby id on the url and save the last connection
-     * to the local storage.
+     * Get the player.
      */
-    private _handleConnectedCommand(wsConnectedData: WsConnectedData): {
-        lobbyId: string;
-        player: Player;
-    } {
-        const { lobbyId, player } = wsConnectedData;
-        Store.save(StoreKey.LastLobbyConnection, wsConnectedData);
-        Store.save(StoreKey.LastPlayerName, player.name);
-        document.dispatchEvent(new Event(SocketEvent.onLobbyJoined));
-        this.logger.save(
-            `Connected to the lobby-ts-${lobbyId}-te- as ${player.name}.`
-        );
-        return { lobbyId, player };
+    private _handleConnectedCommand(wsConnectedData: WsConnectedData): WsConnectedData {
+        return wsConnectedData;
     }
 
     /**
@@ -766,10 +729,10 @@ export class ChessPlatform {
      * Update the player as offline on the notation menu.
      */
     private _handleDisconnectedCommand(
-        wsDisconnectedData: WsDisconnectedData
+        wsDisconnectedData: WsDisconnectedData,
     ): void {
         this.platform.notationMenu.updatePlayerAsOffline(
-            wsDisconnectedData.color
+            wsDisconnectedData.color,
         );
     }
 
@@ -780,10 +743,10 @@ export class ChessPlatform {
      * Update the player as online on the notation menu.
      */
     private _handleReconnectedCommand(
-        wsReconnectedData: WsReconnectedData
+        wsReconnectedData: WsReconnectedData,
     ): void {
         this.platform.notationMenu.updatePlayerAsOnline(
-            wsReconnectedData.color
+            wsReconnectedData.color,
         );
     }
 
@@ -798,13 +761,15 @@ export class ChessPlatform {
      */
     private _handleStartedCommand(
         wsStartedData: WsStartedData,
-        player: Player
+        player: Player,
     ): void {
-        const playerColor =
-            wsStartedData.whitePlayer.id === player!.id
-                ? Color.White
-                : Color.Black;
-        this.platform.preparePlatformForOnlineGame(wsStartedData, playerColor);
+        const playerColor = wsStartedData.players.White.id === player.id
+            ? Color.White
+            : Color.Black
+        this.platform.preparePlatformForOnlineGame(
+            wsStartedData,
+            playerColor
+        );
     }
 
     /**
@@ -821,7 +786,7 @@ export class ChessPlatform {
         document.dispatchEvent(
             new CustomEvent(ChessEvent.onPieceMovedByOpponent, {
                 detail: wsMovedData,
-            })
+            }),
         );
     }
 
@@ -833,12 +798,9 @@ export class ChessPlatform {
      * game if there is a mismatched status between
      * the client and server.
      */
-    private _handleFinishedCommand(
-        wsFinishedData: WsFinishedData,
-        webSocketEndpoint: string
-    ): void {
+    private _handleFinishedCommand(wsFinishedData: WsFinishedData): void {
         if (this.chess.getGameStatus() !== wsFinishedData.gameStatus)
-            this.resyncGameDueToMismatchedStatus(webSocketEndpoint);
+            this.resyncGameDueToMismatchedStatus();
     }
 
     /**
@@ -868,7 +830,7 @@ export class ChessPlatform {
         this.platform.navigatorModal.showGameOverAsResigned(
             wsResignedData.gameStatus === GameStatus.WhiteVictory
                 ? Color.Black
-                : Color.White
+                : Color.White,
         );
     }
 
@@ -891,14 +853,11 @@ export class ChessPlatform {
      * mismatched status between the client and server
      * after the undo, resynchronize the game.
      */
-    private _handleUndoAcceptedCommand(
-        wsUndoData: WsUndoData,
-        webSocketEndpoint: string
-    ): void {
+    private _handleUndoAcceptedCommand(wsUndoData: WsUndoData): void {
         this.platform.notationMenu.goBack();
         this.chess.takeBack(true, wsUndoData.undoColor);
         if (wsUndoData.board !== this.chess.getGameAsFenNotation())
-            this.resyncGameDueToMismatchedStatus(webSocketEndpoint);
+            this.resyncGameDueToMismatchedStatus();
     }
 
     /**
@@ -935,36 +894,23 @@ export class ChessPlatform {
     }
 
     /**
-     * Handle the WsTitle.PlayAgainAccepted command
-     * that is received from the server.
-     *
-     * Start the game again.
-     */
-    private _handlePlayAgainAcceptedCommand(
-        wsStartedData: WsStartedData,
-        player: Player
-    ): void {
-        this._handleStartedCommand(wsStartedData, player);
-    }
-
-    /**
-     * Handle the WsTitle.SentOfferDeclined command
+     * Handle the WsTitle.OfferDeclined command
      * that is received from the server.
      *
      * Go back to the notation menu.
      */
-    private _handleSentOfferDeclinedCommand(): void {
+    private _handleOfferDeclinedCommand(): void {
         this.platform.notationMenu.goBack();
     }
 
     /**
-     * Handle the WsTitle.SentOfferCancelled command
+     * Handle the WsTitle.OfferCancelled command
      * that is received from the server.
      *
      * Go back to the notation menu.
      */
-    private _handleSentOfferCancelledCommand(): void {
-        this._handleSentOfferDeclinedCommand();
+    private _handleOfferCancelledCommand(): void {
+        this._handleOfferDeclinedCommand();
     }
 
     /**
@@ -981,106 +927,16 @@ export class ChessPlatform {
 
 /**
  * This class is used to create WebSocket commands
- * to send to the client.
+ * to send to the server.
  */
-class WsCommand {
+export class WsCommand {
     /**
      * Create a WebSocket command with the given command and data.
      * @example [Moved, {from: Square.a2, to: Square.a4}]
      * @example [Resigned]
      */
-    private static _wsCommand<T extends WsTitle>(
-        title: T,
-        data: WsData<T> | null = null
-    ): string {
-        if (Object.values(WsTitle).indexOf(title) === -1)
-            throw new Error("Invalid command.");
-
-        return data ? JSON.stringify([title, data]) : JSON.stringify([title]);
-    }
-
-    /**
-     * Send moved command to the server.
-     * @example [MOVED, {from: Square.a2, to: Square.a4}]
-     */
-    static moved(moveData: WsMovedData): string {
-        return this._wsCommand(WsTitle.Moved, moveData);
-    }
-
-    /**
-     * Send aborted command to the server.
-     * @example [ABORTED, {}]
-     */
-    static aborted(): string {
-        return this._wsCommand(WsTitle.Aborted);
-    }
-
-    /**
-     * Send resigned command to the server.
-     * @example [RESIGNED, {}]
-     */
-    static resigned(): string {
-        return this._wsCommand(WsTitle.Resigned);
-    }
-
-    /**
-     * Send draw offered command to the server.
-     */
-    static drawOffered(): string {
-        return this._wsCommand(WsTitle.DrawOffered);
-    }
-
-    /**
-     * Send undo offered command to the server.
-     */
-    static undoOffered(): string {
-        return this._wsCommand(WsTitle.UndoOffered);
-    }
-
-    /**
-     * Send draw accepted command to the server.
-     */
-    static drawAccepted(): string {
-        return this._wsCommand(WsTitle.DrawAccepted);
-    }
-
-    /**
-     * Send undo accepted command to the server.
-     */
-    static undoAccepted(): string {
-        return this._wsCommand(WsTitle.UndoAccepted);
-    }
-
-    /**
-     * Send play again offered command to the server.
-     */
-    static playAgainOffered(): string {
-        return this._wsCommand(WsTitle.PlayAgainOffered);
-    }
-
-    /**
-     * Send play again accepted command to the server.
-     */
-    static playAgainAccepted(): string {
-        return this._wsCommand(WsTitle.PlayAgainAccepted);
-    }
-
-    /**
-     * Send cancel offer command to the server. This command
-     * is used when the user cancels the sent offer like draw
-     * or undo move offer.
-     */
-    static offerCanceled(): string {
-        return this._wsCommand(WsTitle.OfferCancelled);
-    }
-
-    /**
-     * Send offer declined command to the server.
-     * This command is used when the user declines the
-     * sent offer like draw or undo move offer.
-     */
-    static sentOfferDeclined(): string {
-        return this._wsCommand(WsTitle.SentOfferDeclined);
+    static create(wsMessage: WsOutgoingMessage): string {
+        return JSON.stringify(wsMessage);
     }
 
     /**
@@ -1088,13 +944,19 @@ class WsCommand {
      * @param message "[Moved, {from: Square.a2, to: Square.a4}]"
      * @example [Moved, {from: Square.a2, to: Square.a4}]
      */
-    static parse<T extends WsTitle>(message: string): [T, WsData<T>] {
+    static parse(message: string): WsIncomingMessage {
         try {
-            return JSON.parse(message) as [T, WsData<T>];
+            const parsed = JSON.parse(message);
+
+            if (!Array.isArray(parsed)) {
+                throw new Error("Invalid message format");
+            }
+
+            return parsed as WsIncomingMessage;
         } catch (error: unknown) {
             throw new Error(
                 "Invalid WebSocket message, the message could not be parsed: " +
-                    (error instanceof Error ? error.message : "")
+                    (error instanceof Error ? error.message : ""),
             );
         }
     }

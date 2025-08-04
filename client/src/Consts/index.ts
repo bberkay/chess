@@ -6,14 +6,11 @@ export const DEFAULT_TITLE = "Chess Platform";
 /**
  * Server Settings
  */
-const isDevelopment = window.location.hostname === "localhost";
+const isDevelopment = ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
 export const SERVER_ADDRESS = isDevelopment
     ? "http://localhost:3000"
     : "https://chess-server-3j94.onrender.com";
-export const WS_ADDRESS = isDevelopment
-    ? "ws://localhost:3000"
-    : "wss://chess-server-3j94.onrender.com";
-export const WS_ENDPOINT_MAX_LENGTH = 1000;
+export const WS_ADDRESS = SERVER_ADDRESS.replace("http", "ws");
 
 /**
  * When the socket connection is lost, the client will

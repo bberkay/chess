@@ -1,8 +1,8 @@
 import { BotAttributes } from "@Chess/Bot";
 import { JsonNotation } from "@Chess/Types";
 import { Theme } from "@Platform/Components/NavbarComponents/AppearanceMenu";
-import { WsCreatedData } from "@ChessPlatform/Types";
 import { Settings } from "@Platform/Components/NavbarComponents/SettingsMenu";
+import { PostQueryResponse, PostRoutes } from "./ApiService";
 
 /**
  * Enum for the local storage keys.
@@ -30,7 +30,7 @@ type StoreData = {
     [StoreKey.LastBoard]: JsonNotation;
     [StoreKey.LastCreatedBoard]: string | null;
     [StoreKey.LastBot]: BotAttributes | null;
-    [StoreKey.LastLobbyConnection]: WsCreatedData | null;
+    [StoreKey.LastLobbyConnection]: PostQueryResponse[PostRoutes.CONNECT_LOBBY] | null;
     [StoreKey.LastPlayerName]: string | null;
     [StoreKey.CustomAppearance]: Record<string, string>;
     [StoreKey.Theme]: Theme;

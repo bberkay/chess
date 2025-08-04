@@ -712,7 +712,7 @@ export class NavigatorModal extends Component {
         this.show(
             "Confirmation",
             `<div id = "confirmation">Are you sure you want to cancel the game?
-            <br> <br> 
+            <br> <br>
             <div class="btn-group-vertical">
                 <button data-menu-operation="${NavigatorModalOperation.Undo}">Continue Playing</button>
                 <button style="background-color:transparent" data-socket-operation="${SocketOperation.CancelLobby}">Yes, Cancel the Game</button>

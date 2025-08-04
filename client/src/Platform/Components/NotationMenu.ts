@@ -276,7 +276,7 @@ export class NotationMenu extends Component {
                 <div class="player-name-container">
                     <div class="player-name" id="black-player-name">
                         Black Player
-                    </div> 
+                    </div>
                     <div class="duration hidden" id="black-player-duration">
                         <div style="display: flex;align-items: end;">
                             <span class="minute-second">00:00</span> <small class="decisecond">.00</small>
@@ -295,7 +295,7 @@ export class NotationMenu extends Component {
                 <div class="player-name-container">
                     <div class="player-name" id="white-player-name">
                         White Player
-                    </div> 
+                    </div>
                     <div class="duration hidden" id="white-player-duration">
                         <div style="display: flex;align-items: end;">
                             <span class="minute-second">00:00</span> <small class="decisecond">.00</small>
@@ -383,11 +383,11 @@ export class NotationMenu extends Component {
                 ${!isMobileView || !whitePlayerSectionMobileLoadingContainer ? whitePlayerSection : ""}
         `
         );
-        
+
         if (isMobileView) {
             if(whitePlayerSectionMobileLoadingContainer)
                 this.loadHTML("white-player-section-mobile-loading-container", whitePlayerSection);
-            if(blackPlayerSectionMobileLoadingContainer) 
+            if(blackPlayerSectionMobileLoadingContainer)
                 this.loadHTML("black-player-section-mobile-loading-container", blackPlayerSection);
         } else {
             whitePlayerSectionMobileLoadingContainer?.remove();
@@ -395,15 +395,15 @@ export class NotationMenu extends Component {
             whitePlayerSectionMobileLoadingContainer = null;
             blackPlayerSectionMobileLoadingContainer = null;
         }
-        
+
         const chessboard = document.getElementById("chessboard")!;
-        const notationMenu = document.getElementById(NOTATION_MENU_ID)!; 
+        const notationMenu = document.getElementById(NOTATION_MENU_ID)!;
         let breakpointCircle = true;
         const reorder = (isFirstTime: boolean = false) => {
             const isMobile = window.innerWidth < 900;
             const isTablet = window.innerWidth >= 900 && window.innerWidth < 1250;
             const isDesktop = window.innerWidth >= 1250;
-            
+
             if(isMobile && (breakpointCircle || isFirstTime)){
                 chessboard.before(document.querySelector(".player-section:first-child")!);
                 chessboard.after(document.querySelector(".player-section:last-child")! || "");
@@ -411,7 +411,7 @@ export class NotationMenu extends Component {
             } else if(isTablet && (!breakpointCircle || isFirstTime)){
                 notationMenu.prepend(document.querySelector(".player-section:first-child")!);
                 notationMenu.append(
-                    document.querySelector("#chessboard ~ .player-section") || 
+                    document.querySelector("#chessboard ~ .player-section") ||
                     document.querySelector(".player-section:last-child")!
                 );
                 breakpointCircle = true;
@@ -424,12 +424,12 @@ export class NotationMenu extends Component {
 
         if(isMobileView && (!whitePlayerSectionMobileLoadingContainer || !blackPlayerSectionMobileLoadingContainer)){
             reorder(true);
-        } 
+        }
 
         window.addEventListener("resize", () => {
             if (whitePlayerSectionMobileLoadingContainer) {
                 whitePlayerSectionMobileLoadingContainer.outerHTML = whitePlayerSectionMobileLoadingContainer.innerHTML;
-                whitePlayerSectionMobileLoadingContainer = null; 
+                whitePlayerSectionMobileLoadingContainer = null;
             }
             if (blackPlayerSectionMobileLoadingContainer) {
                 blackPlayerSectionMobileLoadingContainer.outerHTML = blackPlayerSectionMobileLoadingContainer.innerHTML;
@@ -949,7 +949,7 @@ export class NotationMenu extends Component {
      */
     public displaySingleplayerGameUtilityMenu(): void {
         this.resetConfirmedOperation();
-        
+
         document
             .querySelector(".utility-toggle-menu-section.active")!
             .classList.remove("active");
@@ -1062,7 +1062,7 @@ export class NotationMenu extends Component {
                     this.displaySingleplayerGameUtilityMenu();
                 }
             }
-        } 
+        }
     }
 
     /**

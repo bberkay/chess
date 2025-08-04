@@ -18,7 +18,7 @@ export enum SocketOperation {
     AcceptUndoOffer = "AcceptUndoOffer",
     SendPlayAgainOffer = "SendPlayAgainOffer",
     AcceptPlayAgainOffer = "AcceptPlayAgainOffer",
-    DeclineSentOffer = "DeclineSentOffer",
+    DeclineOffer = "DeclineOffer",
     CancelOffer = "CancelOffer",
 }
 
@@ -70,20 +70,29 @@ export enum SocketEvent {
 }
 
 /**
- * Player interface for the player data.
+ * Represents a player/user.
  */
 export interface Player {
+    token: string;
     id: string;
     name: string;
     isOnline: boolean;
-    token: string;
+}
+
+/*
+ * Inform players about their opponent.
+ * Should not include sensitive information,
+ * as it will be shared with both players in the lobby.
+ */
+export interface Players {
+    [Color.White]: Omit<Player, 'token'>;
+    [Color.Black]: Omit<Player, 'token'>;
 }
 
 /**
- * WebSocket command types.
+ * Enumeration of all WebSocket command titles used in the game protocol.
  */
 export enum WsTitle {
-    Created = "CREATED",
     Connected = "CONNECTED",
     Started = "STARTED",
     Finished = "FINISHED",
@@ -98,20 +107,9 @@ export enum WsTitle {
     UndoAccepted = "UNDO_ACCEPTED",
     PlayAgainOffered = "PLAY_AGAIN_OFFERED",
     PlayAgainAccepted = "PLAY_AGAIN_ACCEPTED",
-    SentOfferDeclined = "SENT_OFFER_DECLINED",
     OfferCancelled = "OFFER_CANCELLED",
-    SentOfferCancelled = "SENT_OFFER_CANCELLED",
+    OfferDeclined = "OFFER_DECLINED",
     Error = "ERROR",
-}
-
-/**
- * WsCreatedData interface for the
- * created command to receive from the
- * WebSocket.
- */
-export interface WsCreatedData {
-    lobbyId: string;
-    player: Player;
 }
 
 /**
@@ -120,8 +118,25 @@ export interface WsCreatedData {
  * WebSocket.
  */
 export interface WsConnectedData {
-    lobbyId: string;
-    player: Player;
+    playerId: string;
+}
+
+/**
+ * WsReconnectedData interface for the
+ * connected command to receive from the
+ * WebSocket.
+ */
+export interface WsReconnectedData {
+    color: Color;
+}
+
+/**
+ * WsDisconnectedData interface for the
+ * connected command to receive from the
+ * WebSocket.
+ */
+export interface WsDisconnectedData {
+    color: Color;
 }
 
 /**
@@ -130,17 +145,8 @@ export interface WsConnectedData {
  * WebSocket.
  */
 export interface WsStartedData {
-    whitePlayer: {
-        id: string;
-        name: string;
-        isOnline: boolean;
-    };
-    blackPlayer: {
-        id: string;
-        name: string;
-        isOnline: boolean;
-    };
-    game: string | JsonNotation;
+    game: JsonNotation;
+    players: Players;
 }
 
 /**
@@ -181,26 +187,6 @@ export interface WsMovedData {
 }
 
 /**
- * WsDisconnectedData interface for the
- * disconnected command to receive from the
- * WebSocket.
- */
-export interface WsDisconnectedData {
-    lobbyId: string;
-    color: Color;
-}
-
-/**
- * WsReconnectedData interface for the
- * reconnected command to receive from the
- * WebSocket.
- */
-export interface WsReconnectedData {
-    lobbyId: string;
-    color: Color;
-}
-
-/**
  * WsErrorData interface for the
  * error command to receive from the
  * WebSocket.
@@ -210,77 +196,70 @@ export interface WsErrorData {
 }
 
 /**
- * WsDataUnion type for the data that can be
- * received from the WebSocket.
- */
-export type WsDataUnion =
-    | WsCreatedData
-    | WsConnectedData
-    | WsStartedData
-    | WsFinishedData
-    | WsResignedData
-    | WsUndoData
-    | WsMovedData
-    | WsReconnectedData
-    | WsDisconnectedData
-    | WsErrorData;
-
-/**
- * WsDataMap type that maps each WebSocket command title (WsTitle)
- * to its corresponding data type.
+ * Maps each WebSocket command title (WsTitle) to the type of data it carries.
+ *
+ * This map serves as the central schema for all WebSocket message payloads.
+ * It is used to derive both `WsIncomingMessage` and `WsOutgoingMessage` types.
+ *
+ * ### Message Direction
+ * - **Outgoing messages** (from server to client) use the `WsOutgoingMessage` type.
+ *   - If the mapped value is `undefined`, the message is sent as `[WsTitle]`.
+ *   - If the mapped value is an object (including unions like `Type | undefined`), the message is sent as `[WsTitle, Data]`.
+ *
+ * - **Incoming messages** (from client to server) use the `WsIncomingMessage` type.
+ *   - These always include both `[WsTitle, Data]`, and the `undefined` is excluded from the data type (`Exclude<T, undefined>`).
+ *   - This ensures the server only parses fully-formed payloads when required.
+ *
+ * ### Examples:
+ * - `[WsTitle.Aborted]` → `undefined` data, both in and out.
+ * - `[WsTitle.Connected, WsConnectedData]` → always with data.
+ * - `[WsTitle.Resigned]` (outgoing) → may be sent as `[WsTitle.Resigned]` or `[WsTitle.Resigned, WsResignedData]`.
+ *   - When parsed (incoming), `Resigned` must always include a `WsResignedData` payload.
  */
 export type WsDataMap = {
-    [WsTitle.Created]: WsCreatedData;
     [WsTitle.Connected]: WsConnectedData;
-    [WsTitle.Started]: WsStartedData;
-    [WsTitle.Finished]: WsFinishedData;
-    [WsTitle.Resigned]: WsResignedData;
-    [WsTitle.UndoAccepted]: WsUndoData;
-    [WsTitle.UndoOffered]: WsUndoData;
-    [WsTitle.Moved]: WsMovedData;
     [WsTitle.Reconnected]: WsReconnectedData;
     [WsTitle.Disconnected]: WsDisconnectedData;
+    [WsTitle.Aborted]: null;
+    [WsTitle.Started]: WsStartedData;
+    [WsTitle.Moved]: WsMovedData;
+    [WsTitle.Finished]: WsFinishedData;
+    [WsTitle.Resigned]: WsResignedData | null;
+    [WsTitle.UndoOffered]: null;
+    [WsTitle.UndoAccepted]: WsUndoData | null;
+    [WsTitle.DrawOffered]: null;
+    [WsTitle.DrawAccepted]: null;
+    [WsTitle.PlayAgainOffered]: null;
+    [WsTitle.PlayAgainAccepted]: null;
+    [WsTitle.OfferCancelled]: null;
+    [WsTitle.OfferDeclined]: null;
     [WsTitle.Error]: WsErrorData;
 };
 
 /**
- * WsData type that retrieves the appropriate data type
- * based on the provided WebSocket command title (WsTitle).
+ * Represents the structure of a message being sent over WebSocket.
+ *
+ * - If the message's associated data is `undefined`, the message is sent as a single-element tuple: [WsTitle].
+ * - Otherwise, the message includes both the title and its payload: [WsTitle, Data].
+ *
+ * This structure is used to minimize payload size and avoid unnecessary `undefined` values in messages.
  */
-export type WsData<T extends WsTitle> = T extends keyof WsDataMap ? WsDataMap[T] : never;
+export type WsOutgoingMessage = {
+    [T in keyof WsDataMap]: null extends WsDataMap[T]
+        ? [T]
+        : [T, WsDataMap[T]];
+}[keyof WsDataMap];
 
 /**
- * WsMessage type for the command and data that can be
- * sent to the client or received from the client.
- * @see src/Platform/Platform.ts
+ * Represents the structure of a message received over WebSocket.
+ *
+ * Every message is treated as a tuple of [WsTitle, Data], with `undefined` types explicitly excluded.
+ *
+ * This ensures that all messages received have a guaranteed data payload (if expected),
+ * allowing for safe usage without runtime `undefined` checks.
  */
-export type WsMessage<T extends WsTitle> = [T, WsData<T>];
-
-/**
- * Represents the parameters required to create a
- * new lobby.
- */
-export interface CreateLobbyReqParams {
-    name: string;
-    board: string;
-    remaining: string;
-    increment: string;
-}
-
-/**
- * Represents the parameters required to join a
- * lobby.
- */
-export interface JoinLobbyReqParams {
-    name: string;
-    lobbyId: string;
-}
-
-/**
- * Represents the parameters required to reconnect
- * to a lobby.
- */
-export interface ReconnectLobbyReqParams {
-    lobbyId: string;
-    token: string;
-}
+export type WsIncomingMessage = {
+    [T in keyof WsDataMap]: WsDataMap[T] extends null
+        ? [T]
+        : [T, Exclude<WsDataMap[T], null>]
+}[keyof WsDataMap];
