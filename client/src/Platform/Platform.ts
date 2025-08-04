@@ -33,6 +33,7 @@ import {
 import { LogConsole } from "./Components/NavbarComponents/LogConsole";
 import { AboutMenu } from "./Components/NavbarComponents/AboutMenu.ts";
 import { AppearanceMenu } from "./Components/NavbarComponents/AppearanceMenu.ts";
+import { Logger } from "@Services/Logger";
 import { Store, StoreKey } from "@Services/Store";
 import { SettingsMenu } from "./Components/NavbarComponents/SettingsMenu.ts";
 import { BotAttributes } from "@ChessPlatform/Chess/Bot/index.ts";
@@ -51,13 +52,12 @@ export class Platform {
     public readonly settingsMenu: SettingsMenu;
     public readonly aboutMenu: AboutMenu;
 
-    public readonly log: ((...messages: unknown[]) => void) | null = null;
+    public readonly logger: Logger = new Logger("src/Platform/Platform.ts");
 
     /**
      * Constructor of the Platform class.
      */
-    constructor(chess: Chess, log: ((...messages: unknown[]) => void) | null = null) {
-        this.log = log;
+    constructor(chess: Chess) {
         this.chess = chess;
         this.boardEditor = new BoardEditor(this.chess);
         this.notationMenu = new NotationMenu(this.chess);
@@ -131,7 +131,7 @@ export class Platform {
                 }
             }) as EventListener);
 
-            this.log?.(
+            this.logger.save(
                 "Menu operations are binded to loaded components."
             );
         };
@@ -148,7 +148,7 @@ export class Platform {
          * for first time after the platform is initialized.
          */
         const showLogConsoleOnMove = () => {
-            if(this.navbar.getShownComponent() !== this.logConsole) {
+            if (this.navbar.getShownComponent() !== this.logConsole) {
                 this.navbar.showComponent(this.logConsole);
             }
 
@@ -157,7 +157,7 @@ export class Platform {
         document.addEventListener(ChessEvent.onPieceMoved, showLogConsoleOnMove);
 
         bindMenuOperations();
-        this.log?.(
+        this.logger.save(
             "Platform Events are added. Menu operations are binded. Platform is initialized."
         );
     }
@@ -348,18 +348,24 @@ export class Platform {
             this.boardEditor.createBoard(notation);
         } else {
             this.notationMenu.hide();
-            if(notation && typeof notation !== "string")
+            if (notation && typeof notation !== "string")
                 throw new Error("Notation type must be string while piece editor is active.");
             this.boardEditor.createEditableBoard(notation);
         }
-        this.log?.(`Board is created and components are updated.`);
+        this.logger.save(`Board is created and components are updated.`);
     }
 
     /**
      * Prepare the platform components for the online game.
      */
     public preparePlatformForOnlineGame(
-        createdGame: WsStartedData,
+        createdGame: {
+            game: JsonNotation,
+            players: {
+                [Color.White]: { name: string; isOnline: boolean },
+                [Color.Black]: { name: string; isOnline: boolean }
+            }
+        },
         playerColor: Color
     ): void {
         if (BoardEditor.isEditorModeEnable()){
@@ -385,7 +391,7 @@ export class Platform {
             this.chess.board.lock();
         else this.chess.board.unlock();
 
-        this.log?.(`Online game is created and components are updated.`);
+        this.logger.save(`Online game is created and components are updated.`);
     }
 
     /**
@@ -423,7 +429,7 @@ export class Platform {
         this.notationMenu.showPlayerCards();
         this.notationMenu.setTurnIndicator(this.chess.getTurnColor());
 
-        this.log?.(`Editor mode is disabled and board is now playable.`);
+        this.logger.save(`Editor mode is disabled and board is now playable.`);
         Store.clear(StoreKey.WasBoardEditorEnabled);
         document.dispatchEvent(new Event(PlatformEvent.onBoardCreated));
     }
