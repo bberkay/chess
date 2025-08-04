@@ -1,16 +1,16 @@
 
 /**
  * LogStore class for storing the logs.
- * This class is separated from the Logger class because 
- * there are multiple logger instances in the application 
+ * This class is separated from the Logger class because
+ * there are multiple logger instances in the application
  * like logger instance in the engine and logger instance
  * in the board for setting the logname as "Engine" and "Board".
  * But the logs should be stored in a single place and should be
- * accessible from LogConsole and other components as a single 
+ * accessible from LogConsole and other components as a single
  * log store because even the logs are coming from different sources
- * they are all a part of the single application. 
- * 
- * For example: 
+ * they are all a part of the single application.
+ *
+ * For example:
  * The game is initialized with the following logs:
  * 1. Board Log Instance: "The board is initialized."
  * 2. Engine Log Instance: "The engine is initialized."
@@ -27,7 +27,7 @@
  * [Board] "The piece selected."
  * [Chess] "The selected piece is sent to the engine."
  * ... and so on.
- * 
+ *
  * But if the logs are stored in the Logger class, the logs will be stored
  * something like this:
  * [Board] "The board is initialized."
@@ -70,11 +70,11 @@ export class Logger{
     /**
      * Save the message
      */
-    public save(message: string): void
+    public save(...messages: unknown[]): void
     {
-        LogStore.logs.push({source: this.logName, message: message[message.length - 1] != "." ? message + "." : message}); 
+        LogStore.logs.push({source: this.logName, message: messages.join(" ")});
         try{
-            if (this.isWindowAndDomAvailable && typeof window !== "undefined" && document) 
+            if (this.isWindowAndDomAvailable && typeof window !== "undefined" && document)
                 document.dispatchEvent(new Event(LoggerEvent.LogAdded));
         }catch(e){
             console.error("The window or document might not be available: ", e);

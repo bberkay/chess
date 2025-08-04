@@ -60,17 +60,16 @@ export class Chess {
     private _currentTakeBackCount: number = 0;
     private _gameTimeMonitorIntervalId: number = -1;
 
-    public readonly logger: Logger = new Logger("src/Chess/Chess.ts");
+    public readonly log: ((...messages: unknown[]) => void) | null = null;
 
     /**
      * Constructor of the Chess class.
      */
-    constructor() {
-        const engineLogger = new Logger("src/Chess/Engine/ChessEngine.ts");
-        this.engine = new ChessEngine((log: string) => { engineLogger.save(log) } );
-        const boardLogger =  new Logger("src/Chess/Board/ChessBoard.ts");
-        this.board = new ChessBoard((log: string) => { boardLogger.save(log) } );
-        this.logger.save("Chess class initialized");
+    constructor(log: ((...messages: unknown[]) => void) | null = null) {
+        this.log = log;
+        this.engine = new ChessEngine(new Logger("src/Chess/Engine/ChessEngine.ts").save);
+        this.board = new ChessBoard(new Logger("src/Chess/Board/ChessBoard.ts").save);
+        this.log?.("Chess class initialized");
         this.checkAndLoadGameFromCache();
     }
 
@@ -89,7 +88,7 @@ export class Chess {
         if (this._gameTimeMonitorIntervalId !== -1)
             clearInterval(this._gameTimeMonitorIntervalId);
         this._gameTimeMonitorIntervalId = -1;
-        this.logger.save("Properties reset");
+        this.log?.("Properties reset");
     }
 
     /**
@@ -100,7 +99,7 @@ export class Chess {
     public checkAndLoadGameFromCache(): void {
         // If there is a game in the cache, load it.
         if (Store.isExist(StoreKey.LastBoard)) {
-            this.logger.save("Game loading from cache...");
+            this.log?.("Game loading from cache...");
             this.createGame(
                 Store.load(StoreKey.LastBoard) as JsonNotation
             );
@@ -109,16 +108,16 @@ export class Chess {
                     StoreKey.LastBot
                 )!;
                 this.addBotToCurrentGame(botAttributes);
-                this.logger.save(
+                this.log?.(
                     `Bot-ts-${JSON.stringify(
                         botAttributes
                     )}-te- found in cache and added to the game`
                 );
             }
-            this.logger.save("Game loaded from cache");
+            this.log?.("Game loaded from cache");
         } else {
             this.createGame();
-            this.logger.save("No game found in cache, created a standard game");
+            this.log?.("No game found in cache, created a standard game");
         }
     }
 
@@ -142,19 +141,19 @@ export class Chess {
         durations: Durations | null = null
     ): void {
         this.resetProperties();
-        this.logger.save(
+        this.log?.(
             "Cache cleared and properties reset before creating a new game"
         );
 
         if (typeof position === "string") {
             position = Converter.fenToJson(position);
-            this.logger.save(`Given position converted to json notation.`);
+            this.log?.(`Given position converted to json notation.`);
         }
 
         if (durations) position.durations = durations;
 
         this.engine.createGame(position);
-        this.logger.save(`Game successfully created on ChessEngine`);
+        this.log?.(`Game successfully created on ChessEngine`);
 
         this.board.createGame(position);
         this.board.setTurnColor(this.engine.getTurnColor());
@@ -169,7 +168,7 @@ export class Chess {
             this.board.addSquareEffects(lastMove.to, SquareEffect.To);
         }
 
-        this.logger.save(
+        this.log?.(
             `Game successfully created on Chessboard and status-ts-${this.engine.getGameStatus()}-te- shown`
         );
 
@@ -185,7 +184,7 @@ export class Chess {
             this.getGameAsFenNotation()
         )
 
-        this.logger.save(`Game saved to cache as json notation`);
+        this.log?.(`Game saved to cache as json notation`);
 
         document.dispatchEvent(new Event(ChessEvent.onGameCreated));
     }
@@ -201,7 +200,7 @@ export class Chess {
 
         this._lastCreatedBotAttributes = this._bot.getAttributes();
         this.board.lockActionsOfColor(this._bot.color);
-        this.logger.save(
+        this.log?.(
             `Bot-ts-${this._bot.color}-te- created with difficulty-ts-${this._bot.difficulty}-te-`
         );
 
@@ -237,7 +236,7 @@ export class Chess {
         this._bot.terminate();
         this._bot = null;
         Store.clear(StoreKey.LastBot);
-        this.logger.save("Bot terminated");
+        this.log?.("Bot terminated");
     }
 
     /**
@@ -250,7 +249,7 @@ export class Chess {
     ): void {
         this.board.createPiece(color, pieceType, square);
         this.engine.createPiece(color, pieceType, square);
-        this.logger.save(
+        this.log?.(
             `Piece-ts-${JSON.stringify({
                 color,
                 pieceType,
@@ -278,7 +277,7 @@ export class Chess {
     public removePiece(square: Square): void {
         this.board.removePiece(square);
         this.engine.removePiece(square);
-        this.logger.save(
+        this.log?.(
             `Piece-ts-${square}-te- removed from board and engine`
         );
         document.dispatchEvent(
@@ -321,11 +320,11 @@ export class Chess {
                         : Color.White
                 ] = [];
                 this.board.closePromotionMenu();
-                this.logger.save("Pre-move canceled");
+                this.log?.("Pre-move canceled");
             },
         });
 
-        this.logger.save("Moves listener initialized");
+        this.log?.("Moves listener initialized");
     }
 
     /**
@@ -350,13 +349,13 @@ export class Chess {
                 clearInterval(this._gameTimeMonitorIntervalId);
                 this._gameTimeMonitorIntervalId = -1;
                 this.finishTurn();
-                this.logger.save(
+                this.log?.(
                     "Game over. Game time monitor interval cleared"
                 );
             }
         }, 1000) as unknown as number;
 
-        this.logger.save("Engine listener initialized");
+        this.log?.("Engine listener initialized");
     }
 
     /**
@@ -365,7 +364,7 @@ export class Chess {
     private handleOnPieceSelected(squareId: Square): void {
         this._selectedSquare = squareId;
         this.board.highlightMoves(this.engine.getMoves(this._selectedSquare!));
-        this.logger.save(`Piece-ts-${squareId}-te- selected on the board`);
+        this.log?.(`Piece-ts-${squareId}-te- selected on the board`);
         document.dispatchEvent(
             new CustomEvent(ChessEvent.onPieceSelected, {
                 detail: { square: squareId },
@@ -382,7 +381,7 @@ export class Chess {
             this.engine.getMoves(this._preSelectedSquare!, true),
             true
         );
-        this.logger.save(`Piece-ts-${squareId}-te- pre selected on the board`);
+        this.log?.(`Piece-ts-${squareId}-te- pre selected on the board`);
         document.dispatchEvent(
             new CustomEvent(ChessEvent.onPieceSelected, {
                 detail: { square: squareId },
@@ -439,7 +438,7 @@ export class Chess {
                 ? Color.Black
                 : Color.White
         ].push(preMove);
-        this.logger.save(`Pre-move-ts-${JSON.stringify(preMove)}-te- saved`);
+        this.log?.(`Pre-move-ts-${JSON.stringify(preMove)}-te- saved`);
         document.dispatchEvent(
             new CustomEvent(ChessEvent.onPieceSelected, {
                 detail: { square: squareId },
@@ -456,7 +455,7 @@ export class Chess {
             if (this._isNonDomMove) {
                 if(this._isLastNonDomMovePromotion) {
                     moveType = MoveType.Promote
-                    this.logger.save(
+                    this.log?.(
                         `Non-dom move wanted to play from ${from} to ${to}. So, move type is found-ts-${moveType}-te- without needing to pre-calculation`
                     );
                 } else {
@@ -464,13 +463,13 @@ export class Chess {
                     if (moveType === null) {
                         const preCalculatedMoves = this.engine.getMoves(from);
                         moveType = this.engine.checkAndFindMoveType(from, to);
-                        this.logger.save(
+                        this.log?.(
                             `Non-dom move wanted to play from ${from} to ${to}. So, moves are pre-calculated-ts-${JSON.stringify(
                                 preCalculatedMoves
                             )}-te- and move type is found-ts-${moveType}-te-`
                         );
                     } else {
-                        this.logger.save(
+                        this.log?.(
                             `Non-dom move wanted to play from ${from} to ${to}. So, move type is found-ts-${moveType}-te- without needing to pre-calculation`
                         );
                     }
@@ -492,7 +491,7 @@ export class Chess {
         }
 
         this.board.playMove(from, to, moveType).then(() => {
-            this.logger.save(
+            this.log?.(
                 `Move-ts-${JSON.stringify({
                     from,
                     to,
@@ -547,7 +546,7 @@ export class Chess {
         setTimeout(async () => {
             try {
                 await this.playMove(from, to);
-                this.logger.save(
+                this.log?.(
                     `Pre-move-ts-${JSON.stringify({ from, to, type })}-te- played`
                 );
                 document.dispatchEvent(
@@ -730,10 +729,10 @@ export class Chess {
                 GameStatus.Draw,
             ].includes(gameStatus)
         ) {
-            this.logger.save("Game updated in cache after move");
+            this.log?.("Game updated in cache after move");
             Store.clear(StoreKey.LastBoard);
             this.terminateBotIfExist();
-            this.logger.save("Game over");
+            this.log?.("Game over");
             if (this._gameTimeMonitorIntervalId !== -1)
                 clearInterval(this._gameTimeMonitorIntervalId);
             document.dispatchEvent(new Event(ChessEvent.onGameOver));
@@ -747,7 +746,7 @@ export class Chess {
             this.board.setTurnColor(this.engine.getTurnColor());
             this.playBotIfExist();
             this.playPreMoveIfExist();
-            this.logger.save("Game updated in cache after move");
+            this.log?.("Game updated in cache after move");
             Store.save(
                 StoreKey.LastBoard,
                 this.engine.getGameAsJsonNotation()
