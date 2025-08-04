@@ -399,6 +399,9 @@ export class ChessBoard {
             if (isPreSelect && !this.config.enablePreSelection) return;
 
             if (isPreSelect) {
+                if (this.getSquareEffects(square).includes(SquareEffect.PreSelected)) {
+                    this.refresh();
+                }
                 this.addSquareEffects(square, SquareEffect.PreSelected);
             } else {
                 this.removeEffectFromAllSquares([SquareEffect.PreSelected]);
