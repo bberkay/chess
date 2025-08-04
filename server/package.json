@@ -1,15 +1,20 @@
 {
-  "name": "chess-server",
-  "module": "index.ts",
-  "type": "module",
-  "devDependencies": {
-    "@eslint/js": "^9.13.0",
-    "@types/bun": "latest",
-    "eslint": "^9.13.0",
-    "globals": "^15.11.0",
-    "typescript-eslint": "^8.11.0"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  }
+    "name": "chess-platform",
+    "version": "1.0.0",
+    "author": "Berkay Kaya <berkaykayaforbusiness@outlook.com> (https://bberkay.github.io/)",
+    "module": "index.ts",
+    "devDependencies": {
+        "@eslint/js": "^9.32.0",
+        "@types/bun": "^1.2.19",
+        "eslint": "^9.32.0",
+        "globals": "^16.3.0",
+        "typescript-eslint": "^8.38.0",
+        "vitest": "^3.2.4"
+    },
+    "peerDependencies": {
+        "typescript": "^5.9.2"
+    },
+    "license": "MIT",
+    "private": false,
+    "type": "module"
 }
