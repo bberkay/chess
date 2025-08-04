@@ -59,6 +59,10 @@
                 transition: 0.1s;
                 margin: 7px 0;
 
+                &:hover {
+                    text-decoration: underline;
+                }
+
                 &.log--last{
                     border-bottom: 1px solid var(--component-active-color);
                     margin-bottom: 15px;

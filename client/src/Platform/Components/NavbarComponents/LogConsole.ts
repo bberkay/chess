@@ -47,7 +47,7 @@ export class LogConsole extends NavbarComponent {
         this.stream();
 
         document.addEventListener(
-            LoggerEvent.LogAdded, 
+            LoggerEvent.LogAdded,
             debounce(this.stream.bind(this), LOG_DEBOUNCE_TIME_MS)
         );
     }
@@ -91,7 +91,7 @@ export class LogConsole extends NavbarComponent {
         logConsoleBody!.addEventListener("scroll", debounce(() => {
             if(!logConsoleBody || !downButton)
                 return;
-            
+
             const isNearBottom = logConsoleBody.scrollHeight - logConsoleBody.scrollTop <= logConsoleBody.clientHeight + LOG_DOWN_ACTIVATION_THRESHOLD;
             if (isNearBottom) {
                 downButton.classList.add("hidden");
@@ -122,7 +122,7 @@ export class LogConsole extends NavbarComponent {
         };
 
         /**
-         * This function generates a tooltip toggle element with 
+         * This function generates a tooltip toggle element with
          * the title and content.
          * For Example:
          * `title` is someone and `content` is [{name: "someone"}}] =>
@@ -163,7 +163,7 @@ export class LogConsole extends NavbarComponent {
 
         const logListElement: HTMLElement =
             document.getElementById("log-list")!;
-        
+
         const lastLogListElement: HTMLElement | null = logListElement.querySelector("li:last-child");
         if (lastLogListElement) {
             lastLogListElement.classList.add("log--last");
@@ -226,7 +226,7 @@ export class LogConsole extends NavbarComponent {
         const newAddedLogs: HTMLElement[] = Array.from(
             document.getElementById("log-list")!.querySelectorAll("li")
         ).slice(this._lastLogIndex);
-        
+
         // Tooltips
         const squares: NodeListOf<HTMLElement> | null = document.querySelectorAll(".square");
         newAddedLogs.forEach((log: HTMLElement) => {
