@@ -26,7 +26,7 @@ import { ChessBoard } from "./Board/ChessBoard";
 import { SquareClickMode, SquareEffect } from "./Board/Types";
 import { Store, StoreKey } from "@Services/Store";
 import { Converter } from "./Utils/Converter.ts";
-import { Logger } from "@Services/Logger.ts";
+import { Logger } from "@Services/Logger";
 import { Bot, BotAttributes } from "./Bot";
 
 /**

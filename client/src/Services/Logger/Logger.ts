@@ -1,3 +1,5 @@
+import { LoggerError } from "./LoggerError";
+import { Log, LoggerEvent, Logs } from "./types";
 
 /**
  * LogStore class for storing the logs.
@@ -38,19 +40,33 @@
  * [Chess] "The selected piece is sent to the engine."
  */
 class LogStore{
-    public static logs: Array<{source: string, message: string}> = [];
+    private static logs: Array<Log> = [];
+
+    public static add(log: Log): void {
+        LogStore.logs.push(log);
+    }
+
+    public static clear(): void {
+        LogStore.logs.length = 0;
+    }
+
+    public static get(): Logs {
+        return Object.freeze([...LogStore.logs]);
+    }
 }
 
-/**
- * LoggerEvent enum for the logger events.
- */
-export enum LoggerEvent{
-    /**
-     * A new log record is added to the LogStore.
-     * @Event
-     */
-    LogAdded = "LogAdded",
-}
+const IS_DOC_AVAILABLE = (() => {
+    try {
+        if (typeof window !== "undefined" && document) {
+            document.dispatchEvent(new Event(LoggerEvent.DocumentCheck));
+            return true;
+        }
+        return false;
+    } catch(e) {
+        console.error("The window or document might not be available: ", e);
+        return false;
+    }
+})();
 
 /**
  * This static class provides a logger instance
@@ -58,7 +74,6 @@ export enum LoggerEvent{
  */
 export class Logger{
     private logName: string;
-    private isWindowAndDomAvailable: boolean = true;
 
     /**
      * Constructor
@@ -72,13 +87,16 @@ export class Logger{
      */
     public save(...messages: unknown[]): void
     {
-        LogStore.logs.push({source: this.logName, message: messages.join(" ")});
-        try{
-            if (this.isWindowAndDomAvailable && typeof window !== "undefined" && document)
-                document.dispatchEvent(new Event(LoggerEvent.LogAdded));
-        }catch(e){
-            console.error("The window or document might not be available: ", e);
-            this.isWindowAndDomAvailable = false;
+        try {
+            LogStore.add({ source: this.logName, message: messages.join(" ") });
+        } catch(e: unknown) {
+            throw LoggerError.factory.LogSavingFailed((e instanceof Error) ? (e as Error).message : "");
+        }
+
+        try {
+            if (IS_DOC_AVAILABLE) document.dispatchEvent(new Event(LoggerEvent.LogAdded));
+        } catch(e: unknown) {
+            throw LoggerError.factory.LogEventDispatchFailed((e instanceof Error) ? (e as Error).message : "");
         }
     }
 
@@ -93,9 +111,9 @@ export class Logger{
     /**
      * Returns the messages.
      */
-    public static messages(): ReadonlyArray<{source: string, message: string}>
+    public static messages(): Logs
     {
-        return Object.freeze([...LogStore.logs]);
+        return LogStore.get();
     }
 
     /**
@@ -103,6 +121,6 @@ export class Logger{
      */
     public static clear(): void
     {
-        LogStore.logs = [];
+        LogStore.clear();
     }
 }
