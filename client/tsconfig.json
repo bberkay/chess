@@ -7,7 +7,7 @@
     "skipLibCheck": true,
     "experimentalDecorators": true,
     "allowJs": true,
-    
+
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
@@ -28,7 +28,7 @@
       "@Chess/*": ["src/Chess/*"],
       "@Platform/*": ["src/Platform/*"],
       "@Services/*": ["src/Services/*"],
-      "@Utils/*": ["src/Utils/*"],
+      "@Utils": ["src/Utils"],
       "@Global/*": ["src/Global/*"],
     }
   },
