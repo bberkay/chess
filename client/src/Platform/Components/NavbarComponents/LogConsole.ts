@@ -2,7 +2,7 @@ import { LogConsoleOperation } from "../../Types";
 import { Logger, LoggerEvent } from "@Services/Logger";
 import { NavbarComponent } from "./NavbarComponent";
 import { LOG_CONSOLE_ID } from "@Platform/Consts";
-import { debounce } from "@ChessPlatform/Utils/Timing";
+import { debounce } from "@Utils";
 
 /**
  * Represents the configuration of the log console.

@@ -26,7 +26,7 @@ import {
     SquareEffect
 } from "./Types";
 import { Converter } from "../Utils/Converter.ts";
-import { throttle } from "@ChessPlatform/Utils/Timing.ts";
+import { throttle } from "@Utils";
 
 /**
  * Default configuration of the chess board.

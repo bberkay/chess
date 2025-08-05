@@ -10,8 +10,8 @@
 
 import { Chess } from "@Chess/Chess";
 import { Platform } from "@Platform/Platform.ts";
-import { Logger } from "@Services/Logger";
-import { Store, StoreKey } from "@Services/Store";
+import { Logger } from "@ChessPlatform/Services/Logger/Logger";
+import { Store, StoreKey } from "@ChessPlatform/Services/Store";
 import { ChessEvent, Color, GameStatus, StartPosition } from "@Chess/Types";
 import {
     DEFULT_PLAYER_NAME,
@@ -42,12 +42,11 @@ import { SocketEvent, SocketOperation, WsTitle } from "./Types";
 import { Page } from "@Global/Page";
 import {
     ApiService,
-    GetQueryParams,
     GetRoutes,
-    PostBody,
     PostRoutes,
 } from "./Services/ApiService";
-import { createURLFromEntries, getPathSegment, getQueryParam } from "./Utils/Url";
+import { createURLFromEntries, getPathSegment, getQueryParam } from "./Utils/url.utils";
+import { GetReqScheme, PostReqScheme } from "./Services/ApiService/scheme";
 
 /**
  * `ChessPlatform` is the main class of the app. It provides the connections
@@ -133,7 +132,7 @@ export class ChessPlatform {
             if (!lobbyId) return;
 
             const isLobbyIdValid = await this.checkLobby(
-                { pathParams: { lobbyId } },
+                { lobbyId },
                 urlLobbyId !== null,
             );
             if (!isLobbyIdValid) return;
@@ -247,7 +246,7 @@ export class ChessPlatform {
      * and is valid.
      */
     private async checkLobby(
-        checkLobbyReqParams: GetQueryParams[GetRoutes.CHECK_LOBBY],
+        checkLobbyReqParams: GetReqScheme[GetRoutes.CheckLobby]["request"]["pathParams"],
         showAsError: boolean = true,
     ): Promise<boolean> {
         try {
@@ -255,8 +254,9 @@ export class ChessPlatform {
                 "Checking the lobby id. Please wait...",
             );
             const response = await ApiService.get(
-                GetRoutes.CHECK_LOBBY,
+                GetRoutes.CheckLobby,
                 checkLobbyReqParams,
+                null
             );
             this.platform.navigatorModal.hide();
             if (!response.success) {
@@ -286,7 +286,7 @@ export class ChessPlatform {
      * to the local storage.
      */
     public async createLobby(
-        createLobbyReqParams: PostBody[PostRoutes.CREATE_LOBBY],
+        createLobbyReqParams: PostReqScheme[PostRoutes.CreateLobby]["request"]["body"],
     ): Promise<void> {
         this.platform.navigatorModal.showLoading(
             "Creating a new lobby. Please wait the server to respond...",
@@ -294,7 +294,8 @@ export class ChessPlatform {
         document.dispatchEvent(new Event(SocketEvent.onCreatingLobby));
 
         const response = await ApiService.post(
-            PostRoutes.CREATE_LOBBY,
+            PostRoutes.CreateLobby,
+            null,
             createLobbyReqParams,
         );
         if (response.success && response.data) {
@@ -340,7 +341,7 @@ export class ChessPlatform {
      * Establishes a WebSocket connection for joining an existing lobby.
      */
     public async connectLobby(
-        connectLobbyReqParams: PostBody[PostRoutes.CONNECT_LOBBY],
+        connectLobbyReqParams: PostReqScheme[PostRoutes.ConnectLobby]["request"]["body"],
     ): Promise<void> {
         this.platform.navigatorModal.showLoading(
             "Joining the lobby. Please wait the server to respond...",
@@ -351,7 +352,8 @@ export class ChessPlatform {
             }),
         );
         const response = await ApiService.post(
-            PostRoutes.CONNECT_LOBBY,
+            PostRoutes.ConnectLobby,
+            null,
             connectLobbyReqParams,
         );
         if (response.success && response.data) {
@@ -388,7 +390,7 @@ export class ChessPlatform {
      * It uses the saved lobby ID and user token to restore the connection.
      */
     private async reconnectLobby(
-        reconnectLobbyReqParams: PostBody[PostRoutes.RECONNECT_LOBBY],
+        reconnectLobbyReqParams: PostReqScheme[PostRoutes.ReconnectLobby]["request"]["body"],
     ): Promise<void> {
         this.platform.navigatorModal.showLoading(
             "Reconnecting to the lobby. Please wait the server to respond...",
@@ -399,7 +401,8 @@ export class ChessPlatform {
             }),
         );
         const response = await ApiService.post(
-            PostRoutes.RECONNECT_LOBBY,
+            PostRoutes.ReconnectLobby,
+            null,
             reconnectLobbyReqParams,
         );
         if (response.success && response.data) {
