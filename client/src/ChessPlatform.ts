@@ -67,9 +67,6 @@ export class ChessPlatform {
         this.chess = new Chess();
         this.platform = new Platform(this.chess);
         this.init();
-        console.log(import.meta.env.NODE_ENV);
-        console.log(import.meta.env.VITE_WS_URL);
-        console.log(import.meta.env.VITE_SERVER_URL);
     }
 
     /**

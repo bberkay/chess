@@ -9,6 +9,10 @@ import {
     MIN_REMAINING_TIME,
 } from "@Consts";
 
+/**
+ * A constant object holding factory functions for constructing
+ * standardized HTTP request validation error messages.
+ */
 const HTTPRequestErrorTemplates = {
     InvalidRoute: (route: string) =>
         `Invalid request. Given route ${route} is not implemented.`,
@@ -26,23 +30,51 @@ const HTTPRequestErrorTemplates = {
         `Invalid request. "playerToken" length must be ${GU_ID_LENGTH}`,
 } as const;
 
+/**
+ * Utility type for creating a strongly-typed error factory from a given template object.
+ */
 type ErrorFactory<T> = {
     [K in keyof T]: T[K] extends (...args: infer P) => string
         ? (...args: P) => HTTPRequestValidatorError
         : never;
 };
 
+/**
+ * Union type of valid error template keys.
+ */
 type HTTPRequestErrorTemplate = keyof typeof HTTPRequestErrorTemplates;
 
+/**
+ * A custom error class for HTTP request validation failures.
+ * Each error is associated with a specific validation failure key and message.
+ */
 export class HTTPRequestValidatorError extends Error {
+    /**
+     * The key identifying which validation rule the error relates to.
+     */
     public readonly key: HTTPRequestErrorTemplate;
 
+    /**
+     * Private constructor to force the use of the static factory.
+     *
+     * @param key - The error key corresponding to the specific validation rule.
+     * @param message - The human-readable error message.
+     */
     private constructor(key: HTTPRequestErrorTemplate, message: string) {
         super(message);
         this.name = "HTTPRequestValidatorError";
         this.key = key;
     }
 
+    /**
+     * A static factory object for constructing `HTTPRequestValidatorError` instances
+     * using the defined templates.
+     *
+     * Example:
+     * ```ts
+     * throw HTTPRequestValidatorError.factory.InvalidLobbyIdLength();
+     * ```
+     */
     public static readonly factory = Object.fromEntries(
         Object.entries(HTTPRequestErrorTemplates).map(([key, template]) => {
             return [

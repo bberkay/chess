@@ -11,7 +11,6 @@ import { ChessEngine } from "@Chess/Engine/ChessEngine";
 import { Converter } from "@Chess/Utils/Converter";
 import { Player } from "src/Player";
 import { DESTROY_INACTIVE_LOBBY_TIMEOUT } from "@Consts";
-//import { LobbyError, LobbyErrorMsg } from "./LobbyError";
 import { Logger } from "src/Services/Logger";
 
 const lobbyLogger = new Logger("LobbyLogger");

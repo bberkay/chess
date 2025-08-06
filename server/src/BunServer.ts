@@ -15,6 +15,25 @@ import {
 } from "./HTTP";
 import { WebSocketHandler, WebSocketData } from "./WebSocket";
 
+/**
+ * Creates and starts a Bun HTTP and WebSocket server configured for the chess platform backend.
+ *
+ * This function sets up:
+ * - HTTP request handling with custom routing and CORS support.
+ * - WebSocket upgrade handling and event management for real-time communication.
+ * - Fallback handling for unmatched HTTP requests.
+ * - Error handling with standardized CORS error responses.
+ *
+ * The server configuration uses environment variables for port, maximum payload length,
+ * and idle timeout settings.
+ *
+ * Usage:
+ * ```ts
+ * const server = createServer();
+ * ```
+ *
+ * @returns The running Bun `Server` instance.
+ */
 export function createServer(): Server {
     const httpRequestHandler = new HTTPRequestHandler();
     const webSocketHandler = new WebSocketHandler();

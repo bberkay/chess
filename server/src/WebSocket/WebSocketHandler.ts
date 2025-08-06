@@ -45,7 +45,8 @@ export class WebSocketHandler {
     }
 
     /**
-     *
+     * Parses and validates the incoming WebSocket upgrade request,
+     * extracting and verifying the lobby ID and player token.
      */
     public createWsData(
         req: Request,
