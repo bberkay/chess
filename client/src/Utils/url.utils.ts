@@ -12,11 +12,12 @@
  * removeFalsyParamsAndEmptyLists({ name: "Alice", age: 0, tags: [], role: null })
  * // Returns: { name: "Alice" }
  */
+// TODO: Fix this eslint disable line
 export function removeFalsyParamsAndEmptyLists(
-    params: Record<string, any>,
+    params: Record<string, any>, // eslint-disable-line @typescript-eslint/no-explicit-any
 ): Record<string, string> {
     return Object.fromEntries(
-        Object.entries(params).filter(([_, value]) => {
+        Object.entries(params).filter(([, value]) => {
             if (Array.isArray(value)) {
                 return value.length > 0;
             }
@@ -40,6 +41,8 @@ export function removeFalsyParamsAndEmptyLists(
  * createURLFromEntries("http://localhost:3000", "api/users", { name: "Alice", active: true })
  * // Returns: "http://localhost:3000/api/users?name=Alice&active=true"
  */
+ // TODO: Fix this eslint disable line
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createURLFromEntries(root?: string, pathname?: string, endpoint?: Record<string, any>): string {
     let url: string = root || "";
     if (root && !root.endsWith("/")) url += "/";
