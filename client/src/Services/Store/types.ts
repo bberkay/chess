@@ -5,8 +5,8 @@ import { Settings } from "@Platform/Components/NavbarComponents/SettingsMenu";
 import { PostReqScheme, PostRoutes } from "../ApiService";
 
 /**
- * Enum for the local storage keys.
- * Add new keys here.
+ * Enum for all valid keys used for localStorage data.
+ * Add any new keys here to keep the Store type-safe.
  */
 export enum StoreKey {
     WasWelcomeModalShown = "WasWelcomeModalShown",
@@ -22,7 +22,7 @@ export enum StoreKey {
 }
 
 /**
- * Type mapping for local storage data types.
+ * Type mapping from StoreKey to the expected data type stored under that key.
  */
 export type StoreData = {
     [StoreKey.WasWelcomeModalShown]: boolean;

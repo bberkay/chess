@@ -55,6 +55,10 @@ class LogStore{
     }
 }
 
+/**
+ * Checks whether the global `document` object is available for event dispatching.
+ * This helps prevent errors in non-browser environments.
+ */
 const IS_DOC_AVAILABLE = (() => {
     try {
         if (typeof window !== "undefined" && document) {
@@ -69,8 +73,8 @@ const IS_DOC_AVAILABLE = (() => {
 })();
 
 /**
- * This static class provides a logger instance
- * for logging system
+ * Logger class provides named loggers to save messages with a source context.
+ * Logs are saved centrally and notify listeners via DOM events if available.
  */
 export class Logger{
     private logName: string;
@@ -83,7 +87,11 @@ export class Logger{
     }
 
     /**
-     * Save the message
+     * Saves a log message into the centralized LogStore.
+     * Joins multiple message parts with spaces.
+     * Dispatches a `LoggerEvent.LogAdded` event if the document is available.
+     * @param messages - One or more message parts to log.
+     * @throws LoggerError if saving or event dispatching fails.
      */
     public save(...messages: unknown[]): void
     {
@@ -101,7 +109,8 @@ export class Logger{
     }
 
     /**
-     * Returns the name of the logger.
+     * Returns the name of this Logger instance.
+     * @returns The logger's source name.
      */
     public name(): string
     {
@@ -109,7 +118,8 @@ export class Logger{
     }
 
     /**
-     * Returns the messages.
+     * Retrieves all saved logs from the central LogStore.
+     * @returns An immutable array of all logs.
      */
     public static messages(): Logs
     {
@@ -117,7 +127,7 @@ export class Logger{
     }
 
     /**
-     * Clear the messages.
+     * Clears all saved logs from the central LogStore.
      */
     public static clear(): void
     {
