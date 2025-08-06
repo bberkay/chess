@@ -2,8 +2,7 @@
  * Server Settings
  */
 export const CORS_HEADERS: Record<string, string> = {
-    // TODO: Change this
-    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Origin": Bun.env.CORS_ORIGIN!,
     "Access-Control-Allow-Methods": "OPTIONS, GET, POST",
     "Access-Control-Allow-Headers": "Content-Type",
     "Cross-Origin-Embedder-Policy": "require-corp",
@@ -13,10 +12,6 @@ export const CORS_HEADERS: Record<string, string> = {
 export const DEFAULT_CORS_RESPONSE: ResponseInit = {
     status: 200,
 };
-
-export const SERVER_PORT = 3000;
-export const MAX_PAYLOAD_LENGTH = 1024 * 25; // 25 KB
-export const MAX_IDLE_TIMEOUT = 16 * 60; // 16 minutes
 
 /**
  * Lobby Settings

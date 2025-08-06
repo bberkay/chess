@@ -8,7 +8,6 @@
  */
 
 import type { Server } from "bun";
-import { MAX_IDLE_TIMEOUT, MAX_PAYLOAD_LENGTH, SERVER_PORT } from "./Consts";
 import {
     AvailableHTTPRequests,
     HTTPRequestHandler,
@@ -20,7 +19,7 @@ export function createServer(): Server {
     const httpRequestHandler = new HTTPRequestHandler();
     const webSocketHandler = new WebSocketHandler();
     const server = Bun.serve<WebSocketData, AvailableHTTPRequests>({
-        port: SERVER_PORT,
+        port: Bun.env.SERVER_PORT,
         // avaiable routes
         routes: httpRequestHandler.expose(),
         // fallback for unmatched routes
@@ -55,8 +54,8 @@ export function createServer(): Server {
         },
         websocket: {
             ...webSocketHandler.expose(),
-            maxPayloadLength: MAX_PAYLOAD_LENGTH,
-            idleTimeout: MAX_IDLE_TIMEOUT,
+            maxPayloadLength: Number(Bun.env.MAX_PAYLOAD_LENGTH),
+            idleTimeout: Number(Bun.env.MAX_IDLE_TIMEOUT),
         },
         error(error) {
             console.error(error);

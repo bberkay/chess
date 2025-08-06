@@ -33,11 +33,6 @@ import type {
     WsOutgoingMessage,
     Player,
 } from "./Types";
-import {
-    RECONNECTION_ATTEMPT_LIMIT,
-    RECONNECTION_TIMEOUT,
-    WS_ADDRESS,
-} from "./Consts";
 import { SocketEvent, SocketOperation, WsTitle } from "./Types";
 import { Page } from "@Global/Page";
 import {
@@ -47,6 +42,9 @@ import {
 } from "./Services/ApiService";
 import { createURLFromEntries, getPathSegment, getQueryParam } from "./Utils/url.utils";
 import { GetReqScheme, PostReqScheme } from "./Services/ApiService/scheme";
+
+const RECONNECTION_ATTEMPT_LIMIT = 3;
+const RECONNECTION_TIMEOUT = 5;
 
 /**
  * `ChessPlatform` is the main class of the app. It provides the connections
@@ -69,6 +67,9 @@ export class ChessPlatform {
         this.chess = new Chess();
         this.platform = new Platform(this.chess);
         this.init();
+        console.log(import.meta.env.NODE_ENV);
+        console.log(import.meta.env.VITE_WS_URL);
+        console.log(import.meta.env.VITE_SERVER_URL);
     }
 
     /**
@@ -554,7 +555,7 @@ export class ChessPlatform {
     private createAndHandleWebSocket(lobbyId: string, player: Player): void {
         const createWebSocketUrl = (lobbyId: string, playerToken: string) => {
             return createURLFromEntries(
-                WS_ADDRESS,
+                import.meta.env.VITE_WS_URL,
                 lobbyId,
                 { playerToken }
             )
