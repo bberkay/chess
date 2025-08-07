@@ -18,7 +18,7 @@ services:
       args:
         VITE_SERVER_URL: http://localhost:3000
         VITE_WS_URL: ws://localhost:3000
-        REPOSITORY_URL: https://github.com/bberkay/chess
+        VITE_REPOSITORY_URL: https://github.com/bberkay/chess
     ports:
       - "4173:4173"
     depends_on:

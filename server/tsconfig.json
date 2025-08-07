@@ -1,34 +1,38 @@
 {
-  "compilerOptions": {
-    // Enable latest features
-    "lib": ["ESNext", "DOM"],
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleDetection": "force",
-    "jsx": "react-jsx",
-    "allowJs": true,
+    "compilerOptions": {
+        // Enable latest features
+        "lib": ["ESNext", "DOM"],
+        "target": "ESNext",
+        "module": "ESNext",
+        "moduleDetection": "force",
+        "jsx": "react-jsx",
+        "allowJs": true,
 
-    // Bundler mode
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "noEmit": true,
+        // Bundler mode
+        "moduleResolution": "bundler",
+        "allowImportingTsExtensions": true,
+        "noEmit": true,
 
-    // Best practices
-    "strict": true,
-    "skipLibCheck": true,
-    "noFallthroughCasesInSwitch": true,
+        // Best practices
+        "strict": true,
+        "skipLibCheck": true,
+        "noFallthroughCasesInSwitch": true,
 
-    // Some stricter flags (disabled by default)
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "noPropertyAccessFromIndexSignature": false,
+        // Some stricter flags (disabled by default)
+        "noUnusedLocals": false,
+        "noUnusedParameters": false,
+        "noPropertyAccessFromIndexSignature": false,
 
-    "baseUrl": ".",
-    "paths": {
-      "@Chess/*": ["src/Chess/*"],
-      "@Lobby": ["src/Lobby/index.ts"],
-      "@Utils": ["src/Utils/index.ts"],
-      "@Consts": ["src/Consts/index.ts"]
+        "baseUrl": ".",
+        "paths": {
+            "@Chess/*": ["src/Chess/*"],
+            "@Lobby": ["src/Lobby/index.ts"],
+            "@Player": ["src/Player/index.ts"],
+            "@Utils": ["src/Utils/index.ts"],
+            "@Consts": ["src/Consts/index.ts"],
+            "@WebSocket": ["src/WebSocket/index.ts"],
+            "@HTTP": ["src/HTTP/index.ts"],
+            "@Services/*": ["src/Services/*"]
+        }
     }
-  }
 }

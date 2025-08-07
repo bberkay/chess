@@ -14,19 +14,16 @@ WORKDIR /app
 # Accept build-time environment variables
 ARG VITE_SERVER_URL
 ARG VITE_WS_URL
-ARG REPOSITORY_URL
+ARG VITE_REPOSITORY_URL
 
 # Pass args to Vite as env variables
 ENV VITE_SERVER_URL=$VITE_SERVER_URL
 ENV VITE_WS_URL=$VITE_WS_URL
-ENV REPOSITORY_URL=$REPOSITORY_URL
+ENV VITE_REPOSITORY_URL=$VITE_REPOSITORY_URL
 
 COPY . .
 
-# Optional: confirm envs are set (debug)
-# RUN echo "Server: $VITE_SERVER_URL, WS: $VITE_WS_URL, Repo: $REPOSITORY_URL"
-
-# Build client (Vite uses VITE_ vars via import.meta.env.*)
+# Build client
 RUN bun run build
 
 # 4. Serve built static files using a tiny web server
