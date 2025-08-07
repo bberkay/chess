@@ -1,9 +1,8 @@
 import { GU_ID_LENGTH } from "@Consts";
 import { createRandomId } from "@Utils";
-import { Player } from "src/Player";
-import { LobbyRegistry } from "src/Lobby";
-import { PlayerRegistryError } from ".";
-import { Logger } from "src/Services/Logger";
+import { Player, PlayerRegistryError } from "@Player";
+import { LobbyRegistry } from "@Lobby";
+import { Logger } from "@Services/Logger";
 
 const _players: Map<string, Player> = new Map();
 const playerRegistryLogger = new Logger("PlayerRegistry");

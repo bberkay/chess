@@ -235,7 +235,7 @@ export class NotationMenu extends Component {
         return `
             <span class="offer-message"></span>
             <div class="offer-buttons">
-                <button class="menu-item" data-socket-operation="${SocketOperation.DeclineSentOffer}" data-tooltip-text="Decline Offer">Decline</button>
+                <button class="menu-item" data-socket-operation="${SocketOperation.DeclineOffer}" data-tooltip-text="Decline Offer">Decline</button>
                 <button class="menu-item" id="accept-button" data-socket-operation="" data-tooltip-text=""></button>
             </div>
         `;

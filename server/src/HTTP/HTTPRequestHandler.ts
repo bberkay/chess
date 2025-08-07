@@ -1,8 +1,8 @@
 import type { BunRequest } from "bun";
 import { HTTPGetRoutes, HTTPPostRoutes, HTTPRequestValidatorError } from ".";
 import { CORSResponse } from "./CORSResponse";
-import { LobbyRegistry } from "../Lobby";
-import { PlayerRegistry } from "../Player/PlayerRegistry";
+import { LobbyRegistry } from "@Lobby";
+import { PlayerRegistry } from "@Player";
 import {
     HTTPGetRequestValidator,
     HTTPPostRequestValidator,

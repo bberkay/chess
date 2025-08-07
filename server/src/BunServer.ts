@@ -12,8 +12,8 @@ import {
     AvailableHTTPRequests,
     HTTPRequestHandler,
     CORSResponse,
-} from "./HTTP";
-import { WebSocketHandler, WebSocketData } from "./WebSocket";
+} from "@HTTP";
+import { WebSocketHandler, WebSocketData } from "@WebSocket";
 
 /**
  * Creates and starts a Bun HTTP and WebSocket server configured for the chess platform backend.

@@ -9,9 +9,9 @@ import {
 } from "@Chess/Types";
 import { ChessEngine } from "@Chess/Engine/ChessEngine";
 import { Converter } from "@Chess/Utils/Converter";
-import { Player } from "src/Player";
+import { Player } from "@Player";
 import { DESTROY_INACTIVE_LOBBY_TIMEOUT } from "@Consts";
-import { Logger } from "src/Services/Logger";
+import { Logger } from "@Services/Logger";
 
 const lobbyLogger = new Logger("LobbyLogger");
 

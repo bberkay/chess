@@ -2,9 +2,9 @@ import { JsonNotation, StartPosition, Duration } from "@Chess/Types";
 import { Lobby } from "@Lobby";
 import { createRandomId } from "@Utils";
 import { GU_ID_LENGTH } from "@Consts";
-import { Player } from "src/Player";
+import { Player } from "@Player";
 import { LobbyRegistryError } from ".";
-import { Logger } from "src/Services/Logger";
+import { Logger } from "@Services/Logger";
 
 const _lobbies: Map<string, Lobby> = new Map();
 const lobbyRegistryLogger = new Logger("LobbyRegistry");

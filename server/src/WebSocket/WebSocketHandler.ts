@@ -5,9 +5,9 @@ import {
     type RWebSocket,
     type WebSocketData,
 } from ".";
-import { Player, PlayerRegistry } from "src/Player";
-import { HTTPGetRoutes, CORSResponse } from "src/HTTP";
-import { LobbyRegistry } from "src/Lobby";
+import { Player, PlayerRegistry } from "@Player";
+import { HTTPGetRoutes, CORSResponse } from "@HTTP";
+import { LobbyRegistry } from "@Lobby";
 import { Lobby } from "@Lobby";
 import { Color, Square } from "@Chess/Types";
 import { WebSocketValidator } from "./WebSocketValidator";

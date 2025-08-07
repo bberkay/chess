@@ -1,7 +1,7 @@
 import { Color, GameStatus, JsonNotation, Square } from "@Chess/Types";
 import { Lobby } from "@Lobby";
 import { ServerWebSocket } from "bun";
-import { Player, Players } from "src/Player";
+import { Player, Players } from "@Player";
 
 /**
  * Represents the data associated with a WebSocket connection.

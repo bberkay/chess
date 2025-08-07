@@ -1,4 +1,4 @@
-import { Player } from "src/Player";
+import { Player } from "@Player";
 
 /**
  * Defines the available HTTP API routes that can be used by
