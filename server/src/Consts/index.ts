@@ -5,8 +5,6 @@ export const CORS_HEADERS: Record<string, string> = {
     "Access-Control-Allow-Origin": Bun.env.CORS_ORIGIN!,
     "Access-Control-Allow-Methods": "OPTIONS, GET, POST",
     "Access-Control-Allow-Headers": "Content-Type",
-    "Cross-Origin-Embedder-Policy": "require-corp",
-    "Cross-Origin-Opener-Policy": "same-origin",
 };
 
 export const DEFAULT_CORS_RESPONSE: ResponseInit = {
