@@ -39,11 +39,9 @@ export function createServer(): Server {
     const webSocketHandler = new WebSocketHandler();
     console.log("available CORS: ", Bun.env.CORS_ORIGIN);
     const server = Bun.serve<WebSocketData, AvailableHTTPRequests>({
+        port: Bun.env.SERVER_PORT,
         // avaiable routes
-        //routes: httpRequestHandler.expose(),
-        routes: {
-            "/health": new Response("OK"),
-        },
+        routes: httpRequestHandler.expose(),
         // fallback for unmatched routes
         fetch(req: Request, server: Server) {
             if (
