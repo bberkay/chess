@@ -37,6 +37,7 @@ import { WebSocketHandler, WebSocketData } from "@WebSocket";
 export function createServer(): Server {
     const httpRequestHandler = new HTTPRequestHandler();
     const webSocketHandler = new WebSocketHandler();
+    console.log("available CORS: ", Bun.env.CORS_ORIGIN);
     const server = Bun.serve<WebSocketData, AvailableHTTPRequests>({
         port: Bun.env.SERVER_PORT,
         // avaiable routes
@@ -47,6 +48,8 @@ export function createServer(): Server {
                 httpRequestHandler.canHandle(req) &&
                 !webSocketHandler.canHandle(req)
             ) {
+                console.log("req could not catched: ", req);
+                console.log("req headers: ", req.headers);
                 return new CORSResponse(
                     {
                         success: false,
@@ -93,6 +96,6 @@ export function createServer(): Server {
         },
     });
 
-    console.log(`Listening on http://localhost:${server.port} ...`);
+    console.log(`Listening on http://${server.hostname}:${server.port} ...`);
     return server;
 }

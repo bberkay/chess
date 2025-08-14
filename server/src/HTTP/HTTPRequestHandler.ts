@@ -113,6 +113,8 @@ export class HTTPRequestHandler {
                     { status: 204, headers: req.headers },
                 ),
             POST: async (req) => {
+                console.log("create post catched: ", req);
+                console.log("create post headers: ", req.headers);
                 try {
                     const body = await HTTPPostRequestValidator.parseAndValidate(HTTPPostRoutes.CreateLobby, req);
 
@@ -122,6 +124,7 @@ export class HTTPRequestHandler {
                     });
 
                     const player = PlayerRegistry.create(body.name);
+                    console.log("Lobby created");
                     return new CORSResponse(
                         {
                             success: true,
@@ -132,6 +135,7 @@ export class HTTPRequestHandler {
                         { status: 200 },
                     );
                 } catch (e: unknown) {
+                    console.log("error is here");
                     return new CORSResponse(
                         {
                             success: false,
