@@ -107,14 +107,17 @@ export class HTTPRequestHandler {
         return {
             GET: () =>
                 new CORSResponse({ success: false, message: "NO" }),
-            OPTIONS: (req) =>
-                new CORSResponse(
+            OPTIONS: (req) => {
+                console.log("OPTION create post catched: ", req);
+                console.log("OPTION create post headers: ", req.headers);
+                return new CORSResponse(
                     { success: true, message: "ok" },
                     { status: 204, headers: req.headers },
-                ),
+                );
+            },
             POST: async (req) => {
-                console.log("create post catched: ", req);
-                console.log("create post headers: ", req.headers);
+                console.log("POST create post catched: ", req);
+                console.log("POST create post headers: ", req.headers);
                 try {
                     const body = await HTTPPostRequestValidator.parseAndValidate(HTTPPostRoutes.CreateLobby, req);
 
