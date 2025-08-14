@@ -301,7 +301,7 @@ export class ChessPlatform {
             this.platform.navigatorModal.showLobbyInfo(
                 window.location.origin + "/" + lobbyId,
             );
-
+            console.log("we are here create lobby");
             Store.save(StoreKey.LastLobbyConnection, response.data);
             Store.save(StoreKey.LastPlayerName, player.name);
             document.dispatchEvent(
@@ -579,7 +579,6 @@ export class ChessPlatform {
         this.socket.onopen = () => {
             shouldTerminateConnectionOnClose = false;
             this.reconnectionAttemptRemaining = RECONNECTION_ATTEMPT_LIMIT;
-            this.platform.navigatorModal.hide();
         };
 
         this.socket.onmessage = (event) => {
