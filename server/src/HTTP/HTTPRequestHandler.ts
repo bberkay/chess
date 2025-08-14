@@ -19,8 +19,8 @@ type GETHandler<T extends HTTPGetRoutes> = {
  * A RESTful request handler interface with GET, OPTIONS, and POST methods.
  */
 type RESTHandler<T extends HTTPPostRoutes> = {
-    GET: () => CORSResponse<HTTPGetRoutes.Root>;
-    OPTIONS: () => CORSResponse<HTTPGetRoutes.Root>;
+    GET: (req: BunRequest<T>) => CORSResponse<HTTPGetRoutes.Root>;
+    OPTIONS: (req: BunRequest<T>) => CORSResponse<HTTPGetRoutes.Root>;
     POST: (req: BunRequest<T>) => Promise<CORSResponse<T>>;
 };
 
@@ -106,11 +106,11 @@ export class HTTPRequestHandler {
     private _createLobby(): AvailableHTTPRequests[HTTPPostRoutes.CreateLobby] {
         return {
             GET: () =>
-                new CORSResponse({ success: false, message: "Use post" }),
-            OPTIONS: () =>
+                new CORSResponse({ success: false, message: "NO" }),
+            OPTIONS: (req) =>
                 new CORSResponse(
-                    { success: true, message: "allowed" },
-                    { status: 204 },
+                    { success: true, message: "ok" },
+                    { status: 204, headers: req.headers },
                 ),
             POST: async (req) => {
                 try {
@@ -157,11 +157,11 @@ export class HTTPRequestHandler {
     private _connectLobby(): AvailableHTTPRequests[HTTPPostRoutes.ConnectLobby] {
         return {
             GET: () =>
-                new CORSResponse({ success: false, message: "Use post" }),
-            OPTIONS: () =>
+                new CORSResponse({ success: false, message: "NO" }),
+            OPTIONS: (req) =>
                 new CORSResponse(
-                    { success: true, message: "allowed" },
-                    { status: 204 },
+                    { success: true, message: "OK" },
+                    { status: 204, headers: req.headers },
                 ),
             POST: async (req) => {
                 try {
@@ -202,11 +202,11 @@ export class HTTPRequestHandler {
     private _reconnectLobby(): AvailableHTTPRequests[HTTPPostRoutes.ReconnectLobby] {
         return {
             GET: () =>
-                new CORSResponse({ success: false, message: "Use post" }),
-            OPTIONS: () =>
+                new CORSResponse({ success: false, message: "NO" }),
+            OPTIONS: (req) =>
                 new CORSResponse(
-                    { success: true, message: "allowed" },
-                    { status: 204 },
+                    { success: true, message: "OK" },
+                    { status: 204, headers: req.headers },
                 ),
             POST: async (req) => {
                 try {
