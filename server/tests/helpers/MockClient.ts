@@ -13,6 +13,7 @@ export abstract class MockClient {
     protected _player: Player | null = null;
     protected _ws: WebSocket | null = null;
     protected _lobbyId: string | null = null;
+    // FIXME: Improve typing of `_incomingMessages`
     protected _incomingMessages: Record<string, unknown> = {};
 
     constructor(serverUrl: string, wsUrl: string) {
@@ -106,6 +107,7 @@ export abstract class MockClient {
                     console.log("found 0504: ", data, this._ws?.url);
                     delete this._incomingMessages[wsTitle];
                     console.log("found 0504: ", this._incomingMessages[wsTitle], this._ws?.url);
+                    // @ts-expect-error Check out FIXME of `_incomingMessages` from the top of the class
                     resolve(data);
                 }
             }, WS_MESSAGE_RECEIVE_CHECK)

@@ -2,7 +2,7 @@
  * A constant object that contains template functions for generating
  * error messages related to player registry failures.
  */
-const PlayerRegistryErrorTemplates = {
+export const PlayerRegistryErrorTemplates = {
     /**
      * Indicates that a player token could not be generated.
      */

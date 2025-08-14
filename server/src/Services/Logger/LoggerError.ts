@@ -1,7 +1,7 @@
 /**
  * Templates for various Logger errors with detailed messages.
  */
-const LoggerErrorTemplates = {
+export const LoggerErrorTemplates = {
     LogSavingFailed: (details: string) => `Failed to save log message ${details}`,
     LogEventDispatchFailed: (details: string) =>
         `Failed to dispatching event after saving log message ${details}`,

@@ -1,7 +1,7 @@
 /**
  * Templates for store-related error messages.
  */
-const StoreErrorTemplates = {
+export const StoreErrorTemplates = {
     /**
      * Error message template for invalid store keys.
      * @param key - The invalid key attempted to be used.

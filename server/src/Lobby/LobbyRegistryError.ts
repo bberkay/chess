@@ -1,7 +1,7 @@
 /**
  * Templates for LobbyRegistry error messages.
  */
-const LobbyRegistryErrorTemplates = {
+export const LobbyRegistryErrorTemplates = {
     LobbyIdNotCreated: () => `Lobby id could not created.`,
 } as const;
 

@@ -32,6 +32,7 @@ export enum PostRoutes {
  * Describes the expected request and response shape
  * for each GET route in the application.
  */
+// TODO: Create validation for GetReqScheme and PostReqScheme
 export interface GetReqScheme {
     [GetRoutes.Hello]: {
         request: {

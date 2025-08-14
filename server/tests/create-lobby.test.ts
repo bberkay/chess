@@ -5,8 +5,7 @@ import { isValidLength } from "@Utils";
 import {
     GU_ID_LENGTH,
 } from "@Consts";
-import { HTTPPostRoutes, HTTPPostBody } from "src/HTTP";
-import { HTTPValidationErrorMsg } from "src/HTTP/HTTPRequestValidator";
+import { HTTPPostRoutes, HTTPPostBody, HTTPRequestErrorTemplates } from "src/HTTP";
 import { MockCreator } from "./helpers/MockCreator";
 
 let server: Server | null = null;
@@ -34,7 +33,7 @@ const shouldCreate = async (body: HTTPPostBody[HTTPPostRoutes.CreateLobby]) => {
     expect(creatorClient.player.isOnline).toBe(true);
 }
 
-const shouldNotCreate = async (body: HTTPPostBody[HTTPPostRoutes.CreateLobby], errMsg?: HTTPValidationErrorMsg) => {
+const shouldNotCreate = async (body: HTTPPostBody[HTTPPostRoutes.CreateLobby], errMsg?: string) => {
     const creatorClient = new MockCreator(serverUrl, webSocketUrl);
     const createdLobbyResponse = await creatorClient.createLobby(body, false);
     expect(createdLobbyResponse.success).toBe(false);
@@ -57,7 +56,7 @@ describe("Create Lobby Tests", () => {
             board: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
             remaining: 300000,
             increment: 5000
-        }, HTTPValidationErrorMsg.INVALID_NAME_LENGTH);
+        }, HTTPRequestErrorTemplates.InvalidNameLength());
     });
 
     test("Should not create a standard lobby when name is too long", async () => {
@@ -66,7 +65,7 @@ describe("Create Lobby Tests", () => {
             board: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
             remaining: 300000,
             increment: 5000
-        }, HTTPValidationErrorMsg.INVALID_NAME_LENGTH);
+        }, HTTPRequestErrorTemplates.InvalidNameLength());
     });
 
     test("Should not create a standard lobby when board is too short", async () => {
@@ -75,7 +74,7 @@ describe("Create Lobby Tests", () => {
             board: "rnbqkbnr/ppp",
             remaining: 300000,
             increment: 5000
-        }, HTTPValidationErrorMsg.INVALID_BOARD_LENGTH);
+        }, HTTPRequestErrorTemplates.InvalidBoardLength());
     });
 
     test("Should not create a standard lobby when board is too long", async () => {
@@ -84,7 +83,7 @@ describe("Create Lobby Tests", () => {
             board: "rnbqkbnr/ppprnbqkbnr/ppprnbqkbnr/ppprnbqkbnr/ppprnbqkbnr/ppprnbqkbnr/ppprnbqkbnr/ppprnbqkbnr/ppprnbqkbnr/ppprnbqkbnr/ppprnbqkbnr/ppprnbqkbnr/ppprnbqkbnr/ppprnbqkbnr/ppprnbqkbnr/ppprnbqkbnr/ppprnbqkbnr/ppprnbqkbnr/ppprnbqkbnr/ppprnbqkbnr/ppprnbqkbnr/ppprnbqkbnr/ppprnbqkbnr/ppprnbqkbnr/ppp",
             remaining: 300000,
             increment: 5000
-        }, HTTPValidationErrorMsg.INVALID_BOARD_LENGTH);
+        }, HTTPRequestErrorTemplates.InvalidBoardLength());
     });
 
     test("Should not create a standard lobby when remaining is too big", async () => {
@@ -93,7 +92,7 @@ describe("Create Lobby Tests", () => {
             board: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
             remaining: 300000000000,
             increment: 5000
-        }, HTTPValidationErrorMsg.INVALID_REMAINING_VALUE);
+        }, HTTPRequestErrorTemplates.InvalidRemainingValue());
     });
 
     test("Should not create a standard lobby when remaining is zero", async () => {
@@ -102,7 +101,7 @@ describe("Create Lobby Tests", () => {
             board: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
             remaining: 0,
             increment: 5000
-        }, HTTPValidationErrorMsg.INVALID_REMAINING_VALUE);
+        }, HTTPRequestErrorTemplates.InvalidRemainingValue());
     });
 
     test("Should not create a standard lobby when remaining is negative", async () => {
@@ -111,7 +110,7 @@ describe("Create Lobby Tests", () => {
             board: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
             remaining: -300000,
             increment: 5000
-        }, HTTPValidationErrorMsg.INVALID_REMAINING_VALUE);
+        }, HTTPRequestErrorTemplates.InvalidRemainingValue());
     });
 
     test("Should not create a standard lobby when increment is too big", async () => {
@@ -120,7 +119,7 @@ describe("Create Lobby Tests", () => {
             board: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
             remaining: 300000,
             increment: 50000000000000,
-        }, HTTPValidationErrorMsg.INVALID_INCREMENT_VALUE);
+        }, HTTPRequestErrorTemplates.InvalidIncrementValue());
     });
 
     test("Should create a standard lobby when increment is zero", async () => {
@@ -138,7 +137,7 @@ describe("Create Lobby Tests", () => {
             board: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
             remaining: 300000,
             increment: -5000,
-        }, HTTPValidationErrorMsg.INVALID_INCREMENT_VALUE);
+        }, HTTPRequestErrorTemplates.InvalidIncrementValue());
     });
 });
 

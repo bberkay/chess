@@ -4,7 +4,7 @@ import { GU_ID_LENGTH } from "@Consts";
  * A constant object holding template functions for generating
  * error messages related to WebSocket validation failures.
  */
-const WebSocketErrorTemplates = {
+export const WebSocketErrorTemplates = {
     /**
      * Error message when the player token length is invalid.
      * Also implies that the lobby must exist.

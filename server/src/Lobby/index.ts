@@ -9,4 +9,4 @@
 
 export * from "./Lobby.ts";
 export * from "./LobbyRegistry.ts";
-export { LobbyRegistryError } from "./LobbyRegistryError.ts";
+export { LobbyRegistryError, LobbyRegistryErrorTemplates } from "./LobbyRegistryError.ts";

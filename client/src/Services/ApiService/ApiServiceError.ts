@@ -2,7 +2,7 @@
  * A collection of error message templates used by the ApiService class.
  * Each template receives contextual details and returns a human-readable string.
  */
-const ApiServiceErrorTemplates = {
+export const ApiServiceErrorTemplates = {
     RequestUrlConstructFailed: (details: string) => `Failed to construct request URL ${details}`,
     GetRequestFailed: (details: string) => `Failed to complete GET request ${details}`,
     PostRequestFailed: (details: string) => `Failed to complete POST request ${details}`,

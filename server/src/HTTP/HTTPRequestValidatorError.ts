@@ -13,7 +13,7 @@ import {
  * A constant object holding factory functions for constructing
  * standardized HTTP request validation error messages.
  */
-const HTTPRequestErrorTemplates = {
+export const HTTPRequestErrorTemplates = {
     InvalidRoute: (route: string) =>
         `Invalid request. Given route ${route} is not implemented.`,
     InvalidLobbyIdLength: () =>
