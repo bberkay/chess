@@ -1,4 +1,3 @@
-import { removeFalsyParamsAndEmptyLists } from "@Utils";
 import { GetReqScheme, GetRoutes, PostReqScheme, PostRoutes } from "./scheme";
 import { ApiServiceError } from "./ApiServiceError";
 
@@ -20,8 +19,8 @@ export class ApiService {
     static _createUrl(
         serverUrl: string,
         route: string,
-        pathParams?: Record<string, unknown> | null,
-        queryParams?: Record<string, unknown> | null,
+        pathParams?: Record<string, string> | null,
+        queryParams?: Record<string, string> | null,
     ): string {
         try {
             let queryString = serverUrl + route;
@@ -33,9 +32,7 @@ export class ApiService {
             if (queryParams) {
                 queryString +=
                     "?" +
-                    new URLSearchParams(
-                        removeFalsyParamsAndEmptyLists(queryParams),
-                    ).toString();
+                    new URLSearchParams(queryParams).toString();
             }
 
             return encodeURI(queryString);
@@ -126,7 +123,7 @@ export class ApiService {
                 body:
                     body instanceof FormData
                         ? body
-                        : JSON.stringify(removeFalsyParamsAndEmptyLists(body)),
+                        : JSON.stringify(body),
             });
 
             const data = await response.json();
