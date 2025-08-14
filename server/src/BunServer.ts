@@ -41,7 +41,10 @@ export function createServer(): Server {
     const server = Bun.serve<WebSocketData, AvailableHTTPRequests>({
         port: Bun.env.SERVER_PORT,
         // avaiable routes
-        routes: httpRequestHandler.expose(),
+        //routes: httpRequestHandler.expose(),
+        routes: {
+            "/health": new Response("OK"),
+        },
         // fallback for unmatched routes
         fetch(req: Request, server: Server) {
             if (
