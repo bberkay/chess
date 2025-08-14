@@ -71,8 +71,13 @@ export class HTTPRequestHandler {
         return {
             GET: (req) => {
                 try {
-                    HTTPGetRequestValidator.validate(HTTPGetRoutes.CheckLobby, req);
-                    const isLobbyFound = LobbyRegistry.check(req.params.lobbyId);
+                    HTTPGetRequestValidator.validate(
+                        HTTPGetRoutes.CheckLobby,
+                        req,
+                    );
+                    const isLobbyFound = LobbyRegistry.check(
+                        req.params.lobbyId,
+                    );
                     const message = isLobbyFound
                         ? "Lobby found"
                         : "Lobby could not be found";
@@ -91,7 +96,9 @@ export class HTTPRequestHandler {
                         },
                         {
                             status:
-                                e instanceof HTTPRequestValidatorError ? 400 : 500,
+                                e instanceof HTTPRequestValidatorError
+                                    ? 400
+                                    : 500,
                         },
                     );
                 }
@@ -105,21 +112,19 @@ export class HTTPRequestHandler {
      */
     private _createLobby(): AvailableHTTPRequests[HTTPPostRoutes.CreateLobby] {
         return {
-            GET: () =>
-                new CORSResponse({ success: false, message: "NO" }),
-            OPTIONS: (req) => {
-                console.log("OPTION create post catched: ", req);
-                console.log("OPTION create post headers: ", req.headers);
-                return new CORSResponse(
+            GET: () => new CORSResponse({ success: false, message: "NO" }),
+            OPTIONS: (req) =>
+                new CORSResponse(
                     { success: true, message: "ok" },
                     { status: 204, headers: req.headers },
-                );
-            },
+                ),
             POST: async (req) => {
-                console.log("POST create post catched: ", req);
-                console.log("POST create post headers: ", req.headers);
                 try {
-                    const body = await HTTPPostRequestValidator.parseAndValidate(HTTPPostRoutes.CreateLobby, req);
+                    const body =
+                        await HTTPPostRequestValidator.parseAndValidate(
+                            HTTPPostRoutes.CreateLobby,
+                            req,
+                        );
 
                     const lobbyId = LobbyRegistry.create(body.board, {
                         remaining: body.remaining,
@@ -149,7 +154,9 @@ export class HTTPRequestHandler {
                         },
                         {
                             status:
-                                e instanceof HTTPRequestValidatorError ? 400 : 500,
+                                e instanceof HTTPRequestValidatorError
+                                    ? 400
+                                    : 500,
                         },
                     );
                 }
@@ -163,8 +170,7 @@ export class HTTPRequestHandler {
      */
     private _connectLobby(): AvailableHTTPRequests[HTTPPostRoutes.ConnectLobby] {
         return {
-            GET: () =>
-                new CORSResponse({ success: false, message: "NO" }),
+            GET: () => new CORSResponse({ success: false, message: "NO" }),
             OPTIONS: (req) =>
                 new CORSResponse(
                     { success: true, message: "OK" },
@@ -172,7 +178,11 @@ export class HTTPRequestHandler {
                 ),
             POST: async (req) => {
                 try {
-                    const body = await HTTPPostRequestValidator.parseAndValidate(HTTPPostRoutes.ConnectLobby, req);
+                    const body =
+                        await HTTPPostRequestValidator.parseAndValidate(
+                            HTTPPostRoutes.ConnectLobby,
+                            req,
+                        );
 
                     const player = PlayerRegistry.create(body.name);
                     return new CORSResponse(
@@ -194,7 +204,9 @@ export class HTTPRequestHandler {
                         },
                         {
                             status:
-                                e instanceof HTTPRequestValidatorError ? 400 : 500,
+                                e instanceof HTTPRequestValidatorError
+                                    ? 400
+                                    : 500,
                         },
                     );
                 }
@@ -208,8 +220,7 @@ export class HTTPRequestHandler {
      */
     private _reconnectLobby(): AvailableHTTPRequests[HTTPPostRoutes.ReconnectLobby] {
         return {
-            GET: () =>
-                new CORSResponse({ success: false, message: "NO" }),
+            GET: () => new CORSResponse({ success: false, message: "NO" }),
             OPTIONS: (req) =>
                 new CORSResponse(
                     { success: true, message: "OK" },
@@ -217,7 +228,11 @@ export class HTTPRequestHandler {
                 ),
             POST: async (req) => {
                 try {
-                    const body = await HTTPPostRequestValidator.parseAndValidate(HTTPPostRoutes.ReconnectLobby, req);
+                    const body =
+                        await HTTPPostRequestValidator.parseAndValidate(
+                            HTTPPostRoutes.ReconnectLobby,
+                            req,
+                        );
 
                     const lobby = LobbyRegistry.get(body.lobbyId);
                     if (!lobby) {
@@ -280,7 +295,9 @@ export class HTTPRequestHandler {
                         },
                         {
                             status:
-                                e instanceof HTTPRequestValidatorError ? 400 : 500,
+                                e instanceof HTTPRequestValidatorError
+                                    ? 400
+                                    : 500,
                         },
                     );
                 }

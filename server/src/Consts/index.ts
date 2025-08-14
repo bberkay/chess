@@ -2,7 +2,7 @@
  * Server Settings
  */
 export const CORS_HEADERS: Record<string, string> = {
-    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Origin": Bun.env.CORS_ORIGIN || "*",
     "Access-Control-Allow-Methods": "OPTIONS, GET, POST",
     "Access-Control-Allow-Headers": "Content-Type",
 };
