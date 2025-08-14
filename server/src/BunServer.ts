@@ -39,7 +39,6 @@ export function createServer(): Server {
     const webSocketHandler = new WebSocketHandler();
     console.log("available CORS: ", Bun.env.CORS_ORIGIN);
     const server = Bun.serve<WebSocketData, AvailableHTTPRequests>({
-        port: Bun.env.SERVER_PORT,
         // avaiable routes
         //routes: httpRequestHandler.expose(),
         routes: {
