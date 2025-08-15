@@ -653,6 +653,7 @@ export class ChessPlatform {
                 "An error occurred on the WebSocket connection. Retrying...",
             );
 
+            // TODO: Add backoff
             let remainingTime = RECONNECTION_TIMEOUT;
             const reconnectionTimeout = document.getElementById(
                 "reconnection-counter",
