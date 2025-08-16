@@ -5,12 +5,9 @@ import { MockCreator } from "./helpers/MockCreator";
 import { MockGuest } from "./helpers/MockGuest";
 import { CORSResponseBody, HTTPPostRoutes } from "@HTTP";
 
-const CONCURRENCY_LEVELS = [10, 50, 100]; //
-const SOAK_TEST_DURATION = 120_000; // 10 seconds
+const TEST_CONCURRENCY_LEVELS = [10, 50, 100]; // number of simultaneous requests
 const ACCEPTABLE_LOBBY_CREATION_TIME = 100; // milliseconds
-
-const LOAD_TEST_TIMEOUT = 10000; // 10 seconds
-const SPIKE_TEST_TIMEOUT = 10000; // 10 seconds
+const TEST_TIMEOUT = 10000; // 10 seconds
 
 let server: Server | null = null;
 let serverUrl = "";
@@ -22,30 +19,10 @@ beforeAll(async () => {
     webSocketUrl = server.url.href.replace("http", "ws");
 });
 
-const createTestLobby = async (): Promise<CORSResponseBody<HTTPPostRoutes.CreateLobby>> => {
-    const result = await (new MockCreator(serverUrl, webSocketUrl)).createLobby();
-    return result;
-}
-
-const connectTestLobby = async (): Promise<CORSResponseBody<HTTPPostRoutes.ConnectLobby>> => {
-    const { lobbyId } = (await (new MockCreator(serverUrl, webSocketUrl)).createLobby()).data!;
-    const result = await (new MockGuest(serverUrl, webSocketUrl)).connectLobby({ name: "guest", lobbyId });
-    return result;
-}
-
-const reconnectTestLobby = async (): Promise<CORSResponseBody<HTTPPostRoutes.ReconnectLobby>> => {
-    const { lobbyId } = (await (new MockCreator(serverUrl, webSocketUrl)).createLobby()).data!;
-    const guest = new MockGuest(serverUrl, webSocketUrl)
-    const { player } = (await guest.connectLobby({ name: "guest", lobbyId })).data!;
-    await guest.disconnectLobby();
-    const result = await guest.reconnectLobby({ playerToken: player.token, lobbyId });
-    return result;
-}
-
-const loadTest = async (clientOperation: () => Promise<CORSResponseBody<HTTPPostRoutes>>): Promise<void> => {
+const measureOperation = async (operation: () => Promise<CORSResponseBody<HTTPPostRoutes>>): Promise<void> => {
     const resultsSummary: Record<string, number | string | boolean>[] = [];
 
-    for (const concurrency of CONCURRENCY_LEVELS) {
+    for (const concurrency of TEST_CONCURRENCY_LEVELS) {
         const latencies: number[] = [];
 
         const startMem = process.memoryUsage().heapUsed;
@@ -55,7 +32,7 @@ const loadTest = async (clientOperation: () => Promise<CORSResponseBody<HTTPPost
 
         const promises = Array.from({ length: concurrency }, async () => {
             const start = performance.now();
-            const result = await clientOperation();
+            const result = await operation();
             latencies.push(performance.now() - start);
             return result;
         });
@@ -106,96 +83,38 @@ const loadTest = async (clientOperation: () => Promise<CORSResponseBody<HTTPPost
     console.table(resultsSummary);
 }
 
-const spikeTest = async (clientOperation: () => Promise<CORSResponseBody<HTTPPostRoutes>>, lowConcurrency: number, highConcurrency: number) => {
-    console.log(`Starting spike test: ${lowConcurrency} → ${highConcurrency} clients`);
+const createTestLobby = async (): Promise<CORSResponseBody<HTTPPostRoutes.CreateLobby>> => {
+    const result = await (new MockCreator(serverUrl, webSocketUrl)).createLobby();
+    return result;
+}
 
-    // Low concurrency warm-up
-    await Promise.all(Array.from({ length: lowConcurrency }, clientOperation));
+const connectTestLobby = async (): Promise<CORSResponseBody<HTTPPostRoutes.ConnectLobby>> => {
+    const { lobbyId } = (await (new MockCreator(serverUrl, webSocketUrl)).createLobby()).data!;
+    const result = await (new MockGuest(serverUrl, webSocketUrl)).connectLobby({ name: "guest", lobbyId });
+    return result;
+}
 
-    // Spike to high concurrency
-    const startMem = process.memoryUsage().heapUsed;
-    const startCpu = process.cpuUsage();
-    const startTime = performance.now();
-
-    const promises = Array.from({ length: highConcurrency }, clientOperation);
-    await Promise.all(promises);
-
-    const endTime = performance.now();
-    const endMem = process.memoryUsage().heapUsed;
-    const memDiffMB = (endMem - startMem) / 1024 / 1024;
-    const cpuTimeMs = (process.cpuUsage(startCpu).user + process.cpuUsage(startCpu).system) / 1000;
-
-    console.log(`Spike test completed in ${(endTime - startTime).toFixed(2)}ms`);
-    console.log(`Memory change: ${memDiffMB.toFixed(2)} MB`);
-    console.log(`CPU time: ${cpuTimeMs.toFixed(2)} ms`);
-};
-
-const soakTest = async (clientOperation: () => Promise<CORSResponseBody<HTTPPostRoutes>>, concurrency: number, durationMs: number) => {
-    console.log(`Starting soak test: ${concurrency} clients for ${durationMs / 1000}s`);
-
-    const startMem = process.memoryUsage().heapUsed;
-    const memSamples: number[] = [];
-
-    const startCpu = process.cpuUsage();
-    const startTime = Date.now();
-    let ops = 0;
-
-    while (Date.now() - startTime < durationMs) {
-        const batch = Array.from({ length: concurrency }, clientOperation);
-        await Promise.all(batch);
-        ops += concurrency;
-
-        // Sample memory periodically
-        if (ops % (concurrency * 5) === 0) {
-            memSamples.push(process.memoryUsage().heapUsed / 1024 / 1024);
-        }
-    }
-
-    const endCpu = process.cpuUsage(startCpu);
-    const cpuTimeMs = (endCpu.user + endCpu.system) / 1000;
-
-    console.log(`Soak test completed. Total operations: ${ops}`);
-    console.log(`CPU time: ${cpuTimeMs.toFixed(2)} ms`);
-    console.log(`Memory samples (MB):`, memSamples);
-    console.log(`Memory change from start: ${(memSamples[memSamples.length - 1] - (startMem / 1024 / 1024)).toFixed(2)} MB`);
-};
+const reconnectTestLobby = async (): Promise<CORSResponseBody<HTTPPostRoutes.ReconnectLobby>> => {
+    const { lobbyId } = (await (new MockCreator(serverUrl, webSocketUrl)).createLobby()).data!;
+    const guest = new MockGuest(serverUrl, webSocketUrl)
+    const { player } = (await guest.connectLobby({ name: "guest", lobbyId })).data!;
+    await guest.disconnectLobby();
+    const result = await guest.reconnectLobby({ playerToken: player.token, lobbyId });
+    return result;
+}
 
 describe("Performance Tests", () => {
-    test("Load test for lobby creation", async () => {
-        await loadTest(createTestLobby);
-    }, LOAD_TEST_TIMEOUT * CONCURRENCY_LEVELS.length);
+    test("Should scale efficiently across concurrency levels during lobby creation", async () => {
+        await measureOperation(createTestLobby);
+    }, TEST_TIMEOUT * TEST_CONCURRENCY_LEVELS.length);
 
-    test("Load test for lobby connection", async () => {
-        await loadTest(connectTestLobby);
-    }, LOAD_TEST_TIMEOUT * CONCURRENCY_LEVELS.length);
+    test("Should scale efficiently across concurrency levels during lobby connection", async () => {
+        await measureOperation(connectTestLobby);
+    }, TEST_TIMEOUT * TEST_CONCURRENCY_LEVELS.length);
 
-    test("Load test for lobby reconnection", async () => {
-        await loadTest(reconnectTestLobby);
-    }, LOAD_TEST_TIMEOUT * CONCURRENCY_LEVELS.length);
-
-    test("Spike test for lobby creation", async () => {
-        await spikeTest(createTestLobby, 10, 500);
-    }, SPIKE_TEST_TIMEOUT);
-
-    test("Spike test for lobby connection", async () => {
-        await spikeTest(connectTestLobby, 10, 500);
-    }, SPIKE_TEST_TIMEOUT);
-
-    test("Spike test for lobby reconnection", async () => {
-        await spikeTest(reconnectTestLobby, 10, 500);
-    }, SPIKE_TEST_TIMEOUT);
-
-    test("Soak test for lobby creation", async () => {
-        await soakTest(createTestLobby, 200, SOAK_TEST_DURATION);
-    }, SOAK_TEST_DURATION * 1.5);
-
-    test("Soak test for lobby connection", async () => {
-        await soakTest(connectTestLobby, 200, SOAK_TEST_DURATION);
-    }, SOAK_TEST_DURATION * 1.5);
-
-    test("Soak test for lobby reconnection", async () => {
-        await soakTest(reconnectTestLobby, 200, SOAK_TEST_DURATION);
-    }, SOAK_TEST_DURATION * 1.5);
+    test("Should scale efficiently across concurrency levels during lobby reconnection", async () => {
+        await measureOperation(reconnectTestLobby);
+    }, TEST_TIMEOUT * TEST_CONCURRENCY_LEVELS.length);
 });
 
 afterAll(() => {

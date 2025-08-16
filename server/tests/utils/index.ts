@@ -1,4 +1,4 @@
-import { HTTPPostBody, HTTPResponseData, HTTPPostRoutes, CORSResponseBody } from "src/HTTP";
+import { HTTPPostBody, HTTPPostRoutes, CORSResponseBody } from "src/HTTP";
 import { fetch } from "bun";
 import { Color, JsonNotation } from "@Chess/Types";
 import { ChessEngine } from "@Chess/Engine/ChessEngine";
@@ -31,63 +31,11 @@ export async function testFetch<
     return (await createLobbyRequest.json()) as CORSResponseBody<T>;
 }
 
-export async function reconnectToTestLobby(
-    serverUrl: string,
-    webSocketUrl: string,
-    reconnectLobbyBody: HTTPPostBody[HTTPPostRoutes.ReconnectLobby],
-): Promise<[HTTPResponseData[HTTPPostRoutes.ReconnectLobby], WebSocket]> {
-    const reconnectedLobbyResponse = await testFetch(
-        serverUrl,
-        HTTPPostRoutes.ReconnectLobby,
-        reconnectLobbyBody,
-    );
-
-    if (!reconnectedLobbyResponse.data)
-        throw new Error("Could not reconnect lobby");
-
-    const { lobbyId, user } = reconnectedLobbyResponse.data;
-
-    const wsSocketUrl = createWebSocketUrl(webSocketUrl, lobbyId, user.id);
-    const guestWs = new WebSocket(wsSocketUrl);
-
-    await new Promise<void>((resolve) => {
-        guestWs.onopen = () => {
-            resolve();
-        };
-    });
-
-    return [reconnectedLobbyResponse.data, guestWs];
-}
-
-export async function disconnectFromTestLobby(ws: WebSocket): Promise<void> {
-    return new Promise<void>((resolve) => {
-        ws.onclose = () => {
-            resolve();
-        };
-        ws.close();
-    });
-}
-
 // Wait briefly to allow WebSocket cleanup and internal state
 // updates to complete.
 export async function waitForWebSocketSettle(duration: number): Promise<void> {
     await new Promise<void>((resolve) => {
         setTimeout(() => resolve(), duration);
-    });
-}
-
-// Waits until a WebSocket message is received, or times out.
-// Useful for testing onmessage handlers or event delivery.
-export async function waitForWebSocketMessage(
-    func: (
-        resolve: (value: void | PromiseLike<void>) => void,
-        reject: (reason?: unknown) => void,
-    ) => void,
-    timeout: number,
-): Promise<void> {
-    await new Promise<void>((resolve, reject) => {
-        func(resolve, reject);
-        setTimeout(() => reject(new Error("Operation timed out")), timeout);
     });
 }
 
