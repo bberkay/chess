@@ -39,7 +39,7 @@ export async function waitForWebSocketSettle(duration: number): Promise<void> {
     });
 }
 
-export function createLocalBoard(createLobbyBody: HTTPPostBody[HTTPPostRoutes.CreateLobby]): JsonNotation {
+export function createLocalBoard(createLobbyBody: { board: string, remaining: number, increment: number }): JsonNotation {
     const chessEngine = new ChessEngine();
     const jsonBoard = Converter.fenToJson(createLobbyBody.board);
     jsonBoard.durations = {

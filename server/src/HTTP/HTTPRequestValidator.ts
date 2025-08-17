@@ -127,7 +127,7 @@ export class HTTPPostRequestValidator {
         ))
             throw HTTPRequestValidatorError.factory.InvalidNameLength();
 
-        if (body.board.length > MAX_FEN_LENGTH || body.board.length < MIN_FEN_LENGTH)
+        if (!isInRange(body.board.length, MIN_FEN_LENGTH, MAX_FEN_LENGTH))
             throw HTTPRequestValidatorError.factory.InvalidBoardLength();
 
         if (!isInRange(body.remaining, MIN_REMAINING_TIME, MAX_REMAINING_TIME))

@@ -7,9 +7,14 @@ export class MockGuest extends MockClient {
         super(serverUrl, wsUrl);
     }
 
-    public async connectLobby(connectLobbyBody: HTTPPostBody[HTTPPostRoutes.ConnectLobby], throwError: boolean = true): Promise<CORSResponseBody<HTTPPostRoutes.ConnectLobby>> {
+    public async connectLobby(
+        connectLobbyBody: HTTPPostBody[HTTPPostRoutes.ConnectLobby],
+        throwError: boolean = true,
+    ): Promise<CORSResponseBody<HTTPPostRoutes.ConnectLobby>> {
         if (this._player && this._player.isOnline) {
-            console.warn("Closing current connection before connecting to new lobby...");
+            console.warn(
+                "Closing current connection before connecting to new lobby...",
+            );
             await this.disconnectLobby();
         }
 
@@ -23,10 +28,16 @@ export class MockGuest extends MockClient {
             this._lobbyId = connectedLobbyResponse.data.lobbyId;
             this._player = connectedLobbyResponse.data.player;
 
-            const wsLobbyUrl = createWsLobbyConnUrl(this._wsUrl, this._lobbyId, this._player.token);
+            const wsLobbyUrl = createWsLobbyConnUrl(
+                this._wsUrl,
+                this._lobbyId,
+                this._player.token,
+            );
             await this._initWsHandlers(wsLobbyUrl);
         } else if (throwError) {
-            throw new Error(`Could not connect to lobby: ${connectedLobbyResponse.message}`);
+            throw new Error(
+                `Could not connect to lobby: ${connectedLobbyResponse.message}`,
+            );
         }
 
         return connectedLobbyResponse;

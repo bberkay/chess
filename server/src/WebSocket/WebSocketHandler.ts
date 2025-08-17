@@ -228,6 +228,10 @@ export class WebSocketHandler {
     /**
      * Start the game of the given lobby id if
      * it is ready.
+     *
+     * TODO: This function should be improved.
+     * WsTitle.Reconnected shouldn't be send
+     * from here.
      */
     private _startGame(ws: RWebSocket, lobby: Lobby): void {
         const createStartedCommand = () => {

@@ -1,5 +1,5 @@
 import type { BunRequest } from "bun";
-import { HTTPGetRoutes, HTTPPostRoutes, HTTPRequestValidatorError } from ".";
+import { HTTPGetRoutes, HTTPPostRoutes, HTTPRequestHandlerError, HTTPRequestValidatorError } from ".";
 import { CORSResponse } from "./CORSResponse";
 import { LobbyRegistry } from "@Lobby";
 import { PlayerRegistry } from "@Player";
@@ -7,6 +7,7 @@ import {
     HTTPGetRequestValidator,
     HTTPPostRequestValidator,
 } from "./HTTPRequestValidator";
+import { createResponseFromError } from "./utils";
 
 /**
  * A GET request handler interface with a single GET method.
@@ -71,18 +72,29 @@ export class HTTPRequestHandler {
         return {
             GET: (req) => {
                 try {
+                    const lobbyId = req.params.lobbyId;
+
                     HTTPGetRequestValidator.validate(
                         HTTPGetRoutes.CheckLobby,
                         req,
                     );
+
                     const isLobbyFound = LobbyRegistry.check(
-                        req.params.lobbyId,
+                        lobbyId
                     );
-                    const message = isLobbyFound
-                        ? "Lobby found"
-                        : "Lobby could not be found";
+
+                    if (!isLobbyFound) {
+                        return new CORSResponse(
+                            {
+                                success: false,
+                                message: HTTPRequestHandlerError.factory.LobbyNotFound(lobbyId).message,
+                            },
+                            { status: 404 },
+                        );
+                    }
+
                     return new CORSResponse(
-                        { success: true, message, data: isLobbyFound },
+                        { success: true, message: "Lobby found", data: true },
                         { status: 200 },
                     );
                 } catch (e: unknown) {
@@ -90,13 +102,13 @@ export class HTTPRequestHandler {
                         {
                             success: false,
                             message:
-                                e instanceof HTTPRequestValidatorError
+                                e instanceof HTTPRequestValidatorError || e instanceof HTTPRequestHandlerError
                                     ? e.message
-                                    : "An error occurred while handling the parameters.",
+                                    : HTTPRequestHandlerError.factory.UnexpectedErrorWhileCheckingLobby().message,
                         },
                         {
                             status:
-                                e instanceof HTTPRequestValidatorError
+                                e instanceof HTTPRequestValidatorError || e instanceof HTTPRequestHandlerError
                                     ? 400
                                     : 500,
                         },
@@ -115,7 +127,7 @@ export class HTTPRequestHandler {
             GET: () => new CORSResponse({ success: false, message: "NO" }),
             OPTIONS: (req) =>
                 new CORSResponse(
-                    { success: true, message: "ok" },
+                    { success: true, message: "OK" },
                     { status: 204, headers: req.headers },
                 ),
             POST: async (req) => {
@@ -132,7 +144,6 @@ export class HTTPRequestHandler {
                     });
 
                     const player = PlayerRegistry.create(body.name);
-                    console.log("Lobby created");
                     return new CORSResponse(
                         {
                             success: true,
@@ -143,22 +154,7 @@ export class HTTPRequestHandler {
                         { status: 200 },
                     );
                 } catch (e: unknown) {
-                    console.log("error is here");
-                    return new CORSResponse(
-                        {
-                            success: false,
-                            message:
-                                e instanceof HTTPRequestValidatorError
-                                    ? e.message
-                                    : "An error occurred while handling the parameters.",
-                        },
-                        {
-                            status:
-                                e instanceof HTTPRequestValidatorError
-                                    ? 400
-                                    : 500,
-                        },
-                    );
+                    return createResponseFromError(e, HTTPRequestHandlerError.factory.UnexpectedErrorWhileCreatingLobby())
                 }
             },
         };
@@ -184,6 +180,37 @@ export class HTTPRequestHandler {
                             req,
                         );
 
+                    const lobby = LobbyRegistry.get(body.lobbyId);
+                    if (!lobby) {
+                        return new CORSResponse(
+                            {
+                                success: false,
+                                message: HTTPRequestHandlerError.factory.LobbyNotFound(body.lobbyId).message,
+                            },
+                            { status: 404 },
+                        );
+                    }
+
+                    if (lobby.isGameStarted()) {
+                        return new CORSResponse(
+                            {
+                                success: false,
+                                message: HTTPRequestHandlerError.factory.LobbyAlreadyStarted(body.lobbyId).message,
+                            },
+                            { status: 403 },
+                        );
+                    }
+
+                    if (lobby.areBothPlayersOnline()) {
+                        return new CORSResponse(
+                            {
+                                success: false,
+                                message: HTTPRequestHandlerError.factory.LobbyFull(body.lobbyId).message,
+                            },
+                            { status: 403 },
+                        );
+                    }
+
                     const player = PlayerRegistry.create(body.name);
                     return new CORSResponse(
                         {
@@ -194,21 +221,7 @@ export class HTTPRequestHandler {
                         { status: 200 },
                     );
                 } catch (e: unknown) {
-                    return new CORSResponse(
-                        {
-                            success: false,
-                            message:
-                                e instanceof HTTPRequestValidatorError
-                                    ? e.message
-                                    : "An error occurred while handling the parameters.",
-                        },
-                        {
-                            status:
-                                e instanceof HTTPRequestValidatorError
-                                    ? 400
-                                    : 500,
-                        },
-                    );
+                    return createResponseFromError(e, HTTPRequestHandlerError.factory.UnexpectedErrorWhileConnectingLobby())
                 }
             },
         };
@@ -239,7 +252,7 @@ export class HTTPRequestHandler {
                         return new CORSResponse(
                             {
                                 success: false,
-                                message: `Lobby not found.`,
+                                message: HTTPRequestHandlerError.factory.LobbyNotFound(body.lobbyId).message,
                             },
                             { status: 404 },
                         );
@@ -250,7 +263,7 @@ export class HTTPRequestHandler {
                         return new CORSResponse(
                             {
                                 success: false,
-                                message: `Invalid playerToken.`,
+                                message: HTTPRequestHandlerError.factory.PlayerNotFound(body.playerToken).message,
                             },
                             { status: 401 },
                         );
@@ -260,9 +273,9 @@ export class HTTPRequestHandler {
                         return new CORSResponse(
                             {
                                 success: false,
-                                message: `User is not a player in the lobby.`,
+                                message: HTTPRequestHandlerError.factory.InvalidPlayer(body.lobbyId, body.playerToken).message,
                             },
-                            { status: 400 },
+                            { status: 403 },
                         );
                     }
 
@@ -270,7 +283,7 @@ export class HTTPRequestHandler {
                         return new CORSResponse(
                             {
                                 success: false,
-                                message: `User is already online.`,
+                                message: HTTPRequestHandlerError.factory.PlayerAlreadyOnline(body.lobbyId, body.playerToken).message,
                             },
                             { status: 400 },
                         );
@@ -285,21 +298,7 @@ export class HTTPRequestHandler {
                         { status: 200 },
                     );
                 } catch (e: unknown) {
-                    return new CORSResponse(
-                        {
-                            success: false,
-                            message:
-                                e instanceof HTTPRequestValidatorError
-                                    ? e.message
-                                    : "An error occurred while handling the parameters.",
-                        },
-                        {
-                            status:
-                                e instanceof HTTPRequestValidatorError
-                                    ? 400
-                                    : 500,
-                        },
-                    );
+                    return createResponseFromError(e, HTTPRequestHandlerError.factory.UnexpectedErrorWhileReconnectingLobby())
                 }
             },
         };

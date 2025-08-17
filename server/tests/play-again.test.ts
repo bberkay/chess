@@ -108,7 +108,6 @@ describe("Play Again Tests", () => {
         expect(guestFirstStartedData.players.White).toEqual(guestSecondStartedData.players.Black);
 
         const awaitedBoard = createLocalBoard({
-            name: "isBoardCorrect",
             board: STARTED_BOARD,
             ...STARTED_DURATIONS
         });

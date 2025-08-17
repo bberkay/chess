@@ -13,19 +13,27 @@ import {
  * A constant object holding factory functions for constructing
  * standardized HTTP request validation error messages.
  */
-export const HTTPRequestErrorTemplates = {
+export const HTTPRequestValidatorErrorTemplates = {
     InvalidRoute: (route: string) =>
         `Invalid request. Given route ${route} is not implemented.`,
+    InvalidLobbyId: () =>
+        `Invalid request. "lobbyId" must be a valid identifier.`,
     InvalidLobbyIdLength: () =>
         `Invalid request. "lobbyId" length must be ${GU_ID_LENGTH} length.`,
+    InvalidName: () =>
+        `Invalid request. "name" must only contain valid characters (letters, numbers, underscores).`,
     InvalidNameLength: () =>
         `Invalid request. "name" length must be between ${MIN_PLAYER_NAME_LENGTH} and ${MAX_PLAYER_NAME_LENGTH}.`,
+    InvalidBoard: () =>
+        `Invalid request. "board" must be a valid FEN string representing a chess position.`,
     InvalidBoardLength: () =>
         `Invalid request. "board" length must be less than ${MAX_FEN_LENGTH}.`,
     InvalidRemainingValue: () =>
         `Invalid request. "remaining" must be a number between ${MIN_REMAINING_TIME} and ${MAX_REMAINING_TIME}.`,
     InvalidIncrementValue: () =>
         `Invalid request. "increment" must be a number between ${MIN_INCREMENT_TIME} and ${MAX_INCREMENT_TIME}.`,
+    InvalidPlayerToken: () =>
+        `Invalid request. "playerToken" must be a valid identifier.`,
     InvalidPlayerTokenLength: () =>
         `Invalid request. "playerToken" length must be ${GU_ID_LENGTH}`,
 } as const;
@@ -42,7 +50,7 @@ type ErrorFactory<T> = {
 /**
  * Union type of valid error template keys.
  */
-type HTTPRequestErrorTemplate = keyof typeof HTTPRequestErrorTemplates;
+type HTTPRequestValidatorErrorTemplate = keyof typeof HTTPRequestValidatorErrorTemplates;
 
 /**
  * A custom error class for HTTP request validation failures.
@@ -52,7 +60,7 @@ export class HTTPRequestValidatorError extends Error {
     /**
      * The key identifying which validation rule the error relates to.
      */
-    public readonly key: HTTPRequestErrorTemplate;
+    public readonly key: HTTPRequestValidatorErrorTemplate;
 
     /**
      * Private constructor to force the use of the static factory.
@@ -60,31 +68,31 @@ export class HTTPRequestValidatorError extends Error {
      * @param key - The error key corresponding to the specific validation rule.
      * @param message - The human-readable error message.
      */
-    private constructor(key: HTTPRequestErrorTemplate, message: string) {
+    private constructor(key: HTTPRequestValidatorErrorTemplate, message: string) {
         super(message);
-        this.name = "HTTPRequestValidatorError";
+        this.name = "HTTPRequestValidatorErrorTemplate";
         this.key = key;
     }
 
     /**
-     * A static factory object for constructing `HTTPRequestValidatorError` instances
+     * A static factory object for constructing `HTTPRequestValidatorErrorTemplate` instances
      * using the defined templates.
      *
      * Example:
      * ```ts
-     * throw HTTPRequestValidatorError.factory.InvalidLobbyIdLength();
+     * throw HTTPRequestValidatorErrorTemplate.factory.InvalidLobbyIdLength();
      * ```
      */
     public static readonly factory = Object.fromEntries(
-        Object.entries(HTTPRequestErrorTemplates).map(([key, template]) => {
+        Object.entries(HTTPRequestValidatorErrorTemplates).map(([key, template]) => {
             return [
                 key,
                 (...args: unknown[]) =>
                     new HTTPRequestValidatorError(
-                        key as HTTPRequestErrorTemplate,
+                        key as HTTPRequestValidatorErrorTemplate,
                         (template as (...args: unknown[]) => string)(...args),
                     ),
             ];
         }),
-    ) as ErrorFactory<typeof HTTPRequestErrorTemplates>;
+    ) as ErrorFactory<typeof HTTPRequestValidatorErrorTemplates>;
 }

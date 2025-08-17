@@ -4,17 +4,11 @@ import { GU_ID_LENGTH } from "@Consts";
  * A constant object holding template functions for generating
  * error messages related to WebSocket validation failures.
  */
-export const WebSocketErrorTemplates = {
-    /**
-     * Error message when the player token length is invalid.
-     * Also implies that the lobby must exist.
-     */
-    InvalidPlayerTokenLength: () => `Invalid request. "playerToken" length must be ${GU_ID_LENGTH} and lobby must exist.`,
-
-    /**
-     * Error message when the lobby ID length is invalid.
-     */
-    InvalidLobbyIdLength: () => `Invalid request. "lobbyId" length must be ${GU_ID_LENGTH} length.`,
+export const WebSocketValidatorErrorTemplates = {
+    InvalidPlayerTokenLength: () =>
+        `Invalid request. "playerToken" length must be ${GU_ID_LENGTH} and lobby must exist.`,
+    InvalidLobbyIdLength: () =>
+        `Invalid request. "lobbyId" length must be ${GU_ID_LENGTH} length.`,
 } as const;
 
 /**
@@ -30,7 +24,8 @@ type ErrorFactory<T> = {
 /**
  * Union type of valid error keys in `WebSocketErrorTemplates`.
  */
-type WebSocketErrorTemplate = keyof typeof WebSocketErrorTemplates;
+type WebSocketValidatorErrorTemplate =
+    keyof typeof WebSocketValidatorErrorTemplates;
 
 /**
  * A custom error class representing WebSocket validation errors,
@@ -40,7 +35,7 @@ export class WebSocketValidatorError extends Error {
     /**
      * The key of the error template that was used to generate this error.
      */
-    public readonly key: WebSocketErrorTemplate;
+    public readonly key: WebSocketValidatorErrorTemplate;
 
     /**
      * Private constructor to enforce error instantiation via the static factory.
@@ -48,7 +43,7 @@ export class WebSocketValidatorError extends Error {
      * @param key - The error template key.
      * @param message - The generated error message.
      */
-    private constructor(key: WebSocketErrorTemplate, message: string) {
+    private constructor(key: WebSocketValidatorErrorTemplate, message: string) {
         super(message);
         this.name = "WebSocketValidatorError";
         this.key = key;
@@ -64,15 +59,19 @@ export class WebSocketValidatorError extends Error {
      * ```
      */
     public static readonly factory = Object.fromEntries(
-        Object.entries(WebSocketErrorTemplates).map(([key, template]) => {
-            return [
-                key,
-                (...args: unknown[]) =>
-                    new WebSocketValidatorError(
-                        key as WebSocketErrorTemplate,
-                        (template as (...args: unknown[]) => string)(...args),
-                    ),
-            ];
-        }),
-    ) as ErrorFactory<typeof WebSocketErrorTemplates>;
+        Object.entries(WebSocketValidatorErrorTemplates).map(
+            ([key, template]) => {
+                return [
+                    key,
+                    (...args: unknown[]) =>
+                        new WebSocketValidatorError(
+                            key as WebSocketValidatorErrorTemplate,
+                            (template as (...args: unknown[]) => string)(
+                                ...args,
+                            ),
+                        ),
+                ];
+            },
+        ),
+    ) as ErrorFactory<typeof WebSocketValidatorErrorTemplates>;
 }
