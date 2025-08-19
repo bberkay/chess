@@ -315,7 +315,7 @@ export class Lobby {
      * both players agree to finish the game as draw.
      */
     public abort(): boolean {
-        if (this.isGameStarted() && this.chessEngine.getMoveHistory().length > 0 || this.isGameFinished()) return false;
+        if (this.isGameStarted() && this.chessEngine.getMoveHistory().length >= 2 || this.isGameFinished()) return false;
         this.chessEngine.setGameStatus(GameStatus.ReadyToStart);
         return this.finishGame();
     }

@@ -2,10 +2,12 @@ import { createServer } from "src/BunServer";
 import { test, expect, beforeAll, afterAll, describe } from "vitest";
 import { type Server } from "bun";
 import { WsStartedData, WsTitle } from "src/WebSocket";
-import { Square } from "@Chess/Types";
+import { GameStatus, Square } from "@Chess/Types";
 import { MockCreator } from "./helpers/MockCreator";
 import { MockGuest } from "./helpers/MockGuest";
-import { MockClient } from "./helpers/MockClient";
+import { MockClient, MockClientPullErrorMsg } from "./helpers/MockClient";
+import { LobbyRegistry } from "@Lobby";
+import { WebSocketHandlerErrorTemplates } from "src/WebSocket/WebSocketHandlerError";
 
 let server: Server | null = null;
 let serverUrl = "";
@@ -17,11 +19,11 @@ beforeAll(async () => {
     webSocketUrl = server.url.href.replace("http", "ws");
 });
 
-const createWhiteAndBlackClients = async (creatorClient: MockCreator, guestClient: MockGuest): Promise<[MockClient, MockClient]> => {
-    creatorClient = new MockCreator(serverUrl, webSocketUrl);
+const createWhiteAndBlackClients = async (): Promise<[MockClient, MockClient]> => {
+    const creatorClient = new MockCreator(serverUrl, webSocketUrl);
     const { lobbyId } = (await creatorClient.createLobby()).data!;
 
-    guestClient = new MockGuest(serverUrl, webSocketUrl);
+    const guestClient = new MockGuest(serverUrl, webSocketUrl);
     await guestClient.connectLobby({ name: "alex", lobbyId });
 
     const startedData: WsStartedData = await guestClient.pull(WsTitle.Started);
@@ -35,12 +37,25 @@ const createWhiteAndBlackClients = async (creatorClient: MockCreator, guestClien
     return [whitePlayerClient, blackPlayerClient];
 }
 
+const shouldGameFinished = (lobbyId: string) => {
+    const lobby = LobbyRegistry.get(lobbyId);
+    if (!lobby) throw new Error("Lobby could not found");
+    expect(lobby.getGameStatus()).toBe(GameStatus.ReadyToStart);
+}
+
+const shouldNotGameFinished = (lobbyId: string) => {
+    const lobby = LobbyRegistry.get(lobbyId);
+    if (!lobby) throw new Error("Lobby could not found");
+    expect(lobby.getGameStatus()).not.toBe(GameStatus.ReadyToStart);
+}
+
 describe("Play Again Tests", () => {
     test("Should creator be able to abort game if the game is not started", async () => {
         const creatorClient = new MockCreator(serverUrl, webSocketUrl);
         await creatorClient.createLobby()
         creatorClient.abortGame();
         await creatorClient.pull(WsTitle.Aborted);
+        shouldGameFinished(creatorClient.lobbyId!);
     });
 
     test("Should guest be able to abort game if the game is not started", async () => {
@@ -53,6 +68,7 @@ describe("Play Again Tests", () => {
         guestClient.abortGame();
         await creatorClient.pull(WsTitle.Aborted);
         await guestClient.pull(WsTitle.Aborted);
+        shouldGameFinished(creatorClient.lobbyId!);
     });
 
     test("Should creator be able to abort game if no move is played", async () => {
@@ -65,73 +81,77 @@ describe("Play Again Tests", () => {
         creatorClient.abortGame();
         await creatorClient.pull(WsTitle.Aborted);
         await guestClient.pull(WsTitle.Aborted);
+        shouldGameFinished(creatorClient.lobbyId!);
     });
 
-    test("Should creator be able to abort game if both sides are not played their own starter moves.", async () => {
-        const creatorClient = new MockCreator(serverUrl, webSocketUrl);
-        const guestClient = new MockGuest(serverUrl, webSocketUrl);
-
-        const [whitePlayerClient, blackPlayerClient] = await createWhiteAndBlackClients(creatorClient, guestClient);
+    test("Should white be able to abort game if both sides are not played their own starter moves.", async () => {
+        const [whitePlayerClient, blackPlayerClient] = await createWhiteAndBlackClients();
 
         whitePlayerClient.move(Square.e2, Square.e4);
         await blackPlayerClient.pull(WsTitle.Moved);
 
-        creatorClient.abortGame();
-        await creatorClient.pull(WsTitle.Aborted);
-        await guestClient.pull(WsTitle.Aborted);
+        whitePlayerClient.abortGame();
+        await whitePlayerClient.pull(WsTitle.Aborted);
+        await blackPlayerClient.pull(WsTitle.Aborted);
+        shouldGameFinished(whitePlayerClient.lobbyId!);
     });
 
-    test("Should guest be able to abort game if both sides are not played their own starter moves", async () => {
-        const creatorClient = new MockCreator(serverUrl, webSocketUrl);
-        const guestClient = new MockGuest(serverUrl, webSocketUrl);
-
-        const [whitePlayerClient, blackPlayerClient] = await createWhiteAndBlackClients(creatorClient, guestClient);
+    test("Should black be able to abort game if both sides are not played their own starter moves", async () => {
+        const [whitePlayerClient, blackPlayerClient] = await createWhiteAndBlackClients();
 
         whitePlayerClient.move(Square.e2, Square.e4);
         await blackPlayerClient.pull(WsTitle.Moved);
 
-        guestClient.abortGame();
-        await creatorClient.pull(WsTitle.Aborted);
-        await guestClient.pull(WsTitle.Aborted);
+        blackPlayerClient.abortGame();
+        await whitePlayerClient.pull(WsTitle.Aborted);
+        await blackPlayerClient.pull(WsTitle.Aborted);
+        shouldGameFinished(whitePlayerClient.lobbyId!);
     });
 
-    test("Should creator not be able to abort game if both sides are played their own starter moves.", async () => {
-        const creatorClient = new MockCreator(serverUrl, webSocketUrl);
-        const guestClient = new MockGuest(serverUrl, webSocketUrl);
-
-        const [whitePlayerClient, blackPlayerClient] = await createWhiteAndBlackClients(creatorClient, guestClient);
+    test("Should white not be able to abort game if both sides are played their own starter moves.", async () => {
+        const [whitePlayerClient, blackPlayerClient] = await createWhiteAndBlackClients();
 
         whitePlayerClient.move(Square.e2, Square.e4);
         await blackPlayerClient.pull(WsTitle.Moved);
         blackPlayerClient.move(Square.e7, Square.e5);
         await whitePlayerClient.pull(WsTitle.Moved);
 
-        creatorClient.abortGame();
-        await expect(creatorClient.pull(WsTitle.Aborted)).rejects.toThrow("Could not poll from pool.");
-        await expect(guestClient.pull(WsTitle.Aborted)).rejects.toThrow("Could not poll from pool.");
+        whitePlayerClient.abortGame();
+        await expect(
+            whitePlayerClient.pull(WsTitle.Aborted),
+        ).rejects.toThrow(MockClientPullErrorMsg);
+        await expect(
+            blackPlayerClient.pull(WsTitle.Aborted),
+        ).rejects.toThrow(MockClientPullErrorMsg);
+        expect((await whitePlayerClient.pull(WsTitle.Error)).message).toBe(
+            WebSocketHandlerErrorTemplates.AbortGameFailed(whitePlayerClient.lobbyId!, whitePlayerClient.player!.token),
+        );
+        shouldNotGameFinished(whitePlayerClient.lobbyId!);
     });
 
-    test("Should guest not be able to abort game if both sides are played their own starter moves", async () => {
-        const creatorClient = new MockCreator(serverUrl, webSocketUrl);
-        const guestClient = new MockGuest(serverUrl, webSocketUrl);
-
-        const [whitePlayerClient, blackPlayerClient] = await createWhiteAndBlackClients(creatorClient, guestClient);
+    test("Should black not be able to abort game if both sides are played their own starter moves", async () => {
+        const [whitePlayerClient, blackPlayerClient] = await createWhiteAndBlackClients();
 
         whitePlayerClient.move(Square.e2, Square.e4);
         await blackPlayerClient.pull(WsTitle.Moved);
         blackPlayerClient.move(Square.e7, Square.e5);
         await whitePlayerClient.pull(WsTitle.Moved);
 
-        guestClient.abortGame();
-        await expect(creatorClient.pull(WsTitle.Aborted)).rejects.toThrow("Could not poll from pool.");
-        await expect(guestClient.pull(WsTitle.Aborted)).rejects.toThrow("Could not poll from pool.");
+        blackPlayerClient.abortGame();
+        await expect(
+            whitePlayerClient.pull(WsTitle.Aborted),
+        ).rejects.toThrow(MockClientPullErrorMsg);
+        await expect(
+            blackPlayerClient.pull(WsTitle.Aborted),
+        ).rejects.toThrow(MockClientPullErrorMsg);
+        expect((await blackPlayerClient.pull(WsTitle.Error)).message).toBe(
+            WebSocketHandlerErrorTemplates.AbortGameFailed(blackPlayerClient.lobbyId!, blackPlayerClient.player!.token),
+        );
+        shouldNotGameFinished(whitePlayerClient.lobbyId!);
     });
 
-    test("Should creator be able to abort game if the game is taken back to initial status", async () => {
-        const creatorClient = new MockCreator(serverUrl, webSocketUrl);
-        const guestClient = new MockGuest(serverUrl, webSocketUrl);
-
-        const [whitePlayerClient, blackPlayerClient] = await createWhiteAndBlackClients(creatorClient, guestClient);
+    test("Should white be able to abort game if the game is taken back to initial status", async () => {
+        const [whitePlayerClient, blackPlayerClient] = await createWhiteAndBlackClients();
 
         whitePlayerClient.move(Square.e2, Square.e4);
         await blackPlayerClient.pull(WsTitle.Moved);
@@ -143,16 +163,14 @@ describe("Play Again Tests", () => {
         await whitePlayerClient.pull(WsTitle.UndoAccepted);
         await blackPlayerClient.pull(WsTitle.UndoAccepted);
 
-        creatorClient.abortGame();
-        await creatorClient.pull(WsTitle.Aborted);
-        await guestClient.pull(WsTitle.Aborted);
+        whitePlayerClient.abortGame();
+        await whitePlayerClient.pull(WsTitle.Aborted);
+        await blackPlayerClient.pull(WsTitle.Aborted);
+        shouldGameFinished(whitePlayerClient.lobbyId!);
     });
 
-    test("Should guest be able to abort game if the game is taken back to initial status", async () => {
-        const creatorClient = new MockCreator(serverUrl, webSocketUrl);
-        const guestClient = new MockGuest(serverUrl, webSocketUrl);
-
-        const [whitePlayerClient, blackPlayerClient] = await createWhiteAndBlackClients(creatorClient, guestClient);
+    test("Should black be able to abort game if the game is taken back to initial status", async () => {
+        const [whitePlayerClient, blackPlayerClient] = await createWhiteAndBlackClients();
 
         whitePlayerClient.move(Square.e2, Square.e4);
         await blackPlayerClient.pull(WsTitle.Moved);
@@ -164,9 +182,10 @@ describe("Play Again Tests", () => {
         await whitePlayerClient.pull(WsTitle.UndoAccepted);
         await blackPlayerClient.pull(WsTitle.UndoAccepted);
 
-        guestClient.abortGame();
-        await creatorClient.pull(WsTitle.Aborted);
-        await guestClient.pull(WsTitle.Aborted);
+        blackPlayerClient.abortGame();
+        await whitePlayerClient.pull(WsTitle.Aborted);
+        await blackPlayerClient.pull(WsTitle.Aborted);
+        shouldGameFinished(whitePlayerClient.lobbyId!);
     });
 });
 
