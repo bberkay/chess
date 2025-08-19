@@ -11,6 +11,12 @@ let server: Server | null = null;
 let serverUrl = "";
 let webSocketUrl = "";
 
+beforeAll(async () => {
+    server = createServer();
+    serverUrl = server.url.href;
+    webSocketUrl = server.url.href.replace("http", "ws");
+});
+
 const createWhiteAndBlackClients = async (creatorClient: MockCreator, guestClient: MockGuest): Promise<[MockClient, MockClient]> => {
     creatorClient = new MockCreator(serverUrl, webSocketUrl);
     const { lobbyId } = (await creatorClient.createLobby()).data!;
@@ -19,21 +25,15 @@ const createWhiteAndBlackClients = async (creatorClient: MockCreator, guestClien
     await guestClient.connectLobby({ name: "alex", lobbyId });
 
     const startedData: WsStartedData = await guestClient.pull(WsTitle.Started);
-    const whitePlayerClient = startedData.players.White.id === guestClient.player.id
+    const whitePlayerClient = startedData.players.White.id === guestClient.player!.id
         ? guestClient
         : creatorClient;
-    const blackPlayerClient = startedData.players.Black.id === guestClient.player.id
+    const blackPlayerClient = startedData.players.Black.id === guestClient.player!.id
         ? guestClient
         : creatorClient;
 
     return [whitePlayerClient, blackPlayerClient];
 }
-
-beforeAll(async () => {
-    server = createServer();
-    serverUrl = server.url.href;
-    webSocketUrl = server.url.href.replace("http", "ws");
-});
 
 describe("Play Again Tests", () => {
     test("Should creator be able to abort game if the game is not started", async () => {

@@ -97,9 +97,9 @@ const connectTestLobby = async (): Promise<CORSResponseBody<HTTPPostRoutes.Conne
 const reconnectTestLobby = async (): Promise<CORSResponseBody<HTTPPostRoutes.ReconnectLobby>> => {
     const { lobbyId } = (await (new MockCreator(serverUrl, webSocketUrl)).createLobby()).data!;
     const guest = new MockGuest(serverUrl, webSocketUrl)
-    const { player } = (await guest.connectLobby({ name: "guest", lobbyId })).data!;
+    await guest.connectLobby({ name: "guest", lobbyId });
     await guest.disconnectLobby();
-    const result = await guest.reconnectLobby({ playerToken: player.token, lobbyId });
+    const result = await guest.reconnectLobby();
     return result;
 }
 

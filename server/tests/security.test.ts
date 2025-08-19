@@ -8,12 +8,6 @@ import { WsCommand } from "src/Controllers/WsCommand";
 import { MockCreator } from "./helpers/MockCreator";
 
 const SECURITY_TIMEOUT = 5000;
-const XSS_PAYLOADS = [
-    '<script>alert("xss")</script>',
-    'javascript:alert("xss")',
-    '<img src="x" onerror="alert(1)">',
-    '"><script>alert("xss")</script>',
-];
 
 let server: Server | null = null;
 let serverUrl = "";
@@ -24,7 +18,6 @@ beforeAll(async () => {
     serverUrl = server.url.href;
     webSocketUrl = server.url.href.replace("http", "ws");
 });
-
 
 describe("Rate Limiting & DoS Protection", () => {
     test("Should handle rapid lobby creation attempts", async () => {
