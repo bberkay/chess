@@ -21,7 +21,7 @@ import { HTTPGetRoutes } from "./types";
  * @param operation - The HTTP operation context, used as a fallback for the response message.
  * @returns A `CORSResponse` containing the error message and appropriate HTTP status code.
  */
-export function createResponseFromError(
+export function createResponseFromHTTPError(
     e: unknown,
     operation: HTTPRequestHandlerError | HTTPRequestValidatorError,
 ): CORSResponse<HTTPGetRoutes.Root> {

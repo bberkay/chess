@@ -1,5 +1,5 @@
 import type { BunRequest } from "bun";
-import { HTTPGetRoutes, HTTPPostRoutes, HTTPRequestHandlerError, HTTPRequestValidatorError } from ".";
+import { HTTPGetRoutes, HTTPPostRoutes, HTTPRequestHandlerError } from ".";
 import { CORSResponse } from "./CORSResponse";
 import { LobbyRegistry } from "@Lobby";
 import { PlayerRegistry } from "@Player";
@@ -7,7 +7,7 @@ import {
     HTTPGetRequestValidator,
     HTTPPostRequestValidator,
 } from "./HTTPRequestValidator";
-import { createResponseFromError } from "./utils";
+import { createResponseFromHTTPError } from "./utils";
 
 /**
  * A GET request handler interface with a single GET method.
@@ -98,21 +98,7 @@ export class HTTPRequestHandler {
                         { status: 200 },
                     );
                 } catch (e: unknown) {
-                    return new CORSResponse(
-                        {
-                            success: false,
-                            message:
-                                e instanceof HTTPRequestValidatorError || e instanceof HTTPRequestHandlerError
-                                    ? e.message
-                                    : HTTPRequestHandlerError.factory.UnexpectedErrorWhileCheckingLobby().message,
-                        },
-                        {
-                            status:
-                                e instanceof HTTPRequestValidatorError || e instanceof HTTPRequestHandlerError
-                                    ? 400
-                                    : 500,
-                        },
-                    );
+                    return createResponseFromHTTPError(e, HTTPRequestHandlerError.factory.UnexpectedErrorWhileCheckingLobby())
                 }
             },
         };
@@ -154,7 +140,7 @@ export class HTTPRequestHandler {
                         { status: 200 },
                     );
                 } catch (e: unknown) {
-                    return createResponseFromError(e, HTTPRequestHandlerError.factory.UnexpectedErrorWhileCreatingLobby())
+                    return createResponseFromHTTPError(e, HTTPRequestHandlerError.factory.UnexpectedErrorWhileCreatingLobby())
                 }
             },
         };
@@ -221,7 +207,7 @@ export class HTTPRequestHandler {
                         { status: 200 },
                     );
                 } catch (e: unknown) {
-                    return createResponseFromError(e, HTTPRequestHandlerError.factory.UnexpectedErrorWhileConnectingLobby())
+                    return createResponseFromHTTPError(e, HTTPRequestHandlerError.factory.UnexpectedErrorWhileConnectingLobby())
                 }
             },
         };
@@ -273,7 +259,7 @@ export class HTTPRequestHandler {
                         return new CORSResponse(
                             {
                                 success: false,
-                                message: HTTPRequestHandlerError.factory.InvalidPlayer(body.lobbyId, body.playerToken).message,
+                                message: HTTPRequestHandlerError.factory.PlayerNotInLobby(body.lobbyId, body.playerToken).message,
                             },
                             { status: 403 },
                         );
@@ -298,7 +284,7 @@ export class HTTPRequestHandler {
                         { status: 200 },
                     );
                 } catch (e: unknown) {
-                    return createResponseFromError(e, HTTPRequestHandlerError.factory.UnexpectedErrorWhileReconnectingLobby())
+                    return createResponseFromHTTPError(e, HTTPRequestHandlerError.factory.UnexpectedErrorWhileReconnectingLobby())
                 }
             },
         };

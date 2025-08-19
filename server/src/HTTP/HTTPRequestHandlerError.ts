@@ -19,7 +19,7 @@ export const HTTPRequestHandlerErrorTemplates = {
         `Lobby with id "${lobbyId}" is already full.`,
     PlayerNotFound: (playerToken: string) =>
         `Player with token "${playerToken}" was not found.`,
-    InvalidPlayer: (lobbyId: string, playerToken: string) =>
+    PlayerNotInLobby: (lobbyId: string, playerToken: string) =>
         `Player with token "${playerToken} is not a part of the lobby with id "${lobbyId}"`,
     PlayerAlreadyOnline: (lobbyId: string, playerToken: string) =>
         `Player with token "${playerToken} is already online in the lobby with id "${lobbyId}"`,
