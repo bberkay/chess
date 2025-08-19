@@ -11,13 +11,6 @@ export class MockGuest extends MockClient {
         connectLobbyBody: HTTPPostBody[HTTPPostRoutes.ConnectLobby],
         throwError: boolean = true,
     ): Promise<CORSResponseBody<HTTPPostRoutes.ConnectLobby>> {
-        if (this._player && this._player.isOnline) {
-            console.warn(
-                "Closing current connection before connecting to new lobby...",
-            );
-            await this.disconnectLobby();
-        }
-
         const connectedLobbyResponse = await testFetch(
             this._serverUrl,
             HTTPPostRoutes.ConnectLobby,
@@ -25,13 +18,13 @@ export class MockGuest extends MockClient {
         );
 
         if (connectedLobbyResponse.success && connectedLobbyResponse.data) {
-            this._lobbyId = connectedLobbyResponse.data.lobbyId;
-            this._player = connectedLobbyResponse.data.player;
+            this.lobbyId = connectedLobbyResponse.data.lobbyId;
+            this.player = connectedLobbyResponse.data.player;
 
             const wsLobbyUrl = createWsLobbyConnUrl(
                 this._wsUrl,
-                this._lobbyId,
-                this._player.token,
+                this.lobbyId,
+                this.player.token,
             );
             await this._initWsHandlers(wsLobbyUrl);
         } else if (throwError) {
