@@ -183,6 +183,9 @@ describe("Undo Tests", () => {
         await expect(
             whitePlayerClient.pull(WsTitle.UndoAccepted),
         ).rejects.toThrow(MockClientPullErrorMsg);
+        await expect(
+            blackPlayerClient.pull(WsTitle.UndoAccepted),
+        ).rejects.toThrow(MockClientPullErrorMsg);
         expect((await whitePlayerClient.pull(WsTitle.Error)).message).toBe(
             WebSocketHandlerErrorTemplates.UndoAcceptFailed(whitePlayerClient.lobbyId!, whitePlayerClient.player!.token),
         );
@@ -201,6 +204,9 @@ describe("Undo Tests", () => {
 
         // Should not accept after offer cancelled
         blackPlayerClient.acceptUndoOffer();
+        await expect(
+            whitePlayerClient.pull(WsTitle.UndoAccepted),
+        ).rejects.toThrow(MockClientPullErrorMsg);
         await expect(
             blackPlayerClient.pull(WsTitle.UndoAccepted),
         ).rejects.toThrow(MockClientPullErrorMsg);
@@ -226,6 +232,9 @@ describe("Undo Tests", () => {
         await expect(
             whitePlayerClient.pull(WsTitle.UndoAccepted),
         ).rejects.toThrow(MockClientPullErrorMsg);
+        await expect(
+            blackPlayerClient.pull(WsTitle.UndoAccepted),
+        ).rejects.toThrow(MockClientPullErrorMsg);
         expect((await whitePlayerClient.pull(WsTitle.Error)).message).toBe(
             WebSocketHandlerErrorTemplates.UndoAcceptFailed(whitePlayerClient.lobbyId!, whitePlayerClient.player!.token),
         );
@@ -245,6 +254,9 @@ describe("Undo Tests", () => {
 
         // Should not accept after offer declined
         blackPlayerClient.acceptUndoOffer();
+        await expect(
+            whitePlayerClient.pull(WsTitle.UndoAccepted),
+        ).rejects.toThrow(MockClientPullErrorMsg);
         await expect(
             blackPlayerClient.pull(WsTitle.UndoAccepted),
         ).rejects.toThrow(MockClientPullErrorMsg);
@@ -269,6 +281,9 @@ describe("Undo Tests", () => {
 
         // Should not accept after offer already accepted
         whitePlayerClient.acceptUndoOffer();
+        await expect(
+            whitePlayerClient.pull(WsTitle.UndoAccepted),
+        ).rejects.toThrow(MockClientPullErrorMsg);
         await expect(
             blackPlayerClient.pull(WsTitle.UndoAccepted),
         ).rejects.toThrow(MockClientPullErrorMsg);
@@ -298,6 +313,9 @@ describe("Undo Tests", () => {
         blackPlayerClient.acceptUndoOffer();
         await expect(
             whitePlayerClient.pull(WsTitle.UndoAccepted),
+        ).rejects.toThrow(MockClientPullErrorMsg);
+        await expect(
+            blackPlayerClient.pull(WsTitle.UndoAccepted),
         ).rejects.toThrow(MockClientPullErrorMsg);
         expect((await blackPlayerClient.pull(WsTitle.Error)).message).toBe(
             WebSocketHandlerErrorTemplates.UndoAcceptFailed(blackPlayerClient.lobbyId!, blackPlayerClient.player!.token),
