@@ -30,6 +30,7 @@ export class WsCommand {
                 throw new Error("Invalid message format");
             }
 
+            // TODO: Validate command and data have proper format and injection check.
             return parsed as WsIncomingMessage;
         } catch (error: unknown) {
             throw new Error(

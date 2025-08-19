@@ -1,17 +1,16 @@
 import type { Server } from "bun";
-import {
-    WsCommand,
-    WsTitle,
-    type RWebSocket,
-    type WebSocketData,
-} from ".";
+import { WsCommand, WsTitle, type RWebSocket, type WebSocketData } from ".";
 import { Player, PlayerRegistry } from "@Player";
-import { HTTPGetRoutes, CORSResponse } from "@HTTP";
+import { HTTPGetRoutes, CORSResponse, HTTPRequestHandlerError } from "@HTTP";
 import { LobbyRegistry } from "@Lobby";
 import { Lobby } from "@Lobby";
 import { Color, Square } from "@Chess/Types";
 import { WebSocketValidator } from "./WebSocketValidator";
-import { WebSocketValidatorError } from ".";
+import { WebSocketHandlerError } from "./WebSocketHandlerError";
+import {
+    createMessageFromWebSocketError,
+    createResponseFromWebSocketError,
+} from "./utils";
 
 /**
  * Handles WebSocket communication for the chess lobby system.
@@ -52,14 +51,18 @@ export class WebSocketHandler {
         req: Request,
     ): WebSocketData | CORSResponse<HTTPGetRoutes.Root> {
         try {
-            const { lobbyId, playerToken } = WebSocketValidator.parseAndValidate(req);
+            const { lobbyId, playerToken } =
+                WebSocketValidator.parseAndValidate(req);
 
             const lobby = LobbyRegistry.get(lobbyId);
             if (!lobby) {
                 return new CORSResponse(
                     {
                         success: false,
-                        message: `Lobby not found.`,
+                        message:
+                            HTTPRequestHandlerError.factory.LobbyNotFound(
+                                lobbyId,
+                            ).message,
                     },
                     { status: 404 },
                 );
@@ -70,26 +73,20 @@ export class WebSocketHandler {
                 return new CORSResponse(
                     {
                         success: false,
-                        message: `Invalid playerToken.`,
+                        message:
+                            HTTPRequestHandlerError.factory.PlayerNotFound(
+                                playerToken,
+                            ).message,
                     },
-                    { status: 401 },
+                    { status: 404 },
                 );
             }
 
             return { lobby, player };
         } catch (e: unknown) {
-            return new CORSResponse(
-                {
-                    success: false,
-                    message:
-                        e instanceof WebSocketValidatorError
-                            ? e.message
-                            : "An error occurred while handling the ws url.",
-                },
-                {
-                    status:
-                        e instanceof WebSocketValidatorError ? 400 : 500,
-                },
+            return createResponseFromWebSocketError(
+                e,
+                WebSocketHandlerError.factory.UnexpectedErrorWhileHandlingWebSocket(),
             );
         }
     }
@@ -141,7 +138,12 @@ export class WebSocketHandler {
         try {
             const lobby = ws.data.lobby;
             const player = ws.data.player;
-            console.log("Connection opened: ", lobby.id, player.token, player.name);
+            console.log(
+                "Connection opened: ",
+                lobby.id,
+                player.token,
+                player.name,
+            );
 
             LobbyRegistry.join(lobby.id, player);
 
@@ -149,7 +151,13 @@ export class WebSocketHandler {
                 ws.send(
                     WsCommand.create([
                         WsTitle.Error,
-                        { message: "User is not a player of lobby." },
+                        {
+                            message:
+                                WebSocketHandlerError.factory.PlayerNotInLobby(
+                                    lobby.id,
+                                    player.token,
+                                ).message,
+                        },
                     ]),
                 );
                 return;
@@ -160,7 +168,13 @@ export class WebSocketHandler {
                 ws.send(
                     WsCommand.create([
                         WsTitle.Error,
-                        { message: "Color of player could not found." },
+                        {
+                            message:
+                                WebSocketHandlerError.factory.PlayerNotInLobby(
+                                    lobby.id,
+                                    player.token,
+                                ).message,
+                        },
                     ]),
                 );
                 return;
@@ -177,15 +191,10 @@ export class WebSocketHandler {
             }
         } catch (e: unknown) {
             ws.send(
-                WsCommand.create([
-                    WsTitle.Error,
-                    {
-                        message:
-                            e instanceof Error
-                                ? e.message
-                                : "An unexpected error occured while opening the websocket connection.",
-                    },
-                ]),
+                createMessageFromWebSocketError(
+                    e,
+                    WebSocketHandlerError.factory.UnexpectedErrorWhileJoiningLobby(),
+                ),
             );
         }
     }
@@ -200,7 +209,7 @@ export class WebSocketHandler {
 
             const color = lobby.getColorOfPlayer(player)!;
 
-            LobbyRegistry.leave(lobby.id, player)
+            LobbyRegistry.leave(lobby.id, player);
 
             ws.publish(
                 lobby.id,
@@ -212,15 +221,10 @@ export class WebSocketHandler {
             LobbyRegistry.destroy(lobby.id);
         } catch (e: unknown) {
             ws.send(
-                WsCommand.create([
-                    WsTitle.Error,
-                    {
-                        message:
-                            e instanceof Error
-                                ? e.message
-                                : "An unexpected error occured while handling the websocket message.",
-                    },
-                ]),
+                createMessageFromWebSocketError(
+                    e,
+                    WebSocketHandlerError.factory.UnexpectedErrorWhileLeavingLobby(),
+                ),
             );
         }
     }
@@ -313,60 +317,66 @@ export class WebSocketHandler {
                     WsCommand.create([
                         WsTitle.Error,
                         {
-                            message:
-                                "Lobby could not or player not in the lobby",
+                            message: !lobby
+                                ? WebSocketHandlerError.factory.LobbyNotFound(
+                                      "",
+                                  ).message
+                                : WebSocketHandlerError.factory.PlayerNotInLobby(
+                                      lobby.id,
+                                      player.token,
+                                  ).message,
                         },
                     ]),
                 );
                 return;
             }
 
+            let commandFunc = null;
             switch (command) {
-                case WsTitle.Aborted:
-                    this._abort(ws, lobby);
-                    break;
-                case WsTitle.Resigned:
-                    this._resign(ws, lobby, player);
-                    break;
                 case WsTitle.Moved:
                     this._movePiece(ws, lobby, player, data.from, data.to);
+                    return;
+                case WsTitle.Aborted:
+                    commandFunc = this._abort;
+                    break;
+                case WsTitle.Resigned:
+                    commandFunc = this._resign;
                     break;
                 case WsTitle.UndoOffered:
-                    this._offerUndo(ws, lobby, player);
+                    commandFunc = this._offerUndo;
                     break;
                 case WsTitle.UndoAccepted:
-                    this._acceptUndo(ws, lobby);
+                    commandFunc = this._acceptUndo;
                     break;
                 case WsTitle.DrawOffered:
-                    this._offerDraw(ws, lobby, player);
+                    commandFunc = this._offerDraw;
                     break;
                 case WsTitle.DrawAccepted:
-                    this._acceptDraw(ws, lobby);
+                    commandFunc = this._acceptDraw;
                     break;
                 case WsTitle.PlayAgainOffered:
-                    this._offerPlayAgain(ws, lobby, player);
+                    commandFunc = this._offerPlayAgain;
                     break;
                 case WsTitle.PlayAgainAccepted:
-                    this._acceptPlayAgain(ws, lobby);
+                    commandFunc = this._acceptPlayAgain;
                     break;
                 case WsTitle.OfferCancelled:
-                    this._cancelOffer(ws, lobby);
+                    commandFunc = this._cancelOffer;
                     break;
                 case WsTitle.OfferDeclined:
-                    this._declineOffer(ws, lobby);
+                    commandFunc = this._declineOffer;
                     break;
             }
+            if (!commandFunc) throw WebSocketHandlerError.factory.UnexpectedErrorWhileHandlingCommand(message);
+            commandFunc.apply(this, [ws, lobby, player]);
         } catch (e: unknown) {
             ws.send(
-                WsCommand.create([
-                    WsTitle.Error,
-                    {
-                        message:
-                            e instanceof Error
-                                ? e.message
-                                : "An unexpected error occured while handling the websocket message.",
-                    },
-                ]),
+                createMessageFromWebSocketError(
+                    e,
+                    WebSocketHandlerError.factory.UnexpectedErrorWhileHandlingCommand(
+                        message,
+                    ),
+                ),
             );
         }
     }
@@ -375,13 +385,16 @@ export class WebSocketHandler {
      * Abort the game and send the aborted command to
      * the client.
      */
-    private _abort(ws: RWebSocket, lobby: Lobby): void {
+    private _abort(ws: RWebSocket, lobby: Lobby, player: Player): void {
         if (!lobby.abort()) {
             ws.send(
                 WsCommand.create([
                     WsTitle.Error,
                     {
-                        message: `Could not abort the game`,
+                        message: WebSocketHandlerError.factory.AbortGameFailed(
+                            lobby.id,
+                            player.token
+                        ).message,
                     },
                 ]),
             );
@@ -400,7 +413,11 @@ export class WebSocketHandler {
                 WsCommand.create([
                     WsTitle.Error,
                     {
-                        message: `Could not resign from the game`,
+                        message:
+                            WebSocketHandlerError.factory.ResignFromGameFailed(
+                                lobby.id,
+                                player.token
+                            ).message,
                     },
                 ]),
             );
@@ -433,16 +450,18 @@ export class WebSocketHandler {
                 WsCommand.create([
                     WsTitle.Error,
                     {
-                        message: `Color of player could not found. Move from ${from} to ${to} could not played.`,
+                        message: WebSocketHandlerError.factory.PlayMoveFailed(
+                            lobby.id,
+                            player.token,
+                            from,
+                            to
+                        ).message,
                     },
                 ]),
             );
             return;
         }
-        ws.publish(
-            lobby.id,
-            WsCommand.create([WsTitle.Moved, { from, to }]),
-        );
+        ws.publish(lobby.id, WsCommand.create([WsTitle.Moved, { from, to }]));
         if (lobby.isGameFinished()) this._finishGame(ws, lobby);
         else console.log("DIDNT FINISHED");
     }
@@ -456,7 +475,10 @@ export class WebSocketHandler {
                 WsCommand.create([
                     WsTitle.Error,
                     {
-                        message: `Could not offer undo.`,
+                        message:  WebSocketHandlerError.factory.UndoOfferFailed(
+                            lobby.id,
+                            player.token
+                        ).message,
                     },
                 ]),
             );
@@ -475,7 +497,10 @@ export class WebSocketHandler {
                 WsCommand.create([
                     WsTitle.Error,
                     {
-                        message: `Could not offer draw.`,
+                        message:  WebSocketHandlerError.factory.DrawOfferFailed(
+                            lobby.id,
+                            player.token
+                        ).message,
                     },
                 ]),
             );
@@ -488,13 +513,20 @@ export class WebSocketHandler {
     /**
      * Offer play again to the opponent player.
      */
-    private _offerPlayAgain(ws: RWebSocket, lobby: Lobby, player: Player): void {
+    private _offerPlayAgain(
+        ws: RWebSocket,
+        lobby: Lobby,
+        player: Player,
+    ): void {
         if (!lobby.isGameFinished()) {
             ws.send(
                 WsCommand.create([
                     WsTitle.Error,
                     {
-                        message: `Could not offer play again.`,
+                        message:  WebSocketHandlerError.factory.PlayAgainOfferFailed(
+                            lobby.id,
+                            player.token
+                        ).message,
                     },
                 ]),
             );
@@ -507,19 +539,25 @@ export class WebSocketHandler {
     /**
      * Accept the play again offer and send the started command to the client.
      */
-    private _acceptPlayAgain(ws: RWebSocket, lobby: Lobby): void {
+    private _acceptPlayAgain(ws: RWebSocket, lobby: Lobby, player: Player): void {
         if (!lobby.getActiveOffer()) {
             ws.send(
                 WsCommand.create([
                     WsTitle.Error,
                     {
-                        message: `Could not accept play again offer.`,
+                        message:  WebSocketHandlerError.factory.PlayAgainAcceptFailed(
+                            lobby.id,
+                            player.token
+                        ).message,
                     },
                 ]),
             );
             return;
         }
-        this._server!.publish(lobby.id, WsCommand.create([WsTitle.PlayAgainAccepted]));
+        this._server!.publish(
+            lobby.id,
+            WsCommand.create([WsTitle.PlayAgainAccepted]),
+        );
         this._startGame(ws, lobby);
     }
 
@@ -527,13 +565,16 @@ export class WebSocketHandler {
      * Accept and handle the draw offer and send the
      * finished command to the client.
      */
-    private _acceptDraw(ws: RWebSocket, lobby: Lobby): void {
+    private _acceptDraw(ws: RWebSocket, lobby: Lobby, player: Player): void {
         if (!lobby.draw()) {
             ws.send(
                 WsCommand.create([
                     WsTitle.Error,
                     {
-                        message: `Could not draw the game.`,
+                        message:  WebSocketHandlerError.factory.DrawAcceptFailed(
+                            lobby.id,
+                            player.token
+                        ).message,
                     },
                 ]),
             );
@@ -549,19 +590,22 @@ export class WebSocketHandler {
      * Accept and handle the undo offer and send the
      * undo accepted command to the client.
      */
-    private _acceptUndo(ws: RWebSocket, lobby: Lobby): void {
+    private _acceptUndo(ws: RWebSocket, lobby: Lobby, player: Player): void {
         const undoColor = lobby.undo();
         if (!undoColor) {
             ws.send(
                 WsCommand.create([
                     WsTitle.Error,
                     {
-                        message: `Could not accept undo offer.`,
+                        message:  WebSocketHandlerError.factory.UndoAcceptFailed(
+                            lobby.id,
+                            player.token
+                        ).message,
                     },
                 ]),
             );
             return;
-        };
+        }
         this._server!.publish(
             lobby.id,
             WsCommand.create([
@@ -577,13 +621,16 @@ export class WebSocketHandler {
     /**
      * Cancel the offer and send the offer cancelled command to the client.
      */
-    private _cancelOffer(ws: RWebSocket, lobby: Lobby): void {
+    private _cancelOffer(ws: RWebSocket, lobby: Lobby, player: Player): void {
         if (!lobby.removeActiveOffer()) {
             ws.send(
                 WsCommand.create([
                     WsTitle.Error,
                     {
-                        message: `Could not cancel offer.`,
+                        message:  WebSocketHandlerError.factory.OfferCancelFailed(
+                            lobby.id,
+                            player.token
+                        ).message,
                     },
                 ]),
             );
@@ -595,13 +642,16 @@ export class WebSocketHandler {
     /**
      * Decline the sent offer and send the declined command to the client.
      */
-    private _declineOffer(ws: RWebSocket, lobby: Lobby): void {
+    private _declineOffer(ws: RWebSocket, lobby: Lobby,player: Player): void {
         if (!lobby.removeActiveOffer()) {
             ws.send(
                 WsCommand.create([
                     WsTitle.Error,
                     {
-                        message: `Could not decline offer.`,
+                        message:  WebSocketHandlerError.factory.OfferDeclineFailed(
+                            lobby.id,
+                            player.token
+                        ).message,
                     },
                 ]),
             );
@@ -620,7 +670,9 @@ export class WebSocketHandler {
                 WsCommand.create([
                     WsTitle.Error,
                     {
-                        message: `Could not finish game.`,
+                        message:  WebSocketHandlerError.factory.FinishGameFailed(
+                            lobby.id,
+                        ).message,
                     },
                 ]),
             );
