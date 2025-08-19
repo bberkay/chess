@@ -324,7 +324,7 @@ export class Lobby {
      * Resign a player from the game.
      */
     public resign(player: Player): boolean {
-        if (!this.isGameStarted() || this.isGameFinished()) return false;
+        if (!this.isGameStarted() || this.chessEngine.getMoveHistory().length < 2 || this.isGameFinished()) return false;
         const color = this.getColorOfPlayer(player);
         if (!color) return false;
 
