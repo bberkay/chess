@@ -43,21 +43,28 @@ const shouldConnect = async (creatorClient: MockCreator, body: HTTPPostBody[HTTP
     const guestStartedData: WsStartedData = await guestClient.pull(WsTitle.Started);
 
     // Test
-    expect(creatorConnectedData!.playerId).toEqual(creatorClient.player.id);
-    expect(guestConnectedData!.playerId).toEqual(guestClient.player.id);
+    expect(creatorConnectedData!.playerId).toEqual(creatorClient.player!.id);
+    expect(guestConnectedData!.playerId).toEqual(guestClient.player!.id);
 
-    if (creatorStartedData.players.White.id === creatorClient.player.id) {
+    const creatorPlayer = Object.fromEntries(
+      Object.entries(creatorClient).filter(([key]) => key !== "token")
+    );
+    const guestPlayer = Object.fromEntries(
+      Object.entries(guestClient).filter(([key]) => key !== "token")
+    );
+
+    if (creatorStartedData.players.White.id === creatorClient.player!.id) {
         // If creator is white, connector is black
-        expect(creatorStartedData!.players.White).toEqual(creatorClient.playerWithoutToken);
-        expect(creatorStartedData!.players.Black).toEqual(guestClient.playerWithoutToken);
-        expect(guestStartedData!.players.White).toEqual(creatorClient.playerWithoutToken);
-        expect(guestStartedData!.players.Black).toEqual(guestClient.playerWithoutToken);
+        expect(creatorStartedData!.players.White).toEqual(creatorPlayer);
+        expect(creatorStartedData!.players.Black).toEqual(guestPlayer);
+        expect(guestStartedData!.players.White).toEqual(creatorPlayer);
+        expect(guestStartedData!.players.Black).toEqual(guestPlayer);
     } else {
         // If creator is black, connector is white
-        expect(creatorStartedData!.players.Black).toEqual(creatorClient.playerWithoutToken);
-        expect(creatorStartedData!.players.White).toEqual(guestClient.playerWithoutToken);
-        expect(guestStartedData!.players.White).toEqual(creatorClient.playerWithoutToken);
-        expect(guestStartedData!.players.Black).toEqual(guestClient.playerWithoutToken);
+        expect(creatorStartedData!.players.Black).toEqual(creatorPlayer);
+        expect(creatorStartedData!.players.White).toEqual(guestPlayer);
+        expect(guestStartedData!.players.White).toEqual(creatorPlayer);
+        expect(guestStartedData!.players.Black).toEqual(guestPlayer);
     }
 
     expect(creatorStartedData!.game).toEqual(guestStartedData!.game);
@@ -76,7 +83,7 @@ describe("Connect Lobby Tests", () => {
         const creatorClient = await createTestLobby();
         await shouldConnect(creatorClient, {
             name: "alex",
-            lobbyId: creatorClient.lobbyId
+            lobbyId: creatorClient.lobbyId!
         })
     })
 
@@ -84,7 +91,7 @@ describe("Connect Lobby Tests", () => {
         const creatorClient = await createTestLobby();
         await shouldNotConnect({
             name: "",
-            lobbyId: creatorClient.lobbyId
+            lobbyId: creatorClient.lobbyId!
         }, HTTPRequestValidatorErrorTemplates.InvalidNameLength());
     });
 
@@ -92,7 +99,7 @@ describe("Connect Lobby Tests", () => {
         const creatorClient = await createTestLobby();
         await shouldNotConnect({
             name: "johnnnnnnnnnnnnnnnnnnnnnnnnnnn",
-            lobbyId: creatorClient.lobbyId
+            lobbyId: creatorClient.lobbyId!
         }, HTTPRequestValidatorErrorTemplates.InvalidNameLength());
     });
 
@@ -101,13 +108,14 @@ describe("Connect Lobby Tests", () => {
             const creatorClient = await createTestLobby();
             await shouldNotConnect({
                 name: payload,
-                lobbyId: creatorClient.lobbyId
+                lobbyId: creatorClient.lobbyId!
             }, HTTPRequestValidatorErrorTemplates.InvalidName());
         }
     });
 
     test("Should not connect to lobby on injection attempts in lobby id", async () => {
         for (const payload of INJECTION_PAYLOADS) {
+            await createTestLobby();
             await shouldNotConnect({
                 name: "alex",
                 lobbyId: payload
@@ -116,6 +124,7 @@ describe("Connect Lobby Tests", () => {
     });
 
     test("Should not connect to lobby when lobby id is not exists", async () => {
+        await createTestLobby();
         const invalidLobbyId = "000001";
         await shouldNotConnect({
             name: "alex",
@@ -127,15 +136,15 @@ describe("Connect Lobby Tests", () => {
         const creatorClient = await createTestLobby();
         await shouldConnect(creatorClient, {
             name: "alex",
-            lobbyId: creatorClient.lobbyId
+            lobbyId: creatorClient.lobbyId!
         });
 
         // Lobby will be in "started" status, right after "alex" connected.
         // so no one should be able to connect to it.
         await shouldNotConnect({
             name: "terry",
-            lobbyId: creatorClient.lobbyId
-        }, HTTPRequestHandlerErrorTemplates.LobbyAlreadyStarted(creatorClient.lobbyId));
+            lobbyId: creatorClient.lobbyId!
+        }, HTTPRequestHandlerErrorTemplates.LobbyAlreadyStarted(creatorClient.lobbyId!));
     });
 
     test("Should not connect to lobby if lobby is not started but full", async () => {
@@ -147,13 +156,13 @@ describe("Connect Lobby Tests", () => {
         });
 
         const guestClient = new MockGuest(serverUrl, webSocketUrl);
-        await guestClient.connectLobby({ name: "alex", lobbyId: creatorClient.lobbyId });
+        await guestClient.connectLobby({ name: "alex", lobbyId: creatorClient.lobbyId! });
         const startedData: WsStartedData = await guestClient.pull(WsTitle.Started);
 
-        const whitePlayerClient = startedData.players.White.id === guestClient.player.id
+        const whitePlayerClient = startedData.players.White.id === guestClient.player!.id
             ? guestClient
             : creatorClient;
-        const blackPlayerClient = startedData.players.Black.id === guestClient.player.id
+        const blackPlayerClient = startedData.players.Black.id === guestClient.player!.id
             ? guestClient
             : creatorClient;
 
@@ -171,8 +180,8 @@ describe("Connect Lobby Tests", () => {
 
         await shouldNotConnect({
             name: "terry",
-            lobbyId: creatorClient.lobbyId
-        }, HTTPRequestHandlerErrorTemplates.LobbyFull(creatorClient.lobbyId));
+            lobbyId: creatorClient.lobbyId!
+        }, HTTPRequestHandlerErrorTemplates.LobbyFull(creatorClient.lobbyId!));
     });
 });
 

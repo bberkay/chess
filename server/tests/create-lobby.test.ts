@@ -26,16 +26,16 @@ const shouldCreate = async (body: HTTPPostBody[HTTPPostRoutes.CreateLobby]) => {
     expect(createdLobbyResponse.success).toBe(true);
     expect(createdLobbyResponse.data).toBeTruthy();
 
-    expect(isValidLength(creatorClient.lobbyId, GU_ID_LENGTH)).toBe(true);
+    expect(isValidLength(creatorClient.lobbyId!, GU_ID_LENGTH)).toBe(true);
 
     expect(creatorClient.player).toBeTruthy();
-    expect(isValidLength(creatorClient.player.id, GU_ID_LENGTH)).toBe(true);
-    expect(isValidLength(creatorClient.player.token, GU_ID_LENGTH)).toBe(true);
-    expect(creatorClient.player.name).toBe("john");
-    expect(creatorClient.player.isOnline).toBe(true);
+    expect(isValidLength(creatorClient.player!.id, GU_ID_LENGTH)).toBe(true);
+    expect(isValidLength(creatorClient.player!.token, GU_ID_LENGTH)).toBe(true);
+    expect(creatorClient.player!.name).toBe("john");
+    expect(creatorClient.player!.isOnline).toBe(true);
 
     const creatorConnectedData: WsConnectedData = await creatorClient.pull(WsTitle.Connected);
-    expect(creatorConnectedData!.playerId).toEqual(creatorClient.player.id);
+    expect(creatorConnectedData!.playerId).toEqual(creatorClient.player!.id);
 }
 
 const shouldNotCreate = async (body: HTTPPostBody[HTTPPostRoutes.CreateLobby], errMsg?: string) => {
@@ -204,8 +204,6 @@ describe("Create Lobby Tests", () => {
             increment: -5000,
         }, HTTPRequestValidatorErrorTemplates.InvalidIncrementValue());
     });
-
-    // TODO: Special name
 });
 
 afterAll(() => {

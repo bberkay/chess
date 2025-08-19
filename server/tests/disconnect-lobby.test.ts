@@ -8,6 +8,8 @@ import { MockCreator } from "./helpers/MockCreator";
 import { MockGuest } from "./helpers/MockGuest";
 import { Player } from "src/Player";
 import { waitForWebSocketSettle } from "./utils";
+import { HTTPPostBody, HTTPPostRoutes } from "@HTTP";
+import { TEST_BOARD } from "./consts";
 
 let server: Server | null = null;
 let serverUrl = "";
@@ -19,25 +21,42 @@ beforeAll(async () => {
     webSocketUrl = server.url.href.replace("http", "ws");
 });
 
+const createTestLobby = async (body: HTTPPostBody[HTTPPostRoutes.CreateLobby] | null = null) => {
+    body = body ?? { name: "alex", ...TEST_BOARD }
+    const creatorClient = new MockCreator(serverUrl, webSocketUrl);
+    const createdLobbyResponse = await creatorClient.createLobby(body)
+    if (!createdLobbyResponse.success) {
+        throw new Error(`Could not create test lobby: ${createdLobbyResponse.message}`);
+    }
+    return creatorClient;
+};
+
+const connectTestLobby = async (lobbyId: string) => {
+    const guestClient = new MockGuest(serverUrl, webSocketUrl);
+    const connectedLobbyResponse = await guestClient.connectLobby({ name: "terry", lobbyId });
+    if (!connectedLobbyResponse.success) {
+        throw new Error(`Could not connect test lobby: ${connectedLobbyResponse.message}`);
+    }
+    await guestClient.pull(WsTitle.Connected);
+    return guestClient;
+}
+
 describe("Disconnect Lobby Tests", () => {
     test("Should mark as offline if the player disconnect while other player is connected", async () => {
-        const creatorClient = new MockCreator(serverUrl, webSocketUrl);
-        const { lobbyId } = (await creatorClient.createLobby()).data!;
-
-        const guestClient = new MockGuest(serverUrl, webSocketUrl);
-        await guestClient.connectLobby({ name: "alex", lobbyId });
+        const creatorClient = await createTestLobby();
+        const guestClient = await connectTestLobby(creatorClient.lobbyId!);
 
         await creatorClient.disconnectLobby();
         await guestClient.pull(WsTitle.Disconnected);
 
-        const testLobby = LobbyRegistry.get(lobbyId);
+        const testLobby = LobbyRegistry.get(creatorClient.lobbyId!);
         if (!testLobby)
             throw new Error("Created lobby could not found");
 
-        expect(testLobby.isPlayerInLobby(creatorClient.player)).toBe(true);
-        expect(creatorClient.player.isOnline).toBe(false);
+        expect(testLobby.isPlayerInLobby(creatorClient.player!)).toBe(true);
+        expect(creatorClient.player!.isOnline).toBe(false);
 
-        const disconnectedPlayerColor = testLobby.getColorOfPlayer(creatorClient.player);
+        const disconnectedPlayerColor = testLobby.getColorOfPlayer(creatorClient.player!);
         if (!disconnectedPlayerColor) throw new Error("Disconnected player not found in lobby");
         const disconnectedPlayerOnServerSide: Player | null = disconnectedPlayerColor === Color.White
             ? testLobby.getWhitePlayer()
@@ -48,51 +67,43 @@ describe("Disconnect Lobby Tests", () => {
     })
 
     test("Should send necessary data to the connected user when other one is disconnected", async () => {
-        const creatorClient = new MockCreator(serverUrl, webSocketUrl);
-        const { lobbyId } = (await creatorClient.createLobby()).data!;
-
-        const guestClient = new MockGuest(serverUrl, webSocketUrl);
-        await guestClient.connectLobby({ name: "alex", lobbyId });
+        const creatorClient = await createTestLobby();
+        const guestClient = await connectTestLobby(creatorClient.lobbyId!);
 
         await guestClient.disconnectLobby();
         const disconnectedGuestData: WsDisconnectedData = await creatorClient.pull(WsTitle.Disconnected);
 
-        const testLobby = LobbyRegistry.get(lobbyId);
+        const testLobby = LobbyRegistry.get(creatorClient.lobbyId!);
         if (!testLobby) throw new Error("Created lobby could not found");
-        const disconnectedPlayerColor = testLobby.getColorOfPlayer(guestClient.player);
+        const disconnectedPlayerColor = testLobby.getColorOfPlayer(guestClient.player!);
 
         expect(disconnectedGuestData).toBeTruthy();
         expect(disconnectedGuestData.color).toBe(disconnectedPlayerColor);
     })
 
     test("Should clean up the lobby if both of the players are disconnected before the game starts", async () => {
-        const creatorClient = new MockCreator(serverUrl, webSocketUrl);
-        const { lobbyId } = (await creatorClient.createLobby()).data!;
-
-        const guestClient = new MockGuest(serverUrl, webSocketUrl);
-        await guestClient.connectLobby({ name: "alex", lobbyId });
+        const creatorClient = await createTestLobby();
+        const guestClient = await connectTestLobby(creatorClient.lobbyId!);
 
         await creatorClient.disconnectLobby();
         await guestClient.disconnectLobby();
 
         await waitForWebSocketSettle(100);
 
-        const testLobby = LobbyRegistry.get(lobbyId);
+        const testLobby = LobbyRegistry.get(creatorClient.lobbyId!);
         expect(testLobby).toBe(null);
     })
 
     test("Should not clean up the lobby if both of the players are disconnected after the game starts", async () => {
-        const creatorClient = new MockCreator(serverUrl, webSocketUrl);
-        const { lobbyId } = (await creatorClient.createLobby()).data!;
+        const creatorClient = await createTestLobby();
+        const guestClient = await connectTestLobby(creatorClient.lobbyId!);
 
-        const guestClient = new MockGuest(serverUrl, webSocketUrl);
-        await guestClient.connectLobby({ name: "alex", lobbyId });
         const startedData: WsStartedData = await guestClient.pull(WsTitle.Started);
 
-        const whitePlayerClient = startedData.players.White.id === guestClient.player.id
+        const whitePlayerClient = startedData.players.White.id === guestClient.player!.id
             ? guestClient
             : creatorClient;
-        const blackPlayerClient = startedData.players.Black.id === guestClient.player.id
+        const blackPlayerClient = startedData.players.Black.id === guestClient.player!.id
             ? guestClient
             : creatorClient;
 
@@ -104,7 +115,7 @@ describe("Disconnect Lobby Tests", () => {
         await creatorClient.disconnectLobby();
         await guestClient.disconnectLobby();
 
-        expect(LobbyRegistry.get(lobbyId)).toBeTruthy();
+        expect(LobbyRegistry.get(creatorClient.lobbyId!)).toBeTruthy();
     });
 });
 
