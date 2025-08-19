@@ -6,7 +6,8 @@ import { WsStartedData, WsTitle } from "src/WebSocket";
 import { Square } from "@Chess/Types";
 import { MockCreator } from "./helpers/MockCreator";
 import { MockGuest } from "./helpers/MockGuest";
-import { MockClient } from "./helpers/MockClient";
+import { MockClient, MockClientPullErrorMsg } from "./helpers/MockClient";
+import { WebSocketHandlerErrorTemplates } from "src/WebSocket/WebSocketHandlerError";
 
 let server: Server | null = null;
 let serverUrl = "";
@@ -18,11 +19,8 @@ beforeAll(async () => {
     webSocketUrl = server.url.href.replace("http", "ws");
 });
 
-const playUntilFinished = async (
-    creatorClient: MockCreator,
-    guestClient: MockGuest,
-): Promise<[MockClient, MockClient]> => {
-    creatorClient = new MockCreator(serverUrl, webSocketUrl);
+const playUntilFinished = async (): Promise<[MockClient, MockClient]> => {
+    const creatorClient = new MockCreator(serverUrl, webSocketUrl);
     const { lobbyId } = (
         await creatorClient.createLobby({
             name: "john",
@@ -32,7 +30,7 @@ const playUntilFinished = async (
         })
     ).data!;
 
-    guestClient = new MockGuest(serverUrl, webSocketUrl);
+    const guestClient = new MockGuest(serverUrl, webSocketUrl);
     await guestClient.connectLobby({ name: "alex", lobbyId });
     const startedData: WsStartedData = await guestClient.pull(WsTitle.Started);
 
@@ -57,26 +55,14 @@ const playUntilFinished = async (
 
 describe("Play Again Tests", () => {
     test("Should be able to offer play again when the game is finished", async () => {
-        const creatorClient = new MockCreator(serverUrl, webSocketUrl);
-        const guestClient = new MockGuest(serverUrl, webSocketUrl);
-
-        const [whitePlayerClient, blackPlayerClient] = await playUntilFinished(
-            creatorClient,
-            guestClient,
-        );
+        const [whitePlayerClient, blackPlayerClient] = await playUntilFinished();
 
         whitePlayerClient.sendPlayAgainOffer();
         await blackPlayerClient.pull(WsTitle.PlayAgainOffered);
     });
 
     test("Should be able to cancel play again before accepted", async () => {
-        const creatorClient = new MockCreator(serverUrl, webSocketUrl);
-        const guestClient = new MockGuest(serverUrl, webSocketUrl);
-
-        const [whitePlayerClient, blackPlayerClient] = await playUntilFinished(
-            creatorClient,
-            guestClient,
-        );
+        const [whitePlayerClient, blackPlayerClient] = await playUntilFinished();
 
         whitePlayerClient.sendPlayAgainOffer();
         await blackPlayerClient.pull(WsTitle.PlayAgainOffered);
@@ -86,13 +72,7 @@ describe("Play Again Tests", () => {
     });
 
     test("Should be able to decline play again when the offer received", async () => {
-        const creatorClient = new MockCreator(serverUrl, webSocketUrl);
-        const guestClient = new MockGuest(serverUrl, webSocketUrl);
-
-        const [whitePlayerClient, blackPlayerClient] = await playUntilFinished(
-            creatorClient,
-            guestClient,
-        );
+        const [whitePlayerClient, blackPlayerClient] = await playUntilFinished();
 
         whitePlayerClient.sendPlayAgainOffer();
         await blackPlayerClient.pull(WsTitle.PlayAgainOffered);
@@ -102,13 +82,7 @@ describe("Play Again Tests", () => {
     });
 
     test("Should not be able to accept play again if the offer is canceled before accepting it", async () => {
-        const creatorClient = new MockCreator(serverUrl, webSocketUrl);
-        const guestClient = new MockGuest(serverUrl, webSocketUrl);
-
-        const [whitePlayerClient, blackPlayerClient] = await playUntilFinished(
-            creatorClient,
-            guestClient,
-        );
+        const [whitePlayerClient, blackPlayerClient] = await playUntilFinished();
 
         whitePlayerClient.sendPlayAgainOffer();
         await blackPlayerClient.pull(WsTitle.PlayAgainOffered);
@@ -119,17 +93,17 @@ describe("Play Again Tests", () => {
         blackPlayerClient.acceptPlayAgainOffer();
         await expect(
             whitePlayerClient.pull(WsTitle.PlayAgainAccepted),
-        ).rejects.toThrow("Could not poll from pool.");
+        ).rejects.toThrow(MockClientPullErrorMsg);
+        await expect(
+            blackPlayerClient.pull(WsTitle.PlayAgainAccepted),
+        ).rejects.toThrow(MockClientPullErrorMsg);
+        expect((await blackPlayerClient.pull(WsTitle.Error)).message).toBe(
+            WebSocketHandlerErrorTemplates.PlayAgainAcceptFailed(blackPlayerClient.lobbyId!, blackPlayerClient.player!.token),
+        );
     });
 
     test("Should not be able to accept play again if the offer is already declined.", async () => {
-        const creatorClient = new MockCreator(serverUrl, webSocketUrl);
-        const guestClient = new MockGuest(serverUrl, webSocketUrl);
-
-        const [whitePlayerClient, blackPlayerClient] = await playUntilFinished(
-            creatorClient,
-            guestClient,
-        );
+        const [whitePlayerClient, blackPlayerClient] = await playUntilFinished();
 
         whitePlayerClient.sendPlayAgainOffer();
         await blackPlayerClient.pull(WsTitle.PlayAgainOffered);
@@ -140,17 +114,17 @@ describe("Play Again Tests", () => {
         blackPlayerClient.acceptPlayAgainOffer();
         await expect(
             whitePlayerClient.pull(WsTitle.PlayAgainAccepted),
-        ).rejects.toThrow("Could not poll from pool.");
+        ).rejects.toThrow(MockClientPullErrorMsg);
+        await expect(
+            blackPlayerClient.pull(WsTitle.PlayAgainAccepted),
+        ).rejects.toThrow(MockClientPullErrorMsg);
+        expect((await blackPlayerClient.pull(WsTitle.Error)).message).toBe(
+            WebSocketHandlerErrorTemplates.PlayAgainAcceptFailed(blackPlayerClient.lobbyId!, blackPlayerClient.player!.token),
+        );
     });
 
     test("Should not be able to accept play again if the offer is already accepted.", async () => {
-        const creatorClient = new MockCreator(serverUrl, webSocketUrl);
-        const guestClient = new MockGuest(serverUrl, webSocketUrl);
-
-        const [whitePlayerClient, blackPlayerClient] = await playUntilFinished(
-            creatorClient,
-            guestClient,
-        );
+        const [whitePlayerClient, blackPlayerClient] = await playUntilFinished();
 
         whitePlayerClient.sendPlayAgainOffer();
         await blackPlayerClient.pull(WsTitle.PlayAgainOffered);
@@ -161,7 +135,10 @@ describe("Play Again Tests", () => {
         blackPlayerClient.acceptPlayAgainOffer();
         await expect(
             whitePlayerClient.pull(WsTitle.PlayAgainAccepted),
-        ).rejects.toThrow("Could not poll from pool.");
+        ).rejects.toThrow(MockClientPullErrorMsg);
+        expect((await blackPlayerClient.pull(WsTitle.Error)).message).toBe(
+            WebSocketHandlerErrorTemplates.PlayAgainAcceptFailed(blackPlayerClient.lobbyId!, blackPlayerClient.player!.token),
+        );
     });
 
     test("Should be able to play again when the offer accepted", async () => {
