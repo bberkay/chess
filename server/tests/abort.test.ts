@@ -49,7 +49,7 @@ const shouldNotGameFinished = (lobbyId: string) => {
     expect(lobby.getGameStatus()).not.toBe(GameStatus.ReadyToStart);
 }
 
-describe("Play Again Tests", () => {
+describe("Abort Tests", () => {
     test("Should creator be able to abort game if the game is not started", async () => {
         const creatorClient = new MockCreator(serverUrl, webSocketUrl);
         await creatorClient.createLobby()

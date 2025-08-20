@@ -492,7 +492,7 @@ export class WebSocketHandler {
      * Offer draw to the opponent player.
      */
     private _offerDraw(ws: RWebSocket, lobby: Lobby, player: Player): void {
-        if (!lobby.isGameStarted() || lobby.isGameFinished()) {
+        if (!lobby.canOfferDraw()) {
             ws.send(
                 WsCommand.create([
                     WsTitle.Error,

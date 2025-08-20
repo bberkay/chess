@@ -54,8 +54,11 @@ const shouldBoardBe = (lobbyId: string, targetBoard: string) => {
     if (!lobby) throw new Error("Lobby could not found");
     expect(lobby.getGameAsFenNotation()).toBe(targetBoard);
 };
-
+// TODO: 3. draw, move bakılabilir. 4. Security ve WebSocket.test.ts yi bitir, 5. mevcut tüm testleri geç! 6. CORSRespone messagı ı kaldır.
 describe("Undo Tests", () => {
+    // TODO: Should not be able to send undo offer if no move has played
+    // TODO: Should not be able to send undo offer if the game is already finished
+    // TODO: Should not be able to accept undo offer if there is not sent undo offer
     test("Should be able to offer undo when its player's turn", async () => {
         const [whitePlayerClient, blackPlayerClient, lastBoard] =
             await playUntilUndoIsAvailable();

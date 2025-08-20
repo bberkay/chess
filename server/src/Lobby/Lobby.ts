@@ -13,6 +13,8 @@ import { Player } from "@Player";
 import { DESTROY_INACTIVE_LOBBY_TIMEOUT } from "@Consts";
 import { Logger } from "@Services/Logger";
 
+export type Offer = ["Undo" | "Draw", Color];
+
 const lobbyLogger = new Logger("LobbyLogger");
 
 /**
@@ -28,6 +30,8 @@ export class Lobby {
     private blackPlayer: Player | null = null;
 
     private gameTimeMonitorInterval: number | null = null;
+    // TODO: Continue to improve offer system.
+    private _activeOffer: Offer | null = null;
     private _activeOfferPlayerColor: Color | null = null;
     private _isGameStarted: boolean = false;
 
@@ -337,6 +341,13 @@ export class Lobby {
     }
 
     /**
+
+     */
+    public canOfferDraw(): boolean {
+        return !this.getActiveOffer() && this.isGameStarted() && this.chessEngine.getMoveHistory().length >= 2 && !this.isGameFinished();
+    }
+
+    /**
      * Finish the game as draw. This method should be used when
      * both players agree to finish the game as draw.
      */
@@ -344,6 +355,13 @@ export class Lobby {
         if (!this.getActiveOffer() || !this.isGameStarted() || this.isGameFinished()) return false;
         this.chessEngine.setGameStatus(GameStatus.Draw);
         return this.finishGame();
+    }
+
+    /**
+
+     */
+    public canOfferUndo(): boolean {
+        return !(!this.isGameStarted() || this.isGameFinished() || this.chessEngine.getMoveHistory().length < 1);
     }
 
     /**

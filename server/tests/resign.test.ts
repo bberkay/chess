@@ -52,7 +52,7 @@ const shouldNotGameFinished = (lobbyId: string) => {
     expect(lobby.getGameStatus()).not.toBe(GameStatus.Draw);
 }
 
-describe("Undo Tests", () => {
+describe("Resign Tests", () => {
     test("Should not be able to resign if no move played/abort available", async () => {
         const [whitePlayerClient, blackPlayerClient] =
             await createWhiteAndBlackClients();

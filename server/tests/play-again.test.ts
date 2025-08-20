@@ -54,6 +54,7 @@ const playUntilFinished = async (): Promise<[MockClient, MockClient]> => {
 };
 
 describe("Play Again Tests", () => {
+    // TODO: Should not be able to accept play again offer when no play again offer has received
     test("Should be able to offer play again when the game is finished", async () => {
         const [whitePlayerClient, blackPlayerClient] = await playUntilFinished();
 
