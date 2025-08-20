@@ -54,7 +54,6 @@ const playUntilFinished = async (): Promise<[MockClient, MockClient]> => {
 };
 
 describe("Play Again Tests", () => {
-    // TODO: Should not be able to accept play again offer when no play again offer has received
     test("Should be able to offer play again when the game is finished", async () => {
         const [whitePlayerClient, blackPlayerClient] = await playUntilFinished();
 
@@ -142,7 +141,64 @@ describe("Play Again Tests", () => {
         );
     });
 
-    test("Should be able to play again when the offer accepted", async () => {
+    test("Should not be able to accept play again offer when no play again offer has received", async () => {
+        const [whitePlayerClient, blackPlayerClient] = await playUntilFinished();
+
+        whitePlayerClient.acceptPlayAgainOffer();
+        await expect(
+            whitePlayerClient.pull(WsTitle.PlayAgainAccepted),
+        ).rejects.toThrow(MockClientPullErrorMsg);
+        await expect(
+            blackPlayerClient.pull(WsTitle.PlayAgainAccepted),
+        ).rejects.toThrow(MockClientPullErrorMsg);
+        expect((await whitePlayerClient.pull(WsTitle.Error)).message).toBe(
+            WebSocketHandlerErrorTemplates.PlayAgainAcceptFailed(whitePlayerClient.lobbyId!, whitePlayerClient.player!.token),
+        );
+    });
+
+    test("Should not be able to accept play again offer if offerer is also same player.", async () => {
+        const [whitePlayerClient, blackPlayerClient] = await playUntilFinished();
+
+        whitePlayerClient.sendPlayAgainOffer();
+        await blackPlayerClient.pull(WsTitle.PlayAgainOffered);
+
+        whitePlayerClient.acceptPlayAgainOffer();
+        await expect(
+            whitePlayerClient.pull(WsTitle.PlayAgainAccepted),
+        ).rejects.toThrow(MockClientPullErrorMsg);
+        await expect(
+            blackPlayerClient.pull(WsTitle.PlayAgainAccepted),
+        ).rejects.toThrow(MockClientPullErrorMsg);
+        expect((await whitePlayerClient.pull(WsTitle.Error)).message).toBe(
+            WebSocketHandlerErrorTemplates.PlayAgainAcceptFailed(whitePlayerClient.lobbyId!, whitePlayerClient.player!.token),
+        );
+    });
+
+    test("Should not be able to accept different offer than play again (imposter offer)", async () => {
+        const [whitePlayerClient, blackPlayerClient] = await playUntilFinished();
+
+        whitePlayerClient.sendUndoOffer();
+        await blackPlayerClient.pull(WsTitle.UndoOffered);
+
+        blackPlayerClient.acceptPlayAgainOffer();
+        await expect(
+            whitePlayerClient.pull(WsTitle.PlayAgainAccepted),
+        ).rejects.toThrow(MockClientPullErrorMsg);
+        await expect(
+            blackPlayerClient.pull(WsTitle.PlayAgainAccepted),
+        ).rejects.toThrow(MockClientPullErrorMsg);
+        await expect(
+            whitePlayerClient.pull(WsTitle.UndoAccepted),
+        ).rejects.toThrow(MockClientPullErrorMsg);
+        await expect(
+            blackPlayerClient.pull(WsTitle.UndoAccepted),
+        ).rejects.toThrow(MockClientPullErrorMsg);
+        expect((await blackPlayerClient.pull(WsTitle.Error)).message).toBe(
+            WebSocketHandlerErrorTemplates.PlayAgainAcceptFailed(blackPlayerClient.lobbyId!, blackPlayerClient.player!.token),
+        );
+    });
+
+    test("Should be able to play again with flipped colors when the offer accepted", async () => {
         const STARTED_BOARD = "k7/8/4rp2/8/8/8/1R5K/1R6 w - - 0 1";
         const STARTED_DURATIONS = {
             remaining: 30000,
