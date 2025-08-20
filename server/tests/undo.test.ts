@@ -8,6 +8,7 @@ import { MockGuest } from "./helpers/MockGuest";
 import { MockClient, MockClientPullErrorMsg } from "./helpers/MockClient";
 import { WebSocketHandlerErrorTemplates } from "src/WebSocket/WebSocketHandlerError";
 import { LobbyRegistry } from "@Lobby";
+import { TEST_BOARD } from "./consts";
 
 let server: Server | null = null;
 let serverUrl = "";
@@ -54,11 +55,8 @@ const shouldBoardBe = (lobbyId: string, targetBoard: string) => {
     if (!lobby) throw new Error("Lobby could not found");
     expect(lobby.getGameAsFenNotation()).toBe(targetBoard);
 };
-// TODO: 3. draw, move bakılabilir. 4. Security ve WebSocket.test.ts yi bitir, 5. mevcut tüm testleri geç! 6. CORSRespone messagı ı kaldır.
+
 describe("Undo Tests", () => {
-    // TODO: Should not be able to send undo offer if no move has played
-    // TODO: Should not be able to send undo offer if the game is already finished
-    // TODO: Should not be able to accept undo offer if there is not sent undo offer
     test("Should be able to offer undo when its player's turn", async () => {
         const [whitePlayerClient, blackPlayerClient, lastBoard] =
             await playUntilUndoIsAvailable();
@@ -169,6 +167,89 @@ describe("Undo Tests", () => {
         whitePlayerClient.sendUndoOffer();
         whitePlayerClient.cancelOffer();
         await blackPlayerClient.pull(WsTitle.OfferCancelled);
+        shouldBoardBe(whitePlayerClient.lobbyId!, lastBoard);
+    });
+
+    test("Should not be able to accept undo offer if there is not sent undo offer", async () => {
+        const [whitePlayerClient, blackPlayerClient, lastBoard] =
+            await playUntilUndoIsAvailable();
+
+        whitePlayerClient.acceptUndoOffer();
+        await expect(
+            whitePlayerClient.pull(WsTitle.UndoAccepted),
+        ).rejects.toThrow(MockClientPullErrorMsg);
+        await expect(
+            blackPlayerClient.pull(WsTitle.UndoAccepted),
+        ).rejects.toThrow(MockClientPullErrorMsg);
+        expect((await whitePlayerClient.pull(WsTitle.Error)).message).toBe(
+            WebSocketHandlerErrorTemplates.UndoAcceptFailed(whitePlayerClient.lobbyId!, whitePlayerClient.player!.token),
+        );
+        shouldBoardBe(whitePlayerClient.lobbyId!, lastBoard);
+    });
+
+    test("Should not be able to send undo offer if no move has played", async () => {
+        const creatorClient = new MockCreator(serverUrl, webSocketUrl);
+        const { lobbyId } = (await creatorClient.createLobby({ ...TEST_BOARD, name: "alex" })).data!;
+
+        const guestClient = new MockGuest(serverUrl, webSocketUrl);
+        await guestClient.connectLobby({ name: "alex", lobbyId });
+
+        guestClient.sendUndoOffer();
+        await expect(
+            creatorClient.pull(WsTitle.UndoOffered),
+        ).rejects.toThrow(MockClientPullErrorMsg);
+        await expect(
+            guestClient.pull(WsTitle.UndoOffered),
+        ).rejects.toThrow(MockClientPullErrorMsg);
+        expect((await guestClient.pull(WsTitle.Error)).message).toBe(
+            WebSocketHandlerErrorTemplates.UndoOfferFailed(guestClient.lobbyId!, guestClient.player!.token),
+        );
+        shouldBoardBe(guestClient.lobbyId!, TEST_BOARD.board);
+    });
+
+    test("Should not be able to accept undo offer if the offerer is same with the player", async () => {
+        const [whitePlayerClient, blackPlayerClient, lastBoard] =
+            await playUntilUndoIsAvailable();
+
+        whitePlayerClient.sendUndoOffer();
+        await blackPlayerClient.pull(WsTitle.UndoOffered);
+
+        whitePlayerClient.acceptUndoOffer();
+        await expect(
+            whitePlayerClient.pull(WsTitle.UndoAccepted),
+        ).rejects.toThrow(MockClientPullErrorMsg);
+        await expect(
+            blackPlayerClient.pull(WsTitle.UndoAccepted),
+        ).rejects.toThrow(MockClientPullErrorMsg);
+        expect((await whitePlayerClient.pull(WsTitle.Error)).message).toBe(
+            WebSocketHandlerErrorTemplates.UndoAcceptFailed(whitePlayerClient.lobbyId!, whitePlayerClient.player!.token),
+        );
+        shouldBoardBe(whitePlayerClient.lobbyId!, lastBoard);
+    });
+
+    test("Should not be able to accept different offer than undo (imposter offer)", async () => {
+        const [whitePlayerClient, blackPlayerClient, lastBoard] =
+            await playUntilUndoIsAvailable();
+
+        whitePlayerClient.sendDrawOffer();
+        await blackPlayerClient.pull(WsTitle.DrawOffered);
+
+        blackPlayerClient.acceptUndoOffer();
+        await expect(
+            whitePlayerClient.pull(WsTitle.UndoAccepted),
+        ).rejects.toThrow(MockClientPullErrorMsg);
+        await expect(
+            blackPlayerClient.pull(WsTitle.UndoAccepted),
+        ).rejects.toThrow(MockClientPullErrorMsg);
+        await expect(
+            whitePlayerClient.pull(WsTitle.DrawAccepted),
+        ).rejects.toThrow(MockClientPullErrorMsg);
+        await expect(
+            blackPlayerClient.pull(WsTitle.DrawAccepted),
+        ).rejects.toThrow(MockClientPullErrorMsg);
+        expect((await blackPlayerClient.pull(WsTitle.Error)).message).toBe(
+            WebSocketHandlerErrorTemplates.UndoAcceptFailed(blackPlayerClient.lobbyId!, blackPlayerClient.player!.token),
+        );
         shouldBoardBe(whitePlayerClient.lobbyId!, lastBoard);
     });
 
@@ -328,6 +409,35 @@ describe("Undo Tests", () => {
         expect(blackPlayerClient).toBeTruthy();
         expect(whitePlayerUndoAccepted).toEqual(blackPlayerUndoAccepted);
         shouldBoardBe(whitePlayerClient.lobbyId!, whitePlayerUndoAccepted!.board);
+    });
+
+    test("Should not be able to send undo offer if the game is already finished", async () => {
+        const [whitePlayerClient, blackPlayerClient] =
+            await playUntilUndoIsAvailable();
+
+        // Continue playing until the game reaches checkmate
+        whitePlayerClient.move(Square.f1, Square.c4);
+        await blackPlayerClient.pull(WsTitle.Moved);
+        blackPlayerClient.move(Square.a7, Square.a6);
+        await whitePlayerClient.pull(WsTitle.Moved);
+        whitePlayerClient.move(Square.d1, Square.f3);
+        await blackPlayerClient.pull(WsTitle.Moved);
+        blackPlayerClient.move(Square.a6, Square.a5);
+        await whitePlayerClient.pull(WsTitle.Moved);
+        whitePlayerClient.move(Square.f3, Square.f7);
+        await blackPlayerClient.pull(WsTitle.Moved);
+
+        whitePlayerClient.sendUndoOffer();
+        await expect(
+            whitePlayerClient.pull(WsTitle.UndoOffered),
+        ).rejects.toThrow(MockClientPullErrorMsg);
+        await expect(
+            blackPlayerClient.pull(WsTitle.UndoOffered),
+        ).rejects.toThrow(MockClientPullErrorMsg);
+        expect((await whitePlayerClient.pull(WsTitle.Error)).message).toBe(
+            WebSocketHandlerErrorTemplates.UndoOfferFailed(whitePlayerClient.lobbyId!, whitePlayerClient.player!.token),
+        );
+        shouldBoardBe(whitePlayerClient.lobbyId!, "rnbqkbnr/1ppp1Qpp/8/p3p3/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 0 4");
     });
 });
 
