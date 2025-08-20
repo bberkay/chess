@@ -60,66 +60,6 @@ const shouldNotGameFinished = (lobbyId: string) => {
 }
 
 describe("Draw Tests", () => {
-    // TODO: Should not be able to accept its own offer, add this also to play again, undo, resign etc.
-    // TODO: Should not be able to accept different offers, add this also to play again, undo, resign etc.
-    test("Should not be able to send draw offer if no move has played/abort available", async () => {
-        const [whitePlayerClient, blackPlayerClient] =
-            await createWhiteAndBlackClients();
-
-        whitePlayerClient.sendDrawOffer();
-        await expect(
-            whitePlayerClient.pull(WsTitle.DrawOffered),
-        ).rejects.toThrow(MockClientPullErrorMsg);
-        await expect(
-            blackPlayerClient.pull(WsTitle.DrawOffered),
-        ).rejects.toThrow(MockClientPullErrorMsg);
-        expect((await whitePlayerClient.pull(WsTitle.Error)).message).toBe(
-            WebSocketHandlerErrorTemplates.DrawOfferFailed(whitePlayerClient.lobbyId!, whitePlayerClient.player!.token),
-        );
-        shouldNotGameFinished(whitePlayerClient.lobbyId!);
-    });
-
-    test("Should not be able to accept draw offer if there is no sent draw offer", async () => {
-        const [whitePlayerClient, blackPlayerClient] =
-            await createWhiteAndBlackClients();
-
-        whitePlayerClient.acceptDrawOffer();
-        await expect(
-            whitePlayerClient.pull(WsTitle.DrawAccepted),
-        ).rejects.toThrow(MockClientPullErrorMsg);
-        await expect(
-            blackPlayerClient.pull(WsTitle.DrawAccepted),
-        ).rejects.toThrow(MockClientPullErrorMsg);
-        expect((await whitePlayerClient.pull(WsTitle.Error)).message).toBe(
-            WebSocketHandlerErrorTemplates.DrawAcceptFailed(whitePlayerClient.lobbyId!, whitePlayerClient.player!.token),
-        );
-        shouldNotGameFinished(whitePlayerClient.lobbyId!);
-    });
-
-    test("Should not be able to send draw offer if game is already finished", async () => {
-        const [whitePlayerClient, blackPlayerClient] =
-            await createWhiteAndBlackClients(StartPosition.Checkmate);
-
-        whitePlayerClient.move(Square.b1, Square.a1);
-        await blackPlayerClient.pull(WsTitle.Moved);
-        blackPlayerClient.move(Square.e6, Square.a6);
-        await whitePlayerClient.pull(WsTitle.Moved);
-        whitePlayerClient.move(Square.a1, Square.a6);
-        await blackPlayerClient.pull(WsTitle.Moved);
-
-        whitePlayerClient.sendDrawOffer();
-        await expect(
-            whitePlayerClient.pull(WsTitle.DrawOffered),
-        ).rejects.toThrow(MockClientPullErrorMsg);
-        await expect(
-            blackPlayerClient.pull(WsTitle.DrawOffered),
-        ).rejects.toThrow(MockClientPullErrorMsg);
-        expect((await whitePlayerClient.pull(WsTitle.Error)).message).toBe(
-            WebSocketHandlerErrorTemplates.DrawOfferFailed(whitePlayerClient.lobbyId!, whitePlayerClient.player!.token),
-        );
-        shouldGameStatusBe(whitePlayerClient.lobbyId!, GameStatus.WhiteVictory);
-    });
-
     test("Should be able to offer draw when its player's turn", async () => {
         const [whitePlayerClient, blackPlayerClient] =
             await createWhiteAndBlackClients();
@@ -226,6 +166,110 @@ describe("Draw Tests", () => {
         shouldNotGameFinished(whitePlayerClient.lobbyId!);
     });
 
+    test("Should not be able to send draw offer if no move has played/abort available", async () => {
+        const [whitePlayerClient, blackPlayerClient] =
+            await createWhiteAndBlackClients();
+
+        whitePlayerClient.sendDrawOffer();
+        await expect(
+            whitePlayerClient.pull(WsTitle.DrawOffered),
+        ).rejects.toThrow(MockClientPullErrorMsg);
+        await expect(
+            blackPlayerClient.pull(WsTitle.DrawOffered),
+        ).rejects.toThrow(MockClientPullErrorMsg);
+        expect((await whitePlayerClient.pull(WsTitle.Error)).message).toBe(
+            WebSocketHandlerErrorTemplates.DrawOfferFailed(whitePlayerClient.lobbyId!, whitePlayerClient.player!.token),
+        );
+        shouldNotGameFinished(whitePlayerClient.lobbyId!);
+    });
+
+    test("Should not be able to accept draw offer if there is no sent draw offer", async () => {
+        const [whitePlayerClient, blackPlayerClient] =
+            await createWhiteAndBlackClients();
+
+        whitePlayerClient.acceptDrawOffer();
+        await expect(
+            whitePlayerClient.pull(WsTitle.DrawAccepted),
+        ).rejects.toThrow(MockClientPullErrorMsg);
+        await expect(
+            blackPlayerClient.pull(WsTitle.DrawAccepted),
+        ).rejects.toThrow(MockClientPullErrorMsg);
+        expect((await whitePlayerClient.pull(WsTitle.Error)).message).toBe(
+            WebSocketHandlerErrorTemplates.DrawAcceptFailed(whitePlayerClient.lobbyId!, whitePlayerClient.player!.token),
+        );
+        shouldNotGameFinished(whitePlayerClient.lobbyId!);
+    });
+
+    test("Should not be able to accept draw offer if the offerer is same with the player", async () => {
+        const [whitePlayerClient, blackPlayerClient] =
+            await createWhiteAndBlackClients();
+
+        whitePlayerClient.sendDrawOffer();
+        await blackPlayerClient.pull(WsTitle.DrawOffered);
+
+        whitePlayerClient.acceptDrawOffer();
+        await expect(
+            whitePlayerClient.pull(WsTitle.DrawAccepted),
+        ).rejects.toThrow(MockClientPullErrorMsg);
+        await expect(
+            blackPlayerClient.pull(WsTitle.DrawAccepted),
+        ).rejects.toThrow(MockClientPullErrorMsg);
+        expect((await whitePlayerClient.pull(WsTitle.Error)).message).toBe(
+            WebSocketHandlerErrorTemplates.DrawAcceptFailed(whitePlayerClient.lobbyId!, whitePlayerClient.player!.token),
+        );
+        shouldNotGameFinished(whitePlayerClient.lobbyId!);
+    });
+
+    test("Should not be able to send draw offer if game is already finished", async () => {
+        const [whitePlayerClient, blackPlayerClient] =
+            await createWhiteAndBlackClients(StartPosition.Checkmate);
+
+        whitePlayerClient.move(Square.b1, Square.a1);
+        await blackPlayerClient.pull(WsTitle.Moved);
+        blackPlayerClient.move(Square.e6, Square.a6);
+        await whitePlayerClient.pull(WsTitle.Moved);
+        whitePlayerClient.move(Square.a1, Square.a6);
+        await blackPlayerClient.pull(WsTitle.Moved);
+
+        whitePlayerClient.sendDrawOffer();
+        await expect(
+            whitePlayerClient.pull(WsTitle.DrawOffered),
+        ).rejects.toThrow(MockClientPullErrorMsg);
+        await expect(
+            blackPlayerClient.pull(WsTitle.DrawOffered),
+        ).rejects.toThrow(MockClientPullErrorMsg);
+        expect((await whitePlayerClient.pull(WsTitle.Error)).message).toBe(
+            WebSocketHandlerErrorTemplates.DrawOfferFailed(whitePlayerClient.lobbyId!, whitePlayerClient.player!.token),
+        );
+        shouldGameStatusBe(whitePlayerClient.lobbyId!, GameStatus.WhiteVictory);
+    });
+
+    test("Should not be able to accept different offer than draw (imposter offer)", async () => {
+        const [whitePlayerClient, blackPlayerClient] =
+            await createWhiteAndBlackClients();
+
+        whitePlayerClient.sendUndoOffer();
+        await blackPlayerClient.pull(WsTitle.UndoOffered);
+
+        blackPlayerClient.acceptDrawOffer();
+        await expect(
+            whitePlayerClient.pull(WsTitle.DrawAccepted),
+        ).rejects.toThrow(MockClientPullErrorMsg);
+        await expect(
+            blackPlayerClient.pull(WsTitle.DrawAccepted),
+        ).rejects.toThrow(MockClientPullErrorMsg);
+        await expect(
+            whitePlayerClient.pull(WsTitle.UndoAccepted),
+        ).rejects.toThrow(MockClientPullErrorMsg);
+        await expect(
+            blackPlayerClient.pull(WsTitle.UndoAccepted),
+        ).rejects.toThrow(MockClientPullErrorMsg);
+        expect((await blackPlayerClient.pull(WsTitle.Error)).message).toBe(
+            WebSocketHandlerErrorTemplates.DrawAcceptFailed(blackPlayerClient.lobbyId!, blackPlayerClient.player!.token),
+        );
+        shouldNotGameFinished(whitePlayerClient.lobbyId!);
+    });
+
     test("Should not be able to accept draw offer that is cancelled when its player's turn", async () => {
         const [whitePlayerClient, blackPlayerClient] =
             await createWhiteAndBlackClients();
@@ -248,7 +292,6 @@ describe("Draw Tests", () => {
         expect((await blackPlayerClient.pull(WsTitle.Error)).message).toBe(
             WebSocketHandlerErrorTemplates.DrawAcceptFailed(whitePlayerClient.lobbyId!, blackPlayerClient.player!.token),
         );
-
         shouldNotGameFinished(whitePlayerClient.lobbyId!);
     });
 
