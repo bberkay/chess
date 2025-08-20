@@ -470,7 +470,7 @@ export class WebSocketHandler {
      * Offer undo to the opponent player.
      */
     private _offerUndo(ws: RWebSocket, lobby: Lobby, player: Player): void {
-        if (!lobby.isGameStarted() || lobby.isGameFinished()) {
+        if (!lobby.setActiveOffer(player, "Undo")) {
             ws.send(
                 WsCommand.create([
                     WsTitle.Error,
@@ -483,8 +483,7 @@ export class WebSocketHandler {
                 ]),
             );
             return;
-        }
-        lobby.setActiveOffer(player);
+        };
         ws.publish(lobby.id, WsCommand.create([WsTitle.UndoOffered]));
     }
 
@@ -492,7 +491,7 @@ export class WebSocketHandler {
      * Offer draw to the opponent player.
      */
     private _offerDraw(ws: RWebSocket, lobby: Lobby, player: Player): void {
-        if (!lobby.canOfferDraw()) {
+        if (!lobby.setActiveOffer(player, "Draw")) {
             ws.send(
                 WsCommand.create([
                     WsTitle.Error,
@@ -506,7 +505,6 @@ export class WebSocketHandler {
             );
             return;
         }
-        lobby.setActiveOffer(player);
         ws.publish(lobby.id, WsCommand.create([WsTitle.DrawOffered]));
     }
 
@@ -518,7 +516,7 @@ export class WebSocketHandler {
         lobby: Lobby,
         player: Player,
     ): void {
-        if (!lobby.isGameFinished()) {
+        if (!lobby.setActiveOffer(player, "PlayAgain")) {
             ws.send(
                 WsCommand.create([
                     WsTitle.Error,
@@ -532,7 +530,6 @@ export class WebSocketHandler {
             );
             return;
         }
-        lobby.setActiveOffer(player);
         ws.publish(lobby.id, WsCommand.create([WsTitle.PlayAgainOffered]));
     }
 
@@ -540,7 +537,7 @@ export class WebSocketHandler {
      * Accept the play again offer and send the started command to the client.
      */
     private _acceptPlayAgain(ws: RWebSocket, lobby: Lobby, player: Player): void {
-        if (!lobby.getActiveOffer()) {
+        if (!lobby.playAgain(player)) {
             ws.send(
                 WsCommand.create([
                     WsTitle.Error,
@@ -566,7 +563,7 @@ export class WebSocketHandler {
      * finished command to the client.
      */
     private _acceptDraw(ws: RWebSocket, lobby: Lobby, player: Player): void {
-        if (!lobby.draw()) {
+        if (!lobby.draw(player)) {
             ws.send(
                 WsCommand.create([
                     WsTitle.Error,
@@ -591,7 +588,7 @@ export class WebSocketHandler {
      * undo accepted command to the client.
      */
     private _acceptUndo(ws: RWebSocket, lobby: Lobby, player: Player): void {
-        const undoColor = lobby.undo();
+        const undoColor = lobby.undo(player);
         if (!undoColor) {
             ws.send(
                 WsCommand.create([

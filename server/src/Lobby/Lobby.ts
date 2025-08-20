@@ -13,7 +13,9 @@ import { Player } from "@Player";
 import { DESTROY_INACTIVE_LOBBY_TIMEOUT } from "@Consts";
 import { Logger } from "@Services/Logger";
 
-export type Offer = ["Undo" | "Draw", Color];
+export type OfferType = "Undo" | "Draw" | "PlayAgain"
+export type Offerer = Player
+export type ActiveOffer = [Offerer, OfferType];
 
 const lobbyLogger = new Logger("LobbyLogger");
 
@@ -24,22 +26,20 @@ export class Lobby {
     public readonly id: string;
     public readonly createdAt: number = Date.now();
     private _lastPlayedAt: number = Date.now();
-    private _restartCount = 0;
+    private _matchCount = 1;
 
-    private whitePlayer: Player | null = null;
-    private blackPlayer: Player | null = null;
+    private _whitePlayer: Player | null = null;
+    private _blackPlayer: Player | null = null;
 
-    private gameTimeMonitorInterval: number | null = null;
-    // TODO: Continue to improve offer system.
-    private _activeOffer: Offer | null = null;
-    private _activeOfferPlayerColor: Color | null = null;
-    private _isGameStarted: boolean = false;
+    private _gameTimeMonitorInterval: number | null = null;
+    private _activeOffer: ActiveOffer | null = null;
+    private _isGameStarted: boolean = false; // TODO: Get rid of this
 
-    private readonly chessEngine: ChessEngine = new ChessEngine();
+    private readonly _chessEngine: ChessEngine = new ChessEngine();
 
     // Inital values
-    private readonly board: StartPosition | JsonNotation | string;
-    private readonly durations: Durations;
+    private readonly _board: StartPosition | JsonNotation | string;
+    private readonly _durations: Durations;
 
     /**
      * Constructor of the Lobby class.
@@ -50,8 +50,8 @@ export class Lobby {
         initialDuration: Duration,
     ) {
         this.id = id;
-        this.board = board;
-        this.durations = {
+        this._board = board;
+        this._durations = {
             [Color.White]: initialDuration,
             [Color.Black]: initialDuration,
         };
@@ -75,14 +75,14 @@ export class Lobby {
      * Get the white player of the lobby.
      */
     public getWhitePlayer(): Player | null {
-        return this.whitePlayer;
+        return this._whitePlayer;
     }
 
     /**
      * Get the black player of the lobby.
      */
     public getBlackPlayer(): Player | null {
-        return this.blackPlayer;
+        return this._blackPlayer;
     }
 
     /**
@@ -90,10 +90,10 @@ export class Lobby {
      */
     public getGameAsJsonNotation(): JsonNotation {
         return this.isGameStarted()
-            ? this.chessEngine.getGameAsJsonNotation()
-            : typeof this.board === "string"
-              ? Converter.fenToJson(this.board)
-              : this.board;
+            ? this._chessEngine.getGameAsJsonNotation()
+            : typeof this._board === "string"
+              ? Converter.fenToJson(this._board)
+              : this._board;
     }
 
     /**
@@ -101,10 +101,10 @@ export class Lobby {
      */
     public getGameAsFenNotation(): string {
         return this.isGameStarted()
-            ? this.chessEngine.getGameAsFenNotation()
-            : typeof this.board === "string"
-              ? this.board
-              : Converter.jsonToFen(this.board);
+            ? this._chessEngine.getGameAsFenNotation()
+            : typeof this._board === "string"
+              ? this._board
+              : Converter.jsonToFen(this._board);
     }
 
     /**
@@ -112,10 +112,10 @@ export class Lobby {
      */
     public areBothPlayersOnline(): boolean {
         return (
-            !!this.whitePlayer &&
-            this.whitePlayer.isOnline &&
-            !!this.blackPlayer &&
-            this.blackPlayer.isOnline
+            !!this._whitePlayer &&
+            this._whitePlayer.isOnline &&
+            !!this._blackPlayer &&
+            this._blackPlayer.isOnline
         );
     }
 
@@ -137,8 +137,8 @@ export class Lobby {
      */
     public isPlayerInLobby(player: Player): boolean {
         return (
-            this.whitePlayer?.token === player.token ||
-            this.blackPlayer?.token === player.token
+            this._whitePlayer?.token === player.token ||
+            this._blackPlayer?.token === player.token
         );
     }
 
@@ -146,9 +146,9 @@ export class Lobby {
      * Get the color of the player.
      */
     public getColorOfPlayer(player: Player): Color | null {
-        return this.whitePlayer?.token === player.token
+        return this._whitePlayer?.token === player.token
             ? Color.White
-            : this.blackPlayer?.token === player.token
+            : this._blackPlayer?.token === player.token
               ? Color.Black
               : null;
     }
@@ -166,13 +166,13 @@ export class Lobby {
 
         lobbyLogger.save("Player is not in the lobby: ", player.id, player.name);
 
-        if (this.whitePlayer) {
-            if (this.blackPlayer) {
+        if (this._whitePlayer) {
+            if (this._blackPlayer) {
                 lobbyLogger.save("Lobby is full");
                 return false;
             }
             this.setBlackPlayer(player);
-        } else if (this.blackPlayer) {
+        } else if (this._blackPlayer) {
             this.setWhitePlayer(player);
         } else {
             const randomColor = Math.random() > 0.5 ? Color.White : Color.Black;
@@ -194,23 +194,23 @@ export class Lobby {
      * Set the white player of the lobby.
      */
     private setWhitePlayer(player: Player): void {
-        this.whitePlayer = player;
+        this._whitePlayer = player;
     }
 
     /**
      * Set the black player of the lobby.
      */
     private setBlackPlayer(player: Player): void {
-        this.blackPlayer = player;
+        this._blackPlayer = player;
     }
 
     /**
      * Flip the colors of the players.
      */
     private flipColors(): void {
-        if (this.whitePlayer && this.blackPlayer) {
-            const temp = { ...this.whitePlayer };
-            this.setWhitePlayer(this.blackPlayer!);
+        if (this._whitePlayer && this._blackPlayer) {
+            const temp = { ...this._whitePlayer };
+            this.setWhitePlayer(this._blackPlayer!);
             this.setBlackPlayer(temp);
         }
     }
@@ -238,7 +238,7 @@ export class Lobby {
      * clearing the interval when the game is finished.
      */
     public setGameTimeMonitorInterval(callback: () => void): void {
-        this.gameTimeMonitorInterval = setInterval(() => {
+        this._gameTimeMonitorInterval = setInterval(() => {
             callback();
         }, 1000) as unknown as number;
     }
@@ -247,10 +247,10 @@ export class Lobby {
      * Clear the game time monitor interval.
      */
     public clearGameTimeMonitorInterval(): void {
-        if (this.gameTimeMonitorInterval !== null)
-            clearInterval(this.gameTimeMonitorInterval);
+        if (this._gameTimeMonitorInterval !== null)
+            clearInterval(this._gameTimeMonitorInterval);
 
-        this.gameTimeMonitorInterval = null;
+        this._gameTimeMonitorInterval = null;
     }
 
     /**
@@ -258,8 +258,8 @@ export class Lobby {
      */
     public isGameReadyToStart(): boolean {
         return (
-            !!this.board &&
-            !!this.durations &&
+            !!this._board &&
+            !!this._durations &&
             !this.isGameStarted() &&
             this.areBothPlayersOnline()
         );
@@ -281,36 +281,68 @@ export class Lobby {
             GameStatus.BlackVictory,
             GameStatus.WhiteVictory,
             GameStatus.Draw,
-        ].includes(this.chessEngine.getGameStatus());
+        ].includes(this._chessEngine.getGameStatus());
     }
 
     /**
      * Get the game status.
      */
     public getGameStatus(): GameStatus {
-        return this.chessEngine.getGameStatus();
+        return this._chessEngine.getGameStatus();
+    }
+
+    /**
+     * Check if offer can be made.
+     */
+    private _canOffer(offerType: OfferType): boolean {
+        if (this._activeOffer)
+            return false;
+
+        if (offerType === "Undo") {
+            return this.isGameStarted() && !this.isGameFinished() && this._chessEngine.getMoveHistory().length >= 1
+        } else if (offerType === "Draw") {
+            return this.isGameStarted() && !this.isGameFinished() && this._chessEngine.getMoveHistory().length >= 2
+        } else if (offerType === "PlayAgain") {
+            return !this.isGameStarted() && this.isGameFinished()
+        }
+
+        return false;
     }
 
     /**
      * Set active offer.
      */
-    public setActiveOffer(player: Player): void {
-        this._activeOfferPlayerColor = this.getColorOfPlayer(player);
+    public _acceptActiveOffer(playerWhoAcceptedOffer: Player, offerType: OfferType): boolean {
+        if (!this._activeOffer) return false;
+        if (this._activeOffer[0] === playerWhoAcceptedOffer) return false;
+        if (this._activeOffer[1] !== offerType) return false;
+        return true;
+    }
+
+    /**
+     * Set active offer.
+     */
+    public setActiveOffer(player: Player, offerType: OfferType): boolean {
+        if (!this._canOffer(offerType))
+            return false;
+
+        this._activeOffer = [player, offerType];
+        return true;
     }
 
     /**
      * Get active offer.
      */
-    public getActiveOffer(): Color | null {
-        return this._activeOfferPlayerColor;
+    public getActiveOffer(): ActiveOffer | null {
+        return this._activeOffer;
     }
 
     /**
      * Remove active offer.
      */
     public removeActiveOffer(): boolean {
-        if (!this.getActiveOffer()) return false;
-        this._activeOfferPlayerColor = null;
+        if (!this._activeOffer) return false;
+        this._activeOffer = null;
         return true;
     }
 
@@ -319,8 +351,8 @@ export class Lobby {
      * both players agree to finish the game as draw.
      */
     public abort(): boolean {
-        if (this.isGameStarted() && this.chessEngine.getMoveHistory().length >= 2 || this.isGameFinished()) return false;
-        this.chessEngine.setGameStatus(GameStatus.ReadyToStart);
+        if (!this.isGameStarted() || this.isGameFinished() || this._chessEngine.getMoveHistory().length >= 2) return false;
+        this._chessEngine.setGameStatus(GameStatus.ReadyToStart);
         return this.finishGame();
     }
 
@@ -328,11 +360,11 @@ export class Lobby {
      * Resign a player from the game.
      */
     public resign(player: Player): boolean {
-        if (!this.isGameStarted() || this.chessEngine.getMoveHistory().length < 2 || this.isGameFinished()) return false;
+        if (!this.isGameStarted() || this.isGameFinished()) return false;
         const color = this.getColorOfPlayer(player);
         if (!color) return false;
 
-        this.chessEngine.setGameStatus(
+        this._chessEngine.setGameStatus(
             color == Color.White
                 ? GameStatus.BlackVictory
                 : GameStatus.WhiteVictory,
@@ -341,41 +373,38 @@ export class Lobby {
     }
 
     /**
-
-     */
-    public canOfferDraw(): boolean {
-        return !this.getActiveOffer() && this.isGameStarted() && this.chessEngine.getMoveHistory().length >= 2 && !this.isGameFinished();
-    }
-
-    /**
      * Finish the game as draw. This method should be used when
      * both players agree to finish the game as draw.
      */
-    public draw(): boolean {
-        if (!this.getActiveOffer() || !this.isGameStarted() || this.isGameFinished()) return false;
-        this.chessEngine.setGameStatus(GameStatus.Draw);
+    public draw(player: Player): boolean {
+        if (!this._acceptActiveOffer(player, "Draw")) return false;
+        this._chessEngine.setGameStatus(GameStatus.Draw);
         return this.finishGame();
-    }
-
-    /**
-
-     */
-    public canOfferUndo(): boolean {
-        return !(!this.isGameStarted() || this.isGameFinished() || this.chessEngine.getMoveHistory().length < 1);
     }
 
     /**
      * Take back the last move. This method should be used when
      * both players agree to take back the last move.
      */
-    public undo(): Color | false {
-        if (!this.isGameStarted() || this.isGameFinished()) return false;
-        const undoColor = this.getActiveOffer();
+    public undo(playerWhoAcceptedOffer: Player): Color | false {
+        if (!this._acceptActiveOffer(playerWhoAcceptedOffer, "Undo")) return false;
+        const playerWhoMadeOffer = this._whitePlayer === playerWhoAcceptedOffer
+            ? this._blackPlayer
+            : this._whitePlayer;
+        const undoColor = this.getColorOfPlayer(playerWhoMadeOffer!);
         if (!undoColor) return false;
-        this.chessEngine.takeBack(undoColor);
+        this._chessEngine.takeBack(undoColor);
         this.removeActiveOffer();
         this.updateLastPlayedAt();
         return undoColor;
+    }
+
+    /**
+     *
+     */
+    public playAgain(player: Player): boolean {
+        if (!this._acceptActiveOffer(player, "PlayAgain")) return false;
+        return true;
     }
 
     /**
@@ -384,9 +413,15 @@ export class Lobby {
     public makeMove(player: Player, from: Square, to: Square): boolean {
         if (!this.isPlayerInLobby(player)) return false;
         if (!this.isGameStarted() || this.isGameFinished()) return false;
-        if (this.chessEngine.getTurnColor() !== this.getColorOfPlayer(player)) return false;
-        this.chessEngine.playMove(from, to);
+        if (this._chessEngine.getTurnColor() !== this.getColorOfPlayer(player)) return false;
+        this._chessEngine.playMove(from, to);
         this.updateLastPlayedAt();
+        // If the player moved when there was an active offer sent by opponent,
+        // it means that player ignored the offer so remove it. We are understand
+        // this by checking if the offerer (which is activeOffer[0]) isn't same
+        // with player.
+        const activeOffer = this.getActiveOffer();
+        if (activeOffer && activeOffer[0] !== player) this.removeActiveOffer();
         return true;
     }
 
@@ -398,15 +433,15 @@ export class Lobby {
             lobbyLogger.save("Game is not ready to start.");
             return;
         }
-        if (this._restartCount >= 1) this.flipColors();
-        this.chessEngine.createGame({
-            ...(typeof this.board === "string"
-                ? Converter.fenToJson(this.board)
-                : this.board),
-            durations: JSON.parse(JSON.stringify(this.durations)),
+        if (this._matchCount >= 2) this.flipColors();
+        this._chessEngine.createGame({
+            ...(typeof this._board === "string"
+                ? Converter.fenToJson(this._board)
+                : this._board),
+            durations: JSON.parse(JSON.stringify(this._durations)),
         });
         this._isGameStarted = true;
-        this._restartCount += 1;
+        this._matchCount += 1;
         this.updateLastPlayedAt();
         this.removeActiveOffer();
     }
@@ -433,7 +468,7 @@ export class Lobby {
             this.areBothPlayersOffline() &&
             (this.isGameFinished() ||
                 !this.isGameStarted() ||
-                this.chessEngine.getMoveHistory().length < 2)
+                this._chessEngine.getMoveHistory().length < 2)
         );
     }
 }
