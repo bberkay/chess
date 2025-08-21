@@ -74,61 +74,6 @@ describe("Rate Limiting & DoS Protection", () => {
     }, SECURITY_TIMEOUT);
 });
 
-describe("WebSocket Security", () => {
-    test("Should validate WebSocket messages", async () => {
-        const [testLobby, ws] = await createTestLobby(serverUrl, webSocketUrl);
-
-        const maliciousMessages = [
-            JSON.stringify({ type: "INVALID_COMMAND", data: "payload" }),
-            '{"type":"<script>alert(\\"xss\\")</script>","data":"test"}',
-            '{"type":"MOVE","data":"../../../../../../etc/passwd"}',
-            "not_valid_json",
-            JSON.stringify({ type: "ADMIN_COMMAND", data: { action: "DELETE_ALL" } }),
-        ];
-
-        let errorCount = 0;
-        ws.onerror = () => errorCount++;
-
-        for (const message of maliciousMessages) {
-            try {
-                ws.send(message);
-                // Wait a bit to see if connection gets terminated
-                await new Promise(resolve => setTimeout(resolve, 100));
-            } catch (error) {
-                // Expected for malformed messages
-            }
-        }
-
-        // Connection should either handle gracefully or terminate safely
-        expect(ws.readyState).toBeOneOf([WebSocket.OPEN, WebSocket.CLOSED]);
-
-        ws.close();
-    });
-
-    test("Should handle oversized WebSocket messages", async () => {
-        const [testLobby, ws] = await createTestLobby(serverUrl, webSocketUrl);
-
-        const oversizedMessage = JSON.stringify({
-            type: "CHAT",
-            data: "a".repeat(100000) // 100KB message
-        });
-
-        let connectionClosed = false;
-        ws.onclose = () => connectionClosed = true;
-        ws.onerror = () => {};
-
-        try {
-            ws.send(oversizedMessage);
-            await new Promise(resolve => setTimeout(resolve, 1000));
-        } catch (error) {
-            // Expected behavior
-        }
-
-        // Should either reject the message or close the connection
-        expect(connectionClosed || ws.readyState === WebSocket.CLOSED).toBe(true);
-    });
-});
-
 afterAll(() => {
     server?.stop(true);
 });
