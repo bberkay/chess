@@ -10,24 +10,24 @@ const WS_MESSAGE_RECEIVE_CHECK = 100;
 export const MockClientPullErrorMsg = "Could not poll from pool.";
 
 export abstract class MockClient {
-    protected _serverUrl: string;
-    protected _wsUrl: string;
-    protected _ws: WebSocket | null = null;
+    public serverUrl: string;
+    public wsUrl: string;
+    public ws: WebSocket | null = null;
     public lobbyId: string | null = null;
     public player: Player | null = null;
     // FIXME: Improve typing of `_incomingMessages`
     protected _incomingMessages: Record<string, unknown> = {};
 
     constructor(serverUrl: string, wsUrl: string) {
-        this._serverUrl = serverUrl;
-        this._wsUrl = wsUrl;
+        this.serverUrl = serverUrl;
+        this.wsUrl = wsUrl;
     }
 
     public async reconnectLobby(throwError: boolean = true): Promise<CORSResponseBody<HTTPPostRoutes.ReconnectLobby>> {
         if (!this.player) throw new Error("MockClient must connect before reconnect.");
 
         const reconnectedLobbyResponse = await testFetch(
-            this._serverUrl,
+            this.serverUrl,
             HTTPPostRoutes.ReconnectLobby,
             { lobbyId: this.lobbyId!, playerToken: this.player.token }
         );
@@ -35,7 +35,7 @@ export abstract class MockClient {
         if (reconnectedLobbyResponse.success && reconnectedLobbyResponse.data) {
             this.lobbyId = reconnectedLobbyResponse.data.lobbyId;
             this.player = reconnectedLobbyResponse.data.player;
-            const wsLobbyUrl = createWsLobbyConnUrl(this._wsUrl, this.lobbyId, this.player.token);
+            const wsLobbyUrl = createWsLobbyConnUrl(this.wsUrl, this.lobbyId, this.player.token);
             await this._initWsHandlers(wsLobbyUrl);
         } else if (throwError) {
             throw new Error(`Could not reconnect lobby: ${reconnectedLobbyResponse.message}`);
@@ -50,10 +50,10 @@ export abstract class MockClient {
 
     protected async _initWsHandlers(wsLobbyUrl: string): Promise<void> {
         if (!this.player) throw new Error("MockClient must connect through HTTP before creating WebSocket connection.");
-        if (this._ws) throw new Error("Before creating new WebSocket connection destroy the open one with `disconnectLobby()`");
+        if (this.ws) throw new Error("Before creating new WebSocket connection destroy the open one with `disconnectLobby()`");
         await new Promise<void>((resolve, reject) => {
-            this._ws = new WebSocket(wsLobbyUrl);
-            this._ws.onmessage = (event: MessageEvent) => {
+            this.ws = new WebSocket(wsLobbyUrl);
+            this.ws.onmessage = (event: MessageEvent) => {
                 const [wsTitle, wsData] = WsCommand.parse(event.data);
                 this._incomingMessages[wsTitle] = wsData;
                 console.log("on message incomingMessage new title", wsTitle, wsLobbyUrl);
@@ -61,7 +61,7 @@ export abstract class MockClient {
                     console.log("error data is: ", wsData)
                 }
             }
-            this._ws.onopen = () => {
+            this.ws.onopen = () => {
                 this.player!.isOnline = true;
                 resolve();
             };
@@ -71,14 +71,14 @@ export abstract class MockClient {
 
     protected async _removeWsHandlers(): Promise<void> {
         if (!this.player) throw new Error("MockClient must connect through HTTP before closing WebSocket connection.");
-        if (!this._ws) throw new Error("No WebSocket connection found to remove its handlers.")
+        if (!this.ws) throw new Error("No WebSocket connection found to remove its handlers.")
         return new Promise<void>((resolve, reject) => {
-            this._ws!.onclose = () => {
+            this.ws!.onclose = () => {
                 this.player!.isOnline = false;
-                this._ws = null;
+                this.ws = null;
                 resolve();
             }
-            this._ws!.close();
+            this.ws!.close();
             setTimeout(() => reject("WebSocket instance could not closed in given time."), WS_MESSAGE_RECEIVE_TIMEOUT);
         });
     }
@@ -86,7 +86,7 @@ export abstract class MockClient {
     public async pull<T extends WsTitle>(wsTitle: T): Promise<WsDataMap[T]> {
         return await new Promise<WsDataMap[T]>((resolve, reject) => {
             const isReceivedInterval = setInterval(() => {
-                console.log("pulling checking: ", wsTitle, this._ws?.url)
+                console.log("pulling checking: ", wsTitle, this.ws?.url)
                 if (Object.hasOwn(this._incomingMessages, wsTitle)) {
                     clearInterval(isReceivedInterval);
                     const data = this._incomingMessages[wsTitle];
@@ -103,13 +103,13 @@ export abstract class MockClient {
         })
     }
 
-    private _send(message: WsOutgoingMessage): void {
-        if (!this._ws) throw new Error("No available websocket connection.");
-        this._ws.send(WsCommand.create(message));
+    public send(message: WsOutgoingMessage): void {
+        if (!this.ws) throw new Error("No available websocket connection.");
+        this.ws.send(WsCommand.create(message));
     }
 
     public abortGame(): void {
-        this._send([WsTitle.Aborted]);
+        this.send([WsTitle.Aborted]);
     }
 
     public resign(): void {
@@ -118,43 +118,43 @@ export abstract class MockClient {
         // so instead of implementing client-side compatible
         // WsIncomingData/WsOutgoingData we are just going to
         // ignore to prevent unnecessary complexity.
-        this._send([WsTitle.Resigned]);
+        this.send([WsTitle.Resigned]);
     }
 
     public sendPlayAgainOffer(): void {
-        this._send([WsTitle.PlayAgainOffered]);
+        this.send([WsTitle.PlayAgainOffered]);
     }
 
     public sendDrawOffer(): void {
-        this._send([WsTitle.DrawOffered]);
+        this.send([WsTitle.DrawOffered]);
     }
 
     public sendUndoOffer(): void {
-        this._send([WsTitle.UndoOffered]);
+        this.send([WsTitle.UndoOffered]);
     }
 
     public acceptDrawOffer(): void {
-        this._send([WsTitle.DrawAccepted]);
+        this.send([WsTitle.DrawAccepted]);
     }
 
     public acceptPlayAgainOffer(): void {
-        this._send([WsTitle.PlayAgainAccepted]);
+        this.send([WsTitle.PlayAgainAccepted]);
     }
 
     public acceptUndoOffer(): void {
         // @ts-expect-error check out resign()
-        this._send([WsTitle.UndoAccepted]);
+        this.send([WsTitle.UndoAccepted]);
     }
 
     public cancelOffer(): void {
-        this._send([WsTitle.OfferCancelled]);
+        this.send([WsTitle.OfferCancelled]);
     }
 
     public declineOffer(): void {
-        this._send([WsTitle.OfferDeclined]);
+        this.send([WsTitle.OfferDeclined]);
     }
 
     public move(from: Square, to: Square): void {
-        this._send([WsTitle.Moved, { from, to }]);
+        this.send([WsTitle.Moved, { from, to }]);
     }
 }

@@ -18,7 +18,7 @@ export class MockCreator extends MockClient {
         }
 
         const createdLobbyResponse = await testFetch(
-            this._serverUrl,
+            this.serverUrl,
             HTTPPostRoutes.CreateLobby,
             createLobbyBody
         );
@@ -27,7 +27,7 @@ export class MockCreator extends MockClient {
             this.lobbyId = createdLobbyResponse.data.lobbyId;
             this.player = createdLobbyResponse.data.player;
 
-            const wsLobbyUrl = createWsLobbyConnUrl(this._wsUrl, this.lobbyId, this.player.token);
+            const wsLobbyUrl = createWsLobbyConnUrl(this.wsUrl, this.lobbyId, this.player.token);
             await this._initWsHandlers(wsLobbyUrl);
         } else if (throwError) {
             throw new Error(`Could not create lobby: ${createdLobbyResponse.message}`);

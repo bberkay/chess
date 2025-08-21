@@ -12,7 +12,7 @@ export class MockGuest extends MockClient {
         throwError: boolean = true,
     ): Promise<CORSResponseBody<HTTPPostRoutes.ConnectLobby>> {
         const connectedLobbyResponse = await testFetch(
-            this._serverUrl,
+            this.serverUrl,
             HTTPPostRoutes.ConnectLobby,
             connectLobbyBody,
         );
@@ -22,7 +22,7 @@ export class MockGuest extends MockClient {
             this.player = connectedLobbyResponse.data.player;
 
             const wsLobbyUrl = createWsLobbyConnUrl(
-                this._wsUrl,
+                this.wsUrl,
                 this.lobbyId,
                 this.player.token,
             );
