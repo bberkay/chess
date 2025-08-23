@@ -31,7 +31,7 @@ Features
     *   Time Control
 *   **Extended Mechanics:**
     *   Pre-Move for every type of move like normal, castling, en passant and promotion/promote (to any type of piece). Supports multiple pre-moves and can be canceled of course.
-    *   Abort, Resign and Draw, Undo and Play again offers.
+    *   Abort, Resign, Draw, Undo and Play again offers.
     *   Going back and forward in the move history.
 *   **Board:**
     *   Includes animations and sounds for normal moves and pre-moves. Can be flipped. Supports drag-and-drop on both desktop and mobile. Easily [customizable](https://github.com/bberkay/chess/blob/main/client/public/css/chessboard.css) and [configurable](https://github.com/bberkay/chess/blob/main/client/src/Chess/Board/Types/index.ts).
