@@ -33,7 +33,7 @@ export class Lobby {
 
     private _gameTimeMonitorInterval: number | null = null;
     private _activeOffer: ActiveOffer | null = null;
-    private _isGameStarted: boolean = false; // TODO: Get rid of this
+    private _isGameStarted: boolean = false;
 
     private readonly _chessEngine: ChessEngine = new ChessEngine();
 
