@@ -11,13 +11,10 @@ import { ChessEngine } from "@Chess/Engine/ChessEngine";
 import { Converter } from "@Chess/Utils/Converter";
 import { Player } from "@Player";
 import { DESTROY_INACTIVE_LOBBY_TIMEOUT } from "@Consts";
-import { Logger } from "@Services/Logger";
 
 export type OfferType = "Undo" | "Draw" | "PlayAgain"
 export type Offerer = Player
 export type ActiveOffer = [Offerer, OfferType];
-
-const lobbyLogger = new Logger("LobbyLogger");
 
 /**
  * This class represents the lobby of the game.
@@ -160,15 +157,15 @@ export class Lobby {
         if (this.isPlayerInLobby(player)) {
             // Reconnect the player
             if (!player.isOnline) this.setPlayerOnline(player);
-            lobbyLogger.save("Player is already in the lobby: ", player.id, player.name);
+            console.log(`Player[${player.id}] is already in the lobby[${this.id}].`);
             return true;
         }
 
-        lobbyLogger.save("Player is not in the lobby: ", player.id, player.name);
+        console.log(`Player[${player.id}] is not in the lobby[${this.id}].`);
 
         if (this._whitePlayer) {
             if (this._blackPlayer) {
-                lobbyLogger.save("Lobby is full");
+                console.log(`Lobby[${this.id}] is full, player[${player.id}] can't join.`);
                 return false;
             }
             this.setBlackPlayer(player);
@@ -430,7 +427,7 @@ export class Lobby {
      */
     public startGame(): void {
         if (!this.isGameReadyToStart()) {
-            lobbyLogger.save("Game is not ready to start.");
+            console.log(`Game[${this.id}] in lobby not ready to start.`);
             return;
         }
         if (this._matchCount >= 2) this.flipColors();

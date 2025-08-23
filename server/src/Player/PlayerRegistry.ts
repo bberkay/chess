@@ -2,10 +2,8 @@ import { GU_ID_LENGTH } from "@Consts";
 import { createRandomId } from "@Utils";
 import { Player, PlayerRegistryError } from "@Player";
 import { LobbyRegistry } from "@Lobby";
-import { Logger } from "@Services/Logger";
 
 const _players: Map<string, Player> = new Map();
-const playerRegistryLogger = new Logger("PlayerRegistry");
 
 export class PlayerRegistry {
     /**
@@ -54,15 +52,23 @@ export class PlayerRegistry {
         return player;
     }
 
-    static delete(userId: string): void {
-        const user = this.get(userId);
-        if (!user) return;
+    /**
+    * Delete a player from the registry by their token.
+    *
+    * If the player exists and is not currently active in a lobby,
+    * the player is removed from the internal registry.
+    * If the player is still part of an active game, the deletion
+    * is skipped and a message is logged instead.
+    */
+    static delete(playerId: string): void {
+        const player = this.get(playerId);
+        if (!player) return;
 
-        if (!LobbyRegistry.isUserActive(user)) {
-            playerRegistryLogger.save("Player in still in online game, could not deleted player with user id ", userId);
+        if (!LobbyRegistry.isPlayerActive(player)) {
+            console.log(`Player[${playerId}] could not deleted because still in online game.`);
         } else {
-            playerRegistryLogger.save("Player is inactive. Deleting...: ", userId);
-            _players.delete(userId);
+            console.log(`Player[${playerId}] is inactive. Deleting...`);
+            _players.delete(playerId);
         }
     }
 }

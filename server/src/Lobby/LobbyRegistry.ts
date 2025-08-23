@@ -4,10 +4,8 @@ import { createRandomId } from "@Utils";
 import { GU_ID_LENGTH } from "@Consts";
 import { Player } from "@Player";
 import { LobbyRegistryError } from ".";
-import { Logger } from "@Services/Logger";
 
 const _lobbies: Map<string, Lobby> = new Map();
-const lobbyRegistryLogger = new Logger("LobbyRegistry");
 
 /**
  * This class manages the lobbies of the game.
@@ -77,17 +75,17 @@ export class LobbyRegistry {
         if (!lobby) return;
 
         if (lobby.isReadyForCleanup()) {
-            lobbyRegistryLogger.save("Lobby is dead. Deleting...: ", lobbyId);
+            console.log(`Lobby[${lobbyId}] is dead. Deleting...`);
             _lobbies.delete(lobbyId);
         } else {
-            lobbyRegistryLogger.save(lobbyId, " lobby is not ready for cleanup.");
+            console.log(`Lobby[${lobbyId}] is not ready for cleanup.`);
         }
     }
 
     /**
      * Checks whether the given user is currently in a lobby.
      */
-    static isUserActive(player: Player) {
+    static isPlayerActive(player: Player) {
         return _lobbies.values().find(lobby => lobby.isPlayerInLobby(player))
     }
 

@@ -301,7 +301,7 @@ export class ChessPlatform {
             this.platform.navigatorModal.showLobbyInfo(
                 window.location.origin + "/" + lobbyId,
             );
-            console.log("we are here create lobby");
+
             Store.save(StoreKey.LastLobbyConnection, response.data);
             Store.save(StoreKey.LastPlayerName, player.name);
             document.dispatchEvent(
@@ -568,7 +568,7 @@ export class ChessPlatform {
         }
 
         const webSocketUrl = createWebSocketUrl(lobbyId, player.token);
-        console.log("WebSocket URL:", webSocketUrl);
+        //console.log("WebSocket URL:", webSocketUrl);
         this.socket = new WebSocket(webSocketUrl);
 
         let shouldTerminateConnectionOnClose = false;
