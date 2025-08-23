@@ -93,30 +93,33 @@ Check out [ARCHITECTURE.md](https://github.com/bberkay/chess/blob/main/docs/ARCH
 Installation
 ------------
 
-1.  Clone the repository.
-    `git clone https://github.com/bberkay/chess.git`
-2.  Server
-    1.  Go to the server directory.
-        `cd server`
-    2.  Install the dependencies.
-        `bun install`
-    3.  Run the server.
-        `bun run src/main.ts`
-3.  Client
-    1.  Go to the client directory.
-        `cd client`
-    2.  Install the dependencies.
-        `bun install`
-    3.  Run the project with `bun run dev`
-        or
-        Build the project and preview with `bun run build && bun run preview`
+Check out [INSTALLATION.md](https://github.com/bberkay/chess/blob/main/docs/INSTALLATION.md) for more information about installation.
+
+1. Clone the repository.
+   ```bash
+   git clone https://github.com/bberkay/chess.git
+   cd chess
+   ```
+
+2. Set up environment variables.
+   ```bash
+   cp server/.env.example server/.env
+   cp client/.env.example client/.env
+   ```
+
+3. Run with Docker Compose.
+   ```bash
+   docker-compose up --build
+   ```
+
+4. Access the application
+   - **Client:** [http://localhost:4173](http://localhost:4173)
+   - **Server:** [http://localhost:3000](http://localhost:3000)
 
 Usage
 -----
 
 Check out [USAGE.md](https://github.com/bberkay/chess/blob/main/docs/USAGE.md) for more information about usage and method list of classes.
-
-### Chess Platform (Full Version)
 
 ```html
 <html>
@@ -160,180 +163,11 @@ Check out [USAGE.md](https://github.com/bberkay/chess/blob/main/docs/USAGE.md) f
 ```
 This is also current usage in [index.html](https://github.com/bberkay/chess/blob/main/client/index.html) of the [Live Demo](https://github.com/bberkay/chess/blob/main/README.md#chess-platform).
 
-### Chess (without Platform)
-
-```html
-<html>
-  <head>
-    <title>Chess without Platform</title>
-  </head>
-  <body>
-    <div id="chessboard"></div>
-    <!-- Required while using Chess -->
-
-    <!-- Initiate Chess without Platform -->
-    <script type="module" async>
-      import { Chess } from '@Chess/Chess';
-      import {
-        BotAttributes,
-        BotDifficulty,
-        BotColor
-      } from '@Chess/Bot';
-      import { Color, Square } from '@Chess/Types';
-
-      // If there is a game in cache, then chess
-      // will load it. Otherwise, chess will
-      // create a new standard game.
-      const chess = new Chess();
-
-      // Stockfish can be added to the game
-      // with different difficulty levels
-      // and colors.
-      const botAttributes = {
-          color: BotColor.Random
-          difficulty: BotDifficulty.Medium
-      }
-      chess.addBotToCurrentGame(botAttributes);
-
-      // Listening the moves
-      document.addEventListener(ChessEvent.onPieceMoved, ((
-          event
-      ) => {
-          console.log(event.detail.from, event.detail.to);
-          console.log(chess.getGameAsFenNotation());
-      }));
-    </script>
-  </body>
-</html>
-```
-
-### ChessBoard (Standalone)
-
-```html
-<html>
-  <head>
-    <title>Chessboard Standalone</title>
-  </head>
-  <body>
-    <div id="chessboard"></div>
-    <!-- Required while using ChessBoard -->
-
-    <!-- Initiate Chessboard as Standalone -->
-    <script type="module" async>
-      import {
-        ChessBoard,
-        AnimationSpeed,
-        Config,
-      } from "@Chess/Board/ChessBoard";
-      import { Square } from "@Chess/Types";
-
-      // Standard game will be created in constructor.
-      const chessBoard = new ChessBoard();
-
-      // Set configuration of the board(optional).
-      const config: Config = {
-        enableSoundEffects: true,
-        enablePreSelection: false,
-        showHighlights: true,
-        enableWinnerAnimation: true,
-        animationSpeed: AnimationSpeed.Slow,
-      };
-      chessBoard.setConfig(config);
-
-      // Bind move event callbacks.
-      // This is a basic example:
-      let selectedSquare: Square | null = null;
-      let preSelectedSquare: Square | null = null;
-      let preMoves: {
-        selectedSquare: Square,
-        targetSquare: Square,
-      }[] = [];
-      chessBoard.bindMoveEventCallbacks({
-        onPieceSelected: (squareId: Square) => {
-          selectedSquare = squareId;
-        },
-        onPiecePreSelected: (squareId: Square) => {
-          preSelectedSquare = squareId;
-        },
-        onPieceMoved: (squareId: Square) => {
-          console.log("Piece moved to: ", squareId);
-          selectedSquare = null;
-        },
-        onPiecePreMoved: (
-          squareId: Square,
-          squareClickMode: SquareClickMode
-        ) => {
-          console.log("Piece pre-moved to: ", squareId);
-          if (squareClickMode === SquareClickMode.PrePromote)
-            chessBoard.showPromotionMenu(squareId);
-          else
-            preMoves.push({
-              selectedSquare: preSelectedSquare,
-              targetSquare: squareId,
-            });
-        },
-        onPreMoveCanceled: () => {
-          console.log("Pre-move canceled.");
-          preSelectedSquare = null;
-          preMoves = [];
-        },
-      });
-    </script>
-  </body>
-</html>
-```
-
-### ChessEngine (Standalone)
-
-```typescript
-// somefile.ts/somefile.js
-import { ChessEngine } from "@Chess/Engine/ChessEngine";
-import { Square } from "@Chess/Types";
-
-// Standard game will be created in constructor.
-const chessEngine = new ChessEngine();
-
-// Get moves of the piece on the given square.
-// This is optional, you don't have to use it to play move.
-const moves: Moves = chessEngine.getMoves(Square.e2);
-console.log(moves);
-//  Example `moves` output:
-//  {
-//    [MoveType.Normal]: [Square.e3, Square.e4],
-//    [MoveType.Castling]: [],
-//    [MoveType.EnPassant]: []
-//  }
-//
-
-// Play on engine(without board)
-chessEngine.playMove(Square.e2, Square.e4);
-
-// Get the fen notation of the current game
-const fen: string = chessEngine.getGameAsFenNotation();
-console.log(fen);
-// Example `fenNotation` output:
-// rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1
-
-// Print the ASCII representation of the current game
-console.log(chessEngine.getGameAsAscii());
-// Example `ASCII` output:
-// +---+---+---+---+---+---+---+---+
-// | r   n   b   q   k   b   n   r | 8
-// | p   p   p   p   p   p   p   p | 7
-// | .   .   .   .   .   .   .   . | 6
-// | .   .   .   .   .   .   .   . | 5
-// | .   .   .   .   P   .   .   . | 4
-// | .   .   .   .   .   .   .   . | 3
-// | P   P   P   P   .   P   P   P | 2
-// | R   N   B   Q   K   B   N   R | 1
-// +---+---+---+---+---+---+---+---+
-//   a   b   c   d   e   f   g   h
-```
-
 Testing
 -------
 
-Chess Platform is tested with _Vitest_. Tests consist mostly of engine tests like **move calculation**, **move validation**, **checkmate**, **stalemate**, etc. Also, there are some tests for converting operations like **fen notation** to [`JsonNotation`](https://github.com/bberkay/chess/blob/main/client/src/Chess/Types/index.ts)
+Chess Platform is tested with _Vitest_. Both [client](https://github.com/bberkay/chess/tree/main/client/tests) and [server](https://github.com/bberkay/chess/tree/main/server/tests) tests can be found under their own dirs. Client tests mostly consist of engine tests, and there are no UI tests yet. I tried to make the server tests as comprehensive as possible.
+
 
 All the tests can be run with the following command.
 `bun run test`
@@ -341,7 +175,6 @@ All the tests can be run with the following command.
 Or run a specific test with the following command.
 `bun run test en-passant`
 
-All tests can be found in the [tests](https://github.com/bberkay/chess/tree/main/client/tests) directory.
 
 Epilogue
 --------
