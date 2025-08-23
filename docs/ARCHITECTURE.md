@@ -30,16 +30,24 @@ For general information about the project check out [README.md](https://github.c
 ### Server
 
 - **[Main](https://github.com/bberkay/chess/blob/main/server/src/main.ts)**  
-  This is the main file on the server-side. It handles all HTTP and websocket requests. It has a copy of the [`ChessEngine`](https://github.com/bberkay/chess/tree/main/server/src/Chess) on the client-side to facilitate gameplay between players. Variables such as allowed origins and CORS headers can be modified via Consts.
+  This is the main file on the server-side. It handles all HTTP and websocket requests. Variables such as headers, validation limits can be modified via Consts.
   - **[WsCommand:](https://github.com/bberkay/chess/blob/main/server/src/main.ts)** Like `ChessEngine`, this is a copy of `WsCommand` under `ChessPlatform` on the client-side.
 
-- **[Managers](https://github.com/bberkay/chess/tree/main/server/src/Managers)**
-  - **[LobbyManager:](https://github.com/bberkay/chess/blob/main/server/src/Managers/LobbyManager.ts)** This is the main class responsible for managing lobbies, such as creating new lobbies, adding players to lobbies, and deleting lobbies that are no longer in use. It is only used by the main file and does not interact with any other class.
-  - **[SocketManager:](https://github.com/bberkay/chess/blob/main/server/src/Managers/SocketManager.ts)** Stores the sockets of users connected to a lobby according to lobby IDs and makes websocket connections accessible for both sides.
+- **[HTTP](https://github.com/bberkay/chess/tree/main/server/src/HTTP)**
+  - **[HTTPRequestHandler:](https://github.com/bberkay/chess/blob/main/server/src/HTTP/HTTPRequestHandler.ts)** This module creates players and sets up lobbies (note that players do not join at this stage). It also sends the necessary data to the frontend for connecting to the WebSocket. It validates incoming data using `HTTPRequestValidator`. It is invoked directly by the BunServer module and exposes the required routes (such as /create-lobby, /reconnect-lobby, etc.) under `Bun.serve`.
 
-- **[Lobby](https://github.com/bberkay/chess/blob/main/server/src/Lobby/index.ts)**  
-  This class represents the lobby, hosts players, and enables gameplay using `ChessEngine`. Each lobby corresponds to a lobby instance. It does not interact with any other class.
+- **[WebSocket](https://github.com/bberkay/chess/tree/main/server/src/WebSocket)**
+  - **[WebSocketRequestHandler:](https://github.com/bberkay/chess/blob/main/server/src/WebSocket/WebSocketRequestHandler.ts)** It takes the data created by `HTTPRequestHandler`, structures it as [`WebSocketData`](https://github.com/bberkay/chess/blob/main/server/src/WebSocket/types.ts) and loads it into [`RWebSocket`](https://github.com/bberkay/chess/blob/main/server/src/WebSocket/types.ts), making the data available throughout the WebSocket session. Using `RWebSocket`, it manages user actions such as joining and leaving a lobby (including notifying oppponent) and enables interactions within the lobby, like sending messages or performing actions (e.g., making a move, sending an offer). It is called directly by the `BunServer` module and exposes the required routes (open, close, message) under `Bun.serve`.
 
+- **[Lobby](https://github.com/bberkay/chess/tree/main/server/src/Lobby)**
+  - **[LobbyRegistry:](https://github.com/bberkay/chess/blob/main/server/src/Lobby/LobbyRegistry.ts)** Static class responsible for managing lobbies, such as creating new lobbies, adding players to lobbies, and deleting lobbies that are no longer in use.
+  - **[Lobby:](https://github.com/bberkay/chess/blob/main/server/src/Lobby/Lobby.ts)** This class represents the lobby, hosts players, and enables gameplay using ChessEngine. Each lobby corresponds to a lobby instance. It does not interact with any other class.
+
+- **[Player](https://github.com/bberkay/chess/tree/main/server/src/Player)**
+  - **[PlayerRegistry:](https://github.com/bberkay/chess/blob/main/server/src/Player/PlayerRegistry.ts)** This is the main class responsible for managing players, such as storing players, creating new one, deleting old ones etc.
+  - **[Player:](https://github.com/bberkay/chess/blob/main/server/src/Player/Player.ts)** This object represents the player. Player does not represent user. Each player object specially created for each lobby. The player is deleted after the client leaves the lobby. This structure was created because there is no database in the project (since it cannot store the users).
+
+  
 ![Server Side Architecture](https://raw.githubusercontent.com/bberkay/chess/refs/heads/main/docs/chess-platform-Server-Side-Architecture.png)
 
 ### Diagrams
