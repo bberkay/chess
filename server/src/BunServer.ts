@@ -47,8 +47,6 @@ export function createServer(): Server {
                 httpRequestHandler.canHandle(req) &&
                 !webSocketHandler.canHandle(req)
             ) {
-                console.log("req could not catched: ", req);
-                console.log("req headers: ", req.headers);
                 return new CORSResponse(
                     {
                         success: false,
@@ -59,8 +57,9 @@ export function createServer(): Server {
             }
 
             const wsData = webSocketHandler.createWsData(req);
-            console.log("ws data created: ");
-            if (wsData instanceof CORSResponse) return wsData;
+            if (wsData instanceof CORSResponse) {
+                return wsData;
+            }
 
             // upgrade the connection.
             const success = server.upgrade(req, {

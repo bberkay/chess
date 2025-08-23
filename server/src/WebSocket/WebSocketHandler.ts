@@ -138,14 +138,7 @@ export class WebSocketHandler {
         try {
             const lobby = ws.data.lobby;
             const player = ws.data.player;
-            console.log(
-                "Connection opened: ",
-                lobby.id,
-                player.token,
-                player.name,
-            );
-
-            LobbyRegistry.join(lobby.id, player);
+            console.log(`Player[${player.id}] trying to join lobby[${lobby.id}].`);
 
             if (!lobby.isPlayerInLobby(player)) {
                 ws.send(
@@ -180,13 +173,15 @@ export class WebSocketHandler {
                 return;
             }
 
+            LobbyRegistry.join(lobby.id, player);
+
             ws.subscribe(lobby.id);
             ws.send(
                 WsCommand.create([WsTitle.Connected, { playerId: player.id }]),
             );
 
             if (lobby.areBothPlayersOnline()) {
-                console.log("Game should start now: ", lobby.id);
+                console.log(`Game of lobby[${lobby.id}} should start now.`);
                 this._startGame(ws, lobby);
             }
         } catch (e: unknown) {
@@ -257,7 +252,7 @@ export class WebSocketHandler {
         };
 
         if (lobby.isGameReadyToStart()) {
-            console.log("Starting the game: ", lobby.id);
+            console.log(`Starting the game of lobby[${lobby.id}].`);
 
             // Start the game and send the started command to the clients.
             lobby.startGame();
@@ -306,7 +301,7 @@ export class WebSocketHandler {
      */
     private _handleCommand(ws: RWebSocket, message: string): void {
         try {
-            console.log("Incoming message: ", message);
+            console.log(`Incoming message: ${message}`);
             const [command, data] = WsCommand.parse(message);
             if (!command) return;
 
@@ -462,8 +457,11 @@ export class WebSocketHandler {
             return;
         }
         ws.publish(lobby.id, WsCommand.create([WsTitle.Moved, { from, to }]));
-        if (lobby.isGameFinished()) this._finishGame(ws, lobby);
-        else console.log("DIDNT FINISHED");
+        if (lobby.isGameFinished()) {
+            this._finishGame(ws, lobby);
+        } else {
+            console.log(`Game of lobby[${lobby.id}] did not finished.`);
+        }
     }
 
     /**
