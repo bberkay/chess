@@ -170,35 +170,35 @@ export class NotationMenu extends Component {
      * Get default lobby utility menu content.
      */
     private getOnlineGameUtilityMenuContent(): string {
-        return `
-            ${
-                this.chess.getMoveHistory().length < 2
-                    ? `<button class="menu-item" data-menu-operation="${NotationMenuOperation.AbortGame}"  data-tooltip-text="Abort the Game">&#x2715; Abort</button>`
-                    : `<button class="menu-item" data-menu-operation="${NotationMenuOperation.SendUndoOffer}" data-tooltip-text="Send Undo Offer">↺ Undo</button>`
-            }
-            <button class="menu-item" data-menu-operation="${
-                NotationMenuOperation.SendDrawOffer
-            }" data-tooltip-text="Send Draw Offer">Draw</button>
-            <button class="menu-item" data-menu-operation="${
-                NotationMenuOperation.Resign
-            }" data-tooltip-text="Resign From Game">⚐ Resign</button>
-        `;
+        const moveCount = this.chess.getMoveHistory().length;
+        return (moveCount >= 1
+            ? `<button class="menu-item" data-menu-operation="${NotationMenuOperation.SendUndoOffer}" data-tooltip-text="Send Undo Offer">↺ Undo</button>`
+            : ``
+        )
+        .concat(
+            moveCount >= 2
+                ? `
+                    <button class="menu-item" data-menu-operation="${NotationMenuOperation.SendDrawOffer}" data-tooltip-text="Send Draw Offer">Draw</button>
+                    <button class="menu-item" data-menu-operation="${NotationMenuOperation.Resign}" data-tooltip-text="Resign From Game">⚐ Resign</button>
+                `
+                : `<button class="menu-item" data-menu-operation="${NotationMenuOperation.AbortGame}"  data-tooltip-text="Abort the Game">&#x2715; Abort</button>`
+        );
     }
 
     /**
      * Get default single player game utility menu content.
      */
     private getSingleplayerGameUtilityMenuContent(): string {
-        return `
-            ${
-                this.chess.getMoveHistory().length < 1
-                    ? `<button class="menu-item" data-menu-operation="${NotationMenuOperation.AbortGame}"  data-tooltip-text="Abort the Game">&#x2715; Abort</button>`
-                    : `<button class="menu-item" data-menu-operation="${NotationMenuOperation.UndoMove}" data-tooltip-text="Take Back Last Move">↺ Undo</button>`
-            }
-            <button class="menu-item" data-menu-operation="${
-                NotationMenuOperation.Resign
-            }" data-tooltip-text="Resign From Game">⚐ Resign</button>
-        `;
+        const moveCount = this.chess.getMoveHistory().length;
+        return (
+            moveCount >= 1
+                ? `<button class="menu-item" data-menu-operation="${NotationMenuOperation.UndoMove}" data-tooltip-text="Take Back Last Move">↺ Undo</button>`
+                : ``
+        ).concat(
+            moveCount >= 2
+                ? `<button class="menu-item" data-menu-operation="${NotationMenuOperation.Resign}" data-tooltip-text="Resign From Game">⚐ Resign</button>`
+                : `<button class="menu-item" data-menu-operation="${NotationMenuOperation.AbortGame}"  data-tooltip-text="Abort the Game">&#x2715; Abort</button>`
+        );
     }
 
     /**
