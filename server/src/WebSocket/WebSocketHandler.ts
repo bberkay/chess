@@ -140,6 +140,8 @@ export class WebSocketHandler {
             const player = ws.data.player;
             console.log(`Player[${player.id}] trying to join lobby[${lobby.id}].`);
 
+            LobbyRegistry.join(lobby.id, player);
+
             if (!lobby.isPlayerInLobby(player)) {
                 ws.send(
                     WsCommand.create([
@@ -172,8 +174,6 @@ export class WebSocketHandler {
                 );
                 return;
             }
-
-            LobbyRegistry.join(lobby.id, player);
 
             ws.subscribe(lobby.id);
             ws.send(
