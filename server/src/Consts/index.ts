@@ -5,6 +5,17 @@ export const CORS_HEADERS: Record<string, string> = {
     "Access-Control-Allow-Origin": Bun.env.CORS_ORIGIN || "*",
     "Access-Control-Allow-Methods": "OPTIONS, GET, POST",
     "Access-Control-Allow-Headers": "Content-Type",
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Content-Security-Policy":
+        "default-src 'self'; " +
+        "script-src 'self'; " +
+        "style-src 'self' 'unsafe-inline'; " +
+        "connect-src 'self' ws: wss:; " +
+        "object-src 'none'; " +
+        "base-uri 'self';",
 };
 
 export const DEFAULT_CORS_RESPONSE: ResponseInit = {
