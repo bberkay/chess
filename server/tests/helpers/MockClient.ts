@@ -1,7 +1,12 @@
 import { Square } from "@Chess/Types";
-import { CORSResponseBody, HTTPPostRoutes } from "src/HTTP";
+import { CORSResponseBody, HTTPRoutes } from "src/HTTP";
 import { Player } from "src/Player";
-import { WsCommand, WsDataMap, WsOutgoingMessage, WsTitle } from "src/WebSocket";
+import {
+    WsCommand,
+    WsDataMap,
+    WsOutgoingMessage,
+    WsTitle,
+} from "src/WebSocket";
 import { createWsLobbyConnUrl, testFetch } from "tests/utils";
 
 const WS_MESSAGE_RECEIVE_TIMEOUT = 1000;
@@ -23,22 +28,31 @@ export abstract class MockClient {
         this.wsUrl = wsUrl;
     }
 
-    public async reconnectLobby(throwError: boolean = true): Promise<CORSResponseBody<HTTPPostRoutes.ReconnectLobby>> {
-        if (!this.player) throw new Error("MockClient must connect before reconnect.");
+    public async reconnectLobby(
+        throwError: boolean = true,
+    ): Promise<CORSResponseBody<HTTPRoutes.ReconnectLobby>> {
+        if (!this.player)
+            throw new Error("MockClient must connect before reconnect.");
 
         const reconnectedLobbyResponse = await testFetch(
             this.serverUrl,
-            HTTPPostRoutes.ReconnectLobby,
-            { lobbyId: this.lobbyId!, playerToken: this.player.token }
+            HTTPRoutes.ReconnectLobby,
+            { lobbyId: this.lobbyId!, playerToken: this.player.token },
         );
 
         if (reconnectedLobbyResponse.success && reconnectedLobbyResponse.data) {
             this.lobbyId = reconnectedLobbyResponse.data.lobbyId;
             this.player = reconnectedLobbyResponse.data.player;
-            const wsLobbyUrl = createWsLobbyConnUrl(this.wsUrl, this.lobbyId, this.player.token);
+            const wsLobbyUrl = createWsLobbyConnUrl(
+                this.wsUrl,
+                this.lobbyId,
+                this.player.token,
+            );
             await this._initWsHandlers(wsLobbyUrl);
         } else if (throwError) {
-            throw new Error(`Could not reconnect lobby: ${reconnectedLobbyResponse.message}`);
+            throw new Error(
+                `Could not reconnect lobby: ${reconnectedLobbyResponse.message}`,
+            );
         }
 
         return reconnectedLobbyResponse;
@@ -49,44 +63,72 @@ export abstract class MockClient {
     }
 
     protected async _initWsHandlers(wsLobbyUrl: string): Promise<void> {
-        if (!this.player) throw new Error("MockClient must connect through HTTP before creating WebSocket connection.");
-        if (this.ws) throw new Error("Before creating new WebSocket connection destroy the open one with `disconnectLobby()`");
+        if (!this.player)
+            throw new Error(
+                "MockClient must connect through HTTP before creating WebSocket connection.",
+            );
+        if (this.ws)
+            throw new Error(
+                "Before creating new WebSocket connection destroy the open one with `disconnectLobby()`",
+            );
         await new Promise<void>((resolve, reject) => {
             this.ws = new WebSocket(wsLobbyUrl);
             this.ws.onmessage = (event: MessageEvent) => {
                 const [wsTitle, wsData] = WsCommand.parse(event.data);
                 this._incomingMessages[wsTitle] = wsData;
-                console.log("on message incomingMessage new title", wsTitle, wsLobbyUrl);
+                console.log(
+                    "on message incomingMessage new title",
+                    wsTitle,
+                    wsLobbyUrl,
+                );
                 if (wsTitle === WsTitle.Error) {
-                    console.log("error data is: ", wsData)
+                    console.log("error data is: ", wsData);
                 }
-            }
+            };
             this.ws.onopen = () => {
                 this.player!.isOnline = true;
                 resolve();
             };
-            setTimeout(() => reject("WebSocket instance could not handled in given time."), WS_MESSAGE_RECEIVE_TIMEOUT);
+            setTimeout(
+                () =>
+                    reject(
+                        "WebSocket instance could not handled in given time.",
+                    ),
+                WS_MESSAGE_RECEIVE_TIMEOUT,
+            );
         });
     }
 
     protected async _removeWsHandlers(): Promise<void> {
-        if (!this.player) throw new Error("MockClient must connect through HTTP before closing WebSocket connection.");
-        if (!this.ws) throw new Error("No WebSocket connection found to remove its handlers.")
+        if (!this.player)
+            throw new Error(
+                "MockClient must connect through HTTP before closing WebSocket connection.",
+            );
+        if (!this.ws)
+            throw new Error(
+                "No WebSocket connection found to remove its handlers.",
+            );
         return new Promise<void>((resolve, reject) => {
             this.ws!.onclose = () => {
                 this.player!.isOnline = false;
                 this.ws = null;
                 resolve();
-            }
+            };
             this.ws!.close();
-            setTimeout(() => reject("WebSocket instance could not closed in given time."), WS_MESSAGE_RECEIVE_TIMEOUT);
+            setTimeout(
+                () =>
+                    reject(
+                        "WebSocket instance could not closed in given time.",
+                    ),
+                WS_MESSAGE_RECEIVE_TIMEOUT,
+            );
         });
     }
 
     public async pull<T extends WsTitle>(wsTitle: T): Promise<WsDataMap[T]> {
         return await new Promise<WsDataMap[T]>((resolve, reject) => {
             const isReceivedInterval = setInterval(() => {
-                console.log("pulling checking: ", wsTitle, this.ws?.url)
+                console.log("pulling checking: ", wsTitle, this.ws?.url);
                 if (Object.hasOwn(this._incomingMessages, wsTitle)) {
                     clearInterval(isReceivedInterval);
                     const data = this._incomingMessages[wsTitle];
@@ -94,13 +136,13 @@ export abstract class MockClient {
                     // @ts-expect-error Check out FIXME of `_incomingMessages` from the top of the class
                     resolve(data);
                 }
-            }, WS_MESSAGE_RECEIVE_CHECK)
+            }, WS_MESSAGE_RECEIVE_CHECK);
 
             setTimeout(() => {
                 clearInterval(isReceivedInterval);
-                reject(MockClientPullErrorMsg)
+                reject(MockClientPullErrorMsg);
             }, WS_MESSAGE_RECEIVE_TIMEOUT);
-        })
+        });
     }
 
     public send(message: WsOutgoingMessage): void {

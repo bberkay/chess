@@ -1,5 +1,5 @@
-import type { BunRequest } from "bun";
-import { HTTPGetRoutes, HTTPPostRoutes, HTTPRequestHandlerError } from ".";
+import type { BunRequest, Server } from "bun";
+import { HTTPRoutes, HTTPRequestHandlerError, rateLimiter } from ".";
 import { CORSResponse } from "./CORSResponse";
 import { LobbyRegistry } from "@Lobby";
 import { PlayerRegistry } from "@Player";
@@ -10,31 +10,75 @@ import {
 import { createResponseFromHTTPError } from "./utils";
 
 /**
- * A GET request handler interface with a single GET method.
- */
-type GETHandler<T extends HTTPGetRoutes> = {
-    GET: (req: BunRequest<T>) => CORSResponse<T>;
-};
-
-/**
  * A RESTful request handler interface with GET, OPTIONS, and POST methods.
+ * Each method takes a typed request and returns a CORSResponse,
+ * with POST optionally supporting async behavior.
  */
-type RESTHandler<T extends HTTPPostRoutes> = {
-    GET: (req: BunRequest<T>) => CORSResponse<HTTPGetRoutes.Root>;
-    OPTIONS: (req: BunRequest<T>) => CORSResponse<HTTPGetRoutes.Root>;
-    POST: (req: BunRequest<T>) => Promise<CORSResponse<T>>;
-};
+interface RESTScheme<T extends HTTPRoutes> {
+    GET: (req: BunRequest<T>) => CORSResponse<T>;
+    OPTIONS?: (req: BunRequest<T>) => CORSResponse<T>;
+    POST?: (req: BunRequest<T>) => Promise<CORSResponse<T>>;
+}
 
 /**
  * Defines all available HTTP route handlers mapped to their implementations.
+ * Each HTTP route key is bound to its corresponding REST handler scheme.
  */
-export interface AvailableHTTPRequests {
-    [HTTPGetRoutes.Root]: CORSResponse<HTTPGetRoutes.Root>;
-    [HTTPGetRoutes.Health]: CORSResponse<HTTPGetRoutes.Health>;
-    [HTTPGetRoutes.CheckLobby]: GETHandler<HTTPGetRoutes.CheckLobby>;
-    [HTTPPostRoutes.CreateLobby]: RESTHandler<HTTPPostRoutes.CreateLobby>;
-    [HTTPPostRoutes.ConnectLobby]: RESTHandler<HTTPPostRoutes.ConnectLobby>;
-    [HTTPPostRoutes.ReconnectLobby]: RESTHandler<HTTPPostRoutes.ReconnectLobby>;
+export type HTTPServerScheme = {
+    [R in HTTPRoutes]: RESTScheme<R>;
+};
+
+/**
+ * Wrapper class for managing and extending RESTful route handlers.
+ * Provides access to a route's handler and supports middleware injection.
+ */
+class RESTHandler<T extends HTTPRoutes> {
+    public readonly route: T;
+    private _handler: HTTPServerScheme[T];
+
+    constructor(route: T, handler: HTTPServerScheme[T]) {
+        this.route = route;
+        this._handler = handler;
+    }
+
+    /**
+     * Returns the current handler for this route.
+     */
+    public get handler(): HTTPServerScheme[T] {
+        return this._handler;
+    }
+
+    /**
+     * Adds middleware to a specific HTTP method in the route handler.
+     * The middleware runs before the original handler for that method.
+     *
+     * @param method - The HTTP method (GET, POST, OPTIONS) to attach middleware to.
+     * @param fn - A function to run before the method's main handler.
+     * @returns The RESTHandler instance (for chaining).
+     */
+    public addMiddleware<K extends keyof HTTPServerScheme[T]>(
+        method: K,
+        fn: (req: BunRequest<T>) => void,
+    ): RESTHandler<T> {
+        if (!Object.hasOwn(this._handler, method)) {
+            throw HTTPRequestHandlerError.factory.InternalError(
+                "Target method not found in the http route's handler to add middleware.",
+            );
+        }
+
+        if (typeof this._handler[method] !== "function") {
+            throw HTTPRequestHandlerError.factory.InternalError(
+                `Target method ${String(method)} is not a callable handler.`,
+            );
+        }
+
+        const oldHandler = this._handler[method];
+        this._handler[method] = ((req: BunRequest<T>) => {
+            fn(req);
+            return oldHandler(req);
+        }) as HTTPServerScheme[T][K];
+        return this;
+    }
 }
 
 /**
@@ -42,14 +86,24 @@ export interface AvailableHTTPRequests {
  * based on the HTTP method and route.
  */
 export class HTTPRequestHandler {
+    private _buildRoot<T extends HTTPRoutes>(
+        route: T,
+        body: HTTPServerScheme[T],
+    ): RESTHandler<T> {
+        return new RESTHandler<T>(route, body);
+    }
+
     /**
      * Handles the root GET request.
      * Used for displaying server availability.
      */
-    private _root(): AvailableHTTPRequests[HTTPGetRoutes.Root] {
-        return new CORSResponse({
-            success: true,
-            message: "Chess server is running.",
+    private _root(): RESTHandler<HTTPRoutes.Root> {
+        return this._buildRoot(HTTPRoutes.Root, {
+            GET: () =>
+                new CORSResponse({
+                    success: true,
+                    message: "Chess server is running.",
+                }),
         });
     }
 
@@ -57,10 +111,13 @@ export class HTTPRequestHandler {
      * Handles the /health GET request.
      * Used as a health check endpoint.
      */
-    private _health(): AvailableHTTPRequests[HTTPGetRoutes.Health] {
-        return new CORSResponse({
-            success: true,
-            message: "OK",
+    private _health(): RESTHandler<HTTPRoutes.Health> {
+        return this._buildRoot(HTTPRoutes.Health, {
+            GET: () =>
+                new CORSResponse({
+                    success: true,
+                    message: "OK",
+                }),
         });
     }
 
@@ -68,26 +125,27 @@ export class HTTPRequestHandler {
      * Handles the /check-lobby GET request.
      * Validates the lobbyId and returns whether the lobby exists.
      */
-    private _checkLobby(): AvailableHTTPRequests[HTTPGetRoutes.CheckLobby] {
-        return {
+    private _checkLobby(): RESTHandler<HTTPRoutes.CheckLobby> {
+        return this._buildRoot(HTTPRoutes.CheckLobby, {
             GET: (req) => {
                 try {
                     const lobbyId = req.params.lobbyId;
 
                     HTTPGetRequestValidator.validate(
-                        HTTPGetRoutes.CheckLobby,
+                        HTTPRoutes.CheckLobby,
                         req,
                     );
 
-                    const isLobbyFound = LobbyRegistry.check(
-                        lobbyId
-                    );
+                    const isLobbyFound = LobbyRegistry.check(lobbyId);
 
                     if (!isLobbyFound) {
                         return new CORSResponse(
                             {
                                 success: false,
-                                message: HTTPRequestHandlerError.factory.LobbyNotFound(lobbyId).message,
+                                message:
+                                    HTTPRequestHandlerError.factory.LobbyNotFound(
+                                        lobbyId,
+                                    ).message,
                             },
                             { status: 404 },
                         );
@@ -98,18 +156,21 @@ export class HTTPRequestHandler {
                         { status: 200 },
                     );
                 } catch (e: unknown) {
-                    return createResponseFromHTTPError(e, HTTPRequestHandlerError.factory.UnexpectedErrorWhileCheckingLobby())
+                    return createResponseFromHTTPError(
+                        e,
+                        HTTPRequestHandlerError.factory.UnexpectedErrorWhileCheckingLobby(),
+                    );
                 }
             },
-        };
+        });
     }
 
     /**
      * Handles the /create-lobby endpoint for GET, OPTIONS, and POST.
      * POST: Creates a new lobby and player.
      */
-    private _createLobby(): AvailableHTTPRequests[HTTPPostRoutes.CreateLobby] {
-        return {
+    private _createLobby(): RESTHandler<HTTPRoutes.CreateLobby> {
+        return this._buildRoot(HTTPRoutes.CreateLobby, {
             GET: () => new CORSResponse({ success: false, message: "NO" }),
             OPTIONS: (req) =>
                 new CORSResponse(
@@ -120,7 +181,7 @@ export class HTTPRequestHandler {
                 try {
                     const body =
                         await HTTPPostRequestValidator.parseAndValidate(
-                            HTTPPostRoutes.CreateLobby,
+                            HTTPRoutes.CreateLobby,
                             req,
                         );
 
@@ -140,18 +201,21 @@ export class HTTPRequestHandler {
                         { status: 200 },
                     );
                 } catch (e: unknown) {
-                    return createResponseFromHTTPError(e, HTTPRequestHandlerError.factory.UnexpectedErrorWhileCreatingLobby())
+                    return createResponseFromHTTPError(
+                        e,
+                        HTTPRequestHandlerError.factory.UnexpectedErrorWhileCreatingLobby(),
+                    );
                 }
             },
-        };
+        });
     }
 
     /**
      * Handles the /connect-lobby endpoint for GET, OPTIONS, and POST.
      * POST: Connects a player to an existing lobby.
      */
-    private _connectLobby(): AvailableHTTPRequests[HTTPPostRoutes.ConnectLobby] {
-        return {
+    private _connectLobby(): RESTHandler<HTTPRoutes.ConnectLobby> {
+        return this._buildRoot(HTTPRoutes.ConnectLobby, {
             GET: () => new CORSResponse({ success: false, message: "NO" }),
             OPTIONS: (req) =>
                 new CORSResponse(
@@ -162,7 +226,7 @@ export class HTTPRequestHandler {
                 try {
                     const body =
                         await HTTPPostRequestValidator.parseAndValidate(
-                            HTTPPostRoutes.ConnectLobby,
+                            HTTPRoutes.ConnectLobby,
                             req,
                         );
 
@@ -171,7 +235,10 @@ export class HTTPRequestHandler {
                         return new CORSResponse(
                             {
                                 success: false,
-                                message: HTTPRequestHandlerError.factory.LobbyNotFound(body.lobbyId).message,
+                                message:
+                                    HTTPRequestHandlerError.factory.LobbyNotFound(
+                                        body.lobbyId,
+                                    ).message,
                             },
                             { status: 404 },
                         );
@@ -181,7 +248,10 @@ export class HTTPRequestHandler {
                         return new CORSResponse(
                             {
                                 success: false,
-                                message: HTTPRequestHandlerError.factory.LobbyAlreadyStarted(body.lobbyId).message,
+                                message:
+                                    HTTPRequestHandlerError.factory.LobbyAlreadyStarted(
+                                        body.lobbyId,
+                                    ).message,
                             },
                             { status: 403 },
                         );
@@ -191,7 +261,10 @@ export class HTTPRequestHandler {
                         return new CORSResponse(
                             {
                                 success: false,
-                                message: HTTPRequestHandlerError.factory.LobbyFull(body.lobbyId).message,
+                                message:
+                                    HTTPRequestHandlerError.factory.LobbyFull(
+                                        body.lobbyId,
+                                    ).message,
                             },
                             { status: 403 },
                         );
@@ -207,18 +280,21 @@ export class HTTPRequestHandler {
                         { status: 200 },
                     );
                 } catch (e: unknown) {
-                    return createResponseFromHTTPError(e, HTTPRequestHandlerError.factory.UnexpectedErrorWhileConnectingLobby())
+                    return createResponseFromHTTPError(
+                        e,
+                        HTTPRequestHandlerError.factory.UnexpectedErrorWhileConnectingLobby(),
+                    );
                 }
             },
-        };
+        });
     }
 
     /**
      * Handles the /reconnect-lobby endpoint for GET, OPTIONS, and POST.
      * POST: Reconnects an offline player to their lobby if eligible.
      */
-    private _reconnectLobby(): AvailableHTTPRequests[HTTPPostRoutes.ReconnectLobby] {
-        return {
+    private _reconnectLobby(): RESTHandler<HTTPRoutes.ReconnectLobby> {
+        return this._buildRoot(HTTPRoutes.ReconnectLobby, {
             GET: () => new CORSResponse({ success: false, message: "NO" }),
             OPTIONS: (req) =>
                 new CORSResponse(
@@ -229,7 +305,7 @@ export class HTTPRequestHandler {
                 try {
                     const body =
                         await HTTPPostRequestValidator.parseAndValidate(
-                            HTTPPostRoutes.ReconnectLobby,
+                            HTTPRoutes.ReconnectLobby,
                             req,
                         );
 
@@ -238,7 +314,10 @@ export class HTTPRequestHandler {
                         return new CORSResponse(
                             {
                                 success: false,
-                                message: HTTPRequestHandlerError.factory.LobbyNotFound(body.lobbyId).message,
+                                message:
+                                    HTTPRequestHandlerError.factory.LobbyNotFound(
+                                        body.lobbyId,
+                                    ).message,
                             },
                             { status: 404 },
                         );
@@ -249,7 +328,10 @@ export class HTTPRequestHandler {
                         return new CORSResponse(
                             {
                                 success: false,
-                                message: HTTPRequestHandlerError.factory.PlayerNotFound(body.playerToken).message,
+                                message:
+                                    HTTPRequestHandlerError.factory.PlayerNotFound(
+                                        body.playerToken,
+                                    ).message,
                             },
                             { status: 401 },
                         );
@@ -259,7 +341,11 @@ export class HTTPRequestHandler {
                         return new CORSResponse(
                             {
                                 success: false,
-                                message: HTTPRequestHandlerError.factory.PlayerNotInLobby(body.lobbyId, body.playerToken).message,
+                                message:
+                                    HTTPRequestHandlerError.factory.PlayerNotInLobby(
+                                        body.lobbyId,
+                                        body.playerToken,
+                                    ).message,
                             },
                             { status: 403 },
                         );
@@ -269,7 +355,11 @@ export class HTTPRequestHandler {
                         return new CORSResponse(
                             {
                                 success: false,
-                                message: HTTPRequestHandlerError.factory.PlayerAlreadyOnline(body.lobbyId, body.playerToken).message,
+                                message:
+                                    HTTPRequestHandlerError.factory.PlayerAlreadyOnline(
+                                        body.lobbyId,
+                                        body.playerToken,
+                                    ).message,
                             },
                             { status: 400 },
                         );
@@ -284,10 +374,13 @@ export class HTTPRequestHandler {
                         { status: 200 },
                     );
                 } catch (e: unknown) {
-                    return createResponseFromHTTPError(e, HTTPRequestHandlerError.factory.UnexpectedErrorWhileReconnectingLobby())
+                    return createResponseFromHTTPError(
+                        e,
+                        HTTPRequestHandlerError.factory.UnexpectedErrorWhileReconnectingLobby(),
+                    );
                 }
             },
-        };
+        });
     }
 
     /**
@@ -295,15 +388,34 @@ export class HTTPRequestHandler {
      *
      * @returns A mapping of all available HTTP routes to their handlers.
      */
-    public expose(): AvailableHTTPRequests {
-        return {
-            [HTTPGetRoutes.Root]: this._root(),
-            [HTTPGetRoutes.Health]: this._health(),
-            [HTTPGetRoutes.CheckLobby]: this._checkLobby(),
-            [HTTPPostRoutes.CreateLobby]: this._createLobby(),
-            [HTTPPostRoutes.ConnectLobby]: this._connectLobby(),
-            [HTTPPostRoutes.ReconnectLobby]: this._reconnectLobby(),
+    public expose(getServer: () => Server): HTTPServerScheme {
+        const handleRateLimit = (req: BunRequest) => {
+            const ip = getServer().requestIP(req)?.address;
+            if (!ip) throw HTTPRequestHandlerError.factory.IpAddressNotFound();
+            const isAllowed = rateLimiter(ip);
+            // FIXME: Burada throw error ile error atıyoruz ama aslında
+            // cors repsonse dönmemeiz lazım belli status, statusTExt ve
+            // header ile, keza yukarıda da her seferinde status code u
+            // biz yazıyoruz hata ile örneğin LobbyNotFoudn 404 gibi
+            // bunun yerine bu status kodları vs. direkt error ile
+            // birleştirmeye çalışalım. Buradan önce HTTPRequestValidator
+            // yapılsın sonra bu yapılsın.
+            if (isAllowed.status !== 200)
+                throw HTTPRequestHandlerError.factory.RateLimitExceed();
         };
+
+        const restHandlers = [
+            this._root(),
+            this._health(),
+            this._checkLobby().addMiddleware("GET", handleRateLimit),
+            this._createLobby().addMiddleware("GET", handleRateLimit),
+            this._connectLobby().addMiddleware("POST", handleRateLimit),
+            this._reconnectLobby().addMiddleware("POST", handleRateLimit),
+        ];
+
+        return Object.fromEntries(
+            restHandlers.map(r => [r.route, r.handler])
+        ) as HTTPServerScheme;
     }
 
     /**

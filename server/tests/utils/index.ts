@@ -1,4 +1,4 @@
-import { HTTPPostBody, HTTPPostRoutes, CORSResponseBody } from "src/HTTP";
+import { HTTPPostBody, HTTPRoutes, CORSResponseBody } from "src/HTTP";
 import { fetch } from "bun";
 import { Color, JsonNotation } from "@Chess/Types";
 import { ChessEngine } from "@Chess/Engine/ChessEngine";
@@ -13,7 +13,7 @@ export function createWsLobbyConnUrl(
 }
 
 export async function testFetch<
-    T extends Extract<HTTPPostRoutes, keyof HTTPPostBody>,
+    T extends Extract<HTTPRoutes, keyof HTTPPostBody>,
 >(
     serverUrl: string,
     httpRoute: T,

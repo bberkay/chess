@@ -1,7 +1,7 @@
 import { CORSResponse } from "./CORSResponse";
 import { HTTPRequestHandlerError } from "./HTTPRequestHandlerError";
 import { HTTPRequestValidatorError } from "./HTTPRequestValidatorError";
-import { HTTPGetRoutes } from "./types";
+import { HTTPRoutes } from "./types";
 
 /**
  * Creates a standardized CORSResponse object from an error that occurs during
@@ -18,13 +18,13 @@ import { HTTPGetRoutes } from "./types";
  * response format, regardless of the error source.
  *
  * @param e - The thrown error, which may or may not be a known request/validation error.
- * @param operation - The HTTP operation context, used as a fallback for the response message.
+ * @param fallbackError - The HTTP operation context, used as a fallback for the response message.
  * @returns A `CORSResponse` containing the error message and appropriate HTTP status code.
  */
 export function createResponseFromHTTPError(
     e: unknown,
-    operation: HTTPRequestHandlerError | HTTPRequestValidatorError,
-): CORSResponse<HTTPGetRoutes.Root> {
+    fallbackError: HTTPRequestHandlerError | HTTPRequestValidatorError,
+): CORSResponse<HTTPRoutes.Root> {
     return new CORSResponse(
         {
             success: false,
@@ -32,7 +32,7 @@ export function createResponseFromHTTPError(
                 e instanceof HTTPRequestValidatorError ||
                 e instanceof HTTPRequestHandlerError
                     ? e.message
-                    : operation.message,
+                    : fallbackError.message,
         },
         {
             status:

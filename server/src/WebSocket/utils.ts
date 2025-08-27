@@ -1,4 +1,4 @@
-import { CORSResponse, HTTPGetRoutes } from "@HTTP";
+import { CORSResponse, HTTPRoutes } from "@HTTP";
 import { WebSocketHandlerError } from "./WebSocketHandlerError";
 import { WebSocketValidatorError } from "./WebSocketValidatorError";
 import { WsCommand } from "./WsCommand";
@@ -20,13 +20,13 @@ import { WsTitle } from "./types";
  * WebSocket-related requests.
  *
  * @param e - The thrown error, which may or may not be a known WebSocket validation/handler error.
- * @param operation - The WebSocket operation context, used as a fallback for the response message.
+ * @param fallbackError - The WebSocket operation context, used as a fallback for the response message.
  * @returns A `CORSResponse` containing the error message and appropriate HTTP status code.
  */
 export function createResponseFromWebSocketError(
     e: unknown,
-    operation: WebSocketHandlerError | WebSocketValidatorError,
-): CORSResponse<HTTPGetRoutes.Root> {
+    fallbackError: WebSocketHandlerError | WebSocketValidatorError,
+): CORSResponse<HTTPRoutes.Root> {
     return new CORSResponse(
         {
             success: false,
@@ -34,7 +34,7 @@ export function createResponseFromWebSocketError(
                 e instanceof WebSocketValidatorError ||
                 e instanceof WebSocketHandlerError
                     ? e.message
-                    : operation.message,
+                    : fallbackError.message,
         },
         {
             status:

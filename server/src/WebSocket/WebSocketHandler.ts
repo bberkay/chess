@@ -1,7 +1,7 @@
 import type { Server } from "bun";
 import { WsCommand, WsTitle, type RWebSocket, type WebSocketData } from ".";
 import { Player, PlayerRegistry } from "@Player";
-import { HTTPGetRoutes, CORSResponse, HTTPRequestHandlerError } from "@HTTP";
+import { HTTPRoutes, CORSResponse, HTTPRequestHandlerError } from "@HTTP";
 import { LobbyRegistry } from "@Lobby";
 import { Lobby } from "@Lobby";
 import { Color, Square } from "@Chess/Types";
@@ -49,7 +49,7 @@ export class WebSocketHandler {
      */
     public createWsData(
         req: Request,
-    ): WebSocketData | CORSResponse<HTTPGetRoutes.Root> {
+    ): WebSocketData | CORSResponse<HTTPRoutes.Root> {
         try {
             const { lobbyId, playerToken } =
                 WebSocketValidator.parseAndValidate(req);
@@ -97,13 +97,6 @@ export class WebSocketHandler {
      */
     public upgradeServer(server: Server) {
         this._server = server;
-    }
-
-    /**
-     * Check whether the server instance has been upgraded.
-     */
-    public isServerUpgraded(): boolean {
-        return !!this._server;
     }
 
     /**

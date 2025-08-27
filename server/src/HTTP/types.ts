@@ -2,19 +2,12 @@ import { Player } from "@Player";
 
 /**
  * Defines the available HTTP API routes that can be used by
- * the clients as GET requests.
+ * the clients as POST requests.
  */
-export enum HTTPGetRoutes {
+export enum HTTPRoutes {
     Root = "/",
     Health = "/health",
     CheckLobby = "/check-lobby/:lobbyId",
-}
-
-/**
- * Defines the available HTTP API routes that can be used by
- * the clients as POST requests.
- */
-export enum HTTPPostRoutes {
     CreateLobby = "/create-lobby",
     ConnectLobby = "/connect-lobby",
     ReconnectLobby = "/reconnect-lobby",
@@ -24,17 +17,17 @@ export enum HTTPPostRoutes {
  * Defines the expected POST request bodies for each HTTP route.
  */
 export interface HTTPPostBody {
-    [HTTPPostRoutes.CreateLobby]: {
+    [HTTPRoutes.CreateLobby]: {
         name: string;
         board: string;
         remaining: number;
         increment: number;
     };
-    [HTTPPostRoutes.ConnectLobby]: {
+    [HTTPRoutes.ConnectLobby]: {
         name: string;
         lobbyId: string;
     };
-    [HTTPPostRoutes.ReconnectLobby]: {
+    [HTTPRoutes.ReconnectLobby]: {
         lobbyId: string;
         playerToken: string;
     };
@@ -44,10 +37,10 @@ export interface HTTPPostBody {
  * Defines the expected response data for each HTTP route.
  */
 export interface HTTPResponseData {
-    [HTTPGetRoutes.Root]: null;
-    [HTTPGetRoutes.Health]: null;
-    [HTTPGetRoutes.CheckLobby]: boolean;
-    [HTTPPostRoutes.CreateLobby]: { lobbyId: string; player: Player };
-    [HTTPPostRoutes.ConnectLobby]: HTTPResponseData[HTTPPostRoutes.CreateLobby];
-    [HTTPPostRoutes.ReconnectLobby]: HTTPResponseData[HTTPPostRoutes.CreateLobby];
+    [HTTPRoutes.Root]: null;
+    [HTTPRoutes.Health]: null;
+    [HTTPRoutes.CheckLobby]: boolean;
+    [HTTPRoutes.CreateLobby]: { lobbyId: string; player: Player };
+    [HTTPRoutes.ConnectLobby]: HTTPResponseData[HTTPRoutes.CreateLobby];
+    [HTTPRoutes.ReconnectLobby]: HTTPResponseData[HTTPRoutes.CreateLobby];
 }

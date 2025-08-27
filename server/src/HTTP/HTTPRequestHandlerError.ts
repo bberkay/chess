@@ -3,6 +3,8 @@
  * standardized HTTP request handler error messages.
  */
 export const HTTPRequestHandlerErrorTemplates = {
+    InternalError: (msg: string) =>
+        `An unexpected internal error occurred while handling http request: ${msg}`,
     UnexpectedErrorWhileCheckingLobby: () =>
         `An unexpected error occurred while checking the lobby.`,
     UnexpectedErrorWhileCreatingLobby: () =>
@@ -11,6 +13,10 @@ export const HTTPRequestHandlerErrorTemplates = {
         `An unexpected error occurred while connecting to the lobby.`,
     UnexpectedErrorWhileReconnectingLobby: () =>
         `An unexpected error occurred while reconnecting to the lobby.`,
+    IpAddressNotFound: () =>
+        `IP address could not be found.`,
+    RateLimitExceed: () =>
+        `Rate limit exceeded. Please try again later.`,
     LobbyNotFound: (lobbyId: string) =>
         `Lobby with id "${lobbyId}" was not found.`,
     LobbyAlreadyStarted: (lobbyId: string) =>

@@ -11,12 +11,18 @@ import {
 } from "@Consts";
 import { isInRange, isValidLength } from "@Utils";
 import { BunRequest } from "bun";
-import { HTTPGetRoutes, HTTPPostBody, HTTPPostRoutes, HTTPRequestValidatorError } from ".";
+import { HTTPPostBody, HTTPRoutes, HTTPRequestValidatorError } from ".";
+
+//TODO: Bu sayfayı yenilemek lazım çünk, HTTPGetRoutes ve HTTPPostRoutes
+// direkt HTTPRoutes a çevrildi. Burası bir halledilsin ardından
+// httprequesthandler da yapılsın buradaki yeni yapı sonra httprequesthandler
+// biter ardından bunserver a geçeriz.
+//  En son websocket message limitera geçilir ardından sanitize ve draw io yapılır.
 
 /**
  * A function signature for validating GET requests based on route.
  */
-type GetValidator<T extends HTTPGetRoutes> = (
+type GetValidator<T extends HTTPRoutes> = (
     req: BunRequest<T>
 ) => void;
 
@@ -24,6 +30,10 @@ type GetValidator<T extends HTTPGetRoutes> = (
  * Validates incoming GET requests for specific routes by checking
  * required URL parameters and their formats.
  */
+// TODO: Convert this to the something like HTTPPathValidator
+// and PostRequestValidator to something like BodyValidator
+// it will be best no need to thinking more about validator
+// structure everything has been taught.
 export class HTTPGetRequestValidator {
     /**
      * Validates a GET request for the given route by dispatching
@@ -33,13 +43,13 @@ export class HTTPGetRequestValidator {
      * @param req - The incoming BunRequest object.
      * @throws HTTPValidationError if the route is not supported or validation fails.
      */
-    public static validate<T extends HTTPGetRoutes>(
+    public static validate<T extends HTTPRoutes>(
         route: T,
         req: BunRequest<T>,
     ): void {
         let validator;
         switch (route) {
-            case HTTPGetRoutes.CheckLobby:
+            case HTTPRoutes.CheckLobby:
                 validator = HTTPGetRequestValidator._validateCheck as GetValidator<T>;
                 break;
             default:
@@ -56,7 +66,7 @@ export class HTTPGetRequestValidator {
      * @throws HTTPValidationError if lobbyId is missing or invalid.
      */
     private static _validateCheck(
-        req: BunRequest<HTTPGetRoutes.CheckLobby>,
+        req: BunRequest<HTTPRoutes.CheckLobby>,
     ): void {
         if (
             !req.params.lobbyId ||
@@ -70,7 +80,7 @@ export class HTTPGetRequestValidator {
  * A function signature for validating POST requests and returning
  * the parsed request body.
  */
-type PostValidator<T extends HTTPPostRoutes> = (
+type PostValidator<T extends HTTPRoutes> = (
     req: BunRequest<T>
 ) => Promise<HTTPPostBody[T]>;
 
@@ -87,19 +97,19 @@ export class HTTPPostRequestValidator {
      * @returns The validated and typed body object.
      * @throws HTTPValidationError if the route is not supported or validation fails.
      */
-    public static async parseAndValidate<T extends HTTPPostRoutes>(
+    public static async parseAndValidate<T extends HTTPRoutes>(
         route: T,
         req: BunRequest<T>
     ): Promise<HTTPPostBody[T]> {
         let validator;
         switch (route) {
-            case HTTPPostRoutes.CreateLobby:
+            case HTTPRoutes.CreateLobby:
                 validator = HTTPPostRequestValidator._validateCreate as PostValidator<T>;
                 break;
-            case HTTPPostRoutes.ConnectLobby:
+            case HTTPRoutes.ConnectLobby:
                 validator = HTTPPostRequestValidator._validateConnect as PostValidator<T>;
                 break;
-            case HTTPPostRoutes.ReconnectLobby:
+            case HTTPRoutes.ReconnectLobby:
                 validator = HTTPPostRequestValidator._validateReconnect as PostValidator<T>;
                 break;
             default:
@@ -116,7 +126,7 @@ export class HTTPPostRequestValidator {
      * @returns The validated request body.
      * @throws HTTPValidationError if any field is invalid or missing.
      */
-    private static async _validateCreate<T extends HTTPPostRoutes.CreateLobby>(
+    private static async _validateCreate<T extends HTTPRoutes.CreateLobby>(
         req: BunRequest<T>,
     ): Promise<HTTPPostBody[T]> {
         const body: HTTPPostBody[T] = await req.json();
@@ -147,7 +157,7 @@ export class HTTPPostRequestValidator {
      * @returns The validated request body.
      * @throws HTTPValidationError if any field is invalid or missing.
      */
-    private static async _validateConnect<T extends HTTPPostRoutes.ConnectLobby>(
+    private static async _validateConnect<T extends HTTPRoutes.ConnectLobby>(
         req: BunRequest<T>,
     ): Promise<HTTPPostBody[T]> {
         const body: HTTPPostBody[T] = await req.json();
@@ -175,7 +185,7 @@ export class HTTPPostRequestValidator {
      * @returns The validated request body.
      * @throws HTTPValidationError if any field is invalid or missing.
      */
-    private static async _validateReconnect<T extends HTTPPostRoutes.ReconnectLobby>(
+    private static async _validateReconnect<T extends HTTPRoutes.ReconnectLobby>(
         req: BunRequest<T>,
     ): Promise<HTTPPostBody[T]> {
         const body: HTTPPostBody[T] = await req.json();

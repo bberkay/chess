@@ -5,7 +5,7 @@ import { WsConnectedData, WsStartedData, WsTitle } from "src/WebSocket";
 import { createLocalBoard } from "./utils";
 import { MockCreator } from "./helpers/MockCreator";
 import { MockGuest } from "./helpers/MockGuest";
-import { HTTPPostBody, HTTPPostRoutes, HTTPRequestHandlerErrorTemplates, HTTPRequestValidatorErrorTemplates } from "@HTTP";
+import { HTTPPostBody, HTTPRoutes, HTTPRequestHandlerErrorTemplates, HTTPRequestValidatorErrorTemplates } from "@HTTP";
 import { INJECTION_PAYLOADS, TEST_BOARD } from "./consts";
 import { Square } from "@Chess/Types";
 
@@ -19,7 +19,7 @@ beforeAll(async () => {
     webSocketUrl = server.url.href.replace("http", "ws");
 });
 
-const createTestLobby = async (body: HTTPPostBody[HTTPPostRoutes.CreateLobby] | null = null) => {
+const createTestLobby = async (body: HTTPPostBody[HTTPRoutes.CreateLobby] | null = null) => {
     body = body ?? { name: "alex", ...TEST_BOARD }
     const creatorClient = new MockCreator(serverUrl, webSocketUrl);
     const createdLobbyResponse = await creatorClient.createLobby(body)
@@ -29,7 +29,7 @@ const createTestLobby = async (body: HTTPPostBody[HTTPPostRoutes.CreateLobby] | 
     return creatorClient;
 };
 
-const shouldConnect = async (creatorClient: MockCreator, body: HTTPPostBody[HTTPPostRoutes.ConnectLobby]) => {
+const shouldConnect = async (creatorClient: MockCreator, body: HTTPPostBody[HTTPRoutes.ConnectLobby]) => {
     const guestClient = new MockGuest(serverUrl, webSocketUrl);
     const connectedLobbyResponse = await guestClient.connectLobby(body);
     if (!connectedLobbyResponse.success) {
@@ -71,7 +71,7 @@ const shouldConnect = async (creatorClient: MockCreator, body: HTTPPostBody[HTTP
     expect(creatorStartedData!.game).toEqual(createLocalBoard(TEST_BOARD));
 }
 
-const shouldNotConnect = async (body: HTTPPostBody[HTTPPostRoutes.ConnectLobby], errMsg?: string) => {
+const shouldNotConnect = async (body: HTTPPostBody[HTTPRoutes.ConnectLobby], errMsg?: string) => {
     const guestClient = new MockGuest(serverUrl, webSocketUrl);
     const connectedLobbyResponse = await guestClient.connectLobby(body);
     expect(connectedLobbyResponse.success).toBe(false);

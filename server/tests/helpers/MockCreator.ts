@@ -1,4 +1,4 @@
-import { CORSResponseBody, HTTPPostBody, HTTPPostRoutes } from "src/HTTP";
+import { CORSResponseBody, HTTPPostBody, HTTPRoutes } from "src/HTTP";
 import { MockClient } from "./MockClient";
 import { createWsLobbyConnUrl, testFetch } from "tests/utils";
 
@@ -7,7 +7,10 @@ export class MockCreator extends MockClient {
         super(serverUrl, wsUrl);
     }
 
-    public async createLobby(createLobbyBody?: HTTPPostBody[HTTPPostRoutes.CreateLobby], throwError: boolean = true): Promise<CORSResponseBody<HTTPPostRoutes.CreateLobby>> {
+    public async createLobby(
+        createLobbyBody?: HTTPPostBody[HTTPRoutes.CreateLobby],
+        throwError: boolean = true,
+    ): Promise<CORSResponseBody<HTTPRoutes.CreateLobby>> {
         if (!createLobbyBody) {
             createLobbyBody = {
                 name: "john",
@@ -19,18 +22,24 @@ export class MockCreator extends MockClient {
 
         const createdLobbyResponse = await testFetch(
             this.serverUrl,
-            HTTPPostRoutes.CreateLobby,
-            createLobbyBody
+            HTTPRoutes.CreateLobby,
+            createLobbyBody,
         );
 
         if (createdLobbyResponse.success && createdLobbyResponse.data) {
             this.lobbyId = createdLobbyResponse.data.lobbyId;
             this.player = createdLobbyResponse.data.player;
 
-            const wsLobbyUrl = createWsLobbyConnUrl(this.wsUrl, this.lobbyId, this.player.token);
+            const wsLobbyUrl = createWsLobbyConnUrl(
+                this.wsUrl,
+                this.lobbyId,
+                this.player.token,
+            );
             await this._initWsHandlers(wsLobbyUrl);
         } else if (throwError) {
-            throw new Error(`Could not create lobby: ${createdLobbyResponse.message}`);
+            throw new Error(
+                `Could not create lobby: ${createdLobbyResponse.message}`,
+            );
         }
 
         return createdLobbyResponse;

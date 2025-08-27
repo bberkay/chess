@@ -1,4 +1,4 @@
-import { CORSResponseBody, HTTPPostBody, HTTPPostRoutes } from "src/HTTP";
+import { CORSResponseBody, HTTPPostBody, HTTPRoutes } from "src/HTTP";
 import { MockClient } from "./MockClient";
 import { createWsLobbyConnUrl, testFetch } from "tests/utils";
 
@@ -8,12 +8,12 @@ export class MockGuest extends MockClient {
     }
 
     public async connectLobby(
-        connectLobbyBody: HTTPPostBody[HTTPPostRoutes.ConnectLobby],
+        connectLobbyBody: HTTPPostBody[HTTPRoutes.ConnectLobby],
         throwError: boolean = true,
-    ): Promise<CORSResponseBody<HTTPPostRoutes.ConnectLobby>> {
+    ): Promise<CORSResponseBody<HTTPRoutes.ConnectLobby>> {
         const connectedLobbyResponse = await testFetch(
             this.serverUrl,
-            HTTPPostRoutes.ConnectLobby,
+            HTTPRoutes.ConnectLobby,
             connectLobbyBody,
         );
 

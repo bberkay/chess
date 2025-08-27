@@ -10,5 +10,6 @@
 export * from "./types.ts";
 export * from "./CORSResponse.ts";
 export * from "./HTTPRequestHandler.ts";
+export * from "./RateLimiter.ts";
 export { HTTPRequestHandlerError, HTTPRequestHandlerErrorTemplates } from "./HTTPRequestHandlerError.ts";
 export { HTTPRequestValidatorError, HTTPRequestValidatorErrorTemplates } from "./HTTPRequestValidatorError.ts";

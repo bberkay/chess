@@ -8,7 +8,7 @@ import { MockCreator } from "./helpers/MockCreator";
 import { MockGuest } from "./helpers/MockGuest";
 import { LobbyRegistry } from "@Lobby";
 import { Player } from "src/Player";
-import { HTTPPostBody, HTTPPostRoutes, HTTPRequestHandlerErrorTemplates, HTTPRequestValidatorErrorTemplates } from "@HTTP";
+import { HTTPPostBody, HTTPRoutes, HTTPRequestHandlerErrorTemplates, HTTPRequestValidatorErrorTemplates } from "@HTTP";
 import { INJECTION_PAYLOADS, TEST_BOARD } from "./consts";
 import { MockClient } from "./helpers/MockClient";
 
@@ -22,7 +22,7 @@ beforeAll(async () => {
     webSocketUrl = server.url.href.replace("http", "ws");
 });
 
-const createTestLobby = async (body: HTTPPostBody[HTTPPostRoutes.CreateLobby] | null = null) => {
+const createTestLobby = async (body: HTTPPostBody[HTTPRoutes.CreateLobby] | null = null) => {
     body = body ?? { name: "alex", ...TEST_BOARD }
     const creatorClient = new MockCreator(serverUrl, webSocketUrl);
     const createdLobbyResponse = await creatorClient.createLobby(body)

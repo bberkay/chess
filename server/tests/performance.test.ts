@@ -3,7 +3,7 @@ import { test, expect, beforeAll, afterAll, describe } from "vitest";
 import { type Server } from "bun";
 import { MockCreator } from "./helpers/MockCreator";
 import { MockGuest } from "./helpers/MockGuest";
-import { CORSResponseBody, HTTPPostRoutes } from "@HTTP";
+import { CORSResponseBody, HTTPRoutes } from "@HTTP";
 
 const TEST_CONCURRENCY_LEVELS = [10, 50, 100]; // number of simultaneous requests
 const ACCEPTABLE_LOBBY_CREATION_TIME = 100; // milliseconds
@@ -19,7 +19,8 @@ beforeAll(async () => {
     webSocketUrl = server.url.href.replace("http", "ws");
 });
 
-const measureOperation = async (operation: () => Promise<CORSResponseBody<HTTPPostRoutes>>): Promise<void> => {
+// TODO: Disable rate limiter, on development enviroment, to run this test without catching by rate limiter
+const measureOperation = async (operation: () => Promise<CORSResponseBody<HTTPRoutes>>): Promise<void> => {
     const resultsSummary: Record<string, number | string | boolean>[] = [];
 
     for (const concurrency of TEST_CONCURRENCY_LEVELS) {
@@ -83,18 +84,18 @@ const measureOperation = async (operation: () => Promise<CORSResponseBody<HTTPPo
     console.table(resultsSummary);
 }
 
-const createTestLobby = async (): Promise<CORSResponseBody<HTTPPostRoutes.CreateLobby>> => {
+const createTestLobby = async (): Promise<CORSResponseBody<HTTPRoutes.CreateLobby>> => {
     const result = await (new MockCreator(serverUrl, webSocketUrl)).createLobby();
     return result;
 }
 
-const connectTestLobby = async (): Promise<CORSResponseBody<HTTPPostRoutes.ConnectLobby>> => {
+const connectTestLobby = async (): Promise<CORSResponseBody<HTTPRoutes.ConnectLobby>> => {
     const { lobbyId } = (await (new MockCreator(serverUrl, webSocketUrl)).createLobby()).data!;
     const result = await (new MockGuest(serverUrl, webSocketUrl)).connectLobby({ name: "guest", lobbyId });
     return result;
 }
 
-const reconnectTestLobby = async (): Promise<CORSResponseBody<HTTPPostRoutes.ReconnectLobby>> => {
+const reconnectTestLobby = async (): Promise<CORSResponseBody<HTTPRoutes.ReconnectLobby>> => {
     const { lobbyId } = (await (new MockCreator(serverUrl, webSocketUrl)).createLobby()).data!;
     const guest = new MockGuest(serverUrl, webSocketUrl)
     await guest.connectLobby({ name: "guest", lobbyId });

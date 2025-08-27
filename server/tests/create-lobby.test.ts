@@ -5,7 +5,7 @@ import { isValidLength } from "@Utils";
 import {
     GU_ID_LENGTH,
 } from "@Consts";
-import { HTTPPostRoutes, HTTPPostBody, HTTPRequestValidatorErrorTemplates } from "src/HTTP";
+import { HTTPRoutes, HTTPPostBody, HTTPRequestValidatorErrorTemplates } from "src/HTTP";
 import { MockCreator } from "./helpers/MockCreator";
 import { WsConnectedData, WsTitle } from "@WebSocket";
 import { INJECTION_PAYLOADS } from "./consts";
@@ -20,7 +20,7 @@ beforeAll(async () => {
     webSocketUrl = server.url.href.replace("http", "ws");
 });
 
-const shouldCreate = async (body: HTTPPostBody[HTTPPostRoutes.CreateLobby]) => {
+const shouldCreate = async (body: HTTPPostBody[HTTPRoutes.CreateLobby]) => {
     const creatorClient = new MockCreator(serverUrl, webSocketUrl);
     const createdLobbyResponse = await creatorClient.createLobby(body);
     expect(createdLobbyResponse.success).toBe(true);
@@ -38,7 +38,7 @@ const shouldCreate = async (body: HTTPPostBody[HTTPPostRoutes.CreateLobby]) => {
     expect(creatorConnectedData!.playerId).toEqual(creatorClient.player!.id);
 }
 
-const shouldNotCreate = async (body: HTTPPostBody[HTTPPostRoutes.CreateLobby], errMsg?: string) => {
+const shouldNotCreate = async (body: HTTPPostBody[HTTPRoutes.CreateLobby], errMsg?: string) => {
     const creatorClient = new MockCreator(serverUrl, webSocketUrl);
     const createdLobbyResponse = await creatorClient.createLobby(body, false);
     expect(createdLobbyResponse.success).toBe(false);
