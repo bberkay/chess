@@ -4,8 +4,8 @@ import { CORSResponse } from "./CORSResponse";
 import { LobbyRegistry } from "@Lobby";
 import { PlayerRegistry } from "@Player";
 import {
-    HTTPRequestPathValidator,
-    HTTPRequestBodyValidator,
+    HTTPGetRequestValidator,
+    HTTPPostRequestValidator,
 } from "./HTTPRequestValidator";
 import { createResponseFromHTTPError } from "./utils";
 
@@ -131,7 +131,7 @@ export class HTTPRequestHandler {
                 try {
                     const lobbyId = req.params.lobbyId;
 
-                    HTTPRequestPathValidator.validate(
+                    HTTPGetRequestValidator.validate(
                         HTTPRoutes.CheckLobby,
                         req,
                     );
@@ -180,7 +180,7 @@ export class HTTPRequestHandler {
             POST: async (req) => {
                 try {
                     const body =
-                        await HTTPRequestBodyValidator.parseAndValidate(
+                        await HTTPPostRequestValidator.parseAndValidate(
                             HTTPRoutes.CreateLobby,
                             req,
                         );
@@ -225,7 +225,7 @@ export class HTTPRequestHandler {
             POST: async (req) => {
                 try {
                     const body =
-                        await HTTPRequestBodyValidator.parseAndValidate(
+                        await HTTPPostRequestValidator.parseAndValidate(
                             HTTPRoutes.ConnectLobby,
                             req,
                         );
@@ -304,7 +304,7 @@ export class HTTPRequestHandler {
             POST: async (req) => {
                 try {
                     const body =
-                        await HTTPRequestBodyValidator.parseAndValidate(
+                        await HTTPPostRequestValidator.parseAndValidate(
                             HTTPRoutes.ReconnectLobby,
                             req,
                         );

@@ -13,7 +13,12 @@ import { isInRange, isValidLength } from "@Utils";
 import { BunRequest } from "bun";
 import { HTTPPostBody, HTTPRoutes, HTTPRequestValidatorError } from ".";
 
-//  En son websocket message limitera geçilir ardından sanitize ve draw io yapılır.
+// TODO: If a http request requires both path and body validation,
+// first HTTPGetRequestValidator.validate can be used on the request,
+// and then HTTPPostRequestValidator.parseAndValidate can be applied.
+// This system could be unified under a single HTTPRequestValidator
+// (with .validate(), .parse() etc.) or it could be refactored into
+// HTTPRequestPathValidator and HTTPRequestBodyValidator.
 
 /**
  * A function signature for validating GET requests based on route.
@@ -26,11 +31,7 @@ type GetValidator<T extends HTTPRoutes> = (
  * Validates incoming request's path for specific routes by checking
  * required URL parameters and their formats.
  */
-// TODO: Convert this to the something like HTTPPathValidator
-// and PostRequestValidator to something like BodyValidator
-// it will be best no need to thinking more about validator
-// structure everything has been taught.
-export class HTTPRequestPathValidator {
+export class HTTPGetRequestValidator {
     /**
      * Validates a GET request for the given route by dispatching
      * to the corresponding route-specific validation method.
@@ -46,7 +47,7 @@ export class HTTPRequestPathValidator {
         let validator;
         switch (route) {
             case HTTPRoutes.CheckLobby:
-                validator = HTTPRequestPathValidator._validateCheck as GetValidator<T>;
+                validator = HTTPGetRequestValidator._validateCheck as GetValidator<T>;
                 break;
             default:
                 throw HTTPRequestValidatorError.factory.InvalidRoute(route)
@@ -84,7 +85,7 @@ type PostValidator<T extends keyof HTTPPostBody> = (
  * Validates and parses incoming request's body for specific routes.
  * Throws an HTTPValidationError if input validation fails.
  */
-export class HTTPRequestBodyValidator {
+export class HTTPPostRequestValidator {
     /**
      * Parses and validates the request body for the given POST route.
      *
@@ -100,13 +101,13 @@ export class HTTPRequestBodyValidator {
         let validator;
         switch (route) {
             case HTTPRoutes.CreateLobby:
-                validator = HTTPRequestBodyValidator._validateCreate as PostValidator<T>;
+                validator = HTTPPostRequestValidator._validateCreate as PostValidator<T>;
                 break;
             case HTTPRoutes.ConnectLobby:
-                validator = HTTPRequestBodyValidator._validateConnect as PostValidator<T>;
+                validator = HTTPPostRequestValidator._validateConnect as PostValidator<T>;
                 break;
             case HTTPRoutes.ReconnectLobby:
-                validator = HTTPRequestBodyValidator._validateReconnect as PostValidator<T>;
+                validator = HTTPPostRequestValidator._validateReconnect as PostValidator<T>;
                 break;
             default:
                 throw HTTPRequestValidatorError.factory.InvalidRoute(route);
