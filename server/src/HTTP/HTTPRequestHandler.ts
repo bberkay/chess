@@ -390,6 +390,8 @@ export class HTTPRequestHandler {
      */
     public expose(getServer: () => Server): HTTPServerScheme {
         const handleRateLimit = (req: BunRequest) => {
+            if (Number(Bun.env.ENABLE_RATE_LIMIT) !== 1)
+                return;
             const ip = getServer().requestIP(req)?.address;
             if (!ip) throw HTTPRequestHandlerError.factory.IpAddressNotFound();
             const isAllowed = rateLimiter(ip);
