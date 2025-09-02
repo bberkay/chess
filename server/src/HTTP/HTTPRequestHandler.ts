@@ -15,9 +15,9 @@ import { createResponseFromHTTPError } from "./utils";
  * with POST optionally supporting async behavior.
  */
 interface RESTScheme<T extends HTTPRoutes> {
-    GET: (req: BunRequest<T>) => CORSResponse<T>;
-    OPTIONS?: (req: BunRequest<T>) => CORSResponse<T>;
-    POST?: (req: BunRequest<T>) => Promise<CORSResponse<T>>;
+    GET: (req: BunRequest<T>, server: Server) => CORSResponse<T>;
+    OPTIONS?: (req: BunRequest<T>, server: Server) => CORSResponse<T>;
+    POST?: (req: BunRequest<T>, server: Server) => Promise<CORSResponse<T>>;
 }
 
 /**
@@ -58,7 +58,7 @@ class RESTHandler<T extends HTTPRoutes> {
      */
     public addMiddleware<K extends keyof HTTPServerScheme[T]>(
         method: K,
-        fn: (req: BunRequest<T>) => void,
+        fn: (req: BunRequest<T>, server: Server) => void,
     ): RESTHandler<T> {
         if (!Object.hasOwn(this._handler, method)) {
             throw HTTPRequestHandlerError.factory.InternalError(
@@ -73,8 +73,8 @@ class RESTHandler<T extends HTTPRoutes> {
         }
 
         const oldHandler = this._handler[method];
-        this._handler[method] = ((req: BunRequest<T>) => {
-            fn(req);
+        this._handler[method] = ((req: BunRequest<T>, server: Server) => {
+            fn(req, server);
             return oldHandler(req);
         }) as HTTPServerScheme[T][K];
         return this;
@@ -388,20 +388,15 @@ export class HTTPRequestHandler {
      *
      * @returns A mapping of all available HTTP routes to their handlers.
      */
-    public expose(getServer: () => Server): HTTPServerScheme {
-        const handleRateLimit = (req: BunRequest) => {
+    public expose(): HTTPServerScheme {
+        const handleRateLimit = (req: BunRequest, server: Server) => {
             if (Number(Bun.env.ENABLE_RATE_LIMIT) !== 1)
                 return;
-            const ip = getServer().requestIP(req)?.address;
+
+            const ip = server.requestIP(req)?.address;
             if (!ip) throw HTTPRequestHandlerError.factory.IpAddressNotFound();
+
             const isAllowed = rateLimiter(ip);
-            // FIXME: Burada throw error ile error atıyoruz ama aslında
-            // cors repsonse dönmemeiz lazım belli status, statusTExt ve
-            // header ile, keza yukarıda da her seferinde status code u
-            // biz yazıyoruz hata ile örneğin LobbyNotFoudn 404 gibi
-            // bunun yerine bu status kodları vs. direkt error ile
-            // birleştirmeye çalışalım. Buradan önce HTTPRequestValidator
-            // yapılsın sonra bu yapılsın.
             if (isAllowed.status !== 200)
                 throw HTTPRequestHandlerError.factory.RateLimitExceed();
         };

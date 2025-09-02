@@ -37,19 +37,12 @@ import { WebSocketHandler, WebSocketData } from "@WebSocket";
 export function createServer(): Server {
     const httpRequestHandler = new HTTPRequestHandler();
     const webSocketHandler = new WebSocketHandler();
-    // TODO: Fix this, bu test proje de oluyordu burada olmuyor nedense
     const server = Bun.serve<WebSocketData, HTTPServerScheme>({
         port: Bun.env.SERVER_PORT,
         // avaiable routes
-        routes: httpRequestHandler.expose(() => server),
+        routes: httpRequestHandler.expose(),
         // fallback for unmatched routes
         fetch(req: Request, server: Server) {
-            // TODO: Olmuyor, tüm sistemi değiştirmek lazım onu yapmayalım. Ama bir şekilde de yapamayız
-            // bir şekilde server a erişebilmeliyiz route dan, öyle ya da böyle, ayrı bir proje de test
-            // edilebilir belki.
-            // Server değişkenin tanımlandığı yer belli sonuçta yukarıda satır 40 da const ile, onu başka bir yere
-            // taşımak mantıklı değil.
-            // Acaba bunu yapabilecek miyiz?
             if (
                 httpRequestHandler.canHandle(req) &&
                 !webSocketHandler.canHandle(req)
