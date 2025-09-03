@@ -530,6 +530,6 @@ export class Platform {
     private _playAgainSingleplayerGame(): void {
         const botAttributes = this.chess.getLastCreatedBotAttributes() ?? false;
         if(botAttributes) botAttributes.color = botAttributes.color == Color.White ? Color.Black : Color.White;
-        this.preparePlatformForSingleplayerGame(this.chess.getBoardHistory()[0], botAttributes);
+        this.preparePlatformForSingleplayerGame(null, botAttributes);
     }
 }

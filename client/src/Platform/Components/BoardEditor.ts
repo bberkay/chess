@@ -516,7 +516,7 @@ export class BoardEditor extends Component {
     public createBoard(
         fenNotation: string | StartPosition | JsonNotation | null = null
     ): void {
-        this.chess.createGame(fenNotation || this.getShownFen());
+        this.chess.createGame(fenNotation);
         this._prepareBoardEditorForGame();
     }
 

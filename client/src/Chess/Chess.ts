@@ -138,13 +138,20 @@ export class Chess {
         position:
             | JsonNotation
             | StartPosition
-            | string = StartPosition.Standard,
+            | string
+            | null = null,
         durations: Durations | null = null
     ): void {
         this.resetProperties();
         this.logger.save(
             "Cache cleared and properties reset before creating a new game"
         );
+
+        if (!position) {
+            position = Store.isExist(StoreKey.LastCreatedBoard)
+                ? Store.load(StoreKey.LastCreatedBoard)!
+                : StartPosition.Standard;
+        }
 
         if (typeof position === "string") {
             position = Converter.fenToJson(position);
