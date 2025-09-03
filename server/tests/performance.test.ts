@@ -19,7 +19,6 @@ beforeAll(async () => {
     webSocketUrl = server.url.href.replace("http", "ws");
 });
 
-// TODO: Disable rate limiter, on development enviroment, to run this test without catching by rate limiter
 const measureOperation = async (operation: () => Promise<CORSResponseBody<HTTPRoutes>>): Promise<void> => {
     const resultsSummary: Record<string, number | string | boolean>[] = [];
 
@@ -104,7 +103,8 @@ const reconnectTestLobby = async (): Promise<CORSResponseBody<HTTPRoutes.Reconne
     return result;
 }
 
-describe("Performance Tests", () => {
+const isRateLimiterOn = Number(Bun.env.RATE_LIMITER) === 1;
+describe.skipIf(isRateLimiterOn)("Performance Tests", () => {
     test("Should scale efficiently across concurrency levels during lobby creation", async () => {
         await measureOperation(createTestLobby);
     }, TEST_TIMEOUT * TEST_CONCURRENCY_LEVELS.length);
