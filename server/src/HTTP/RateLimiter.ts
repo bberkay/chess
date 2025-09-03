@@ -36,7 +36,6 @@ export function rateLimiter(ip: string): CORSResponse<HTTPRoutes.Root> {
             },
             {
                 status: 429,
-                statusText: "Too Many Requests",
                 headers: {
                     "Retry-After": (Number(Bun.env.RATE_WINDOW_MS) / 1000).toString(),
                     "X-RateLimit-Limit": Number(Bun.env.RATE_LIMIT).toString(),

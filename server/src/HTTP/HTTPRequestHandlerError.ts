@@ -15,8 +15,6 @@ export const HTTPRequestHandlerErrorTemplates = {
         `An unexpected error occurred while reconnecting to the lobby.`,
     IpAddressNotFound: () =>
         `IP address could not be found.`,
-    RateLimitExceed: () =>
-        `Rate limit exceeded. Please try again later.`,
     LobbyNotFound: (lobbyId: string) =>
         `Lobby with id "${lobbyId}" was not found.`,
     LobbyAlreadyStarted: (lobbyId: string) =>

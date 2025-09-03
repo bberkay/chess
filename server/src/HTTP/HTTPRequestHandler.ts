@@ -74,7 +74,8 @@ class RESTHandler<T extends HTTPRoutes> {
 
         const oldHandler = this._handler[method];
         this._handler[method] = ((req: BunRequest<T>, server: Server) => {
-            fn(req, server);
+            const response = fn(req, server);
+            if (response !== undefined) return response;
             return oldHandler(req);
         }) as HTTPServerScheme[T][K];
         return this;
@@ -398,7 +399,8 @@ export class HTTPRequestHandler {
 
             const isAllowed = rateLimiter(ip);
             if (isAllowed.status !== 200)
-                throw HTTPRequestHandlerError.factory.RateLimitExceed();
+                return isAllowed;
+            return;
         };
 
         const restHandlers = [
