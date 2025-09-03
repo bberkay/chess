@@ -1,32 +1,4 @@
 /**
- * Removes all falsy values and empty arrays from the given object.
- *
- * This is useful for cleaning up query or body parameters before sending them in a request.
- * Falsy values (like `null`, `undefined`, `false`, `0`, `""`, etc.) and arrays with no elements
- * will be removed from the final result.
- *
- * @param params - An object containing key-value pairs to clean.
- * @returns A new object containing only truthy values and non-empty arrays, with all values cast to strings.
- *
- * @example
- * removeFalsyParamsAndEmptyLists({ name: "Alice", age: 0, tags: [], role: null })
- * // Returns: { name: "Alice" }
- */
-// TODO: Fix this eslint disable line
-export function removeFalsyParamsAndEmptyLists(
-    params: Record<string, any>, // eslint-disable-line @typescript-eslint/no-explicit-any
-): Record<string, string> {
-    return Object.fromEntries(
-        Object.entries(params).filter(([, value]) => {
-            if (Array.isArray(value)) {
-                return value.length > 0;
-            }
-            return !!value;
-        }),
-    );
-}
-
-/**
  * Constructs a full URL string from the given parts.
  *
  * Concatenates a root URL, an optional pathname, and an optional object of query parameters
@@ -41,15 +13,13 @@ export function removeFalsyParamsAndEmptyLists(
  * createURLFromEntries("http://localhost:3000", "api/users", { name: "Alice", active: true })
  * // Returns: "http://localhost:3000/api/users?name=Alice&active=true"
  */
- // TODO: Fix this eslint disable line
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function createURLFromEntries(root?: string, pathname?: string, endpoint?: Record<string, any>): string {
+export function createURLFromEntries(root?: string, pathname?: string, endpoint?: Record<string, string | number | boolean | null | undefined>): string {
     let url: string = root || "";
     if (root && !root.endsWith("/")) url += "/";
     if (pathname) url += pathname;
     if (endpoint && !url.endsWith("?")) url += "?";
     if (!endpoint) return url;
-    return url + new URLSearchParams(Object.entries(endpoint)).toString();
+    return url + new URLSearchParams(Object.entries(endpoint).map(([k, v]) => [k, String(v)])).toString();
 }
 
 /**
