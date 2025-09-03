@@ -160,6 +160,7 @@ export class ChessBoard {
         const board: HTMLDivElement = document.getElementById(
             "chessboard"
         ) as HTMLDivElement;
+        board.addEventListener("contextmenu", (e) => e.preventDefault());
         board.innerHTML = "";
 
         for (let row = 0; row < 8; row++) {
