@@ -1,7 +1,7 @@
 import type { Server } from "bun";
 import { WsCommand, WsTitle, type RWebSocket, type WebSocketData } from ".";
 import { Player, PlayerRegistry } from "@Player";
-import { HTTPRoutes, CORSResponse, HTTPRequestHandlerError } from "@HTTP";
+import { HTTPRoutes, CORSResponse, HTTPRequestHandlerError, rateLimiter } from "@HTTP";
 import { LobbyRegistry } from "@Lobby";
 import { Lobby } from "@Lobby";
 import { Color, Square } from "@Chess/Types";
@@ -11,6 +11,7 @@ import {
     createMessageFromWebSocketError,
     createResponseFromWebSocketError,
 } from "./utils";
+import { messageLimiter } from "./MessageLimiter";
 
 /**
  * Handles WebSocket communication for the chess lobby system.
@@ -50,7 +51,22 @@ export class WebSocketHandler {
     public createWsData(
         req: Request,
     ): WebSocketData | CORSResponse<HTTPRoutes.Root> {
+        const handleRateLimit = (req: Request, server: Server) => {
+            if (Number(Bun.env.ENABLE_RATE_LIMIT) !== 1)
+                return;
+
+            const ip = server.requestIP(req)?.address;
+            if (!ip) throw HTTPRequestHandlerError.factory.IpAddressNotFound();
+
+            return rateLimiter(ip);
+        };
+
         try {
+            const rateLimitResponse = handleRateLimit(req, this._server!);
+            if (rateLimitResponse !== undefined) {
+                return rateLimitResponse;
+            }
+
             const { lobbyId, playerToken } =
                 WebSocketValidator.parseAndValidate(req);
 
@@ -289,7 +305,20 @@ export class WebSocketHandler {
      * Handle the messages from the client.
      */
     private _handleCommand(ws: RWebSocket, message: string): void {
+        const handleMessageLimit = (ws: RWebSocket) => {
+            if (Number(Bun.env.ENABLE_MESSAGE_LIMIT) !== 1)
+                return;
+            return messageLimiter(ws.data.player.id);
+        }
+
         try {
+            const messageLimitResponse = handleMessageLimit(ws);
+            if (messageLimitResponse !== undefined) {
+                ws.send(messageLimitResponse);
+                ws.close();
+                return;
+            }
+
             console.log(`Incoming message: ${message}`);
             const [command, data] = WsCommand.parse(message);
             if (!command) return;

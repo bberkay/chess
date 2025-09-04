@@ -13,19 +13,16 @@ const ipRequests: Map<string, HTTPRequestLimitRecord> = new Map();
 /**
  * Simple in-memory rate limiter based on IP.
  * Allows up to RATE_LIMIT requests per RATE_WINDOW_MS,
- * returns 429 when limit is exceeded.
+ * returns 429 if limit is exceeded otherwise undefined.
  */
-export function rateLimiter(ip: string): CORSResponse<HTTPRoutes.Root> {
+export function rateLimiter(ip: string): CORSResponse<HTTPRoutes.Root> | undefined {
     const now = Date.now();
 
     const record: HTTPRequestLimitRecord | undefined = ipRequests.get(ip);
 
     if (!record) {
         ipRequests.set(ip, { count: 1, firstRequestTime: now });
-        return new CORSResponse({
-            success: true,
-            message: "OK",
-        });
+        return;
     }
 
     if (now - record.firstRequestTime < Number(Bun.env.RATE_WINDOW_MS)) {
@@ -49,8 +46,5 @@ export function rateLimiter(ip: string): CORSResponse<HTTPRoutes.Root> {
         record.count = 1;
     }
 
-    return new CORSResponse({
-        success: true,
-        message: "OK",
-    });
+    return;
 }

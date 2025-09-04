@@ -397,10 +397,7 @@ export class HTTPRequestHandler {
             const ip = server.requestIP(req)?.address;
             if (!ip) throw HTTPRequestHandlerError.factory.IpAddressNotFound();
 
-            const isAllowed = rateLimiter(ip);
-            if (isAllowed.status !== 200)
-                return isAllowed;
-            return;
+            return rateLimiter(ip);
         };
 
         const restHandlers = [
