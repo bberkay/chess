@@ -75,7 +75,7 @@ export abstract class Component {
     private createTooltipsIfThereAre(componentId: string): void {
         const component = document.getElementById(componentId);
         if (!component) return;
-        
+
         // An ugly and unstable way to wait for the component to be rendered.
         setTimeout(() => {
             for (const menuItem of component.querySelectorAll(
@@ -178,10 +178,29 @@ export abstract class Component {
         }
 
         /**
+         * Prevents a key press if it would cause the input's value
+         * to not match its HTML `pattern` attribute.
+         */
+        function preventInvalidPatternInput(event: KeyboardEvent, regex: RegExp): void {
+            const input = event.target as HTMLInputElement;
+
+            if (event.ctrlKey || event.altKey || event.metaKey || event.key.length > 1) return;
+
+            // Compute the value if the key is allowed
+            const start = input.selectionStart || 0;
+            const end = input.selectionEnd || 0;
+            const futureValue = input.value.slice(0, start) + event.key + input.value.slice(end);
+
+            if (!regex.test(futureValue)) {
+                event.preventDefault();
+            }
+        }
+
+        /**
          * Prevent non-numeric input for number inputs.
          */
         function preventNonNumericInput(event: KeyboardEvent): void {
-            if (event.ctrlKey || event.altKey || event.metaKey) {
+            if (event.ctrlKey || event.altKey || event.metaKey || event.key.length > 1) {
                 return;
             }
 
@@ -215,8 +234,10 @@ export abstract class Component {
             if (!input) return;
 
             const isNumber = input.getAttribute("type") === "number";
+            const pattern = input.hasAttribute("pattern") ? new RegExp(`^${input.getAttribute("pattern")}$`) : undefined;
             input.addEventListener("keydown", (e) => {
                 if (isNumber) preventNonNumericInput(e);
+                if (pattern) preventInvalidPatternInput(e, pattern);
             });
 
             input.addEventListener("input", () => {

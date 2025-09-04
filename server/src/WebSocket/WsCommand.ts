@@ -1,7 +1,10 @@
 import {
     WsIncomingMessage,
-    WsOutgoingMessage
+    WsOutgoingMessage,
+    WsTitle
 } from ".";
+
+const ALLOWED_COMMANDS = Object.values(WsTitle).join(", ");
 
 /**
  * This class is used to create WebSocket commands
@@ -27,7 +30,11 @@ export class WsCommand {
             const parsed = JSON.parse(message);
 
             if (!Array.isArray(parsed)) {
-                throw new Error("Invalid message format");
+                throw new Error("Message must be an array in the format: [command, payload?]");
+            }
+
+            if (Object.values(WsTitle).find(parsed[0])) {
+                throw new Error(`Invalid command "${parsed[0]}". Allowed commands: ${ALLOWED_COMMANDS}`);
             }
 
             return parsed as WsIncomingMessage;

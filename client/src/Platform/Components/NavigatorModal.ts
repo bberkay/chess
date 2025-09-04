@@ -502,7 +502,7 @@ export class NavigatorModal extends Component {
                     Store.isExist(StoreKey.LastPlayerName)
                         ? Store.load(StoreKey.LastPlayerName)
                         : ""
-                }" maxlength="${MAX_PLAYER_NAME_LENGTH}" minlength="${MIN_PLAYER_NAME_LENGTH}" required>
+                }" maxlength="${MAX_PLAYER_NAME_LENGTH}" pattern="[A-Za-z]+" minlength="${MIN_PLAYER_NAME_LENGTH}" required>
                 <button type="submit" data-socket-operation="${
                     SocketOperation.CreateLobby
                 }">Create</button>
@@ -565,7 +565,7 @@ export class NavigatorModal extends Component {
                     Store.isExist(StoreKey.LastPlayerName)
                         ? Store.load(StoreKey.LastPlayerName)
                         : ""
-                }" maxlength="${MAX_PLAYER_NAME_LENGTH}" minlength="${MIN_PLAYER_NAME_LENGTH}" required>
+                }" maxlength="${MAX_PLAYER_NAME_LENGTH}" pattern="[A-Za-z]+" minlength="${MIN_PLAYER_NAME_LENGTH}" required>
                 <button type="submit" data-socket-operation="${
                     SocketOperation.JoinLobby
                 }">Play</button>
@@ -608,7 +608,7 @@ export class NavigatorModal extends Component {
             document
                 .getElementById("navigator-modal")!
                 .querySelector("#player-name") as HTMLInputElement
-        ).value;
+        ).value.replace(/[^a-zA-Z\s]/g, '').replace(/\s+/g, ' ').trim();
         this.lastEnteredPlayerName =
             playerName.length < MIN_PLAYER_NAME_LENGTH ||
             playerName.length > MAX_PLAYER_NAME_LENGTH
