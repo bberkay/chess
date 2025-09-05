@@ -6,6 +6,19 @@ export function isValidLength(value: string, length: number): boolean {
 }
 
 /**
+ * Regular expression that matches strings containing only
+ * alphabetic characters (A–Z, case-insensitive).
+ */
+const ALPHABETIC_REGEX = /^[a-z]+$/i;
+
+/**
+ * Check if the given string contains only alphabetic characters (A–Z, case-insensitive).
+ */
+export function isAlphabetic(message: string): boolean {
+    return ALPHABETIC_REGEX.test(message)
+}
+
+/**
  * Check if the given value is in the given range.
  */
 export function isInRange(value: number, min: number, max: number): boolean {

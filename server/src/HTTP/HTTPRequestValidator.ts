@@ -9,7 +9,7 @@ import {
     MIN_PLAYER_NAME_LENGTH,
     MIN_REMAINING_TIME,
 } from "@Consts";
-import { isInRange, isValidLength } from "@Utils";
+import { isAlphabetic, isInRange, isValidLength } from "@Utils";
 import { BunRequest } from "bun";
 import { HTTPPostBody, HTTPRoutes, HTTPRequestValidatorError } from ".";
 import { assertNoMaliciousContent } from "./utils";
@@ -124,6 +124,9 @@ export class HTTPPostRequestValidator {
         ))
             throw HTTPRequestValidatorError.factory.InvalidNameLength();
 
+        if (!isAlphabetic(body.name))
+            throw HTTPRequestValidatorError.factory.InvalidName();
+
         if (!isInRange(body.board.length, MIN_FEN_LENGTH, MAX_FEN_LENGTH))
             throw HTTPRequestValidatorError.factory.InvalidBoardLength();
 
@@ -154,6 +157,9 @@ export class HTTPPostRequestValidator {
             )
         )
             throw HTTPRequestValidatorError.factory.InvalidNameLength()
+
+        if (!isAlphabetic(body.name))
+            throw HTTPRequestValidatorError.factory.InvalidName();
 
         if (!body.lobbyId || !isValidLength(body.lobbyId, GU_ID_LENGTH))
             throw HTTPRequestValidatorError.factory.InvalidLobbyIdLength();
