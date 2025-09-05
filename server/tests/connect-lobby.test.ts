@@ -95,6 +95,14 @@ describe("Connect Lobby Tests", () => {
         }, HTTPRequestValidatorErrorTemplates.InvalidNameLength());
     });
 
+    test("Should not create a lobby when name has non-alphabetic char", async () => {
+        const creatorClient = await createTestLobby();
+        await shouldNotConnect({
+            name: "123",
+            lobbyId: creatorClient.lobbyId!
+        }, HTTPRequestValidatorErrorTemplates.InvalidName());
+    });
+
     test("Should not connect to lobby when name is too long", async () => {
         const creatorClient = await createTestLobby();
         await shouldNotConnect({
@@ -109,7 +117,7 @@ describe("Connect Lobby Tests", () => {
             await shouldNotConnect({
                 name: payload,
                 lobbyId: creatorClient.lobbyId!
-            }, HTTPRequestValidatorErrorTemplates.InvalidName());
+            }, HTTPRequestValidatorErrorTemplates.InvalidPayload());
         }
     });
 
@@ -119,7 +127,7 @@ describe("Connect Lobby Tests", () => {
             await shouldNotConnect({
                 name: "alex",
                 lobbyId: payload
-            }, HTTPRequestValidatorErrorTemplates.InvalidLobbyId());
+            }, HTTPRequestValidatorErrorTemplates.InvalidPayload());
         }
     });
 

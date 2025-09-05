@@ -64,6 +64,15 @@ describe("Create Lobby Tests", () => {
         }, HTTPRequestValidatorErrorTemplates.InvalidNameLength());
     });
 
+    test("Should not create a lobby when name has non-alphabetic char", async () => {
+        await shouldNotCreate({
+            name: "123",
+            board: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+            remaining: 300000,
+            increment: 5000
+        }, HTTPRequestValidatorErrorTemplates.InvalidName());
+    });
+
     test("Should not create a lobby when name is too long", async () => {
         await shouldNotCreate({
             name: "johnnnnnnnnnnnnnnnnnnnnnnnnnnn",
@@ -80,7 +89,7 @@ describe("Create Lobby Tests", () => {
                 board: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
                 remaining: 300000,
                 increment: 5000,
-            }, HTTPRequestValidatorErrorTemplates.InvalidName());
+            }, HTTPRequestValidatorErrorTemplates.InvalidPayload());
         }
     });
 
@@ -109,7 +118,7 @@ describe("Create Lobby Tests", () => {
                 board: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
                 remaining: 300000,
                 increment: 5000,
-            }, HTTPRequestValidatorErrorTemplates.InvalidBoard());
+            }, HTTPRequestValidatorErrorTemplates.InvalidPayload());
         }
     });
 

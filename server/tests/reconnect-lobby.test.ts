@@ -140,7 +140,7 @@ describe("Reconnect Lobby Tests", () => {
             const guestClient = await connectTestLobby(creatorClient.lobbyId!);
             await guestClient.disconnectLobby();
             guestClient.lobbyId = payload;
-            await shouldNotReconnect(guestClient, HTTPRequestValidatorErrorTemplates.InvalidLobbyId());
+            await shouldNotReconnect(guestClient, HTTPRequestValidatorErrorTemplates.InvalidPayload());
         }
     });
 
@@ -150,7 +150,7 @@ describe("Reconnect Lobby Tests", () => {
             const guestClient = await connectTestLobby(creatorClient.lobbyId!);
             await guestClient.disconnectLobby();
             guestClient.player!.token = payload;
-            await shouldNotReconnect(guestClient, HTTPRequestValidatorErrorTemplates.InvalidPlayerToken());
+            await shouldNotReconnect(guestClient, HTTPRequestValidatorErrorTemplates.InvalidPayload());
         }
     });
 
