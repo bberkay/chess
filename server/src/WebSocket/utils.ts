@@ -1,8 +1,34 @@
 import { WebSocketHandlerError } from "./WebSocketHandlerError";
 import { WebSocketValidatorError } from "./WebSocketValidatorError";
 import { WsCommand } from "./WsCommand";
+import { WsCommandError } from "./WsCommandError";
 import { WsTitle } from "./types";
 import { containsSuspiciousPattern } from "@Utils";
+
+/**
+ * Normalizes any thrown value into a known WebSocket error type.
+ *
+ * - If the thrown value is already a `WebSocketHandlerError` or
+ *   `WebSocketValidatorError`, it is re-thrown as is.
+ * - Otherwise, the value is wrapped in a generic
+ *   `UnexpectedErrorWhileHandlingWebSocket`.
+ *
+ * This ensures that only expected, standardized error types propagate
+ * through the WebSocket layer.
+ *
+ * @param e - The error or unknown value caught during WebSocket handling.
+ * @throws {WebSocketHandlerError | WebSocketValidatorError}
+ */
+export function normalizeWebSocketError(e: unknown): never {
+    if (
+        e instanceof WebSocketHandlerError ||
+        e instanceof WebSocketValidatorError
+    ) {
+        throw e;
+    } else {
+        throw WebSocketHandlerError.factory.UnexpectedErrorWhileHandlingWebSocket();
+    }
+}
 
 /**
  * Creates a standardized WebSocket error message command from an error that occurs
@@ -29,7 +55,9 @@ export function createMessageFromWebSocketError(
         WsTitle.Error,
         {
             message:
-                e instanceof WebSocketValidatorError || e instanceof WebSocketHandlerError
+                e instanceof WebSocketValidatorError ||
+                e instanceof WebSocketHandlerError ||
+                e instanceof WsCommandError
                     ? e.message
                     : operation.message,
         },
@@ -61,7 +89,7 @@ export function assertNoMaliciousContent(obj: unknown): void {
                 walk(val);
             }
         }
-    }
+    };
 
     walk(obj);
 }

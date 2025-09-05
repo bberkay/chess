@@ -13,7 +13,7 @@ import {
     HTTPRequestHandler,
     CORSResponse,
 } from "@HTTP";
-import { WebSocketHandler, WebSocketData, WebSocketHandlerError } from "@WebSocket";
+import { WebSocketHandler, WebSocketData, WebSocketHandlerError, WebSocketValidatorError } from "@WebSocket";
 
 /**
  * Creates and starts a Bun HTTP and WebSocket server configured for the chess platform backend.
@@ -73,7 +73,7 @@ export function createServer(): Server {
                 return new CORSResponse(
                     {
                         success: false,
-                        message: e instanceof WebSocketHandlerError
+                        message: e instanceof WebSocketHandlerError || e instanceof WebSocketValidatorError
                             ? e.message
                             : WebSocketHandlerError.factory.UnexpectedErrorWhileUpgradingToWebSocket().message
                     },

@@ -74,7 +74,17 @@ export abstract class MockClient {
         await new Promise<void>((resolve, reject) => {
             this.ws = new WebSocket(wsLobbyUrl);
             this.ws.onmessage = (event: MessageEvent) => {
-                const [wsTitle, wsData] = WsCommand.parse(event.data);
+                console.log("Incoming message data: ", event.data);
+                // We use JSON.parse instead of WsCommand.parse to
+                // bypass the malicious content scan. This is because
+                // the scan would throw an error and prevent returning
+                // the "parsed" error when testing malicious payloads.
+                // As a result, it would be impossible to receive
+                // WsTitle.Error messages. The reason is that the error
+                // message mirrors the malicious payload in the "message"
+                // field, which triggers the scan and causes an error
+                // before "parsed" can be returned.
+                const [wsTitle, wsData] = JSON.parse(event.data);
                 this._incomingMessages[wsTitle] = wsData;
                 console.log(
                     "on message incomingMessage new title",

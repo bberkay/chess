@@ -10,5 +10,6 @@
 export * from "./types.ts";
 export * from "./WsCommand.ts";
 export * from "./WebSocketHandler.ts";
+export { WsCommandError, WsCommandErrorTemplates } from "./WsCommandError.ts";
 export { WebSocketHandlerError, WebSocketHandlerErrorTemplates } from "./WebSocketHandlerError.ts";
 export { WebSocketValidatorError, WebSocketValidatorErrorTemplates } from "./WebSocketValidatorError.ts";

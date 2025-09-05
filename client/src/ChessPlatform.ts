@@ -950,7 +950,11 @@ export class WsCommand {
             const parsed = JSON.parse(message);
 
             if (!Array.isArray(parsed)) {
-                throw new Error("Invalid message format");
+                throw new Error("Message must be an array in the format: [command, payload?]");
+            }
+
+            if (!Object.values(WsTitle).find((title) => title === parsed[0])) {
+                throw new Error(`Invalid command "${parsed[0]}"`);
             }
 
             return parsed as WsIncomingMessage;

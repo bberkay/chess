@@ -1,11 +1,9 @@
-// TODO: security.test.ts WebSocket Security.
-
 import { createServer } from "src/BunServer";
 import { test, expect, beforeAll, afterAll, describe } from "vitest";
 import { type Server } from "bun";
 import { createWsLobbyConnUrl } from "./utils";
 import { MockCreator } from "./helpers/MockCreator";
-import { WsTitle } from "@WebSocket";
+import { WebSocketHandlerErrorTemplates, WebSocketValidatorErrorTemplates, WsCommandErrorTemplates, WsTitle } from "@WebSocket";
 import { INJECTION_PAYLOADS } from "./consts";
 
 const WS_CONN_TIMEOUT = 10000;
@@ -43,7 +41,6 @@ const connectToWebSocket = async (wsUrl: string, timeout: number = WS_CONN_TIMEO
         }
         ws.onerror = () => {
             console.log(`Error for WebSocket(${wsUrl})`);
-            console.log()
             resolve(WS_ONERROR);
         }
         setTimeout(() => reject(WS_TIMEOUT), timeout);
@@ -53,10 +50,10 @@ const connectToWebSocket = async (wsUrl: string, timeout: number = WS_CONN_TIMEO
 describe("WebSocket Security Tests", () => {
     test("Should close the ws connection if invalid props sent while connecting to websocket", async () => {
         const urls = [
-            webSocketUrl + "/" + "?someProps=123",
+            webSocketUrl + "/?" + "someProps=123",
+            ...INJECTION_PAYLOADS.map((payload) => webSocketUrl + "/?" + payload),
             createWsLobbyConnUrl(webSocketUrl, "123456", "789012"),
-            ...INJECTION_PAYLOADS.map((payload) => webSocketUrl + "/" + payload),
-            ...INJECTION_PAYLOADS.map((payload) => createWsLobbyConnUrl(webSocketUrl, payload, payload))
+            ...INJECTION_PAYLOADS.map((payload) => createWsLobbyConnUrl(webSocketUrl, payload, payload)),
         ];
         for (const url of urls) {
             console.log(`Testing: ${url} .......`);
@@ -65,31 +62,72 @@ describe("WebSocket Security Tests", () => {
         }
     });
 
-    test("Should close the ws connection if imposter player try to connect websocket", async () => {
+    test("Should send error message if sent command has invalid format", async () => {
         const creatorClient = new MockCreator(serverUrl, webSocketUrl);
-        const { lobbyId } = (await creatorClient.createLobby()).data!;
+        await creatorClient.createLobby();
 
-        const response = await connectToWebSocket(createWsLobbyConnUrl(webSocketUrl, lobbyId, "123123"));
-        expect(response).toBe(WS_ONCLOSE);
+        // @ts-expect-error close ts error for this line
+        creatorClient.send([["invalidcommand"]]);
+        const payloadDirectMsg = (await creatorClient.pull(WsTitle.Error)).message;
+        expect(payloadDirectMsg).toBeTruthy();
+        expect(payloadDirectMsg).toBe(WsCommandErrorTemplates.InvalidFormat());
     });
 
-    test("Should send error message if invalid command sent to websocket", async () => {
-        const commands = [
-            "invalidcommand",
-            JSON.stringify([WsTitle.Moved, "invalidcommand"]),
-            ...INJECTION_PAYLOADS,
-            ...INJECTION_PAYLOADS.map((payload) => JSON.stringify([WsTitle.Moved, payload]))
-        ];
+    test("Should send error message if invalid command sent to websocket in WsTitle", async () => {
+        const creatorClient = new MockCreator(serverUrl, webSocketUrl);
+        await creatorClient.createLobby();
+
+        // @ts-expect-error close ts error for this line
+        creatorClient.send(["invalidcommand", { from: 32, to: 43}]);
+        const payloadDirectMsg = (await creatorClient.pull(WsTitle.Error)).message;
+        expect(payloadDirectMsg).toBeTruthy();
+        expect(payloadDirectMsg).toBe(WsCommandErrorTemplates.InvalidCommand());
+    });
+
+    test("Should send error message if invalid command sent to websocket in WsData", async () => {
+        const creatorClient = new MockCreator(serverUrl, webSocketUrl);
+        await creatorClient.createLobby();
+
+        // @ts-expect-error close ts error for this line
+        creatorClient.send([WsTitle.Moved, "invalidcommand"]);
+        const payloadDirectMsg = (await creatorClient.pull(WsTitle.Error)).message;
+        expect(payloadDirectMsg).toBeTruthy();
+        expect(payloadDirectMsg).toBe(WebSocketHandlerErrorTemplates.PlayMoveFailed(
+            creatorClient.lobbyId!,
+            creatorClient.player!.token,
+            // @ts-expect-error since we didn't give any move the value of "from" and "to" will be "undefined" in the error message
+            undefined,
+            undefined
+        ));
+    });
+
+    test("Should send error message if malicious command sent to websocket in WsTitle", async () => {
+        const commands = INJECTION_PAYLOADS.map((payload) => [payload, { from: 32, to: 43}]);
         for (const command of commands) {
             console.log(`Testing: ${command} .......`);
             const creatorClient = new MockCreator(serverUrl, webSocketUrl);
             await creatorClient.createLobby();
 
             // @ts-expect-error close ts error for this line
-            creatorClient.send(payload);
+            creatorClient.send(command);
             const payloadDirectMsg = (await creatorClient.pull(WsTitle.Error)).message;
             expect(payloadDirectMsg).toBeTruthy();
-            expect(payloadDirectMsg.length).toBeGreaterThan(1);
+            expect(payloadDirectMsg).toBe(WsCommandErrorTemplates.InvalidCommand());
+        }
+    });
+
+    test("Should send error message if malicious command sent to websocket in WsData", async () => {
+        const commands = INJECTION_PAYLOADS.map((payload) => [WsTitle.Moved, payload]);
+        for (const command of commands) {
+            console.log(`Testing: ${command} .......`);
+            const creatorClient = new MockCreator(serverUrl, webSocketUrl);
+            await creatorClient.createLobby();
+
+            // @ts-expect-error close ts error for this line
+            creatorClient.send(command);
+            const payloadDirectMsg = (await creatorClient.pull(WsTitle.Error)).message;
+            expect(payloadDirectMsg).toBeTruthy();
+            expect(payloadDirectMsg).toBe(WebSocketValidatorErrorTemplates.InvalidPayload());
         }
     });
 });

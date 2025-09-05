@@ -1,12 +1,20 @@
 import type { Server } from "bun";
-import { WsCommand, WsTitle, type RWebSocket, type WebSocketData } from ".";
+import {
+    WsCommand,
+    WsTitle,
+    type RWebSocket,
+    type WebSocketData,
+} from ".";
 import { Player, PlayerRegistry } from "@Player";
 import { LobbyRegistry } from "@Lobby";
 import { Lobby } from "@Lobby";
 import { Color, Square } from "@Chess/Types";
 import { WebSocketValidator } from "./WebSocketValidator";
 import { WebSocketHandlerError } from "./WebSocketHandlerError";
-import { createMessageFromWebSocketError } from "./utils";
+import {
+    createMessageFromWebSocketError,
+    normalizeWebSocketError,
+} from "./utils";
 import { messageLimiter } from "./MessageLimiter";
 
 /**
@@ -52,6 +60,7 @@ export class WebSocketHandler {
             const lobby = LobbyRegistry.get(lobbyId);
             if (!lobby)
                 throw WebSocketHandlerError.factory.LobbyNotFound(lobbyId);
+
             const player = PlayerRegistry.get(playerToken)!;
             if (!lobby)
                 throw WebSocketHandlerError.factory.PlayerNotInLobby(
@@ -60,8 +69,8 @@ export class WebSocketHandler {
                 );
 
             return { lobby, player };
-        } catch {
-            throw WebSocketHandlerError.factory.UnexpectedErrorWhileHandlingWebSocket();
+        } catch (e: unknown) {
+            normalizeWebSocketError(e);
         }
     }
 

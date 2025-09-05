@@ -1,11 +1,11 @@
 import {
+    WebSocketValidatorError,
     WsIncomingMessage,
     WsOutgoingMessage,
     WsTitle
 } from ".";
 import { assertNoMaliciousContent } from "./utils";
-
-const ALLOWED_COMMANDS = Object.values(WsTitle).join(", ");
+import { WsCommandError } from "./WsCommandError";
 
 /**
  * This class is used to create WebSocket commands
@@ -28,24 +28,25 @@ export class WsCommand {
      */
     static parse(message: string): WsIncomingMessage {
         try {
-            const parsed = JSON.parse(message);
+            const parsed: WsIncomingMessage = JSON.parse(message);
 
-            if (!Array.isArray(parsed)) {
-                throw new Error("Message must be an array in the format: [command, payload?]");
+            if (!Array.isArray(parsed) || typeof parsed[0] !== "string") {
+                throw WsCommandError.factory.InvalidFormat();
             }
 
-            if (Object.values(WsTitle).find(parsed[0])) {
-                throw new Error(`Invalid command "${parsed[0]}". Allowed commands: ${ALLOWED_COMMANDS}`);
+            if (!Object.values(WsTitle).find((title) => title === parsed[0])) {
+                throw WsCommandError.factory.InvalidCommand();
             }
 
             assertNoMaliciousContent(parsed[1]);
 
-            return parsed as WsIncomingMessage;
-        } catch (error: unknown) {
-            throw new Error(
-                "Invalid WebSocket message, the message could not be parsed: " +
-                    (error instanceof Error ? error.message : ""),
-            );
+            return parsed;
+        } catch (e: unknown) {
+            if (e instanceof WsCommandError || e instanceof WebSocketValidatorError) {
+                throw e;
+            } else {
+                throw WsCommandError.factory.UnexpectedErrorWhileParsingWsCommand();
+            }
         }
     }
 }
