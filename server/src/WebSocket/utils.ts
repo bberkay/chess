@@ -1,51 +1,8 @@
-import { CORSResponse, HTTPRoutes } from "@HTTP";
 import { WebSocketHandlerError } from "./WebSocketHandlerError";
 import { WebSocketValidatorError } from "./WebSocketValidatorError";
 import { WsCommand } from "./WsCommand";
 import { WsTitle } from "./types";
 import { containsSuspiciousPattern } from "@Utils";
-
-/**
- * Creates a standardized CORSResponse object from an error that occurs during
- * the handling or validation of a WebSocket operation.
- *
- * - If the error is an instance of `WebSocketValidatorError` or
- *   `WebSocketHandlerError`, the response will contain the error's message
- *   and a `400 Bad Request` status code.
- * - For all other error types (unexpected/internal errors), the response will
- *   contain the provided operation's message and a `500 Internal Server Error`
- *   status code.
- *
- * This function ensures that clients always receive a consistent error
- * response format, regardless of the error source, when dealing with
- * WebSocket-related requests.
- *
- * @param e - The thrown error, which may or may not be a known WebSocket validation/handler error.
- * @param fallbackError - The WebSocket operation context, used as a fallback for the response message.
- * @returns A `CORSResponse` containing the error message and appropriate HTTP status code.
- */
-export function createResponseFromWebSocketError(
-    e: unknown,
-    fallbackError: WebSocketHandlerError | WebSocketValidatorError,
-): CORSResponse<HTTPRoutes.Root> {
-    return new CORSResponse(
-        {
-            success: false,
-            message:
-                e instanceof WebSocketValidatorError ||
-                e instanceof WebSocketHandlerError
-                    ? e.message
-                    : fallbackError.message,
-        },
-        {
-            status:
-                e instanceof WebSocketValidatorError ||
-                e instanceof WebSocketHandlerError
-                    ? 400
-                    : 500,
-        },
-    );
-}
 
 /**
  * Creates a standardized WebSocket error message command from an error that occurs

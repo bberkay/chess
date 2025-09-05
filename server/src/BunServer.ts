@@ -56,10 +56,10 @@ export function createServer(): Server {
                 );
             }
 
+            const isHit = httpRequestHandler.enforceRateLimit(req, server);
+            if (isHit) return isHit;
+
             const wsData = webSocketHandler.createWsData(req);
-            if (wsData instanceof CORSResponse) {
-                return wsData;
-            }
 
             // upgrade the connection.
             const success = server.upgrade(req, {

@@ -385,28 +385,33 @@ export class HTTPRequestHandler {
     }
 
     /**
+     * Enforces the configured rate limit for incoming requests.
+     * Extracts the client IP, throws if unavailable, and applies
+     * the rate limiter if rate limiting is enabled.
+     */
+    public enforceRateLimit(req: Request, server: Server) {
+        if (Number(Bun.env.ENABLE_RATE_LIMIT) !== 1)
+            return;
+
+        const ip = server.requestIP(req)?.address;
+        if (!ip) throw HTTPRequestHandlerError.factory.IpAddressNotFound();
+
+        return rateLimiter(ip);
+    }
+
+    /**
      * Exposes all HTTP request handlers mapped by their corresponding routes.
      *
      * @returns A mapping of all available HTTP routes to their handlers.
      */
     public expose(): HTTPServerScheme {
-        const handleRateLimit = (req: BunRequest, server: Server) => {
-            if (Number(Bun.env.ENABLE_RATE_LIMIT) !== 1)
-                return;
-
-            const ip = server.requestIP(req)?.address;
-            if (!ip) throw HTTPRequestHandlerError.factory.IpAddressNotFound();
-
-            return rateLimiter(ip);
-        };
-
         const restHandlers = [
             this._root(),
             this._health(),
-            this._checkLobby().addMiddleware("GET", handleRateLimit),
-            this._createLobby().addMiddleware("GET", handleRateLimit),
-            this._connectLobby().addMiddleware("POST", handleRateLimit),
-            this._reconnectLobby().addMiddleware("POST", handleRateLimit),
+            this._checkLobby().addMiddleware("GET", this.enforceRateLimit),
+            this._createLobby().addMiddleware("GET", this.enforceRateLimit),
+            this._connectLobby().addMiddleware("POST", this.enforceRateLimit),
+            this._reconnectLobby().addMiddleware("POST", this.enforceRateLimit),
         ];
 
         return Object.fromEntries(
