@@ -3,6 +3,7 @@ import { WebSocketHandlerError } from "./WebSocketHandlerError";
 import { WebSocketValidatorError } from "./WebSocketValidatorError";
 import { WsCommand } from "./WsCommand";
 import { WsTitle } from "./types";
+import { containsSuspiciousPattern } from "@Utils";
 
 /**
  * Creates a standardized CORSResponse object from an error that occurs during
@@ -76,4 +77,34 @@ export function createMessageFromWebSocketError(
                     : operation.message,
         },
     ]);
+}
+
+/**
+ * Recursively validates that the given payload object (including all nested objects and arrays)
+ * does not contain any suspicious keys or values that may indicate XSS or code injection attempts.
+ *
+ * @param obj - The payload object to validate (may contain nested objects/arrays).
+ * @throws {WebSocketValidatorError} If the payload contains potentially malicious content.
+ */
+export function assertNoMaliciousContent(obj: unknown): void {
+    const walk = (value: unknown): void => {
+        if (typeof value === "string") {
+            if (containsSuspiciousPattern(value)) {
+                throw WebSocketValidatorError.factory.InvalidPayload();
+            }
+        } else if (Array.isArray(value)) {
+            for (const item of value) {
+                walk(item);
+            }
+        } else if (value && typeof value === "object") {
+            for (const [key, val] of Object.entries(value)) {
+                if (containsSuspiciousPattern(key)) {
+                    throw WebSocketValidatorError.factory.InvalidPayload();
+                }
+                walk(val);
+            }
+        }
+    }
+
+    walk(obj);
 }

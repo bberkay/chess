@@ -3,6 +3,7 @@ import {
     WsOutgoingMessage,
     WsTitle
 } from ".";
+import { assertNoMaliciousContent } from "./utils";
 
 const ALLOWED_COMMANDS = Object.values(WsTitle).join(", ");
 
@@ -36,6 +37,8 @@ export class WsCommand {
             if (Object.values(WsTitle).find(parsed[0])) {
                 throw new Error(`Invalid command "${parsed[0]}". Allowed commands: ${ALLOWED_COMMANDS}`);
             }
+
+            assertNoMaliciousContent(parsed[1]);
 
             return parsed as WsIncomingMessage;
         } catch (error: unknown) {

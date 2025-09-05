@@ -1,3 +1,4 @@
+import { containsSuspiciousPattern } from "@Utils";
 import { CORSResponse } from "./CORSResponse";
 import { HTTPRequestHandlerError } from "./HTTPRequestHandlerError";
 import { HTTPRequestValidatorError } from "./HTTPRequestValidatorError";
@@ -42,4 +43,34 @@ export function createResponseFromHTTPError(
                     : 500,
         },
     );
+}
+
+/**
+ * Recursively validates that the given payload object (including all nested objects and arrays)
+ * does not contain any suspicious keys or values that may indicate XSS or code injection attempts.
+ *
+ * @param obj - The payload object to validate (may contain nested objects/arrays).
+ * @throws {HTTPRequestValidatorError} If the payload contains potentially malicious content.
+ */
+export function assertNoMaliciousContent(obj: unknown): void {
+    const walk = (value: unknown): void => {
+        if (typeof value === "string") {
+            if (containsSuspiciousPattern(value)) {
+                throw HTTPRequestValidatorError.factory.InvalidPayload();
+            }
+        } else if (Array.isArray(value)) {
+            for (const item of value) {
+                walk(item);
+            }
+        } else if (value && typeof value === "object") {
+            for (const [key, val] of Object.entries(value)) {
+                if (containsSuspiciousPattern(key)) {
+                    throw HTTPRequestValidatorError.factory.InvalidPayload();
+                }
+                walk(val);
+            }
+        }
+    }
+
+    walk(obj);
 }

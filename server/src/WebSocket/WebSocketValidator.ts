@@ -1,6 +1,7 @@
 import { GU_ID_LENGTH } from "@Consts";
 import { isValidLength } from "@Utils";
 import { WebSocketValidatorError } from ".";
+import { assertNoMaliciousContent } from "./utils";
 
 /**
  * Validates and extracts parameters from a WebSocket connection request URL.
@@ -29,6 +30,8 @@ export class WebSocketValidator {
             throw WebSocketValidatorError.factory.InvalidPlayerTokenLength();
         }
 
-        return { lobbyId, playerToken };
+        const wsData = { lobbyId, playerToken };
+        assertNoMaliciousContent(wsData);
+        return wsData;
     }
 }

@@ -16,6 +16,8 @@ import {
 export const HTTPRequestValidatorErrorTemplates = {
     InvalidRoute: (route: string) =>
         `Invalid request. Given route ${route} is not implemented.`,
+    InvalidPayload: () =>
+        `Invalid request. One or more parameters contain invalid or potentially malicious content.`,
     InvalidLobbyId: () =>
         `Invalid request. "lobbyId" must be a valid identifier.`,
     InvalidLobbyIdLength: () =>

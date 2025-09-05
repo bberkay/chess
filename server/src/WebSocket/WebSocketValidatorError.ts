@@ -5,6 +5,8 @@ import { GU_ID_LENGTH } from "@Consts";
  * error messages related to WebSocket validation failures.
  */
 export const WebSocketValidatorErrorTemplates = {
+    InvalidPayload: () =>
+        `Invalid request. One or more parameters contain invalid or potentially malicious content.`,
     InvalidPlayerTokenLength: () =>
         `Invalid request. "playerToken" length must be ${GU_ID_LENGTH} and lobby must exist.`,
     InvalidLobbyIdLength: () =>

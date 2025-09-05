@@ -12,6 +12,7 @@ import {
 import { isInRange, isValidLength } from "@Utils";
 import { BunRequest } from "bun";
 import { HTTPPostBody, HTTPRoutes, HTTPRequestValidatorError } from ".";
+import { assertNoMaliciousContent } from "./utils";
 
 // TODO: If a http request requires both path and body validation,
 // first HTTPGetRequestValidator.validate can be used on the request,
@@ -19,13 +20,6 @@ import { HTTPPostBody, HTTPRoutes, HTTPRequestValidatorError } from ".";
 // This system could be unified under a single HTTPRequestValidator
 // (with .validate(), .parse() etc.) or it could be refactored into
 // HTTPRequestPathValidator and HTTPRequestBodyValidator.
-
-/**
- * A function signature for validating GET requests based on route.
- */
-type GetValidator<T extends HTTPRoutes> = (
-    req: BunRequest<T>
-) => void;
 
 /**
  * Validates incoming request's path for specific routes by checking
@@ -44,15 +38,15 @@ export class HTTPGetRequestValidator {
         route: T,
         req: BunRequest<T>,
     ): void {
-        let validator;
+        assertNoMaliciousContent(req.params);
+
         switch (route) {
             case HTTPRoutes.CheckLobby:
-                validator = HTTPGetRequestValidator._validateCheck as GetValidator<T>;
+                HTTPGetRequestValidator._validateCheck(req as BunRequest<HTTPRoutes.CheckLobby>);
                 break;
             default:
                 throw HTTPRequestValidatorError.factory.InvalidRoute(route)
         }
-        validator(req);
     }
 
     /**
@@ -74,14 +68,6 @@ export class HTTPGetRequestValidator {
 }
 
 /**
- * A function signature for validating POST requests and returning
- * the parsed request body.
- */
-type PostValidator<T extends keyof HTTPPostBody> = (
-    req: BunRequest<T>
-) => Promise<HTTPPostBody[T]>;
-
-/**
  * Validates and parses incoming request's body for specific routes.
  * Throws an HTTPValidationError if input validation fails.
  */
@@ -98,21 +84,24 @@ export class HTTPPostRequestValidator {
         route: T,
         req: BunRequest<T>
     ): Promise<HTTPPostBody[T]> {
-        let validator;
+        assertNoMaliciousContent(req.params);
+
+        const body: HTTPPostBody[T] = await req.json();
         switch (route) {
             case HTTPRoutes.CreateLobby:
-                validator = HTTPPostRequestValidator._validateCreate as PostValidator<T>;
+                HTTPPostRequestValidator._validateCreate(body as HTTPPostBody[HTTPRoutes.CreateLobby]);
                 break;
             case HTTPRoutes.ConnectLobby:
-                validator = HTTPPostRequestValidator._validateConnect as PostValidator<T>;
+                HTTPPostRequestValidator._validateConnect(body as HTTPPostBody[HTTPRoutes.ConnectLobby]);
                 break;
             case HTTPRoutes.ReconnectLobby:
-                validator = HTTPPostRequestValidator._validateReconnect as PostValidator<T>;
+                HTTPPostRequestValidator._validateReconnect(body as HTTPPostBody[HTTPRoutes.ReconnectLobby])
                 break;
             default:
                 throw HTTPRequestValidatorError.factory.InvalidRoute(route);
         }
-        return await validator(req);
+
+        return body;
     }
 
     /**
@@ -123,10 +112,11 @@ export class HTTPPostRequestValidator {
      * @returns The validated request body.
      * @throws HTTPValidationError if any field is invalid or missing.
      */
-    private static async _validateCreate<T extends HTTPRoutes.CreateLobby>(
-        req: BunRequest<T>,
-    ): Promise<HTTPPostBody[T]> {
-        const body: HTTPPostBody[T] = await req.json();
+    private static _validateCreate(
+        body: HTTPPostBody[HTTPRoutes.CreateLobby],
+    ): void {
+        assertNoMaliciousContent(body);
+
         if (!isInRange(
             body.name.length,
             MIN_PLAYER_NAME_LENGTH,
@@ -142,8 +132,6 @@ export class HTTPPostRequestValidator {
 
         if (!isInRange(body.increment, MIN_INCREMENT_TIME, MAX_INCREMENT_TIME))
             throw HTTPRequestValidatorError.factory.InvalidIncrementValue();
-
-        return body;
     }
 
     /**
@@ -154,10 +142,9 @@ export class HTTPPostRequestValidator {
      * @returns The validated request body.
      * @throws HTTPValidationError if any field is invalid or missing.
      */
-    private static async _validateConnect<T extends HTTPRoutes.ConnectLobby>(
-        req: BunRequest<T>,
-    ): Promise<HTTPPostBody[T]> {
-        const body: HTTPPostBody[T] = await req.json();
+    private static _validateConnect(
+        body: HTTPPostBody[HTTPRoutes.ConnectLobby],
+    ): void {
         if (
             !body.name ||
             !isInRange(
@@ -170,8 +157,6 @@ export class HTTPPostRequestValidator {
 
         if (!body.lobbyId || !isValidLength(body.lobbyId, GU_ID_LENGTH))
             throw HTTPRequestValidatorError.factory.InvalidLobbyIdLength();
-
-        return body;
     }
 
     /**
@@ -182,16 +167,13 @@ export class HTTPPostRequestValidator {
      * @returns The validated request body.
      * @throws HTTPValidationError if any field is invalid or missing.
      */
-    private static async _validateReconnect<T extends HTTPRoutes.ReconnectLobby>(
-        req: BunRequest<T>,
-    ): Promise<HTTPPostBody[T]> {
-        const body: HTTPPostBody[T] = await req.json();
+    private static _validateReconnect(
+        body: HTTPPostBody[HTTPRoutes.ReconnectLobby],
+    ): void {
         if (!body.lobbyId || !isValidLength(body.lobbyId, GU_ID_LENGTH))
             throw HTTPRequestValidatorError.factory.InvalidLobbyIdLength();
 
         if (!body.playerToken || !isValidLength(body.playerToken, GU_ID_LENGTH))
             throw HTTPRequestValidatorError.factory.InvalidPlayerTokenLength()
-
-        return body;
     }
 }
