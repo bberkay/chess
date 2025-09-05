@@ -60,8 +60,7 @@ export class WebSocketHandler {
                 );
 
             return { lobby, player };
-        } catch (e: unknown) {
-            console.error(e);
+        } catch {
             throw WebSocketHandlerError.factory.UnexpectedErrorWhileHandlingWebSocket();
         }
     }

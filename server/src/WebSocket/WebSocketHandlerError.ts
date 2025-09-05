@@ -3,6 +3,8 @@
  * error messages related to WebSocket handling failures.
  */
 export const WebSocketHandlerErrorTemplates = {
+    UnexpectedErrorWhileUpgradingToWebSocket: () =>
+        `WebSocket upgrade failed due to an unknown issue.`,
     UnexpectedErrorWhileHandlingWebSocket: () =>
         `An error occurred while handling the websocket url.`,
     UnexpectedErrorWhileJoiningLobby: () =>

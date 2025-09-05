@@ -13,7 +13,7 @@ import {
     HTTPRequestHandler,
     CORSResponse,
 } from "@HTTP";
-import { WebSocketHandler, WebSocketData } from "@WebSocket";
+import { WebSocketHandler, WebSocketData, WebSocketHandlerError } from "@WebSocket";
 
 /**
  * Creates and starts a Bun HTTP and WebSocket server configured for the chess platform backend.
@@ -59,15 +59,26 @@ export function createServer(): Server {
             const isHit = httpRequestHandler.enforceRateLimit(req, server);
             if (isHit) return isHit;
 
-            const wsData = webSocketHandler.createWsData(req);
-
-            // upgrade the connection.
-            const success = server.upgrade(req, {
-                data: wsData,
-            });
-            if (success) {
-                webSocketHandler.upgradeServer(server);
-                return;
+            try {
+                const wsData = webSocketHandler.createWsData(req);
+                // upgrade the connection.
+                const success = server.upgrade(req, {
+                    data: wsData,
+                });
+                if (success) {
+                    webSocketHandler.upgradeServer(server);
+                    return;
+                }
+            } catch (e: unknown) {
+                return new CORSResponse(
+                    {
+                        success: false,
+                        message: e instanceof WebSocketHandlerError
+                            ? e.message
+                            : WebSocketHandlerError.factory.UnexpectedErrorWhileUpgradingToWebSocket().message
+                    },
+                    { status: 400 },
+                );
             }
 
             return undefined;
