@@ -103,7 +103,7 @@ const reconnectTestLobby = async (): Promise<CORSResponseBody<HTTPRoutes.Reconne
     return result;
 }
 
-const isRateLimiterOn = Number(Bun.env.RATE_LIMITER) === 1;
+const isRateLimiterOn = Number(Bun.env.ENABLE_RATE_LIMIT) === 1;
 describe.skipIf(isRateLimiterOn)("Performance Tests", () => {
     test("Should scale efficiently across concurrency levels during lobby creation", async () => {
         await measureOperation(createTestLobby);

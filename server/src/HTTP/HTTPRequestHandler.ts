@@ -409,7 +409,7 @@ export class HTTPRequestHandler {
             this._root(),
             this._health(),
             this._checkLobby().addMiddleware("GET", this.enforceRateLimit),
-            this._createLobby().addMiddleware("GET", this.enforceRateLimit),
+            this._createLobby().addMiddleware("POST", this.enforceRateLimit),
             this._connectLobby().addMiddleware("POST", this.enforceRateLimit),
             this._reconnectLobby().addMiddleware("POST", this.enforceRateLimit),
         ];
