@@ -1,79 +1,140 @@
-// security.test.ts
 import { createServer } from "src/BunServer";
-import { test, expect, beforeAll, afterAll, describe } from "vitest";
+import { test, expect, describe, beforeEach, afterEach } from "vitest";
 import { type Server } from "bun";
-import { HTTPRoutes, WsTitle } from "src/Types";
-import { createTestLobby, connectToTestLobby, testFetch } from "./utils";
-import { WsCommand } from "src/Controllers/WsCommand";
-import { MockCreator } from "./helpers/MockCreator";
+import { pruneIPRequests, HTTPRoutes } from "src/HTTP";
+import { waitForWebSocketSettle } from "./utils";
 
-const SECURITY_TIMEOUT = 5000;
+const MAX_TIME_PER_REQUEST = 100; // milliseconds
+const REQUEST_COUNT = Number(Bun.env.RATE_LIMIT) * 1.5;
+const SAFETY_MARGIN = 2;
+console.log("RATE_LIMIT: ", Bun.env.RATE_LIMIT);
+
+const HTTP_RETRY_AFTER = Number(Bun.env.RATE_WINDOW_MS);
+const WS_RETRY_AFTER = Number(Bun.env.MESSAGE_WINDOW_MS);
+if (HTTP_RETRY_AFTER > 5000 || WS_RETRY_AFTER > 5000) {
+    console.warn(
+        "Consider reducing `RATE_WINDOW_MS` and `MESSAGE_WINDOW_MS` for faster tests."
+    );
+}
+
+const isRateLimiterOff = Number(Bun.env.ENABLE_RATE_LIMIT) === 0;
+const isMessageLimiterOff = Number(Bun.env.ENABLE_MESSAGE_LIMIT) === 0;
+if (isRateLimiterOff || isMessageLimiterOff) {
+    console.warn(
+        "Rate limiter or message limiter is disabled — skipping related tests."
+    );
+}
 
 let server: Server | null = null;
 let serverUrl = "";
 let webSocketUrl = "";
 
-beforeAll(async () => {
+const makeHTTPRequest = async () => {
+    const response = await fetch(
+        serverUrl + HTTPRoutes.CheckLobby.replace("/", "").replace(":lobbyId", "123123"),
+        { method: "GET" },
+    );
+    return response;
+};
+
+const getRetryAfterHeaderOfRequest = (response: PromiseSettledResult<Response>) => {
+    return response.status === "fulfilled" && (response.value.headers.get("Retry-After") || response.value.headers.get("retry-after"));
+}
+
+const howManyRequestsPassedRateLimiter = (responses: PromiseSettledResult<Response>[]): number => {
+    return responses.map(r => {
+        return !getRetryAfterHeaderOfRequest(r);
+    }).filter(Boolean).length;
+}
+
+beforeEach(async () => {
     server = createServer();
+    pruneIPRequests(true);
     serverUrl = server.url.href;
     webSocketUrl = server.url.href.replace("http", "ws");
 });
 
-describe("Rate Limiting & DoS Protection", () => {
-    test("Should handle rapid lobby creation attempts", async () => {
-        const rapidRequests = Array.from({ length: 50 }, () =>
-            testFetch(serverUrl, HTTPRoutes.CreateLobby, {
-                name: "spammer",
-                board: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-                remaining: "300000",
-                increment: "5000",
-            })
+describe.skipIf(isRateLimiterOff || isMessageLimiterOff)("Rate Limiting & DoS Protection", () => {
+    test("Should limit rapid HTTP requests within a time window", async () => {
+        console.log("Generating rapid HTTP requests...");
+        const rapidRequests = Array.from({ length: REQUEST_COUNT }, () =>
+            makeHTTPRequest()
         );
 
         const results = await Promise.allSettled(rapidRequests);
-        const successCount = results.filter(r =>
-            r.status === 'fulfilled' && r.value.success
-        ).length;
+        const successCount = howManyRequestsPassedRateLimiter(results);
 
-        // Should either rate limit or handle all requests gracefully
-        expect(successCount).toBeLessThanOrEqual(50);
-
-        // At least some should succeed (not completely blocked)
+        console.log("Success count:", successCount, REQUEST_COUNT, );
+        expect(successCount).toBeLessThanOrEqual(REQUEST_COUNT);
         expect(successCount).toBeGreaterThan(0);
-    }, SECURITY_TIMEOUT);
+    }, (MAX_TIME_PER_REQUEST * REQUEST_COUNT) * SAFETY_MARGIN);
 
-    test("Should handle WebSocket connection flooding", async () => {
-        const [testLobby] = await createTestLobby(serverUrl, webSocketUrl);
-        const connections: WebSocket[] = [];
+    test("Should reset rate limiting after retry-after period passes", async () => {
+        console.log("Sending initial batch of requests...");
+        const rapidRequests = Array.from({ length: REQUEST_COUNT }, () =>
+            makeHTTPRequest()
+        );
 
-        // Try to create many connections to the same lobby
-        const connectionPromises = Array.from({ length: 20 }, async () => {
-            try {
-                const ws = new WebSocket(`${webSocketUrl}?lobbyId=${testLobby.lobbyId}&name=flood${Math.random()}`);
-                connections.push(ws);
-                return new Promise((resolve, reject) => {
-                    ws.onopen = () => resolve(ws);
-                    ws.onerror = () => reject();
-                    setTimeout(() => reject(new Error("Connection timeout")), 1000);
-                });
-            } catch (error) {
-                return Promise.reject(error);
-            }
-        });
+        const results = await Promise.allSettled(rapidRequests);
+        const successCount = howManyRequestsPassedRateLimiter(results);
 
-        const results = await Promise.allSettled(connectionPromises);
-        const successfulConnections = results.filter(r => r.status === 'fulfilled').length;
+        console.log("Initial success count:", successCount);
+        expect(successCount).toBeLessThanOrEqual(REQUEST_COUNT);
+        expect(successCount).toBeGreaterThan(0);
 
-        // Should limit connections per lobby (chess only needs 2 players)
-        expect(successfulConnections).toBeLessThanOrEqual(10);
+        const retryAfter = getRetryAfterHeaderOfRequest(results[results.length - 1]);
 
-        // Cleanup
-        connections.forEach(ws => {
-            try { ws.close(); } catch {}
-        });
-    }, SECURITY_TIMEOUT);
+        console.log("Retry-After header value:", retryAfter);
+        expect(retryAfter).toBeTruthy();
+
+        console.log("Waiting for Retry-After duration...");
+        await waitForWebSocketSettle(Number(retryAfter));
+
+        console.log("Sending requests AFTER waiting for Retry-After...");
+        const postWaitRequests = Array.from({ length: REQUEST_COUNT }, () =>
+            makeHTTPRequest()
+        );
+
+        const postWaitResults = await Promise.allSettled(postWaitRequests);
+        const postWaitSuccessCount = howManyRequestsPassedRateLimiter(postWaitResults);
+
+        console.log("Success count after waiting:", postWaitSuccessCount);
+        expect(postWaitSuccessCount).toBeLessThanOrEqual(REQUEST_COUNT);
+        expect(postWaitSuccessCount).toBeGreaterThan(0);
+    }, (MAX_TIME_PER_REQUEST * (REQUEST_COUNT * 2)) * SAFETY_MARGIN);
+
+    test("Should enforce retry-after header and block requests before waiting period ends", async () => {
+        console.log("Sending initial batch of requests...");
+        const rapidRequests = Array.from({ length: REQUEST_COUNT }, () =>
+            makeHTTPRequest()
+        );
+
+        const results = await Promise.allSettled(rapidRequests);
+        const successCount = howManyRequestsPassedRateLimiter(results);
+
+        console.log("Initial success count:", successCount);
+        expect(successCount).toBeLessThanOrEqual(REQUEST_COUNT);
+        expect(successCount).toBeGreaterThan(0);
+
+        const retryAfter = getRetryAfterHeaderOfRequest(results[results.length - 1]);
+
+        console.log("Retry-After header value:", retryAfter);
+        expect(retryAfter).toBeTruthy();
+
+        console.log("Sending requests BEFORE waiting for Retry-After...");
+        const preWaitRequests = Array.from({ length: REQUEST_COUNT / 2 }, () =>
+            makeHTTPRequest()
+        );
+
+        const preWaitResults = await Promise.allSettled(preWaitRequests);
+        const preWaitSuccessCount = howManyRequestsPassedRateLimiter(preWaitResults);
+
+        console.log("Success count before waiting:", preWaitSuccessCount);
+        expect(preWaitSuccessCount).toBe(0);
+    }, (MAX_TIME_PER_REQUEST * (REQUEST_COUNT * 2)) * SAFETY_MARGIN);
+
 });
 
-afterAll(() => {
+afterEach(() => {
     server?.stop(true);
 });

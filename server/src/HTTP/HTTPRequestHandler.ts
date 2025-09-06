@@ -147,13 +147,14 @@ export class HTTPRequestHandler {
                                     HTTPRequestHandlerError.factory.LobbyNotFound(
                                         lobbyId,
                                     ).message,
+                                data: false
                             },
                             { status: 404 },
                         );
                     }
 
                     return new CORSResponse(
-                        { success: true, message: "Lobby found", data: true },
+                        { success: true, message: "Lobby found", data: isLobbyFound },
                         { status: 200 },
                     );
                 } catch (e: unknown) {
