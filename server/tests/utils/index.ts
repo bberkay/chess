@@ -4,6 +4,9 @@ import { Color, JsonNotation } from "@Chess/Types";
 import { ChessEngine } from "@Chess/Engine/ChessEngine";
 import { Converter } from "@Chess/Utils/Converter";
 
+/**
+ * Build a WebSocket lobby connection URL with player token.
+ */
 export function createWsLobbyConnUrl(
     webSocketUrl: string,
     lobbyId: string,
@@ -12,6 +15,9 @@ export function createWsLobbyConnUrl(
     return webSocketUrl + lobbyId + "?playerToken=" + playerToken;
 }
 
+/**
+ * Send an HTTP POST request to a given route and return the response.
+ */
 export async function testFetch<
     T extends Extract<HTTPRoutes, keyof HTTPPostBody>,
 >(
@@ -19,7 +25,7 @@ export async function testFetch<
     httpRoute: T,
     body: HTTPPostBody[T],
 ): Promise<CORSResponseBody<T>> {
-    const createLobbyRequest = await fetch(
+    const createLobbyResponse = await fetch(
         serverUrl + httpRoute.replace("/", ""),
         {
             method: "POST",
@@ -27,18 +33,22 @@ export async function testFetch<
             body: JSON.stringify(body),
         },
     );
-
-    return (await createLobbyRequest.json()) as CORSResponseBody<T>;
+    console.log("rrr213: ", createLobbyResponse)
+    return (await createLobbyResponse.json()) as CORSResponseBody<T>;
 }
 
-// Wait briefly to allow WebSocket cleanup and internal state
-// updates to complete.
+/**
+ * Pause for a given duration to allow WebSocket cleanup.
+ */
 export async function waitForWebSocketSettle(duration: number): Promise<void> {
     await new Promise<void>((resolve) => {
         setTimeout(() => resolve(), duration);
     });
 }
 
+/**
+ * Create a local chess board from FEN notation and game settings.
+ */
 export function createLocalBoard(createLobbyBody: { board: string, remaining: number, increment: number }): JsonNotation {
     const chessEngine = new ChessEngine();
     const jsonBoard = Converter.fenToJson(createLobbyBody.board);

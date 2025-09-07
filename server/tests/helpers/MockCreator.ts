@@ -1,6 +1,7 @@
 import { CORSResponseBody, HTTPPostBody, HTTPRoutes } from "src/HTTP";
 import { MockClient } from "./MockClient";
 import { createWsLobbyConnUrl, testFetch } from "tests/utils";
+import { TEST_BOARD } from "tests/consts";
 
 export class MockCreator extends MockClient {
     constructor(serverUrl: string, wsUrl: string) {
@@ -12,12 +13,7 @@ export class MockCreator extends MockClient {
         throwError: boolean = true,
     ): Promise<CORSResponseBody<HTTPRoutes.CreateLobby>> {
         if (!createLobbyBody) {
-            createLobbyBody = {
-                name: "john",
-                board: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-                remaining: 300000,
-                increment: 5000,
-            };
+            createLobbyBody = { name: "john", ...TEST_BOARD };
         }
 
         const createdLobbyResponse = await testFetch(

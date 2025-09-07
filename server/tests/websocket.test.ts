@@ -11,7 +11,7 @@ const WS_ONOPEN = 1;
 const WS_ONMESSAGE = 2;
 const WS_ONCLOSE = 3;
 const WS_ONERROR = 4;
-const WS_TIMEOUT = -1;
+const WS_RESPONSE_TIMEOUT = -1;
 
 let server: Server | null = null;
 let serverUrl = "";
@@ -43,7 +43,7 @@ const connectToWebSocket = async (wsUrl: string, timeout: number = WS_CONN_TIMEO
             console.log(`Error for WebSocket(${wsUrl})`);
             resolve(WS_ONERROR);
         }
-        setTimeout(() => reject(WS_TIMEOUT), timeout);
+        setTimeout(() => reject(WS_RESPONSE_TIMEOUT), timeout);
     });
 }
 

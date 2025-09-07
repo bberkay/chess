@@ -7,15 +7,16 @@ export function isValidLength(value: string, length: number): boolean {
 
 /**
  * Regular expression that matches strings containing only
- * alphabetic characters (A–Z, case-insensitive).
+ * alphabetic characters (A–Z, case-insensitive) and spaces.
  */
-const ALPHABETIC_REGEX = /^[a-z]+$/i;
+const ALPHABETIC_REGEX = /^[a-z\s]+$/i;
 
 /**
- * Check if the given string contains only alphabetic characters (A–Z, case-insensitive).
+ * Check if the given string contains only alphabetic characters (A–Z, case-insensitive)
+ * and spaces.
  */
 export function isAlphabetic(message: string): boolean {
-    return ALPHABETIC_REGEX.test(message)
+    return ALPHABETIC_REGEX.test(message);
 }
 
 /**
