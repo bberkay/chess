@@ -272,11 +272,12 @@ export class WebSocketHandler {
 
     /**
      * Enforces the configured message limit for a WebSocket connection.
-     * Uses the player's ID to apply the message limiter if message limiting is enabled.
+     * Uses the player's ip to apply the message limiter if message limiting is
+     * enabled.
      */
-    public enforceMessageLimit(ws: RWebSocket) {
+    public enforceMessageLimit(ws: RWebSocket): string | undefined {
         if (Number(Bun.env.ENABLE_MESSAGE_LIMIT) !== 1) return;
-        return messageLimiter(ws.data.player.id);
+        return messageLimiter(ws.remoteAddress);
     }
 
     /**

@@ -10,7 +10,7 @@ import {
 import { createWsLobbyConnUrl, testFetch } from "tests/utils";
 
 const WS_MESSAGE_RECEIVE_TIMEOUT = 1000;
-const WS_MESSAGE_RECEIVE_CHECK = 100;
+const WS_MESSAGE_RECEIVE_CHECK = 50;
 
 export const MockClientPullErrorMsg = "Could not poll from pool.";
 

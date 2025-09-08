@@ -33,7 +33,6 @@ export async function testFetch<
             body: JSON.stringify(body),
         },
     );
-    console.log("rrr213: ", createLobbyResponse)
     return (await createLobbyResponse.json()) as CORSResponseBody<T>;
 }
 

@@ -7,10 +7,9 @@ import { TEST_BOARD } from "./consts";
 
 // Check rate and message limiter
 const isRateLimiterOff = Number(Bun.env.ENABLE_RATE_LIMIT) === 0;
-const isMessageLimiterOff = Number(Bun.env.ENABLE_MESSAGE_LIMIT) === 0;
-if (isRateLimiterOff || isMessageLimiterOff) {
-    console.warn(
-        "Consider enabling `ENABLE_RATE_LIMIT` and `ENABLE_MESSAGE_LIMIT` from .env.test to run rate limiting tests."
+if (isRateLimiterOff) {
+    console.error(
+        "Consider enabling `ENABLE_RATE_LIMIT` from .env.test to run rate limiting tests."
     );
 }
 
@@ -20,25 +19,25 @@ const MAX_TIME_PER_HTTP_REQUEST = 100; // milliseconds
 const MAX_TIME_PER_WS_REQUEST = 100; // milliseconds
 
 // Create request counts
-const HTTP_REQUEST_COUNT = Number(Bun.env.RATE_LIMIT) * 1.5;
-const WS_REQUEST_COUNT = Number(Bun.env.MESSAGE_LIMIT) * 1.5;
-console.log(".RATE_LIMIT from .env.test: ", Bun.env.RATE_LIMIT);
-console.log(".MESSAGE_LIMIT from .env.test: ", Bun.env.MESSAGE_LIMIT);
-if (Number(Bun.env.RATE_LIMIT) > 5000 || Number(Bun.env.MESSAGE_LIMIT) > 5000) {
+const RATE_LIMIT = Number(Bun.env.RATE_LIMIT);
+const HTTP_REQUEST_COUNT = RATE_LIMIT * 1.5;
+const WS_REQUEST_COUNT = RATE_LIMIT * 1.5;
+const MAX_RCMNDD_REQUEST_COUNT_FOR_TESTING = 30;
+console.log(".RATE_LIMIT from .env.test: ", RATE_LIMIT);
+if (RATE_LIMIT > MAX_RCMNDD_REQUEST_COUNT_FOR_TESTING) {
     console.warn(
-        "Consider reducing `RATE_WINDOW_MS` and `MESSAGE_WINDOW_MS` from .env.test for faster tests."
+        `Consider reducing "RATE_LIMIT" below ${MAX_RCMNDD_REQUEST_COUNT_FOR_TESTING} from .env.test for faster tests.`
     );
 }
 
 // Create windows
+const RATE_WINDOW_MS = Number(Bun.env.RATE_WINDOW_MS);
 const SAFETY_MARGIN = 2;
-const HTTP_RETRY_AFTER = Number(Bun.env.RATE_WINDOW_MS);
-const WS_RETRY_AFTER = Number(Bun.env.MESSAGE_WINDOW_MS);
-console.log(".RATE_WINDOW_MS from .env.test: ", Bun.env.RATE_WINDOW_MS);
-console.log(".MESSAGE_WINDOW_MS from .env.test: ", Bun.env.MESSAGE_WINDOW_MS);
-if (HTTP_RETRY_AFTER > 5000 || WS_RETRY_AFTER > 5000) {
+const MAX_RCMNDD_WINDOW_MS_FOR_TESTING = 5000;
+console.log(".RATE_WINDOW_MS from .env.test: ", RATE_WINDOW_MS);
+if (RATE_WINDOW_MS > MAX_RCMNDD_WINDOW_MS_FOR_TESTING) {
     console.warn(
-        "Consider reducing `RATE_WINDOW_MS` and `MESSAGE_WINDOW_MS` from .env.test for faster tests."
+        `Consider reducing "RATE_WINDOW_MS" below ${MAX_RCMNDD_WINDOW_MS_FOR_TESTING} from .env.test for faster tests.`
     );
 }
 
@@ -78,19 +77,38 @@ const makeWSRequest = async (wsUrl: string) => {
     });
 };
 
-const getRetryAfterHeaderOfRequest = (response: PromiseSettledResult<Response>) => {
+const getRetryAfterHeaderFromResponse = (response: PromiseSettledResult<Response>) => {
     return response.status === "fulfilled" && (response.value.headers.get("Retry-After") || response.value.headers.get("retry-after"));
+}
+
+const getRetryAfterHeaderFromResponses = (responses: PromiseSettledResult<Response>[]) => {
+    for(const r of responses) {
+        const retryAfter = getRetryAfterHeaderFromResponse(r);
+        if (retryAfter) return retryAfter;
+    }
+    return null;
+}
+
+const parseRetryAfterFromMessage = (message: string) => {
+    const match = message.match(/retry-after=(\d+)/);
+    const retryAfter = match ? parseInt(match[1], 10) : null;
+    return retryAfter;
+}
+
+const getRetryAfterHeaderFromMessage = (response: PromiseSettledResult<string | false>) => {
+    if (response.status !== "fulfilled" || !response.value) return false;
+    return parseRetryAfterFromMessage(response.value);
 }
 
 const howManyHTTPRequestsPassedRateLimiter = (responses: PromiseSettledResult<Response>[]): number => {
     return responses.map(r => {
-        return !getRetryAfterHeaderOfRequest(r);
+        return !getRetryAfterHeaderFromResponse(r);
     }).filter(Boolean).length;
 }
 
 const howManyWSRequestsPassedRateLimiter = (responses: PromiseSettledResult<string | false>[]): number => {
     return responses.map(r => {
-        return !!r;
+        return !getRetryAfterHeaderFromMessage(r);
     }).filter(Boolean).length;
 }
 
@@ -101,7 +119,7 @@ beforeEach(async () => {
     webSocketUrl = server.url.href.replace("http", "ws");
 });
 
-describe.skipIf(isRateLimiterOff || isMessageLimiterOff)("Rate Limiting & DoS Protection", () => {
+describe.skipIf(isRateLimiterOff)("Rate Limiter", () => {
     test("Should limit rapid HTTP requests within a time window", async () => {
         console.log("Generating rapid HTTP requests...");
         const rapidRequests = Array.from({ length: HTTP_REQUEST_COUNT }, () =>
@@ -129,9 +147,7 @@ describe.skipIf(isRateLimiterOff || isMessageLimiterOff)("Rate Limiting & DoS Pr
         expect(successCount).toBeLessThanOrEqual(HTTP_REQUEST_COUNT);
         expect(successCount).toBeGreaterThan(0);
 
-        const retryAfter = getRetryAfterHeaderOfRequest(results[results.length - 1]);
-
-        console.log("Retry-After header value:", retryAfter);
+        const retryAfter = getRetryAfterHeaderFromResponses(results);
         expect(retryAfter).toBeTruthy();
 
         console.log("Waiting for Retry-After duration...");
@@ -163,9 +179,7 @@ describe.skipIf(isRateLimiterOff || isMessageLimiterOff)("Rate Limiting & DoS Pr
         expect(successCount).toBeLessThanOrEqual(HTTP_REQUEST_COUNT);
         expect(successCount).toBeGreaterThan(0);
 
-        const retryAfter = getRetryAfterHeaderOfRequest(results[results.length - 1]);
-
-        console.log("Retry-After header value:", retryAfter);
+        const retryAfter = getRetryAfterHeaderFromResponses(results);
         expect(retryAfter).toBeTruthy();
 
         console.log("Sending requests BEFORE waiting for Retry-After...");
@@ -180,7 +194,7 @@ describe.skipIf(isRateLimiterOff || isMessageLimiterOff)("Rate Limiting & DoS Pr
         expect(preWaitSuccessCount).toBe(0);
     }, (MAX_TIME_PER_HTTP_REQUEST * (HTTP_REQUEST_COUNT * 2)) * SAFETY_MARGIN);
 
-    test("Should limit rapid websocket connection requests", async () => {
+    test("Should rate limit rapid websocket connection requests", async () => {
         console.log("Generating rapid WS requests...");
 
         const { lobbyId, player } = await createTestLobby();
@@ -198,7 +212,6 @@ describe.skipIf(isRateLimiterOff || isMessageLimiterOff)("Rate Limiting & DoS Pr
         expect(successCount).toBeLessThanOrEqual(WS_REQUEST_COUNT);
         expect(successCount).toBeGreaterThan(0);
     }, (MAX_TIME_PER_WS_REQUEST * WS_REQUEST_COUNT) * SAFETY_MARGIN);
-
 });
 
 afterEach(() => {

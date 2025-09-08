@@ -1,6 +1,9 @@
 import { WsCommand } from "./WsCommand";
 import { WsTitle } from "./types";
 
+const MESSAGE_WINDOW_MS = Number(Bun.env.MESSAGE_WINDOW_MS);
+const MESSAGE_LIMIT = Number(Bun.env.MESSAGE_LIMIT);
+
 /**
  *  Represents the state of requests from a single IP
  */
@@ -9,30 +12,51 @@ interface WSMessageLimitRecord {
     firstMessageTime: number;
 }
 
-const playerMessages: Map<string, WSMessageLimitRecord> = new Map();
+const ipMessages: Map<string, WSMessageLimitRecord> = new Map();
 
 /**
- * Simple in-memory rate limiter based on player id.
+ * Prunes the `ipMessages` map by removing stale IP message records.
+ *
+ * If `force` is true, all records are removed regardless of age.
+ * Otherwise, only records older than the rate limiting window (`MESSAGE_WINDOW_MS`) are removed.
+ *
+ * @param force - If true, removes all records regardless of age. If false, only removes records older than the expiration threshold.
+ */
+export function pruneIPMessages(force = false) {
+    const now = Date.now();
+
+    const lengthBeforeCleaning = ipMessages.size;
+    for (const [ip, record] of ipMessages.entries()) {
+        if (force || now - record.firstMessageTime > MESSAGE_WINDOW_MS) {
+            ipMessages.delete(ip);
+        }
+    }
+
+    console.log(`Removed ${lengthBeforeCleaning - ipMessages.size} IP records${force ? " (force)" : ""} from MessageLimiter's records.`);
+}
+
+/**
+ * Simple in-memory websocket message limiter based on IP.
  * Allows up to MESSAGE_LIMIT requests per MESSAGE_WINDOW_MS,
  * returns WsCommand (WsTitle.Error) if limit is exceeded
  * otherwise undefined.
  */
-export function messageLimiter(playerId: string): string | undefined {
+export function messageLimiter(ip: string): string | undefined {
     const now = Date.now();
 
-    const record: WSMessageLimitRecord | undefined = playerMessages.get(playerId);
+    const record: WSMessageLimitRecord | undefined = ipMessages.get(ip);
 
     if (!record) {
-        playerMessages.set(playerId, { count: 1, firstMessageTime: now });
+        ipMessages.set(ip, { count: 1, firstMessageTime: now });
         return;
     }
 
-    if (now - record.firstMessageTime < Number(Bun.env.MESSAGE_WINDOW_MS)) {
+    if (now - record.firstMessageTime < MESSAGE_WINDOW_MS) {
         if (record.count >= Number(Bun.env.MESSAGE_LIMIT)) {
             return WsCommand.create([
                 WsTitle.Error,
                 {
-                    message: `Rate limit exceeded. Retry-After=${Number(Bun.env.MESSAGE_WINDOW_MS) / 1000}s, Limit=${Number(Bun.env.MESSAGE_LIMIT)}, Remaining=0`
+                    message: `Rate limit exceeded. Retry-After=${MESSAGE_WINDOW_MS}ms, Limit=${MESSAGE_LIMIT}, Remaining=0`
                 }
             ])
         }
