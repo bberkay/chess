@@ -93,15 +93,6 @@ describe("Create Lobby Tests", () => {
         }
     });
 
-    test("Should not create a lobby when board is invalid", async () => {
-        await shouldNotCreate({
-            name: "john",
-            board: "rnbYkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-            remaining: 300000,
-            increment: 5000
-        }, HTTPRequestValidatorErrorTemplates.InvalidBoard());
-    });
-
     test("Should not create a lobby when board is empty", async () => {
         await shouldNotCreate({
             name: "alex",

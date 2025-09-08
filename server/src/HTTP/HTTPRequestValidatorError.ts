@@ -26,8 +26,6 @@ export const HTTPRequestValidatorErrorTemplates = {
         `Invalid request. "name" must only contain valid characters (letters, numbers, underscores).`,
     InvalidNameLength: () =>
         `Invalid request. "name" length must be between ${MIN_PLAYER_NAME_LENGTH} and ${MAX_PLAYER_NAME_LENGTH}.`,
-    InvalidBoard: () =>
-        `Invalid request. "board" must be a valid FEN string representing a chess position.`,
     InvalidBoardLength: () =>
         `Invalid request. "board" length must be less than ${MAX_FEN_LENGTH}.`,
     InvalidRemainingValue: () =>
