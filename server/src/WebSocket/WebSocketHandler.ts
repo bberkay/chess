@@ -158,7 +158,11 @@ export class WebSocketHandler {
                 WsCommand.create([WsTitle.Connected, { playerId: player.id }]),
             );
 
-            if (lobby.areBothPlayersOnline()) {
+            // If the game has already started, there is no need to check whether both
+            // players are online. This situation usually occurs when both players
+            // disconnect after the game has started, and one of them reconnects
+            // while the other does not.
+            if (lobby.isGameStarted() || lobby.areBothPlayersOnline()) {
                 console.log(`Game of lobby[${lobby.id}} should start now.`);
                 this._startGame(ws, lobby);
             }
@@ -225,14 +229,7 @@ export class WebSocketHandler {
             ]);
         };
 
-        if (lobby.isGameReadyToStart()) {
-            console.log(`Starting the game of lobby[${lobby.id}].`);
-
-            // Start the game and send the started command to the clients.
-            lobby.startGame();
-            this._server!.publish(lobby.id, createStartedCommand());
-            this._monitorGameTimeExpiration(ws, lobby);
-        } else if (lobby.isGameStarted()) {
+        if (lobby.isGameStarted()) {
             // Game is already started so it means that one of the
             // players is reconnected.
             console.log("Reconnecting player to the game: ", lobby.id);
@@ -255,6 +252,13 @@ export class WebSocketHandler {
                     ]),
                 );
             }
+        } else if (lobby.isGameReadyToStart()) {
+            console.log(`Starting the game of lobby[${lobby.id}].`);
+
+            // Start the game and send the started command to the clients.
+            lobby.startGame();
+            this._server!.publish(lobby.id, createStartedCommand());
+            this._monitorGameTimeExpiration(ws, lobby);
         }
     }
 

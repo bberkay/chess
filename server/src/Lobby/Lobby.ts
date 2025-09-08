@@ -86,7 +86,7 @@ export class Lobby {
      * Get the current board as json notation.
      */
     public getGameAsJsonNotation(): JsonNotation {
-        return this.isGameStarted()
+        return this.isGameStarted() || this.isGameFinished()
             ? this._chessEngine.getGameAsJsonNotation()
             : typeof this._board === "string"
               ? Converter.fenToJson(this._board)
