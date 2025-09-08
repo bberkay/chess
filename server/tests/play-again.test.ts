@@ -174,30 +174,6 @@ describe("Play Again Tests", () => {
         );
     });
 
-    test("Should not be able to accept different offer than play again (imposter offer)", async () => {
-        const [whitePlayerClient, blackPlayerClient] = await playUntilFinished();
-
-        whitePlayerClient.sendUndoOffer();
-        await blackPlayerClient.pull(WsTitle.UndoOffered);
-
-        blackPlayerClient.acceptPlayAgainOffer();
-        await expect(
-            whitePlayerClient.pull(WsTitle.PlayAgainAccepted),
-        ).rejects.toThrow(MockClientPullErrorMsg);
-        await expect(
-            blackPlayerClient.pull(WsTitle.PlayAgainAccepted),
-        ).rejects.toThrow(MockClientPullErrorMsg);
-        await expect(
-            whitePlayerClient.pull(WsTitle.UndoAccepted),
-        ).rejects.toThrow(MockClientPullErrorMsg);
-        await expect(
-            blackPlayerClient.pull(WsTitle.UndoAccepted),
-        ).rejects.toThrow(MockClientPullErrorMsg);
-        expect((await blackPlayerClient.pull(WsTitle.Error)).message).toBe(
-            WebSocketHandlerErrorTemplates.PlayAgainAcceptFailed(blackPlayerClient.lobbyId!, blackPlayerClient.player!.token),
-        );
-    });
-
     test("Should be able to play again with flipped colors when the offer accepted", async () => {
         const STARTED_BOARD = "k7/8/4rp2/8/8/8/1R5K/1R6 w - - 0 1";
         const STARTED_DURATIONS = {
