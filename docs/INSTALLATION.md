@@ -21,6 +21,8 @@ For general information about the project check out [README.md](https://github.c
    ```bash
    cp server/.env.example server/.env
    cp client/.env.example client/.env
+   cp server/.env.development.example server/.env.development
+   cp client/.env.development.example client/.env.development
    ```
 
 3. Run with Docker Compose.
@@ -40,6 +42,7 @@ For general information about the project check out [README.md](https://github.c
 2. Copy environment file and configure.
    ```bash
    cp .env.example .env
+   cp .env.development.example .env.development
    ```
 
 3. Install dependencies.
@@ -62,6 +65,7 @@ For general information about the project check out [README.md](https://github.c
 2. Copy environment file and configure.
    ```bash
    cp .env.example .env
+   cp .env.development.example .env.development
    ```
 
 3. Install dependencies.
@@ -80,63 +84,6 @@ For general information about the project check out [README.md](https://github.c
    ```bash
    bun run build && bun run preview
    ```
-
-## Environment Configuration
-
-### Server Environment Variables
-
-Edit `server/.env` file:
-
-```env
-# Connection Limits
-MAX_PAYLOAD_LENGTH=25600
-MAX_IDLE_TIMEOUT=960
-
-# Server Config
-SERVER_PORT=3000
-CORS_ORIGIN=*  # For development: *, For production: https://your-frontend-domain.com
-```
-
-or you can also create `.env.production` and `.env.development` files:
-```env
-# .env.development
-# Server Config
-SERVER_PORT=3000
-CORS_ORIGIN=*
-```
-```env
-# .env.production
-# Server Config
-SERVER_PORT=3000
-CORS_ORIGIN=https://your-frontend-domain.com
-```
-
-
-### Client Environment Variables
-
-Edit `client/.env` file:
-
-```env
-# Project Info
-VITE_REPOSITORY_URL=https://github.com/bberkay/chess
-
-# Server Connections
-VITE_SERVER_URL=http://localhost:3000
-VITE_WS_URL=ws://localhost:3000
-```
-or like in the server, you can also create `.env.production` and `.env.development` files:
-```env
-# .env.development
-# Server Connections
-VITE_SERVER_URL=http://localhost:3000
-VITE_WS_URL=ws://localhost:3000
-```
-```env
-# .env.production
-# Server Connections
-VITE_SERVER_URL=https://your-frontend-domain.com
-VITE_WS_URL=wss://your-frontend-domain.com
-```
 
 ## Accessing the Application
 > Make sure to check your `docker-compose.yml` and environment files for port configurations.

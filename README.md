@@ -79,6 +79,8 @@ Check out [INSTALLATION.md](https://github.com/bberkay/chess/blob/main/docs/INST
    ```bash
    cp server/.env.example server/.env
    cp client/.env.example client/.env
+   cp server/.env.development.example server/.env.development
+   cp client/.env.development.example client/.env.development
    ```
 
 3. Run with Docker Compose.
@@ -142,13 +144,20 @@ Testing
 
 Chess Platform is tested with _Vitest_. Both [client](https://github.com/bberkay/chess/tree/main/client/tests) and [server](https://github.com/bberkay/chess/tree/main/server/tests) tests can be found under their own dirs. Client tests mostly consist of engine tests, and there are no UI tests yet. I tried to make the server tests as comprehensive as possible.
 
+Before running tests, make sure the environments are set up:
+```bash
+   cp server/.env.test.example server/.env.test
+   cp client/.env.test.example client/.env.test
+   ```
 
-All the tests can be run with the following command.
+Run all tests with:
 `bun run test`
 
-Or run a specific test with the following command.
-`bun run test en-passant`
+Run a specific test:
+`bun run test castling.test.ts`
 
+Or a specific test case:
+`bun run test castling.test.ts -t="King Side Castling"`
 
 Epilogue
 --------
