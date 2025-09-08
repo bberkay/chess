@@ -97,7 +97,7 @@ export class Lobby {
      * Get the current board as fen notation.
      */
     public getGameAsFenNotation(): string {
-        return this.isGameStarted()
+        return this.isGameStarted() || this.isGameFinished()
             ? this._chessEngine.getGameAsFenNotation()
             : typeof this._board === "string"
               ? this._board
@@ -411,7 +411,7 @@ export class Lobby {
         if (!this.isPlayerInLobby(player)) return false;
         if (!this.isGameStarted() || this.isGameFinished()) return false;
         if (this._chessEngine.getTurnColor() !== this.getColorOfPlayer(player)) return false;
-        this._chessEngine.playMove(from, to);
+        try { this._chessEngine.playMove(from, to) } catch { return false }
         this.updateLastPlayedAt();
         // If the player moved when there was an active offer sent by opponent,
         // it means that player ignored the offer so remove it. We are understand

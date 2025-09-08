@@ -119,7 +119,7 @@ describe("Move Tests", () => {
     });
 
     test("Should not be able to play invalid move", async () => {
-        const [whitePlayerClient, blackPlayerClient] = await createWhiteAndBlackClients(StartPosition.Checkmate);
+        const [whitePlayerClient, blackPlayerClient] = await createWhiteAndBlackClients();
 
         whitePlayerClient.move(Square.e2, Square.e4);
         await blackPlayerClient.pull(WsTitle.Moved);
@@ -131,14 +131,14 @@ describe("Move Tests", () => {
             whitePlayerClient.pull(WsTitle.Moved),
         ).rejects.toThrow(MockClientPullErrorMsg);
         expect((await blackPlayerClient.pull(WsTitle.Error)).message).toBe(
-            WebSocketHandlerErrorTemplates.PlayMoveFailed(whitePlayerClient.lobbyId!, whitePlayerClient.player!.token, from, to),
+            WebSocketHandlerErrorTemplates.PlayMoveFailed(whitePlayerClient.lobbyId!, blackPlayerClient.player!.token, from, to),
         );
 
         shouldBoardBe(whitePlayerClient.lobbyId!, "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1");
     });
 
     test("Should not be able to play opponent's pieces", async () => {
-        const [whitePlayerClient, blackPlayerClient] = await createWhiteAndBlackClients(StartPosition.Checkmate);
+        const [whitePlayerClient, blackPlayerClient] = await createWhiteAndBlackClients();
 
         whitePlayerClient.move(Square.e2, Square.e4);
         await blackPlayerClient.pull(WsTitle.Moved);
@@ -150,7 +150,7 @@ describe("Move Tests", () => {
             whitePlayerClient.pull(WsTitle.Moved),
         ).rejects.toThrow(MockClientPullErrorMsg);
         expect((await blackPlayerClient.pull(WsTitle.Error)).message).toBe(
-            WebSocketHandlerErrorTemplates.PlayMoveFailed(whitePlayerClient.lobbyId!, whitePlayerClient.player!.token, from, to),
+            WebSocketHandlerErrorTemplates.PlayMoveFailed(whitePlayerClient.lobbyId!, blackPlayerClient.player!.token, from, to),
         );
 
         shouldBoardBe(whitePlayerClient.lobbyId!, "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1");
