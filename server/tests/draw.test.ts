@@ -204,6 +204,10 @@ describe("Draw Tests", () => {
         const [whitePlayerClient, blackPlayerClient] =
             await createWhiteAndBlackClients();
 
+        whitePlayerClient.move(Square.e2, Square.e4);
+        await blackPlayerClient.pull(WsTitle.Moved);
+        blackPlayerClient.move(Square.e7, Square.e5);
+        await whitePlayerClient.pull(WsTitle.Moved);
         whitePlayerClient.sendDrawOffer();
         await blackPlayerClient.pull(WsTitle.DrawOffered);
 
@@ -244,10 +248,12 @@ describe("Draw Tests", () => {
         shouldGameStatusBe(whitePlayerClient.lobbyId!, GameStatus.WhiteVictory);
     });
 
-    test("Should not be able to accept different offer than draw (imposter offer)", async () => {
+    test("Should not be able to accept different offer than draw", async () => {
         const [whitePlayerClient, blackPlayerClient] =
             await createWhiteAndBlackClients();
 
+        whitePlayerClient.move(Square.e2, Square.e4);
+        await blackPlayerClient.pull(WsTitle.Moved);
         whitePlayerClient.sendUndoOffer();
         await blackPlayerClient.pull(WsTitle.UndoOffered);
 
