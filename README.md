@@ -154,10 +154,10 @@ Run all tests with:
 `bun run test`
 
 Run a specific test:
-`bun run test castling.test.ts`
+`bun test ./tests/castling.test.ts`
 
 Or a specific test case:
-`bun run test castling.test.ts -t="King Side Castling"`
+`bun test ./tests/castling.test.ts -t="King Side Castling"`
 
 Epilogue
 --------

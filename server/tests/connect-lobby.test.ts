@@ -39,32 +39,33 @@ const shouldConnect = async (creatorClient: MockCreator, body: HTTPPostBody[HTTP
     const creatorConnectedData: WsConnectedData = await creatorClient.pull(WsTitle.Connected);
     const guestConnectedData: WsConnectedData = await guestClient.pull(WsTitle.Connected);
 
-    const creatorStartedData: WsStartedData = await creatorClient!.pull(WsTitle.Started);
-    const guestStartedData: WsStartedData = await guestClient.pull(WsTitle.Started);
-
-    // Test
     expect(creatorConnectedData!.playerId).toEqual(creatorClient.player!.id);
     expect(guestConnectedData!.playerId).toEqual(guestClient.player!.id);
 
+    const creatorStartedData: WsStartedData = await creatorClient!.pull(WsTitle.Started);
+    const guestStartedData: WsStartedData = await guestClient.pull(WsTitle.Started);
+
+    expect(creatorStartedData).toEqual(guestStartedData);
+
     const creatorPlayer = Object.fromEntries(
-      Object.entries(creatorClient).filter(([key]) => key !== "token")
+      Object.entries(creatorClient.player!).filter(([key]) => key !== "token")
     );
     const guestPlayer = Object.fromEntries(
-      Object.entries(guestClient).filter(([key]) => key !== "token")
+      Object.entries(guestClient.player!).filter(([key]) => key !== "token")
     );
 
     if (creatorStartedData.players.White.id === creatorClient.player!.id) {
-        // If creator is white, connector is black
+        // If creator is white, guest must be black
         expect(creatorStartedData!.players.White).toEqual(creatorPlayer);
         expect(creatorStartedData!.players.Black).toEqual(guestPlayer);
         expect(guestStartedData!.players.White).toEqual(creatorPlayer);
         expect(guestStartedData!.players.Black).toEqual(guestPlayer);
     } else {
-        // If creator is black, connector is white
+        // If creator is black, connector must be white
         expect(creatorStartedData!.players.Black).toEqual(creatorPlayer);
         expect(creatorStartedData!.players.White).toEqual(guestPlayer);
-        expect(guestStartedData!.players.White).toEqual(creatorPlayer);
-        expect(guestStartedData!.players.Black).toEqual(guestPlayer);
+        expect(guestStartedData!.players.Black).toEqual(creatorPlayer);
+        expect(guestStartedData!.players.White).toEqual(guestPlayer);
     }
 
     expect(creatorStartedData!.game).toEqual(guestStartedData!.game);
@@ -73,7 +74,7 @@ const shouldConnect = async (creatorClient: MockCreator, body: HTTPPostBody[HTTP
 
 const shouldNotConnect = async (body: HTTPPostBody[HTTPRoutes.ConnectLobby], errMsg?: string) => {
     const guestClient = new MockGuest(serverUrl, webSocketUrl);
-    const connectedLobbyResponse = await guestClient.connectLobby(body);
+    const connectedLobbyResponse = await guestClient.connectLobby(body, false);
     expect(connectedLobbyResponse.success).toBe(false);
     if (errMsg) expect(connectedLobbyResponse.message).toBe(errMsg);
 }

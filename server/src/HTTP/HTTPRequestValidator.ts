@@ -87,6 +87,7 @@ export class HTTPPostRequestValidator {
         assertNoMaliciousContent(req.params);
 
         const body: HTTPPostBody[T] = await req.json();
+        assertNoMaliciousContent(body);
         switch (route) {
             case HTTPRoutes.CreateLobby:
                 HTTPPostRequestValidator._validateCreate(body as HTTPPostBody[HTTPRoutes.CreateLobby]);
@@ -115,8 +116,6 @@ export class HTTPPostRequestValidator {
     private static _validateCreate(
         body: HTTPPostBody[HTTPRoutes.CreateLobby],
     ): void {
-        assertNoMaliciousContent(body);
-
         if (!isInRange(
             body.name.length,
             MIN_PLAYER_NAME_LENGTH,
