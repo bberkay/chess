@@ -53,7 +53,7 @@ export function rateLimiter(ip: string): CORSResponse<HTTPRoutes.Root> | undefin
         if (record.count >= RATE_LIMIT) {
             return new CORSResponse({
                 success: false,
-                message: "NO",
+                message: `Rate limit exceeded. Retry-After=${RATE_WINDOW_MS}ms, Limit=${RATE_LIMIT}, Remaining=0`,
             },
             {
                 status: 429,
