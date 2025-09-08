@@ -10,6 +10,9 @@ import { LobbyRegistry } from "@Lobby";
 import { TEST_BOARD } from "./consts";
 import { waitForWebSocketSettle } from "./utils";
 
+const REMAINING = 15000; // 15 seconds total time
+const SAFETY_MARGIN = 5000;
+
 let server: Server | null = null;
 let serverUrl = "";
 let webSocketUrl = "";
@@ -40,7 +43,6 @@ const createWhiteAndBlackClients = async (remaining: number): Promise<[MockClien
 
 describe("Timer Tests", () => {
     test("Should be able finish the game and inform the players when the timer is over.", async () => {
-        const REMAINING = 10000; // 10 seconds total time
         const [whitePlayerClient, blackPlayerClient] = await createWhiteAndBlackClients(REMAINING);
 
         // Make first moves to start timer
@@ -54,7 +56,7 @@ describe("Timer Tests", () => {
 
         // Verify that both players are correctly informed
         const whiteFinishedData: WsFinishedData = await whitePlayerClient.pull(WsTitle.Finished);
-        const blackFinishedData: WsFinishedData = await whitePlayerClient.pull(WsTitle.Finished);
+        const blackFinishedData: WsFinishedData = await blackPlayerClient.pull(WsTitle.Finished);
 
         expect(whiteFinishedData).toBeTruthy();
         expect(blackFinishedData).toBeTruthy();
@@ -65,7 +67,7 @@ describe("Timer Tests", () => {
         const lobby = LobbyRegistry.get(whitePlayerClient.lobbyId!);
         if (!lobby) throw new Error("Lobby could not found");
         expect(lobby.getGameStatus()).toBe(GameStatus.BlackVictory);
-    });
+    }, REMAINING + SAFETY_MARGIN);
 });
 
 afterAll(() => {

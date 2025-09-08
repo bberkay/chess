@@ -11,7 +11,7 @@ import { WsErrorData, WsTitle, pruneIPMessages } from "@WebSocket";
 // Check message limiter
 const isMessageLimiterOff = Number(Bun.env.ENABLE_MESSAGE_LIMIT) === 0;
 if (isMessageLimiterOff) {
-    console.error(
+    throw new Error(
         "Consider enabling `ENABLE_MESSAGE_LIMIT` from .env.test to run message limiting tests."
     );
 }
@@ -25,7 +25,7 @@ const WS_MESSAGE_COUNT = MESSAGE_LIMIT * 1.5;
 const MAX_RCMNDD_MESSAGE_LIMIT_FOR_TESTING = 50;
 console.log("MESSAGE_LIMIT from .env.test: ", Bun.env.MESSAGE_LIMIT);
 if (MESSAGE_LIMIT > MAX_RCMNDD_MESSAGE_LIMIT_FOR_TESTING) {
-    console.warn(
+    throw new Error(
         `Consider reducing "MESSAGE_LIMIT" below ${MAX_RCMNDD_MESSAGE_LIMIT_FOR_TESTING} from .env.test for faster tests.`
     );
 }
@@ -36,7 +36,7 @@ const MESSAGE_WINDOW_MS = Number(Bun.env.MESSAGE_WINDOW_MS);
 const MAX_RCMNDD_WINDOW_MS_FOR_TESTING = 5000;
 console.log("MESSAGE_WINDOW_MS from .env.test: ", MESSAGE_WINDOW_MS);
 if (MESSAGE_WINDOW_MS > MAX_RCMNDD_WINDOW_MS_FOR_TESTING) {
-    console.warn(
+    throw new Error(
         `Consider reducing "MESSAGE_WINDOW_MS" below ${MAX_RCMNDD_WINDOW_MS_FOR_TESTING} from .env.test for faster tests.`
     );
 }
