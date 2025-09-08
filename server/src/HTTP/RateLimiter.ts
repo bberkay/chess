@@ -43,7 +43,7 @@ export function rateLimiter(ip: string): CORSResponse<HTTPRoutes.Root> | undefin
     const now = Date.now();
 
     const record: HTTPRequestLimitRecord | undefined = ipRequests.get(ip);
-    console.log("ip record here: ", ip, "and record is: ", !!record);
+
     if (!record) {
         ipRequests.set(ip, { count: 1, firstRequestTime: now });
         return;
