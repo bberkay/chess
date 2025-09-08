@@ -146,9 +146,9 @@ Chess Platform is tested with _Vitest_. Both [client](https://github.com/bberkay
 
 Before running tests, make sure the environments are set up:
 ```bash
-   cp server/.env.test.example server/.env.test
-   cp client/.env.test.example client/.env.test
-   ```
+cp server/.env.test.example server/.env.test
+cp client/.env.test.example client/.env.test
+```
 
 Run all tests with:
 `bun run test`
