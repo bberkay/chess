@@ -32,5 +32,5 @@ WORKDIR /app
 COPY --from=builder /app/dist ./dist
 RUN bun add -d serve
 EXPOSE 4173
-ENTRYPOINT [ "bun", "x", "serve", "dist", "-l", "4173" ]
+ENTRYPOINT [ "bun", "x", "serve", "-s", "dist", "-l", "4173" ]
 
