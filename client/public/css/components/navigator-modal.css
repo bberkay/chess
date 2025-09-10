@@ -190,7 +190,7 @@ body[data-color-scheme="dark"] {
 
 /**
  * ------------------ Responsive -------------------
- *             700px - 900px - 1250px
+ *             700px - 950px - 1250px
  */
 @media screen and (max-width: 1250px) {
     body:has(.navigator-modal-backdrop) {

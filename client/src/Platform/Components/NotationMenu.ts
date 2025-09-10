@@ -311,7 +311,7 @@ export class NotationMenu extends Component {
 
         let whitePlayerSectionMobileLoadingContainer = document.getElementById("white-player-section-mobile-loading-container");
         let blackPlayerSectionMobileLoadingContainer = document.getElementById("black-player-section-mobile-loading-container");
-        const isMobileView = window.innerWidth < 900;
+        const isMobileView = window.innerWidth < 950;
         this.loadHTML(
             NOTATION_MENU_ID,
             `
@@ -400,10 +400,9 @@ export class NotationMenu extends Component {
         const notationMenu = document.getElementById(NOTATION_MENU_ID)!;
         let breakpointCircle = true;
         const reorder = (isFirstTime: boolean = false) => {
-            const isMobile = window.innerWidth < 900;
-            const isTablet = window.innerWidth >= 900 && window.innerWidth < 1250;
+            const isMobile = window.innerWidth < 950;
+            const isTablet = window.innerWidth >= 950 && window.innerWidth < 1250;
             const isDesktop = window.innerWidth >= 1250;
-
             if(isMobile && (breakpointCircle || isFirstTime)){
                 chessboard.before(document.querySelector(".player-section:first-child")!);
                 chessboard.after(document.querySelector(".player-section:last-child")! || "");

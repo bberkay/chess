@@ -118,23 +118,23 @@
     }
 }
 
-/** 
- * ------------------ Responsive ------------------- 
- *             700px - 900px - 1250px
+/**
+ * ------------------ Responsive -------------------
+ *             700px - 950px - 1250px
  */
-@media screen and (max-width: 900px) {
+@media screen and (max-width: 950px) {
     #piece-table {
         width: 100%!important;
         height: auto!important;
         padding: 4px;
     }
-    
+
     #piece-options {
         display: flex!important;
         flex-direction: row!important;
         height:auto!important;
     }
-    
+
     #piece-options tr {
         display: grid!important;
         width: 100%!important;

@@ -301,11 +301,11 @@
     }
 }
 
-/** 
- * ------------------ Responsive ------------------- 
- *             700px - 900px - 1250px
+/**
+ * ------------------ Responsive -------------------
+ *             700px - 950px - 1250px
  */
-@media screen and (max-width: 900px) {
+@media screen and (max-width: 950px) {
     #notation-table {
         width: 100%;
     }
@@ -347,7 +347,7 @@
             height: auto;
         }
     }
-    
+
     .player-section-mobile-loading-container {
         &:first-of-type .player-section {
             margin-bottom: 0.75rem;

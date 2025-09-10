@@ -1,4 +1,4 @@
-// Layout.js is responsible for reordering the layout 
+// Layout.js is responsible for reordering the layout
 // of the page based on the screen size.
 
 const left = document.querySelector(".left");
@@ -18,15 +18,14 @@ document.addEventListener("DOMContentLoaded", () => {
     reorder(true);
 
     window.addEventListener("resize", () => {
-        reorder();   
+        reorder();
     });
 });
 
 const reorder = (isFirstTime = false) => {
-    const isMobile = window.innerWidth < 900;
-    const isTablet = window.innerWidth >= 900 && window.innerWidth < 1250;
+    const isMobile = window.innerWidth < 950;
+    const isTablet = window.innerWidth >= 950 && window.innerWidth < 1250;
     const isDesktop = window.innerWidth >= 1250;
-    
     if(isMobile && (breakpointCircle || isFirstTime)){
         reorderLayoutForMobile();
         breakpointCircle = false;

@@ -53,9 +53,9 @@
     }
 }
 
-/** 
- * ------------------ Responsive ------------------- 
- *             700px - 900px - 1250px
+/**
+ * ------------------ Responsive -------------------
+ *             700px - 950px - 1250px
  */
 @media screen and (max-width: 700px) {
     #settings-body {

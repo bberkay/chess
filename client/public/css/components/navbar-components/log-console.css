@@ -198,9 +198,9 @@
 
 /**
  * ------------------ Responsive -------------------
- *             700px - 900px - 1250px
+ *             700px - 950px - 1250px
  */
-@media screen and (max-width: 900px) {
+@media screen and (max-width: 950px) {
     #log-console {
         & #log-console-body {
             height: calc(var(--chessboard-board-size) / 2);
@@ -212,7 +212,7 @@
     }
 }
 
-@media screen and (min-width: 700px) and (max-width: 900px) {
+@media screen and (min-width: 700px) and (max-width: 950px) {
     #log-console #log-console-body {
         height: calc(var(--chessboard-board-size) / 1.5);
     }

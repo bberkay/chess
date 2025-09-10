@@ -103,8 +103,8 @@ export class BoardEditor extends Component {
     protected renderComponent(): void {
         let boardCreatorMobileLoadingContainer = document.getElementById(`${BOARD_CREATOR_ID}-mobile-loading-container`);
         let boardCreatorTabletLoadingContainer = document.getElementById(`${BOARD_CREATOR_ID}-tablet-loading-container`);
-        const isMobileView = window.innerWidth < 900;
-        const isTabletView = window.innerWidth >= 900 && window.innerWidth < 1250;
+        const isMobileView = window.innerWidth < 950;
+        const isTabletView = window.innerWidth >= 950 && window.innerWidth < 1250;
         this.loadHTML(
             isMobileView && boardCreatorMobileLoadingContainer
                 ? boardCreatorMobileLoadingContainer!.id

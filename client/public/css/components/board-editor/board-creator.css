@@ -2,7 +2,7 @@
  * CSS codes of Board Editor component
  * @see For more information about this component check file: src\Platform\Components\BoardEditor.ts
  */
- #board-creator, 
+ #board-creator,
  #board-creator-mobile-loading-container,
  #board-creator-tablet-loading-container{
     position: relative;
@@ -14,14 +14,14 @@
         visibility: hidden;
         border: 1px solid var(--border-color);
         box-shadow: 0 0 5px var(--shadow-color);
-    
+
         &.visible {
             visibility: visible;
         }
     }
 }
 
-/** 
- * ------------------ Responsive ------------------- 
- *             700px - 900px - 1250px
+/**
+ * ------------------ Responsive -------------------
+ *             700px - 950px - 1250px
  */
