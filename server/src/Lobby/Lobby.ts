@@ -157,15 +157,15 @@ export class Lobby {
         if (this.isPlayerInLobby(player)) {
             // Reconnect the player
             if (!player.isOnline) this.setPlayerOnline(player);
-            console.log(`Player[${player.id}] is already in the lobby[${this.id}].`);
+            //console.log(`Player[${player.id}] is already in the lobby[${this.id}].`);
             return true;
         }
 
-        console.log(`Player[${player.id}] is not in the lobby[${this.id}].`);
+        //console.log(`Player[${player.id}] is not in the lobby[${this.id}].`);
 
         if (this._whitePlayer) {
             if (this._blackPlayer) {
-                console.log(`Lobby[${this.id}] is full, player[${player.id}] can't join.`);
+                //console.log(`Lobby[${this.id}] is full, player[${player.id}] can't join.`);
                 return false;
             }
             this.setBlackPlayer(player);
@@ -427,7 +427,7 @@ export class Lobby {
      */
     public startGame(): void {
         if (!this.isGameReadyToStart()) {
-            console.log(`Game[${this.id}] in lobby not ready to start.`);
+            //console.log(`Game[${this.id}] in lobby not ready to start.`);
             return;
         }
         if (this._matchCount >= 2) this.flipColors();

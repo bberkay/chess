@@ -74,7 +74,7 @@ export abstract class MockClient {
         await new Promise<void>((resolve, reject) => {
             this.ws = new WebSocket(wsLobbyUrl);
             this.ws.onmessage = (event: MessageEvent) => {
-                console.log("Incoming message data: ", event.data);
+                //console.log("Incoming message data: ", event.data);
                 // We use JSON.parse instead of WsCommand.parse to
                 // bypass the malicious content scan. This is because
                 // the scan would throw an error and prevent returning
@@ -86,14 +86,6 @@ export abstract class MockClient {
                 // before "parsed" can be returned.
                 const [wsTitle, wsData] = JSON.parse(event.data);
                 this._incomingMessages[wsTitle] = wsData;
-                console.log(
-                    "on message incomingMessage new title",
-                    wsTitle,
-                    wsLobbyUrl,
-                );
-                if (wsTitle === WsTitle.Error) {
-                    console.log("error data is: ", wsData);
-                }
             };
             this.ws.onopen = () => {
                 this.player!.isOnline = true;
@@ -122,7 +114,9 @@ export abstract class MockClient {
             this.ws!.onclose = () => {
                 this.player!.isOnline = false;
                 this.ws = null;
-                resolve();
+                // Wait a little to make sure server has safely finished
+                // after-close operations
+                setTimeout(resolve, 5);
             };
             this.ws!.close();
             setTimeout(
@@ -138,7 +132,7 @@ export abstract class MockClient {
     public async pull<T extends WsTitle>(wsTitle: T): Promise<WsDataMap[T]> {
         return await new Promise<WsDataMap[T]>((resolve, reject) => {
             const isReceivedInterval = setInterval(() => {
-                console.log("pulling checking: ", wsTitle, this.ws?.url);
+                //console.log("pulling checking: ", wsTitle, this.ws?.url);
                 if (Object.hasOwn(this._incomingMessages, wsTitle)) {
                     clearInterval(isReceivedInterval);
                     const data = this._incomingMessages[wsTitle];

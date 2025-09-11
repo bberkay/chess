@@ -114,9 +114,7 @@ export class WebSocketHandler {
         try {
             const lobby = ws.data.lobby;
             const player = ws.data.player;
-            console.log(
-                `Player[${player.id}] trying to join lobby[${lobby.id}].`,
-            );
+            //console.log(`Player[${player.id}] trying to join lobby[${lobby.id}].`);
 
             LobbyRegistry.join(lobby.id, player);
 
@@ -163,7 +161,7 @@ export class WebSocketHandler {
             // disconnect after the game has started, and one of them reconnects
             // while the other does not.
             if (lobby.isGameStarted() || lobby.areBothPlayersOnline()) {
-                console.log(`Game of lobby[${lobby.id}} should start now.`);
+                //console.log(`Game of lobby[${lobby.id}} should start now.`);
                 this._startGame(ws, lobby);
             }
         } catch (e: unknown) {
@@ -194,7 +192,7 @@ export class WebSocketHandler {
             );
             ws.unsubscribe(lobby.id);
 
-            console.log("Connection closed: ", lobby.id, player.name);
+            //console.log("Connection closed: ", lobby.id, player.name);
             LobbyRegistry.destroy(lobby.id);
         } catch (e: unknown) {
             ws.send(
@@ -232,7 +230,7 @@ export class WebSocketHandler {
         if (lobby.isGameStarted()) {
             // Game is already started so it means that one of the
             // players is reconnected.
-            console.log("Reconnecting player to the game: ", lobby.id);
+            //console.log("Reconnecting player to the game: ", lobby.id);
 
             ws.send(createStartedCommand());
 
@@ -253,7 +251,7 @@ export class WebSocketHandler {
                 );
             }
         } else if (lobby.isGameReadyToStart()) {
-            console.log(`Starting the game of lobby[${lobby.id}].`);
+            //console.log(`Starting the game of lobby[${lobby.id}].`);
 
             // Start the game and send the started command to the clients.
             lobby.startGame();
@@ -296,7 +294,7 @@ export class WebSocketHandler {
                 return;
             }
 
-            console.log(`Incoming message: ${message}`);
+            //console.log(`Incoming message: ${message}`);
             const [command, data] = WsCommand.parse(message);
             if (!command) return;
 
@@ -457,8 +455,6 @@ export class WebSocketHandler {
         ws.publish(lobby.id, WsCommand.create([WsTitle.Moved, { from, to }]));
         if (lobby.isGameFinished()) {
             this._finishGame(ws, lobby);
-        } else {
-            console.log(`Game of lobby[${lobby.id}] did not finished.`);
         }
     }
 

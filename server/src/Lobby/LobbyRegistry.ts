@@ -75,10 +75,8 @@ export class LobbyRegistry {
         if (!lobby) return;
 
         if (lobby.isReadyForCleanup()) {
-            console.log(`Lobby[${lobbyId}] is dead. Deleting...`);
+            //console.log(`Lobby[${lobbyId}] is dead. Deleting...`);
             _lobbies.delete(lobbyId);
-        } else {
-            console.log(`Lobby[${lobbyId}] is not ready for cleanup.`);
         }
     }
 

@@ -64,10 +64,7 @@ export class PlayerRegistry {
         const player = this.get(playerId);
         if (!player) return;
 
-        if (!LobbyRegistry.isPlayerActive(player)) {
-            console.log(`Player[${playerId}] could not deleted because still in online game.`);
-        } else {
-            console.log(`Player[${playerId}] is inactive. Deleting...`);
+        if (LobbyRegistry.isPlayerActive(player)) {
             _players.delete(playerId);
         }
     }
