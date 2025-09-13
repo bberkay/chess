@@ -5,6 +5,16 @@ import { ChessEngine } from "@Chess/Engine/ChessEngine";
 import { Converter } from "@Chess/Utils/Converter";
 
 /**
+ * Sends multiple requests to warm up a server before use.
+ */
+export async function warmUp(serverUrl: string, rounds = 50): Promise<void> {
+    console.log("Warming server up ...");
+    const p = Array.from({ length: rounds }, () => fetch(serverUrl));
+    await Promise.all(p);
+    await new Promise((r) => setTimeout(r, 50));
+}
+
+/**
  * Build a WebSocket lobby connection URL with player token.
  */
 export function createWsLobbyConnUrl(
@@ -48,12 +58,22 @@ export async function waitForWebSocketSettle(duration: number): Promise<void> {
 /**
  * Create a local chess board from FEN notation and game settings.
  */
-export function createLocalBoard(createLobbyBody: { board: string, remaining: number, increment: number }): JsonNotation {
+export function createLocalBoard(createLobbyBody: {
+    board: string;
+    remaining: number;
+    increment: number;
+}): JsonNotation {
     const chessEngine = new ChessEngine();
     const jsonBoard = Converter.fenToJson(createLobbyBody.board);
     jsonBoard.durations = {
-        [Color.White]: { remaining: createLobbyBody.remaining, increment: createLobbyBody.increment },
-        [Color.Black]: { remaining: createLobbyBody.remaining, increment: createLobbyBody.increment },
+        [Color.White]: {
+            remaining: createLobbyBody.remaining,
+            increment: createLobbyBody.increment,
+        },
+        [Color.Black]: {
+            remaining: createLobbyBody.remaining,
+            increment: createLobbyBody.increment,
+        },
     };
     chessEngine.createGame(jsonBoard);
     return chessEngine.getGameAsJsonNotation();

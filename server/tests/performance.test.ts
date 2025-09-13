@@ -1,71 +1,212 @@
+import os from "os";
 import { createServer } from "src/BunServer";
-import { test, expect, beforeAll, afterAll, describe } from "vitest";
+import { test, expect, describe, afterEach, beforeEach } from "vitest";
 import { type Server } from "bun";
 import { MockCreator } from "./helpers/MockCreator";
 import { MockGuest } from "./helpers/MockGuest";
 import { CORSResponseBody, HTTPRoutes } from "@HTTP";
 import { MockClient } from "./helpers/MockClient";
+import { warmUp } from "./utils";
 
-const MAX_TIME_PER_HTTP_REQUEST = 10; // milliseconds
-const TEST_CONCURRENCY_LEVELS = [10, 50, 100]; // number of simultaneous requests
-const TEST_CONCURRENCY_LEVELS_TIMEOUT = TEST_CONCURRENCY_LEVELS
-    .map(l => l * MAX_TIME_PER_HTTP_REQUEST)
-    .reduce((a, b) => a + b, 0);
+const isRateLimiterOn = Number(Bun.env.ENABLE_RATE_LIMIT) === 1;
+if (isRateLimiterOn) {
+    throw new Error(
+        "Consider disabling `ENABLE_RATE_LIMIT` from .env.test to run performance tests.",
+    );
+}
+
+interface CPUInfo {
+    "CPU Time (ms)": number;
+    "CPU Utilization (%)": number;
+    "CPU Time per Request (ms)": number;
+}
+
+interface MEMInfo {
+    "Heap (MB)": number;
+    "Median Heap (MB)": number;
+    "Median RSS (MB)": number;
+}
+
+interface PERFInfo {
+    "Avg Latency (ms)": number;
+    "p95 Latency (ms)": number;
+    "p99 Latency (ms)": number;
+    "Max Latency (ms)": number;
+    "Min Latency (ms)": number;
+    "Std Dev (ms)": number;
+    "Total Time (s)": number;
+    "Throughput (req/sec)": number;
+}
+
+type ResultsSummary = { Concurrency: number } & { MemInfo: MEMInfo } & {
+    CpuInfo: CPUInfo;
+} & { PerfInfo: PERFInfo };
+
+const CORES = os.cpus().length;
 
 let server: Server | null = null;
 let serverUrl = "";
 let webSocketUrl = "";
 
-beforeAll(async () => {
+beforeEach(async () => {
     server = createServer();
     serverUrl = server.url.href;
     webSocketUrl = server.url.href.replace("http", "ws");
+    await warmUp(serverUrl);
+    if (typeof globalThis.gc === "function") globalThis.gc();
 });
+
+// number of simultaneous requests
+const TEST_CONCURRENCY_LEVELS = [10, 50, 100];
+const PERFORMANCE_THRESHOLDS = {
+    LOBBY_CREATION: 0.75,
+    // Since the game begins immediately after the connection,
+    // we should include that time as well
+    // See WebSocketHandler._joinLobby(...) for more details.
+    LOBBY_CONNECTION: 1.2, // 0.5 + 0.7
+    // Since the game resending immediately after the connection,
+    // we should include that time as well
+    // See WebSocketHandler._joinLobby(...) for more details.
+    LOBBY_RECONNECTION: 0.7, // 0.5 + 0.2
+    VALIDATION_RUNS: 10,
+    ACCEPTABLE_PASS_RATE: 0.95,
+};
 
 const measureOperation = async (
     operation: (
         level: number,
         i: number,
     ) => Promise<CORSResponseBody<HTTPRoutes>>,
-    acceptableTime: number
+    acceptableTime: number,
+    suggestOptimalAcceptableTime: boolean = true,
 ): Promise<void> => {
-    const resultsSummary: Record<string, number | string | boolean>[] = [];
+    const printTable = (finalStatus: ResultsSummary[]) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { Concurrency, ...scheme } = finalStatus[0];
+        const tableTypes = Object.keys(scheme);
+        const tables = Object.fromEntries(tableTypes.map((k) => [k, []]));
+        for (let i = 0; i < tableTypes.length; i++) {
+            for (const status of finalStatus) {
+                // @ts-expect-error is going to make code too complicated
+                // for just a simple test file
+                tables[tableTypes[i]].push({
+                    Concurrency: status.Concurrency,
+                    // @ts-expect-error is going to make code too complicated
+                    // for just a simple test file
+                    ...status[tableTypes[i]],
+                });
+            }
+        }
 
-    for (const [level, concurrency] of TEST_CONCURRENCY_LEVELS.entries()) {
-        const latencies: number[] = [];
+        for (const tableType in tables) {
+            console.log(tableType);
+            console.table(tables[tableType]);
+        }
+    };
 
-        const startMem = process.memoryUsage().heapUsed;
-        const startCpu = process.cpuUsage();
+    const median = (values: number[]): number => {
+        const sorted = [...values].sort((a, b) => a - b);
+        const mid = Math.floor(sorted.length / 2);
 
-        const startTime = performance.now();
+        if (sorted.length % 2 === 0) {
+            return (sorted[mid - 1] + sorted[mid]) / 2;
+        }
+        return sorted[mid];
+    };
 
-        const promises = Array.from(
-            { length: concurrency },
-            async (_, i: number) => {
-                const start = performance.now();
-                const result = await operation(level, i);
-                latencies.push(performance.now() - start);
-                return result;
-            },
-        );
+    const combine = (data: ResultsSummary[][]): ResultsSummary[] => {
+        if (!data.length) return [];
 
-        const results = await Promise.all(promises);
-        expect(results.every((r) => r.success)).toBe(true);
+        const groups = data[0].length;
+        const result: ResultsSummary[] = [];
 
-        const endTime = performance.now();
-        const totalTimeMs = endTime - startTime;
-        const totalTimeSec = totalTimeMs / 1000;
+        for (let i = 0; i < groups; i++) {
+            const items = data.map((run) => run[i]);
+            const concurreny = items[0].Concurrency;
+            const combined: Record<string, Record<string, number[]>> = {};
+            for (const item of items) {
+                for (const key in item) {
+                    const k = key as Exclude<
+                        keyof ResultsSummary,
+                        "Concurrency"
+                    >;
+                    if (!Object.hasOwn(combined, k)) {
+                        combined[k] = Object.fromEntries(
+                            Object.entries(item[k]).map(([k]) => [k, []]),
+                        );
+                    }
+                    for (const metric in item[k]) {
+                        const m = metric as keyof ResultsSummary[typeof k];
+                        combined[k][metric].push(item[k][m]);
+                    }
+                }
+            }
 
-        const endMem = process.memoryUsage().heapUsed;
-        const memDiffMB = (endMem - startMem) / 1024 / 1024;
-        const endCpu = process.cpuUsage(startCpu);
-        const cpuTimeMs = (endCpu.user + endCpu.system) / 1000;
+            const medians: Partial<ResultsSummary> = {
+                Concurrency: concurreny,
+            };
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { Concurrency, ...combinedWithoutCurrency } = combined;
+            for (const key in combinedWithoutCurrency) {
+                const k = key as Exclude<keyof ResultsSummary, "Concurrency">;
+                if (!Object.hasOwn(medians, k)) {
+                    medians[k] = Object.fromEntries(
+                        Object.entries(combinedWithoutCurrency[k]!).map(
+                            ([metric]) => [metric, 0],
+                        ),
+                    ) as keyof ResultsSummary[typeof k];
+                }
+                for (const metric in combinedWithoutCurrency[k]!) {
+                    const m = metric as keyof ResultsSummary[typeof k];
+                    // @ts-expect-error is going to make code too complicated
+                    // for just a simple test file
+                    medians[k]![m] = median(
+                        combinedWithoutCurrency[k]![metric]!,
+                    ).toFixed(2);
+                }
+            }
 
+            result.push(medians as ResultsSummary);
+        }
+
+        return result;
+    };
+
+    const percentile = (sorted: number[], p: number): number => {
+        if (sorted.length === 0) return 0;
+        if (p <= 0) return sorted[0];
+        if (p >= 1) return sorted[sorted.length - 1];
+
+        const n = sorted.length;
+        // fractional zero-based rank
+        const r = p * (n - 1);
+        const lower = Math.floor(r);
+        const upper = Math.ceil(r);
+        const weight = r - lower;
+
+        if (upper === lower) return sorted[lower];
+        return sorted[lower] * (1 - weight) + sorted[upper] * weight;
+    };
+
+    const snapshotMemory = () => {
+        const mem = process.memoryUsage();
+        return {
+            heapUsed: mem.heapUsed,
+            heapTotal: mem.heapTotal,
+            rss: mem.rss,
+        };
+    };
+
+    const performanceInfo = (
+        latencies: number[],
+        concurrency: number,
+        totalTimeMs: number,
+    ): PERFInfo => {
         latencies.sort((a, b) => a - b);
         const avgLatency =
             latencies.reduce((sum, val) => sum + val, 0) / latencies.length;
-        const p95 = latencies[Math.floor(latencies.length * 0.95)];
-        const p99 = latencies[Math.floor(latencies.length * 0.99)];
+        const p95 = percentile(latencies, 0.95);
+        const p99 = percentile(latencies, 0.99);
         const maxLatency = latencies[latencies.length - 1];
         const minLatency = latencies[0];
         const variance =
@@ -75,146 +216,241 @@ const measureOperation = async (
             ) / latencies.length;
         const stdDev = Math.sqrt(variance);
 
+        const totalTimeSec = totalTimeMs / 1000;
         const throughputRPS = concurrency / totalTimeSec;
 
-        const row = {
-            Concurrency: concurrency,
+        return {
             "Avg Latency (ms)": avgLatency,
             "p95 Latency (ms)": p95,
             "p99 Latency (ms)": p99,
             "Max Latency (ms)": maxLatency,
             "Min Latency (ms)": minLatency,
             "Std Dev (ms)": stdDev,
-            "Throughput (req/sec)": throughputRPS,
             "Total Time (s)": totalTimeSec,
-            "CPU Time (ms)": cpuTimeMs,
-            "Memory Change (MB)": memDiffMB
+            "Throughput (req/sec)": throughputRPS,
         };
-        resultsSummary.push(row);
-    }
+    };
 
-    console.table(resultsSummary);
+    const test1 = async (): Promise<ResultsSummary[]> => {
+        const resultsSummary: ResultsSummary[] = [];
 
-    for (const results of resultsSummary) {
-        expect(Number(results["p95 Latency (ms)"])).toBeLessThan(
-            acceptableTime * 1.25,
-        );
-        expect(Number(results["p99 Latency (ms)"])).toBeLessThan(
-            acceptableTime * 1.5,
-        );
-        expect(Number(results["Max Latency (ms)"])).toBeLessThan(
-            acceptableTime * 2,
-        );
-        expect(Number(results["Min Latency (ms)"])).toBeLessThan(
-            acceptableTime / 2,
-        );
-    }
-};
+        for (const [level, concurrency] of TEST_CONCURRENCY_LEVELS.entries()) {
+            const latencies: number[] = [];
 
-const createTestLobby = async (): Promise<
-    [MockCreator, CORSResponseBody<HTTPRoutes.CreateLobby>]
-> => {
-    const creator = new MockCreator(serverUrl, webSocketUrl);
-    const createLobbyResponse = await creator.createLobby();
-    return [creator, createLobbyResponse];
-};
+            // Ready memory
+            const samplesMem: Array<ReturnType<typeof snapshotMemory>> = [];
+            const samplerMem = setInterval(
+                () => samplesMem.push(snapshotMemory()),
+                50,
+            );
+            const startMem = snapshotMemory();
 
-const connectTestLobby = async (
-    lobbyId: string,
-): Promise<[MockGuest, CORSResponseBody<HTTPRoutes.ConnectLobby>]> => {
-    const guest = new MockGuest(serverUrl, webSocketUrl);
-    const connectLobbyResponse = await guest.connectLobby({
-        name: "guest",
-        lobbyId,
-    });
-    return [guest, connectLobbyResponse];
-};
+            // Ready cpu
+            const startCpu = process.cpuUsage();
 
-const disconnectLobbyTestLobby = async (client: MockClient): Promise<void> => {
-    await client.disconnectLobby();
-};
+            // Ready latency
+            const startTime = performance.now();
 
-const reconnectTestLobby = async (
-    client: MockClient,
-): Promise<[MockClient, CORSResponseBody<HTTPRoutes.ReconnectLobby>]> => {
-    const reconnectLobbyResponse = await client.reconnectLobby();
-    return [client, reconnectLobbyResponse];
-};
-
-const isRateLimiterOn = Number(Bun.env.ENABLE_RATE_LIMIT) === 1;
-describe.skipIf(isRateLimiterOn)("Performance Tests", () => {
-    test(
-        "Should scale efficiently across concurrency levels during lobby creation",
-        async () => {
-            const ACCEPTABLE_LOBBY_CREATION_TIME = 100; // milliseconds
-
-            await measureOperation(async () => {
-                return (await createTestLobby())[1];
-            }, ACCEPTABLE_LOBBY_CREATION_TIME);
-        },
-        TEST_CONCURRENCY_LEVELS_TIMEOUT
-    );
-
-    test(
-        "Should scale efficiently across concurrency levels during lobby connection",
-        async () => {
-            // The first 100 ms is for the lobby connection, and the second 100 ms is for
-            // starting the game (since the game begins immediately after the connection,
-            // we should include that time as well).
-            // See WebSocketHandler._joinLobby(...) for more details.
-            const ACCEPTABLE_LOBBY_CONNECTION_TIME = 100 + 100; // milliseconds
-
-            console.log("Lobbies are preparing for connection test...");
-            const lobbyIds: string[][] = [];
-            for (const concurrency of TEST_CONCURRENCY_LEVELS) {
-                const level = [];
-                for (let i = 0; i < concurrency; i++) {
-                    const [, createLobbyResponse] = await createTestLobby();
-                    level.push(createLobbyResponse.data!.lobbyId);
-                }
-                lobbyIds.push(level);
-            }
-
-            console.log("Lobbies are ready for connection test.");
-            await measureOperation(async (level: number, i: number) => {
-                return (await connectTestLobby(lobbyIds[level][i]))[1];
-            }, ACCEPTABLE_LOBBY_CONNECTION_TIME);
-        },
-        TEST_CONCURRENCY_LEVELS_TIMEOUT
-    );
-
-    test(
-        "Should scale efficiently across concurrency levels during lobby reconnection",
-        async () => {
-            // 100 ms is for the lobby reconnection, and 50 ms is for
-            // resending the game info to the reconnected player.
-            // See WebSocketHandler._joinLobby(...) for more.
-            const ACCEPTABLE_LOBBY_RECONNECTION_TIME = 100 + 50; // milliseconds
-
-            console.log("Lobbies are preparing for reconnection test...");
-            const clients: MockClient[][] = [];
-            for (const concurrency of TEST_CONCURRENCY_LEVELS) {
-                const level = [];
-                for (let i = 0; i < concurrency; i++) {
-                    const [, createLobbyResponse] = await createTestLobby();
-                    const [mockClient] = await connectTestLobby(
-                        createLobbyResponse.data!.lobbyId,
+            const randomDelays: number[] = [];
+            const promises = Array.from(
+                { length: concurrency },
+                async (_, i: number) => {
+                    // Random delay between 0-50ms (simulates real user behavior)
+                    const randomDelayMs = Math.random() * 50;
+                    randomDelays.push(randomDelayMs);
+                    await new Promise((resolve) =>
+                        setTimeout(resolve, randomDelayMs),
                     );
-                    await disconnectLobbyTestLobby(mockClient);
-                    level.push(mockClient);
-                }
-                clients.push(level);
-            }
 
-            console.log("Lobbies are ready for reconnection test.");
-            await measureOperation(async (level: number, i: number) => {
-                return (await reconnectTestLobby(clients[level][i]))[1];
-            }, ACCEPTABLE_LOBBY_RECONNECTION_TIME);
-        },
-        TEST_CONCURRENCY_LEVELS_TIMEOUT
-    );
+                    const start = performance.now();
+                    const result = await operation(level, i);
+                    latencies.push(performance.now() - start);
+                    return result;
+                },
+            );
+
+            const results = await Promise.all(promises);
+            expect(results.every((r) => r.success)).toBe(true);
+
+            // Latency
+            const endTime = performance.now();
+            randomDelays.sort();
+            const totalTimeMs =
+                endTime - startTime - randomDelays[randomDelays.length - 1];
+            const performaceInfo = performanceInfo(
+                latencies,
+                concurrency,
+                totalTimeMs,
+            );
+
+            // Memory
+            clearInterval(samplerMem);
+            const endMem = snapshotMemory();
+            samplesMem.push(endMem);
+            const memInfo: MEMInfo = {
+                "Heap (MB)":
+                    (endMem.heapUsed - startMem.heapUsed) / 1024 / 1024,
+                "Median Heap (MB)":
+                    median(samplesMem.map((samp) => samp.heapUsed)) /
+                    1024 /
+                    1024,
+                "Median RSS (MB)":
+                    median(samplesMem.map((samp) => samp.rss)) / 1024 / 1024,
+            };
+
+            // Cpu
+            const endCpu = process.cpuUsage(startCpu);
+            const cpuTimeMs = (endCpu.user + endCpu.system) / 1000;
+            const wallMs = endTime - startTime;
+            const cpuPercent = (cpuTimeMs / (wallMs * CORES)) * 100;
+            const cpuMsPerReq = cpuTimeMs / concurrency;
+            const cpuInfo: CPUInfo = {
+                "CPU Time (ms)": cpuTimeMs,
+                "CPU Utilization (%)": cpuPercent,
+                "CPU Time per Request (ms)": cpuMsPerReq,
+            };
+
+            const row: ResultsSummary = {
+                Concurrency: concurrency,
+                CpuInfo: cpuInfo,
+                PerfInfo: performaceInfo,
+                MemInfo: memInfo,
+            };
+            resultsSummary.push(row);
+        }
+
+        return resultsSummary;
+    };
+
+    const test2 = (resultsSummary: ResultsSummary[]) => {
+        for (const results of resultsSummary) {
+            const concurrency = Number(results["Concurrency"]);
+            const targetDuration = acceptableTime * concurrency;
+            try {
+                expect(
+                    Number(results.PerfInfo["p95 Latency (ms)"]),
+                ).toBeLessThan(targetDuration * 1.25);
+                expect(
+                    Number(results.PerfInfo["p99 Latency (ms)"]),
+                ).toBeLessThan(targetDuration * 1.5);
+                expect(
+                    Number(results.PerfInfo["Max Latency (ms)"]),
+                ).toBeLessThan(targetDuration * 2);
+                expect(
+                    Number(results.PerfInfo["Min Latency (ms)"]),
+                ).toBeLessThan(targetDuration);
+            } catch {
+                return false;
+            }
+        }
+        return true;
+    };
+
+    let allValidationRuns: ResultsSummary[][] = [];
+    let optimalTimeMeasurementIter = 0;
+    while (acceptableTime > 0) {
+        allValidationRuns = [];
+
+        let successCount = 0;
+        for (let i = 0; i < PERFORMANCE_THRESHOLDS.VALIDATION_RUNS; i++) {
+            const resultsSummary = await test1();
+            allValidationRuns.push(resultsSummary);
+            successCount += test2(resultsSummary) ? 1 : 0;
+        }
+
+        try {
+            expect(
+                (successCount * PERFORMANCE_THRESHOLDS.VALIDATION_RUNS) / 100,
+            ).toBeGreaterThanOrEqual(
+                PERFORMANCE_THRESHOLDS.ACCEPTABLE_PASS_RATE,
+            );
+            if (!suggestOptimalAcceptableTime) break;
+        } catch (e: unknown) {
+            if (optimalTimeMeasurementIter == 0) throw e;
+            if (suggestOptimalAcceptableTime) {
+                console.log(
+                    `Suggested Acceptable Time: ${acceptableTime.toFixed(3)} ms`,
+                );
+            }
+            break;
+        }
+
+        acceptableTime -= (acceptableTime * 10) / 100;
+        optimalTimeMeasurementIter += 1;
+    }
+
+    const finalStatus = combine(allValidationRuns);
+    printTable(finalStatus);
+};
+
+const activeClients: MockClient[] = [];
+describe.skipIf(isRateLimiterOn)("Performance Tests", () => {
+    test("Should scale efficiently across concurrency levels during lobby creation", async () => {
+        await measureOperation(async () => {
+            const mockClient = new MockCreator(serverUrl, webSocketUrl);
+            const createLobbyResponse = await mockClient.createLobby();
+            activeClients.push(mockClient);
+            return createLobbyResponse;
+        }, PERFORMANCE_THRESHOLDS.LOBBY_CREATION);
+    }, 10000000000);
+
+    test("Should scale efficiently across concurrency levels during lobby connection", async () => {
+        console.log("Lobbies are preparing for connection test...");
+        const lobbyIds: string[][] = [];
+        for (const concurrency of TEST_CONCURRENCY_LEVELS) {
+            const level = [];
+            for (let i = 0; i < concurrency; i++) {
+                const mockClient = new MockCreator(serverUrl, webSocketUrl);
+                const createLobbyResponse = await mockClient.createLobby();
+                activeClients.push(mockClient);
+                level.push(createLobbyResponse.data!.lobbyId);
+            }
+            lobbyIds.push(level);
+        }
+
+        console.log("Lobbies are ready for connection test.");
+        await measureOperation(async (level: number, i: number) => {
+            const guest = new MockGuest(serverUrl, webSocketUrl);
+            const connectLobbyResponse = await guest.connectLobby({
+                name: "guest",
+                lobbyId: lobbyIds[level][i],
+            });
+            return connectLobbyResponse;
+        }, PERFORMANCE_THRESHOLDS.LOBBY_CONNECTION);
+    });
+
+    test("Should scale efficiently across concurrency levels during lobby reconnection", async () => {
+        console.log("Lobbies are preparing for reconnection test...");
+        const clients: MockClient[][] = [];
+        for (const concurrency of TEST_CONCURRENCY_LEVELS) {
+            const level = [];
+            for (let i = 0; i < concurrency; i++) {
+                const mockCreator = new MockCreator(serverUrl, webSocketUrl);
+                const createLobbyResponse = await mockCreator.createLobby();
+                activeClients.push(mockCreator);
+                const mockGuest = new MockGuest(serverUrl, webSocketUrl);
+                await mockGuest.connectLobby({
+                    name: "guest",
+                    lobbyId: createLobbyResponse.data!.lobbyId,
+                });
+                activeClients.push(mockGuest);
+                await mockGuest.disconnectLobby();
+                level.push(mockGuest);
+            }
+            clients.push(level);
+        }
+
+        console.log("Lobbies are ready for reconnection test.");
+        await measureOperation(async (level: number, i: number) => {
+            const reconnectLobbyResponse =
+                await clients[level][i].reconnectLobby();
+            return reconnectLobbyResponse;
+        }, PERFORMANCE_THRESHOLDS.LOBBY_RECONNECTION);
+    });
 });
 
-afterAll(() => {
+afterEach(async () => {
+    await Promise.all(activeClients.map((client) => client.disconnectLobby()));
+    activeClients.length = 0;
     server?.stop(true);
 });
