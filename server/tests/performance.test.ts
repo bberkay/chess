@@ -1,4 +1,3 @@
-import os from "os";
 import { createServer } from "src/BunServer";
 import { test, expect, describe, afterEach, beforeEach } from "vitest";
 import { type Server } from "bun";
@@ -7,6 +6,41 @@ import { MockGuest } from "./helpers/MockGuest";
 import { CORSResponseBody, HTTPRoutes } from "@HTTP";
 import { MockClient } from "./helpers/MockClient";
 import { warmUp } from "./utils";
+import { median } from "@Utils";
+import { CPUMonitor, CPUStatistics } from "./helpers/CPUMonitor";
+import { MEMMonitor, MEMStatistics } from "./helpers/MemoryMonitor";
+import { PerformanceMonitor, PerfStatistics } from "./helpers/PerformanceMonitor";
+
+// Number of simultaneous requests
+const TEST_CONCURRENCY_LEVELS = [10, 50, 100];
+
+const MeasurementConfig = {
+    AcceptableLobbyCreationMs: 0.75,
+
+    // Since the game begins immediately after the connection,
+    // we should include that time as well
+    // See WebSocketHandler._joinLobby(...) for more details.
+    AcceptableLobbyConnectionMs: 1.2, // 0.5 + 0.7
+
+    // Since the game resending immediately after the connection,
+    // we should include that time as well
+    // See WebSocketHandler._joinLobby(...) for more details.
+    AcceptableLobbyReconnectionMs: 0.7, // 0.5 + 0.2
+
+    // Number of times an operation should be executed to validate
+    // that the performance measurements are reliable.
+    ValidationRuns: 10,
+
+    // Minimum fraction (0–1) of validation runs that must succeed
+    // for the measurement to be considered acceptable.
+    // Example: 0.95 means at least 95% of runs must pass.
+    AcceptablePassRate: 0.95,
+
+    // Percentage by which the acceptable time is reduced after
+    // each successful validation iteration.
+    // Example: 10 means acceptable time is tightened by 10%.
+    TimeReductionRate: 10
+};
 
 const isRateLimiterOn = Number(Bun.env.ENABLE_RATE_LIMIT) === 1;
 if (isRateLimiterOn) {
@@ -15,34 +49,9 @@ if (isRateLimiterOn) {
     );
 }
 
-interface CPUInfo {
-    "CPU Time (ms)": number;
-    "CPU Utilization (%)": number;
-    "CPU Time per Request (ms)": number;
-}
-
-interface MEMInfo {
-    "Heap (MB)": number;
-    "Median Heap (MB)": number;
-    "Median RSS (MB)": number;
-}
-
-interface PERFInfo {
-    "Avg Latency (ms)": number;
-    "p95 Latency (ms)": number;
-    "p99 Latency (ms)": number;
-    "Max Latency (ms)": number;
-    "Min Latency (ms)": number;
-    "Std Dev (ms)": number;
-    "Total Time (s)": number;
-    "Throughput (req/sec)": number;
-}
-
-type ResultsSummary = { Concurrency: number } & { MemInfo: MEMInfo } & {
-    CpuInfo: CPUInfo;
-} & { PerfInfo: PERFInfo };
-
-const CORES = os.cpus().length;
+type ResultsSummary = { Concurrency: number } & { MEMStatistics: MEMStatistics } & {
+    CPUStatistics: CPUStatistics;
+} & { PerfStatistics: PerfStatistics };
 
 let server: Server | null = null;
 let serverUrl = "";
@@ -56,22 +65,6 @@ beforeEach(async () => {
     if (typeof globalThis.gc === "function") globalThis.gc();
 });
 
-// number of simultaneous requests
-const TEST_CONCURRENCY_LEVELS = [10, 50, 100];
-const PERFORMANCE_THRESHOLDS = {
-    LOBBY_CREATION: 0.75,
-    // Since the game begins immediately after the connection,
-    // we should include that time as well
-    // See WebSocketHandler._joinLobby(...) for more details.
-    LOBBY_CONNECTION: 1.2, // 0.5 + 0.7
-    // Since the game resending immediately after the connection,
-    // we should include that time as well
-    // See WebSocketHandler._joinLobby(...) for more details.
-    LOBBY_RECONNECTION: 0.7, // 0.5 + 0.2
-    VALIDATION_RUNS: 10,
-    ACCEPTABLE_PASS_RATE: 0.95,
-};
-
 const measureOperation = async (
     operation: (
         level: number,
@@ -80,13 +73,17 @@ const measureOperation = async (
     acceptableTime: number,
     suggestOptimalAcceptableTime: boolean = true,
 ): Promise<void> => {
-    const printTable = (finalStatus: ResultsSummary[]) => {
+    const perfMonitor = new PerformanceMonitor();
+    const memMonitor = new MEMMonitor();
+    const cpuMonitor = new CPUMonitor();
+
+    const print = (measureResult: ResultsSummary[]): void => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { Concurrency, ...scheme } = finalStatus[0];
+        const { Concurrency, ...scheme } = measureResult[0];
         const tableTypes = Object.keys(scheme);
         const tables = Object.fromEntries(tableTypes.map((k) => [k, []]));
         for (let i = 0; i < tableTypes.length; i++) {
-            for (const status of finalStatus) {
+            for (const status of measureResult) {
                 // @ts-expect-error is going to make code too complicated
                 // for just a simple test file
                 tables[tableTypes[i]].push({
@@ -104,17 +101,7 @@ const measureOperation = async (
         }
     };
 
-    const median = (values: number[]): number => {
-        const sorted = [...values].sort((a, b) => a - b);
-        const mid = Math.floor(sorted.length / 2);
-
-        if (sorted.length % 2 === 0) {
-            return (sorted[mid - 1] + sorted[mid]) / 2;
-        }
-        return sorted[mid];
-    };
-
-    const combine = (data: ResultsSummary[][]): ResultsSummary[] => {
+    const normalize = (data: ResultsSummary[][]): ResultsSummary[] => {
         if (!data.length) return [];
 
         const groups = data[0].length;
@@ -172,84 +159,15 @@ const measureOperation = async (
         return result;
     };
 
-    const percentile = (sorted: number[], p: number): number => {
-        if (sorted.length === 0) return 0;
-        if (p <= 0) return sorted[0];
-        if (p >= 1) return sorted[sorted.length - 1];
-
-        const n = sorted.length;
-        // fractional zero-based rank
-        const r = p * (n - 1);
-        const lower = Math.floor(r);
-        const upper = Math.ceil(r);
-        const weight = r - lower;
-
-        if (upper === lower) return sorted[lower];
-        return sorted[lower] * (1 - weight) + sorted[upper] * weight;
-    };
-
-    const snapshotMemory = () => {
-        const mem = process.memoryUsage();
-        return {
-            heapUsed: mem.heapUsed,
-            heapTotal: mem.heapTotal,
-            rss: mem.rss,
-        };
-    };
-
-    const performanceInfo = (
-        latencies: number[],
-        concurrency: number,
-        totalTimeMs: number,
-    ): PERFInfo => {
-        latencies.sort((a, b) => a - b);
-        const avgLatency =
-            latencies.reduce((sum, val) => sum + val, 0) / latencies.length;
-        const p95 = percentile(latencies, 0.95);
-        const p99 = percentile(latencies, 0.99);
-        const maxLatency = latencies[latencies.length - 1];
-        const minLatency = latencies[0];
-        const variance =
-            latencies.reduce(
-                (sum, val) => sum + Math.pow(val - avgLatency, 2),
-                0,
-            ) / latencies.length;
-        const stdDev = Math.sqrt(variance);
-
-        const totalTimeSec = totalTimeMs / 1000;
-        const throughputRPS = concurrency / totalTimeSec;
-
-        return {
-            "Avg Latency (ms)": avgLatency,
-            "p95 Latency (ms)": p95,
-            "p99 Latency (ms)": p99,
-            "Max Latency (ms)": maxLatency,
-            "Min Latency (ms)": minLatency,
-            "Std Dev (ms)": stdDev,
-            "Total Time (s)": totalTimeSec,
-            "Throughput (req/sec)": throughputRPS,
-        };
-    };
-
-    const test1 = async (): Promise<ResultsSummary[]> => {
+    const measure = async (): Promise<ResultsSummary[]> => {
         const resultsSummary: ResultsSummary[] = [];
 
         for (const [level, concurrency] of TEST_CONCURRENCY_LEVELS.entries()) {
-            const latencies: number[] = [];
-
-            // Ready memory
-            const samplesMem: Array<ReturnType<typeof snapshotMemory>> = [];
-            const samplerMem = setInterval(
-                () => samplesMem.push(snapshotMemory()),
-                50,
-            );
-            const startMem = snapshotMemory();
-
-            // Ready cpu
-            const startCpu = process.cpuUsage();
-
-            // Ready latency
             const startTime = performance.now();
+
+            perfMonitor.start(concurrency);
+            memMonitor.start(concurrency);
+            cpuMonitor.start(concurrency);
 
             const randomDelays: number[] = [];
             const promises = Array.from(
@@ -262,83 +180,43 @@ const measureOperation = async (
                         setTimeout(resolve, randomDelayMs),
                     );
 
-                    const start = performance.now();
-                    const result = await operation(level, i);
-                    latencies.push(performance.now() - start);
-                    return result;
+                    return await perfMonitor.watch(async () => {
+                        return await operation(level, i)
+                    });
                 },
             );
 
             const results = await Promise.all(promises);
             expect(results.every((r) => r.success)).toBe(true);
 
-            // Latency
+            perfMonitor.end();
+            cpuMonitor.end();
+            memMonitor.end();
+
             const endTime = performance.now();
             randomDelays.sort();
-            const totalTimeMs =
-                endTime - startTime - randomDelays[randomDelays.length - 1];
-            const performaceInfo = performanceInfo(
-                latencies,
-                concurrency,
-                totalTimeMs,
-            );
-
-            // Memory
-            clearInterval(samplerMem);
-            const endMem = snapshotMemory();
-            samplesMem.push(endMem);
-            const memInfo: MEMInfo = {
-                "Heap (MB)":
-                    (endMem.heapUsed - startMem.heapUsed) / 1024 / 1024,
-                "Median Heap (MB)":
-                    median(samplesMem.map((samp) => samp.heapUsed)) /
-                    1024 /
-                    1024,
-                "Median RSS (MB)":
-                    median(samplesMem.map((samp) => samp.rss)) / 1024 / 1024,
-            };
-
-            // Cpu
-            const endCpu = process.cpuUsage(startCpu);
-            const cpuTimeMs = (endCpu.user + endCpu.system) / 1000;
-            const wallMs = endTime - startTime;
-            const cpuPercent = (cpuTimeMs / (wallMs * CORES)) * 100;
-            const cpuMsPerReq = cpuTimeMs / concurrency;
-            const cpuInfo: CPUInfo = {
-                "CPU Time (ms)": cpuTimeMs,
-                "CPU Utilization (%)": cpuPercent,
-                "CPU Time per Request (ms)": cpuMsPerReq,
-            };
+            const totalTimeMs = endTime - startTime - randomDelays[randomDelays.length - 1];
 
             const row: ResultsSummary = {
                 Concurrency: concurrency,
-                CpuInfo: cpuInfo,
-                PerfInfo: performaceInfo,
-                MemInfo: memInfo,
+                CPUStatistics: cpuMonitor.get(totalTimeMs),
+                PerfStatistics: perfMonitor.get(totalTimeMs),
+                MEMStatistics: memMonitor.get(),
             };
+
             resultsSummary.push(row);
         }
 
         return resultsSummary;
     };
 
-    const test2 = (resultsSummary: ResultsSummary[]) => {
+    const validate = (resultsSummary: ResultsSummary[]) => {
         for (const results of resultsSummary) {
             const concurrency = Number(results["Concurrency"]);
-            const targetDuration = acceptableTime * concurrency;
             try {
-                expect(
-                    Number(results.PerfInfo["p95 Latency (ms)"]),
-                ).toBeLessThan(targetDuration * 1.25);
-                expect(
-                    Number(results.PerfInfo["p99 Latency (ms)"]),
-                ).toBeLessThan(targetDuration * 1.5);
-                expect(
-                    Number(results.PerfInfo["Max Latency (ms)"]),
-                ).toBeLessThan(targetDuration * 2);
-                expect(
-                    Number(results.PerfInfo["Min Latency (ms)"]),
-                ).toBeLessThan(targetDuration);
+                perfMonitor.validate(results.PerfStatistics, concurrency, acceptableTime);
+                cpuMonitor.validate(results.CPUStatistics, concurrency);
+                memMonitor.validate(results.MEMStatistics, concurrency);
             } catch {
                 return false;
             }
@@ -352,17 +230,17 @@ const measureOperation = async (
         allValidationRuns = [];
 
         let successCount = 0;
-        for (let i = 0; i < PERFORMANCE_THRESHOLDS.VALIDATION_RUNS; i++) {
-            const resultsSummary = await test1();
+        for (let i = 0; i < MeasurementConfig.ValidationRuns; i++) {
+            const resultsSummary = await measure();
             allValidationRuns.push(resultsSummary);
-            successCount += test2(resultsSummary) ? 1 : 0;
+            successCount += validate(resultsSummary) ? 1 : 0;
         }
 
         try {
             expect(
-                (successCount * PERFORMANCE_THRESHOLDS.VALIDATION_RUNS) / 100,
+                (successCount * MeasurementConfig.ValidationRuns) / 100,
             ).toBeGreaterThanOrEqual(
-                PERFORMANCE_THRESHOLDS.ACCEPTABLE_PASS_RATE,
+                MeasurementConfig.AcceptablePassRate,
             );
             if (!suggestOptimalAcceptableTime) break;
         } catch (e: unknown) {
@@ -375,12 +253,12 @@ const measureOperation = async (
             break;
         }
 
-        acceptableTime -= (acceptableTime * 10) / 100;
+        acceptableTime -= (acceptableTime * MeasurementConfig.TimeReductionRate) / 100;
         optimalTimeMeasurementIter += 1;
     }
 
-    const finalStatus = combine(allValidationRuns);
-    printTable(finalStatus);
+    const finalStatus = normalize(allValidationRuns);
+    print(finalStatus);
 };
 
 const activeClients: MockClient[] = [];
@@ -391,7 +269,7 @@ describe.skipIf(isRateLimiterOn)("Performance Tests", () => {
             const createLobbyResponse = await mockClient.createLobby();
             activeClients.push(mockClient);
             return createLobbyResponse;
-        }, PERFORMANCE_THRESHOLDS.LOBBY_CREATION);
+        }, MeasurementConfig.AcceptableLobbyCreationMs);
     }, 10000000000);
 
     test("Should scale efficiently across concurrency levels during lobby connection", async () => {
@@ -416,7 +294,7 @@ describe.skipIf(isRateLimiterOn)("Performance Tests", () => {
                 lobbyId: lobbyIds[level][i],
             });
             return connectLobbyResponse;
-        }, PERFORMANCE_THRESHOLDS.LOBBY_CONNECTION);
+        }, MeasurementConfig.AcceptableLobbyConnectionMs);
     });
 
     test("Should scale efficiently across concurrency levels during lobby reconnection", async () => {
@@ -445,7 +323,7 @@ describe.skipIf(isRateLimiterOn)("Performance Tests", () => {
             const reconnectLobbyResponse =
                 await clients[level][i].reconnectLobby();
             return reconnectLobbyResponse;
-        }, PERFORMANCE_THRESHOLDS.LOBBY_RECONNECTION);
+        }, MeasurementConfig.AcceptableLobbyReconnectionMs);
     });
 });
 
