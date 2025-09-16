@@ -9,9 +9,12 @@ import { Converter } from "@Chess/Utils/Converter";
  */
 export async function warmUp(serverUrl: string, rounds = 50): Promise<void> {
     console.log("Warming server up ...");
-    const p = Array.from({ length: rounds }, () => fetch(serverUrl));
-    await Promise.all(p);
-    await new Promise((r) => setTimeout(r, 50));
+    const f = Array.from({ length: rounds }, () => fetch(serverUrl));
+    await Promise.all(f);
+    await new Promise((r) => setTimeout(r, 100));
+    const w = Array.from({ length: rounds }, () => new WebSocket(serverUrl.replace("http", "ws")));
+    await Promise.all(w);
+    await new Promise((r) => setTimeout(r, 100));
 }
 
 /**

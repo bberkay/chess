@@ -73,7 +73,7 @@ export class MEMMonitor extends Monitor {
             "Median RSS (MB)": medianRSSMB,
         };
     }
-
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public validate(memStatistics: MEMStatistics, concurrency: number): void {
 
     }

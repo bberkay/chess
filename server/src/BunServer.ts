@@ -39,7 +39,7 @@ export function createServer(): Server {
     const webSocketHandler = new WebSocketHandler();
     const server = Bun.serve<WebSocketData, HTTPServerScheme>({
         port: Bun.env.SERVER_PORT,
-        // avaiable routes
+        maxRequestBodySize: Number(Bun.env.MAX_PAYLOAD_LENGTH),
         routes: httpRequestHandler.expose(),
         // fallback for unmatched routes
         fetch(req: Request, server: Server) {

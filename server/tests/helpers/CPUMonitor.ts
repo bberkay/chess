@@ -48,7 +48,7 @@ export class CPUMonitor extends Monitor {
             "CPU Time per Request (ms)": cpuMsPerReq,
         };
     }
-
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public validate(cpuStatistics: CPUStatistics, concurrency: number): void {
 
     }

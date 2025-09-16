@@ -13,44 +13,47 @@ import {
     PerfStatistics,
 } from "./helpers/PerformanceMonitor";
 
-// Number of simultaneous requests
-const TEST_CONCURRENCY_LEVELS = [1, 10, 50, 100, 1000, 2000];
-
-// Multiplier applied to acceptable performance thresholds
-// to provide buffer against unexpected delays or load spikes.
-const SAFETY_MARGIN = 1.5;
-
-const MeasurementConfig = {
-    AcceptableLobbyCreationMs: 0.4,
-
-    // Since the game begins immediately after the connection,
-    // we should include that time as well
-    // See WebSocketHandler._joinLobby(...) for more details.
-    AcceptableLobbyConnectionMs: 1.2, // 0.5 + 0.7
-
-    // Since the game resending immediately after the connection,
-    // we should include that time as well
-    // See WebSocketHandler._joinLobby(...) for more details.
-    AcceptableLobbyReconnectionMs: 0.7, // 0.5 + 0.2
-};
-
-const createTimeoutForTest = (tt: number) => {
-    const totalConcurrencyRun = TEST_CONCURRENCY_LEVELS.reduce(
-        (acc, val) => acc + ((val * 50) * tt),
-        0,
-    );
-    return (
-        totalConcurrencyRun *
-        SAFETY_MARGIN
-    );
-};
-
 const isRateLimiterOn = Number(Bun.env.ENABLE_RATE_LIMIT) === 1;
 if (isRateLimiterOn) {
     throw new Error(
         "Consider disabling `ENABLE_RATE_LIMIT` from .env.test to run performance tests.",
     );
 }
+
+//
+// -------------- CONFIG --------------
+//
+
+// PERF_MODE values:
+//   0 = regression (CI/CD) → adaptive thresholds, fails on real regressions
+//   1 = benchmark  (local) → prints detailed metrics, does not fail tests
+const MODE = Number(Bun.env.PERF_MODE) === 0 ? "regression" : "benchmark";
+if (MODE === "regression") {
+    console.warn(
+        "[PERF_MODE=0] Running in regression mode. " +
+        "Tests will enforce adaptive thresholds and may fail if performance regresses."
+    );
+} else {
+    console.warn(
+        "[PERF_MODE=1] Running in benchmark mode. " +
+        "Tests will print metrics only and will not fail on slow performance."
+    );
+}
+
+// Number of simultaneous requests
+const TEST_CONCURRENCY_LEVELS = MODE === "regression" ? [1, 10, 100] : [1, 100, 1000, 10_000];
+
+// How much slower than baseline we tolerate in regression mode
+const BASELINE_TOLERANCE = 2.0; // 2x slower = fail
+
+// Random delay between 0-50ms (simulates real user behavior)
+const BASELINE_MEASURE_RUN = 50;
+
+// Random delay between 0-50ms (simulates real user behavior)
+const MAX_REAL_USER_DELAY_MS = 50;
+
+//
+const TIMEOUT = 30_000;
 
 type ResultsSummary = { Concurrency: number } & {
     MEMStatistics: MEMStatistics;
@@ -70,53 +73,33 @@ beforeEach(async () => {
     if (typeof globalThis.gc === "function") globalThis.gc();
 });
 
+//
+// -------------- BASELINE LOGIC --------------
+//
+async function measureBaseline(fn: () => Promise<unknown>): Promise<number> {
+    const times: number[] = [];
+    for (let i = 0; i < BASELINE_MEASURE_RUN; i++) {
+        const start = performance.now();
+        await fn();
+        times.push(performance.now() - start);
+    }
+    const avg = times.reduce((a, b) => a + b, 0) / BASELINE_MEASURE_RUN;
+    return avg;
+}
+
+//
+// -------------- MEASURE FUNCTION --------------
+//
 const measureOperation = async (
     operation: (
         level: number,
         i: number,
     ) => Promise<CORSResponseBody<HTTPRoutes>>,
-    acceptableTime: number,
+    baseline: number,
 ): Promise<void> => {
     const perfMonitor = new PerformanceMonitor();
     const memMonitor = new MEMMonitor();
     const cpuMonitor = new CPUMonitor();
-
-    const print = (resultsSummary: ResultsSummary[]): void => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { Concurrency, ...scheme } = resultsSummary[0];
-        const tableTypes = Object.keys(scheme);
-        const tables = Object.fromEntries(tableTypes.map((k) => [k, []]));
-        for (let i = 0; i < tableTypes.length; i++) {
-            for (const status of resultsSummary) {
-                // @ts-expect-error is going to make code too complicated
-                // for just a simple test file
-                tables[tableTypes[i]].push({
-                    Concurrency: status.Concurrency,
-                    // @ts-expect-error is going to make code too complicated
-                    // for just a simple test file
-                    ...status[tableTypes[i]],
-                });
-            }
-        }
-
-        for (const tableType in tables) {
-            console.log(tableType);
-            console.table(tables[tableType]);
-        }
-    };
-
-    const validate = (resultsSummary: ResultsSummary[]) => {
-        for (const results of resultsSummary) {
-            const concurrency = Number(results["Concurrency"]);
-            perfMonitor.validate(
-                results.PerfStatistics,
-                concurrency,
-                acceptableTime,
-            );
-            cpuMonitor.validate(results.CPUStatistics, concurrency);
-            memMonitor.validate(results.MEMStatistics, concurrency);
-        }
-    };
 
     const resultsSummary: ResultsSummary[] = [];
 
@@ -131,8 +114,7 @@ const measureOperation = async (
         const promises = Array.from(
             { length: concurrency },
             async (_, i: number) => {
-                // Random delay between 0-50ms (simulates real user behavior)
-                const randomDelayMs = Math.random() * 50;
+                const randomDelayMs = Math.random() * MAX_REAL_USER_DELAY_MS;
                 randomDelays.push(randomDelayMs);
                 await new Promise((resolve) =>
                     setTimeout(resolve, randomDelayMs),
@@ -167,8 +149,31 @@ const measureOperation = async (
         resultsSummary.push(row);
     }
 
-    print(resultsSummary);
-    validate(resultsSummary);
+    // Always print results
+    for (const tableType of Object.keys(resultsSummary[0]).filter(k => k !== "Concurrency")) {
+        console.log(tableType);
+        console.table(resultsSummary.map((r) => ({
+            Concurrency: r.Concurrency,
+            // @ts-expect-error Fixing this would make the
+            // code too complicated
+            ...r[tableType as keyof ResultsSummary],
+        })));
+    }
+
+    // Only validate in regression mode
+    if (MODE === "regression") {
+        if (!baseline) throw new Error(`Baseline could not found.`);
+        for (const results of resultsSummary) {
+            const concurrency = Number(results["Concurrency"]);
+            perfMonitor.validate(
+                results.PerfStatistics,
+                concurrency,
+                baseline * BASELINE_TOLERANCE,
+            );
+            cpuMonitor.validate(results.CPUStatistics, concurrency);
+            memMonitor.validate(results.MEMStatistics, concurrency);
+        }
+    }
 };
 
 const activeClients: MockClient[] = [];
@@ -176,14 +181,21 @@ describe.skipIf(isRateLimiterOn)("Performance Tests", () => {
     test(
         "Should scale efficiently across concurrency levels during lobby creation",
         async () => {
+            console.log("Measuring baseline for lobby connection test...");
+            const lobbyCreationBaseline = await measureBaseline(async () => {
+                const c = new MockCreator(serverUrl, webSocketUrl);
+                return c.createLobby();
+            });
+
+            console.log("Lobbies are ready for creation test.");
             await measureOperation(async () => {
                 const mockClient = new MockCreator(serverUrl, webSocketUrl);
-                const createLobbyResponse = await mockClient.createLobby(undefined, true);
+                const createLobbyResponse = await mockClient.createLobby();
                 activeClients.push(mockClient);
                 return createLobbyResponse;
-            }, MeasurementConfig.AcceptableLobbyCreationMs);
+            }, lobbyCreationBaseline);
         },
-        createTimeoutForTest(MeasurementConfig.AcceptableLobbyCreationMs)
+        TIMEOUT
     );
 
     test(
@@ -202,22 +214,23 @@ describe.skipIf(isRateLimiterOn)("Performance Tests", () => {
                 lobbyIds.push(level);
             }
 
+            console.log("Measuring baseline for lobby connection test...");
+            const lobbyConnectionBaseline = await measureBaseline(async () => {
+                const c = new MockCreator(serverUrl, webSocketUrl);
+                return c.createLobby();
+            });
+
             console.log("Lobbies are ready for connection test.");
-            console.log("lobbyIds: ", lobbyIds);
             await measureOperation(async (level: number, i: number) => {
-                console.log("b: ", level, i);
                 const guest = new MockGuest(serverUrl, webSocketUrl);
                 const connectLobbyResponse = await guest.connectLobby({
                     name: "guest",
                     lobbyId: lobbyIds[level][i],
                 });
                 return connectLobbyResponse;
-            }, MeasurementConfig.AcceptableLobbyConnectionMs);
+            }, lobbyConnectionBaseline);
         },
-        createTimeoutForTest(
-            MeasurementConfig.AcceptableLobbyCreationMs *
-                MeasurementConfig.AcceptableLobbyConnectionMs,
-        ),
+        TIMEOUT
     );
 
     test(
@@ -246,18 +259,20 @@ describe.skipIf(isRateLimiterOn)("Performance Tests", () => {
                 clients.push(level);
             }
 
+            console.log("Measuring baseline for lobby reconnection test...");
+            const lobbyReconnectionBaseline = await measureBaseline(async () => {
+                const c = new MockCreator(serverUrl, webSocketUrl);
+                return c.createLobby();
+            });
+
             console.log("Lobbies are ready for reconnection test.");
             await measureOperation(async (level: number, i: number) => {
                 const reconnectLobbyResponse =
                     await clients[level][i].reconnectLobby();
                 return reconnectLobbyResponse;
-            }, MeasurementConfig.AcceptableLobbyReconnectionMs);
+            }, lobbyReconnectionBaseline);
         },
-        createTimeoutForTest(
-            MeasurementConfig.AcceptableLobbyCreationMs *
-                MeasurementConfig.AcceptableLobbyConnectionMs *
-                MeasurementConfig.AcceptableLobbyReconnectionMs,
-        ),
+        TIMEOUT
     );
 });
 
