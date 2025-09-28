@@ -3,9 +3,9 @@
  * @param func Function to be throttled.
  * @param delay Time to wait before calling the function again.
  */
-export function throttle <T extends (...args: any[]) => void>( // eslint-disable-line
+export function throttle<T extends (...args: any[]) => void>( // eslint-disable-line
     func: T,
-    delay: number
+    delay: number,
 ) {
     let inThrottle = false;
     let waitingParams: Parameters<T> | null = null;
@@ -29,7 +29,7 @@ export function throttle <T extends (...args: any[]) => void>( // eslint-disable
             waitingParams = args;
         }
     };
-};
+}
 
 /**
  * Debounces the `func` so it only runs after `wait` milliseconds have passed
@@ -38,10 +38,10 @@ export function throttle <T extends (...args: any[]) => void>( // eslint-disable
  * @param wait Time to wait before calling the function.
  * @returns A function that will call the original function after the wait time.
  */
-export function debounce (func: (...args: unknown[]) => void, wait: number) {
+export function debounce(func: (...args: unknown[]) => void, wait: number) {
     let timeout: number;
     return (...args: unknown[]) => {
         clearTimeout(timeout);
         timeout = setTimeout(() => func(...args), wait) as unknown as number;
     };
-};
+}

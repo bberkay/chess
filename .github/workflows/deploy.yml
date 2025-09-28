@@ -15,22 +15,30 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Detect changes
         id: detect_changes
         run: |
-          # Check client changes
-          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^client/'; then
+          if [ "${GITHUB_EVENT_BEFORE}" = "0000000000000000000000000000000000000000" ]; then
+            # First commit — assume everything changed
             echo "client_changed=true" >> $GITHUB_OUTPUT
-          else
-            echo "client_changed=false" >> $GITHUB_OUTPUT
-          fi
-
-          # Check server changes
-          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^server/'; then
             echo "server_changed=true" >> $GITHUB_OUTPUT
           else
-            echo "server_changed=false" >> $GITHUB_OUTPUT
+            # Detect client changes
+            if git diff --name-only $GITHUB_EVENT_BEFORE $GITHUB_SHA | grep -q '^client/'; then
+              echo "client_changed=true" >> $GITHUB_OUTPUT
+            else
+              echo "client_changed=false" >> $GITHUB_OUTPUT
+            fi
+
+            # Detect server changes
+            if git diff --name-only $GITHUB_EVENT_BEFORE $GITHUB_SHA | grep -q '^server/'; then
+              echo "server_changed=true" >> $GITHUB_OUTPUT
+            else
+              echo "server_changed=false" >> $GITHUB_OUTPUT
+            fi
           fi
 
       - name: Set up Bun
