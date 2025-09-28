@@ -13,13 +13,22 @@
  * createURLFromEntries("http://localhost:3000", "api/users", { name: "Alice", active: true })
  * // Returns: "http://localhost:3000/api/users?name=Alice&active=true"
  */
-export function createURLFromEntries(root?: string, pathname?: string, endpoint?: Record<string, string | number | boolean | null | undefined>): string {
+export function createURLFromEntries(
+    root?: string,
+    pathname?: string,
+    endpoint?: Record<string, string | number | boolean | null | undefined>,
+): string {
     let url: string = root || "";
     if (root && !root.endsWith("/")) url += "/";
     if (pathname) url += pathname;
     if (endpoint && !url.endsWith("?")) url += "?";
     if (!endpoint) return url;
-    return url + new URLSearchParams(Object.entries(endpoint).map(([k, v]) => [k, String(v)])).toString();
+    return (
+        url +
+        new URLSearchParams(
+            Object.entries(endpoint).map(([k, v]) => [k, String(v)]),
+        ).toString()
+    );
 }
 
 /**
@@ -53,7 +62,9 @@ export function getQueryParam(url: string, key: string): string | null {
  * Parses query parameters from a URL and returns them as a typed key-value object.
  * Example: getQueryParams<{ userId: string }>(url) -> { userId: "567" }
  */
-export function getQueryParams<T extends Record<string, string>>(url: string): Partial<T> {
+export function getQueryParams<T extends Record<string, string>>(
+    url: string,
+): Partial<T> {
     try {
         const parsedUrl = new URL(url);
         const result = {} as Partial<T>;
