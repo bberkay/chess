@@ -8,5 +8,5 @@ export interface TestGame{
     board: JsonNotation | StartPosition | string;
     durations?: Durations;
     moves?: Array<Move>;
-    expectation: any;
+    expectation: unknown;
 }
