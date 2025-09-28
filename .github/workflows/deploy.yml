@@ -1,0 +1,83 @@
+name: CI + CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  # Detect Changes & Run Tests
+  test:
+    runs-on: ubuntu-latest
+    outputs:
+      client_changed: ${{ steps.detect_changes.outputs.client_changed }}
+      server_changed: ${{ steps.detect_changes.outputs.server_changed }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Detect changes
+        id: detect_changes
+        run: |
+          # Check client changes
+          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^client/'; then
+            echo "client_changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "client_changed=false" >> $GITHUB_OUTPUT
+          fi
+
+          # Check server changes
+          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^server/'; then
+            echo "server_changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "server_changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: ./server/.bun-version
+
+      # Server tests
+      - name: Install dependencies (server)
+        if: steps.detect_changes.outputs.server_changed == 'true'
+        working-directory: ./server
+        run: bun install
+
+      - name: Run tests (server)
+        if: steps.detect_changes.outputs.server_changed == 'true'
+        working-directory: ./server
+        run: bun test
+
+      # Client tests
+      - name: Install dependencies (client)
+        if: steps.detect_changes.outputs.client_changed == 'true'
+        working-directory: ./client
+        run: bun install
+
+      - name: Run tests (client)
+        if: steps.detect_changes.outputs.client_changed == 'true'
+        working-directory: ./client
+        run: bun test
+
+  # Deploy Client (Vercel) if changed
+  deploy-client:
+    needs: test
+    if: needs.test.outputs.client_changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy client to Vercel
+        run: curl -X POST ${{ secrets.VERCEL_DEPLOY_HOOK }}
+
+  # Deploy Server (Render) if changed
+  deploy-server:
+    needs: test
+    if: needs.test.outputs.server_changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy server to Render
+        run: |
+          curl -X POST \
+          -H "Accept: application/json" \
+          -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+          https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}/deploys
