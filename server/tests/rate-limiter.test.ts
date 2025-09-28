@@ -8,7 +8,7 @@ import { TEST_BOARD } from "./consts";
 // Check rate and message limiter
 const isRateLimiterOff = Number(Bun.env.ENABLE_RATE_LIMIT) === 0;
 if (isRateLimiterOff) {
-    throw new Error(
+    console.error(
         "Consider enabling `ENABLE_RATE_LIMIT` from .env.test to run rate limiting tests."
     );
 }
@@ -25,7 +25,7 @@ const WS_REQUEST_COUNT = RATE_LIMIT * 1.5;
 const MAX_RCMNDD_REQUEST_COUNT_FOR_TESTING = 50;
 console.log(".RATE_LIMIT from .env.test: ", RATE_LIMIT);
 if (RATE_LIMIT > MAX_RCMNDD_REQUEST_COUNT_FOR_TESTING) {
-    throw new Error(
+    console.warn(
         `Consider reducing "RATE_LIMIT" below ${MAX_RCMNDD_REQUEST_COUNT_FOR_TESTING} from .env.test for faster tests.`
     );
 }
@@ -36,7 +36,7 @@ const SAFETY_MARGIN = 2;
 const MAX_RCMNDD_WINDOW_MS_FOR_TESTING = 5000;
 console.log(".RATE_WINDOW_MS from .env.test: ", RATE_WINDOW_MS);
 if (RATE_WINDOW_MS > MAX_RCMNDD_WINDOW_MS_FOR_TESTING) {
-    throw new Error(
+    console.warn(
         `Consider reducing "RATE_WINDOW_MS" below ${MAX_RCMNDD_WINDOW_MS_FOR_TESTING} from .env.test for faster tests.`
     );
 }

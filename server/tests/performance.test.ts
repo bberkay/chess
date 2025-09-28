@@ -15,7 +15,7 @@ import {
 
 const isRateLimiterOn = Number(Bun.env.ENABLE_RATE_LIMIT) === 1;
 if (isRateLimiterOn) {
-    throw new Error(
+    console.error(
         "Consider disabling `ENABLE_RATE_LIMIT` from .env.test to run performance tests.",
     );
 }

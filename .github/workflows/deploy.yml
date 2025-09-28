@@ -33,6 +33,11 @@ jobs:
           bun-version-file: ./server/.bun-version
 
       # Server tests
+      - name: Create server .env file
+        if: steps.changes.outputs.server == 'true'
+        working-directory: ./server
+        run: echo "${{ secrets.ENV_FILE_SERVER }}" > .env
+
       - name: Create server .env.test file
         if: steps.changes.outputs.server == 'true'
         working-directory: ./server
@@ -49,6 +54,11 @@ jobs:
         run: bun test
 
       # Client tests
+      - name: Create client .env file
+        if: steps.changes.outputs.client == 'true'
+        working-directory: ./client
+        run: echo "${{ secrets.ENV_FILE_CLIENT }}" > .env
+
       - name: Create client .env.test file
         if: steps.changes.outputs.client == 'true'
         working-directory: ./client
