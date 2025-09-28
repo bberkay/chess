@@ -85,8 +85,8 @@ export interface Player {
  * as it will be shared with both players in the lobby.
  */
 export interface Players {
-    [Color.White]: Omit<Player, 'token'>;
-    [Color.Black]: Omit<Player, 'token'>;
+    [Color.White]: Omit<Player, "token">;
+    [Color.Black]: Omit<Player, "token">;
 }
 
 /**
@@ -245,9 +245,7 @@ export type WsDataMap = {
  * This structure is used to minimize payload size and avoid unnecessary `undefined` values in messages.
  */
 export type WsOutgoingMessage = {
-    [T in keyof WsDataMap]: null extends WsDataMap[T]
-        ? [T]
-        : [T, WsDataMap[T]];
+    [T in keyof WsDataMap]: null extends WsDataMap[T] ? [T] : [T, WsDataMap[T]];
 }[keyof WsDataMap];
 
 /**
@@ -261,5 +259,5 @@ export type WsOutgoingMessage = {
 export type WsIncomingMessage = {
     [T in keyof WsDataMap]: WsDataMap[T] extends null
         ? [T]
-        : [T, Exclude<WsDataMap[T], null>]
+        : [T, Exclude<WsDataMap[T], null>];
 }[keyof WsDataMap];
