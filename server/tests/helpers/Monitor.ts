@@ -4,5 +4,5 @@ export abstract class Monitor {
     public abstract end(): void;
     protected abstract _reset(): void;
     public abstract get(totalTimeMs: number): unknown;
-    public abstract validate(statistics: unknown, concurrency: number, ...args: unknown[]): void;
+    public abstract validate(statistics: unknown, ...args: unknown[]): void;
 }
