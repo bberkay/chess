@@ -21,25 +21,22 @@ jobs:
       - name: Detect changes
         id: detect_changes
         run: |
-          if [ "${GITHUB_EVENT_BEFORE}" = "0000000000000000000000000000000000000000" ]; then
-            # First commit — assume everything changed
+            if [ "${GITHUB_EVENT_BEFORE}" = "0000000000000000000000000000000000000000" ]; then
             echo "client_changed=true" >> $GITHUB_OUTPUT
             echo "server_changed=true" >> $GITHUB_OUTPUT
-          else
-            # Detect client changes
-            if git diff --name-only $GITHUB_EVENT_BEFORE $GITHUB_SHA | grep -q '^client/'; then
-              echo "client_changed=true" >> $GITHUB_OUTPUT
             else
-              echo "client_changed=false" >> $GITHUB_OUTPUT
+            if git diff --name-only $GITHUB_EVENT_BEFORE $GITHUB_SHA | grep -q '^client/'; then
+                echo "client_changed=true" >> $GITHUB_OUTPUT
+            else
+                echo "client_changed=false" >> $GITHUB_OUTPUT
             fi
 
-            # Detect server changes
             if git diff --name-only $GITHUB_EVENT_BEFORE $GITHUB_SHA | grep -q '^server/'; then
-              echo "server_changed=true" >> $GITHUB_OUTPUT
+                echo "server_changed=true" >> $GITHUB_OUTPUT
             else
-              echo "server_changed=false" >> $GITHUB_OUTPUT
+                echo "server_changed=false" >> $GITHUB_OUTPUT
             fi
-          fi
+            fi
 
       - name: Set up Bun
         uses: oven-sh/setup-bun@v2
@@ -48,23 +45,23 @@ jobs:
 
       # Server tests
       - name: Install dependencies (server)
-        if: steps.detect_changes.outputs.server_changed == 'true'
+        if: ${{ steps.detect_changes.outputs.server_changed == 'true' }}
         working-directory: ./server
         run: bun install
 
       - name: Run tests (server)
-        if: steps.detect_changes.outputs.server_changed == 'true'
+        if: ${{ steps.detect_changes.outputs.server_changed == 'true' }}
         working-directory: ./server
         run: bun test
 
       # Client tests
       - name: Install dependencies (client)
-        if: steps.detect_changes.outputs.client_changed == 'true'
+        if: ${{ steps.detect_changes.outputs.client_changed == 'true' }}
         working-directory: ./client
         run: bun install
 
       - name: Run tests (client)
-        if: steps.detect_changes.outputs.client_changed == 'true'
+        if: ${{ steps.detect_changes.outputs.client_changed == 'true' }}
         working-directory: ./client
         run: bun test
 
