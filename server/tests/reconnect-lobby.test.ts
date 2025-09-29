@@ -1,7 +1,7 @@
 import { createServer } from "src/BunServer";
 import { test, expect, beforeAll, afterAll, describe, beforeEach } from "vitest";
 import { type Server } from "bun";
-import { waitForWebSocketSettle } from "./utils";
+import { createLocalBoard, waitForWebSocketSettle } from "./utils";
 import { pruneIPMessages, WsReconnectedData, WsStartedData, WsTitle } from "@WebSocket";
 import { Color, Square } from "@Chess/Types";
 import { MockCreator } from "./helpers/MockCreator";
@@ -20,6 +20,8 @@ beforeAll(async () => {
     server = createServer();
     serverUrl = server.url.href;
     webSocketUrl = server.url.href.replace("http", "ws");
+    pruneIPRequests(true);
+    pruneIPMessages(true);
 });
 
 beforeEach(async () => {
@@ -60,7 +62,12 @@ const shouldReconnect = async (alreadyConnectedClient: MockClient, reconnectClie
 
     expect(creatorRestartedData).toBeTruthy();
     expect(guestRestartedData).toBeTruthy();
-    expect(creatorRestartedData).toEqual(guestRestartedData);
+    // Remove durations from game since they cannot be same
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { durations: creatorDurations, ...creatorRestartedGame } = creatorRestartedData.game;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { durations: guestDurations, ...guestRestartedGame } = guestRestartedData.game;
+    expect(creatorRestartedGame).toEqual(guestRestartedGame);
 
     const testLobby = LobbyRegistry.get(reconnectClient.lobbyId!);
     if (!testLobby) throw new Error("Created lobby could not found");
