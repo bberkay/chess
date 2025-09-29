@@ -8,7 +8,6 @@ import { describe, expect, test } from 'vitest';
 import { TestGame } from './types';
 import { ChessEngine } from '@Chess/Engine/ChessEngine';
 import { GameStatus, Square, StartPosition } from "@Chess/Types";
-import { BoardQuerier } from "@Chess/Engine/Board/BoardQuerier";
 
 /**
  * Test the fifty-move rule (50 moves without a capture
@@ -68,7 +67,8 @@ describe('Fifty Move Rule Test', () => {
              * If it is not, then check if the game status is equal to the expectation.
              */
             if(typeof game.expectation === "number")
-                expect(BoardQuerier.getHalfMoveCount()).toBe(game.expectation);
+                // @ts-expect-error Do not care for typescript error about access of boardQuerier
+                expect(engine.boardQuerier.getHalfMoveCount()).toBe(game.expectation);
             else
                 expect(engine.getGameStatus()).toBe(game.expectation);
 

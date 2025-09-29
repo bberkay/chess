@@ -18,8 +18,9 @@ export class Board {
     /**
      * Properties of the Board class.
      */
+
     // prettier-ignore
-    protected static currentBoard: Record<Square, Piece | null> = {
+    public currentBoard: Record<Square, Piece | null> = {
         [Square.a1]: null, [Square.a2]: null, [Square.a3]: null, [Square.a4]: null, [Square.a5]: null, [Square.a6]: null, [Square.a7]: null, [Square.a8]: null,
         [Square.b1]: null, [Square.b2]: null, [Square.b3]: null, [Square.b4]: null, [Square.b5]: null, [Square.b6]: null, [Square.b7]: null, [Square.b8]: null,
         [Square.c1]: null, [Square.c2]: null, [Square.c3]: null, [Square.c4]: null, [Square.c5]: null, [Square.c6]: null, [Square.c7]: null, [Square.c8]: null,
@@ -29,23 +30,23 @@ export class Board {
         [Square.g1]: null, [Square.g2]: null, [Square.g3]: null, [Square.g4]: null, [Square.g5]: null, [Square.g6]: null, [Square.g7]: null, [Square.g8]: null,
         [Square.h1]: null, [Square.h2]: null, [Square.h3]: null, [Square.h4]: null, [Square.h5]: null, [Square.h6]: null, [Square.h7]: null, [Square.h8]: null,
     };
-    protected static currentTurn: Color = Color.White;
-    protected static moveCount: number = 0;
-    protected static halfMoveCount: number = 0;
-    protected static enPassant: Square | null = null;
-    protected static castling: Castling = {
+    public currentTurn: Color = Color.White;
+    public moveCount: number = 0;
+    public halfMoveCount: number = 0;
+    public enPassant: Square | null = null;
+    public castling: Castling = {
         [CastlingType.WhiteLong]: true,
         [CastlingType.WhiteShort]: true,
         [CastlingType.BlackLong]: true,
         [CastlingType.BlackShort]: true,
     };
-    protected static scores: Scores = {
+    public scores: Scores = {
         [Color.White]: { score: 0, pieces: [] },
         [Color.Black]: { score: 0, pieces: [] },
     };
-    protected static algebraicNotation: string[] = [];
-    protected static moveHistory: Move[] = [];
-    protected static durations: Durations | null = null;
-    protected static gameStatus: GameStatus = GameStatus.NotReady;
-    protected static boardHistory: JsonNotation[] = [];
+    public algebraicNotation: string[] = [];
+    public moveHistory: Move[] = [];
+    public durations: Durations | null = null;
+    public gameStatus: GameStatus = GameStatus.NotReady;
+    public boardHistory: JsonNotation[] = [];
 }

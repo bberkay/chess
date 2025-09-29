@@ -31,6 +31,7 @@ import { Converter } from "../Utils/Converter";
 import { BoardQuerier } from "./Board/BoardQuerier.ts";
 import { Locator } from "./Move/Utils/Locator.ts";
 import { Flattener } from "./Move/Utils/Flattener.ts";
+import { Board } from "./Board/Board.ts";
 
 /**
  * MoveValidationError class is used when the given
@@ -69,8 +70,13 @@ export class DurationsAreNotSet extends Error {
  * This class provides users to create and manage a game(does not include board or other ui elements).
  */
 export class ChessEngine {
-    private readonly moveEngine: MoveEngine = new MoveEngine();
-    private readonly boardManager: BoardManager = new BoardManager();
+    private readonly board: Board = new Board();
+    private readonly boardQuerier = new BoardQuerier(this.board);
+    private readonly boardManager: BoardManager = new BoardManager(
+        this.board,
+        this.boardQuerier,
+    );
+    private readonly moveEngine: MoveEngine = new MoveEngine(this.boardQuerier);
 
     private playedFrom: Square | null = null;
     private playedTo: Square | null = null;
@@ -105,17 +111,21 @@ export class ChessEngine {
      * @see For more information about StartPosition enum check src/Chess/Types/index.ts
      */
     public createGame(
-        position: JsonNotation | StartPosition | string = StartPosition.Standard
+        position:
+            | JsonNotation
+            | StartPosition
+            | string = StartPosition.Standard,
     ): void {
         this.clearProperties();
         this.boardManager.createBoard(
             typeof position !== "string"
                 ? position
-                : Converter.fenToJson(position)
+                : Converter.fenToJson(position),
         );
         this.checkGameStatus();
         this.createTimersIfGiven();
-        if (this.getBoardHistory().length === 0) this.boardManager.saveCurrentBoard();
+        if (this.getBoardHistory().length === 0)
+            this.boardManager.saveCurrentBoard();
         this.log?.("Game is created");
     }
 
@@ -146,28 +156,28 @@ export class ChessEngine {
      * This function returns the current game as fen notation.
      */
     public getGameAsFenNotation(): string {
-        return Converter.jsonToFen(BoardQuerier.getGame());
+        return Converter.jsonToFen(this.boardQuerier.getGame());
     }
 
     /**
      * This function returns the current game as json notation.
      */
     public getGameAsJsonNotation(): JsonNotation {
-        return BoardQuerier.getGame();
+        return this.boardQuerier.getGame();
     }
 
     /**
      * This function returns the current game as ascii notation.
      */
     public getGameAsAscii(): string {
-        return Converter.jsonToASCII(BoardQuerier.getGame());
+        return Converter.jsonToASCII(this.boardQuerier.getGame());
     }
 
     /**
      * Get initial durations of the players.
      */
     public getDurations(): Durations | null {
-        return BoardQuerier.getDurations();
+        return this.boardQuerier.getDurations();
     }
 
     /**
@@ -175,10 +185,11 @@ export class ChessEngine {
      * in milliseconds.
      */
     public getPlayersRemainingTime(): RemainingTimes {
-        if (!BoardQuerier.getDurations())
+        if (!this.boardQuerier.getDurations())
             throw new DurationsAreNotSet("Durations are not set");
 
-        if (!this.timerMap) throw new TimerNotAvailableError("Timers are not available");
+        if (!this.timerMap)
+            throw new TimerNotAvailableError("Timers are not available");
 
         return {
             [Color.White]: this.timerMap.White.timer.get(),
@@ -201,7 +212,7 @@ export class ChessEngine {
         this._isBoardPlayable = false;
         this._threefoldRepetitionHistory = [];
         this.log?.(
-            "Game properties set to default on ChessEngine, timers and bot are destroyed if they are created"
+            "Game properties set to default on ChessEngine, timers and bot are destroyed if they are created",
         );
     }
 
@@ -209,21 +220,21 @@ export class ChessEngine {
      * Create timer for the players if the durations are set.
      */
     private createTimersIfGiven(): void {
-        const durations = BoardQuerier.getDurations();
+        const durations = this.boardQuerier.getDurations();
         if (!durations) return;
 
         this.timerMap = {
             [Color.White]: {
                 timer: new Timer(
                     durations[Color.White].remaining,
-                    durations[Color.White].increment
+                    durations[Color.White].increment,
                 ),
                 intervalId: undefined,
             },
             [Color.Black]: {
                 timer: new Timer(
                     durations[Color.Black].remaining,
-                    durations[Color.Black].increment
+                    durations[Color.Black].increment,
                 ),
                 intervalId: undefined,
             },
@@ -231,7 +242,7 @@ export class ChessEngine {
 
         this.updateTimersIfExists();
         this.log?.(
-            "Timers are created and updated according to the turn color"
+            "Timers are created and updated according to the turn color",
         );
     }
 
@@ -269,7 +280,7 @@ export class ChessEngine {
          */
         if (!Object.hasOwn(this.currentMoves, from)) {
             this.log?.(
-                "Move type is not found because there is no selected square"
+                "Move type is not found because there is no selected square",
             );
             return null;
         }
@@ -293,8 +304,8 @@ export class ChessEngine {
             `Move type is not found because the given move-ts-${
                 to
             }-te- is not in the current moves-ts-${JSON.stringify(
-                this.currentMoves[from]
-            )}-te-`
+                this.currentMoves[from],
+            )}-te-`,
         );
         return null;
     }
@@ -304,22 +315,25 @@ export class ChessEngine {
      */
     public getMoves(
         square: Square,
-        isPreCalculation: boolean = false
+        isPreCalculation: boolean = false,
     ): Moves | null {
         if (isPreCalculation) {
             this.log?.(
-                `Pre-calculation of moves of the square-ts-${square}-te- is started`
+                `Pre-calculation of moves of the square-ts-${square}-te- is started`,
             );
             return this.moveEngine.getMoves(square, !isPreCalculation);
         }
 
-        if (!this._isBoardPlayable || !BoardQuerier.isSquareSelectable(square)) {
+        if (
+            !this._isBoardPlayable ||
+            !this.boardQuerier.isSquareSelectable(square)
+        ) {
             this.log?.(
                 `Moves of the square is not found because ${
                     !this._isBoardPlayable
                         ? `board is not playable`
                         : ` square[${square}] is not selectable`
-                }`
+                }`,
             );
             return null;
         }
@@ -330,16 +344,16 @@ export class ChessEngine {
         this.log?.(
             Object.hasOwn(this.currentMoves, square)
                 ? `Moves of the square-ts-${square}-te- is found from calculated moves-ts-${JSON.stringify(
-                      this.currentMoves
+                      this.currentMoves,
                   )}-te-`
-                : `Moves of the square-ts-${square}-te- is calculated by move engine`
+                : `Moves of the square-ts-${square}-te- is calculated by move engine`,
         );
 
         // Save the moves to the calculatedMoves.
         this.log?.(
             `Moves of the square is saved to calculated moves-ts-${JSON.stringify(
-                this.currentMoves
-            )}-te-`
+                this.currentMoves,
+            )}-te-`,
         );
 
         // Return the moves.
@@ -357,7 +371,7 @@ export class ChessEngine {
         const turnDifference = this.getTurnColor() != undoColor ? 0 : 2;
         const movesToUndo = undoColor
             ? this.getBoardHistory().findLastIndex(
-                  (board) => board.turn == undoColor
+                  (board) => board.turn == undoColor,
               ) - turnDifference
             : 1;
         if (movesToUndo == -1)
@@ -367,21 +381,21 @@ export class ChessEngine {
             ? this.getBoardHistory().length - 1 - movesToUndo
             : 1;
         this.boardManager.createBoard(
-            BoardQuerier.getBoardHistory().length >
+            this.boardQuerier.getBoardHistory().length >
                 (undoColor == Color.Black ? 2 : 1)
                 ? {
-                      ...BoardQuerier.getBoardHistory()
+                      ...this.boardQuerier
+                          .getBoardHistory()
                           .slice(0, -lastIndex)
                           .pop()!,
-                      boardHistory: BoardQuerier.getBoardHistory().slice(
-                          0,
-                          -lastIndex
-                      ),
+                      boardHistory: this.boardQuerier
+                          .getBoardHistory()
+                          .slice(0, -lastIndex),
                   }
                 : {
-                      ...BoardQuerier.getBoardHistory().pop()!,
+                      ...this.boardQuerier.getBoardHistory().pop()!,
                       boardHistory: [],
-                  }
+                  },
         );
         this.updateTimersIfExists();
     }
@@ -391,32 +405,34 @@ export class ChessEngine {
      * @param {MoveType|null} moveType The type of the move to prevent recalculation
      * if calculated before.
      */
-    public playMove(from: Square, to: Square, moveType: MoveType | null = null): void {
+    public playMove(
+        from: Square,
+        to: Square,
+        moveType: MoveType | null = null,
+    ): void {
         if (
             [
                 GameStatus.NotReady,
                 GameStatus.Draw,
                 GameStatus.WhiteVictory,
                 GameStatus.BlackVictory,
-            ].includes(BoardQuerier.getBoardStatus())
+            ].includes(this.boardQuerier.getBoardStatus())
         ) {
             this.log?.(
-                "Move is not played because game is not started or game is finished."
+                "Move is not played because game is not started or game is finished.",
             );
             return;
         }
 
         if (this.getGameStatus() == GameStatus.ReadyToStart) {
             this.boardManager.setGameStatus(GameStatus.InPlay);
-            this.log?.(
-                "Game status set to in play because game is started"
-            );
+            this.log?.("Game status set to in play because game is started");
         }
 
         if (!this.currentMoves || !Object.hasOwn(this.currentMoves, from)) {
             this.currentMoves[from] = this.getMoves(from);
             this.log?.(
-                "Moves of the square is not calculated so calculate the moves"
+                "Moves of the square is not calculated so calculate the moves",
             );
         }
 
@@ -435,9 +451,13 @@ export class ChessEngine {
             this._doPromote(to);
             this.moveType = MoveType.Promote;
         } else {
-            if(!moveType) {
-                const moveType: MoveType | null = this.checkAndFindMoveType(from, to);
-                if (!moveType) throw new MoveValidationError("Move is not valid");
+            if (!moveType) {
+                const moveType: MoveType | null = this.checkAndFindMoveType(
+                    from,
+                    to,
+                );
+                if (!moveType)
+                    throw new MoveValidationError("Move is not valid");
                 this.moveType = moveType;
             } else {
                 this.moveType = moveType;
@@ -456,7 +476,7 @@ export class ChessEngine {
                 case MoveType.Normal:
                     this._doNormalMove(from, to, true);
                     this.log?.(
-                        `Piece moved to target square-ts-${to}-te- on engine`
+                        `Piece moved to target square-ts-${to}-te- on engine`,
                     );
                     break;
             }
@@ -475,20 +495,20 @@ export class ChessEngine {
     private _doNormalMove(
         from: Square,
         to: Square,
-        saveToHistory: boolean = false
+        saveToHistory: boolean = false,
     ): void {
         if (saveToHistory) {
             /**
              * Set the current move for the move history.
              * @see For more information about history, see https://en.wikipedia.org/wiki/Algebraic_notation_(chess)
              */
-            const piece: Piece = BoardQuerier.getPieceOnSquare(from)!;
+            const piece: Piece = this.boardQuerier.getPieceOnSquare(from)!;
 
             // If the piece is not pawn then add the piece name to the current move.
             if (piece?.getType() != PieceType.Pawn)
                 this.moveNotation += Converter.pieceTypeToPieceName(
                     piece.getType(),
-                    piece.getColor()
+                    piece.getColor(),
                 );
 
             /**
@@ -511,13 +531,13 @@ export class ChessEngine {
                 ].includes(piece!.getType())
             ) {
                 const sameTypePieces: Array<Piece> =
-                    BoardQuerier.getPiecesWithFilter(piece?.getColor(), [
+                    this.boardQuerier.getPiecesWithFilter(piece?.getColor(), [
                         piece?.getType(),
                     ]);
                 if (sameTypePieces.length > 1) {
                     for (const pieceItem of sameTypePieces) {
                         const pieceItemSquare: Square =
-                            BoardQuerier.getSquareOfPiece(pieceItem)!;
+                            this.boardQuerier.getSquareOfPiece(pieceItem)!;
                         if (!Object.hasOwn(this.currentMoves, pieceItemSquare))
                             this.currentMoves[pieceItemSquare] =
                                 this.moveEngine.getMoves(pieceItemSquare);
@@ -566,13 +586,13 @@ export class ChessEngine {
                         /^([rnbqRNBQ])([1-8])([a-h])$/;
                     this.moveNotation = this.moveNotation.replace(
                         rowColumnIncorrectOrderPattern,
-                        "$1$3$2"
+                        "$1$3$2",
                     );
                 }
             }
 
             // If the move kill a piece then add "x" to the current move.
-            if (BoardQuerier.isSquareHasPiece(to)) {
+            if (this.boardQuerier.isSquareHasPiece(to)) {
                 // If the piece is pawn then add the column of the pawn to the current move.
                 if (piece?.getType() == PieceType.Pawn)
                     this.moveNotation += Converter.squareIDToSquare(from)[0];
@@ -630,7 +650,7 @@ export class ChessEngine {
                 : Number(this.playedFrom) + 2;
         this._doNormalMove(this.playedFrom as Square, kingNewSquare as Square);
         this.log?.(
-            `King moved to target square-ts-${kingNewSquare}-te- on engine`
+            `King moved to target square-ts-${kingNewSquare}-te- on engine`,
         );
 
         /**
@@ -655,13 +675,15 @@ export class ChessEngine {
 
         // Disable the castling.
         this.boardManager.disableCastling(
-            (BoardQuerier.getTurnColor() + CastlingSide.Short) as CastlingType
+            (this.boardQuerier.getTurnColor() +
+                CastlingSide.Short) as CastlingType,
         );
         this.boardManager.disableCastling(
-            (BoardQuerier.getTurnColor() + CastlingSide.Long) as CastlingType
+            (this.boardQuerier.getTurnColor() +
+                CastlingSide.Long) as CastlingType,
         );
         this.log?.(
-            `Rook moved to target square and castling-ts-${castlingSide}-te- move is saved.`
+            `Rook moved to target square and castling-ts-${castlingSide}-te- move is saved.`,
         );
 
         // Set the current move for the move history.
@@ -677,7 +699,7 @@ export class ChessEngine {
     private _doEnPassant(): void {
         this._doNormalMove(this.playedFrom as Square, this.playedTo as Square);
         this.log?.(
-            `Piece moved to target square-ts-${this.playedTo}-te- on engine`
+            `Piece moved to target square-ts-${this.playedTo}-te- on engine`,
         );
 
         /**
@@ -690,16 +712,16 @@ export class ChessEngine {
          */
         const killedPieceSquare =
             Number(this.playedTo) +
-            (BoardQuerier.getPieceOnSquare(
-                this.playedTo as Square
-            )?.getColor() == Color.White
+            (this.boardQuerier
+                .getPieceOnSquare(this.playedTo as Square)
+                ?.getColor() == Color.White
                 ? 8
                 : -8);
 
         // Remove the killed piece.
         this.boardManager.removePiece(killedPieceSquare);
         this.log?.(
-            `Captured piece by en passant move is found on square-ts-${killedPieceSquare}-te- and removed on engine`
+            `Captured piece by en passant move is found on square-ts-${killedPieceSquare}-te- and removed on engine`,
         );
 
         // Set the current move for the move history.
@@ -717,10 +739,10 @@ export class ChessEngine {
         this._doNormalMove(
             this.playedFrom as Square,
             this.playedTo as Square,
-            true
+            true,
         );
         this.log?.(
-            `Piece moved to target square-ts-${this.playedTo}-te- on engine`
+            `Piece moved to target square-ts-${this.playedTo}-te- on engine`,
         );
         this._isPromoteWaiting = true;
     }
@@ -746,13 +768,13 @@ export class ChessEngine {
             to > 8 && to < 32
                 ? to - (Locator.getRow(to) - 1) * 8
                 : to > 32 && to < 57
-                ? to + (8 - Locator.getRow(to)) * 8
-                : to;
+                  ? to + (8 - Locator.getRow(to)) * 8
+                  : to;
 
         // Remove the pawn.
         this.boardManager.removePiece(firstSquareOfRow);
         this.log?.(
-            `Promoted Pawn is removed from square-ts-${to}-te- on engine`
+            `Promoted Pawn is removed from square-ts-${to}-te- on engine`,
         );
 
         /**
@@ -786,21 +808,21 @@ export class ChessEngine {
             ([6, 3].includes(clickedRow) ? PieceType.Bishop : null) ||
             ([5, 4].includes(clickedRow) ? PieceType.Knight : null))!;
         this.log?.(
-            `Promoted piece type-ts-${selectedPromote}-te- is determined by clicked row-ts-${clickedRow}-te- on engine`
+            `Promoted piece type-ts-${selectedPromote}-te- is determined by clicked row-ts-${clickedRow}-te- on engine`,
         );
 
         // Get the player's color.
-        const playerColor: Color = BoardQuerier.getTurnColor();
+        const playerColor: Color = this.boardQuerier.getTurnColor();
 
         // Create the new piece and increase the score of the player.
         this.boardManager.createPiece(
             playerColor,
             selectedPromote as PieceType,
-            firstSquareOfRow
+            firstSquareOfRow,
         );
         this.boardManager.updateScores(firstSquareOfRow);
         this.log?.(
-            `Player's-ts-${playerColor}-te- Piece-ts-${selectedPromote}-te- created on square-ts-${to}-te- on engine`
+            `Player's-ts-${playerColor}-te- Piece-ts-${selectedPromote}-te- created on square-ts-${to}-te- on engine`,
         );
 
         // Finish the promotion.
@@ -812,7 +834,7 @@ export class ChessEngine {
             NotationSymbol.Promotion +
             Converter.pieceTypeToPieceName(
                 selectedPromote as PieceType,
-                playerColor
+                playerColor,
             );
     }
 
@@ -832,18 +854,25 @@ export class ChessEngine {
                 GameStatus.WhiteVictory,
                 GameStatus.BlackVictory,
                 GameStatus.Draw,
-            ].includes(BoardQuerier.getBoardStatus())
+            ].includes(this.boardQuerier.getBoardStatus())
         ) {
             // Timeover situation comes here.
             this.boardManager.saveAlgebraicNotation(this.moveNotation);
-            this.boardManager.saveMove(this.playedFrom as Square, this.playedTo as Square);
+            this.boardManager.saveMove(
+                this.playedFrom as Square,
+                this.playedTo as Square,
+            );
             this.log?.(
-                `Turn-ts-${BoardQuerier.getTurnColor()}-te- is finished`
+                `Turn-ts-${this.boardQuerier.getTurnColor()}-te- is finished`,
             );
             return;
         }
 
-        this.boardManager.saveMove(this.playedFrom!, this.playedTo!, this.moveType);
+        this.boardManager.saveMove(
+            this.playedFrom!,
+            this.playedTo!,
+            this.moveType,
+        );
         this.boardManager.changeTurn();
 
         this.checkEnPassant();
@@ -858,7 +887,7 @@ export class ChessEngine {
         this.moveNotation = "";
         this.boardManager.saveCurrentBoard();
         this.log?.(
-            `Turn controls done. Turn-ts-${BoardQuerier.getTurnColor()}-te- is finished`
+            `Turn controls done. Turn-ts-${this.boardQuerier.getTurnColor()}-te- is finished`,
         );
     }
 
@@ -870,15 +899,15 @@ export class ChessEngine {
     private updateTimersIfExists(): void {
         if (!this.timerMap) return;
 
-        if (BoardQuerier.getMoveCount() < 2) {
+        if (this.boardQuerier.getMoveCount() < 2) {
             this.log?.(
-                "Timers are not handled because move count is less than 2"
+                "Timers are not handled because move count is less than 2",
             );
             return;
         }
 
-        const playerColor: Color = BoardQuerier.getTurnColor();
-        const opponentColor: Color = BoardQuerier.getOpponentColor();
+        const playerColor: Color = this.boardQuerier.getTurnColor();
+        const opponentColor: Color = this.boardQuerier.getOpponentColor();
 
         if (this.timerMap[opponentColor].timer.isStarted()) {
             this.timerMap[opponentColor].timer.increase();
@@ -900,7 +929,7 @@ export class ChessEngine {
 
             this.boardManager.updateRemainingTime(
                 playerColor,
-                this.timerMap[playerColor].timer.get()
+                this.timerMap[playerColor].timer.get(),
             );
             if (this.timerMap[playerColor].timer.get() <= 0)
                 this.handleTimeover();
@@ -908,7 +937,7 @@ export class ChessEngine {
 
         this.timerMap![playerColor].intervalId = intervalId;
         this.log?.(
-            `Timers are handled. Player-ts-${playerColor}-te- timer is started and opponent-ts-${opponentColor}-te- timer is paused`
+            `Timers are handled. Player-ts-${playerColor}-te- timer is started and opponent-ts-${opponentColor}-te- timer is paused`,
         );
     }
 
@@ -925,18 +954,18 @@ export class ChessEngine {
                 GameStatus.WhiteVictory,
                 GameStatus.BlackVictory,
                 GameStatus.Draw,
-            ].includes(BoardQuerier.getBoardStatus())
+            ].includes(this.boardQuerier.getBoardStatus())
         )
             return;
 
         const winner =
-            BoardQuerier.getOpponentColor() == Color.White
+            this.boardQuerier.getOpponentColor() == Color.White
                 ? GameStatus.WhiteVictory
                 : GameStatus.BlackVictory;
         this.boardManager.setGameStatus(winner);
 
         this.log?.(
-            `Player-ts-${BoardQuerier.getTurnColor()}-te- is timeover and game status is set to ${winner}`
+            `Player-ts-${this.boardQuerier.getTurnColor()}-te- is timeover and game status is set to ${winner}`,
         );
         this.finishTurn();
     }
@@ -947,35 +976,55 @@ export class ChessEngine {
      * @see for more information about en passant https://en.wikipedia.org/wiki/En_passant
      */
     private checkEnPassant(): void {
-        if(BoardQuerier.getEnPassant() !== null){
+        if (this.boardQuerier.getEnPassant() !== null) {
             this.boardManager.setEnPassant(null);
             this.log?.("undone en passant move removed from fen notation");
         }
 
-        const moveHistoryLength = BoardQuerier.getMoveHistory().length;
-        if(moveHistoryLength < 1) {
+        const moveHistoryLength = this.boardQuerier.getMoveHistory().length;
+        if (moveHistoryLength < 1) {
             this.log?.("Not enough moves for possible en passant move");
             return;
         }
 
-        const lastMove = BoardQuerier.getMoveHistory()[moveHistoryLength - 1];
-        const lastMovedPiece = BoardQuerier.getPieceOnSquare(lastMove.to);
-        if(!lastMovedPiece || lastMovedPiece.getType() !== PieceType.Pawn
-        || Math.abs(lastMove.to - lastMove.from) !== 16){
+        const lastMove =
+            this.boardQuerier.getMoveHistory()[moveHistoryLength - 1];
+        const lastMovedPiece = this.boardQuerier.getPieceOnSquare(lastMove.to);
+        if (
+            !lastMovedPiece ||
+            lastMovedPiece.getType() !== PieceType.Pawn ||
+            Math.abs(lastMove.to - lastMove.from) !== 16
+        ) {
             this.boardManager.setEnPassant(null);
             this.log?.("En passant move chance is not found");
             return;
         }
 
         const lastMovedPawnColor = lastMovedPiece.getColor();
-        if(Locator.getRow(lastMove.to) === (lastMovedPawnColor === Color.White ? 5 : 4)){
-            const rightSquare = BoardQuerier.getPieceOnSquare(lastMove.to + 1);
-            const leftSquare = BoardQuerier.getPieceOnSquare(lastMove.to - 1);
-            if((rightSquare && rightSquare.getType() === PieceType.Pawn && rightSquare.getColor() !== lastMovedPawnColor)
-            || (leftSquare && leftSquare.getType() === PieceType.Pawn && leftSquare.getColor() !== lastMovedPawnColor)){
-                const enPassantMove = lastMove.to + (lastMovedPawnColor === Color.White ? 8 : -8);
+        if (
+            Locator.getRow(lastMove.to) ===
+            (lastMovedPawnColor === Color.White ? 5 : 4)
+        ) {
+            const rightSquare = this.boardQuerier.getPieceOnSquare(
+                lastMove.to + 1,
+            );
+            const leftSquare = this.boardQuerier.getPieceOnSquare(
+                lastMove.to - 1,
+            );
+            if (
+                (rightSquare &&
+                    rightSquare.getType() === PieceType.Pawn &&
+                    rightSquare.getColor() !== lastMovedPawnColor) ||
+                (leftSquare &&
+                    leftSquare.getType() === PieceType.Pawn &&
+                    leftSquare.getColor() !== lastMovedPawnColor)
+            ) {
+                const enPassantMove =
+                    lastMove.to + (lastMovedPawnColor === Color.White ? 8 : -8);
                 this.boardManager.setEnPassant(enPassantMove);
-                this.log?.(`En passant move-ts-${enPassantMove}-te- is found and set on fen notation`);
+                this.log?.(
+                    `En passant move-ts-${enPassantMove}-te- is found and set on fen notation`,
+                );
                 return;
             }
         }
@@ -992,7 +1041,7 @@ export class ChessEngine {
                 GameStatus.WhiteVictory,
                 GameStatus.BlackVictory,
                 GameStatus.Draw,
-            ].includes(BoardQuerier.getBoardStatus())
+            ].includes(this.boardQuerier.getBoardStatus())
         )
             return;
 
@@ -1001,11 +1050,11 @@ export class ChessEngine {
          * standard position then continue is unnecessary.
          */
         if (
-            Converter.jsonToFen(BoardQuerier.getGame()) ==
+            Converter.jsonToFen(this.boardQuerier.getGame()) ==
             StartPosition.Standard
         ) {
             this.log?.(
-                "Game status will not be checked because board is the standard position."
+                "Game status will not be checked because board is the standard position.",
             );
             this.boardManager.setGameStatus(GameStatus.ReadyToStart);
             this._isBoardPlayable = true;
@@ -1019,27 +1068,27 @@ export class ChessEngine {
         if (this.getMoveHistory().length == 0) {
             const whitePawnOnPromotionRow = [1, 2, 3, 4, 5, 6, 7, 8].filter(
                 (square) =>
-                    BoardQuerier.isSquareHasPiece(
+                    this.boardQuerier.isSquareHasPiece(
                         square,
                         Color.White,
-                        PieceType.Pawn
-                    )
+                        PieceType.Pawn,
+                    ),
             );
             const blackPawnOnPromotionRow = [
                 57, 58, 59, 60, 61, 62, 63, 64,
             ].filter((square) =>
-                BoardQuerier.isSquareHasPiece(
+                this.boardQuerier.isSquareHasPiece(
                     square,
                     Color.Black,
-                    PieceType.Pawn
-                )
+                    PieceType.Pawn,
+                ),
             );
             if (
                 whitePawnOnPromotionRow.length > 0 ||
                 blackPawnOnPromotionRow.length > 0
             ) {
                 this.log?.(
-                    "Game status set to not ready because there is a pawn on the promotion row."
+                    "Game status set to not ready because there is a pawn on the promotion row.",
                 );
                 this.boardManager.setGameStatus(GameStatus.NotReady);
                 this._isBoardPlayable = false;
@@ -1051,15 +1100,15 @@ export class ChessEngine {
          * If board is not on the standard position then check the board is playable or not.
          * If the board is not ready to play then continue is unnecessary.
          */
-        this._isBoardPlayable = BoardQuerier.isBoardPlayable();
+        this._isBoardPlayable = this.boardQuerier.isBoardPlayable();
         if (this._isBoardPlayable) {
             this.boardManager.setGameStatus(
-                BoardQuerier.getBoardStatus() != GameStatus.NotReady
-                    ? BoardQuerier.getBoardStatus()
-                    : GameStatus.ReadyToStart
+                this.boardQuerier.getBoardStatus() != GameStatus.NotReady
+                    ? this.boardQuerier.getBoardStatus()
+                    : GameStatus.ReadyToStart,
             );
             this.log?.(
-                `Game status set to-ts-${BoardQuerier.getBoardStatus()}-te- because board is playable.`
+                `Game status set to-ts-${this.boardQuerier.getBoardStatus()}-te- because board is playable.`,
             );
         } else {
             this.boardManager.setGameStatus(
@@ -1067,13 +1116,13 @@ export class ChessEngine {
                     GameStatus.InPlay,
                     GameStatus.WhiteInCheck,
                     GameStatus.BlackInCheck,
-                ].includes(BoardQuerier.getBoardStatus())
+                ].includes(this.boardQuerier.getBoardStatus())
                     ? GameStatus.Draw
-                    : GameStatus.NotReady
+                    : GameStatus.NotReady,
             );
             this._isBoardPlayable = false;
             this.log?.(
-                `Game status is not checked because board is not playable so checkGameStatus calculation is unnecessary.`
+                `Game status is not checked because board is not playable so checkGameStatus calculation is unnecessary.`,
             );
             return;
         }
@@ -1085,38 +1134,40 @@ export class ChessEngine {
          */
         this._checkFiftyMoveRule();
         this._checkThreefoldRepetition();
-        if (BoardQuerier.getBoardStatus() == GameStatus.Draw) return;
+        if (this.boardQuerier.getBoardStatus() == GameStatus.Draw) return;
 
         /**
          * Start the continue to check, checkmate, stalemate and check status by
          * finding necessary squares and enums.
          */
-        const kingSquare: Square | null = BoardQuerier.getSquareOfPiece(
-            BoardQuerier.getPiecesWithFilter(BoardQuerier.getTurnColor(), [
-                PieceType.King,
-            ])[0]!
+        const kingSquare: Square | null = this.boardQuerier.getSquareOfPiece(
+            this.boardQuerier.getPiecesWithFilter(
+                this.boardQuerier.getTurnColor(),
+                [PieceType.King],
+            )[0]!,
         );
-        const threateningSquares: Square[] = BoardQuerier.isSquareThreatened(
-            kingSquare!,
-            BoardQuerier.getOpponentColor(),
-            true
-        ) as Square[];
+        const threateningSquares: Square[] =
+            this.boardQuerier.isSquareThreatened(
+                kingSquare!,
+                this.boardQuerier.getOpponentColor(),
+                true,
+            ) as Square[];
         this.log?.(
             `Threatening squares-ts-${JSON.stringify(
-                threateningSquares
-            )}-te- are found by king's square-ts-${kingSquare}-te-`
+                threateningSquares,
+            )}-te- are found by king's square-ts-${kingSquare}-te-`,
         );
 
         const checkEnum: GameStatus =
-            BoardQuerier.getTurnColor() == Color.White
+            this.boardQuerier.getTurnColor() == Color.White
                 ? GameStatus.WhiteInCheck
                 : GameStatus.BlackInCheck;
         const checkmateEnum: GameStatus =
-            BoardQuerier.getTurnColor() == Color.White
+            this.boardQuerier.getTurnColor() == Color.White
                 ? GameStatus.BlackVictory
                 : GameStatus.WhiteVictory;
         this.log?.(
-            `Check-ts-${checkEnum}-te- and Checkmate-ts-${checkmateEnum}-te- enums are found by player's color-ts-${BoardQuerier.getTurnColor()}-te-`
+            `Check-ts-${checkEnum}-te- and Checkmate-ts-${checkmateEnum}-te- enums are found by player's color-ts-${this.boardQuerier.getTurnColor()}-te-`,
         );
 
         /**
@@ -1128,7 +1179,8 @@ export class ChessEngine {
          *
          * @see For more information about check please check the https://en.wikipedia.org/wiki/Check_(chess)
          */
-        if (threateningSquares.length > 0) this.boardManager.setGameStatus(checkEnum);
+        if (threateningSquares.length > 0)
+            this.boardManager.setGameStatus(checkEnum);
         else if (
             [
                 GameStatus.InPlay,
@@ -1144,15 +1196,15 @@ export class ChessEngine {
         this.currentMoves[kingSquare!] = movesOfKing;
         this.log?.(
             `Moves of the king-ts-${kingSquare}-te- are calculated and saved to calculated moves-ts-${JSON.stringify(
-                movesOfKing
-            )}-te-`
+                movesOfKing,
+            )}-te-`,
         );
 
         // Check the checkmate and stalemate status.
         if (movesOfKing[MoveType.Normal]!.length == 0) {
             if (
                 threateningSquares.length > 1 &&
-                BoardQuerier.getBoardStatus() == checkEnum
+                this.boardQuerier.getBoardStatus() == checkEnum
             ) {
                 /**
                  * Control Checkmate by Double Check
@@ -1165,7 +1217,7 @@ export class ChessEngine {
                  */
                 this.boardManager.setGameStatus(checkmateEnum);
                 this.log?.(
-                    "Game status set to checkmate because king has no moves and threatened by more than one piece(double check)"
+                    "Game status set to checkmate because king has no moves and threatened by more than one piece(double check)",
                 );
             } else {
                 let isAnyMoveFound: boolean = false;
@@ -1176,25 +1228,25 @@ export class ChessEngine {
                  * @see For more information about stalemate please check the https://en.wikipedia.org/wiki/Stalemate
                  * @see For more information about check mate please check the https://en.wikipedia.org/wiki/Checkmate
                  */
-                for (const piece of BoardQuerier.getPiecesWithFilter(
-                    BoardQuerier.getTurnColor()
+                for (const piece of this.boardQuerier.getPiecesWithFilter(
+                    this.boardQuerier.getTurnColor(),
                 )) {
                     // King's moves are already calculated so skip the king.
                     if (piece.getType() == PieceType.King) continue;
 
                     // Calculate the moves of the piece and get squares of the moves. Also save the moves to the currentMoves for prevent unnecessary calculations.
                     const square: Square =
-                        BoardQuerier.getSquareOfPiece(piece)!;
+                        this.boardQuerier.getSquareOfPiece(piece)!;
                     this.currentMoves[square] =
                         this.moveEngine.getMoves(square);
                     const moves: Square[] = Flattener.flattenSquares(
-                        this.currentMoves[square]!
+                        this.currentMoves[square]!,
                     );
 
                     // If piece has at least one move then the game is in play status.
                     if (moves.length > 0) {
                         this.log?.(
-                            "Doubly Check and Stalemate is not satisfied."
+                            "Doubly Check and Stalemate is not satisfied.",
                         );
                         isAnyMoveFound = true;
                         break;
@@ -1206,25 +1258,25 @@ export class ChessEngine {
                  * if game is not in check status but no moves found then the game is in stalemate status.
                  */
                 if (!isAnyMoveFound) {
-                    if (BoardQuerier.getBoardStatus() != checkEnum) {
+                    if (this.boardQuerier.getBoardStatus() != checkEnum) {
                         this.boardManager.setGameStatus(GameStatus.Draw);
                         this.log?.(
-                            "Game status set to draw because king and any other pieces have no moves(stalemate)"
+                            "Game status set to draw because king and any other pieces have no moves(stalemate)",
                         );
                     } else {
                         this.boardManager.setGameStatus(checkmateEnum);
                         this.log?.(
-                            "Game status is set to checkmate because king has no moves and threat can't be blocked or killed by player's pieces."
+                            "Game status is set to checkmate because king has no moves and threat can't be blocked or killed by player's pieces.",
                         );
                     }
                 }
             }
         }
 
-        if (BoardQuerier.getBoardStatus() === checkmateEnum)
+        if (this.boardQuerier.getBoardStatus() === checkmateEnum)
             this.moveNotation += NotationSymbol.Checkmate;
         else if (
-            BoardQuerier.getBoardStatus() === checkEnum &&
+            this.boardQuerier.getBoardStatus() === checkEnum &&
             this.moveNotation !== ""
         )
             this.moveNotation += NotationSymbol.Check;
@@ -1242,12 +1294,13 @@ export class ChessEngine {
          * @see For more information about threefold repetition rule, see https://en.wikipedia.org/wiki/Threefold_repetition
          */
         this._threefoldRepetitionHistory.push(
-            this.getGameAsFenNotation().split(" ")[0]
+            this.getGameAsFenNotation().split(" ")[0],
         );
         if (this._threefoldRepetitionHistory.length > 15)
             this._threefoldRepetitionHistory.shift();
 
-        const notations: Array<string> = BoardQuerier.getAlgebraicNotation()
+        const notations: Array<string> = this.boardQuerier
+            .getAlgebraicNotation()
             .slice(-14)
             .concat(this.moveNotation);
         const currentBoard: string = this.getGameAsFenNotation().split(" ")[0];
@@ -1255,15 +1308,13 @@ export class ChessEngine {
             notations.filter((notation) => notation == this.moveNotation)
                 .length > 2 &&
             this._threefoldRepetitionHistory.filter(
-                (notation) => notation == currentBoard
+                (notation) => notation == currentBoard,
             ).length > 2
         ) {
             // When the threefold repetition rule is satisfied then set the game status to draw.
             this.boardManager.setGameStatus(GameStatus.Draw);
             this.moveNotation = NotationSymbol.Draw;
-            this.log?.(
-                "Game status set to draw by threefold repetition rule"
-            );
+            this.log?.("Game status set to draw by threefold repetition rule");
         }
 
         this.log?.("Threefold repetition rule is not satisfied.");
@@ -1274,7 +1325,7 @@ export class ChessEngine {
      * @see For more information about half move count, see https://en.wikipedia.org/wiki/Fifty-move_rule
      */
     private _checkFiftyMoveRule(): void {
-        if (BoardQuerier.getHalfMoveCount() > 101) {
+        if (this.boardQuerier.getHalfMoveCount() > 101) {
             this.boardManager.setGameStatus(GameStatus.Draw);
             this.moveNotation = NotationSymbol.Draw;
             this.log?.("Game status set to draw by half move count");
@@ -1293,16 +1344,16 @@ export class ChessEngine {
                 GameStatus.InPlay,
                 GameStatus.WhiteInCheck,
                 GameStatus.BlackInCheck,
-            ].includes(BoardQuerier.getBoardStatus())
+            ].includes(this.boardQuerier.getBoardStatus())
         ) {
             this.log?.(
-                "Castling moves are not checked because game is not playable"
+                "Castling moves are not checked because game is not playable",
             );
             return;
         }
 
         const color =
-            BoardQuerier.getTurnColor() == Color.White
+            this.boardQuerier.getTurnColor() == Color.White
                 ? Color.Black
                 : Color.White;
         const shortCastling: CastlingType = (color +
@@ -1310,38 +1361,42 @@ export class ChessEngine {
         const longCastling: CastlingType = (color +
             CastlingSide.Long) as CastlingType;
         if (
-            !BoardQuerier.getCastling()[shortCastling] &&
-            !BoardQuerier.getCastling()[longCastling]
+            !this.boardQuerier.getCastling()[shortCastling] &&
+            !this.boardQuerier.getCastling()[longCastling]
         ) {
-            this.log?.(`Castling moves-ts-${BoardQuerier.getCastling()}-te- are already disabled`);
+            this.log?.(
+                `Castling moves-ts-${this.boardQuerier.getCastling()}-te- are already disabled`,
+            );
             return;
         }
 
         const kingSquare = color == Color.White ? Square.e1 : Square.e8;
-        const kingPiece = BoardQuerier.getPieceOnSquare(kingSquare);
+        const kingPiece = this.boardQuerier.getPieceOnSquare(kingSquare);
         if (!kingPiece) {
             this.boardManager.disableCastling(shortCastling);
             this.boardManager.disableCastling(longCastling);
             this.log?.(
-                `King-ts-${kingSquare}-te- is not it's starting square so castling moves are disabled`
+                `King-ts-${kingSquare}-te- is not it's starting square so castling moves are disabled`,
             );
             return;
         }
 
         const longRookSquare = color == Color.White ? Square.a1 : Square.a8;
         const shortRookSquare = color == Color.White ? Square.h1 : Square.h8;
-        const longRookPiece = BoardQuerier.getPieceOnSquare(longRookSquare);
-        const shortRookPiece = BoardQuerier.getPieceOnSquare(shortRookSquare);
+        const longRookPiece =
+            this.boardQuerier.getPieceOnSquare(longRookSquare);
+        const shortRookPiece =
+            this.boardQuerier.getPieceOnSquare(shortRookSquare);
         if (!longRookPiece) {
             this.boardManager.disableCastling(longCastling);
             this.log?.(
-                `Long rook-ts-${longCastling}-te- is not it's starting square so long castling move is disabled`
+                `Long rook-ts-${longCastling}-te- is not it's starting square so long castling move is disabled`,
             );
         }
         if (!shortRookPiece) {
             this.boardManager.disableCastling(shortCastling);
             this.log?.(
-                `Short rook-ts-${shortCastling}-te- is not it's starting square so short castling move is disabled`
+                `Short rook-ts-${shortCastling}-te- is not it's starting square so short castling move is disabled`,
             );
         }
     }
@@ -1350,28 +1405,28 @@ export class ChessEngine {
      * Get color of current turn.
      */
     public getTurnColor(): Color {
-        return BoardQuerier.getTurnColor();
+        return this.boardQuerier.getTurnColor();
     }
 
     /**
      * This function returns the status of board.
      */
     public getGameStatus(): GameStatus {
-        return BoardQuerier.getBoardStatus();
+        return this.boardQuerier.getBoardStatus();
     }
 
     /**
      * This function returns the algebraic notation of the game.
      */
     public getAlgebraicNotation(): ReadonlyArray<string> {
-        return BoardQuerier.getAlgebraicNotation();
+        return this.boardQuerier.getAlgebraicNotation();
     }
 
     /**
      * This function returns the move history of the game.
      */
     public getMoveHistory(): ReadonlyArray<Move> {
-        return BoardQuerier.getMoveHistory();
+        return this.boardQuerier.getMoveHistory();
     }
 
     /**
@@ -1379,13 +1434,13 @@ export class ChessEngine {
      * After every move, the board is saved.
      */
     public getBoardHistory(): ReadonlyArray<JsonNotation> {
-        return BoardQuerier.getBoardHistory();
+        return this.boardQuerier.getBoardHistory();
     }
 
     /**
      * This function returns the scores of the players.
      */
     public getScores(): Readonly<Scores> {
-        return BoardQuerier.getScores();
+        return this.boardQuerier.getScores();
     }
 }

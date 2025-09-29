@@ -24,7 +24,8 @@ export class MoveExtender {
      * @description Check if the castling is available for the given king, rook and squares between king and rook.
      * @see src/Chess/Engine/Move/Helper/MoveExtender.ts For more information.
      */
-    private calculateCastlingMove(
+    private static calculateCastlingMove(
+        board: BoardQuerier,
         color: Color,
         castlingSide: CastlingSide,
         pieceSensitivity: boolean = true
@@ -58,7 +59,7 @@ export class MoveExtender {
             color == Color.White ? PieceIcon.WhiteRook : PieceIcon.BlackRook;
 
         if (
-            BoardQuerier.getBoardStatus() ==
+            board.getBoardStatus() ==
             (color == Color.White
                 ? GameStatus.WhiteInCheck
                 : GameStatus.BlackInCheck)
@@ -68,22 +69,22 @@ export class MoveExtender {
         // Check first rule. Also, check the fen notation for castling availability
         // when the game is loaded from fen notation.
         if (
-            !BoardQuerier.isSquareHasPiece(kingSquare, color, [
+            !board.isSquareHasPiece(kingSquare, color, [
                 PieceType.King,
             ]) ||
-            !BoardQuerier.isSquareHasPiece(castlingMove, color, [
+            !board.isSquareHasPiece(castlingMove, color, [
                 PieceType.Rook,
             ]) ||
-            (BoardQuerier.getAlgebraicNotation().length == 0 &&
+            (board.getAlgebraicNotation().length == 0 &&
                 !(
                     (castlingMove == Square.a8 &&
-                        BoardQuerier.getCastling().BlackLong) ||
+                        board.getCastling().BlackLong) ||
                     (castlingMove == Square.h8 &&
-                        BoardQuerier.getCastling().BlackShort) ||
+                        board.getCastling().BlackShort) ||
                     (castlingMove == Square.a1 &&
-                        BoardQuerier.getCastling().WhiteLong) ||
+                        board.getCastling().WhiteLong) ||
                     (castlingMove == Square.h1 &&
-                        BoardQuerier.getCastling().WhiteShort)
+                        board.getCastling().WhiteShort)
                 ))
         )
             return null;
@@ -101,7 +102,7 @@ export class MoveExtender {
                 : [Square.f8, Square.g8];
 
         // Check second rule.
-        for (const notation of BoardQuerier.getAlgebraicNotation()) {
+        for (const notation of board.getAlgebraicNotation()) {
             if (
                 notation.includes(kingIcon) ||
                 (notation.includes(rookIcon + "a") &&
@@ -123,13 +124,13 @@ export class MoveExtender {
         }
 
         // Check third rule.
-        if (BoardQuerier.isSquareThreatened(kingSquare)) return null;
+        if (board.isSquareThreatened(kingSquare)) return null;
 
         // Check fourth rule.
         for (const square of betweenSquares) {
             if (
-                BoardQuerier.getPieceOnSquare(square) ||
-                BoardQuerier.isSquareThreatened(square)
+                board.getPieceOnSquare(square) ||
+                board.isSquareThreatened(square)
             )
                 return null;
         }
@@ -141,11 +142,13 @@ export class MoveExtender {
      * @description Check if the long castling is available for the given color.
      * @see src/Chess/Engine/Move/Helper/MoveExtender.ts For more information.
      */
-    public getLongCastlingMove(
+    public static getLongCastlingMove(
+        board: BoardQuerier,
         color: Color,
         pieceSensitivity: boolean = true
     ): Square | null {
-        return this.calculateCastlingMove(
+        return MoveExtender.calculateCastlingMove(
+            board,
             color,
             CastlingSide.Long,
             pieceSensitivity
@@ -156,11 +159,13 @@ export class MoveExtender {
      * @description Check if the short castling is available for the given color.
      * @see src/Chess/Engine/Move/Helper/MoveExtender.ts For more information.
      */
-    public getShortCastlingMove(
+    public static getShortCastlingMove(
+        board: BoardQuerier,
         color: Color,
         pieceSensitivity: boolean = true
     ): Square | null {
-        return this.calculateCastlingMove(
+        return MoveExtender.calculateCastlingMove(
+            board,
             color,
             CastlingSide.Short,
             pieceSensitivity
@@ -171,11 +176,12 @@ export class MoveExtender {
      * @description Check if the en passant is available for the given square and direction.
      * @see src/Chess/Engine/Move/Helper/MoveExtender.ts For more information.
      */
-    private calculateEnPassantMove(
+    private static calculateEnPassantMove(
+        board: BoardQuerier,
         square: Square,
         direction: EnPassantDirection
     ): Square | null {
-        const pawn: Piece | null = BoardQuerier.getPieceOnSquare(square);
+        const pawn: Piece | null = board.getPieceOnSquare(square);
         if (!pawn || pawn.getType() != PieceType.Pawn) return null;
 
         const pawnColumn = Locator.getColumn(square);
@@ -196,8 +202,8 @@ export class MoveExtender {
                 ? square - 7
                 : square + 9;
 
-        // Check fen notation for en passant availability 
-        if (BoardQuerier.getGame().enPassant == enPassantMove)
+        // Check fen notation for en passant availability
+        if (board.getGame().enPassant == enPassantMove)
             return enPassantMove;
 
         return null;
@@ -207,10 +213,12 @@ export class MoveExtender {
      * @description Check if the left en passant is available for the given square.
      * @see src/Chess/Engine/Move/Helper/MoveExtender.ts For more information.
      */
-    public getLeftEnPassantMove(
+    public static getLeftEnPassantMove(
+        board: BoardQuerier,
         square: Square
     ): Square | null {
-        return this.calculateEnPassantMove(
+        return MoveExtender.calculateEnPassantMove(
+            board,
             square,
             EnPassantDirection.Left
         );
@@ -220,10 +228,12 @@ export class MoveExtender {
      * @description Check if the right en passant is available for the given square.
      * @see src/Chess/Engine/Move/Helper/MoveExtender.ts For more information.
      */
-    public getRightEnPassantMove(
+    public static getRightEnPassantMove(
+        board: BoardQuerier,
         square: Square
     ): Square | null {
-        return this.calculateEnPassantMove(
+        return MoveExtender.calculateEnPassantMove(
+            board,
             square,
             EnPassantDirection.Right
         );

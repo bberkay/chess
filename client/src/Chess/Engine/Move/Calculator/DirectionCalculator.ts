@@ -33,6 +33,7 @@ export class DirectionCalculator {
      * @See src/Chess/Engine/Move/Calculator/DirectionCalculator.ts
      */
     public static getDiagonalSquares(
+        board: BoardQuerier,
         square: Square,
         stopColor: Color | null,
         distanceLimit: number | null = null,
@@ -46,6 +47,7 @@ export class DirectionCalculator {
          */
         return {
             [MoveRoute.BottomRight]: this.traversePath(
+                board,
                 square,
                 9,
                 distanceLimit,
@@ -53,6 +55,7 @@ export class DirectionCalculator {
                 stopColor
             ),
             [MoveRoute.TopRight]: this.traversePath(
+                board,
                 square,
                 -7,
                 distanceLimit,
@@ -60,6 +63,7 @@ export class DirectionCalculator {
                 stopColor
             ),
             [MoveRoute.TopLeft]: this.traversePath(
+                board,
                 square,
                 -9,
                 distanceLimit,
@@ -67,6 +71,7 @@ export class DirectionCalculator {
                 stopColor
             ),
             [MoveRoute.BottomLeft]: this.traversePath(
+                board,
                 square,
                 7,
                 distanceLimit,
@@ -82,6 +87,7 @@ export class DirectionCalculator {
      * @See src/Chess/Engine/Move/Calculator/DirectionCalculator.ts
      */
     public static getHorizontalSquares(
+        board: BoardQuerier,
         square: Square,
         stopColor: Color | null,
         distanceLimit: number | null = null,
@@ -95,6 +101,7 @@ export class DirectionCalculator {
          */
         return {
             [MoveRoute.Right]: this.traversePath(
+                board,
                 square,
                 1,
                 distanceLimit,
@@ -102,6 +109,7 @@ export class DirectionCalculator {
                 stopColor
             ),
             [MoveRoute.Left]: this.traversePath(
+                board,
                 square,
                 -1,
                 distanceLimit,
@@ -117,6 +125,7 @@ export class DirectionCalculator {
      * @See src/Chess/Engine/Move/Calculator/DirectionCalculator.ts
      */
     public static getVerticalSquares(
+        board: BoardQuerier,
         square: Square,
         stopColor: Color | null,
         distanceLimit: number | null = null,
@@ -130,6 +139,7 @@ export class DirectionCalculator {
          */
         return {
             [MoveRoute.Bottom]: this.traversePath(
+                board,
                 square,
                 8,
                 distanceLimit,
@@ -137,6 +147,7 @@ export class DirectionCalculator {
                 stopColor
             ),
             [MoveRoute.Top]: this.traversePath(
+                board,
                 square,
                 -8,
                 distanceLimit,
@@ -152,6 +163,7 @@ export class DirectionCalculator {
      * @See src/Chess/Engine/Move/Calculator/DirectionCalculator.ts
      */
     private static traversePath(
+        board: BoardQuerier,
         square: Square,
         step: number,
         distanceLimit: number | null,
@@ -213,7 +225,7 @@ export class DirectionCalculator {
              * add the square to the array.
              */
             if (
-                !BoardQuerier.isSquareHasPiece(square, stopColor) ||
+                !board.isSquareHasPiece(square, stopColor) ||
                 !pieceSensitivity
             )
                 squares.push(square);
@@ -222,7 +234,7 @@ export class DirectionCalculator {
              * If piece sensitivity is true AND if square has a piece(enemy or player), then break the loop.
              * Because we can't go further.
              */
-            if (pieceSensitivity && BoardQuerier.isSquareHasPiece(square))
+            if (pieceSensitivity && board.isSquareHasPiece(square))
                 break;
 
             // Increase the step counter.

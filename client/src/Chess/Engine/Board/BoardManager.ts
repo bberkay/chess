@@ -17,12 +17,16 @@ import { Piece } from "../Types";
 /**
  * This class provides the board management of the game.
  */
-export class BoardManager extends Board {
+export class BoardManager {
+    private readonly _board: Board;
+    private readonly _boardQuerier: BoardQuerier;
+
     /**
-     * Constructor of the BoardController class.
+     * Constructor of the BoardManager class.
      */
-    constructor() {
-        super();
+    constructor(board: Board, boardQuerier: BoardQuerier) {
+        this._board = board;
+        this._boardQuerier = boardQuerier;
     }
 
     /**
@@ -30,8 +34,8 @@ export class BoardManager extends Board {
      */
     public createBoard(jsonNotation: JsonNotation): void {
         // Reset board by setting all squares to null.
-        for (const square in Board.currentBoard) {
-            Board.currentBoard[Number(square) as Square] = null;
+        for (const square in this._board.currentBoard) {
+            this._board.currentBoard[Number(square) as Square] = null;
         }
 
         /**
@@ -40,20 +44,20 @@ export class BoardManager extends Board {
          * @see for more information about fen notation https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
          */
         this.createPieces(jsonNotation.board);
-        Board.currentTurn = jsonNotation.turn;
-        Board.moveCount = jsonNotation.fullMoveNumber;
-        Board.halfMoveCount = jsonNotation.halfMoveClock;
-        Board.castling = jsonNotation.castling;
-        Board.enPassant = jsonNotation.enPassant;
-        Board.algebraicNotation = jsonNotation.algebraicNotation ?? [];
-        Board.scores = jsonNotation.scores ?? {
+        this._board.currentTurn = jsonNotation.turn;
+        this._board.moveCount = jsonNotation.fullMoveNumber;
+        this._board.halfMoveCount = jsonNotation.halfMoveClock;
+        this._board.castling = jsonNotation.castling;
+        this._board.enPassant = jsonNotation.enPassant;
+        this._board.algebraicNotation = jsonNotation.algebraicNotation ?? [];
+        this._board.scores = jsonNotation.scores ?? {
             [Color.White]: { score: 0, pieces: [] },
             [Color.Black]: { score: 0, pieces: [] },
         };
-        Board.moveHistory = jsonNotation.moveHistory ?? [];
-        Board.boardHistory = jsonNotation.boardHistory ?? [];
-        Board.durations = jsonNotation.durations ?? null;
-        Board.gameStatus = jsonNotation.gameStatus ?? Board.gameStatus;
+        this._board.moveHistory = jsonNotation.moveHistory ?? [];
+        this._board.boardHistory = jsonNotation.boardHistory ?? [];
+        this._board.durations = jsonNotation.durations ?? null;
+        this._board.gameStatus = jsonNotation.gameStatus ?? this._board.gameStatus;
         this.calculateScores();
     }
 
@@ -77,14 +81,14 @@ export class BoardManager extends Board {
         type: PieceType,
         square: Square
     ): void {
-        Board.currentBoard[square] = new PieceModel(color, type);
+        this._board.currentBoard[square] = new PieceModel(color, type);
     }
 
     /**
      * Remove piece from square
      */
     public removePiece(square: Square): void {
-        Board.currentBoard[square] = null;
+        this._board.currentBoard[square] = null;
     }
 
     /**
@@ -92,8 +96,8 @@ export class BoardManager extends Board {
      */
     public movePiece(from: Square, to: Square): void {
         // Check if the square has a piece and get the piece.
-        const fromPiece: Piece | null = BoardQuerier.getPieceOnSquare(from)!;
-        const toPiece: Piece | null = BoardQuerier.getPieceOnSquare(to);
+        const fromPiece: Piece | null = this._boardQuerier.getPieceOnSquare(from)!;
+        const toPiece: Piece | null = this._boardQuerier.getPieceOnSquare(to);
 
         /**
          * If the moved piece is a pawn or capture move then set half move count to 0
@@ -104,50 +108,50 @@ export class BoardManager extends Board {
          * @see for more information about half move count https://en.wikipedia.org/wiki/Fifty-move_rule
          */
         if (fromPiece.getType() == PieceType.King && Math.abs(from - to) == 2)
-            Board.halfMoveCount = 0;
+            this._board.halfMoveCount = 0;
         else
-            Board.halfMoveCount =
+            this._board.halfMoveCount =
                 toPiece || fromPiece.getType() === PieceType.Pawn
                     ? 0
-                    : Board.halfMoveCount + 1;
+                    : this._board.halfMoveCount + 1;
 
         // Calculate score of the move if the move is a capture move.
         this.updateScores(to);
 
         // Move piece from square to square.
-        Board.currentBoard[to] = fromPiece;
-        Board.currentBoard[from] = null;
+        this._board.currentBoard[to] = fromPiece;
+        this._board.currentBoard[from] = null;
     }
 
     /**
      * Set en passant square
      */
     public setEnPassant(square: Square | null): void {
-        Board.enPassant = square;
+        this._board.enPassant = square;
     }
 
     /**
      * Change castling availability
      */
     public disableCastling(castlingType: CastlingType): void {
-        Board.castling[castlingType] = false;
+        this._board.castling[castlingType] = false;
     }
 
     /**
      * Change color to oppenent's color and increase move count
      */
     public changeTurn(): void {
-        Board.currentTurn = BoardQuerier.getOpponentColor();
-        Board.moveCount += Board.currentTurn === Color.White ? 1 : 0;
+        this._board.currentTurn = this._boardQuerier.getOpponentColor();
+        this._board.moveCount += this._board.currentTurn === Color.White ? 1 : 0;
     }
-    
+
     /**
      * Calculate the scores of the players by checking the pieces of the players.
      *
      * @see for more information about piece scores https://en.wikipedia.org/wiki/Chess_piece_relative_value
      */
     private calculateScores(): void {
-        Board.scores = {
+        this._board.scores = {
             [Color.White]: { score: 0, pieces: [] },
             [Color.Black]: { score: 0, pieces: [] },
         };
@@ -158,10 +162,10 @@ export class BoardManager extends Board {
             PieceType.Rook,
             PieceType.Queen,
         ]) {
-            const whitePieces = BoardQuerier.getPiecesWithFilter(Color.White, [
+            const whitePieces = this._boardQuerier.getPiecesWithFilter(Color.White, [
                 pieceType,
             ]);
-            const blackPieces = BoardQuerier.getPiecesWithFilter(Color.Black, [
+            const blackPieces = this._boardQuerier.getPiecesWithFilter(Color.Black, [
                 pieceType,
             ]);
             const whiteDifference = whitePieces.length - blackPieces.length;
@@ -170,16 +174,16 @@ export class BoardManager extends Board {
                     ? whiteDifference
                     : Math.abs(whiteDifference);
             const winnerColor = whiteDifference > 0 ? Color.White : Color.Black;
-            Board.scores[winnerColor].score +=
+            this._board.scores[winnerColor].score +=
                 winnerDifference *
                 new PieceModel(winnerColor, pieceType).getScore();
             for (let i = 0; i < winnerDifference; i++) {
-                Board.scores[winnerColor].pieces.push(pieceType);
+                this._board.scores[winnerColor].pieces.push(pieceType);
             }
         }
 
         const scoreDifference =
-            Board.scores[Color.White].score - Board.scores[Color.Black].score;
+            this._board.scores[Color.White].score - this._board.scores[Color.Black].score;
         if (scoreDifference !== 0) {
             const scoreDifferenceWinner =
                 scoreDifference > 0 ? Color.White : Color.Black;
@@ -187,10 +191,10 @@ export class BoardManager extends Board {
                 scoreDifferenceWinner == Color.White
                     ? Color.Black
                     : Color.White;
-            Board.scores[scoreDifferenceWinner].score -=
-                Board.scores[scoreDifferenceLoser].score;
-            Board.scores[scoreDifferenceLoser].score =
-                -Board.scores[scoreDifferenceWinner].score;
+            this._board.scores[scoreDifferenceWinner].score -=
+                this._board.scores[scoreDifferenceLoser].score;
+            this._board.scores[scoreDifferenceLoser].score =
+                -this._board.scores[scoreDifferenceWinner].score;
         }
     }
 
@@ -202,28 +206,28 @@ export class BoardManager extends Board {
      */
     public updateScores(capturedOrPromotedSquare: Square): void {
         const enemyColor: Color =
-            Board.currentTurn == Color.White ? Color.Black : Color.White;
+            this._board.currentTurn == Color.White ? Color.Black : Color.White;
         let capturedOrPromotedPiece: Piece | null =
-            BoardQuerier.getPieceOnSquare(capturedOrPromotedSquare);
+            this._boardQuerier.getPieceOnSquare(capturedOrPromotedSquare);
 
         // En passant is only situation where the captured
         // piece is not on the square so we need to get the
         // piece if the move is an en passant move.
-        if (capturedOrPromotedSquare == Board.enPassant) {
-            capturedOrPromotedPiece = BoardQuerier.getPieceOnSquare(
+        if (capturedOrPromotedSquare == this._board.enPassant) {
+            capturedOrPromotedPiece = this._boardQuerier.getPieceOnSquare(
                 capturedOrPromotedSquare +
-                    (Board.currentTurn == Color.White ? 8 : -8)
+                    (this._board.currentTurn == Color.White ? 8 : -8)
             );
         }
 
         if (!capturedOrPromotedPiece) return;
 
-        if (capturedOrPromotedPiece!.getColor() == Board.currentTurn) {
-            Board.scores[Board.currentTurn].score -= 1;
-            const pawnIndex = Board.scores[Board.currentTurn].pieces.indexOf(
+        if (capturedOrPromotedPiece!.getColor() == this._board.currentTurn) {
+            this._board.scores[this._board.currentTurn].score -= 1;
+            const pawnIndex = this._board.scores[this._board.currentTurn].pieces.indexOf(
                 PieceType.Pawn
             );
-            Board.scores[Board.currentTurn].pieces.splice(pawnIndex, 1);
+            this._board.scores[this._board.currentTurn].pieces.splice(pawnIndex, 1);
         }
 
         /**
@@ -232,12 +236,12 @@ export class BoardManager extends Board {
          * then increase the score of the white player by 1 and decrease the score of the
          * black player by 1.
          */
-        Board.scores[Board.currentTurn].score +=
-            Board.enPassant == capturedOrPromotedSquare
+        this._board.scores[this._board.currentTurn].score +=
+            this._board.enPassant == capturedOrPromotedSquare
                 ? 1
                 : capturedOrPromotedPiece!.getScore();
-        Board.scores[enemyColor].score -=
-            Board.enPassant == capturedOrPromotedSquare
+        this._board.scores[enemyColor].score -=
+            this._board.enPassant == capturedOrPromotedSquare
                 ? 1
                 : capturedOrPromotedPiece!.getScore();
 
@@ -249,9 +253,9 @@ export class BoardManager extends Board {
          * player has no pawn then add the pawn to the white player's pieces.
          */
         const enemyPlayersPieces: Array<PieceType> =
-            Board.scores[enemyColor].pieces;
+            this._board.scores[enemyColor].pieces;
         const capturedPieceType: PieceType =
-            Board.enPassant == capturedOrPromotedSquare
+            this._board.enPassant == capturedOrPromotedSquare
                 ? PieceType.Pawn
                 : capturedOrPromotedPiece!.getType();
         if (enemyPlayersPieces.includes(capturedPieceType))
@@ -259,16 +263,16 @@ export class BoardManager extends Board {
                 enemyPlayersPieces.indexOf(capturedPieceType),
                 1
             );
-        else Board.scores[Board.currentTurn].pieces.push(capturedPieceType);
+        else this._board.scores[this._board.currentTurn].pieces.push(capturedPieceType);
     }
 
     /**
      * Update remaining time of the player.
      */
     public updateRemainingTime(player: Color, remainingTime: number): void {
-        if (!Board.durations) return;
+        if (!this._board.durations) return;
 
-        Board.durations[player].remaining = remainingTime;
+        this._board.durations[player].remaining = remainingTime;
     }
 
     /**
@@ -276,7 +280,7 @@ export class BoardManager extends Board {
      */
     public saveAlgebraicNotation(move: string): void {
         if(!move.trim()) return;
-        Board.algebraicNotation.push(move);
+        this._board.algebraicNotation.push(move);
     }
 
     /**
@@ -289,22 +293,22 @@ export class BoardManager extends Board {
     ): void {
         const move: Move = { from: from, to: to };
         if (type) move.type = type;
-        Board.moveHistory.push(move);
+        this._board.moveHistory.push(move);
     }
 
     /**
      * Save board to history
      */
     public saveCurrentBoard(): void {
-        const game = BoardQuerier.getGame();
+        const game = this._boardQuerier.getGame();
         delete game.boardHistory;
-        Board.boardHistory.push(JSON.parse(JSON.stringify(game)));
+        this._board.boardHistory.push(JSON.parse(JSON.stringify(game)));
     }
 
     /**
      * Set game status
      */
     public setGameStatus(gameStatus: GameStatus): void {
-        Board.gameStatus = gameStatus;
+        this._board.gameStatus = gameStatus;
     }
 }

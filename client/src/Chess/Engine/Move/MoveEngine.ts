@@ -14,17 +14,12 @@ export class MoveEngine {
     /**
      * Properties of the MoveEngine class.
      */
-    private readonly moveFilterer: MoveFilterer;
-    private readonly moveExtender: MoveExtender;
-    private piece: Piece | null = null;
-    private pieceSquare: Square | null = null;
+    private readonly _board: BoardQuerier;
+    private _piece: Piece | null = null;
+    private _pieceSquare: Square | null = null;
 
-    /**
-     * Constructor of the MoveEngine class.
-     */
-    constructor() {
-        this.moveFilterer = new MoveFilterer();
-        this.moveExtender = new MoveExtender();
+    constructor(board: BoardQuerier) {
+        this._board = board;
     }
 
     /**
@@ -32,7 +27,7 @@ export class MoveEngine {
      */
     public getMoves(
         square: Square,
-        pieceSensitivity: boolean = true
+        pieceSensitivity: boolean = true,
     ): Moves | null {
         /**
          * Check the given moves. If there is no move, then return null
@@ -50,17 +45,17 @@ export class MoveEngine {
         }
 
         // Get the piece on the given square.
-        this.piece = BoardQuerier.getPieceOnSquare(square);
-        this.pieceSquare = square;
+        this._piece = this._board.getPieceOnSquare(square);
+        this._pieceSquare = square;
 
         // If there is no piece on the given square, return null;
-        if (!this.piece) return null;
+        if (!this._piece) return null;
 
         /**
          * If there is a piece on the given square, get
          * the possible moves of the piece by its type.
          */
-        switch (this.piece.getType()) {
+        switch (this._piece.getType()) {
             case PieceType.Pawn:
                 return hasAnyMove(this.getPawnMoves(pieceSensitivity));
             case PieceType.Knight:
@@ -91,8 +86,9 @@ export class MoveEngine {
 
         // Find possible moves of the pawn.
         const route: Route = RouteCalculator.getPawnRoute(
-            this.pieceSquare!,
-            pieceSensitivity
+            this._board,
+            this._pieceSquare!,
+            pieceSensitivity,
         );
         if (!route) return null;
 
@@ -106,7 +102,7 @@ export class MoveEngine {
          **************************************************************************/
 
         // Find the pawn's color and enemy's color by the given square.
-        const color: Color = this.piece!.getColor();
+        const color: Color = this._piece!.getColor();
         const enemyColor: Color =
             color === Color.White ? Color.Black : Color.White;
 
@@ -143,7 +139,9 @@ export class MoveEngine {
         }
 
         // Filter two square toward move
-        if (Locator.getRow(this.pieceSquare!) != (color == Color.White ? 7 : 2))
+        if (
+            Locator.getRow(this._pieceSquare!) != (color == Color.White ? 7 : 2)
+        )
             route[moveDirection.vertical]!.splice(1, 1);
 
         /**
@@ -153,18 +151,18 @@ export class MoveEngine {
          * the diagonal routes from the moves.
          */
         if (
-            !BoardQuerier.isSquareHasPiece(
+            !this._board.isSquareHasPiece(
                 route[moveDirection.leftDiagonal]![0],
-                enemyColor
+                enemyColor,
             ) &&
             pieceSensitivity
         )
             delete route[moveDirection.leftDiagonal];
 
         if (
-            !BoardQuerier.isSquareHasPiece(
+            !this._board.isSquareHasPiece(
                 route[moveDirection.rightDiagonal]![0],
-                enemyColor
+                enemyColor,
             ) &&
             pieceSensitivity
         )
@@ -172,12 +170,13 @@ export class MoveEngine {
 
         moves[MoveType.Normal] = Flattener.flattenSquares(
             pieceSensitivity
-                ? this.moveFilterer.filterForKingSafety(
-                      this.pieceSquare!,
-                      this.piece!.getColor(),
-                      route
+                ? MoveFilterer.filterForKingSafety(
+                      this._board,
+                      this._pieceSquare!,
+                      this._piece!.getColor(),
+                      route,
                   )!
-                : route
+                : route,
         );
 
         /**
@@ -206,30 +205,29 @@ export class MoveEngine {
          */
 
         // Add left en passant move to the pawn's moves.
-        const leftEnPassant: Square | null =
-            this.moveExtender.getLeftEnPassantMove(
-                this.pieceSquare!
-            );
+        const leftEnPassant: Square | null = MoveExtender.getLeftEnPassantMove(
+            this._board,
+            this._pieceSquare!,
+        );
         if (leftEnPassant)
             route[moveDirection.leftDiagonal]!.push(leftEnPassant);
 
         // Add right en passant move to the pawn's moves.
         const rightEnPassant: Square | null =
-            this.moveExtender.getRightEnPassantMove(
-                this.pieceSquare!
-            );
+            MoveExtender.getRightEnPassantMove(this._board, this._pieceSquare!);
         if (rightEnPassant)
             route[moveDirection.rightDiagonal]!.push(rightEnPassant);
 
         // Add filtered(for king's safety) en passant moves to the pawn's moves.
         moves[MoveType.EnPassant] = Flattener.flattenSquares(
             pieceSensitivity
-                ? this.moveFilterer.filterForKingSafety(
-                      this.pieceSquare!,
-                      this.piece!.getColor(),
-                      route
+                ? MoveFilterer.filterForKingSafety(
+                      this._board,
+                      this._pieceSquare!,
+                      this._piece!.getColor(),
+                      route,
                   )!
-                : route
+                : route,
         );
 
         /**
@@ -251,7 +249,7 @@ export class MoveEngine {
          */
 
         if (
-            Locator.getRow(this.pieceSquare!) == (color == Color.White ? 2 : 7)
+            Locator.getRow(this._pieceSquare!) == (color == Color.White ? 2 : 7)
         ) {
             moves[MoveType.Promotion] = moves[MoveType.Normal];
             moves[MoveType.Normal] = [];
@@ -265,19 +263,21 @@ export class MoveEngine {
      */
     private getKnightMoves(pieceSensitivity: boolean = true): Moves | null {
         const route: Route = RouteCalculator.getKnightRoute(
-            this.pieceSquare!,
-            pieceSensitivity
+            this._board,
+            this._pieceSquare!,
+            pieceSensitivity,
         );
         if (!route) return null;
         return {
             [MoveType.Normal]: Flattener.flattenSquares(
                 pieceSensitivity
-                    ? this.moveFilterer.filterForKingSafety(
-                          this.pieceSquare!,
-                          this.piece!.getColor(),
-                          route
+                    ? MoveFilterer.filterForKingSafety(
+                          this._board,
+                          this._pieceSquare!,
+                          this._piece!.getColor(),
+                          route,
                       )
-                    : route
+                    : route,
             ),
         };
     }
@@ -287,19 +287,21 @@ export class MoveEngine {
      */
     private getBishopMoves(pieceSensitivity: boolean = true): Moves | null {
         const route: Route = RouteCalculator.getBishopRoute(
-            this.pieceSquare!,
-            pieceSensitivity
+            this._board,
+            this._pieceSquare!,
+            pieceSensitivity,
         );
         if (!route) return null;
         return {
             [MoveType.Normal]: Flattener.flattenSquares(
                 pieceSensitivity
-                    ? this.moveFilterer.filterForKingSafety(
-                          this.pieceSquare!,
-                          this.piece!.getColor(),
-                          route
+                    ? MoveFilterer.filterForKingSafety(
+                          this._board,
+                          this._pieceSquare!,
+                          this._piece!.getColor(),
+                          route,
                       )
-                    : route
+                    : route,
             ),
         };
     }
@@ -309,19 +311,21 @@ export class MoveEngine {
      */
     private getRookMoves(pieceSensitivity: boolean = true): Moves | null {
         const route: Route = RouteCalculator.getRookRoute(
-            this.pieceSquare!,
-            pieceSensitivity
+            this._board,
+            this._pieceSquare!,
+            pieceSensitivity,
         );
         if (!route) return null;
         return {
             [MoveType.Normal]: Flattener.flattenSquares(
                 pieceSensitivity
-                    ? this.moveFilterer.filterForKingSafety(
-                          this.pieceSquare!,
-                          this.piece!.getColor(),
-                          route
+                    ? MoveFilterer.filterForKingSafety(
+                          this._board,
+                          this._pieceSquare!,
+                          this._piece!.getColor(),
+                          route,
                       )
-                    : route
+                    : route,
             ),
         };
     }
@@ -331,19 +335,21 @@ export class MoveEngine {
      */
     private getQueenMoves(pieceSensitivity: boolean = true): Moves | null {
         const route: Route = RouteCalculator.getQueenRoute(
-            this.pieceSquare!,
-            pieceSensitivity
+            this._board,
+            this._pieceSquare!,
+            pieceSensitivity,
         );
         if (!route) return null;
         return {
             [MoveType.Normal]: Flattener.flattenSquares(
                 pieceSensitivity
-                    ? this.moveFilterer.filterForKingSafety(
-                          this.pieceSquare!,
-                          this.piece!.getColor(),
-                          route
+                    ? MoveFilterer.filterForKingSafety(
+                          this._board,
+                          this._pieceSquare!,
+                          this._piece!.getColor(),
+                          route,
                       )
-                    : route
+                    : route,
             ),
         };
     }
@@ -355,14 +361,15 @@ export class MoveEngine {
         const moves: Moves = { [MoveType.Normal]: [], [MoveType.Castling]: [] };
 
         const route: Route = RouteCalculator.getKingRoute(
-            this.pieceSquare!,
-            pieceSensitivity
+            this._board,
+            this._pieceSquare!,
+            pieceSensitivity,
         );
         if (!route) return null;
 
-        const color: Color = BoardQuerier.getPieceOnSquare(
-            this.pieceSquare!
-        )!.getColor();
+        const color: Color = this._board
+            .getPieceOnSquare(this._pieceSquare!)!
+            .getColor();
 
         /**
          * Remove squares that are threatened by the enemy pieces so that
@@ -374,9 +381,9 @@ export class MoveEngine {
         for (const square of Flattener.flattenSquares(route)) {
             if (
                 !pieceSensitivity ||
-                !BoardQuerier.isSquareThreatened(
+                !this._board.isSquareThreatened(
                     square,
-                    color == Color.White ? Color.Black : Color.White
+                    color == Color.White ? Color.Black : Color.White,
                 )
             )
                 moves[MoveType.Normal]!.push(square);
@@ -389,25 +396,25 @@ export class MoveEngine {
          * by the enemy's bishop again. This code block prevents this situation.
          */
         const enemies: boolean | Square[] = pieceSensitivity
-            ? BoardQuerier.isSquareThreatened(
-                  this.pieceSquare!,
+            ? this._board.isSquareThreatened(
+                  this._pieceSquare!,
                   color == Color.White ? Color.Black : Color.White,
-                  true
+                  true,
               )
             : false;
         if (moves[MoveType.Normal]!.length > 0 && enemies) {
             for (const enemySquare of enemies as Square[]) {
                 if (
-                    BoardQuerier.getPieceOnSquare(enemySquare)!.getType() ==
+                    this._board.getPieceOnSquare(enemySquare)!.getType() ==
                         PieceType.Knight ||
-                    BoardQuerier.getPieceOnSquare(enemySquare)!.getType() ==
+                    this._board.getPieceOnSquare(enemySquare)!.getType() ==
                         PieceType.Pawn
                 )
                     continue;
 
                 const dangerousRoute: MoveRoute | null = Locator.getRelative(
-                    this.pieceSquare!,
-                    enemySquare
+                    this._pieceSquare!,
+                    enemySquare,
                 );
                 if (!dangerousRoute) continue;
 
@@ -444,15 +451,21 @@ export class MoveEngine {
          */
         for (const path in route) route[path as MoveRoute] = [];
 
-        const longCastling: Square | null =
-            this.moveExtender.getLongCastlingMove(color, pieceSensitivity);
+        const longCastling: Square | null = MoveExtender.getLongCastlingMove(
+            this._board,
+            color,
+            pieceSensitivity,
+        );
         if (longCastling) {
             route[MoveRoute.Left]!.push(longCastling);
             route[MoveRoute.Left]!.push(longCastling + 2);
         }
 
-        const shortCastling: Square | null =
-            this.moveExtender.getShortCastlingMove(color, pieceSensitivity);
+        const shortCastling: Square | null = MoveExtender.getShortCastlingMove(
+            this._board,
+            color,
+            pieceSensitivity,
+        );
         if (shortCastling) {
             route[MoveRoute.Right]!.push(shortCastling);
             route[MoveRoute.Right]!.push(shortCastling - 1);

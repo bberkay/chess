@@ -8,7 +8,6 @@ import { describe, expect, test } from 'vitest';
 import { TestGame } from './types';
 import { Color, MoveType, PieceType, Square, StartPosition } from '@Chess/Types';
 import { ChessEngine } from '@Chess/Engine/ChessEngine';
-import { BoardQuerier } from "@Chess/Engine/Board/BoardQuerier";
 
 /**
  * All Castling Tests For every situation.
@@ -142,8 +141,10 @@ describe('Castling Moves', () => {
                 expect(engine.getGameAsFenNotation()).toEqual(game.expectation);
             else{
                 // Get the square of white king
-                const squareOfKing: Square = BoardQuerier.getSquareOfPiece(
-                    BoardQuerier.getPiecesWithFilter(Color.White, [PieceType.King])[0]
+                // @ts-expect-error Do not care for typescript error about access of boardQuerier
+                const squareOfKing: Square = engine.boardQuerier.getSquareOfPiece(
+                    // @ts-expect-error Same as above
+                    engine.boardQuerier.getPiecesWithFilter(Color.White, [PieceType.King])[0]
                 )!;
 
                 // Check the castling moves of the king are equal to the expectation.

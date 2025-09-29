@@ -18,11 +18,20 @@ import { Flattener } from "../Move/Utils/Flattener.ts";
  * This class provides the traversing and querying of the board.
  * Like, get all pieces, get piece on square, get square of piece, etc.
  */
-export class BoardQuerier extends Board {
+export class BoardQuerier {
+    private readonly _board: Board;
+
+    /**
+     * Constructor of the BoardQuerier class.
+     */
+    constructor(board: Board) {
+        this._board = board;
+    }
+
     /**
      * Get current game
      */
-    public static getGame(): JsonNotation {
+    public getGame(): JsonNotation {
         /**
          * Get all pieces on the board and convert them to JsonNotation.
          * @see For more information about JsonNotation, please check the src/Chess/Types/index.ts
@@ -44,122 +53,122 @@ export class BoardQuerier extends Board {
         // Return the game as JsonNotation.
         return {
             board: pieces,
-            turn: BoardQuerier.getTurnColor(),
-            castling: BoardQuerier.getCastling(),
-            enPassant: BoardQuerier.getEnPassant(),
-            halfMoveClock: BoardQuerier.getHalfMoveCount(),
-            fullMoveNumber: BoardQuerier.getMoveCount(),
-            algebraicNotation: BoardQuerier.getAlgebraicNotation(),
-            moveHistory: BoardQuerier.getMoveHistory(),
-            boardHistory: BoardQuerier.getBoardHistory(),
-            durations: BoardQuerier.getDurations() || undefined,
-            scores: BoardQuerier.getScores(),
-            gameStatus: BoardQuerier.getBoardStatus(),
+            turn: this.getTurnColor(),
+            castling: this.getCastling(),
+            enPassant: this.getEnPassant(),
+            halfMoveClock: this.getHalfMoveCount(),
+            fullMoveNumber: this.getMoveCount(),
+            algebraicNotation: this.getAlgebraicNotation(),
+            moveHistory: this.getMoveHistory(),
+            boardHistory: this.getBoardHistory(),
+            durations: this.getDurations() || undefined,
+            scores: this.getScores(),
+            gameStatus: this.getBoardStatus(),
         };
     }
 
     /**
      * Get current board
      */
-    public static getBoard(): Record<Square, Piece | null> {
-        return JSON.parse(JSON.stringify(Board.currentBoard));
+    public getBoard(): Record<Square, Piece | null> {
+        return JSON.parse(JSON.stringify(this._board.currentBoard));
     }
 
     /**
      * Get current turn's color
      */
-    public static getTurnColor(): Color {
-        return Board.currentTurn;
+    public getTurnColor(): Color {
+        return this._board.currentTurn;
     }
 
     /**
      * Get opponent's color
      */
-    public static getOpponentColor(): Color {
-        return Board.currentTurn === Color.White ? Color.Black : Color.White;
+    public getOpponentColor(): Color {
+        return this._board.currentTurn === Color.White ? Color.Black : Color.White;
     }
 
     /**
      * Get move count
      */
-    public static getMoveCount(): number {
-        return Board.moveCount;
+    public getMoveCount(): number {
+        return this._board.moveCount;
     }
 
     /**
      * Get en passant square
      */
-    public static getEnPassant(): Square | null {
-        return JSON.parse(JSON.stringify(Board.enPassant));
+    public getEnPassant(): Square | null {
+        return JSON.parse(JSON.stringify(this._board.enPassant));
     }
 
     /**
      * Get castling availability
      */
-    public static getCastling(): Castling {
-        return JSON.parse(JSON.stringify(Board.castling));
+    public getCastling(): Castling {
+        return JSON.parse(JSON.stringify(this._board.castling));
     }
 
     /**
      * Get half move count
      */
-    public static getHalfMoveCount(): number {
-        return Board.halfMoveCount;
+    public getHalfMoveCount(): number {
+        return this._board.halfMoveCount;
     }
 
     /**
      * Get algebraic notation
      */
-    public static getAlgebraicNotation(): string[] {
-        return Board.algebraicNotation || [];
+    public getAlgebraicNotation(): string[] {
+        return this._board.algebraicNotation || [];
     }
 
     /**
      * Get move history
      */
-    public static getMoveHistory(): Move[] {
-        return JSON.parse(JSON.stringify(Board.moveHistory || []));
+    public getMoveHistory(): Move[] {
+        return JSON.parse(JSON.stringify(this._board.moveHistory || []));
     }
 
     /**
      * Get board history
      */
-    public static getBoardHistory(): JsonNotation[] {
-        return JSON.parse(JSON.stringify(Board.boardHistory || []));
+    public getBoardHistory(): JsonNotation[] {
+        return JSON.parse(JSON.stringify(this._board.boardHistory || []));
     }
 
     /**
      * Get durations
      */
-    public static getDurations(): Durations | null {
-        return JSON.parse(JSON.stringify(Board.durations));
+    public getDurations(): Durations | null {
+        return JSON.parse(JSON.stringify(this._board.durations));
     }
 
     /**
      * Get scores
      */
-    public static getScores(): Scores {
-        return JSON.parse(JSON.stringify(Board.scores));
+    public getScores(): Scores {
+        return JSON.parse(JSON.stringify(this._board.scores));
     }
 
     /**
      * Get game status
      */
-    public static getBoardStatus(): GameStatus {
-        return JSON.parse(JSON.stringify(Board.gameStatus));
+    public getBoardStatus(): GameStatus {
+        return JSON.parse(JSON.stringify(this._board.gameStatus));
     }
 
     /**
      * Get piece with the given square.
      */
-    public static getPieceOnSquare(square: Square): Piece | null {
-        return Board.currentBoard[square] ?? null;
+    public getPieceOnSquare(square: Square): Piece | null {
+        return this._board.currentBoard[square] ?? null;
     }
 
     /**
      * Get square of the given piece.
      */
-    public static getSquareOfPiece(piece: Piece): Square | null {
+    public getSquareOfPiece(piece: Piece): Square | null {
         for (const square in this.getBoard()) {
             // Convert square to Square type.
             const squareKey: Square = Number(square) as Square;
@@ -179,7 +188,7 @@ export class BoardQuerier extends Board {
      * Get all pieces by color and/or type.
      * @example getPiecesWithFilter(Color.White, [PieceType.Rook, PieceType.Bishop]); // Returns all white rooks and bishops.
      */
-    public static getPiecesWithFilter(
+    public getPiecesWithFilter(
         targetColor: Color | null = null,
         targetTypes: Array<PieceType> | null = null
     ): Array<Piece> {
@@ -203,7 +212,7 @@ export class BoardQuerier extends Board {
     /**
      * Find player's color by given square
      */
-    public static getColorBySquare(square: Square): Color | null {
+    public getColorBySquare(square: Square): Color | null {
         return this.isSquareHasPiece(square)
             ? this.getPieceOnSquare(square)!.getColor()
             : null;
@@ -213,7 +222,7 @@ export class BoardQuerier extends Board {
      * Has the given square a piece?
      * @example hasPiece(Square.a1, Color.White, [PieceType.King, PieceType.Queen]); // Returns true if the square has a white king or queen.
      */
-    public static isSquareHasPiece(
+    public isSquareHasPiece(
         square: Square,
         specificColor: Color | null = null,
         specificTypes: Array<PieceType> | PieceType | null = null
@@ -245,7 +254,7 @@ export class BoardQuerier extends Board {
      * This function check the select is legal or not by checking the piece's color
      * and the color of the turn.
      */
-    public static isSquareSelectable(select: Square): boolean {
+    public isSquareSelectable(select: Square): boolean {
         return !(
             !this.getPieceOnSquare(select) ||
             this.getPieceOnSquare(select)?.getColor() != this.getTurnColor()
@@ -255,7 +264,7 @@ export class BoardQuerier extends Board {
     /**
      * This function check the board is playable or not.
      */
-    public static isBoardPlayable(): boolean {
+    public isBoardPlayable(): boolean {
         /**
          * Check the status is it started or finished. Also,
          * check pieces on the board and if there is no pieces that can
@@ -281,6 +290,7 @@ export class BoardQuerier extends Board {
             if (
                 Flattener.flattenSquares(
                     RouteCalculator.getKingRoute(
+                        this,
                         this.getSquareOfPiece(
                             this.getPiecesWithFilter(Color.White, [
                                 PieceType.King,
@@ -313,11 +323,11 @@ export class BoardQuerier extends Board {
 
             // If board has no queen, rook or pawn then check the king and bishop count.
             return (
-                BoardQuerier.getPiecesWithFilter(Color.White, [
+                this.getPiecesWithFilter(Color.White, [
                     PieceType.Knight,
                     PieceType.Bishop,
                 ]).length > 1 ||
-                BoardQuerier.getPiecesWithFilter(Color.Black, [
+                this.getPiecesWithFilter(Color.Black, [
                     PieceType.Knight,
                     PieceType.Bishop,
                 ]).length > 1
@@ -340,7 +350,7 @@ export class BoardQuerier extends Board {
      * 4. Get knight routes and check if any of them contains any enemy piece.
      * 5. If any of the routes not contains any enemy piece, then return false.
      */
-    public static isSquareThreatened(
+    public isSquareThreatened(
         targetSquare: Square,
         by: Color | null = null,
         getThreatening: boolean = false
@@ -367,6 +377,7 @@ export class BoardQuerier extends Board {
          * @see src/Chess/Engine/Core/Move/Calculator/RouteCalculator.ts For more information.
          */
         const allRoutes: Route = RouteCalculator.getAllRoutes(
+            this,
             targetSquare,
             enemyColor == Color.White ? Color.Black : Color.White
         );
