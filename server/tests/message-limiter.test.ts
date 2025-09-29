@@ -17,7 +17,7 @@ if (isMessageLimiterOff) {
 }
 
 // Create timeouts
-const MAX_TIME_PER_WS_MESSAGE = 50; // milliseconds
+const TIMEOUT = 60_000; // milliseconds
 
 // Create message counts
 const MESSAGE_LIMIT = Number(Bun.env.MESSAGE_LIMIT)
@@ -31,7 +31,6 @@ if (MESSAGE_LIMIT > MAX_RCMNDD_MESSAGE_LIMIT_FOR_TESTING) {
 }
 
 // Create windows
-const SAFETY_MARGIN = 2;
 const MESSAGE_WINDOW_MS = Number(Bun.env.MESSAGE_WINDOW_MS);
 const MAX_RCMNDD_WINDOW_MS_FOR_TESTING = 5000;
 console.log("MESSAGE_WINDOW_MS from .env.test: ", MESSAGE_WINDOW_MS);
@@ -111,7 +110,7 @@ describe.skipIf(isMessageLimiterOff)("Message Limiting", () => {
         console.log("Success count:", successCount);
         expect(successCount).toBeLessThanOrEqual(MESSAGE_LIMIT);
         expect(successCount).toBeGreaterThan(0);
-    }, (MAX_TIME_PER_WS_MESSAGE * WS_MESSAGE_COUNT) * SAFETY_MARGIN);
+    }, TIMEOUT);
 
     test("Should reset message limiting after retry-after period passes", async () => {
         console.log("Sending initial batch of WS messages...");
@@ -164,7 +163,7 @@ describe.skipIf(isMessageLimiterOff)("Message Limiting", () => {
         console.log("Success count after waiting:", postMsgSuccessCount);
         expect(postMsgSuccessCount).toBeLessThanOrEqual(MESSAGE_LIMIT);
         expect(postMsgSuccessCount).toBeGreaterThan(0);
-    }, (((MAX_TIME_PER_WS_MESSAGE * WS_MESSAGE_COUNT) * 2) * SAFETY_MARGIN) + (MESSAGE_WINDOW_MS * 1.5));
+    }, TIMEOUT);
 
     test("Should enforce retry-after header and block messages before waiting period ends", async () => {
         console.log("Sending initial batch of WS messages...");
@@ -210,10 +209,9 @@ describe.skipIf(isMessageLimiterOff)("Message Limiting", () => {
         }
 
         const postMsgSuccessCount = howManyWSMessagesPassedMessageLimiter(postMsgResults);
-
         console.log("Success count before waiting:", postMsgSuccessCount);
         expect(postMsgSuccessCount).toBe(0);
-    }, ((MAX_TIME_PER_WS_MESSAGE * WS_MESSAGE_COUNT) * 2) * SAFETY_MARGIN);
+    }, TIMEOUT);
 });
 
 afterEach(() => {

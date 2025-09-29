@@ -1,10 +1,11 @@
 import { createServer } from "src/BunServer";
-import { test, expect, beforeAll, afterAll, describe } from "vitest";
+import { test, expect, beforeAll, afterAll, describe, beforeEach } from "vitest";
 import { type Server } from "bun";
 import { createWsLobbyConnUrl } from "./utils";
 import { MockCreator } from "./helpers/MockCreator";
-import { WebSocketHandlerErrorTemplates, WebSocketValidatorErrorTemplates, WsCommandErrorTemplates, WsTitle } from "@WebSocket";
+import { pruneIPMessages, WebSocketHandlerErrorTemplates, WebSocketValidatorErrorTemplates, WsCommandErrorTemplates, WsTitle } from "@WebSocket";
 import { INJECTION_PAYLOADS } from "./consts";
+import { pruneIPRequests } from "@HTTP";
 
 const WS_CONN_TIMEOUT = 10000;
 const WS_ONOPEN = 1;
@@ -21,6 +22,11 @@ beforeAll(async () => {
     server = createServer();
     serverUrl = server.url.href;
     webSocketUrl = server.url.href.replace("http", "ws");
+});
+
+beforeEach(async () => {
+    pruneIPRequests(true);
+    pruneIPMessages(true);
 });
 
 const connectToWebSocket = async (wsUrl: string, timeout: number = WS_CONN_TIMEOUT): Promise<number> => {

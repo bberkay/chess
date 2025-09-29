@@ -21,7 +21,7 @@ const ipRequests: Map<string, HTTPRequestLimitRecord> = new Map();
  *
  * @param force - If true, removes all records regardless of age. If false, only removes records older than the expiration threshold.
  */
-export function pruneIPRequests(force = false) {
+export function pruneIPRequests(force = false): number {
     const now = Date.now();
 
     const lengthBeforeCleaning = ipRequests.size;
@@ -31,7 +31,9 @@ export function pruneIPRequests(force = false) {
         }
     }
 
-    console.log(`Removed ${lengthBeforeCleaning - ipRequests.size} IP records${force ? " (force)" : ""} from RateLimiter's records.`);
+    const removedRecordCount = lengthBeforeCleaning - ipRequests.size;
+    //console.log(`Removed ${removedRecordCount} IP records${force ? " (force)" : ""} from RateLimiter's records.`);
+    return removedRecordCount;
 }
 
 /**

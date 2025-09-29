@@ -1,13 +1,14 @@
 import { createServer } from "src/BunServer";
-import { test, expect, beforeAll, afterAll, describe } from "vitest";
+import { test, expect, beforeAll, afterAll, describe, beforeEach } from "vitest";
 import { type Server } from "bun";
 import { createLocalBoard } from "./utils";
-import { WsStartedData, WsTitle } from "src/WebSocket";
+import { pruneIPMessages, WsStartedData, WsTitle } from "@WebSocket";
 import { Square } from "@Chess/Types";
 import { MockCreator } from "./helpers/MockCreator";
 import { MockGuest } from "./helpers/MockGuest";
 import { MockClient, MockClientPullErrorMsg } from "./helpers/MockClient";
 import { WebSocketHandlerErrorTemplates } from "src/WebSocket/WebSocketHandlerError";
+import { pruneIPRequests } from "@HTTP";
 
 let server: Server | null = null;
 let serverUrl = "";
@@ -17,6 +18,11 @@ beforeAll(async () => {
     server = createServer();
     serverUrl = server.url.href;
     webSocketUrl = server.url.href.replace("http", "ws");
+});
+
+beforeEach(async () => {
+    pruneIPRequests(true);
+    pruneIPMessages(true);
 });
 
 const playUntilFinished = async (): Promise<[MockClient, MockClient]> => {

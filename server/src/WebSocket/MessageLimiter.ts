@@ -22,7 +22,7 @@ const ipMessages: Map<string, WSMessageLimitRecord> = new Map();
  *
  * @param force - If true, removes all records regardless of age. If false, only removes records older than the expiration threshold.
  */
-export function pruneIPMessages(force = false) {
+export function pruneIPMessages(force = false): number {
     const now = Date.now();
 
     const lengthBeforeCleaning = ipMessages.size;
@@ -32,7 +32,9 @@ export function pruneIPMessages(force = false) {
         }
     }
 
-    console.log(`Removed ${lengthBeforeCleaning - ipMessages.size} IP records${force ? " (force)" : ""} from MessageLimiter's records.`);
+    const removedRecordCount = lengthBeforeCleaning - ipMessages.size;
+    //console.log(`Removed ${lengthBeforeCleaning - ipMessages.size} IP records${force ? " (force)" : ""} from MessageLimiter's records.`);
+    return removedRecordCount;
 }
 
 /**

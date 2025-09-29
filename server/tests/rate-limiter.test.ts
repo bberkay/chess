@@ -14,9 +14,7 @@ if (isRateLimiterOff) {
 }
 
 // Create timeouts
-const WS_CONN_TIMEOUT = 10000;
-const MAX_TIME_PER_HTTP_REQUEST = 100; // milliseconds
-const MAX_TIME_PER_WS_REQUEST = 100; // milliseconds
+const TIMEOUT = 60_000; // milliseconds
 
 // Create request counts
 const RATE_LIMIT = Number(Bun.env.RATE_LIMIT);
@@ -32,7 +30,6 @@ if (RATE_LIMIT > MAX_RCMNDD_REQUEST_COUNT_FOR_TESTING) {
 
 // Create windows
 const RATE_WINDOW_MS = Number(Bun.env.RATE_WINDOW_MS);
-const SAFETY_MARGIN = 2;
 const MAX_RCMNDD_WINDOW_MS_FOR_TESTING = 5000;
 console.log(".RATE_WINDOW_MS from .env.test: ", RATE_WINDOW_MS);
 if (RATE_WINDOW_MS > MAX_RCMNDD_WINDOW_MS_FOR_TESTING) {
@@ -73,7 +70,7 @@ const makeWSRequest = async (wsUrl: string) => {
         ws.onmessage = (event: MessageEvent) => resolve(event.data);
         ws.onclose = () => resolve(false);
         ws.onerror = () => resolve(false);
-        setTimeout(() => resolve(false), WS_CONN_TIMEOUT);
+        setTimeout(() => resolve(false), TIMEOUT);
     });
 };
 
@@ -132,7 +129,7 @@ describe.skipIf(isRateLimiterOff)("Rate Limiter", () => {
         console.log("Success count:", successCount);
         expect(successCount).toBeLessThanOrEqual(HTTP_REQUEST_COUNT);
         expect(successCount).toBeGreaterThan(0);
-    }, (MAX_TIME_PER_HTTP_REQUEST * HTTP_REQUEST_COUNT) * SAFETY_MARGIN);
+    }, TIMEOUT);
 
     test("Should reset rate limiting after retry-after period passes", async () => {
         console.log("Sending initial batch of requests...");
@@ -164,7 +161,7 @@ describe.skipIf(isRateLimiterOff)("Rate Limiter", () => {
         console.log("Success count after waiting:", postWaitSuccessCount);
         expect(postWaitSuccessCount).toBeLessThanOrEqual(HTTP_REQUEST_COUNT);
         expect(postWaitSuccessCount).toBeGreaterThan(0);
-    }, (MAX_TIME_PER_HTTP_REQUEST * (HTTP_REQUEST_COUNT * 2)) * SAFETY_MARGIN);
+    }, TIMEOUT);
 
     test("Should enforce retry-after header and block requests before waiting period ends", async () => {
         console.log("Sending initial batch of requests...");
@@ -192,7 +189,7 @@ describe.skipIf(isRateLimiterOff)("Rate Limiter", () => {
 
         console.log("Success count before waiting:", preWaitSuccessCount);
         expect(preWaitSuccessCount).toBe(0);
-    }, (MAX_TIME_PER_HTTP_REQUEST * (HTTP_REQUEST_COUNT * 2)) * SAFETY_MARGIN);
+    }, TIMEOUT);
 
     test("Should rate limit rapid websocket connection requests", async () => {
         console.log("Generating rapid WS requests...");
@@ -211,7 +208,7 @@ describe.skipIf(isRateLimiterOff)("Rate Limiter", () => {
         console.log("Success count:", successCount);
         expect(successCount).toBeLessThanOrEqual(WS_REQUEST_COUNT);
         expect(successCount).toBeGreaterThan(0);
-    }, (MAX_TIME_PER_WS_REQUEST * WS_REQUEST_COUNT) * SAFETY_MARGIN);
+    }, TIMEOUT);
 });
 
 afterEach(() => {

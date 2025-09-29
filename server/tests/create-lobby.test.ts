@@ -1,13 +1,13 @@
 import { createServer } from "src/BunServer";
-import { test, expect, beforeAll, afterAll, describe } from "vitest";
+import { test, expect, beforeAll, afterAll, describe, beforeEach } from "vitest";
 import { type Server } from "bun";
 import { isValidLength } from "@Utils";
 import {
     GU_ID_LENGTH,
 } from "@Consts";
-import { HTTPRoutes, HTTPPostBody, HTTPRequestValidatorErrorTemplates } from "src/HTTP";
+import { HTTPRoutes, HTTPPostBody, HTTPRequestValidatorErrorTemplates, pruneIPRequests } from "@HTTP";
 import { MockCreator } from "./helpers/MockCreator";
-import { WsConnectedData, WsTitle } from "@WebSocket";
+import { pruneIPMessages, WsConnectedData, WsTitle } from "@WebSocket";
 import { INJECTION_PAYLOADS } from "./consts";
 
 let server: Server | null = null;
@@ -18,6 +18,11 @@ beforeAll(async () => {
     server = createServer();
     serverUrl = server.url.href;
     webSocketUrl = server.url.href.replace("http", "ws");
+});
+
+beforeEach(async () => {
+    pruneIPRequests(true);
+    pruneIPMessages(true);
 });
 
 const shouldCreate = async (body: HTTPPostBody[HTTPRoutes.CreateLobby]) => {

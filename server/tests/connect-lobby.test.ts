@@ -1,11 +1,11 @@
 import { createServer } from "src/BunServer";
-import { test, expect, beforeAll, afterAll, describe } from "vitest";
+import { test, expect, beforeAll, afterAll, describe, beforeEach } from "vitest";
 import { type Server } from "bun";
-import { WsConnectedData, WsStartedData, WsTitle } from "src/WebSocket";
+import { pruneIPMessages, WsConnectedData, WsStartedData, WsTitle } from "@WebSocket";
 import { createLocalBoard } from "./utils";
 import { MockCreator } from "./helpers/MockCreator";
 import { MockGuest } from "./helpers/MockGuest";
-import { HTTPPostBody, HTTPRoutes, HTTPRequestHandlerErrorTemplates, HTTPRequestValidatorErrorTemplates } from "@HTTP";
+import { HTTPPostBody, HTTPRoutes, HTTPRequestHandlerErrorTemplates, HTTPRequestValidatorErrorTemplates, pruneIPRequests } from "@HTTP";
 import { INJECTION_PAYLOADS, TEST_BOARD } from "./consts";
 import { Square } from "@Chess/Types";
 
@@ -17,6 +17,11 @@ beforeAll(async () => {
     server = createServer();
     serverUrl = server.url.href;
     webSocketUrl = server.url.href.replace("http", "ws");
+});
+
+beforeEach(async () => {
+    pruneIPRequests(true);
+    pruneIPMessages(true);
 });
 
 const createTestLobby = async (body: HTTPPostBody[HTTPRoutes.CreateLobby] | null = null) => {

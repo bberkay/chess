@@ -1,7 +1,7 @@
 import { createServer } from "src/BunServer";
-import { test, expect, beforeAll, afterAll, describe } from "vitest";
+import { test, expect, beforeAll, afterAll, describe, beforeEach } from "vitest";
 import { type Server } from "bun";
-import { WsFinishedData, WsStartedData, WsTitle } from "src/WebSocket";
+import { pruneIPMessages, WsFinishedData, WsStartedData, WsTitle } from "@WebSocket";
 import { GameStatus, Square, StartPosition } from "@Chess/Types";
 import { MockCreator } from "./helpers/MockCreator";
 import { MockGuest } from "./helpers/MockGuest";
@@ -9,6 +9,7 @@ import { MockClient, MockClientPullErrorMsg } from "./helpers/MockClient";
 import { WebSocketHandlerErrorTemplates } from "src/WebSocket/WebSocketHandlerError";
 import { LobbyRegistry } from "@Lobby";
 import { TEST_BOARD } from "./consts";
+import { pruneIPRequests } from "@HTTP";
 
 let server: Server | null = null;
 let serverUrl = "";
@@ -18,6 +19,11 @@ beforeAll(async () => {
     server = createServer();
     serverUrl = server.url.href;
     webSocketUrl = server.url.href.replace("http", "ws");
+});
+
+beforeEach(async () => {
+    pruneIPRequests(true);
+    pruneIPMessages(true);
 });
 
 const createWhiteAndBlackClients = async (board?: string): Promise<[MockClient, MockClient]> => {

@@ -1,7 +1,7 @@
 import { createServer } from "src/BunServer";
-import { test, expect, beforeAll, afterAll, describe } from "vitest";
+import { test, expect, beforeAll, afterAll, describe, beforeEach } from "vitest";
 import { type Server } from "bun";
-import { WsFinishedData, WsStartedData, WsTitle } from "src/WebSocket";
+import { pruneIPMessages, WsFinishedData, WsStartedData, WsTitle } from "src/WebSocket";
 import { GameStatus, Square } from "@Chess/Types";
 import { MockCreator } from "./helpers/MockCreator";
 import { MockGuest } from "./helpers/MockGuest";
@@ -9,6 +9,7 @@ import { MockClient } from "./helpers/MockClient";
 import { LobbyRegistry } from "@Lobby";
 import { TEST_BOARD } from "./consts";
 import { waitForWebSocketSettle } from "./utils";
+import { pruneIPRequests } from "@HTTP";
 
 const REMAINING = 15000; // 15 seconds total time
 const SAFETY_MARGIN = 5000;
@@ -21,6 +22,11 @@ beforeAll(async () => {
     server = createServer();
     serverUrl = server.url.href;
     webSocketUrl = server.url.href.replace("http", "ws");
+});
+
+beforeEach(async () => {
+    pruneIPRequests(true);
+    pruneIPMessages(true);
 });
 
 const createWhiteAndBlackClients = async (remaining: number): Promise<[MockClient, MockClient]> => {

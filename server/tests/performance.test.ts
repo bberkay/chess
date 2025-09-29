@@ -27,7 +27,7 @@ if (isRateLimiterOn) {
 // PERF_MODE values:
 //   0 = regression (CI/CD) → adaptive thresholds, fails on real regressions
 //   1 = benchmark  (local) → prints detailed metrics, does not fail tests
-const MODE = Number(Bun.env.PERF_MODE) === 0 ? "regression" : "benchmark";
+const MODE = Number(Bun.env.PERF_MODE) === 1 ? "benchmark" : "regression";
 if (MODE === "regression") {
     console.warn(
         "[PERF_MODE=0] Running in regression mode. " +
