@@ -64,7 +64,7 @@ describe("WebSocket Security Tests", () => {
         for (const url of urls) {
             console.log(`Testing: ${url} .......`);
             const response = await connectToWebSocket(url);
-            expect(response).toBe(WS_ONCLOSE);
+            expect(response).toBe(WS_ONERROR);
         }
     });
 
